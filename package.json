@@ -1,7 +1,7 @@
 {
 	"name": "@wishknish/knishio-client-js",
 	"version": "0.1.4",
-	"description": "Removes all spaces from a string",
+	"description": "Knish.IO Javascript API Client",
 	"license": "GPLV3",
 	"repository": {
 		"type": "git",
