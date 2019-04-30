@@ -9,10 +9,28 @@ This is an experimental Javascript / NodeJS implementation of the Knish.IO API c
 
 # Building Your Molecule
 1. Build your molecule with `let molecule = new Molecule(cellId, wallet.bundle);` The `cellId` argument represents the slug for your Knish.IO cell. It's meant to segregate molecules of one use case from others. Leave it null if not sure.
-2. For a "M"-type molecule, build your metadata as an array of objects, for example: `const data = [ { key: 'name', value: 'foo' }, { key: 'email', value: 'bar' } ];`
+2. For a "M"-type molecule, build your metadata as an array of objects, for example:
+```
+const data = [
+  {
+    key: 'name',
+    value: 'foo'
+  },
+  {
+    key: 'email',
+    value: 'bar'
+  }.
+  ...
+];
+```
 3. Initialize the molecule as "M"-type: `molecule.initMeta(wallet, data, metaType, metaId);` The `metaType` and `metaId` arguments represent a polymorphic key to whatever asset you are attaching this metadata to.
 4. Sign the molecule with the user secret: `molecule.sign(secret);`
-5. Make sure everything checks out by verifying the molecule: `if(Molecule.verifyMolecularHash(molecule) && Molecule.verifyOts(molecule)){ ... }`
+5. Make sure everything checks out by verifying the molecule:
+```
+if( Molecule.verifyMolecularHash(molecule) && Molecule.verifyOts(molecule) ) {
+  ... // Do stuff? Send the molecule to a Knish.IO node, maybe?
+}
+```
 
 # Broadcasting
 1. Knish.IO nodes use GraphQL to receive new molecules as a Mutation. The code for the mutation is as follows:
