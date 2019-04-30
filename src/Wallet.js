@@ -1,8 +1,8 @@
 import { shake256, } from 'js-sha3';
-import { chunkSubstr, } from './util/strings';
+import { chunkSubstr, } from '../util/strings';
 import bigInt from 'big-integer/BigInteger';
 
-export class Wallet {
+export default class Wallet {
 
   constructor(secret, position, token = 'USER', bundle = null) {
     // console.log('Wallet constructor(): START');

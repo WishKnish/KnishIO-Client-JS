@@ -1,7 +1,7 @@
 import { shake256, } from 'js-sha3';
-import { charsetBaseConvert, } from './util/strings';
+import { charsetBaseConvert, } from '../util/strings';
 
-export class Atom {
+export default class Atom {
 
   /**
    *

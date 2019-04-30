@@ -1,5 +1,5 @@
 
-class Meta {
+export default class Meta {
   constructor(modelType, modelId, meta, snapshotMolecule = null) {
     this.modelType = modelType;
     this.modelId = modelId;
