@@ -5,7 +5,7 @@
 
 import { Atom, } from './Atom';
 import { shake256, } from 'js-sha3';
-import { chunkSubstr, } from '../util/strings';
+import { chunkSubstr, } from './util/strings';
 import Wallet from './Wallet';
 
 export default class Molecule {

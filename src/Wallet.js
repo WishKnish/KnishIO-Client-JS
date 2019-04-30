@@ -4,7 +4,7 @@
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
 import { shake256, } from 'js-sha3';
-import { chunkSubstr, } from '../util/strings';
+import { chunkSubstr, } from './util/strings';
 import bigInt from 'big-integer/BigInteger';
 
 export default class Wallet {

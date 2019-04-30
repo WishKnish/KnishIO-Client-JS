@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/WishKnish/KnishIO-Client-JS.git"
 	},
-	"main": "index.js",
+	"main": "src/index.js",
 	"keywords": [
 		"wishknish",
 		"knishio",
@@ -18,5 +18,8 @@
 	"dependencies": {
 		"big-integer": "peterolson/BigInteger.js",
 		"js-sha3": "^0.8.0"
-	}
+	},
+	"files": [
+		"/src"
+	]
 }

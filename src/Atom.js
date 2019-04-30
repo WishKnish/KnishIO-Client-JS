@@ -4,7 +4,7 @@
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
 import { shake256, } from 'js-sha3';
-import { charsetBaseConvert, } from '../util/strings';
+import { charsetBaseConvert, } from './util/strings';
 
 export default class Atom {
 
