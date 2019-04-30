@@ -1,20 +1,37 @@
+// Copyright 2019 WishKnish Corp. All rights reserved.
+// You may use, distribute, and modify this code under the GPLV3 license, which is provided at:
+// https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+// This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
+
 import { shake256, } from 'js-sha3';
 import { chunkSubstr, } from '../util/strings';
 import bigInt from 'big-integer/BigInteger';
 
 export default class Wallet {
 
-  constructor(secret, position, token = 'USER', bundle = null) {
+  constructor(secret, position, token = 'USER') {
     // console.log('Wallet constructor(): START');
     // Position via which (combined with token) we will generate the one-time keys
     this.position = position;
     this.token = token;
-    this.bundle = bundle;
     this.key = Wallet.generateWalletKey(secret, position, token);
     this.address = Wallet.generateWalletAddress(this.key);
     this.balance = 0;
     this.molecules = {};
+    this.bundle = this.generateBundleHash();
     // console.log('Wallet constructor(): FINISH');
+  }
+
+	/**
+	 * Hashes the user secret to produce a wallet bundle
+	 *
+	 * @returns string
+	 */
+  generateBundleHash()
+  {
+	  const bundleSponge = shake256.create(256);
+	  bundleSponge.update(this.secret);
+	  return bundleSponge.hex();
   }
 
   static generateWalletKey(secret, position, token = null) {
