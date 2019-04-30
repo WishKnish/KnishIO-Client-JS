@@ -1,0 +1,22 @@
+{
+	"name": "@wishknish/knishio-client-js",
+	"version": "0.1.0",
+	"description": "Removes all spaces from a string",
+	"license": "GPLV3",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/WishKnish/KnishIO-Client-JS.git"
+	},
+	"main": "index.js",
+	"keywords": [
+		"wishknish",
+		"knishio",
+		"blockchain",
+		"dag",
+		"client"
+	],
+	"dependencies": {
+		"big-integer": "peterolson/BigInteger.js",
+		"js-sha3": "^0.8.0"
+	}
+}
