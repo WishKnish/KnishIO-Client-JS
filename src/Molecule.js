@@ -3,7 +3,7 @@
 // https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
-import { Atom, } from './Atom';
+import Atom from './Atom';
 import { shake256, } from 'js-sha3';
 import { chunkSubstr, } from './util/strings';
 import Wallet from './Wallet';
