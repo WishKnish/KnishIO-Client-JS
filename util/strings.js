@@ -1,0 +1,88 @@
+import bigInt from 'big-integer';
+
+if (!String.prototype.trim) {
+  String.prototype.trim = function () {
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+  };
+}
+
+/**
+ * Chunks a string into array segments of equal size
+ *
+ * @param str
+ * @param size
+ * @returns {any[]}
+ */
+export function chunkSubstr(str, size) {
+  const numChunks = Math.ceil(str.length / size);
+  const chunks = new Array(numChunks);
+
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substr(o, size);
+  }
+
+  return chunks;
+}
+
+/**
+ * Generates a random string of the given length out of the given alphabet
+ *
+ * @param length
+ * @param alphabet
+ * @returns {string}
+ */
+export function randomString(length = 256, alphabet = 'abcdef0123456789') {
+  let randomStr = '';
+  for(let i = 0; i < length; i++)
+  {
+    randomStr = randomStr.concat(alphabet.charAt(Math.floor(Math.random() * alphabet.length)));
+  }
+  return randomStr;
+}
+
+export function charsetBaseConvert(src, from_base, to_base, src_symbol_table, dest_symbol_table) {
+  // From: convert.js: http://rot47.net/_js/convert.js
+  //	http://rot47.net
+  //	http://helloacm.com
+  //	http://codingforspeed.com
+  //	Dr Zhihua Lai
+  //
+  // Modified by MLM to work with BigInteger: https://github.com/peterolson/BigInteger.js
+  // This is able to convert extremely large numbers; At any base equal to or less than the symbol table length
+
+  // The reasoning behind capital first is because it comes first in a ASCII/Unicode character map
+// 96 symbols support up to base 96
+  var base_symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡';
+
+  // Default the symbol table to a nice default table that supports up to base 96
+  src_symbol_table = src_symbol_table ? src_symbol_table : base_symbols;
+  // Default the desttable equal to the srctable if it isn't defined
+  dest_symbol_table = dest_symbol_table ? dest_symbol_table : src_symbol_table;
+
+  // Make sure we are not trying to convert out of the symbol table range
+  if(from_base > src_symbol_table.length || to_base > dest_symbol_table.length) {
+    console.warn('Can\'t convert', src, 'to base', to_base, 'greater than symbol table length. src-table:', src_symbol_table.length, 'dest-table:', dest_symbol_table.length);
+    return false;
+  }
+
+  // First convert to base 10
+  var val = bigInt(0);
+  for(var i = 0; i < src.length; i ++) {
+    val = val.multiply(from_base).add(src_symbol_table.indexOf(src.charAt(i)));
+  }
+  if(val.lesser(0)) {
+    return 0;
+  }
+
+  // Then covert to any base
+  var r = val.mod(to_base);
+  var res = dest_symbol_table.charAt(r);
+  var q = val.divide(to_base);
+  while(!q.equals(0)) {
+    r = q.mod(to_base);
+    q = q.divide(to_base);
+    res = dest_symbol_table.charAt(r) + res;
+  }
+
+  return res;
+}
