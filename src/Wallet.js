@@ -18,7 +18,7 @@ export default class Wallet {
     this.address = Wallet.generateWalletAddress(this.key);
     this.balance = 0;
     this.molecules = {};
-    this.bundle = this.generateBundleHash();
+    this.bundle = Wallet.generateBundleHash(secret);
     // console.log('Wallet constructor(): FINISH');
   }
 
@@ -27,10 +27,10 @@ export default class Wallet {
 	 *
 	 * @returns string
 	 */
-  generateBundleHash()
+  static generateBundleHash(secret)
   {
 	  const bundleSponge = shake256.create(256);
-	  bundleSponge.update(this.secret);
+	  bundleSponge.update(secret);
 	  return bundleSponge.hex();
   }
 
