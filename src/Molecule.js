@@ -271,13 +271,6 @@ export default class Molecule {
     // console.log('sign(): START');
     // console.log(`sign(): molecular hash: ${ this.molecularHash }`);
 
-    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
-    const enumeratedHash = Molecule.enumerate(this.molecularHash);
-    // console.log(`sign(): enumerated hash - ${ enumeratedHash }`);
-
-    const normalizedHash = Molecule.normalize(enumeratedHash);
-    // console.log(`sign(): normalized hash - ${ normalizedHash }`);
-
     // Determine first atom
     let firstAtom = null;
     this.atoms.forEach(function(atom) {
@@ -294,9 +287,17 @@ export default class Molecule {
     const keyChunks = chunkSubstr(key, 128);
     // console.log(`sign(): number of key chunks - ${ Object.keys(keyChunks).length }`);
 
+    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
+    const enumeratedHash = Molecule.enumerate(this.molecularHash);
+    // console.log(`sign(): enumerated hash - ${ enumeratedHash }`);
+
+    const normalizedHash = Molecule.normalize(enumeratedHash);
+    // console.log(`sign(): normalized hash - ${ normalizedHash }`);
+
     // Iterate across each segment as Ki
     let lastPosition = null;
     // console.log(`sign(): iterating across ${ Object.keys(this.atoms).length } atoms`);
+
     this.atoms = this.atoms.map(atom => {
       let signatureFragments = '';
       keyChunks.forEach(function(keyChunk, index){

@@ -3,8 +3,8 @@
 // https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
-import { shake256, } from 'js-sha3';
-import { charsetBaseConvert, } from './util/strings';
+import {shake256,} from 'js-sha3';
+import {charsetBaseConvert,} from './util/strings';
 
 export default class Atom {
 
@@ -44,29 +44,39 @@ export default class Atom {
    * @returns {number[] | *}
    */
   static hashAtoms(atoms, output = 'base17') {
-    // Hashing the atoms in the molecule to produce a molecular hash
     const molecularSponge = shake256.create(256);
     const numberOfAtoms = Object.keys(atoms).length;
 
-    Object.values(atoms).forEach(function(atom){
-      // console.log(`hashAtoms(): wallet address - ${ atom.walletAddress }`);
-      // console.log(`hashAtoms(): position - ${ atom.position }`);
-      // console.log(`hashAtoms(): number of atoms - ${ numberOfAtoms }`);
-      // if(atom.value)
-        // console.log(`hashAtoms(): value - ${ atom.value }`);
-      // console.log(`hashAtoms(): created at - ${ atom.createdAt }`);
-
-      molecularSponge.update(String(atom.walletAddress));
+    // Hashing each atom in the molecule to produce a molecular hash
+    Object.values(atoms).forEach(function (atom) {
       molecularSponge.update(String(atom.position));
       molecularSponge.update(String(numberOfAtoms));
-      if(atom.value)
+      molecularSponge.update(String(atom.walletAddress));
+      molecularSponge.update(String(atom.isotope));
+
+      if (atom.token)
+        molecularSponge.update(String(atom.token));
+      if (atom.value)
         molecularSponge.update(String(atom.value));
+      if (atom.metaType)
+        molecularSponge.update(String(atom.metaType));
+      if (atom.metaId)
+        molecularSponge.update(String(atom.metaId));
+
+      // Adding meta keys and values, if any
+      if (atom.meta.length)
+      {
+        atom.meta.forEach(function(meta){
+          molecularSponge.update(String(meta.key));
+          molecularSponge.update(String(meta.value));
+        })
+      }
+
       molecularSponge.update(String(atom.createdAt));
     });
 
     let result = null;
-    switch(output)
-    {
+    switch (output) {
       case 'hex':
         result = molecularSponge.hex();
         break;
