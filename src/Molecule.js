@@ -31,19 +31,17 @@ export default class Molecule {
    * @param meta
    * @param metaType
    * @param metaId
+   * @returns String
    */
   initMeta(wallet, meta, metaType, metaId)
   {
     // Initializing a new Atom to hold our metadata
-    const position = wallet.position;
-    const walletAddress = wallet.address;
-
     this.atoms = [
       new Atom(
-        position,
-        walletAddress,
+        wallet.position,
+        wallet.address,
         'M',
-        'USER',
+        wallet.token,
         null,
         metaType,
         metaId,
@@ -53,7 +51,54 @@ export default class Molecule {
     this.molecularHash = Atom.hashAtoms(this.atoms);
     // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
 
-    return position + 1;
+    return this.molecularHash;
+  }
+
+
+
+  /**
+   * Initialize a C-type molecule to issue a new type of token
+   *
+   * @param sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
+   * @param recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
+   * @param amount - how many of the token we are initially issuing (for fungible tokens only)
+   * @param tokenMeta - additional fields to configure the token
+   * @returns String
+   */
+  initTokenCreation(sourceWallet, recipientWallet, amount, tokenMeta)
+  {
+    this.atoms = [
+      // Initializing a new Atom to issue a new token
+
+      // The primary atom tells the ledger that a certain amount of the new token is being issued.
+      new Atom(
+        sourceWallet.position,
+        sourceWallet.address,
+        'C',
+        sourceWallet.token,
+        amount,
+        'token',
+        recipientWallet.token,
+        tokenMeta,
+        null),
+
+      // Secondary atom delivers token supply to the destination wallet
+      new Atom(
+        0,
+        recipientWallet.address,
+        'V',
+        recipientWallet.token,
+        amount,
+        null,
+        null,
+        null,
+        null),
+    ];
+
+    this.molecularHash = Atom.hashAtoms(this.atoms);
+    // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
+
+    return this.molecularHash;
   }
 
   /**
@@ -63,11 +108,10 @@ export default class Molecule {
    * @param sourceWallet
    * @param recipientWallet
    * @param remainderWallet
-   * @param token
    * @param value
-   * @returns Number
+   * @returns String
    */
-  initValue(sourceWallet, recipientWallet, remainderWallet, token, value)
+  initValue(sourceWallet, recipientWallet, remainderWallet, value)
   {
     let position = sourceWallet.position;
     this.atoms = [
@@ -76,7 +120,7 @@ export default class Molecule {
         position,
         sourceWallet.address,
         'V',
-        token,
+        sourceWallet.token,
         -value,
         null,
         null,
@@ -88,7 +132,7 @@ export default class Molecule {
         ++position,
         recipientWallet.address,
         'V',
-        token,
+        sourceWallet.token,
         value,
         null,
         null,
@@ -106,7 +150,7 @@ export default class Molecule {
           ++position,
           sourceWallet.address,
           'V',
-          token,
+          sourceWallet.token,
           -remainder,
           null,
           null,
@@ -118,7 +162,7 @@ export default class Molecule {
           ++position,
           remainderWallet.address,
           'V',
-          token,
+          sourceWallet.token,
           remainder,
           null,
           null,
@@ -130,7 +174,7 @@ export default class Molecule {
     this.molecularHash = Atom.hashAtoms(this.atoms);
     // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
 
-    return position + 1;
+    return this.molecularHash;
   }
 
 
