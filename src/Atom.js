@@ -64,7 +64,7 @@ export default class Atom {
         molecularSponge.update(String(atom.metaId));
 
       // Adding meta keys and values, if any
-      if (atom.meta.length)
+      if (atom.meta && atom.meta.length)
       {
         atom.meta.forEach(function(meta){
           molecularSponge.update(String(meta.key));
