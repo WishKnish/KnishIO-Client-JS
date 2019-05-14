@@ -54,8 +54,6 @@ export default class Molecule {
     return this.molecularHash;
   }
 
-
-
   /**
    * Initialize a C-type molecule to issue a new type of token
    *
@@ -67,23 +65,22 @@ export default class Molecule {
    */
   initTokenCreation(sourceWallet, recipientWallet, amount, tokenMeta)
   {
-    this.atoms = [
-      // Initializing a new Atom to issue a new token
+    // The primary atom tells the ledger that a certain amount of the new token is being issued.
+    this.atoms.push(new Atom(
+      sourceWallet.position,
+      sourceWallet.address,
+      'C',
+      sourceWallet.token,
+      amount,
+      'token',
+      recipientWallet.token,
+      tokenMeta,
+      null));
 
-      // The primary atom tells the ledger that a certain amount of the new token is being issued.
-      new Atom(
-        sourceWallet.position,
-        sourceWallet.address,
-        'C',
-        sourceWallet.token,
-        amount,
-        'token',
-        recipientWallet.token,
-        tokenMeta,
-        null),
-
+    if(amount)
+    {
       // Secondary atom delivers token supply to the destination wallet
-      new Atom(
+      this.atoms.push(new Atom(
         0,
         recipientWallet.address,
         'V',
@@ -92,8 +89,8 @@ export default class Molecule {
         null,
         null,
         null,
-        null),
-    ];
+        null));
+    }
 
     this.molecularHash = Atom.hashAtoms(this.atoms);
     // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
