@@ -1,6 +1,6 @@
 {
 	"name": "@wishknish/knishio-client-js",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"description": "Knish.IO Javascript API Client",
 	"license": "GPLV3",
 	"repository": {
