@@ -66,7 +66,7 @@ export default class Molecule {
   initTokenCreation(sourceWallet, recipientWallet, amount, tokenMeta)
   {
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
-    this.atoms.push(new Atom(
+    this.atoms[0] = new Atom(
       sourceWallet.position,
       sourceWallet.address,
       'C',
@@ -75,13 +75,13 @@ export default class Molecule {
       'token',
       recipientWallet.token,
       tokenMeta,
-      null));
+      null);
 
     if(amount)
     {
       // Secondary atom delivers token supply to the destination wallet
-      this.atoms.push(new Atom(
-        0,
+      this.atoms[1] = new Atom(
+        recipientWallet.position,
         recipientWallet.address,
         'V',
         recipientWallet.token,
@@ -89,7 +89,7 @@ export default class Molecule {
         null,
         null,
         null,
-        null));
+        null);
     }
 
     this.molecularHash = Atom.hashAtoms(this.atoms);
@@ -141,31 +141,29 @@ export default class Molecule {
     const remainder = sourceWallet.balance - value;
     if(remainder > 0)
     {
-      this.atoms.push(
-        // Removing remainder from the source wallet
-        new Atom(
-          ++position,
-          sourceWallet.address,
-          'V',
-          sourceWallet.token,
-          -remainder,
-          null,
-          null,
-          null,
-          null),
+      // Removing remainder from the source wallet
+      this.atoms[2] = new Atom(
+        ++position,
+        sourceWallet.address,
+        'V',
+        sourceWallet.token,
+        -remainder,
+        null,
+        null,
+        null,
+        null);
 
-        // Moving remainder to the remainder wallet
-        new Atom(
-          ++position,
-          remainderWallet.address,
-          'V',
-          sourceWallet.token,
-          remainder,
-          null,
-          null,
-          null,
-          null)
-      );
+      // Moving remainder to the remainder wallet
+      this.atoms[3] = new Atom(
+        ++position,
+        remainderWallet.address,
+        'V',
+        sourceWallet.token,
+        remainder,
+        null,
+        null,
+        null,
+        null);
     }
 
     this.molecularHash = Atom.hashAtoms(this.atoms);
@@ -246,7 +244,7 @@ export default class Molecule {
           mappedHashArray[index] = 8;
           break;
         default:
-          // console.log(`This should not happen: ${ symbol }`);
+        // console.log(`This should not happen: ${ symbol }`);
       }
     });
 
@@ -335,33 +333,33 @@ export default class Molecule {
     const normalizedHash = Molecule.normalize(enumeratedHash);
     // console.log(`sign(): normalized hash - ${ normalizedHash }`);
 
-    // Iterate across each segment as Ki
-    let lastPosition = null;
-    // console.log(`sign(): iterating across ${ Object.keys(this.atoms).length } atoms`);
-
-    this.atoms = this.atoms.map(atom => {
-      let signatureFragments = '';
-      keyChunks.forEach(function(keyChunk, index){
-        // Iterate a number of times equal to 8-Hm[i]
-        let workingChunk = keyChunk;
-        for(let iterationCount = 0; iterationCount < (8 - normalizedHash[index]); iterationCount++)
-        {
-          // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashing ${ iterationCount } times`);
-          let workingChunkSponge = shake256.create(512);
-          workingChunkSponge.update(workingChunk);
-          workingChunk = workingChunkSponge.hex(); // bigInt.fromArray(workingChunkSponge.array(), 256, false).toString(16).padStart(64, '0');
-        }
-        // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashed ${ String(8 - normalizedHash[index]).padStart(2, '0') } times:`);
-        // console.log(workingChunk);
-        signatureFragments += workingChunk;
-      });
-      // console.log(`sign(): atom ${ atom.position } signature fragment length - ${ signatureFragments.length }`);
-      // console.log(`sign(): atom ${ atom.position } signature fragment - ${ signatureFragments }`);
-      atom.otsFragment = signatureFragments;
-      lastPosition = atom.position;
-      return atom;
+    // Building a one-time-signature
+    let signatureFragments = '';
+    keyChunks.forEach(function(keyChunk, index){
+      // Iterate a number of times equal to 8-Hm[i]
+      let workingChunk = keyChunk;
+      for(let iterationCount = 0; iterationCount < (8 - normalizedHash[index]); iterationCount++)
+      {
+        // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashing ${ iterationCount } times`);
+        let workingChunkSponge = shake256.create(512);
+        workingChunkSponge.update(workingChunk);
+        workingChunk = workingChunkSponge.hex(); // bigInt.fromArray(workingChunkSponge.array(), 256, false).toString(16).padStart(64, '0');
+      }
+      // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashed ${ String(8 - normalizedHash[index]).padStart(2, '0') } times:`);
+      // console.log(workingChunk);
+      signatureFragments += workingChunk;
     });
 
+    // Chunking the signature across multiple atoms
+    const chunkedSignature = chunkSubstr(signatureFragments, Math.round(2048 / this.atoms.length));
+    let lastPosition = null;
+    for(let chunkCount = 0; chunkCount < chunkedSignature.length; chunkCount++)
+    {
+      this.atoms[chunkCount].otsFragment = chunkedSignature[chunkCount];
+      lastPosition = this.atoms[chunkCount].position;
+      // console.log(`sign(): atom ${ this.atoms[chunkCount].position } signature fragment length - ${ this.atoms[chunkCount].otsFragment.length }`);
+      // console.log(`sign(): atom ${ this.atoms[chunkCount].position } signature fragment - ${ this.atoms[chunkCount].otsFragment }`);
+    }
     // console.log('sign(): FINISH');
     return lastPosition;
   }
@@ -389,9 +387,14 @@ export default class Molecule {
     // console.log('verifyOts(): START');
     // console.log(molecule);
 
+    let atoms = molecule.atoms;
+    console.log(atoms);
+    atoms.sort(Atom.comparePositions);
+    console.log(atoms);
+
     // Determine first atom
     let firstAtom = null;
-    molecule.atoms.forEach(function(atom) {
+    atoms.forEach(function(atom) {
       if(!firstAtom)
         firstAtom = atom;
       return atom;
@@ -406,7 +409,7 @@ export default class Molecule {
 
     // Rebuilding OTS out of all the atoms
     let ots = '';
-    molecule.atoms.forEach(function(atom) {
+    atoms.forEach(function(atom) {
       ots += atom.otsFragment;
       // console.log(`verifyOts(): atom ${ atom.position } ots fragment length - ${ atom.otsFragment.length }`);
       // console.log(`verifyOts(): atom ${ atom.position } ots fragment - ${ atom.otsFragment }`);

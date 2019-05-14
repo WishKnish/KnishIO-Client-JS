@@ -45,10 +45,12 @@ export default class Atom {
    */
   static hashAtoms(atoms, output = 'base17') {
     const molecularSponge = shake256.create(256);
-    const numberOfAtoms = Object.keys(atoms).length;
+    const numberOfAtoms = atoms.length;
+
+    atoms.sort(this.comparePositions);
 
     // Hashing each atom in the molecule to produce a molecular hash
-    Object.values(atoms).forEach(function (atom) {
+    atoms.forEach(function (atom) {
       molecularSponge.update(String(atom.position));
       molecularSponge.update(String(numberOfAtoms));
       molecularSponge.update(String(atom.walletAddress));
@@ -97,5 +99,15 @@ export default class Atom {
     // console.log(`hashAtoms(): ${ result }`);
 
     return result;
+  }
+
+  static comparePositions( a, b ) {
+    if ( a.position < b.position ){
+      return -1;
+    }
+    if ( a.position > b.position ){
+      return 1;
+    }
+    return 0;
   }
 }
