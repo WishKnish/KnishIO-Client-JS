@@ -3,18 +3,24 @@
 // https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
-import { shake256, } from 'js-sha3';
-import { chunkSubstr, } from './util/strings';
+import {shake256,} from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
+import {chunkSubstr, randomString,} from './util/strings';
 
 export default class Wallet {
 
-  constructor(secret, position, token = 'USER') {
+  /**
+   * @param secret - typically a 2048-character biometric hash
+   * @param token - slug for the token this wallet is intended for
+   * @param position - hexadecimal string used to salt the secret and produce one-time signatures
+   * @param saltLength - length of the position parameter that should be generated if position is not provided
+   */
+  constructor(secret, token = 'USER', position = null, saltLength = 64) {
     // console.log('Wallet constructor(): START');
     // Position via which (combined with token) we will generate the one-time keys
-    this.position = position;
+    this.position = position > 0 ? position : bigInt(randomString(saltLength), 16);
     this.token = token;
-    this.key = Wallet.generateWalletKey(secret, position, token);
+    this.key = Wallet.generateWalletKey(secret, this.token, this.position);
     this.address = Wallet.generateWalletAddress(this.key);
     this.balance = 0;
     this.molecules = {};
@@ -22,31 +28,37 @@ export default class Wallet {
     // console.log('Wallet constructor(): FINISH');
   }
 
-	/**
-	 * Hashes the user secret to produce a wallet bundle
-	 *
-	 * @returns string
-	 */
-  static generateBundleHash(secret)
-  {
-	  const bundleSponge = shake256.create(256);
-	  bundleSponge.update(secret);
-	  return bundleSponge.hex();
+  /**
+   * Hashes the user secret to produce a wallet bundle
+   *
+   * @returns string
+   */
+  static generateBundleHash(secret) {
+    const bundleSponge = shake256.create(256);
+    bundleSponge.update(secret);
+    return bundleSponge.hex();
   }
 
-  static generateWalletKey(secret, position, token = null) {
+  /**
+   *
+   * @param secret
+   * @param token
+   * @param position
+   * @return string
+   */
+  static generateWalletKey(secret, token, position,) {
     // Converting secret to bigInt
     let bigIntSecret = bigInt(secret, 16);
     // console.log(bigIntSecret.toString(16));
 
     // Adding new position to the user secret to produce the indexed key
-    const indexedKey = bigIntSecret.add(bigInt(position, 10));
+    const indexedKey = bigIntSecret.add(bigInt(position, 16));
     // console.log(indexedKey.toString(16));
 
     // Hashing the indexed key to produce the intermediate key
     const intermediateKeySponge = shake256.create(8192);
     intermediateKeySponge.update(indexedKey.toString(16));
-    if(token)
+    if (token)
       intermediateKeySponge.update(token);
 
     const intermediateKey = intermediateKeySponge.hex(); // bigInt.fromArray(intermediateKeySponge.array(), 256, false).toString(16).padStart(2048, '0');
@@ -66,9 +78,9 @@ export default class Wallet {
 
     // Generating wallet digest
     const digestSponge = shake256.create(8192);
-    keyFragments.forEach(function(fragment, index){
+    keyFragments.forEach(function (fragment, index) {
       let workingFragment = fragment;
-      for(let i = 1; i <= 16; i++){
+      for (let i = 1; i <= 16; i++) {
         let workingSponge = shake256.create(512);
         workingSponge.update(workingFragment);
         workingFragment = workingSponge.hex(); // bigInt.fromArray(workingSponge.array(), 256, false).toString(16).padStart(128, '0');
