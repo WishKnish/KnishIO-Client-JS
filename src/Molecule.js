@@ -319,7 +319,7 @@ export default class Molecule {
     });
 
     // Generate the private signing key for this molecule
-    const key = Wallet.generateWalletKey(secret, firstAtom.position, firstAtom.token);
+    const key = Wallet.generateWalletKey(secret, firstAtom.token, firstAtom.position);
     // console.log(`sign(): wallet key for token ${ firstAtom.token }, pos ${ firstAtom.position }: ${ key }`);
 
     // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
