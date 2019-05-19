@@ -25,19 +25,17 @@ export function chunkSubstr(str, size) {
 }
 
 /**
- * Generates a random string of the given length out of the given alphabet
+ * Generates a cryptographically-secure pseudo-random string of the given length out of the given alphabet
  *
  * @param length
  * @param alphabet
  * @returns {string}
  */
 export function randomString(length = 256, alphabet = 'abcdef0123456789') {
-  let randomStr = '';
-  for(let i = 0; i < length; i++)
-  {
-    randomStr = randomStr.concat(alphabet.charAt(Math.floor(Math.random() * alphabet.length)));
-  }
-  return randomStr;
+  let array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+  array = array.map(x => alphabet.charCodeAt(x % alphabet.length));
+  return String.fromCharCode.apply(null, array);
 }
 
 export function charsetBaseConvert(src, from_base, to_base, src_symbol_table, dest_symbol_table) {
