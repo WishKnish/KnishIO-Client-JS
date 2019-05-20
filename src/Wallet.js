@@ -18,7 +18,7 @@ export default class Wallet {
   constructor(secret, token = 'USER', position = null, saltLength = 64) {
     // console.log('Wallet constructor(): START');
     // Position via which (combined with token) we will generate the one-time keys
-    this.position = position > 0 ? position : bigInt(randomString(saltLength), 16);
+    this.position = position > 0 ? position : randomString(saltLength, 'abcdef0123456789');
     this.token = token;
     this.key = Wallet.generateWalletKey(secret, this.token, this.position);
     this.address = Wallet.generateWalletAddress(this.key);
