@@ -6,6 +6,7 @@
 import Atom from './Atom';
 import { shake256, } from 'js-sha3';
 import { chunkSubstr, } from './util/strings';
+import bigInt from 'big-integer';
 import Wallet from './Wallet';
 
 export default class Molecule {
@@ -110,11 +111,11 @@ export default class Molecule {
    */
   initValue(sourceWallet, recipientWallet, remainderWallet, value)
   {
-    let position = sourceWallet.position;
+    let position = bigInt(sourceWallet.position, 16);
     this.atoms = [
       // Initializing a new Atom to remove tokens from source
       new Atom(
-        position,
+        position.toString(16),
         sourceWallet.address,
         'V',
         sourceWallet.token,
@@ -126,7 +127,7 @@ export default class Molecule {
 
       // Initializing a new Atom to add tokens to recipient
       new Atom(
-        ++position,
+        position.add(1).toString(16),
         recipientWallet.address,
         'V',
         sourceWallet.token,
@@ -143,7 +144,7 @@ export default class Molecule {
     {
       // Removing remainder from the source wallet
       this.atoms[2] = new Atom(
-        ++position,
+        position.add(2).toString(16),
         sourceWallet.address,
         'V',
         sourceWallet.token,
@@ -155,7 +156,7 @@ export default class Molecule {
 
       // Moving remainder to the remainder wallet
       this.atoms[3] = new Atom(
-        ++position,
+        position.add(3).toString(16),
         remainderWallet.address,
         'V',
         sourceWallet.token,
@@ -388,9 +389,9 @@ export default class Molecule {
     // console.log(molecule);
 
     let atoms = molecule.atoms;
-    console.log(atoms);
+    //console.log(atoms);
     atoms.sort(Atom.comparePositions);
-    console.log(atoms);
+    //console.log(atoms);
 
     // Determine first atom
     let firstAtom = null;
