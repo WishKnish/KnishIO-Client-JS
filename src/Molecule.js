@@ -13,12 +13,12 @@ export default class Molecule {
 
   /**
    *
-   * @param cellId
+   * @param cellSlug
    * @param bundle
    */
-  constructor(cellId = null, bundle = null) {
+  constructor(cellSlug = null, bundle = null) {
     this.molecularHash = null;
-    this.cellId = cellId;
+    this.cellSlug = cellSlug;
     this.bundle = bundle;
     this.status = null;
     this.createdAt = +new Date;
