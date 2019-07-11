@@ -12,7 +12,7 @@ import Wallet from './Wallet';
 export default class Molecule {
 
   /**
-   *
+   * Molecule constructor.
    * @param cellSlug
    * @param bundle
    */
@@ -24,6 +24,98 @@ export default class Molecule {
     this.createdAt = +new Date;
     this.atoms = [];
   }
+
+  /**
+   * Initialize a V-type molecule to transfer value from one wallet to another, with a third,
+   * regenerated wallet receiving the remainder
+   *
+   * @param sourceWallet
+   * @param recipientWallet
+   * @param remainderWallet
+   * @param value
+   * @returns String
+   */
+  initValue(sourceWallet, recipientWallet, remainderWallet, value)
+  {
+    let position = bigInt(sourceWallet.position, 16);
+
+    this.atoms = [
+      // Initializing a new Atom to remove tokens from source
+      new Atom(
+        position.toString(16),
+        sourceWallet.address,
+        'V',
+        sourceWallet.token,
+        -value,
+        'remainderWallet',
+        remainderWallet.address,
+        null,
+        null),
+
+      // Initializing a new Atom to add tokens to recipient
+      new Atom(
+        position.add(1).toString(16),
+        recipientWallet.address,
+        'V',
+        sourceWallet.token,
+        value,
+        'walletBundle',
+        recipientWallet.bundle,
+        null,
+        null),
+    ];
+
+    this.molecularHash = Atom.hashAtoms(this.atoms);
+    // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
+
+    return this.molecularHash;
+  }
+
+  /**
+   * Initialize a C-type molecule to issue a new type of token
+   *
+   * @param sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
+   * @param recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
+   * @param amount - how many of the token we are initially issuing (for fungible tokens only)
+   * @param tokenMeta - additional fields to configure the token
+   * @returns String
+   */
+  initTokenCreation(sourceWallet, recipientWallet, amount, tokenMeta)
+  {
+    // The primary atom tells the ledger that a certain amount of the new token is being issued.
+    this.atoms[0] = new Atom(
+      sourceWallet.position,
+      sourceWallet.address,
+      'C',
+      sourceWallet.token,
+      amount,
+      'token',
+      recipientWallet.token,
+      tokenMeta,
+      null);
+
+
+    // Secondary atom delivers token supply to the destination wallet
+    if(amount)
+    {
+      this.atoms[1] = new Atom(
+        recipientWallet.position,
+        recipientWallet.address,
+        'V',
+        recipientWallet.token,
+        amount,
+        null,
+        null,
+        null,
+        null);
+    }
+
+    this.molecularHash = Atom.hashAtoms(this.atoms);
+    // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
+
+    return this.molecularHash;
+  }
+
 
   /**
    * Initialize an M-type molecule with the given data
@@ -56,123 +148,172 @@ export default class Molecule {
   }
 
   /**
-   * Initialize a C-type molecule to issue a new type of token
+   * Creates a one-time signature for a molecule and breaks it up across multiple atoms within that
+   * molecule. Resulting 4096 byte (2048 character) string is the one-time signature.
    *
-   * @param sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
-   * @param recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
-   * @param amount - how many of the token we are initially issuing (for fungible tokens only)
-   * @param tokenMeta - additional fields to configure the token
-   * @returns String
+   * @param secret
+   * @returns {*}
    */
-  initTokenCreation(sourceWallet, recipientWallet, amount, tokenMeta)
-  {
-    // The primary atom tells the ledger that a certain amount of the new token is being issued.
-    this.atoms[0] = new Atom(
-      sourceWallet.position,
-      sourceWallet.address,
-      'C',
-      sourceWallet.token,
-      amount,
-      'token',
-      recipientWallet.token,
-      tokenMeta,
-      null);
+  sign(secret) {
+    // console.log('sign(): START');
+    // console.log(`sign(): molecular hash: ${ this.molecularHash }`);
 
-    if(amount)
+    // Determine first atom
+    let firstAtom = null;
+    this.atoms.forEach(function(atom) {
+      if(!firstAtom)
+        firstAtom = atom;
+      return atom;
+    });
+
+    // Generate the private signing key for this molecule
+    const key = Wallet.generateWalletKey(secret, firstAtom.token, firstAtom.position);
+    // console.log(`sign(): wallet key for token ${ firstAtom.token }, pos ${ firstAtom.position }: ${ key }`);
+
+    // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
+    const keyChunks = chunkSubstr(key, 128);
+    // console.log(`sign(): number of key chunks - ${ Object.keys(keyChunks).length }`);
+
+    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
+    const enumeratedHash = Molecule.enumerate(this.molecularHash);
+    // console.log(`sign(): enumerated hash - ${ enumeratedHash }`);
+
+    const normalizedHash = Molecule.normalize(enumeratedHash);
+    // console.log(`sign(): normalized hash - ${ normalizedHash }`);
+
+    // Building a one-time-signature
+    let signatureFragments = '';
+    keyChunks.forEach(function(keyChunk, index){
+      // Iterate a number of times equal to 8-Hm[i]
+      let workingChunk = keyChunk;
+      for(let iterationCount = 0; iterationCount < (8 - normalizedHash[index]); iterationCount++)
+      {
+        // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashing ${ iterationCount } times`);
+        let workingChunkSponge = shake256.create(512);
+        workingChunkSponge.update(workingChunk);
+        workingChunk = workingChunkSponge.hex(); // bigInt.fromArray(workingChunkSponge.array(), 256, false).toString(16).padStart(64, '0');
+      }
+      // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashed ${ String(8 - normalizedHash[index]).padStart(2, '0') } times:`);
+      // console.log(workingChunk);
+      signatureFragments += workingChunk;
+    });
+
+    // Chunking the signature across multiple atoms
+    const chunkedSignature = chunkSubstr(signatureFragments, Math.round(2048 / this.atoms.length));
+    let lastPosition = null;
+    for(let chunkCount = 0; chunkCount < chunkedSignature.length; chunkCount++)
     {
-      // Secondary atom delivers token supply to the destination wallet
-      this.atoms[1] = new Atom(
-        recipientWallet.position,
-        recipientWallet.address,
-        'V',
-        recipientWallet.token,
-        amount,
-        null,
-        null,
-        null,
-        null);
+      this.atoms[chunkCount].otsFragment = chunkedSignature[chunkCount];
+      lastPosition = this.atoms[chunkCount].position;
+      // console.log(`sign(): atom ${ this.atoms[chunkCount].position } signature fragment length - ${ this.atoms[chunkCount].otsFragment.length }`);
+      // console.log(`sign(): atom ${ this.atoms[chunkCount].position } signature fragment - ${ this.atoms[chunkCount].otsFragment }`);
     }
-
-    this.molecularHash = Atom.hashAtoms(this.atoms);
-    // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
-
-    return this.molecularHash;
+    // console.log('sign(): FINISH');
+    return lastPosition;
   }
 
   /**
-   * Initialize a V-type molecule to transfer value from one wallet to another, with a third,
-   * regenerated wallet receiving the remainder
+   * Verifies if the hash of all the atoms matches the molecular hash to ensure content has not been messed with
    *
-   * @param sourceWallet
-   * @param recipientWallet
-   * @param remainderWallet
-   * @param value
-   * @returns String
+   * @param molecule
+   * @return {boolean}
    */
-  initValue(sourceWallet, recipientWallet, remainderWallet, value)
-  {
-    let position = bigInt(sourceWallet.position, 16);
-    this.atoms = [
-      // Initializing a new Atom to remove tokens from source
-      new Atom(
-        position.toString(16),
-        sourceWallet.address,
-        'V',
-        sourceWallet.token,
-        -value,
-        null,
-        null,
-        null,
-        null),
+  static verifyMolecularHash(molecule) {
+    const atomicHash = Atom.hashAtoms(molecule.atoms);
+    const result = (atomicHash === molecule.molecularHash);
 
-      // Initializing a new Atom to add tokens to recipient
-      new Atom(
-        position.add(1).toString(16),
-        recipientWallet.address,
-        'V',
-        sourceWallet.token,
-        value,
-        null,
-        null,
-        null,
-        null),
-    ];
+    if(!result)
+      console.log(`verifyMolecularHash(): ${ atomicHash } ${ result ? '=' : '!' }== ${ molecule.molecularHash }`);
 
-    // If we have remaining balance, we need to move it into a new wallet
-    const remainder = sourceWallet.balance - value;
-    if(remainder > 0)
-    {
-      // Removing remainder from the source wallet
-      this.atoms[2] = new Atom(
-        position.add(2).toString(16),
-        sourceWallet.address,
-        'V',
-        sourceWallet.token,
-        -remainder,
-        null,
-        null,
-        null,
-        null);
-
-      // Moving remainder to the remainder wallet
-      this.atoms[3] = new Atom(
-        position.add(3).toString(16),
-        remainderWallet.address,
-        'V',
-        sourceWallet.token,
-        remainder,
-        null,
-        null,
-        null,
-        null);
-    }
-
-    this.molecularHash = Atom.hashAtoms(this.atoms);
-    // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
-
-    return this.molecularHash;
+    return result;
   }
 
+  /**
+   * Checks if the provided molecule was signed properly by transforming a collection of signature
+   * fragments from its atoms and its molecular hash into a single-use wallet address to be matched
+   * against the sender’s address. If it matches, the molecule was correctly signed.
+   *
+   * @param molecule
+   * @returns {boolean}
+   */
+  static verifyOts(molecule)
+  {
+    // console.log('verifyOts(): START');
+    // console.log(molecule);
+
+    let atoms = molecule.atoms;
+    //console.log(atoms);
+    atoms.sort(Atom.comparePositions);
+    //console.log(atoms);
+
+    // Determine first atom
+    let firstAtom = null;
+    atoms.forEach(function(atom) {
+      if(!firstAtom)
+        firstAtom = atom;
+      return atom;
+    });
+
+    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
+    const enumeratedHash = Molecule.enumerate(molecule.molecularHash);
+    // console.log(`sign(): enumerated hash - ${ enumeratedHash }`);
+
+    const normalizedHash = Molecule.normalize(enumeratedHash);
+    // console.log(`sign(): normalized hash - ${ normalizedHash }`);
+
+    // Rebuilding OTS out of all the atoms
+    let ots = '';
+    atoms.forEach(function(atom) {
+      ots += atom.otsFragment;
+      // console.log(`verifyOts(): atom ${ atom.position } ots fragment length - ${ atom.otsFragment.length }`);
+      // console.log(`verifyOts(): atom ${ atom.position } ots fragment - ${ atom.otsFragment }`);
+    });
+
+    // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
+    const otsChunks = chunkSubstr(ots, 128);
+    // console.log(`verifyOts(): number of ots chunks - ${ Object.keys(otsChunks).length }`);
+
+    let keyFragments = '';
+    otsChunks.forEach(function(otsChunk, index){
+      // Iterate a number of times equal to 8+Hm[i]
+      let workingChunk = otsChunk;
+      for(let iterationCount = 0; iterationCount < (8 + normalizedHash[index]); iterationCount++)
+      {
+        // console.log(`verifyOts(): chunk ${ index }, hashing ${ iterationCount } times - ${ workingChunk }`);
+        let workingChunkSponge = shake256.create(512);
+        workingChunkSponge.update(workingChunk);
+        workingChunk = workingChunkSponge.hex(); // bigInt.fromArray(workingChunkSponge.array(), 256, false).toString(16).padStart(64, '0');
+      }
+      keyFragments += workingChunk; // otsHashFragment;
+      // console.log(`verifyOts(): #${ String(index).padStart(2, '0') }, ${ String(8 + normalizedHash[index]).padStart(2, '0') } times vs  ${ String(8 - normalizedHash[index]).padStart(2, '0') } times:`);
+      // console.log(`${ workingChunk } vs ${ otsChunk } - ${ otsChunk === workingChunk ? 'MATCH' : 'NO' }`);
+    });
+
+    // console.log(`verifyOts(): ots hash length: ${ keyFragments.length }`);
+    // console.log(`verifyOts(): ots hash: ${ keyFragments }`);
+
+    // Absorb the hashed Kk into the sponge to receive the digest Dk
+    const digestSponge = shake256.create(8192);
+    digestSponge.update(keyFragments);
+    const digest = digestSponge.hex(); // bigInt.fromArray(digestSponge.array(), 256, false).toString(16).padStart(2048, '0');
+
+    // console.log(`verifyOts(): digest length: ${ digest.length }`);
+    // console.log(`verifyOts(): digest: ${ digest }`);
+
+    // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
+    const addressSponge = shake256.create(256);
+    addressSponge.update(digest);
+    const address = addressSponge.hex(); // bigInt.fromArray(addressSponge.array(), 256, false).toString(16).padStart(64, '0');
+    // console.log(`verifyOts(): ${ address } vs *${ firstAtom.walletAddress }`);
+    // console.log('verifyOts(): FINISH');
+
+    const result = (address === firstAtom.walletAddress);
+
+    if(!result)
+      console.log(`verifyOts(): ${ address } ${ result ? '=' : '!' }== ${ firstAtom.walletAddress }`);
+
+    return result;
+  }
 
   /**
    * Accept a string of letters and numbers, and outputs a collection of decimals representing each
@@ -298,167 +439,5 @@ export default class Molecule {
     }
 
     return mappedHashArray;
-  }
-
-  /**
-   * Creates a one-time signature for a molecule and breaks it up across multiple atoms within that
-   * molecule. Resulting 4096 byte (2048 character) string is the one-time signature.
-   *
-   * @param secret
-   * @returns {*}
-   */
-  sign(secret) {
-    // console.log('sign(): START');
-    // console.log(`sign(): molecular hash: ${ this.molecularHash }`);
-
-    // Determine first atom
-    let firstAtom = null;
-    this.atoms.forEach(function(atom) {
-      if(!firstAtom)
-        firstAtom = atom;
-      return atom;
-    });
-
-    // Generate the private signing key for this molecule
-    const key = Wallet.generateWalletKey(secret, firstAtom.token, firstAtom.position);
-    // console.log(`sign(): wallet key for token ${ firstAtom.token }, pos ${ firstAtom.position }: ${ key }`);
-
-    // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
-    const keyChunks = chunkSubstr(key, 128);
-    // console.log(`sign(): number of key chunks - ${ Object.keys(keyChunks).length }`);
-
-    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
-    const enumeratedHash = Molecule.enumerate(this.molecularHash);
-    // console.log(`sign(): enumerated hash - ${ enumeratedHash }`);
-
-    const normalizedHash = Molecule.normalize(enumeratedHash);
-    // console.log(`sign(): normalized hash - ${ normalizedHash }`);
-
-    // Building a one-time-signature
-    let signatureFragments = '';
-    keyChunks.forEach(function(keyChunk, index){
-      // Iterate a number of times equal to 8-Hm[i]
-      let workingChunk = keyChunk;
-      for(let iterationCount = 0; iterationCount < (8 - normalizedHash[index]); iterationCount++)
-      {
-        // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashing ${ iterationCount } times`);
-        let workingChunkSponge = shake256.create(512);
-        workingChunkSponge.update(workingChunk);
-        workingChunk = workingChunkSponge.hex(); // bigInt.fromArray(workingChunkSponge.array(), 256, false).toString(16).padStart(64, '0');
-      }
-      // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashed ${ String(8 - normalizedHash[index]).padStart(2, '0') } times:`);
-      // console.log(workingChunk);
-      signatureFragments += workingChunk;
-    });
-
-    // Chunking the signature across multiple atoms
-    const chunkedSignature = chunkSubstr(signatureFragments, Math.round(2048 / this.atoms.length));
-    let lastPosition = null;
-    for(let chunkCount = 0; chunkCount < chunkedSignature.length; chunkCount++)
-    {
-      this.atoms[chunkCount].otsFragment = chunkedSignature[chunkCount];
-      lastPosition = this.atoms[chunkCount].position;
-      // console.log(`sign(): atom ${ this.atoms[chunkCount].position } signature fragment length - ${ this.atoms[chunkCount].otsFragment.length }`);
-      // console.log(`sign(): atom ${ this.atoms[chunkCount].position } signature fragment - ${ this.atoms[chunkCount].otsFragment }`);
-    }
-    // console.log('sign(): FINISH');
-    return lastPosition;
-  }
-
-  static verifyMolecularHash(molecule) {
-    const atomicHash = Atom.hashAtoms(molecule.atoms);
-    const result = (atomicHash === molecule.molecularHash);
-
-    if(!result)
-      console.log(`verifyMolecularHash(): ${ atomicHash } ${ result ? '=' : '!' }== ${ molecule.molecularHash }`);
-
-    return result;
-  }
-
-  /**
-   * Checks if the provided molecule was signed properly by transforming a collection of signature
-   * fragments from its atoms and its molecular hash into a single-use wallet address to be matched
-   * against the sender’s address. If it matches, the molecule was correctly signed.
-   *
-   * @param molecule
-   * @returns {boolean}
-   */
-  static verifyOts(molecule)
-  {
-    // console.log('verifyOts(): START');
-    // console.log(molecule);
-
-    let atoms = molecule.atoms;
-    //console.log(atoms);
-    atoms.sort(Atom.comparePositions);
-    //console.log(atoms);
-
-    // Determine first atom
-    let firstAtom = null;
-    atoms.forEach(function(atom) {
-      if(!firstAtom)
-        firstAtom = atom;
-      return atom;
-    });
-
-    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
-    const enumeratedHash = Molecule.enumerate(molecule.molecularHash);
-    // console.log(`sign(): enumerated hash - ${ enumeratedHash }`);
-
-    const normalizedHash = Molecule.normalize(enumeratedHash);
-    // console.log(`sign(): normalized hash - ${ normalizedHash }`);
-
-    // Rebuilding OTS out of all the atoms
-    let ots = '';
-    atoms.forEach(function(atom) {
-      ots += atom.otsFragment;
-      // console.log(`verifyOts(): atom ${ atom.position } ots fragment length - ${ atom.otsFragment.length }`);
-      // console.log(`verifyOts(): atom ${ atom.position } ots fragment - ${ atom.otsFragment }`);
-    });
-
-    // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
-    const otsChunks = chunkSubstr(ots, 128);
-    // console.log(`verifyOts(): number of ots chunks - ${ Object.keys(otsChunks).length }`);
-
-    let keyFragments = '';
-    otsChunks.forEach(function(otsChunk, index){
-      // Iterate a number of times equal to 8+Hm[i]
-      let workingChunk = otsChunk;
-      for(let iterationCount = 0; iterationCount < (8 + normalizedHash[index]); iterationCount++)
-      {
-        // console.log(`verifyOts(): chunk ${ index }, hashing ${ iterationCount } times - ${ workingChunk }`);
-        let workingChunkSponge = shake256.create(512);
-        workingChunkSponge.update(workingChunk);
-        workingChunk = workingChunkSponge.hex(); // bigInt.fromArray(workingChunkSponge.array(), 256, false).toString(16).padStart(64, '0');
-      }
-      keyFragments += workingChunk; // otsHashFragment;
-      // console.log(`verifyOts(): #${ String(index).padStart(2, '0') }, ${ String(8 + normalizedHash[index]).padStart(2, '0') } times vs  ${ String(8 - normalizedHash[index]).padStart(2, '0') } times:`);
-      // console.log(`${ workingChunk } vs ${ otsChunk } - ${ otsChunk === workingChunk ? 'MATCH' : 'NO' }`);
-    });
-
-    // console.log(`verifyOts(): ots hash length: ${ keyFragments.length }`);
-    // console.log(`verifyOts(): ots hash: ${ keyFragments }`);
-
-    // Absorb the hashed Kk into the sponge to receive the digest Dk
-    const digestSponge = shake256.create(8192);
-    digestSponge.update(keyFragments);
-    const digest = digestSponge.hex(); // bigInt.fromArray(digestSponge.array(), 256, false).toString(16).padStart(2048, '0');
-
-    // console.log(`verifyOts(): digest length: ${ digest.length }`);
-    // console.log(`verifyOts(): digest: ${ digest }`);
-
-    // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
-    const addressSponge = shake256.create(256);
-    addressSponge.update(digest);
-    const address = addressSponge.hex(); // bigInt.fromArray(addressSponge.array(), 256, false).toString(16).padStart(64, '0');
-    // console.log(`verifyOts(): ${ address } vs *${ firstAtom.walletAddress }`);
-    // console.log('verifyOts(): FINISH');
-
-    const result = (address === firstAtom.walletAddress);
-
-    if(!result)
-      console.log(`verifyOts(): ${ address } ${ result ? '=' : '!' }== ${ firstAtom.walletAddress }`);
-
-    return result;
   }
 }
