@@ -3,111 +3,151 @@
 // https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
-import {shake256,} from 'js-sha3';
-import {charsetBaseConvert,} from './util/strings';
+import { shake256, } from 'js-sha3';
+import { charsetBaseConvert, } from './libraries/strings';
 
+/**
+ * class Atom
+ *
+ * @property {string} position
+ * @property {string} walletAddress
+ * @property {string} isotope
+ * @property {string | null} token
+ * @property {string | number | null} value
+ * @property {string | null} metaType
+ * @property {string | null} metaId
+ * @property {Array | Object | null} meta
+ * @property {string | null} otsFragment
+ * @property {string} createdAt
+ */
 export default class Atom {
 
   /**
-   *
-   * @param position
-   * @param walletAddress
-   * @param isotope
-   * @param token
-   * @param value
-   * @param metaType
-   * @param metaId
-   * @param meta
-   * @param otsFragment
+   * @param {string} position
+   * @param {string} walletAddress
+   * @param {string} isotope
+   * @param {string | null} token
+   * @param {string | number | null} value
+   * @param {string | null} metaType
+   * @param {string | null} metaId
+   * @param {Array | Object | null} meta
+   * @param {string | null} otsFragment
    */
-  constructor(position, walletAddress, isotope, token = null, value = null, metaType = null, metaId = null, meta = null, otsFragment = null) {
+  constructor ( position, walletAddress, isotope, token = null, value = null, metaType = null, metaId = null, meta = null, otsFragment = null ) {
+
     this.position = position;
     this.walletAddress = walletAddress;
     this.isotope = isotope;
     this.token = token;
-    this.value = value;
+    this.value = null !== value ? String( value ) : null;
 
     this.metaType = metaType;
     this.metaId = metaId;
-    this.meta = meta;
+    this.meta = meta ? Atom.normalizeMeta( meta ) : [];
 
     this.otsFragment = otsFragment;
-    this.createdAt = +new Date;
+    this.createdAt = String( +new Date );
+  }
+
+  /**
+   * @param {string} json
+   * @return {Object}
+   */
+  static jsonToObject ( json )
+  {
+    return Object.assign( new Atom( null, null, null ), JSON.parse( json ) );
   }
 
   /**
    * Produces a hash of the atoms inside a molecule.
    * Used to generate the molecularHash field for Molecules.
    *
-   * @param atoms
-   * @param output
+   * @param {Array} atoms
+   * @param {string} output
    * @returns {number[] | *}
    */
-  static hashAtoms(atoms, output = 'base17') {
-    const molecularSponge = shake256.create(256);
-    const numberOfAtoms = atoms.length;
-
-    atoms.sort(this.comparePositions);
+  static hashAtoms ( atoms, output = 'base17' )
+  {
+    const molecularSponge = shake256.create( 256 ),
+        numberOfAtoms = atoms.length;
 
     // Hashing each atom in the molecule to produce a molecular hash
-    atoms.forEach(function (atom) {
-      molecularSponge.update(String(atom.position));
-      molecularSponge.update(String(numberOfAtoms));
-      molecularSponge.update(String(atom.walletAddress));
-      molecularSponge.update(String(atom.isotope));
+    for ( const atom of atoms.sort( this.comparePositions ) ) {
+      molecularSponge.update( String( numberOfAtoms ) );
 
-      if (atom.token)
-        molecularSponge.update(String(atom.token));
-      if (atom.value)
-        molecularSponge.update(String(atom.value));
-      if (atom.metaType)
-        molecularSponge.update(String(atom.metaType));
-      if (atom.metaId)
-        molecularSponge.update(String(atom.metaId));
+      for ( const property in atom ) {
+        if ( atom.hasOwnProperty( property ) ) {
 
-      // Adding meta keys and values, if any
-      if (atom.meta && atom.meta.length)
-      {
-        atom.meta.forEach(function(meta){
-          molecularSponge.update(String(meta.key));
-          molecularSponge.update(String(meta.value));
-        })
+          if ( 'otsFragment' === property ) {
+            continue;
+          }
+
+          if ( 'meta' === property ) {
+            atom[property] = Atom.normalizeMeta( atom[property] );
+
+            for ( const meta of atom[property] ) {
+              molecularSponge.update( String( meta.key ) );
+              molecularSponge.update( String( meta.value ) );
+            }
+            continue;
+          }
+
+          if ( [ 'position', 'walletAddress', 'isotope', ].includes( property ) ) {
+            molecularSponge.update( String( atom[property] ) );
+            continue;
+          }
+
+          if ( null !== atom[property] ) {
+            molecularSponge.update( String( atom[property] ) );
+          }
+        }
       }
-
-      molecularSponge.update(String(atom.createdAt));
-    });
-
-    let result = null;
-    switch (output) {
-      case 'hex':
-        result = molecularSponge.hex();
-        break;
-      case 'array':
-        result = molecularSponge.array();
-        break;
-      case 'base17':
-        const hexOutput = molecularSponge.hex();
-        // console.log(`hashAtoms(): hex output - ${ hexOutput }`);
-        result = charsetBaseConvert(hexOutput, 16, 17, '0123456789abcdef', '0123456789abcdefg').padStart(64, '0');
-        // let result2 = parseInt(`${ hexOutput }`, 16).toString(17).padStart(64, '0');
-
-        // const bigIntHex = bigInt(hexOutput, 16);
-        // result = bigIntHex.toString(17, '0123456789abcdefg').padStart(64, '0');
-        break;
     }
 
-    // console.log(`hashAtoms(): ${ result }`);
-
-    return result;
+    switch ( output ) {
+      case 'hex': {
+        return molecularSponge.hex();
+      }
+      case 'array': {
+        return  molecularSponge.array();
+      }
+      case 'base17': {
+        return charsetBaseConvert( molecularSponge.hex(), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
+      }
+      default:{
+        return null;
+      }
+    }
   }
 
-  static comparePositions( a, b ) {
-    if ( a.position < b.position ){
-      return -1;
+  /**
+   * @param {Array | Object} meta
+   * @return {Array}
+   */
+  static normalizeMeta ( meta )
+  {
+    if ( toString.call( meta ) === '[object Object]' ) {
+      const target = [];
+      for ( const property in meta ) {
+        if ( meta.hasOwnProperty( property ) ) {
+          target.push( { key: property, value: meta[property] } );
+        }
+      }
+      return target;
     }
-    if ( a.position > b.position ){
-      return 1;
+    return meta;
+  }
+
+  /**
+   * @param {Atom} a
+   * @param {Atom} b
+   * @return {number}
+   */
+  static comparePositions ( a, b )
+  {
+    if ( a.position === b.position ) {
+      return 0;
     }
-    return 0;
+    return a.position < b.position ? -1 : 1;
   }
 }

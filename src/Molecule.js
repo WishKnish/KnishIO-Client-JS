@@ -5,23 +5,33 @@
 
 import Atom from './Atom';
 import { shake256, } from 'js-sha3';
-import { chunkSubstr, } from './util/strings';
+import { chunkSubstr, } from './libraries/strings';
 import bigInt from 'big-integer';
 import Wallet from './Wallet';
+import AtomsNotFoundException from './exception/AtomsNotFoundException';
 
+/**
+ * class Molecule
+ *
+ * @property {string | null} molecularHash
+ * @property {string | null} cellSlug
+ * @property {string | null} bundle
+ * @property {string | null} status
+ * @property {string} createdAt
+ * @property {Array} atoms
+ */
 export default class Molecule {
 
   /**
    * Molecule constructor.
    * @param cellSlug
-   * @param bundle
    */
-  constructor(cellSlug = null, bundle = null) {
+  constructor ( cellSlug = null ) {
     this.molecularHash = null;
     this.cellSlug = cellSlug;
-    this.bundle = bundle;
+    this.bundle = null;
     this.status = null;
-    this.createdAt = +new Date;
+    this.createdAt = String( +new Date );
     this.atoms = [];
   }
 
@@ -29,32 +39,36 @@ export default class Molecule {
    * Initialize a V-type molecule to transfer value from one wallet to another, with a third,
    * regenerated wallet receiving the remainder
    *
-   * @param sourceWallet
-   * @param recipientWallet
-   * @param remainderWallet
-   * @param value
-   * @returns String
+   * @param {Wallet} sourceWallet
+   * @param {Wallet} recipientWallet
+   * @param {Wallet} remainderWallet
+   * @param {*} value
+   * @returns {Array}
    */
-  initValue(sourceWallet, recipientWallet, remainderWallet, value)
+  initValue ( sourceWallet, recipientWallet, remainderWallet, value )
   {
-    let position = bigInt(sourceWallet.position, 16);
+    this.molecularHash = null;
+    const position = bigInt( sourceWallet.position, 16 );
 
-    this.atoms = [
-      // Initializing a new Atom to remove tokens from source
+    // Initializing a new Atom to remove tokens from source
+    this.atoms.push(
       new Atom(
-        position.toString(16),
+        position.toString( 16 ),
         sourceWallet.address,
         'V',
         sourceWallet.token,
         -value,
         'remainderWallet',
         remainderWallet.address,
-        null,
-        null),
+        { 'remainderPosition': remainderWallet.position },
+        null
+      )
+    );
 
-      // Initializing a new Atom to add tokens to recipient
+    // Initializing a new Atom to add tokens to recipient
+    this.atoms.push(
       new Atom(
-        position.add(1).toString(16),
+        position.add( 1 ).toString( 16 ),
         recipientWallet.address,
         'V',
         sourceWallet.token,
@@ -62,74 +76,66 @@ export default class Molecule {
         'walletBundle',
         recipientWallet.bundle,
         null,
-        null),
-    ];
+        null
+      )
+    );
 
-    this.molecularHash = Atom.hashAtoms(this.atoms);
-    // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
-
-    return this.molecularHash;
+    return this.atoms;
   }
 
   /**
    * Initialize a C-type molecule to issue a new type of token
    *
-   * @param sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
-   * @param recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
-   * @param amount - how many of the token we are initially issuing (for fungible tokens only)
-   * @param tokenMeta - additional fields to configure the token
-   * @returns String
+   * @param {Wallet} sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
+   * @param {Wallet} recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
+   * @param {number} amount - how many of the token we are initially issuing (for fungible tokens only)
+   * @param {Array | Object} tokenMeta - additional fields to configure the token
+   * @returns {Array}
    */
-  initTokenCreation(sourceWallet, recipientWallet, amount, tokenMeta)
+  initTokenCreation ( sourceWallet, recipientWallet, amount, tokenMeta )
   {
-    // The primary atom tells the ledger that a certain amount of the new token is being issued.
-    this.atoms[0] = new Atom(
-      sourceWallet.position,
-      sourceWallet.address,
-      'C',
-      sourceWallet.token,
-      amount,
-      'token',
-      recipientWallet.token,
-      tokenMeta,
-      null);
+    this.molecularHash = null;
+    const metas = Atom.normalizeMeta( tokenMeta );
 
-
-    // Secondary atom delivers token supply to the destination wallet
-    if(amount)
-    {
-      this.atoms[1] = new Atom(
-        recipientWallet.position,
-        recipientWallet.address,
-        'V',
-        recipientWallet.token,
-        amount,
-        null,
-        null,
-        null,
-        null);
+    for ( const walletKey of [ 'walletAddress', 'walletPosition', ] ) {
+      if ( 0 === metas.filter( meta => toString.call( meta ) === '[object Object]' && typeof meta.key !== 'undefined' && meta.key === walletKey ).length ) {
+        metas.push( { key: walletKey, value: recipientWallet[walletKey.toLowerCase().substr( 6 )] } );
+      }
     }
 
-    this.molecularHash = Atom.hashAtoms(this.atoms);
-    // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
+    // The primary atom tells the ledger that a certain amount of the new token is being issued.
+    this.atoms.push(
+      new Atom(
+        sourceWallet.position,
+        sourceWallet.address,
+        'C',
+        sourceWallet.token,
+        amount,
+        'token',
+        recipientWallet.token,
+        metas,
+        null
+      )
+    );
 
-    return this.molecularHash;
+    return this.atoms;
   }
 
 
   /**
    * Initialize an M-type molecule with the given data
    *
-   * @param wallet
-   * @param meta
-   * @param metaType
-   * @param metaId
-   * @returns String
+   * @param {Wallet} wallet
+   * @param {Array | Object} meta
+   * @param {string} metaType
+   * @param {string} metaId
+   * @returns {Array}
    */
-  initMeta(wallet, meta, metaType, metaId)
+  initMeta ( wallet, meta, metaType, metaId )
   {
+    this.molecularHash = null;
     // Initializing a new Atom to hold our metadata
-    this.atoms = [
+    this.atoms.push(
       new Atom(
         wallet.position,
         wallet.address,
@@ -139,93 +145,163 @@ export default class Molecule {
         metaType,
         metaId,
         meta,
-        null),
-    ];
-    this.molecularHash = Atom.hashAtoms(this.atoms);
-    // console.log(`initMeta(): molecular hash - ${ this.molecularHash }`);
+        null
+      )
+    );
 
-    return this.molecularHash;
+    return this.atoms;
+  }
+
+  /**
+   * Clears the instance of the data, leads the instance to a state equivalent to that after new Molecule()
+   *
+   * @return {Molecule}
+   */
+  clear ()
+  {
+    this.constructor( this.cellSlug );
+    return this;
   }
 
   /**
    * Creates a one-time signature for a molecule and breaks it up across multiple atoms within that
    * molecule. Resulting 4096 byte (2048 character) string is the one-time signature.
    *
-   * @param secret
+   * @param {string} secret
+   * @param {boolean} anonymous
    * @returns {*}
    */
-  sign(secret) {
-    // console.log('sign(): START');
-    // console.log(`sign(): molecular hash: ${ this.molecularHash }`);
+  sign ( secret, anonymous = false ) {
+
+    if ( 0 === this.atoms.length ||
+        0 !== this.atoms.filter( atom => !( atom instanceof Atom ) ).length ) {
+      throw new AtomsNotFoundException();
+    }
+
+    if ( !anonymous ) {
+      this.bundle = Wallet.generateBundleHash( secret );
+    }
+
+    this.molecularHash = Atom.hashAtoms( this.atoms );
 
     // Determine first atom
-    let firstAtom = null;
-    this.atoms.forEach(function(atom) {
-      if(!firstAtom)
-        firstAtom = atom;
-      return atom;
-    });
+    const firstAtom = this.atoms[0],
+        // Generate the private signing key for this molecule
+        key = Wallet.generateWalletKey( secret, firstAtom.token, firstAtom.position ),
+        // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
+        keyChunks = chunkSubstr( key, 128 ),
+        // Convert Hm to numeric notation via EnumerateMolecule(Hm)
+        enumeratedHash = Molecule.enumerate( this.molecularHash ),
+        normalizedHash = Molecule.normalize( enumeratedHash );
 
-    // Generate the private signing key for this molecule
-    const key = Wallet.generateWalletKey(secret, firstAtom.token, firstAtom.position);
-    // console.log(`sign(): wallet key for token ${ firstAtom.token }, pos ${ firstAtom.position }: ${ key }`);
-
-    // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
-    const keyChunks = chunkSubstr(key, 128);
-    // console.log(`sign(): number of key chunks - ${ Object.keys(keyChunks).length }`);
-
-    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
-    const enumeratedHash = Molecule.enumerate(this.molecularHash);
-    // console.log(`sign(): enumerated hash - ${ enumeratedHash }`);
-
-    const normalizedHash = Molecule.normalize(enumeratedHash);
-    // console.log(`sign(): normalized hash - ${ normalizedHash }`);
 
     // Building a one-time-signature
     let signatureFragments = '';
-    keyChunks.forEach(function(keyChunk, index){
-      // Iterate a number of times equal to 8-Hm[i]
-      let workingChunk = keyChunk;
-      for(let iterationCount = 0; iterationCount < (8 - normalizedHash[index]); iterationCount++)
-      {
-        // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashing ${ iterationCount } times`);
-        let workingChunkSponge = shake256.create(512);
-        workingChunkSponge.update(workingChunk);
-        workingChunk = workingChunkSponge.hex(); // bigInt.fromArray(workingChunkSponge.array(), 256, false).toString(16).padStart(64, '0');
-      }
-      // console.log(`sign(): atom ${ atom.position } fragment ${ index }, hashed ${ String(8 - normalizedHash[index]).padStart(2, '0') } times:`);
-      // console.log(workingChunk);
-      signatureFragments += workingChunk;
-    });
 
+    for ( const index in keyChunks) {
+      let workingChunk = keyChunks[index];
+
+      for ( let iterationCount = 0, condition = 8 - normalizedHash[index]; iterationCount < condition; iterationCount++ ) {
+        workingChunk = shake256.create( 512 ).update( workingChunk ).hex();
+      }
+      signatureFragments += workingChunk;
+    }
     // Chunking the signature across multiple atoms
-    const chunkedSignature = chunkSubstr(signatureFragments, Math.round(2048 / this.atoms.length));
+    const chunkedSignature = chunkSubstr( signatureFragments, Math.round( 2048 / this.atoms.length ) );
     let lastPosition = null;
-    for(let chunkCount = 0; chunkCount < chunkedSignature.length; chunkCount++)
-    {
+
+    for ( let chunkCount = 0, condition = chunkedSignature.length; chunkCount < condition; chunkCount++ ) {
       this.atoms[chunkCount].otsFragment = chunkedSignature[chunkCount];
       lastPosition = this.atoms[chunkCount].position;
-      // console.log(`sign(): atom ${ this.atoms[chunkCount].position } signature fragment length - ${ this.atoms[chunkCount].otsFragment.length }`);
-      // console.log(`sign(): atom ${ this.atoms[chunkCount].position } signature fragment - ${ this.atoms[chunkCount].otsFragment }`);
     }
-    // console.log('sign(): FINISH');
     return lastPosition;
+  }
+
+  /**
+   * @param {string} json
+   * @return {Object}
+   */
+  static jsonToObject ( json )
+  {
+    const target = Object.assign( new Molecule(), JSON.parse( json ) );
+
+    if ( !Array.isArray( target.atoms ) && 0 === target.atoms.length ) {
+      throw new AtomsNotFoundException();
+    }
+
+    for ( const index in Object.keys( target.atoms ) ) {
+      target.atoms[index] = Atom.jsonToObject( JSON.stringify( target.atoms[index] ) )
+    }
+    
+    for ( const atom of target.atoms ) {
+      for ( const property of [ 'position', 'walletAddress', 'isotope', ] ) {
+        if ( typeof atom[property] === 'undefined' || null === atom[property] ) {
+          throw new AtomsNotFoundException();
+        }
+      }
+    } 
+
+    return target;
+  }
+
+  /**
+   *
+   * @param {Molecule} molecule
+   * @return {boolean}
+   */
+  static verify ( molecule )
+  {
+    return this.verifyMolecularHash( molecule ) && this.verifyOts( molecule ) && this.verifyTokenIsotopeV( molecule )
+  }
+
+  /**
+   * @param {Molecule} molecule
+   * @return {boolean}
+   * @throws {TypeError}
+   */
+  static verifyTokenIsotopeV ( molecule )
+  {
+    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
+      const vAtoms = molecule.atoms.filter( atom => ( 'V' === atom.isotope ) ? atom : false );
+
+      for ( const token of [ ...new Set( vAtoms.map( atom => atom.token ) ) ] ) {
+        const total = vAtoms.filter( atom => token === atom.token )
+            .map( atom => {
+              const target = atom.value * 1;
+              if ( Number.isNaN( target ) ) {
+                throw new TypeError( 'Invalid isotope "V" values' );
+              }
+              return target;
+            } )
+            .reduce( ( accumulator, value ) => accumulator + value );
+
+        if ( 0 !== total ) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
   /**
    * Verifies if the hash of all the atoms matches the molecular hash to ensure content has not been messed with
    *
-   * @param molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    */
-  static verifyMolecularHash(molecule) {
-    const atomicHash = Atom.hashAtoms(molecule.atoms);
-    const result = (atomicHash === molecule.molecularHash);
+  static verifyMolecularHash ( molecule )
+  {
+    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
+      const atomicHash = Atom.hashAtoms( molecule.atoms ),
+          result = ( atomicHash === molecule.molecularHash );
 
-    if(!result)
-      console.log(`verifyMolecularHash(): ${ atomicHash } ${ result ? '=' : '!' }== ${ molecule.molecularHash }`);
-
-    return result;
+      if ( !result ) {
+        console.error(`verifyMolecularHash(): ${ atomicHash } ${ result ? '=' : '!' }== ${ molecule.molecularHash }`);
+      }
+      return result;
+    }
+    return false;
   }
 
   /**
@@ -233,86 +309,44 @@ export default class Molecule {
    * fragments from its atoms and its molecular hash into a single-use wallet address to be matched
    * against the sender’s address. If it matches, the molecule was correctly signed.
    *
-   * @param molecule
+   * @param {Molecule} molecule
    * @returns {boolean}
    */
-  static verifyOts(molecule)
+  static verifyOts ( molecule )
   {
-    // console.log('verifyOts(): START');
-    // console.log(molecule);
+    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
 
-    let atoms = molecule.atoms;
-    //console.log(atoms);
-    atoms.sort(Atom.comparePositions);
-    //console.log(atoms);
+      const atoms = [...molecule.atoms],
+          firstAtom = atoms.sort( Atom.comparePositions )[0],
+          // Convert Hm to numeric notation via EnumerateMolecule(Hm)
+          enumeratedHash = Molecule.enumerate( molecule.molecularHash ),
+          normalizedHash = Molecule.normalize( enumeratedHash ),
+          ots = atoms.map( atom => atom.otsFragment ).reduce( ( accumulator, otsFragment ) => accumulator + otsFragment ),
+          otsChunks = chunkSubstr( ots, 128 );
 
-    // Determine first atom
-    let firstAtom = null;
-    atoms.forEach(function(atom) {
-      if(!firstAtom)
-        firstAtom = atom;
-      return atom;
-    });
+      let keyFragments = '';
 
-    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
-    const enumeratedHash = Molecule.enumerate(molecule.molecularHash);
-    // console.log(`sign(): enumerated hash - ${ enumeratedHash }`);
+      for ( const index in otsChunks) {
+        let workingChunk = otsChunks[index];
 
-    const normalizedHash = Molecule.normalize(enumeratedHash);
-    // console.log(`sign(): normalized hash - ${ normalizedHash }`);
-
-    // Rebuilding OTS out of all the atoms
-    let ots = '';
-    atoms.forEach(function(atom) {
-      ots += atom.otsFragment;
-      // console.log(`verifyOts(): atom ${ atom.position } ots fragment length - ${ atom.otsFragment.length }`);
-      // console.log(`verifyOts(): atom ${ atom.position } ots fragment - ${ atom.otsFragment }`);
-    });
-
-    // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
-    const otsChunks = chunkSubstr(ots, 128);
-    // console.log(`verifyOts(): number of ots chunks - ${ Object.keys(otsChunks).length }`);
-
-    let keyFragments = '';
-    otsChunks.forEach(function(otsChunk, index){
-      // Iterate a number of times equal to 8+Hm[i]
-      let workingChunk = otsChunk;
-      for(let iterationCount = 0; iterationCount < (8 + normalizedHash[index]); iterationCount++)
-      {
-        // console.log(`verifyOts(): chunk ${ index }, hashing ${ iterationCount } times - ${ workingChunk }`);
-        let workingChunkSponge = shake256.create(512);
-        workingChunkSponge.update(workingChunk);
-        workingChunk = workingChunkSponge.hex(); // bigInt.fromArray(workingChunkSponge.array(), 256, false).toString(16).padStart(64, '0');
+        for ( let iterationCount = 0, condition = 8 + normalizedHash[index]; iterationCount < condition; iterationCount++ ) {
+          workingChunk = shake256.create( 512 ).update( workingChunk ).hex();
+        }
+        keyFragments += workingChunk;
       }
-      keyFragments += workingChunk; // otsHashFragment;
-      // console.log(`verifyOts(): #${ String(index).padStart(2, '0') }, ${ String(8 + normalizedHash[index]).padStart(2, '0') } times vs  ${ String(8 - normalizedHash[index]).padStart(2, '0') } times:`);
-      // console.log(`${ workingChunk } vs ${ otsChunk } - ${ otsChunk === workingChunk ? 'MATCH' : 'NO' }`);
-    });
 
-    // console.log(`verifyOts(): ots hash length: ${ keyFragments.length }`);
-    // console.log(`verifyOts(): ots hash: ${ keyFragments }`);
+      // Absorb the hashed Kk into the sponge to receive the digest Dk
+      const digest = shake256.create( 8192 ).update( keyFragments ).hex(),
+          // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
+          address = shake256.create( 256 ).update( digest ).hex(),
+          result = ( address === firstAtom.walletAddress );
 
-    // Absorb the hashed Kk into the sponge to receive the digest Dk
-    const digestSponge = shake256.create(8192);
-    digestSponge.update(keyFragments);
-    const digest = digestSponge.hex(); // bigInt.fromArray(digestSponge.array(), 256, false).toString(16).padStart(2048, '0');
-
-    // console.log(`verifyOts(): digest length: ${ digest.length }`);
-    // console.log(`verifyOts(): digest: ${ digest }`);
-
-    // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
-    const addressSponge = shake256.create(256);
-    addressSponge.update(digest);
-    const address = addressSponge.hex(); // bigInt.fromArray(addressSponge.array(), 256, false).toString(16).padStart(64, '0');
-    // console.log(`verifyOts(): ${ address } vs *${ firstAtom.walletAddress }`);
-    // console.log('verifyOts(): FINISH');
-
-    const result = (address === firstAtom.walletAddress);
-
-    if(!result)
-      console.log(`verifyOts(): ${ address } ${ result ? '=' : '!' }== ${ firstAtom.walletAddress }`);
-
-    return result;
+      if ( !result ) {
+        console.error(`verifyOts(): ${ address } ${ result ? '=' : '!' }== ${ firstAtom.walletAddress }`);
+      }
+      return result;
+    }
+    return false;
   }
 
   /**
@@ -324,73 +358,22 @@ export default class Molecule {
    *  0   1   2   3   4   5   6   7  8  9  a   b   c   d   e   f   g
    * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
    *
-   * @param hash
+   * @param {string} hash
    * @returns {Array}
    */
-  static enumerate(hash) {
-    // console.log(`enumerate(): hash - ${ hash }`);
+  static enumerate ( hash ) {
+    const mapped = { '0': -8, '1': -7, '2': -6, '3': -5, '4': -4, '5': -3, '6': -2, '7': -1, '8': 0, '9': 1, 'a': 2, 'b': 3, 'c': 4, 'd': 5, 'e': 6, 'f': 7, 'g': 8, },
+        target = [],
+        hashList = hash.toLowerCase().split('');
 
-    let mappedHashArray = [];
-    hash.toLowerCase().split('').forEach(function(symbol, index){
-      switch(String(symbol))
-      {
-        case '0':
-          mappedHashArray[index] = -8;
-          break;
-        case '1':
-          mappedHashArray[index] = -7;
-          break;
-        case '2':
-          mappedHashArray[index] = -6;
-          break;
-        case '3':
-          mappedHashArray[index] = -5;
-          break;
-        case '4':
-          mappedHashArray[index] = -4;
-          break;
-        case '5':
-          mappedHashArray[index] = -3;
-          break;
-        case '6':
-          mappedHashArray[index] = -2;
-          break;
-        case '7':
-          mappedHashArray[index] = -1;
-          break;
-        case '8':
-          mappedHashArray[index] = 0;
-          break;
-        case '9':
-          mappedHashArray[index] = 1;
-          break;
-        case 'a':
-          mappedHashArray[index] = 2;
-          break;
-        case 'b':
-          mappedHashArray[index] = 3;
-          break;
-        case 'c':
-          mappedHashArray[index] = 4;
-          break;
-        case 'd':
-          mappedHashArray[index] = 5;
-          break;
-        case 'e':
-          mappedHashArray[index] = 6;
-          break;
-        case 'f':
-          mappedHashArray[index] = 7;
-          break;
-        case 'g':
-          mappedHashArray[index] = 8;
-          break;
-        default:
-        // console.log(`This should not happen: ${ symbol }`);
+    for ( let index = 0, len = hashList.length; index < len; ++index ) {
+      const symbol = hashList[index];
+
+      if ( typeof mapped[symbol] !== 'undefined' ) {
+        target[index] = mapped[symbol];
       }
-    });
-
-    return mappedHashArray;
+    }
+    return target;
   }
 
   /**
@@ -403,41 +386,27 @@ export default class Molecule {
    *    If m<0 and Im<8 , let Im=Im+1
    *    If m=0, stop the iteration
    *
-   * @param mappedHashArray
+   * @param {Array} mappedHashArray
    * @returns {*}
    */
-  static normalize(mappedHashArray)
+  static normalize ( mappedHashArray )
   {
-    let total = mappedHashArray.reduce(function(total, num){
-      return total + num;
-    });
+    let total = mappedHashArray.reduce( ( total, num ) => total + num );
+    const total_condition = total < 0;
 
-    if(total > 0)
-    {
-      while(total > 0){
-        for(let index = 0; index < Object.keys(mappedHashArray).length; index++){
-          if(mappedHashArray[index] > -8) {
-            mappedHashArray[index] -= 1;
-            total -= 1;
-            if(total === 0)
-              break;
+    while ( total < 0 || total > 0 ) {
+      for ( const index of Object.keys( mappedHashArray ) ) {
+        const condition = total_condition ? mappedHashArray[index] < 8 : mappedHashArray[index] > -8;
+
+        if ( condition ) {
+          const process = total_condition ? [ ++mappedHashArray[index], ++total, ] : [ --mappedHashArray[index], --total, ];
+
+          if ( 0 === total ) {
+            break;
           }
         }
       }
     }
-    else{
-      while(total < 0){
-        for(let index = 0; index < Object.keys(mappedHashArray).length; index++){
-          if(mappedHashArray[index] < 8) {
-            mappedHashArray[index] += 1;
-            total += 1;
-            if(total === 0)
-              break;
-          }
-        }
-      }
-    }
-
     return mappedHashArray;
   }
 }
