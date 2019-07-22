@@ -225,7 +225,7 @@ export default class Molecule {
   {
     const target = Object.assign( new Molecule(), JSON.parse( json ) );
 
-    if ( !Array.isArray( target.atoms ) && 0 === target.atoms.length ) {
+    if ( !Array.isArray( target.atoms ) || 0 === target.atoms.length ) {
       throw new AtomsNotFoundException();
     }
 
@@ -261,7 +261,7 @@ export default class Molecule {
    */
   static verifyTokenIsotopeV ( molecule )
   {
-    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
+    if ( 0 < molecule.atoms.length || null !== molecule.molecularHash ) {
       const vAtoms = molecule.atoms.filter( atom => ( 'V' === atom.isotope ) ? atom : false );
 
       for ( const token of [ ...new Set( vAtoms.map( atom => atom.token ) ) ] ) {
@@ -292,7 +292,7 @@ export default class Molecule {
    */
   static verifyMolecularHash ( molecule )
   {
-    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
+    if ( 0 < molecule.atoms.length || null !== molecule.molecularHash ) {
       const atomicHash = Atom.hashAtoms( molecule.atoms ),
           result = ( atomicHash === molecule.molecularHash );
 
@@ -314,7 +314,7 @@ export default class Molecule {
    */
   static verifyOts ( molecule )
   {
-    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
+    if ( 0 < molecule.atoms.length || null !== molecule.molecularHash ) {
 
       const atoms = [...molecule.atoms],
           firstAtom = atoms.sort( Atom.comparePositions )[0],
