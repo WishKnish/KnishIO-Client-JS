@@ -73,7 +73,6 @@ export default class Wallet {
   }
 
   /**
-   *
    * @param {string} key
    * @return {string}
    */

@@ -121,7 +121,6 @@ export default class Molecule {
     return this.atoms;
   }
 
-
   /**
    * Initialize an M-type molecule with the given data
    *
@@ -170,6 +169,7 @@ export default class Molecule {
    * @param {string} secret
    * @param {boolean} anonymous
    * @returns {*}
+   * @throws {AtomsNotFoundException}
    */
   sign ( secret, anonymous = false ) {
 
@@ -198,7 +198,7 @@ export default class Molecule {
     // Building a one-time-signature
     let signatureFragments = '';
 
-    for ( const index in keyChunks) {
+    for ( const index in keyChunks ) {
       let workingChunk = keyChunks[index];
 
       for ( let iterationCount = 0, condition = 8 - normalizedHash[index]; iterationCount < condition; iterationCount++ ) {
@@ -220,32 +220,29 @@ export default class Molecule {
   /**
    * @param {string} json
    * @return {Object}
+   * @throws {AtomsNotFoundException}
    */
   static jsonToObject ( json )
   {
     const target = Object.assign( new Molecule(), JSON.parse( json ) );
 
-    if ( !Array.isArray( target.atoms ) || 0 === target.atoms.length ) {
+    if ( !Array.isArray( target.atoms ) ) {
       throw new AtomsNotFoundException();
     }
 
     for ( const index in Object.keys( target.atoms ) ) {
-      target.atoms[index] = Atom.jsonToObject( JSON.stringify( target.atoms[index] ) )
-    }
-    
-    for ( const atom of target.atoms ) {
+      target.atoms[index] = Atom.jsonToObject( JSON.stringify( target.atoms[index] ) );
+
       for ( const property of [ 'position', 'walletAddress', 'isotope', ] ) {
-        if ( typeof atom[property] === 'undefined' || null === atom[property] ) {
-          throw new AtomsNotFoundException();
+        if ( typeof target.atoms[index][property] === 'undefined' || null === target.atoms[index][property] ) {
+            throw new AtomsNotFoundException();
         }
       }
-    } 
-
+    }
     return target;
   }
 
   /**
-   *
    * @param {Molecule} molecule
    * @return {boolean}
    */
@@ -261,7 +258,7 @@ export default class Molecule {
    */
   static verifyTokenIsotopeV ( molecule )
   {
-    if ( 0 < molecule.atoms.length || null !== molecule.molecularHash ) {
+    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
       const vAtoms = molecule.atoms.filter( atom => ( 'V' === atom.isotope ) ? atom : false );
 
       for ( const token of [ ...new Set( vAtoms.map( atom => atom.token ) ) ] ) {
@@ -292,7 +289,7 @@ export default class Molecule {
    */
   static verifyMolecularHash ( molecule )
   {
-    if ( 0 < molecule.atoms.length || null !== molecule.molecularHash ) {
+    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
       const atomicHash = Atom.hashAtoms( molecule.atoms ),
           result = ( atomicHash === molecule.molecularHash );
 
@@ -314,7 +311,7 @@ export default class Molecule {
    */
   static verifyOts ( molecule )
   {
-    if ( 0 < molecule.atoms.length || null !== molecule.molecularHash ) {
+    if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
 
       const atoms = [...molecule.atoms],
           firstAtom = atoms.sort( Atom.comparePositions )[0],
