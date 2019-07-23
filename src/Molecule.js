@@ -224,7 +224,8 @@ export default class Molecule {
    */
   static jsonToObject ( json )
   {
-    const target = Object.assign( new Molecule(), JSON.parse( json ) );
+    const target = Object.assign( new Molecule(), JSON.parse( json ) ),
+      properties = Object.keys( new Molecule() );
 
     if ( !Array.isArray( target.atoms ) ) {
       throw new AtomsNotFoundException();
@@ -235,10 +236,17 @@ export default class Molecule {
 
       for ( const property of [ 'position', 'walletAddress', 'isotope', ] ) {
         if ( typeof target.atoms[index][property] === 'undefined' || null === target.atoms[index][property] ) {
-            throw new AtomsNotFoundException();
+            throw new AtomsNotFoundException( 'The required properties of the atom are not filled.' );
         }
       }
     }
+
+    for (const property in target ) {
+      if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
+        delete target[property]
+      }
+    }
+
     return target;
   }
 

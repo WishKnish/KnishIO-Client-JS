@@ -55,7 +55,16 @@ export default class Atom {
    */
   static jsonToObject ( json )
   {
-    return Object.assign( new Atom( null, null, null ), JSON.parse( json ) );
+    const target = Object.assign( new Atom( null, null, null ), JSON.parse( json ) ),
+      properties = Object.keys( new Atom( null, null, null ) );
+
+    for (const property in target ) {
+      if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
+        delete target[property]
+      }
+    }
+
+    return target;
   }
 
   /**
