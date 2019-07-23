@@ -41,7 +41,9 @@ const data = {
 4. Sign the molecule with the user secret: `molecule.sign( secret );`
 5. Make sure everything checks out by verifying the molecule:
 ```javascript
-if ( Molecule.verifyMolecularHash( molecule ) && Molecule.verifyOts( molecule ) && Molecule.verifyTokenIsotopeV( molecule ) ) {
+if ( Molecule.verifyMolecularHash( molecule ) &&
+     Molecule.verifyOts( molecule ) &&
+     Molecule.verifyTokenIsotopeV( molecule ) ) {
   //...  Do stuff? Send the molecule to a Knish.IO node, maybe?
 }
 ```
