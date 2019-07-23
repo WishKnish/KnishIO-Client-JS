@@ -47,6 +47,12 @@ if ( Molecule.verifyMolecularHash( molecule ) &&
   //...  Do stuff? Send the molecule to a Knish.IO node, maybe?
 }
 ```
+or
+```javascript
+if ( Molecule.verify( molecule ) ) {
+  //...  Do stuff? Send the molecule to a Knish.IO node, maybe?
+}
+```
 
 # Broadcasting
 1. Knish.IO nodes use GraphQL to receive new molecules as a Mutation. The code for the mutation is as follows:
