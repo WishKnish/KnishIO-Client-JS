@@ -5,7 +5,7 @@ This is an experimental Javascript / NodeJS implementation of the Knish.IO API c
 1. `yarn add @wishknish/knishio-client-js` -or- `npm install @wishknish/knishio-client-js --save`
 2. Inside your application code, `import { Molecule, Wallet } from '@wishknish/knishio-client-js';`
 3. Build a 2048-character user secret via your preferred methodology (random string?).
-4. Initialize a wallet with `let wallet = new Wallet(secret, token);`
+4. Initialize a wallet with `let wallet = new Wallet( secret, token );`
 
 You can also specify a third, optional `position` argument represents the private key index (hexadecimal), and must NEVER be used more than once. It will be generated randmly if not provided.
 
@@ -14,9 +14,9 @@ A fourth argument, `saltLength`, helps tweak the length of the random `position`
 The `token` argument (string) is the slug for the token being transacted with. Knish.IO anticipates user's personal metadata being kept under the `USER` token.
 
 # Building Your Molecule
-1. Build your molecule with `let molecule = new Molecule(cellId, wallet.bundle);` The `cellId` argument represents the slug for your Knish.IO cell. It's meant to segregate molecules of one use case from others. Leave it null if not sure.
+1. Build your molecule with `let molecule = new Molecule( cellId );` The `cellId` argument represents the slug for your Knish.IO cell. It's meant to segregate molecules of one use case from others. Leave it null if not sure.
 2. For a "M"-type molecule, build your metadata as an array of objects, for example:
-```
+```javascript
 const data = [
   {
     key: 'name',
@@ -25,16 +25,16 @@ const data = [
   {
     key: 'email',
     value: 'bar'
-  }.
-  ...
+  },
+  //...
 ];
 ```
-3. Initialize the molecule as "M"-type: `molecule.initMeta(wallet, data, metaType, metaId);` The `metaType` and `metaId` arguments represent a polymorphic key to whatever asset you are attaching this metadata to.
-4. Sign the molecule with the user secret: `molecule.sign(secret);`
+3. Initialize the molecule as "M"-type: `molecule.initMeta( wallet, data, metaType, metaId );` The `metaType` and `metaId` arguments represent a polymorphic key to whatever asset you are attaching this metadata to.
+4. Sign the molecule with the user secret: `molecule.sign( secret );`
 5. Make sure everything checks out by verifying the molecule:
-```
-if( Molecule.verifyMolecularHash(molecule) && Molecule.verifyOts(molecule) ) {
-  ... // Do stuff? Send the molecule to a Knish.IO node, maybe?
+```javascript
+if( Molecule.verifyMolecularHash( molecule ) && Molecule.verifyOts( molecule ) ) {
+  //...  Do stuff? Send the molecule to a Knish.IO node, maybe?
 }
 ```
 
