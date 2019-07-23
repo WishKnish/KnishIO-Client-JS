@@ -4,11 +4,11 @@
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
 export default class Meta {
-  constructor(modelType, modelId, meta, snapshotMolecule = null) {
+  constructor ( modelType, modelId, meta, snapshotMolecule = null ) {
     this.modelType = modelType;
     this.modelId = modelId;
     this.meta = meta;
     this.snapshotMolecule = snapshotMolecule;
-    created_at = +new Date;
+    this.created_at = +new Date;
   }
 }
