@@ -2,7 +2,7 @@ import bigInt from 'big-integer';
 
 if ( !String.prototype.trim ) {
   String.prototype.trim = function () {
-    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    return this.replace( /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '' );
   };
 }
 
@@ -13,13 +13,12 @@ if ( !String.prototype.trim ) {
  * @param size
  * @returns {any[]}
  */
-export function chunkSubstr ( str, size )
-{
+export function chunkSubstr ( str, size ) {
   const numChunks = Math.ceil( str.length / size ),
-      chunks = new Array( numChunks );
+    chunks = new Array( numChunks );
 
   for ( let i = 0, o = 0; i < numChunks; ++i, o += size ) {
-    chunks[i] = str.substr( o, size );
+    chunks[ i ] = str.substr( o, size );
   }
   return chunks;
 }
@@ -31,16 +30,24 @@ export function chunkSubstr ( str, size )
  * @param alphabet
  * @returns {string}
  */
-export function randomString ( length = 256, alphabet = 'abcdef0123456789' )
-{
+export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
   let array = new Uint8Array( length );
   window.crypto.getRandomValues( array );
   array = array.map( x => alphabet.charCodeAt( x % alphabet.length ) );
   return String.fromCharCode.apply( null, array );
 }
 
-export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, dest_symbol_table )
-{
+/**
+ * Convert charset between bases and alphabets
+ *
+ * @param src
+ * @param from_base
+ * @param to_base
+ * @param src_symbol_table
+ * @param dest_symbol_table
+ * @returns {boolean|string|number}
+ */
+export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, dest_symbol_table ) {
   // From: convert.js: http://rot47.net/_js/convert.js
   //	http://rot47.net
   //	http://helloacm.com
@@ -67,18 +74,18 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
 
   // First convert to base 10
   let val = bigInt( 0 );
-  for ( let i = 0; i < src.length; i ++ ) {
+  for ( let i = 0; i < src.length; i++ ) {
     val = val.multiply( from_base ).add( src_symbol_table.indexOf( src.charAt( i ) ) );
   }
 
-  if ( val.lesser(0) ) {
+  if ( val.lesser( 0 ) ) {
     return 0;
   }
 
   // Then covert to any base
   let r = val.mod( to_base ),
-      res = dest_symbol_table.charAt( r ),
-      q = val.divide( to_base );
+    res = dest_symbol_table.charAt( r ),
+    q = val.divide( to_base );
 
   while ( !q.equals( 0 ) ) {
     r = q.mod( to_base );
@@ -87,4 +94,57 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
   }
 
   return res;
+}
+
+/**
+ * Used to turn a Uint8Array into a Big Integer (Little Endian method)
+ *
+ * @param bytes
+ * @returns {bigInt.BigInteger}
+ */
+export function fromLittleEndian ( bytes ) {
+  let result = bigInt( 0 );
+  let base = bigInt( 1 );
+  bytes.forEach( function ( byte ) {
+    result = result.add( base.multiply( bigInt( byte ) ) );
+    base = base.multiply( bigInt( 256 ) );
+  } );
+  return result;
+}
+
+/**
+ * Used to turn a Uint8Array into a Big Integer (Big Endian method)
+ *
+ * @param bytes
+ * @returns {bigInt.BigInteger}
+ */
+export function fromBigEndian ( bytes ) {
+  return fromLittleEndian( bytes.reverse() );
+}
+
+/**
+ * Used to turn a Big Integer into a Uint8Array (Little Endian method)
+ *
+ * @param bigNumber
+ * @returns {Uint8Array}
+ */
+export function toLittleEndian ( bigNumber ) {
+  let result = new Uint8Array( 32 );
+  let i = 0;
+  while ( bigNumber.greater( bigInt( 0 ) ) ) {
+    result[ i ] = bigNumber.mod( bigInt( 256 ) );
+    bigNumber = bigNumber.divide( bigInt( 256 ) );
+    i += 1;
+  }
+  return result;
+}
+
+/**
+ * Used to turn a Big Integer into a Uint8Array (Big Endian method)
+ *
+ * @param bigNumber
+ * @returns {Uint8Array}
+ */
+export function toBigEndian ( bytes ) {
+  return toLittleEndian( bytes ).reverse();
 }
