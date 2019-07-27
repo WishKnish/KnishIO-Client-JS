@@ -10,7 +10,7 @@ import {
   encodeBase64,
   decodeBase64
 } from 'tweetnacl-util';
-import { toLittleEndian } from "./util/strings";
+import { toLittleEndian } from "./libraries/strings";
 import bigInt from 'big-integer';
 
 export default class Meta {
