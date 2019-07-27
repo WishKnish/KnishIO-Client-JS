@@ -2,7 +2,7 @@
 	"name": "@wishknish/knishio-client-js",
 	"version": "0.1.15",
 	"description": "Knish.IO Javascript API Client",
-	"license": "GPLV3",
+	"license": "GPL-3.0-or-later",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/WishKnish/KnishIO-Client-JS.git"
@@ -17,7 +17,9 @@
 	],
 	"dependencies": {
 		"big-integer": "peterolson/BigInteger.js",
-		"js-sha3": "^0.8.0"
+		"js-sha3": "^0.8.0",
+		"tweetnacl": "^1.0.1",
+		"tweetnacl-util": "^0.15.0"
 	},
 	"files": [
 		"/src"
