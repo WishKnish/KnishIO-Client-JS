@@ -58,12 +58,12 @@ export default class Wallet {
   static generateWalletKey ( secret, token, position ) {
     // Converting secret to bigInt
     const bigIntSecret = bigInt( secret, 16 ),
-        // Adding new position to the user secret to produce the indexed key
-        indexedKey = bigIntSecret.add( bigInt( position, 16 ) ),
-        // Hashing the indexed key to produce the intermediate key
-        intermediateKeySponge = shake256.create( 8192 );
+      // Adding new position to the user secret to produce the indexed key
+      indexedKey = bigIntSecret.add( bigInt( position, 16 ) ),
+      // Hashing the indexed key to produce the intermediate key
+      intermediateKeySponge = shake256.create( 8192 );
 
-    intermediateKeySponge.update( indexedKey.toString(16) );
+    intermediateKeySponge.update( indexedKey.toString( 16 ) );
 
     if ( token ) {
       intermediateKeySponge.update( token );
@@ -79,11 +79,11 @@ export default class Wallet {
   static generateWalletAddress ( key ) {
     // Subdivide private key into 16 fragments of 128 characters each
     const keyFragments = chunkSubstr( key, 128 ),
-        // Generating wallet digest
-        digestSponge = shake256.create( 8192 );
+      // Generating wallet digest
+      digestSponge = shake256.create( 8192 );
 
     for ( const index in keyFragments ) {
-      let workingFragment = keyFragments[index];
+      let workingFragment = keyFragments[ index ];
       for ( let i = 1; i <= 16; i++ ) {
         workingFragment = shake256.create( 512 ).update( workingFragment ).hex();
       }
