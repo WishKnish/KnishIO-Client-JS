@@ -4,7 +4,8 @@
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
 import { shake256, } from 'js-sha3';
-import { charsetBaseConvert, } from './libraries/strings';
+import { charsetBaseConvert } from './libraries/strings';
+import Meta from "./Meta";
 
 /**
  * class Atom
@@ -43,7 +44,7 @@ export default class Atom {
 
     this.metaType = metaType;
     this.metaId = metaId;
-    this.meta = meta ? Atom.normalizeMeta( meta ) : [];
+    this.meta = meta ? Meta.normalizeMeta( meta ) : [];
 
     this.otsFragment = otsFragment;
     this.createdAt = String( +new Date );
@@ -53,14 +54,13 @@ export default class Atom {
    * @param {string} json
    * @return {Object}
    */
-  static jsonToObject ( json )
-  {
+  static jsonToObject ( json ) {
     const target = Object.assign( new Atom( null, null, null ), JSON.parse( json ) ),
       properties = Object.keys( new Atom( null, null, null ) );
 
-    for (const property in target ) {
+    for ( const property in target ) {
       if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
-        delete target[property]
+        delete target[ property ]
       }
     }
 
@@ -75,10 +75,9 @@ export default class Atom {
    * @param {string} output
    * @returns {number[] | *}
    */
-  static hashAtoms ( atoms, output = 'base17' )
-  {
+  static hashAtoms ( atoms, output = 'base17' ) {
     const molecularSponge = shake256.create( 256 ),
-        numberOfAtoms = atoms.length;
+      numberOfAtoms = atoms.length;
 
     // Hashing each atom in the molecule to produce a molecular hash
     for ( const atom of atoms.sort( this.comparePositions ) ) {
@@ -92,22 +91,22 @@ export default class Atom {
           }
 
           if ( 'meta' === property ) {
-            atom[property] = Atom.normalizeMeta( atom[property] );
+            atom[ property ] = Meta.normalizeMeta( atom[ property ] );
 
-            for ( const meta of atom[property] ) {
+            for ( const meta of atom[ property ] ) {
               molecularSponge.update( String( meta.key ) );
               molecularSponge.update( String( meta.value ) );
             }
             continue;
           }
 
-          if ( [ 'position', 'walletAddress', 'isotope', ].includes( property ) ) {
-            molecularSponge.update( String( atom[property] ) );
+          if ( [ 'position', 'walletAddress', 'isotope' ].includes( property ) ) {
+            molecularSponge.update( String( atom[ property ] ) );
             continue;
           }
 
-          if ( null !== atom[property] ) {
-            molecularSponge.update( String( atom[property] ) );
+          if ( null !== atom[ property ] ) {
+            molecularSponge.update( String( atom[ property ] ) );
           }
         }
       }
@@ -118,33 +117,15 @@ export default class Atom {
         return molecularSponge.hex();
       }
       case 'array': {
-        return  molecularSponge.array();
+        return molecularSponge.array();
       }
       case 'base17': {
         return charsetBaseConvert( molecularSponge.hex(), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
       }
-      default:{
+      default: {
         return null;
       }
     }
-  }
-
-  /**
-   * @param {Array | Object} meta
-   * @return {Array}
-   */
-  static normalizeMeta ( meta )
-  {
-    if ( toString.call( meta ) === '[object Object]' ) {
-      const target = [];
-      for ( const property in meta ) {
-        if ( meta.hasOwnProperty( property ) ) {
-          target.push( { key: property, value: meta[property] } );
-        }
-      }
-      return target;
-    }
-    return meta;
   }
 
   /**
@@ -152,8 +133,7 @@ export default class Atom {
    * @param {Atom} b
    * @return {number}
    */
-  static comparePositions ( a, b )
-  {
+  static comparePositions ( a, b ) {
     if ( a.position === b.position ) {
       return 0;
     }
