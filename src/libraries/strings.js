@@ -95,3 +95,29 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
 
   return res;
 }
+
+/**
+ * Converts a buffer into a hexadecimal string
+ *
+ * @param byteArray
+ * @returns {string}
+ */
+export function bufferToHexString(byteArray) {
+  return Array.prototype.map.call(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('');
+}
+
+/**
+ * Converts a hexadecimal string into a buffer
+ *
+ * @param hexString
+ * @returns {Buffer}
+ */
+export function hexStringToBuffer(hexString) {
+  var result = [];
+  for (var i = 0; i < hexString.length; i += 2) {
+    result.push(parseInt(hexString.substr(i, 2), 16));
+  }
+  return new Buffer(result);
+}

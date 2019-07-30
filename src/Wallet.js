@@ -5,7 +5,12 @@
 
 import { shake256 } from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
-import { chunkSubstr, randomString, } from './libraries/strings';
+import {
+  bufferToHexString,
+  chunkSubstr,
+  hexStringToBuffer,
+  randomString,
+} from './libraries/strings';
 import eccrypto from 'eccrypto';
 import {
   decodeUTF8,
@@ -93,9 +98,14 @@ export default class Wallet {
   static encryptMessage ( message, recipientPublicKey ) {
     const encodedMessage = decodeUTF8( JSON.stringify( message ) );
     return eccrypto.encrypt( recipientPublicKey, encodedMessage, {} )
-      .then(function(encryptedMessage) {
-        return encryptedMessage;
-      });
+      .then( function ( encryptedMessage ) {
+
+        // Converting buffer array to hex
+        Object.keys( encryptedMessage ).forEach( function ( key ) {
+          encryptedMessage[ key ] = bufferToHexString( encryptedMessage[ key ] );
+        } );
+        return btoa( JSON.stringify( encryptedMessage ) );
+      } );
   }
 
   /**
@@ -106,11 +116,18 @@ export default class Wallet {
    * @returns {*}
    */
   static decryptMessage ( message, senderPrivateKey ) {
+    const encryptedMessage = JSON.parse( atob( message ) );
+
+    // Converting hex back into buffer array
+    Object.keys( encryptedMessage ).forEach( function ( key ) {
+      encryptedMessage[ key ] = hexStringToBuffer( encryptedMessage[ key ] );
+    } );
+
     return eccrypto.decrypt( senderPrivateKey, {
-      iv: message.iv,
-      ephemPublicKey: message.ephemPublicKey,
-      ciphertext: message.ciphertext,
-      mac: message.mac,
+      iv: encryptedMessage.iv,
+      ephemPublicKey: encryptedMessage.ephemPublicKey,
+      ciphertext: encryptedMessage.ciphertext,
+      mac: encryptedMessage.mac,
     } )
       .then( function ( decrypted ) {
           return JSON.parse( encodeUTF8( decrypted ) );
