@@ -3,9 +3,16 @@
 // https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
-import { shake256, } from 'js-sha3';
+import { shake256 } from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
 import { chunkSubstr, randomString, } from './libraries/strings';
+import eccrypto from 'eccrypto';
+import {
+  decodeUTF8,
+  encodeUTF8,
+  encodeBase64,
+  decodeBase64
+} from 'tweetnacl-util';
 
 /**
  * class Wallet
@@ -35,7 +42,113 @@ export default class Wallet {
     this.balance = 0;
     this.molecules = {};
     this.bundle = Wallet.generateBundleHash( secret );
+    this.pubkey = Wallet.generateEncPrivateKey( this.key );
+  }
 
+  /**
+   * Derives a private key for encrypting data with this wallet's key
+   *
+   * @returns {Buffer}
+   */
+  getMyEncPrivateKey () {
+    return Wallet.generateEncPrivateKey( this.key );
+  }
+
+  /**
+   * Dervies a public key for encrypting data for this wallet's consumption
+   *
+   * @returns {Buffer}
+   */
+  getMyEncPublicKey () {
+    return Wallet.generateEncPublicKey( this.getMyEncPrivateKey() )
+  }
+
+  /**
+   * Creates a shared key by combining this wallet's private key and another wallet's public key
+   *
+   * @param otherPublicKey
+   * @returns {*|Promise|Promise<unknown>}
+   */
+  getMyEncSharedKey ( otherPublicKey ) {
+    return Wallet.generateEncSharedKey( this.getMyEncPrivateKey(), otherPublicKey );
+  }
+
+  /**
+   * Uses the current wallet's private key to decrypt the given message
+   *
+   * @param message
+   * @returns {*}
+   */
+  decryptMyMessage ( message ) {
+    return Wallet.decryptMessage( message, this.getMyEncPrivateKey() );
+  }
+
+  /**
+   * Encrypts the given message or data with the recipient's public key
+   *
+   * @param message
+   * @param recipientPublicKey
+   * @returns {PromiseLike<ArrayBuffer>}
+   */
+  static encryptMessage ( message, recipientPublicKey ) {
+    const encodedMessage = decodeUTF8( JSON.stringify( message ) );
+    return eccrypto.encrypt( recipientPublicKey, encodedMessage, {} )
+      .then(function(encryptedMessage) {
+        return encryptedMessage;
+      });
+  }
+
+  /**
+   * Uses the given private key to decrypt an encrypted message
+   *
+   * @param message
+   * @param senderPrivateKey
+   * @returns {*}
+   */
+  static decryptMessage ( message, senderPrivateKey ) {
+    return eccrypto.decrypt( senderPrivateKey, {
+      iv: message.iv,
+      ephemPublicKey: message.ephemPublicKey,
+      ciphertext: message.ciphertext,
+      mac: message.mac,
+    } )
+      .then( function ( decrypted ) {
+          return JSON.parse( encodeUTF8( decrypted ) );
+        }
+      );
+  }
+
+  /**
+   * Derives a private key for encrypting data with the given key
+   *
+   * @param key
+   * @returns {Buffer}
+   */
+  static generateEncPrivateKey ( key ) {
+    const sponge = shake256.create( 128 );
+    sponge.update( key );
+    return Buffer.from( sponge.hex() );
+  }
+
+  /**
+   * Derives a public key for encrypting data for this wallet's consumption
+   *
+   * @param privateKey
+   * @returns {Buffer}
+   */
+  static generateEncPublicKey ( privateKey ) {
+    return eccrypto.getPublic( privateKey );
+  }
+
+  /**
+   * Creates a shared key by combining this wallet's private key and another wallet's public key
+   *
+   * @param privateKey
+   * @param otherPublicKey
+   * @returns {*|Promise<unknown>|Promise|Promise}
+   */
+  static generateEncSharedKey ( privateKey, otherPublicKey ) {
+    return eccrypto.derive( privateKey, otherPublicKey );
   }
 
   /**

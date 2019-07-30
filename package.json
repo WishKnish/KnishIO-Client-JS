@@ -17,8 +17,8 @@
 	],
 	"dependencies": {
 		"big-integer": "peterolson/BigInteger.js",
+		"eccrypto": "^1.1.1",
 		"js-sha3": "^0.8.0",
-		"tweetnacl": "^1.0.1",
 		"tweetnacl-util": "^0.15.0"
 	},
 	"files": [
