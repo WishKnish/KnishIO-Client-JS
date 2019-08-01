@@ -47,7 +47,7 @@ export default class Wallet {
     this.balance = 0;
     this.molecules = {};
     this.bundle = Wallet.generateBundleHash( secret );
-    this.pubkey = Wallet.generateEncPrivateKey( this.key );
+    this.pubkey = Wallet.generateEncPublicKey( this.key );
   }
 
   /**
