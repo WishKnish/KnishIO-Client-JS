@@ -15,8 +15,6 @@ import eccrypto from 'eccrypto';
 import {
   decodeUTF8,
   encodeUTF8,
-  encodeBase64,
-  decodeBase64
 } from 'tweetnacl-util';
 
 /**
@@ -47,7 +45,8 @@ export default class Wallet {
     this.balance = 0;
     this.molecules = {};
     this.bundle = Wallet.generateBundleHash( secret );
-    this.pubkey = Wallet.generateEncPublicKey( this.key );
+    this.privkey = Wallet.generateEncPrivateKey( this.key );
+    this.pubkey = Wallet.generateEncPublicKey( this.privkey );
   }
 
   /**
