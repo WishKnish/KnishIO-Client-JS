@@ -6,16 +6,15 @@
 import { shake256 } from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
 import {
-  bufferToHexString,
   chunkSubstr,
-  hexStringToBuffer,
-  randomString,
+  randomString
 } from './libraries/strings';
-import eccrypto from 'eccrypto';
 import {
-  decodeUTF8,
-  encodeUTF8,
-} from 'tweetnacl-util';
+  generateEncPrivateKey,
+  generateEncPublicKey,
+  generateEncSharedKey,
+  decryptMessage
+} from './libraries/crypto';
 
 /**
  * class Wallet
@@ -45,8 +44,8 @@ export default class Wallet {
     this.balance = 0;
     this.molecules = {};
     this.bundle = Wallet.generateBundleHash( secret );
-    this.privkey = Wallet.generateEncPrivateKey( this.key );
-    this.pubkey = Wallet.generateEncPublicKey( this.privkey );
+    this.privkey = generateEncPrivateKey( this.key );
+    this.pubkey = generateEncPublicKey( this.privkey );
   }
 
   /**
@@ -55,7 +54,7 @@ export default class Wallet {
    * @returns {Buffer}
    */
   getMyEncPrivateKey () {
-    return Wallet.generateEncPrivateKey( this.key );
+    return generateEncPrivateKey( this.key );
   }
 
   /**
@@ -64,7 +63,7 @@ export default class Wallet {
    * @returns {Buffer}
    */
   getMyEncPublicKey () {
-    return Wallet.generateEncPublicKey( this.getMyEncPrivateKey() )
+    return generateEncPublicKey( this.getMyEncPrivateKey() )
   }
 
   /**
@@ -74,7 +73,7 @@ export default class Wallet {
    * @returns {*|Promise|Promise<unknown>}
    */
   getMyEncSharedKey ( otherPublicKey ) {
-    return Wallet.generateEncSharedKey( this.getMyEncPrivateKey(), otherPublicKey );
+    return generateEncSharedKey( this.getMyEncPrivateKey(), otherPublicKey );
   }
 
   /**
@@ -84,87 +83,7 @@ export default class Wallet {
    * @returns {*}
    */
   decryptMyMessage ( message ) {
-    return Wallet.decryptMessage( message, this.getMyEncPrivateKey() );
-  }
-
-  /**
-   * Encrypts the given message or data with the recipient's public key
-   *
-   * @param message
-   * @param recipientPublicKey
-   * @returns {PromiseLike<ArrayBuffer>}
-   */
-  static encryptMessage ( message, recipientPublicKey ) {
-    const encodedMessage = decodeUTF8( JSON.stringify( message ) );
-    return eccrypto.encrypt( recipientPublicKey, encodedMessage, {} )
-      .then( function ( encryptedMessage ) {
-
-        // Converting buffer array to hex
-        Object.keys( encryptedMessage ).forEach( function ( key ) {
-          encryptedMessage[ key ] = bufferToHexString( encryptedMessage[ key ] );
-        } );
-        return btoa( JSON.stringify( encryptedMessage ) );
-      } );
-  }
-
-  /**
-   * Uses the given private key to decrypt an encrypted message
-   *
-   * @param message
-   * @param senderPrivateKey
-   * @returns {*}
-   */
-  static decryptMessage ( message, senderPrivateKey ) {
-    const encryptedMessage = JSON.parse( atob( message ) );
-
-    // Converting hex back into buffer array
-    Object.keys( encryptedMessage ).forEach( function ( key ) {
-      encryptedMessage[ key ] = hexStringToBuffer( encryptedMessage[ key ] );
-    } );
-
-    return eccrypto.decrypt( senderPrivateKey, {
-      iv: encryptedMessage.iv,
-      ephemPublicKey: encryptedMessage.ephemPublicKey,
-      ciphertext: encryptedMessage.ciphertext,
-      mac: encryptedMessage.mac,
-    } )
-      .then( function ( decrypted ) {
-          return JSON.parse( encodeUTF8( decrypted ) );
-        }
-      );
-  }
-
-  /**
-   * Derives a private key for encrypting data with the given key
-   *
-   * @param key
-   * @returns {Buffer}
-   */
-  static generateEncPrivateKey ( key ) {
-    const sponge = shake256.create( 128 );
-    sponge.update( key );
-    return Buffer.from( sponge.hex() );
-  }
-
-  /**
-   * Derives a public key for encrypting data for this wallet's consumption
-   *
-   * @param privateKey
-   * @returns {Buffer}
-   */
-  static generateEncPublicKey ( privateKey ) {
-    return eccrypto.getPublic( privateKey );
-  }
-
-  /**
-   * Creates a shared key by combining this wallet's private key and another wallet's public key
-   *
-   * @param privateKey
-   * @param otherPublicKey
-   * @returns {*|Promise<unknown>|Promise|Promise}
-   */
-  static generateEncSharedKey ( privateKey, otherPublicKey ) {
-    return eccrypto.derive( privateKey, otherPublicKey );
+    return decryptMessage( message, this.getMyEncPrivateKey() );
   }
 
   /**
