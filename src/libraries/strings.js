@@ -1,4 +1,5 @@
 import bigInt from 'big-integer';
+import LZString from 'lz-string';
 
 if ( !String.prototype.trim ) {
   String.prototype.trim = function () {
@@ -102,10 +103,10 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
  * @param byteArray
  * @returns {string}
  */
-export function bufferToHexString(byteArray) {
-  return Array.prototype.map.call(byteArray, function(byte) {
-    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-  }).join('');
+export function bufferToHexString ( byteArray ) {
+  return Array.prototype.map.call( byteArray, function ( byte ) {
+    return ( '0' + ( byte & 0xFF ).toString( 16 ) ).slice( -2 );
+  } ).join( '' );
 }
 
 /**
@@ -114,10 +115,30 @@ export function bufferToHexString(byteArray) {
  * @param hexString
  * @returns {Buffer}
  */
-export function hexStringToBuffer(hexString) {
+export function hexStringToBuffer ( hexString ) {
   var result = [];
-  for (var i = 0; i < hexString.length; i += 2) {
-    result.push(parseInt(hexString.substr(i, 2), 16));
+  for ( var i = 0; i < hexString.length; i += 2 ) {
+    result.push( parseInt( hexString.substr( i, 2 ), 16 ) );
   }
-  return new Buffer(result);
+  return new Buffer( result );
+}
+
+/**
+ * Compresses a given string for web sharing
+ *
+ * @param string
+ * @returns {*}
+ */
+export function compress ( string ) {
+  return LZString.compressToEncodedURIComponent( string );
+}
+
+/**
+ * Decompresses a compressed string
+ *
+ * @param string
+ * @returns {*}
+ */
+export function decompress ( string ) {
+  return LZString.decompressFromEncodedURIComponent( string );
 }
