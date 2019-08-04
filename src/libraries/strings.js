@@ -130,7 +130,7 @@ export function hexStringToBuffer ( hexString ) {
  * @returns {*}
  */
 export function compress ( string ) {
-  return LZString.compressToEncodedURIComponent( string );
+  return LZString.compressToBase64( string );
 }
 
 /**
@@ -140,5 +140,5 @@ export function compress ( string ) {
  * @returns {*}
  */
 export function decompress ( string ) {
-  return LZString.decompressFromEncodedURIComponent( string );
+  return LZString.decompressFromBase64( string );
 }
