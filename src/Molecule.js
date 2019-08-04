@@ -5,7 +5,7 @@
 
 import Atom from './Atom';
 import { shake256, } from 'js-sha3';
-import { chunkSubstr, } from './libraries/strings';
+import { chunkSubstr, compress, decompress, } from './libraries/strings';
 import bigInt from 'big-integer';
 import Wallet from './Wallet';
 import AtomsNotFoundException from './exception/AtomsNotFoundException';
@@ -220,7 +220,7 @@ export default class Molecule {
     let lastPosition = null;
 
     for ( let chunkCount = 0, condition = chunkedSignature.length; chunkCount < condition; chunkCount++ ) {
-      this.atoms[ chunkCount ].otsFragment = chunkedSignature[ chunkCount ];
+      this.atoms[ chunkCount ].otsFragment = compress(chunkedSignature[ chunkCount ]);
       lastPosition = this.atoms[ chunkCount ].position;
     }
     return lastPosition;
@@ -347,7 +347,7 @@ export default class Molecule {
         enumeratedHash = Molecule.enumerate( molecule.molecularHash ),
         normalizedHash = Molecule.normalize( enumeratedHash ),
         ots = atoms.map(
-          atom => atom.otsFragment
+          atom => decompress(atom.otsFragment)
         ).reduce(
           ( accumulator, otsFragment ) => accumulator + otsFragment
         ),
