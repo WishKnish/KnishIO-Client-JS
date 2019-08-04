@@ -172,7 +172,7 @@ export default class Molecule {
 
   /**
    * Creates a one-time signature for a molecule and breaks it up across multiple atoms within that
-   * molecule. Resulting 4096 byte (2048 character) string is the one-time signature.
+   * molecule. Resulting 4096 byte (2048 character) string is the one-time signature, which is then compressed.
    *
    * @param {string} secret
    * @param {boolean} anonymous
@@ -215,12 +215,15 @@ export default class Molecule {
       signatureFragments += workingChunk;
     }
 
+    // Compressing the OTS
+    signatureFragments = compress(signatureFragments);
+
     // Chunking the signature across multiple atoms
-    const chunkedSignature = chunkSubstr( signatureFragments, Math.round( 2048 / this.atoms.length ) );
+    const chunkedSignature = chunkSubstr( signatureFragments, Math.round( signatureFragments.length / this.atoms.length ) );
     let lastPosition = null;
 
     for ( let chunkCount = 0, condition = chunkedSignature.length; chunkCount < condition; chunkCount++ ) {
-      this.atoms[ chunkCount ].otsFragment = compress(chunkedSignature[ chunkCount ]);
+      this.atoms[ chunkCount ].otsFragment = chunkedSignature[ chunkCount ];
       lastPosition = this.atoms[ chunkCount ].position;
     }
     return lastPosition;
@@ -342,19 +345,35 @@ export default class Molecule {
     if ( 0 < molecule.atoms.length && null !== molecule.molecularHash ) {
 
       const atoms = [ ...molecule.atoms ],
+
+        // First atom's wallet is what the molecule must be signed with
         firstAtom = atoms.sort( Atom.comparePositions )[ 0 ],
+
         // Convert Hm to numeric notation via EnumerateMolecule(Hm)
         enumeratedHash = Molecule.enumerate( molecule.molecularHash ),
-        normalizedHash = Molecule.normalize( enumeratedHash ),
-        ots = atoms.map(
-          atom => decompress(atom.otsFragment)
+        normalizedHash = Molecule.normalize( enumeratedHash );
+
+      let ots = atoms.map(
+          atom => atom.otsFragment
         ).reduce(
           ( accumulator, otsFragment ) => accumulator + otsFragment
-        ),
-        otsChunks = chunkSubstr( ots, 128 );
+        );
+
+      // Wrong size? Maybe it's compressed
+      if(ots.length !== 2048) {
+        // Attempting decompression
+        ots = decompress(ots);
+
+        // Still wrong? That's a failure
+        if(ots.length !== 2048) {
+          return false;
+        }
+      }
+
+      // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
+      const otsChunks = chunkSubstr( ots, 128 );
 
       let keyFragments = '';
-
       for ( const index in otsChunks ) {
         let workingChunk = otsChunks[ index ];
 
