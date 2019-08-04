@@ -176,11 +176,12 @@ export default class Molecule {
    *
    * @param {string} secret
    * @param {boolean} anonymous
+   * @param {boolean} compressed
    * @returns {*}
    * @throws {AtomsNotFoundException}
    */
-  sign ( secret, anonymous = false ) {
-
+  sign ( secret, anonymous = false, compressed = true ) {
+    // Do we have atoms?
     if ( 0 === this.atoms.length ||
       0 !== this.atoms.filter(
         atom => !( atom instanceof Atom )
@@ -189,10 +190,12 @@ export default class Molecule {
       throw new AtomsNotFoundException();
     }
 
+    // Derive the user's bundle
     if ( !anonymous ) {
       this.bundle = Wallet.generateBundleHash( secret );
     }
 
+    // Hash atoms to get molecular hash
     this.molecularHash = Atom.hashAtoms( this.atoms );
 
     // Determine first atom
@@ -216,7 +219,9 @@ export default class Molecule {
     }
 
     // Compressing the OTS
-    signatureFragments = compress(signatureFragments);
+    if ( compressed ) {
+      signatureFragments = compress( signatureFragments );
+    }
 
     // Chunking the signature across multiple atoms
     const chunkedSignature = chunkSubstr( signatureFragments, Math.round( signatureFragments.length / this.atoms.length ) );
@@ -354,18 +359,18 @@ export default class Molecule {
         normalizedHash = Molecule.normalize( enumeratedHash );
 
       let ots = atoms.map(
-          atom => atom.otsFragment
-        ).reduce(
-          ( accumulator, otsFragment ) => accumulator + otsFragment
-        );
+        atom => atom.otsFragment
+      ).reduce(
+        ( accumulator, otsFragment ) => accumulator + otsFragment
+      );
 
       // Wrong size? Maybe it's compressed
-      if(ots.length !== 2048) {
+      if ( ots.length !== 2048 ) {
         // Attempting decompression
-        ots = decompress(ots);
+        ots = decompress( ots );
 
         // Still wrong? That's a failure
-        if(ots.length !== 2048) {
+        if ( ots.length !== 2048 ) {
           return false;
         }
       }
