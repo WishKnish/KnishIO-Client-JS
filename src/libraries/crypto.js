@@ -1,10 +1,40 @@
-import { bufferToHexString, hexStringToBuffer } from './strings';
+import { bufferToHexString, hexStringToBuffer, randomString } from './strings';
 import { shake256 } from 'js-sha3';
 import eccrypto from 'eccrypto';
 import {
   decodeUTF8,
   encodeUTF8
 } from 'tweetnacl-util';
+
+/**
+ * Generates a secret based on an optional seed
+ *
+ * @param seed
+ * @param length
+ * @returns {string|*}
+ */
+export function generateSecret ( seed = null, length = 2048 ) {
+  if(seed) {
+    const sponge = shake256.create( length * 2 );
+    sponge.update( seed );
+    return sponge.hex();
+  }
+  else {
+    return randomString( length );
+  }
+}
+
+/**
+ * Hashes the user secret to produce a bundle hash
+ *
+ * @param {string} secret
+ * @returns {string}
+ */
+export function generateBundleHash ( secret ) {
+  const sponge = shake256.create(256);
+  sponge.update(secret);
+  return sponge.hex();
+}
 
 /**
  * Encrypts the given message or data with the recipient's public key

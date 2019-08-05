@@ -9,6 +9,7 @@ import { chunkSubstr, compress, decompress, } from './libraries/strings';
 import bigInt from 'big-integer';
 import Wallet from './Wallet';
 import AtomsNotFoundException from './exception/AtomsNotFoundException';
+import { generateBundleHash } from "./libraries/crypto";
 
 /**
  * class Molecule
@@ -192,7 +193,7 @@ export default class Molecule {
 
     // Derive the user's bundle
     if ( !anonymous ) {
-      this.bundle = Wallet.generateBundleHash( secret );
+      this.bundle = generateBundleHash( secret );
     }
 
     // Hash atoms to get molecular hash

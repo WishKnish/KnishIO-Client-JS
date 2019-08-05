@@ -13,7 +13,7 @@ import {
   generateEncPrivateKey,
   generateEncPublicKey,
   generateEncSharedKey,
-  decryptMessage
+  decryptMessage, generateBundleHash
 } from './libraries/crypto';
 
 /**
@@ -43,7 +43,7 @@ export default class Wallet {
     this.address = Wallet.generateWalletAddress( this.key );
     this.balance = 0;
     this.molecules = {};
-    this.bundle = Wallet.generateBundleHash( secret );
+    this.bundle = generateBundleHash( secret );
     this.privkey = generateEncPrivateKey( this.key );
     this.pubkey = generateEncPublicKey( this.privkey );
   }
@@ -84,16 +84,6 @@ export default class Wallet {
    */
   decryptMyMessage ( message ) {
     return decryptMessage( message, this.getMyEncPrivateKey() );
-  }
-
-  /**
-   * Hashes the user secret to produce a wallet bundle
-   *
-   * @param {string} secret
-   * @returns {string}
-   */
-  static generateBundleHash ( secret ) {
-    return shake256.create( 256 ).update( secret ).hex();
   }
 
   /**
