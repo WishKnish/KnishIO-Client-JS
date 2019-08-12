@@ -50,39 +50,34 @@ export default class Molecule {
    */
   initValue ( sourceWallet, recipientWallet, remainderWallet, value ) {
     this.molecularHash = null;
-    const position = bigInt(
-      sourceWallet.position,
-      16
-    );
+
+    let idx = this.atoms.length;
 
     // Initializing a new Atom to remove tokens from source
-    this.atoms.push(
-      new Atom(
-        position.toString( 16 ),
-        sourceWallet.address,
-        'V',
-        sourceWallet.token,
-        -value,
-        'remainderWallet',
-        remainderWallet.address,
-        { 'remainderPosition': remainderWallet.position },
-        null
-      )
+    this.atoms[idx] = new Atom(
+      sourceWallet.position,
+      sourceWallet.address,
+      'V',
+      sourceWallet.token,
+      -value,
+      'remainderWallet',
+      remainderWallet.address,
+      { 'remainderPosition': remainderWallet.position },
+      null
     );
 
+    idx++;
     // Initializing a new Atom to add tokens to recipient
-    this.atoms.push(
-      new Atom(
-        position.add( 1 ).toString( 16 ),
-        recipientWallet.address,
-        'V',
-        sourceWallet.token,
-        value,
-        'walletBundle',
-        recipientWallet.bundle,
-        null,
-        null
-      )
+    this.atoms[idx] = new Atom(
+      recipientWallet.position,
+      recipientWallet.address,
+      'V',
+      sourceWallet.token,
+      value,
+      'walletBundle',
+      recipientWallet.bundle,
+      null,
+      null
     );
 
     return this.atoms;
@@ -100,6 +95,7 @@ export default class Molecule {
   initTokenCreation ( sourceWallet, recipientWallet, amount, tokenMeta ) {
     this.molecularHash = null;
     const metas = Atom.normalizeMeta( tokenMeta );
+    let idx = this.atoms.length;
 
     for ( const walletKey of [ 'walletAddress', 'walletPosition' ] ) {
       if ( 0 === metas.filter(
@@ -115,18 +111,16 @@ export default class Molecule {
     }
 
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
-    this.atoms.push(
-      new Atom(
-        sourceWallet.position,
-        sourceWallet.address,
-        'C',
-        sourceWallet.token,
-        amount,
-        'token',
-        recipientWallet.token,
-        metas,
-        null
-      )
+    this.atoms[idx] = new Atom(
+      sourceWallet.position,
+      sourceWallet.address,
+      'C',
+      sourceWallet.token,
+      amount,
+      'token',
+      recipientWallet.token,
+      metas,
+      null
     );
 
     return this.atoms;
@@ -143,19 +137,19 @@ export default class Molecule {
    */
   initMeta ( wallet, meta, metaType, metaId ) {
     this.molecularHash = null;
+    let idx = this.atoms.length;
+
     // Initializing a new Atom to hold our metadata
-    this.atoms.push(
-      new Atom(
-        wallet.position,
-        wallet.address,
-        'M',
-        wallet.token,
-        null,
-        metaType,
-        metaId,
-        meta,
-        null
-      )
+    this.atoms[idx] = new Atom(
+      wallet.position,
+      wallet.address,
+      'M',
+      wallet.token,
+      null,
+      metaType,
+      metaId,
+      meta,
+      null
     );
 
     return this.atoms;
@@ -353,7 +347,7 @@ export default class Molecule {
       const atoms = [ ...molecule.atoms ],
 
         // First atom's wallet is what the molecule must be signed with
-        firstAtom = atoms.sort( Atom.comparePositions )[ 0 ],
+        firstAtom = atoms[ 0 ],
 
         // Convert Hm to numeric notation via EnumerateMolecule(Hm)
         enumeratedHash = Molecule.enumerate( molecule.molecularHash ),
