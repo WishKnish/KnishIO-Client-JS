@@ -4,6 +4,7 @@
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
 import Atom from './Atom';
+import Meta from './Meta';
 import { shake256, } from 'js-sha3';
 import { chunkSubstr, compress, decompress, } from './libraries/strings';
 import bigInt from 'big-integer';
@@ -99,7 +100,7 @@ export default class Molecule {
    */
   initTokenCreation ( sourceWallet, recipientWallet, amount, tokenMeta ) {
     this.molecularHash = null;
-    const metas = Atom.normalizeMeta( tokenMeta );
+    const metas = Meta.normalizeMeta( tokenMeta );
 
     for ( const walletKey of [ 'walletAddress', 'walletPosition' ] ) {
       if ( 0 === metas.filter(
