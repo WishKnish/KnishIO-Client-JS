@@ -80,7 +80,7 @@ export default class Atom {
       numberOfAtoms = atoms.length;
 
     // Hashing each atom in the molecule to produce a molecular hash
-    for ( const atom of atoms.sort( this.comparePositions ) ) {
+    for ( const atom of atoms ) {
       molecularSponge.update( String( numberOfAtoms ) );
 
       for ( const property in atom ) {
@@ -126,17 +126,5 @@ export default class Atom {
         return null;
       }
     }
-  }
-
-  /**
-   * @param {Atom} a
-   * @param {Atom} b
-   * @return {number}
-   */
-  static comparePositions ( a, b ) {
-    if ( a.position === b.position ) {
-      return 0;
-    }
-    return a.position < b.position ? -1 : 1;
   }
 }
