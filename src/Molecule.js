@@ -47,7 +47,7 @@ export default class Molecule {
    * @param {Wallet} recipientWallet
    * @param {Wallet} remainderWallet
    * @param {*} value
-   * @returns {Array}
+   * @returns {Molecule}
    */
   initValue ( sourceWallet, recipientWallet, remainderWallet, value ) {
     this.molecularHash = null;
@@ -61,15 +61,14 @@ export default class Molecule {
       'V',
       sourceWallet.token,
       -value,
-      'remainderWallet',
-      remainderWallet.address,
-      { 'remainderPosition': remainderWallet.position },
+      'sourceWallet',
+      null,
+      null,
       null
     );
 
-    idx++;
     // Initializing a new Atom to add tokens to recipient
-    this.atoms[idx] = new Atom(
+    this.atoms[++idx] = new Atom(
       recipientWallet.position,
       recipientWallet.address,
       'V',
@@ -81,7 +80,19 @@ export default class Molecule {
       null
     );
 
-    return this.atoms;
+    this.atoms[++idx] = new Atom(
+      remainderWallet.position,
+      remainderWallet.address,
+      'V',
+      sourceWallet.token,
+      remainderWallet.balance + ( sourceWallet.balance - value ),
+      'remainderWallet',
+      null,
+      null,
+      null
+    );
+
+    return this;
   }
 
   /**
@@ -91,7 +102,7 @@ export default class Molecule {
    * @param {Wallet} recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
    * @param {number} amount - how many of the token we are initially issuing (for fungible tokens only)
    * @param {Array | Object} tokenMeta - additional fields to configure the token
-   * @returns {Array}
+   * @returns {Molecule}
    */
   initTokenCreation ( sourceWallet, recipientWallet, amount, tokenMeta ) {
     this.molecularHash = null;
@@ -124,7 +135,7 @@ export default class Molecule {
       null
     );
 
-    return this.atoms;
+    return this;
   }
 
   /**
@@ -134,7 +145,7 @@ export default class Molecule {
    * @param {Array | Object} meta
    * @param {string} metaType
    * @param {string} metaId
-   * @returns {Array}
+   * @returns {Molecule}
    */
   initMeta ( wallet, meta, metaType, metaId ) {
     this.molecularHash = null;
@@ -153,7 +164,7 @@ export default class Molecule {
       null
     );
 
-    return this.atoms;
+    return this;
   }
 
   /**
@@ -285,27 +296,44 @@ export default class Molecule {
     if ( 0 < molecule.atoms.length
       && null !== molecule.molecularHash
     ) {
-      const vAtoms = molecule.atoms.filter(
-        atom => ( 'V' === atom.isotope ) ? atom : false
-      );
+      const vAtoms = molecule.atoms.filter( atom => ( 'V' === atom.isotope ) ? atom : false ),
+        value_conversion = atom => {
+          const target = atom.value * 1;
+          if ( Number.isNaN( target ) ) {
+            throw new TypeError( 'Invalid isotope "V" values' );
+          }
+          return target;
+        },
+        /**
+         * @param {Array} arr
+         * @param {number} size
+         * @returns {Array}
+         */
+        chunk = ( arr, size ) => {
+          if ( !arr.length ) {
+            return [];
+          }
+          return [ arr.slice( 0, size ) ].concat( chunk( arr.slice( size ), size ) );
+        };
 
       for ( const token of [ ...new Set( vAtoms.map( atom => atom.token ) ) ] ) {
-        const total = vAtoms.filter(
-          atom => token === atom.token
-        )
-          .map( atom => {
-            const target = atom.value * 1;
-            if ( Number.isNaN( target ) ) {
-              throw new TypeError( 'Invalid isotope "V" values' );
-            }
-            return target;
-          } )
-          .reduce(
-            ( accumulator, value ) => accumulator + value
-          );
-
-        if ( 0 !== total ) {
-          return false;
+        // Each token transaction consists of 3 atoms
+        // Break atoms into transactions
+        for ( const atoms of chunk( vAtoms.filter( atom => token === atom.token ), 3 ) ) {
+          // If less than 3 atoms are involved in the transaction, these are integrity violations
+          if ( atoms.length < 3 ) {
+            return false;
+          }
+          // If the sum of the first two atoms is not equal to zero,
+          // this violates the integrity of the transaction
+          if ( 0 !== atoms.slice( 0, 2 ).map( value_conversion ).reduce( ( accumulator, value ) => accumulator + value ) ) {
+            return false;
+          }
+          // If after the transaction the poisoner wallet has a negative balance,
+          // this is a violation of the integrity of the transaction
+          if ( 0 > atoms.map( value_conversion ).reduce( ( accumulator, value ) => accumulator + value ) ) {
+            return false;
+          }
         }
       }
       return true;
