@@ -4,10 +4,9 @@
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
 import Atom from './Atom';
-import Meta from './Meta';
 import { shake256, } from 'js-sha3';
+import { chunkArray, } from './libraries/array';
 import { chunkSubstr, compress, decompress, } from './libraries/strings';
-import bigInt from 'big-integer';
 import Wallet from './Wallet';
 import AtomsNotFoundException from './exception/AtomsNotFoundException';
 import { generateBundleHash } from "./libraries/crypto";
@@ -61,7 +60,7 @@ export default class Molecule {
       'V',
       sourceWallet.token,
       -value,
-      'sourceWallet',
+      null,
       null,
       null,
       null
@@ -85,9 +84,9 @@ export default class Molecule {
       remainderWallet.address,
       'V',
       sourceWallet.token,
-      remainderWallet.balance + ( sourceWallet.balance - value ),
-      'remainderWallet',
-      null,
+      sourceWallet.balance - value,
+      'walletBundle',
+      sourceWallet.bundle,
       null,
       null
     );
@@ -296,30 +295,19 @@ export default class Molecule {
     if ( 0 < molecule.atoms.length
       && null !== molecule.molecularHash
     ) {
-      const vAtoms = molecule.atoms.filter( atom => ( 'V' === atom.isotope ) ? atom : false ),
+      const vAtoms = molecule.atoms.filter( atom => 'V' === atom.isotope ),
         value_conversion = atom => {
           const target = atom.value * 1;
           if ( Number.isNaN( target ) ) {
             throw new TypeError( 'Invalid isotope "V" values' );
           }
           return target;
-        },
-        /**
-         * @param {Array} arr
-         * @param {number} size
-         * @returns {Array}
-         */
-        chunk = ( arr, size ) => {
-          if ( !arr.length ) {
-            return [];
-          }
-          return [ arr.slice( 0, size ) ].concat( chunk( arr.slice( size ), size ) );
         };
 
       for ( const token of [ ...new Set( vAtoms.map( atom => atom.token ) ) ] ) {
         // Each token transaction consists of 3 atoms
         // Break atoms into transactions
-        for ( const atoms of chunk( vAtoms.filter( atom => token === atom.token ), 3 ) ) {
+        for ( const atoms of chunkArray( vAtoms.filter( atom => token === atom.token ), 3 ) ) {
           // If less than 3 atoms are involved in the transaction, these are integrity violations
           if ( atoms.length < 3 ) {
             return false;
@@ -502,5 +490,24 @@ export default class Molecule {
       }
     }
     return mappedHashArray;
+  }
+
+  /**
+   * Returns the array of atoms to which the incoming atom belongs.
+   *
+   * @param {Molecule} molecule
+   * @param {Atom} atom
+   * @return {Array | null}
+   */
+  static getGroupAtomsV ( molecule, atom )
+  {
+    for ( const atoms of chunkArray( molecule.atoms.filter( a => 'V' === a.isotope && a.token === atom.token ), 3 ) ) {
+      const search = atoms.filter( a => a.position === atom.position && a.walletAddress === atom.walletAddress );
+
+      if ( search.length > 0 ) {
+        return atoms;
+      }
+    }
+    return null;
   }
 }
