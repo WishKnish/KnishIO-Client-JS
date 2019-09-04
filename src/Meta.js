@@ -28,4 +28,18 @@ export default class Meta {
     }
     return meta;
   }
+
+  /**
+   * @param array $meta
+   * @return array
+   */
+  static aggregateMeta ( meta ) {
+    const aggregate = [];
+    if ( meta.length > 0 ) {
+      meta.forEach(function(metaEntry) {
+        aggregate[ metaEntry.key ] = metaEntry.value;
+      });
+    }
+    return aggregate;
+  }
 }

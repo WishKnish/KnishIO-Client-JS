@@ -105,7 +105,7 @@ export default class Atom {
             continue;
           }
 
-          if ( null !== atom[ property ] ) {
+          if ( atom[ property ] !== null ) {
             molecularSponge.update( String( atom[ property ] ) );
           }
         }
