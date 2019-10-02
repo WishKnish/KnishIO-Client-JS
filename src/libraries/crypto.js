@@ -19,14 +19,21 @@ import {
  * @returns {string|*}
  */
 export function generateSecret ( seed = null, length = 2048 ) {
-  if(seed) {
+
+  if ( seed ) {
+
     const sponge = shake256.create( length * 2 );
+
     sponge.update( seed );
+
     return sponge.hex();
   }
   else {
+
     return randomString( length );
+
   }
+
 }
 
 /**
@@ -36,9 +43,13 @@ export function generateSecret ( seed = null, length = 2048 ) {
  * @returns {string}
  */
 export function generateBundleHash ( secret ) {
-  const sponge = shake256.create(256);
-  sponge.update(secret);
+
+  const sponge = shake256.create( 256 );
+
+  sponge.update( secret );
+
   return sponge.hex();
+
 }
 
 /**
@@ -49,15 +60,23 @@ export function generateBundleHash ( secret ) {
  * @returns {PromiseLike<ArrayBuffer>}
  */
 export function encryptMessage ( message, recipientPublicKey ) {
+
   const encodedMessage = decodeUTF8( JSON.stringify( message ) );
+
   return eccrypto.encrypt( recipientPublicKey, encodedMessage, {} )
-    .then( function ( encryptedMessage ) {
+    .then( encryptedMessage => {
+
       // Converting buffer array to hex
-      Object.keys( encryptedMessage ).forEach( function ( key ) {
+      Object.keys( encryptedMessage ).forEach( key => {
+
         encryptedMessage[ key ] = bufferToHexString( encryptedMessage[ key ] );
+
       } );
+
       return JSON.stringify( encryptedMessage );
+
     } );
+
 }
 
 /**
@@ -68,10 +87,14 @@ export function encryptMessage ( message, recipientPublicKey ) {
  * @returns {*}
  */
 export function decryptMessage ( message, recipientPrivateKey ) {
+
   const encryptedMessage = JSON.parse( message );
+
   // Converting hex back into buffer array
-  Object.keys( encryptedMessage ).forEach( function ( key ) {
+  Object.keys( encryptedMessage ).forEach( key => {
+
     encryptedMessage[ key ] = hexStringToBuffer( encryptedMessage[ key ] );
+
   } );
 
   return eccrypto.decrypt( recipientPrivateKey, {
@@ -80,10 +103,13 @@ export function decryptMessage ( message, recipientPrivateKey ) {
     ciphertext: encryptedMessage.ciphertext,
     mac: encryptedMessage.mac,
   } )
-    .then( function ( decrypted ) {
+    .then( decrypted => {
+
         return JSON.parse( encodeUTF8( decrypted ) );
+
       }
     );
+
 }
 
 /**
@@ -93,9 +119,13 @@ export function decryptMessage ( message, recipientPrivateKey ) {
  * @returns {Buffer}
  */
 export function generateEncPrivateKey ( key ) {
+
   const sponge = shake256.create( 128 );
+
   sponge.update( key );
+
   return Buffer.from( sponge.hex() );
+
 }
 
 /**
@@ -105,7 +135,9 @@ export function generateEncPrivateKey ( key ) {
  * @returns {Buffer}
  */
 export function generateEncPublicKey ( privateKey ) {
+
   return eccrypto.getPublic( privateKey );
+
 }
 
 /**
@@ -116,5 +148,7 @@ export function generateEncPublicKey ( privateKey ) {
  * @returns {*|Promise<unknown>|Promise|Promise}
  */
 export function generateEncSharedKey ( privateKey, otherPublicKey ) {
+
   return eccrypto.derive( privateKey, otherPublicKey );
+
 }

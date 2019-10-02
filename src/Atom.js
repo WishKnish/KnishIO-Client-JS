@@ -18,6 +18,7 @@ import Meta from "./Meta";
  * @property {string | null} metaType
  * @property {string | null} metaId
  * @property {Array | Object | null} meta
+ * @property {number | null } index
  * @property {string | null} otsFragment
  * @property {string} createdAt
  */
@@ -32,9 +33,10 @@ export default class Atom {
    * @param {string | null} metaType
    * @param {string | null} metaId
    * @param {Array | Object | null} meta
+   * @param {number | null} index
    * @param {string | null} otsFragment
    */
-  constructor ( position, walletAddress, isotope, token = null, value = null, metaType = null, metaId = null, meta = null, otsFragment = null ) {
+  constructor ( position, walletAddress, isotope, token = null, value = null, metaType = null, metaId = null, meta = null, otsFragment = null, index = null ) {
 
     this.position = position;
     this.walletAddress = walletAddress;
@@ -46,8 +48,10 @@ export default class Atom {
     this.metaId = metaId;
     this.meta = meta ? Meta.normalizeMeta( meta ) : [];
 
+    this.index = index;
     this.otsFragment = otsFragment;
     this.createdAt = String( +new Date );
+
   }
 
   /**
@@ -55,16 +59,22 @@ export default class Atom {
    * @return {Object}
    */
   static jsonToObject ( json ) {
+
     const target = Object.assign( new Atom( null, null, null ), JSON.parse( json ) ),
       properties = Object.keys( new Atom( null, null, null ) );
 
     for ( const property in target ) {
+
       if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
-        delete target[ property ]
+
+        delete target[ property ];
+
       }
+
     }
 
     return target;
+
   }
 
   /**
@@ -76,55 +86,111 @@ export default class Atom {
    * @returns {number[] | *}
    */
   static hashAtoms ( atoms, output = 'base17' ) {
+
     const molecularSponge = shake256.create( 256 ),
-      numberOfAtoms = atoms.length;
+      numberOfAtoms = atoms.length,
+      atomList = Atom.sortAtoms( atoms );
 
     // Hashing each atom in the molecule to produce a molecular hash
-    for ( const atom of atoms ) {
+    for ( const atom of atomList ) {
+
       molecularSponge.update( String( numberOfAtoms ) );
 
       for ( const property in atom ) {
+
         if ( atom.hasOwnProperty( property ) ) {
 
-          if ( 'otsFragment' === property ) {
+          if ( [ 'otsFragment', 'index', ].includes( property ) ) {
+
             continue;
+
           }
 
           if ( 'meta' === property ) {
+
             atom[ property ] = Meta.normalizeMeta( atom[ property ] );
 
             for ( const meta of atom[ property ] ) {
+
               molecularSponge.update( String( meta.key ) );
               molecularSponge.update( String( meta.value ) );
+
             }
+
             continue;
+
           }
 
           if ( [ 'position', 'walletAddress', 'isotope' ].includes( property ) ) {
+
             molecularSponge.update( String( atom[ property ] ) );
+
             continue;
+
           }
 
           if ( atom[ property ] !== null ) {
+
             molecularSponge.update( String( atom[ property ] ) );
+
           }
+
         }
+
       }
+
     }
 
     switch ( output ) {
+
       case 'hex': {
+
         return molecularSponge.hex();
+
       }
       case 'array': {
+
         return molecularSponge.array();
+
       }
       case 'base17': {
+
         return charsetBaseConvert( molecularSponge.hex(), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
+
       }
       default: {
+
         return null;
+
       }
+
     }
+
   }
+
+  /**
+   *
+   * @param {Array} atoms
+   * @return {Array}
+   */
+  static sortAtoms ( atoms ) {
+
+    const atomList = [ ...atoms ];
+
+    atomList.sort( ( first, second ) => {
+
+      if ( first.index === second.index ) {
+
+        return 0;
+
+      }
+
+      return first.index < second.index ? -1 : 1;
+
+    } );
+
+    return atomList;
+
+  }
+
 }

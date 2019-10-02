@@ -7,9 +7,13 @@ import bigInt from 'big-integer';
 import LZString from 'lz-string';
 
 if ( !String.prototype.trim ) {
+
   String.prototype.trim = function () {
+
     return this.replace( /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '' );
+
   };
+
 }
 
 /**
@@ -20,13 +24,18 @@ if ( !String.prototype.trim ) {
  * @returns {any[]}
  */
 export function chunkSubstr ( str, size ) {
+
   const numChunks = Math.ceil( str.length / size ),
     chunks = new Array( numChunks );
 
   for ( let i = 0, o = 0; i < numChunks; ++i, o += size ) {
+
     chunks[ i ] = str.substr( o, size );
+
   }
+
   return chunks;
+
 }
 
 /**
@@ -37,10 +46,14 @@ export function chunkSubstr ( str, size ) {
  * @returns {string}
  */
 export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
+
   let array = new Uint8Array( length );
+
   window.crypto.getRandomValues( array );
   array = array.map( x => alphabet.charCodeAt( x % alphabet.length ) );
+
   return String.fromCharCode.apply( null, array );
+
 }
 
 /**
@@ -54,6 +67,7 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
  * @returns {boolean|string|number}
  */
 export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, dest_symbol_table ) {
+
   // From: convert.js: http://rot47.net/_js/convert.js
   //	http://rot47.net
   //	http://helloacm.com
@@ -74,18 +88,25 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
 
   // Make sure we are not trying to convert out of the symbol table range
   if ( from_base > src_symbol_table.length || to_base > dest_symbol_table.length ) {
+
     console.warn( 'Can\'t convert', src, 'to base', to_base, 'greater than symbol table length. src-table:', src_symbol_table.length, 'dest-table:', dest_symbol_table.length );
     return false;
+
   }
 
   // First convert to base 10
   let val = bigInt( 0 );
+
   for ( let i = 0; i < src.length; i++ ) {
+
     val = val.multiply( from_base ).add( src_symbol_table.indexOf( src.charAt( i ) ) );
+
   }
 
   if ( val.lesser( 0 ) ) {
+
     return 0;
+
   }
 
   // Then covert to any base
@@ -94,12 +115,15 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
     q = val.divide( to_base );
 
   while ( !q.equals( 0 ) ) {
+
     r = q.mod( to_base );
     q = q.divide( to_base );
     res = dest_symbol_table.charAt( r ) + res;
+
   }
 
   return res;
+
 }
 
 /**
@@ -109,9 +133,13 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
  * @returns {string}
  */
 export function bufferToHexString ( byteArray ) {
+
   return Array.prototype.map.call( byteArray, function ( byte ) {
+
     return ( '0' + ( byte & 0xFF ).toString( 16 ) ).slice( -2 );
+
   } ).join( '' );
+
 }
 
 /**
@@ -121,11 +149,17 @@ export function bufferToHexString ( byteArray ) {
  * @returns {Buffer}
  */
 export function hexStringToBuffer ( hexString ) {
-  var result = [];
-  for ( var i = 0; i < hexString.length; i += 2 ) {
+
+  const result = [];
+
+  for ( let i = 0; i < hexString.length; i += 2 ) {
+
     result.push( parseInt( hexString.substr( i, 2 ), 16 ) );
+
   }
-  return new Buffer( result );
+
+  return new Buffer.from( result );
+
 }
 
 /**
@@ -135,7 +169,9 @@ export function hexStringToBuffer ( hexString ) {
  * @returns {*}
  */
 export function compress ( string ) {
+
   return LZString.compressToBase64( string );
+
 }
 
 /**
@@ -145,5 +181,7 @@ export function compress ( string ) {
  * @returns {*}
  */
 export function decompress ( string ) {
+
   return LZString.decompressFromBase64( string );
+
 }

@@ -36,6 +36,7 @@ export default class Wallet {
    * @param {number} saltLength - length of the position parameter that should be generated if position is not provided
    */
   constructor ( secret, token = 'USER', position = null, saltLength = 64 ) {
+
     // Position via which (combined with token) we will generate the one-time keys
     this.position = position ? position : randomString( saltLength, 'abcdef0123456789' );
     this.token = token;
@@ -46,6 +47,7 @@ export default class Wallet {
     this.bundle = generateBundleHash( secret );
     this.privkey = generateEncPrivateKey( this.key );
     this.pubkey = generateEncPublicKey( this.privkey );
+
   }
 
   /**
@@ -54,7 +56,9 @@ export default class Wallet {
    * @returns {Buffer}
    */
   getMyEncPrivateKey () {
+
     return generateEncPrivateKey( this.key );
+
   }
 
   /**
@@ -63,7 +67,9 @@ export default class Wallet {
    * @returns {Buffer}
    */
   getMyEncPublicKey () {
-    return generateEncPublicKey( this.getMyEncPrivateKey() )
+
+    return generateEncPublicKey( this.getMyEncPrivateKey() );
+
   }
 
   /**
@@ -73,7 +79,9 @@ export default class Wallet {
    * @returns {*|Promise|Promise<unknown>}
    */
   getMyEncSharedKey ( otherPublicKey ) {
+
     return generateEncSharedKey( this.getMyEncPrivateKey(), otherPublicKey );
+
   }
 
   /**
@@ -83,7 +91,9 @@ export default class Wallet {
    * @returns {*}
    */
   decryptMyMessage ( message ) {
+
     return decryptMessage( message, this.getMyEncPrivateKey() );
+
   }
 
   /**
@@ -94,6 +104,7 @@ export default class Wallet {
    * @return {string}
    */
   static generateWalletKey ( secret, token, position ) {
+
     // Converting secret to bigInt
     const bigIntSecret = bigInt( secret, 16 ),
       // Adding new position to the user secret to produce the indexed key
@@ -104,10 +115,14 @@ export default class Wallet {
     intermediateKeySponge.update( indexedKey.toString( 16 ) );
 
     if ( token ) {
+
       intermediateKeySponge.update( token );
+
     }
+
     // Hashing the intermediate key to produce the private key
     return shake256.create( 8192 ).update( intermediateKeySponge.hex() ).hex();
+
   }
 
   /**
@@ -115,19 +130,29 @@ export default class Wallet {
    * @return {string}
    */
   static generateWalletAddress ( key ) {
+
     // Subdivide private key into 16 fragments of 128 characters each
     const keyFragments = chunkSubstr( key, 128 ),
       // Generating wallet digest
       digestSponge = shake256.create( 8192 );
 
     for ( const index in keyFragments ) {
+
       let workingFragment = keyFragments[ index ];
+
       for ( let i = 1; i <= 16; i++ ) {
+
         workingFragment = shake256.create( 512 ).update( workingFragment ).hex();
+
       }
+
       digestSponge.update( workingFragment );
+
     }
+
     // Producing wallet address
     return shake256.create( 256 ).update( digestSponge.hex() ).hex();
+
   }
+
 }
