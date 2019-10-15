@@ -93,13 +93,30 @@ export default class Wallet {
    *
    * @param {string} message
    * @param {string | null} otherPublicKey
-   * @returns {Array | Object}
+   * @returns {Array | Object | null}
    */
   decryptMyMessage ( message, otherPublicKey = null ) {
 
-    return ( otherPublicKey ) ?
-      decryptMessage( message, generateEncPublicKey( this.getMyEncSharedKey( otherPublicKey ) ) ) :
-      decryptMessage( message, this.getMyEncPublicKey() );
+    let target = null;
+
+    if ( otherPublicKey === null ) {
+
+      target = decryptMessage( message, this.getMyEncPublicKey() );
+
+    }
+    else {
+
+      target = decryptMessage( message, generateEncPublicKey( this.getMyEncSharedKey( otherPublicKey ) ) );
+
+      if ( target === null ) {
+
+        target = decryptMessage( message, otherPublicKey );
+
+      }
+
+    }
+
+    return target;
 
   }
 
