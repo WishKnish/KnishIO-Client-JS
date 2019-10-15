@@ -4,7 +4,10 @@
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
 import bigInt from 'big-integer';
-import LZString from 'lz-string';
+import {
+  decodeBase64,
+  encodeBase64,
+} from 'tweetnacl-util';
 
 if ( !String.prototype.trim ) {
 
@@ -154,23 +157,23 @@ export function hexStringToBuffer ( hexString ) {
  * Compresses a given string for web sharing
  *
  * @param string
- * @returns {*}
+ * @returns {string}
  */
 export function compress ( string ) {
 
-  return LZString.compressToBase64( string );
+  return encodeBase64( Hex.toUint8Array( string ) );
 
 }
 
 /**
  * Decompresses a compressed string
  *
- * @param string
- * @returns {*}
+ * @param {string} string
+ * @returns {string}
  */
 export function decompress ( string ) {
 
-  return LZString.decompressFromBase64( string );
+  return Hex.toHex( decodeBase64( string ) );
 
 }
 
@@ -191,7 +194,7 @@ export class Hex {
    *
    * return a hexadecimal string representing the buffer.
    *
-   * @param {Array|ArrayBuffer|Uint8Array|Buffer} arr
+   * @param {Array|ArrayBuffer|Uint8Array} arr
    * @param {Object} options
    * @returns {string}
    */

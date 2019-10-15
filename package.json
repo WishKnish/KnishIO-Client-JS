@@ -18,7 +18,6 @@
 	"dependencies": {
 		"big-integer": "peterolson/BigInteger.js",
 		"js-sha3": "^0.8.0",
-		"lz-string": "^1.4.4",
 		"tweetnacl": "^1.0.1",
 		"tweetnacl-util": "^0.15.0"
 	},
