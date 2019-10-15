@@ -5,7 +5,7 @@
 
 import { Atom, Wallet, Meta } from './index';
 import { shake256, } from 'js-sha3';
-import { chunkSubstr, compress, decompress, } from './libraries/strings';
+import { chunkSubstr, hexToBase64, base64ToHex, } from './libraries/strings';
 import { generateBundleHash } from "./libraries/crypto";
 import {
   AtomsMissingException,
@@ -289,7 +289,7 @@ export default class Molecule {
     // Compressing the OTS
     if ( compressed ) {
 
-      signatureFragments = compress( signatureFragments );
+      signatureFragments = hexToBase64( signatureFragments );
 
     }
 
@@ -582,7 +582,7 @@ export default class Molecule {
     if ( ots.length !== 2048 ) {
 
       // Attempting decompression
-      ots = decompress( ots );
+      ots = base64ToHex( ots );
 
       // Still wrong? That's a failure
       if ( ots.length !== 2048 ) {

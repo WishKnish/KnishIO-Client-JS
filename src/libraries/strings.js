@@ -159,7 +159,7 @@ export function hexStringToBuffer ( hexString ) {
  * @param string
  * @returns {string}
  */
-export function compress ( string ) {
+export function hexToBase64 ( string ) {
 
   return encodeBase64( Hex.toUint8Array( string ) );
 
@@ -171,7 +171,7 @@ export function compress ( string ) {
  * @param {string} string
  * @returns {string}
  */
-export function decompress ( string ) {
+export function base64ToHex ( string ) {
 
   return Hex.toHex( decodeBase64( string ) );
 
