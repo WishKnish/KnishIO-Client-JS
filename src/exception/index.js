@@ -11,6 +11,7 @@ import MolecularHashMismatchException from './MolecularHashMismatchException';
 import SignatureMalformedException from './SignatureMalformedException';
 import SignatureMismatchException from './SignatureMismatchException';
 import AtomIndexException from './AtomIndexException';
+import MetaMissingException from './MetaMissingException';
 
 export {
   AtomsMissingException,
@@ -26,4 +27,5 @@ export {
   SignatureMalformedException,
   SignatureMismatchException,
   AtomIndexException,
+  MetaMissingException,
 };
