@@ -52,7 +52,9 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
 
   let array = new Uint8Array( length );
 
-  window.crypto.getRandomValues( array );
+  let cryptoObj = window.crypto || window.msCrypto; // for IE 11
+  cryptoObj.getRandomValues( array );
+
   array = array.map( x => alphabet.charCodeAt( x % alphabet.length ) );
 
   return String.fromCharCode.apply( null, array );
