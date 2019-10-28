@@ -139,7 +139,7 @@ export default class CheckMolecule {
 
       }
 
-      const remainder = senderWallet.balance + value;
+      const remainder = ( 1 * senderWallet.balance ) + value;
 
       // Is there enough balance to send?
       if ( remainder < 0 ) {
