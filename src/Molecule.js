@@ -116,6 +116,49 @@ export default class Molecule {
   }
 
   /**
+   *
+   * @param {Wallet} sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
+   * @param {string} source - phone number or email string
+   * @param {string} type - phone or email
+   * @param {string} code -
+   *
+   * @returns {Molecule}
+   */
+  initIdentifierCreation ( sourceWallet, source, type, code ) {
+
+    this.molecularHash = null;
+
+    this.atoms.push(
+      new Atom(
+        sourceWallet.position,
+        sourceWallet.address,
+        'C',
+        sourceWallet.token,
+        null,
+        'identifier',
+        type,
+        [
+          {
+            key: 'code',
+            value: code,
+          },
+          {
+            key: 'hash',
+            value: generateBundleHash( source.trim() ),
+          },
+        ],
+        null,
+        this.generateIndex()
+      )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+
+  }
+
+  /**
    * Initialize a C-type molecule to issue a new type of token
    *
    * @param {Wallet} sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
