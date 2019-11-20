@@ -66,21 +66,23 @@ export default class Meta {
    * @return {Array}
    */
   static aggregateMeta ( meta ) {
-
-    const aggregate = [];
+    const aggregate = {};
 
     if ( meta.length > 0 ) {
 
       meta.forEach(function(metaEntry) {
-
-        aggregate[ metaEntry.key ] = metaEntry.value;
-
+        if ( metaEntry.key ) {
+          aggregate[ metaEntry.key ] = metaEntry.value;
+        }
       });
 
     }
 
-    return aggregate;
+    // Making sure we actually have anything to return
+    if ( Object.keys( aggregate ).length > 0 )
+      return aggregate;
 
+    return meta;
   }
 
 }
