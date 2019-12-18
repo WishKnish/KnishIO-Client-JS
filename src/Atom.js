@@ -30,19 +30,21 @@ export default class Atom {
    * @param {string} isotope
    * @param {string | null} token
    * @param {string | number | null} value
+   * @param {string} batchId
    * @param {string | null} metaType
    * @param {string | null} metaId
    * @param {Array | Object | null} meta
    * @param {number | null} index
    * @param {string | null} otsFragment
    */
-  constructor ( position, walletAddress, isotope, token = null, value = null, metaType = null, metaId = null, meta = null, otsFragment = null, index = null ) {
+  constructor ( position, walletAddress, isotope, token = null, value = null, batchId = null, metaType = null, metaId = null, meta = null, otsFragment = null, index = null ) {
 
     this.position = position;
     this.walletAddress = walletAddress;
     this.isotope = isotope;
     this.token = token;
     this.value = null !== value ? String( value ) : null;
+    this.batchId = batchId;
 
     this.metaType = metaType;
     this.metaId = metaId;
@@ -99,6 +101,13 @@ export default class Atom {
       for ( const property in atom ) {
 
         if ( atom.hasOwnProperty( property ) ) {
+
+          // Old atoms support (without batch_id field)
+          if ( property === 'batchId' && atom[ property ] === null ) {
+
+            continue;
+
+          }
 
           if ( [ 'otsFragment', 'index', ].includes( property ) ) {
 
