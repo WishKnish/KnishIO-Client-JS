@@ -43,6 +43,62 @@ export default class Molecule {
   }
 
   /**
+   *
+   * @param {Wallet} sourceWallet
+   * @param {Wallet} newWallet
+   * @returns {Molecule}
+   */
+  initWalletCreation ( sourceWallet, newWallet ) {
+
+    this.molecularHash = null;
+
+    this.atoms.push(
+      new Atom(
+        sourceWallet.position,
+        sourceWallet.address,
+        'C',
+        sourceWallet.token,
+        null,
+        'wallet',
+        newWallet.token,
+        [
+          {
+            key: 'address',
+            value: newWallet.address,
+          },
+          {
+            key: 'token',
+            value: newWallet.token,
+          },
+          {
+            key: 'bundle',
+            value: newWallet.bundle,
+          },
+          {
+            key: 'position',
+            value: newWallet.position,
+          },
+          {
+            key: 'amount',
+            value: newWallet.balance,
+          },
+          {
+            key: 'batch_id',
+            value: newWallet.batchId,
+          },
+        ],
+        null,
+        this.generateIndex()
+      )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+
+  }
+
+  /**
    * Initialize a V-type molecule to transfer value from one wallet to another, with a third,
    * regenerated wallet receiving the remainder
    *

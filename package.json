@@ -1,12 +1,13 @@
 {
 	"name": "@wishknish/knishio-client-js",
-	"version": "0.1.55",
+	"version": "0.1.56",
 	"description": "Knish.IO Javascript API Client",
 	"license": "GPL-3.0-or-later",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/WishKnish/KnishIO-Client-JS.git"
 	},
+	"type": "module",
 	"main": "src/index.js",
 	"keywords": [
 		"wishknish",

@@ -25,6 +25,7 @@ import {
  * @property {string} key
  * @property {string} address
  * @property {number} balance
+ * @property {string} batchId
  * @property {Object} molecules
  * @property {string} bundle
  */
@@ -43,6 +44,7 @@ export default class Wallet {
     this.token = token;
     this.balance = 0;
     this.molecules = {};
+    this.batchId = null;
 
     if ( secret ) {
       this.key = Wallet.generateWalletKey( secret, this.token, this.position );
