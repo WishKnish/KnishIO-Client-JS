@@ -61,7 +61,7 @@ export default class Molecule {
         null,
         sourceWallet.batchId,
         'wallet',
-        newWallet.token,
+        newWallet.address,
         [
           {
             key: 'address',
@@ -81,7 +81,7 @@ export default class Molecule {
           },
           {
             key: 'amount',
-            value: newWallet.balance,
+            value: "0",
           },
           {
             key: 'batch_id',

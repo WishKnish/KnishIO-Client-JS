@@ -121,8 +121,12 @@ export default class Atom {
 
             for ( const meta of atom[ property ] ) {
 
-              molecularSponge.update( String( meta.key ) );
-              molecularSponge.update( String( meta.value ) );
+              if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
+
+                molecularSponge.update( String( meta.key ) );
+                molecularSponge.update( String( meta.value ) );
+
+              }
 
             }
 
