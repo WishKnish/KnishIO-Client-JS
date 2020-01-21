@@ -100,6 +100,45 @@ export default class Molecule {
   }
 
   /**
+   *
+   * @param {string} secret
+   * @param {string} token
+   * @param {number} amount
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {Array} meta
+   *
+   * @returns {Molecule}
+   */
+  initTokenTransfer ( secret, token, amount, metaType, metaId, meta = [] ) {
+
+    this.molecularHash = null;
+
+    const wallet = new Wallet( secret, token );
+
+    this.atoms.push(
+      new Atom(
+        wallet.position,
+        wallet.address,
+        'T',
+        wallet.token,
+        amount,
+        wallet.batchId,
+        metaType,
+        metaId,
+        meta,
+        null,
+        this.generateIndex()
+      )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+
+  }
+
+  /**
    * Initialize a V-type molecule to transfer value from one wallet to another, with a third,
    * regenerated wallet receiving the remainder
    *
@@ -479,6 +518,7 @@ export default class Molecule {
       && CheckMolecule.ots( molecule )
       && CheckMolecule.index( molecule )
       && CheckMolecule.isotopeM( molecule )
+      && CheckMolecule.isotopeT( molecule )
       && CheckMolecule.isotopeV( molecule, senderWallet );
 
   }

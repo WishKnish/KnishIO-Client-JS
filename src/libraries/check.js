@@ -13,7 +13,7 @@ import {
   TransferUnbalancedException,
   MetaMissingException,
 } from "../exception";
-import { Atom } from "../index";
+import { Atom, Meta } from "../index";
 import { base64ToHex, chunkSubstr } from "./strings";
 import { shake256 } from "js-sha3";
 
@@ -39,6 +39,33 @@ export default class CheckMolecule {
 
       }
 
+    }
+
+    return true;
+
+  }
+
+  /**
+   *
+   * @param {Molecule} molecule
+   * @return {boolean}
+   * @throws {MetaMissingException}
+   */
+  static isotopeT ( molecule ) {
+
+    CheckMolecule.missing( molecule );
+
+    for ( let atom of CheckMolecule.isotopeFilter( 'V', molecule.atoms ) ) {
+      const meta = Meta.aggregateMeta( Meta.normalizeMeta( atom.meta ) ),
+        metaType = String( atom.metaType ).toLowerCase();
+
+      if ( metaType === 'wallet' ) {
+        for ( let key of [ 'position', 'bundle' ] ) {
+          if ( !meta.hasOwnProperty( key ) || !Boolean( meta[ key ] ) ) {
+            throw new MetaMissingException( 'No or not defined "' + key + '" in meta' );
+          }
+        }
+      }
     }
 
     return true;
