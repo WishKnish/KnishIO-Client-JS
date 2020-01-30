@@ -13,7 +13,8 @@ import {
   generateEncPrivateKey,
   generateEncPublicKey,
   generateEncSharedKey,
-  decryptMessage, generateBundleHash
+  decryptMessage,
+  generateBundleHash,
 } from './libraries/crypto';
 
 /**
@@ -24,66 +25,101 @@ import {
  * @property {string} key
  * @property {string} address
  * @property {number} balance
+ * @property {string} batchId
  * @property {Object} molecules
  * @property {string} bundle
  */
 export default class Wallet {
 
   /**
-   * @param {string} secret - typically a 2048-character biometric hash
+   * @param {string | null} secret - typically a 2048-character biometric hash
    * @param {string} token - slug for the token this wallet is intended for
    * @param {string | null} position - hexadecimal string used to salt the secret and produce one-time signatures
    * @param {number} saltLength - length of the position parameter that should be generated if position is not provided
    */
-  constructor ( secret, token = 'USER', position = null, saltLength = 64 ) {
+  constructor ( secret = null, token = 'USER', position = null, saltLength = 64 ) {
+
     // Position via which (combined with token) we will generate the one-time keys
     this.position = position ? position : randomString( saltLength, 'abcdef0123456789' );
     this.token = token;
-    this.key = Wallet.generateWalletKey( secret, this.token, this.position );
-    this.address = Wallet.generateWalletAddress( this.key );
     this.balance = 0;
     this.molecules = {};
-    this.bundle = generateBundleHash( secret );
-    this.privkey = generateEncPrivateKey( this.key );
-    this.pubkey = generateEncPublicKey( this.privkey );
+    this.batchId = null;
+
+    if ( secret ) {
+      this.key = Wallet.generateWalletKey( secret, this.token, this.position );
+      this.address = Wallet.generateWalletAddress( this.key );
+      this.bundle = generateBundleHash( secret );
+      this.privkey = this.getMyEncPrivateKey();
+      this.pubkey = this.getMyEncPublicKey();
+    }
+
   }
 
   /**
    * Derives a private key for encrypting data with this wallet's key
    *
-   * @returns {Buffer}
+   * @returns {string}
    */
   getMyEncPrivateKey () {
+
     return generateEncPrivateKey( this.key );
+
   }
 
   /**
    * Dervies a public key for encrypting data for this wallet's consumption
    *
-   * @returns {Buffer}
+   * @returns {string}
    */
   getMyEncPublicKey () {
-    return generateEncPublicKey( this.getMyEncPrivateKey() )
+
+    return generateEncPublicKey( this.getMyEncPrivateKey() );
+
   }
 
   /**
    * Creates a shared key by combining this wallet's private key and another wallet's public key
    *
-   * @param otherPublicKey
-   * @returns {*|Promise|Promise<unknown>}
+   * @param {string} otherPublicKey
+   * @returns {string}
    */
   getMyEncSharedKey ( otherPublicKey ) {
+
     return generateEncSharedKey( this.getMyEncPrivateKey(), otherPublicKey );
+
   }
 
   /**
    * Uses the current wallet's private key to decrypt the given message
    *
-   * @param message
-   * @returns {*}
+   * @param {string} message
+   * @param {string | null} otherPublicKey
+   * @returns {Array | Object | null}
    */
-  decryptMyMessage ( message ) {
-    return decryptMessage( message, this.getMyEncPrivateKey() );
+  decryptMyMessage ( message, otherPublicKey = null ) {
+
+    let target = null;
+
+    if ( otherPublicKey === null ) {
+
+      target = decryptMessage( message, this.getMyEncPublicKey() );
+
+    }
+    else {
+
+      target = decryptMessage( message, generateEncPublicKey( this.getMyEncSharedKey( otherPublicKey ) ) );
+
+      if ( target === null ) {
+
+        target = decryptMessage( message, otherPublicKey );
+
+      }
+
+    }
+
+    return target;
+
   }
 
   /**
@@ -94,6 +130,7 @@ export default class Wallet {
    * @return {string}
    */
   static generateWalletKey ( secret, token, position ) {
+
     // Converting secret to bigInt
     const bigIntSecret = bigInt( secret, 16 ),
       // Adding new position to the user secret to produce the indexed key
@@ -104,10 +141,14 @@ export default class Wallet {
     intermediateKeySponge.update( indexedKey.toString( 16 ) );
 
     if ( token ) {
+
       intermediateKeySponge.update( token );
+
     }
+
     // Hashing the intermediate key to produce the private key
     return shake256.create( 8192 ).update( intermediateKeySponge.hex() ).hex();
+
   }
 
   /**
@@ -115,19 +156,29 @@ export default class Wallet {
    * @return {string}
    */
   static generateWalletAddress ( key ) {
+
     // Subdivide private key into 16 fragments of 128 characters each
     const keyFragments = chunkSubstr( key, 128 ),
       // Generating wallet digest
       digestSponge = shake256.create( 8192 );
 
     for ( const index in keyFragments ) {
+
       let workingFragment = keyFragments[ index ];
+
       for ( let i = 1; i <= 16; i++ ) {
+
         workingFragment = shake256.create( 512 ).update( workingFragment ).hex();
+
       }
+
       digestSponge.update( workingFragment );
+
     }
+
     // Producing wallet address
     return shake256.create( 256 ).update( digestSponge.hex() ).hex();
+
   }
+
 }

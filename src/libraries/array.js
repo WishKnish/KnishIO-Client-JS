@@ -6,8 +6,13 @@
  * @returns {Array}
  */
 export function chunkArray ( arr, size ) {
-  if ( !arr.length ) {
+
+  if ( ! arr.length ) {
+
     return [];
+
   }
+
   return [ arr.slice( 0, size ) ].concat( chunkArray( arr.slice( size ), size ) );
+
 }
