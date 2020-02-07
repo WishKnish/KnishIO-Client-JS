@@ -63,7 +63,7 @@ export default class Meta {
 
   /**
    * @param {Array | Object} meta
-   * @return {Array}
+   * @return {Array | Object}
    */
   static aggregateMeta ( meta ) {
     const aggregate = {};
