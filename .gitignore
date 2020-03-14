@@ -1,3 +1,9 @@
 .idea/
 node_modules/
 yarn.lock
+package.lock
+package-lock.json
+index.js
+index.html
+dist/KnishIOClientJSDev.js
+dist/KnishIOClientJSDev.js.map

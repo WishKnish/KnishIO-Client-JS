@@ -5,9 +5,9 @@
 
 import bigInt from 'big-integer';
 import {
-  decodeBase64,
-  encodeBase64,
-} from 'tweetnacl-util';
+  decode as decodeBase64,
+  encode as encodeBase64,
+} from '@stablelib/base64';
 
 if ( !String.prototype.trim ) {
 

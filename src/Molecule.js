@@ -43,90 +43,29 @@ export default class Molecule {
   }
 
   /**
+   * Add user remainder atom
    *
-   * @param {Wallet} sourceWallet
-   * @param {Wallet} newWallet
+   * @param {Wallet} userRemainderWallet
    * @returns {Molecule}
    */
-  initWalletCreation ( sourceWallet, newWallet ) {
+  addUserRemainderAtom ( userRemainderWallet ) {
 
     this.molecularHash = null;
 
+    // Remainder atom
     this.atoms.push(
       new Atom(
-        sourceWallet.position,
-        sourceWallet.address,
+        userRemainderWallet.position,
+        userRemainderWallet.address,
         'C',
-        sourceWallet.token,
+        userRemainderWallet.token,
         null,
-        sourceWallet.batchId,
-        'wallet',
-        newWallet.address,
-        [
-          {
-            key: 'address',
-            value: newWallet.address,
-          },
-          {
-            key: 'token',
-            value: newWallet.token,
-          },
-          {
-            key: 'bundle',
-            value: newWallet.bundle,
-          },
-          {
-            key: 'position',
-            value: newWallet.position,
-          },
-          {
-            key: 'amount',
-            value: "0",
-          },
-          {
-            key: 'batch_id',
-            value: newWallet.batchId,
-          },
-        ],
         null,
-        this.generateIndex()
-      )
-    );
-
-    this.atoms = Atom.sortAtoms( this.atoms );
-
-    return this;
-
-  }
-
-  /**
-   *
-   * @param {string} secret
-   * @param {string} token
-   * @param {number} amount
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {Array} meta
-   *
-   * @returns {Molecule}
-   */
-  initTokenTransfer ( secret, token, amount, metaType, metaId, meta = [] ) {
-
-    this.molecularHash = null;
-
-    const wallet = new Wallet( secret, token );
-
-    this.atoms.push(
-      new Atom(
-        wallet.position,
-        wallet.address,
-        'T',
-        wallet.token,
-        amount,
-        wallet.batchId,
-        metaType,
-        metaId,
-        meta,
+        'walletBundle',
+        userRemainderWallet.bundle,
+        null,
+        userRemainderWallet.pubkey,
+        userRemainderWallet.characters,
         null,
         this.generateIndex()
       )
@@ -170,6 +109,8 @@ export default class Molecule {
         null,
         null,
         null,
+        sourceWallet.pubkey,
+        sourceWallet.characters,
         null,
         this.generateIndex()
       )
@@ -187,6 +128,8 @@ export default class Molecule {
         'walletBundle',
         recipientWallet.bundle,
         null,
+        recipientWallet.pubkey,
+        recipientWallet.characters,
         null,
         this.generateIndex()
       )
@@ -203,6 +146,8 @@ export default class Molecule {
         'walletBundle',
         sourceWallet.bundle,
         null,
+        remainderWallet.pubkey,
+        remainderWallet.characters,
         null,
         this.generateIndex()
       )
@@ -216,14 +161,85 @@ export default class Molecule {
 
   /**
    *
+   * @param {Wallet} sourceWallet
+   * @param {Wallet} newWallet
+   * @param {Wallet} userRemainderWallet
+   * @returns {Molecule}
+   */
+  initWalletCreation ( sourceWallet, newWallet, userRemainderWallet ) {
+
+    this.molecularHash = null;
+
+    this.atoms.push(
+      new Atom(
+        sourceWallet.position,
+        sourceWallet.address,
+        'C',
+        sourceWallet.token,
+        null,
+        sourceWallet.batchId,
+        'wallet',
+        newWallet.address,
+        [
+          {
+            key: 'address',
+            value: newWallet.address,
+          },
+          {
+            key: 'token',
+            value: newWallet.token,
+          },
+          {
+            key: 'bundle',
+            value: newWallet.bundle,
+          },
+          {
+            key: 'position',
+            value: newWallet.position,
+          },
+          {
+            key: 'amount',
+            value: "0",
+          },
+          {
+            key: 'batch_id',
+            value: newWallet.batchId,
+          },
+          {
+            key: 'pubkey',
+            value: newWallet.pubkey,
+          },
+          {
+            key: 'characters',
+            value: newWallet.characters,
+          },
+        ],
+        sourceWallet.pubkey,
+        sourceWallet.characters,
+        null,
+        this.generateIndex()
+      )
+    );
+
+    this.addUserRemainderAtom( userRemainderWallet );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+
+  }
+
+  /**
+   *
    * @param {Wallet} sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
+   * @param {Wallet} userRemainderWallet
    * @param {string} source - phone number or email string
    * @param {string} type - phone or email
    * @param {string} code -
    *
    * @returns {Molecule}
    */
-  initIdentifierCreation ( sourceWallet, source, type, code ) {
+  initIdentifierCreation ( sourceWallet, userRemainderWallet, source, type, code ) {
 
     this.molecularHash = null;
 
@@ -247,10 +263,14 @@ export default class Molecule {
             value: generateBundleHash( source.trim() ),
           },
         ],
+        sourceWallet.pubkey,
+        sourceWallet.characters,
         null,
         this.generateIndex()
       )
     );
+
+    this.addUserRemainderAtom( userRemainderWallet );
 
     this.atoms = Atom.sortAtoms( this.atoms );
 
@@ -263,17 +283,18 @@ export default class Molecule {
    *
    * @param {Wallet} sourceWallet - wallet signing the transaction. This should ideally be the USER wallet.
    * @param {Wallet} recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
+   * @param {Wallet} userRemainderWallet
    * @param {number} amount - how many of the token we are initially issuing (for fungible tokens only)
    * @param {Array | Object} tokenMeta - additional fields to configure the token
    * @returns {Molecule}
    */
-  initTokenCreation ( sourceWallet, recipientWallet, amount, tokenMeta ) {
+  initTokenCreation ( sourceWallet, recipientWallet, userRemainderWallet, amount, tokenMeta ) {
 
     this.molecularHash = null;
 
     const metas = Meta.normalizeMeta( tokenMeta );
 
-    for ( const walletKey of [ 'walletAddress', 'walletPosition' ] ) {
+    for ( const walletKey of [ 'walletAddress', 'walletPosition', 'walletPubkey', 'walletCharacters' ] ) {
 
       if ( 0 === metas.filter(
         meta => toString.call( meta ) === '[object Object]'
@@ -302,10 +323,55 @@ export default class Molecule {
         'token',
         recipientWallet.token,
         metas,
+        sourceWallet.pubkey,
+        sourceWallet.characters,
         null,
         this.generateIndex()
       )
     );
+
+    // User remainder atom
+    this.addUserRemainderAtom( userRemainderWallet );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+
+  }
+
+  /**
+   *
+   * @param {Wallet} sourceWallet
+   * @param {Wallet} shadowWallet
+   * @param {Wallet} userRemainderWallet
+   * @param {Array|Object|null} tokenMeta
+   * @returns {Molecule}
+   */
+  initShadowWalletClaim ( sourceWallet, shadowWallet, userRemainderWallet, tokenMeta = null ) {
+
+    this.molecularHash = null;
+
+    // Create an 'C' atom
+    this.atoms.push(
+      new Atom(
+        sourceWallet.position,
+        sourceWallet.address,
+        'C',
+        sourceWallet.token,
+        null,
+        shadowWallet.batchId,
+        'shadowWallet',
+        shadowWallet.token,
+        tokenMeta || [],
+        sourceWallet.pubkey,
+        sourceWallet.characters,
+        null,
+        this.generateIndex()
+      )
+    );
+
+    // User remainder atom
+    this.addUserRemainderAtom( userRemainderWallet );
 
     this.atoms = Atom.sortAtoms( this.atoms );
 
@@ -338,6 +404,54 @@ export default class Molecule {
         metaType,
         metaId,
         meta,
+        wallet.pubkey,
+        wallet.characters,
+        null,
+        this.generateIndex()
+      )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+
+  }
+
+  /**
+   *
+   * @param {Wallet} sourceWallet
+   * @param {string} token
+   * @param {number} amount
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {Array} meta
+   *
+   * @returns {Molecule}
+   */
+  initTokenTransfer ( sourceWallet, token, amount, metaType, metaId, meta = [] ) {
+
+    this.molecularHash = null;
+
+    if ( Array.isArray( meta ) ) {
+      meta.push( { key: 'token', value: token, } );
+    }
+    else if ( toString.call( meta ) === '[object Object]' ) {
+      meta.token = token;
+    }
+
+    this.atoms.push(
+      new Atom(
+        sourceWallet.position,
+        sourceWallet.address,
+        'T',
+        sourceWallet.token,
+        amount,
+        null,
+        metaType,
+        metaId,
+        meta,
+        sourceWallet.pubkey,
+        sourceWallet.characters,
         null,
         this.generateIndex()
       )
@@ -519,6 +633,7 @@ export default class Molecule {
       && CheckMolecule.index( molecule )
       && CheckMolecule.isotopeM( molecule )
       && CheckMolecule.isotopeT( molecule )
+      && CheckMolecule.isotopeC( molecule )
       && CheckMolecule.isotopeV( molecule, senderWallet );
 
   }

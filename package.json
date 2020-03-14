@@ -1,13 +1,30 @@
 {
 	"name": "@wishknish/knishio-client-js",
-	"version": "0.1.61",
+	"version": "0.1.62",
 	"description": "Knish.IO Javascript API Client",
 	"license": "GPL-3.0-or-later",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/WishKnish/KnishIO-Client-JS.git"
 	},
-	"type": "module",
+	"contributors": [
+		{
+			"name": "Eugene Teplitsky",
+			"email": "eugene@wishknish.com",
+			"homepage": "https://wishknish.com",
+			"role": "developer"
+		},
+		{
+			"name": "Vladimir Makarov",
+			"email": "vladimir.php@gmail.com",
+			"role": "developer"
+		},
+		{
+			"name": "Yuri Kizilov",
+			"email": "y.kizilov.sev@yandex.ru",
+			"role": "developer"
+		}
+	],
 	"main": "src/index.js",
 	"keywords": [
 		"wishknish",
@@ -17,15 +34,54 @@
 		"client"
 	],
 	"dependencies": {
+		"@stablelib/base64": "^1.0.0",
+		"@stablelib/utf8": "^1.0.0",
+		"base-x": "^3.0.7",
 		"big-integer": "peterolson/BigInteger.js",
+		"buffer": "^5.4.3",
 		"js-sha3": "^0.8.0",
-		"tweetnacl": "^1.0.1",
-		"tweetnacl-util": "^0.15.0"
+		"tweetnacl": "^1.0.2",
+		"tweetnacl-sealedbox-js": "^1.2.0"
 	},
 	"files": [
 		"/src"
 	],
 	"devDependencies": {
-		"src": "^1.1.2"
+		"@babel/core": "^7.8.4",
+		"@babel/plugin-proposal-class-properties": "^7.0.0",
+		"@babel/plugin-proposal-decorators": "^7.0.0",
+		"@babel/plugin-proposal-do-expressions": "^7.0.0",
+		"@babel/plugin-proposal-export-default-from": "^7.0.0",
+		"@babel/plugin-proposal-export-namespace-from": "^7.0.0",
+		"@babel/plugin-proposal-function-bind": "^7.0.0",
+		"@babel/plugin-proposal-function-sent": "^7.0.0",
+		"@babel/plugin-proposal-json-strings": "^7.0.0",
+		"@babel/plugin-proposal-logical-assignment-operators": "^7.0.0",
+		"@babel/plugin-proposal-nullish-coalescing-operator": "^7.0.0",
+		"@babel/plugin-proposal-numeric-separator": "^7.0.0",
+		"@babel/plugin-proposal-optional-chaining": "^7.0.0",
+		"@babel/plugin-proposal-pipeline-operator": "^7.0.0",
+		"@babel/plugin-proposal-throw-expressions": "^7.0.0",
+		"@babel/plugin-syntax-dynamic-import": "^7.0.0",
+		"@babel/plugin-syntax-import-meta": "^7.0.0",
+		"@babel/plugin-transform-arrow-functions": "^7.8.3",
+		"@babel/plugin-transform-classes": "^7.8.3",
+		"@babel/plugin-transform-for-of": "^7.8.4",
+		"@babel/plugin-transform-property-mutators": "^7.8.3",
+		"@babel/plugin-transform-shorthand-properties": "^7.8.3",
+		"@babel/preset-env": "^7.8.4",
+		"babel-loader": "^8.0.6",
+		"src": "^1.1.2",
+		"webpack": "^4.41.5",
+		"webpack-cli": "^3.3.10"
+	},
+	"browserslist": [
+		"> 1%",
+		"last 2 versions",
+		"not ie <= 8"
+	],
+	"scripts": {
+		"build:dev": "webpack --mode development --watch --colors --verbose",
+		"build": "webpack --mode production --progress --colors --verbose"
 	}
 }

@@ -12,6 +12,7 @@ import {
   TransferToSelfException,
   TransferUnbalancedException,
   MetaMissingException,
+  WrongTokenTypeException,
 } from "../exception";
 import { Atom, Meta } from "../index";
 import { base64ToHex, chunkSubstr } from "./strings";
@@ -26,6 +27,7 @@ export default class CheckMolecule {
    *
    * @param {Molecule} molecule
    * @returns {boolean}
+   * @throws {MetaMissingException|WrongTokenTypeException}
    */
   static isotopeM ( molecule ) {
 
@@ -34,11 +36,32 @@ export default class CheckMolecule {
     for ( let atom of CheckMolecule.isotopeFilter( 'M', molecule.atoms ) ) {
 
       if ( atom.meta.length < 1 ) {
-
         throw new MetaMissingException();
-
       }
 
+      if ( atom.token !== 'USER' ) {
+        throw new WrongTokenTypeException( `Invalid token name for "${ $atom.isotope }" isotope` );
+      }
+
+    }
+
+    return true;
+
+  }
+
+  /**
+   * @param {Molecule} molecule
+   * @return {boolean}
+   * @throws {WrongTokenTypeException}
+   */
+  static isotopeC ( molecule ) {
+
+    CheckMolecule.missing( molecule );
+
+    for ( let atom of CheckMolecule.isotopeFilter( 'C', molecule.atoms ) ) {
+      if ( atom.token !== 'USER' ) {
+        throw new WrongTokenTypeException( `Invalid token name for "${ $atom.isotope }" isotope` );
+      }
     }
 
     return true;
@@ -49,7 +72,7 @@ export default class CheckMolecule {
    *
    * @param {Molecule} molecule
    * @return {boolean}
-   * @throws {MetaMissingException}
+   * @throws {MetaMissingException|WrongTokenTypeException}
    */
   static isotopeT ( molecule ) {
 
@@ -62,10 +85,21 @@ export default class CheckMolecule {
       if ( metaType === 'wallet' ) {
         for ( let key of [ 'position', 'bundle' ] ) {
           if ( !meta.hasOwnProperty( key ) || !Boolean( meta[ key ] ) ) {
-            throw new MetaMissingException( 'No or not defined "' + key + '" in meta' );
+            throw new MetaMissingException( `No or not defined "${ key }" in meta` );
           }
         }
       }
+
+      for ( let key of [ 'token', ] ) {
+        if ( !meta.hasOwnProperty( key ) || !Boolean( meta[ key ] ) ) {
+          throw new MetaMissingException( `No or not defined "${ key }" in meta` );
+        }
+      }
+
+      if ( atom.token !== 'USER' ) {
+        throw new WrongTokenTypeException( `Invalid token name for "${ $atom.isotope }" isotope` );
+      }
+
     }
 
     return true;

@@ -5,6 +5,8 @@
 
 import { shake256 } from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
+import Base58 from './libraries/Base58';
+import Decimal from './libraries/Decimal';
 import {
   chunkSubstr,
   randomString
@@ -12,10 +14,12 @@ import {
 import {
   generateEncPrivateKey,
   generateEncPublicKey,
-  generateEncSharedKey,
   decryptMessage,
+  encryptMessage,
   generateBundleHash,
+  hashShare,
 } from './libraries/crypto';
+import { WalletShadow } from "./index";
 
 /**
  * class Wallet
@@ -25,9 +29,11 @@ import {
  * @property {string} key
  * @property {string} address
  * @property {number} balance
- * @property {string} batchId
+ * @property {string|null} batchId
  * @property {Object} molecules
  * @property {string} bundle
+ * @property {string|null} characters
+ * @property {string|null} pubkey
  */
 export default class Wallet {
 
@@ -36,8 +42,9 @@ export default class Wallet {
    * @param {string} token - slug for the token this wallet is intended for
    * @param {string | null} position - hexadecimal string used to salt the secret and produce one-time signatures
    * @param {number} saltLength - length of the position parameter that should be generated if position is not provided
+   * @param {string|null} characters
    */
-  constructor ( secret = null, token = 'USER', position = null, saltLength = 64 ) {
+  constructor ( secret = null, token = 'USER', position = null, saltLength = 64, characters = null ) {
 
     // Position via which (combined with token) we will generate the one-time keys
     this.position = position ? position : randomString( saltLength, 'abcdef0123456789' );
@@ -45,13 +52,93 @@ export default class Wallet {
     this.balance = 0;
     this.molecules = {};
     this.batchId = null;
+    this.characters = ( new Base58() )[ characters ] !== 'undefined' ? characters : null;
+
+    this.key = null;
+    this.address = null;
+    this.bundle = null;
+    this.privkey = null;
+    this.pubkey = null;
 
     if ( secret ) {
+      this.sign( secret );
+    }
+
+  }
+
+  /**
+   *
+   * @param {string} secretOrBundle
+   * @param {string} token
+   * @param {string|null} batchId
+   * @param {string|null} characters
+   * @returns {Wallet|WalletShadow}
+   */
+  static create ( secretOrBundle, token, batchId = null, characters = null ) {
+
+    // Shadow wallet
+    if ( Wallet.isBundleHash( secretOrBundle ) ) {
+      return new WalletShadow( secretOrBundle, token, batchId, characters );
+    }
+
+    // Base wallet
+    const wallet = new Wallet( secretOrBundle, token );
+
+    wallet.batchId = batchId;
+    wallet.characters = ( new Base58() )[ characters ] !== 'undefined' ? characters : null;
+
+    return wallet;
+  }
+
+  /**
+   *
+   * @param {string} code
+   * @returns {boolean}
+   */
+  static isBundleHash ( code ) {
+
+    if ( typeof code !== 'string' ) {
+      return false;
+    }
+
+    return code.length === 64;
+  }
+
+  /**
+   * @param {string} secret
+   */
+  sign ( secret ) {
+    if ( this.key === null && this.address === null && this.bundle === null ) {
       this.key = Wallet.generateWalletKey( secret, this.token, this.position );
       this.address = Wallet.generateWalletAddress( this.key );
       this.bundle = generateBundleHash( secret );
-      this.privkey = this.getMyEncPrivateKey();
-      this.pubkey = this.getMyEncPublicKey();
+      this.getMyEncPrivateKey();
+      this.getMyEncPublicKey();
+    }
+  }
+
+  /**
+   * @returns {string}
+   */
+  static generateBatchId () {
+    return randomString( 64 );
+  }
+
+  /**
+   * @param {Wallet} senderWallet
+   * @param {number} transferAmount
+   */
+  initBatchId ( senderWallet, transferAmount ) {
+
+    if ( senderWallet.batchId ) {
+
+      // Set batchID to recipient wallet
+      this.batchId = ( !this.batchId && Decimal.cmp( senderWallet.balance, transferAmount ) > 0 ) ?
+        // Has a remainder value (source balance is bigger than a transfer value)
+        Wallet.generateBatchId() :
+        // Has no remainder? use batch ID from the source wallet
+        senderWallet.batchId;
+
     }
 
   }
@@ -63,7 +150,11 @@ export default class Wallet {
    */
   getMyEncPrivateKey () {
 
-    return generateEncPrivateKey( this.key );
+    if ( this.privkey === null && this.key !== null ) {
+      this.privkey = generateEncPrivateKey( this.key, this.characters );
+    }
+
+    return this.privkey;
 
   }
 
@@ -74,51 +165,52 @@ export default class Wallet {
    */
   getMyEncPublicKey () {
 
-    return generateEncPublicKey( this.getMyEncPrivateKey() );
+    const privateKey = this.getMyEncPrivateKey();
+
+    if ( this.pubkey === null && privateKey !== null ) {
+      this.pubkey = generateEncPublicKey( privateKey, this.characters );
+    }
+
+    return this.pubkey;
 
   }
 
   /**
-   * Creates a shared key by combining this wallet's private key and another wallet's public key
-   *
-   * @param {string} otherPublicKey
-   * @returns {string}
+   * @param {Object|Array} message
+   * @returns {Object}
    */
-  getMyEncSharedKey ( otherPublicKey ) {
+  encryptMyMessage ( message ) {
 
-    return generateEncSharedKey( this.getMyEncPrivateKey(), otherPublicKey );
+    const encrypt = {};
+
+    for ( let index = 1, length = arguments.length; index < length; index++ ) {
+      encrypt[ hashShare( arguments[ index ], this.characters ) ] = encryptMessage( message, arguments[ index ], this.characters );
+    }
+
+    return encrypt;
 
   }
 
   /**
    * Uses the current wallet's private key to decrypt the given message
    *
-   * @param {string} message
-   * @param {string | null} otherPublicKey
+   * @param {string | Object} message
    * @returns {Array | Object | null}
    */
-  decryptMyMessage ( message, otherPublicKey = null ) {
+  decryptMyMessage ( message ) {
 
-    let target = null;
+    const pubKey = this.getMyEncPublicKey();
+    let encrypt = message;
 
-    if ( otherPublicKey === null ) {
+    if ( message !== null
+      && typeof message === 'object'
+      && Object.prototype.toString.call( message ) === '[object Object]' ) {
 
-      target = decryptMessage( message, this.getMyEncPublicKey() );
-
-    }
-    else {
-
-      target = decryptMessage( message, generateEncPublicKey( this.getMyEncSharedKey( otherPublicKey ) ) );
-
-      if ( target === null ) {
-
-        target = decryptMessage( message, otherPublicKey );
-
-      }
+      encrypt = message[ hashShare( pubKey, this.characters ) ] || '';
 
     }
 
-    return target;
+    return decryptMessage( encrypt, this.getMyEncPrivateKey(), pubKey, this.characters );
 
   }
 

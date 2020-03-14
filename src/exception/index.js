@@ -12,6 +12,7 @@ import SignatureMalformedException from './SignatureMalformedException';
 import SignatureMismatchException from './SignatureMismatchException';
 import AtomIndexException from './AtomIndexException';
 import MetaMissingException from './MetaMissingException';
+import WrongTokenTypeException from './WrongTokenTypeException'
 
 export {
   AtomsMissingException,
@@ -28,4 +29,5 @@ export {
   SignatureMismatchException,
   AtomIndexException,
   MetaMissingException,
+  WrongTokenTypeException,
 };
