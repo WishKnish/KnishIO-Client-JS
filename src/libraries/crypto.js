@@ -52,12 +52,12 @@ export function generateBundleHash ( secret ) {
  * Encrypts the given message or data with the recipient's public key
  *
  * @param message
- * @param {string} recipientPrivateKey
+ * @param {string} recipientPublicKey
  * @param {string|null} characters
  * @returns {string}
  */
-export function encryptMessage ( message, recipientPrivateKey, characters = null ) {
-  return ( new Soda( characters ) ).encrypt( message, recipientPrivateKey );
+export function encryptMessage ( message, recipientPublicKey, characters = null ) {
+  return ( new Soda( characters ) ).encrypt( message, recipientPublicKey );
 }
 
 /**
