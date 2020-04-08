@@ -27,6 +27,71 @@ export default class CheckMolecule {
    *
    * @param {Molecule} molecule
    * @returns {boolean}
+   * @throws {AtomsMissingException}
+   */
+  static continueId ( molecule )
+  {
+    CheckMolecule.missing( molecule );
+
+    const firstAtom = molecule.atoms[ 0 ];
+
+    if ( firstAtom.token === 'USER' && CheckMolecule.isotopeFilter( 'I', molecule.atoms ).length < 1 ) {
+      throw new AtomsMissingException( 'Missing atom ContinueID' );
+    }
+
+    return true;
+  }
+
+  /**
+   *
+   * @param {Molecule} molecule
+   * @returns {boolean}
+   * @throws {WrongTokenTypeException|AtomIndexException}
+   */
+  static isotopeI ( molecule ) {
+
+    CheckMolecule.missing( molecule );
+
+    for ( let atom of CheckMolecule.isotopeFilter( 'I', molecule.atoms ) ) {
+      if ( atom.token !== 'USER' ) {
+        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
+      }
+
+      if ( atom.index === 0 ) {
+        throw new AtomIndexException( `Invalid isotope "${ atom.isotope }" index` );
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   *
+   * @param {Molecule} molecule
+   * @returns {boolean}
+   * @throws {WrongTokenTypeException|AtomIndexException}
+   */
+  static isotopeU ( molecule ) {
+
+    CheckMolecule.missing( molecule );
+
+    for ( let atom of CheckMolecule.isotopeFilter( 'U', molecule.atoms ) ) {
+      if ( atom.token !== 'USER' ) {
+        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
+      }
+
+      if ( atom.index !== 0 ) {
+        throw new AtomIndexException( `Invalid isotope "${ atom.isotope }" index` );
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   *
+   * @param {Molecule} molecule
+   * @returns {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException}
    */
   static isotopeM ( molecule ) {
@@ -40,19 +105,17 @@ export default class CheckMolecule {
       }
 
       if ( atom.token !== 'USER' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ $atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
       }
-
     }
 
     return true;
-
   }
 
   /**
    * @param {Molecule} molecule
    * @return {boolean}
-   * @throws {WrongTokenTypeException}
+   * @throws {WrongTokenTypeException|AtomIndexException}
    */
   static isotopeC ( molecule ) {
 
@@ -60,19 +123,22 @@ export default class CheckMolecule {
 
     for ( let atom of CheckMolecule.isotopeFilter( 'C', molecule.atoms ) ) {
       if ( atom.token !== 'USER' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ $atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
+      }
+
+      if ( atom.index !== 0 ) {
+        throw new AtomIndexException( `Invalid isotope "${ atom.isotope }" index` );
       }
     }
 
     return true;
-
   }
 
   /**
    *
    * @param {Molecule} molecule
    * @return {boolean}
-   * @throws {MetaMissingException|WrongTokenTypeException}
+   * @throws {MetaMissingException|WrongTokenTypeException|AtomIndexException}
    */
   static isotopeT ( molecule ) {
 
@@ -100,26 +166,26 @@ export default class CheckMolecule {
         throw new WrongTokenTypeException( `Invalid token name for "${ $atom.isotope }" isotope` );
       }
 
+      if ( atom.index !== 0 ) {
+        throw new AtomIndexException( `Invalid isotope "${ atom.isotope }" index` );
+      }
     }
 
     return true;
-
   }
 
   /**
    * @param {Molecule} molecule
    * @param {Wallet} senderWallet
    * @return {boolean}
-   * @throws {TypeError}
+   * @throws {TransferRemainderException|TransferRemainderException|TypeError|TransferMismatchedException|TransferMalformedException|TransferToSelfException|TransferUnbalancedException|TransferBalanceException}
    */
   static isotopeV ( molecule, senderWallet = null ) {
 
     CheckMolecule.missing( molecule );
 
     if ( CheckMolecule.isotopeFilter( 'V', molecule.atoms ).length === 0 ) {
-
       return true;
-
     }
 
     const firstAtom = molecule.atoms[ 0 ];
@@ -135,25 +201,19 @@ export default class CheckMolecule {
 
         // Not V? Next...
         if ( vAtom.isotope !== 'V' ) {
-
           continue;
-
         }
 
         // Making sure we're in integer land
         value = 1 * vAtom.value;
 
         if ( Number.isNaN( value ) ) {
-
           throw new TypeError( 'Invalid isotope "V" values' );
-
         }
 
         // Making sure all V atoms of the same token
         if ( vAtom.token !== firstAtom.token ) {
-
           throw new TransferMismatchedException();
-
         }
 
         // Checking non-primary atoms
@@ -161,32 +221,24 @@ export default class CheckMolecule {
 
           // Negative V atom in a non-primary position?
           if ( value < 0 ) {
-
             throw new TransferMalformedException();
-
           }
 
           // Cannot be sending and receiving from the same address
           if ( vAtom.walletAddress === firstAtom.walletAddress ) {
-
             throw new TransferToSelfException();
-
           }
 
         }
 
         // Adding this Atom's value to the total sum
         sum += value;
-
       }
-
     }
 
     // Does the total sum of all atoms equal the remainder atom's value? (all other atoms must add up to zero)
     if ( sum !== value ) {
-
       throw new TransferUnbalancedException();
-
     }
 
     // If we're provided with a senderWallet argument, we can perform additional checks
@@ -195,37 +247,28 @@ export default class CheckMolecule {
       value = firstAtom.value * 1;
 
       if ( Number.isNaN( value ) ) {
-
         throw new TypeError( 'Invalid isotope "V" values' );
-
       }
 
       const remainder = ( 1 * senderWallet.balance ) + value;
 
       // Is there enough balance to send?
       if ( remainder < 0 ) {
-
         throw new TransferBalanceException();
-
       }
 
       // Does the remainder match what should be there in the source wallet, if provided?
       if ( remainder !== sum ) {
-
         throw new TransferRemainderException();
-
       }
 
     } // No senderWallet, but have a remainder?
     else if ( value !== 0 ) {
-
       throw new TransferRemainderException();
-
     }
 
     // Looks like we passed all the tests!
     return true;
-
   }
 
   /**
@@ -233,20 +276,18 @@ export default class CheckMolecule {
    *
    * @param {Molecule} molecule
    * @return {boolean}
+   * @throws {MolecularHashMismatchException}
    */
   static molecularHash ( molecule ) {
 
     CheckMolecule.missing( molecule );
 
     if ( molecule.molecularHash !== Atom.hashAtoms( molecule.atoms ) ) {
-
       throw new MolecularHashMismatchException();
-
     }
 
     // Looks like we passed all the tests!
     return true;
-
   }
 
   /**
@@ -256,6 +297,7 @@ export default class CheckMolecule {
    *
    * @param {Molecule} molecule
    * @returns {boolean}
+   * @throws {SignatureMalformedException|SignatureMismatchException}
    */
   static ots ( molecule ) {
 
@@ -282,11 +324,8 @@ export default class CheckMolecule {
 
       // Still wrong? That's a failure
       if ( ots.length !== 2048 ) {
-
         throw new SignatureMalformedException();
-
       }
-
     }
 
     // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
@@ -299,13 +338,10 @@ export default class CheckMolecule {
       let workingChunk = otsChunks[ index ];
 
       for ( let iterationCount = 0, condition = 8 + normalizedHash[ index ]; iterationCount < condition; iterationCount++ ) {
-
         workingChunk = shake256.create( 512 ).update( workingChunk ).hex();
-
       }
 
       keyFragments += workingChunk;
-
     }
 
     // Absorb the hashed Kk into the sponge to receive the digest Dk
@@ -314,14 +350,11 @@ export default class CheckMolecule {
       address = shake256.create( 256 ).update( digest ).hex();
 
     if ( address !== walletAddress ) {
-
       throw new SignatureMismatchException();
-
     }
 
     // Looks like we passed all the tests!
     return true;
-
   }
 
   /**
@@ -337,15 +370,11 @@ export default class CheckMolecule {
     for ( let atom of molecule.atoms ) {
 
       if ( atom.index === null ) {
-
         throw new AtomIndexException();
-
       }
-
     }
 
     return true;
-
   }
 
   /**
@@ -359,7 +388,6 @@ export default class CheckMolecule {
     atoms = atoms || [];
 
     return atoms.filter( atom => isotope === atom.isotope );
-
   }
 
   /**
@@ -372,7 +400,6 @@ export default class CheckMolecule {
 
     // Convert Hm to numeric notation via EnumerateMolecule(Hm)
     return CheckMolecule.normalize( CheckMolecule.enumerate( hash ) )
-
   }
 
   /**
@@ -416,15 +443,11 @@ export default class CheckMolecule {
       const symbol = hashList[ index ];
 
       if ( typeof mapped[ symbol ] !== 'undefined' ) {
-
         target[ index ] = mapped[ symbol ];
-
       }
-
     }
 
     return target;
-
   }
 
   /**
@@ -457,41 +480,30 @@ export default class CheckMolecule {
           const process = total_condition ? [ ++mappedHashArray[ index ], ++total ] : [ --mappedHashArray[ index ], --total ];
 
           if ( 0 === total ) {
-
             break;
-
           }
-
         }
-
       }
-
     }
 
     return mappedHashArray;
-
   }
 
   /**
    *
    * @param {Molecule} molecule
+   * @throws {MolecularHashMissingException|AtomsMissingException}
    */
   static missing ( molecule ) {
 
     // No molecular hash?
     if ( molecule.molecularHash === null ) {
-
       throw new MolecularHashMissingException();
-
     }
 
     // No atoms?
     if ( 1 > molecule.atoms.length ) {
-
       throw new AtomsMissingException();
-
     }
-
   }
-
 }

@@ -39,7 +39,6 @@ export default class Molecule {
       +new Date
     );
     this.atoms = [];
-
   }
 
   /**
@@ -57,7 +56,7 @@ export default class Molecule {
       new Atom(
         userRemainderWallet.position,
         userRemainderWallet.address,
-        'C',
+        'I',
         userRemainderWallet.token,
         null,
         null,
@@ -74,7 +73,6 @@ export default class Molecule {
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
-
   }
 
   /**
@@ -90,9 +88,7 @@ export default class Molecule {
   initValue ( sourceWallet, recipientWallet, remainderWallet, value ) {
 
     if ( sourceWallet.balance - value < 0 ) {
-
       throw new BalanceInsufficientException();
-
     }
 
     this.molecularHash = null;
@@ -156,7 +152,6 @@ export default class Molecule {
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
-
   }
 
   /**
@@ -226,7 +221,6 @@ export default class Molecule {
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
-
   }
 
   /**
@@ -275,7 +269,6 @@ export default class Molecule {
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
-
   }
 
   /**
@@ -301,14 +294,11 @@ export default class Molecule {
           && typeof meta.key !== 'undefined'
           && meta.key === walletKey ).length
       ) {
-
         metas.push( {
           key: walletKey,
           value: recipientWallet[ walletKey.toLowerCase().substr( 6 ) ]
         } );
-
       }
-
     }
 
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
@@ -336,7 +326,6 @@ export default class Molecule {
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
-
   }
 
   /**
@@ -376,19 +365,19 @@ export default class Molecule {
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
-
   }
 
   /**
    * Initialize an M-type molecule with the given data
    *
    * @param {Wallet} wallet
+   * @param {Wallet} userRemainderWallet
    * @param {Array | Object} meta
    * @param {string} metaType
    * @param {string} metaId
    * @returns {Molecule}
    */
-  initMeta ( wallet, meta, metaType, metaId ) {
+  initMeta ( wallet, userRemainderWallet, meta, metaType, metaId ) {
 
     this.molecularHash = null;
 
@@ -411,15 +400,18 @@ export default class Molecule {
       )
     );
 
+    // User remainder atom
+    this.addUserRemainderAtom( userRemainderWallet );
+
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
-
   }
 
   /**
    *
    * @param {Wallet} sourceWallet
+   * @param {Wallet} userRemainderWallet
    * @param {string} token
    * @param {number} amount
    * @param {string} metaType
@@ -428,7 +420,7 @@ export default class Molecule {
    *
    * @returns {Molecule}
    */
-  initTokenTransfer ( sourceWallet, token, amount, metaType, metaId, meta = [] ) {
+  initTokenTransfer ( sourceWallet, userRemainderWallet, token, amount, metaType, metaId, meta = [] ) {
 
     this.molecularHash = null;
 
@@ -457,10 +449,49 @@ export default class Molecule {
       )
     );
 
+    // User remainder atom
+    this.addUserRemainderAtom( userRemainderWallet );
+
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
+  }
 
+  /**
+   *
+   * @param {Wallet} wallet
+   * @param {Wallet} userRemainderWallet
+   * @returns {Molecule}
+   */
+  initAuthentication ( wallet, userRemainderWallet )
+  {
+    this.molecularHash = null;
+
+    // Initializing a new Atom to hold our metadata
+    this.atoms.push(
+      new Atom(
+        wallet.position,
+        wallet.address,
+        'U',
+        wallet.token,
+        null,
+        wallet.batchId,
+        null,
+        null,
+        null,
+        wallet.pubkey,
+        wallet.characters,
+        null,
+        this.generateIndex()
+      )
+    );
+
+    // User remainder atom
+    this.addUserRemainderAtom( userRemainderWallet );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
   }
 
   /**
@@ -473,7 +504,6 @@ export default class Molecule {
     this.constructor( this.cellSlug );
 
     return this;
-
   }
 
   /**
@@ -494,16 +524,12 @@ export default class Molecule {
         atom => !( atom instanceof Atom )
       ).length
     ) {
-
       throw new AtomsMissingException();
-
     }
 
     // Derive the user's bundle
     if ( !anonymous ) {
-
       this.bundle = generateBundleHash( secret );
-
     }
 
     // Hash atoms to get molecular hash
@@ -526,20 +552,14 @@ export default class Molecule {
       let workingChunk = keyChunks[ index ];
 
       for ( let iterationCount = 0, condition = 8 - normalizedHash[ index ]; iterationCount < condition; iterationCount++ ) {
-
         workingChunk = shake256.create( 512 ).update( workingChunk ).hex();
-
       }
-
       signatureFragments += workingChunk;
-
     }
 
     // Compressing the OTS
     if ( compressed ) {
-
       signatureFragments = hexToBase64( signatureFragments );
-
     }
 
     // Chunking the signature across multiple atoms
@@ -548,14 +568,11 @@ export default class Molecule {
     let lastPosition = null;
 
     for ( let chunkCount = 0, condition = chunkedSignature.length; chunkCount < condition; chunkCount++ ) {
-
       this.atoms[ chunkCount ].otsFragment = chunkedSignature[ chunkCount ];
       lastPosition = this.atoms[ chunkCount ].position;
-
     }
 
     return lastPosition;
-
   }
 
   /**
@@ -569,9 +586,7 @@ export default class Molecule {
       properties = Object.keys( new Molecule() );
 
     if ( !Array.isArray( target.atoms ) ) {
-
       throw new AtomsMissingException();
-
     }
 
     for ( const index in Object.keys( target.atoms ) ) {
@@ -583,13 +598,9 @@ export default class Molecule {
         if ( typeof target.atoms[ index ][ property ] === 'undefined'
           || null === target.atoms[ index ][ property ]
         ) {
-
           throw new AtomsMissingException( 'The required properties of the atom are not filled.' );
-
         }
-
       }
-
     }
 
     for ( const property in target ) {
@@ -597,17 +608,13 @@ export default class Molecule {
       if ( target.hasOwnProperty( property )
         && !properties.includes( property )
       ) {
-
         delete target[ property ];
-
       }
-
     }
 
     target.atoms = Atom.sortAtoms( target.atoms );
 
     return target;
-
   }
 
   /**
@@ -616,9 +623,7 @@ export default class Molecule {
    * @returns {boolean}
    */
   check ( senderWallet = null ) {
-
     return Molecule.verify( this, senderWallet )
-
   }
 
   /**
@@ -631,11 +636,13 @@ export default class Molecule {
     return CheckMolecule.molecularHash( molecule )
       && CheckMolecule.ots( molecule )
       && CheckMolecule.index( molecule )
+      && CheckMolecule.continueId( molecule )
       && CheckMolecule.isotopeM( molecule )
       && CheckMolecule.isotopeT( molecule )
       && CheckMolecule.isotopeC( molecule )
+      && CheckMolecule.isotopeU( molecule )
+      && CheckMolecule.isotopeI( molecule )
       && CheckMolecule.isotopeV( molecule, senderWallet );
-
   }
 
   /**
@@ -643,9 +650,7 @@ export default class Molecule {
    * @returns {number}
    */
   generateIndex () {
-
     return Molecule.generateNextAtomIndex( this.atoms );
-
   }
 
   /**
@@ -658,7 +663,5 @@ export default class Molecule {
     const length = atoms.length - 1;
 
     return ( length > -1 ) ? atoms[length].index + 1 : 0;
-
   }
-
 }

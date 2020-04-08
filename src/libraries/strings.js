@@ -12,11 +12,8 @@ import {
 if ( !String.prototype.trim ) {
 
   String.prototype.trim = function () {
-
     return this.replace( /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '' );
-
   };
-
 }
 
 /**
@@ -32,13 +29,10 @@ export function chunkSubstr ( str, size ) {
     chunks = new Array( numChunks );
 
   for ( let i = 0, o = 0; i < numChunks; ++i, o += size ) {
-
     chunks[ i ] = str.substr( o, size );
-
   }
 
   return chunks;
-
 }
 
 /**
@@ -58,7 +52,6 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
   array = array.map( x => alphabet.charCodeAt( x % alphabet.length ) );
 
   return String.fromCharCode.apply( null, array );
-
 }
 
 /**
@@ -96,22 +89,17 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
 
     console.warn( 'Can\'t convert', src, 'to base', to_base, 'greater than symbol table length. src-table:', src_symbol_table.length, 'dest-table:', dest_symbol_table.length );
     return false;
-
   }
 
   // First convert to base 10
   let val = bigInt( 0 );
 
   for ( let i = 0; i < src.length; i++ ) {
-
     val = val.multiply( from_base ).add( src_symbol_table.indexOf( src.charAt( i ) ) );
-
   }
 
   if ( val.lesser( 0 ) ) {
-
     return 0;
-
   }
 
   // Then covert to any base
@@ -124,11 +112,9 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
     r = q.mod( to_base );
     q = q.divide( to_base );
     res = dest_symbol_table.charAt( r ) + res;
-
   }
 
   return res;
-
 }
 
 /**
@@ -138,9 +124,7 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
  * @returns {string}
  */
 export function bufferToHexString ( byteArray ) {
-
   return Hex.toHex( byteArray );
-
 }
 
 /**
@@ -150,9 +134,7 @@ export function bufferToHexString ( byteArray ) {
  * @returns {Uint8Array}
  */
 export function hexStringToBuffer ( hexString ) {
-
   return Hex.toUint8Array( hexString );
-
 }
 
 /**
@@ -162,9 +144,7 @@ export function hexStringToBuffer ( hexString ) {
  * @returns {string}
  */
 export function hexToBase64 ( string ) {
-
   return encodeBase64( Hex.toUint8Array( string ) );
-
 }
 
 /**
@@ -174,9 +154,15 @@ export function hexToBase64 ( string ) {
  * @returns {string}
  */
 export function base64ToHex ( string ) {
-
   return Hex.toHex( decodeBase64( string ) );
+}
 
+/**
+ * @param {string} str
+ * @return {boolean}
+ */
+export function isHex( str ) {
+  return /^[A-F0-9]+$/i.test( str );
 }
 
 /**
@@ -234,9 +220,7 @@ export class Hex {
       str += numberToHex( arr[i], opts.uppercase );
 
       if ( i === arr.length - 1 ) {
-
         break;
-
       }
 
       if ( opts.grouping > 0 && ++group === opts.grouping ) {
@@ -247,20 +231,14 @@ export class Hex {
 
           column = 0;
           str += "\n";
-
         }
         else {
-
           str += " ";
-
         }
-
       }
-
     }
 
     return str;
-
   }
 
   /**
@@ -279,9 +257,7 @@ export class Hex {
     let target = str.toLowerCase().replace( /\s/g, "" );
 
     if ( target.length % 2 === 1 ) {
-
       target = "0" + target;
-
     }
 
     let buffer = new Uint8Array( Math.floor( target.length / 2 ) ),
@@ -293,27 +269,19 @@ export class Hex {
         val = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" ].indexOf( c );
 
       if ( val === -1 ) {
-
         throw Error( "unexpected character" );
-
       }
 
       if ( curr === -1 ) {
-
         curr = 16 * val;
-
       }
       else {
 
         buffer[ Math.floor( i / 2 ) ] = curr + val;
         curr = -1;
-
       }
-
     }
 
     return buffer;
-
   }
-
 }

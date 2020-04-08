@@ -25,11 +25,8 @@ export function generateSecret ( seed = null, length = 2048 ) {
     return sponge.hex();
   }
   else {
-
     return randomString( length );
-
   }
-
 }
 
 /**
@@ -45,7 +42,6 @@ export function generateBundleHash ( secret ) {
   sponge.update( secret );
 
   return sponge.hex();
-
 }
 
 /**

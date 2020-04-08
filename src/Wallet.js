@@ -19,7 +19,7 @@ import {
   generateBundleHash,
   hashShare,
 } from './libraries/crypto';
-import { WalletShadow } from "./index";
+import WalletShadow from "./WalletShadow";
 
 /**
  * class Wallet
@@ -101,7 +101,7 @@ export default class Wallet {
       return false;
     }
 
-    return code.length === 64;
+    return code.length === 64 && isHex( code );
   }
 
   /**
@@ -138,9 +138,7 @@ export default class Wallet {
         Wallet.generateBatchId() :
         // Has no remainder? use batch ID from the source wallet
         senderWallet.batchId;
-
     }
-
   }
 
   /**
@@ -155,7 +153,6 @@ export default class Wallet {
     }
 
     return this.privkey;
-
   }
 
   /**
@@ -172,7 +169,6 @@ export default class Wallet {
     }
 
     return this.pubkey;
-
   }
 
   /**
@@ -188,7 +184,6 @@ export default class Wallet {
     }
 
     return encrypt;
-
   }
 
   /**
@@ -207,11 +202,9 @@ export default class Wallet {
       && Object.prototype.toString.call( message ) === '[object Object]' ) {
 
       encrypt = message[ hashShare( pubKey, this.characters ) ] || '';
-
     }
 
     return decryptMessage( encrypt, this.getMyEncPrivateKey(), pubKey, this.characters );
-
   }
 
   /**
@@ -233,14 +226,11 @@ export default class Wallet {
     intermediateKeySponge.update( indexedKey.toString( 16 ) );
 
     if ( token ) {
-
       intermediateKeySponge.update( token );
-
     }
 
     // Hashing the intermediate key to produce the private key
     return shake256.create( 8192 ).update( intermediateKeySponge.hex() ).hex();
-
   }
 
   /**
@@ -265,12 +255,9 @@ export default class Wallet {
       }
 
       digestSponge.update( workingFragment );
-
     }
 
     // Producing wallet address
     return shake256.create( 256 ).update( digestSponge.hex() ).hex();
-
   }
-
 }

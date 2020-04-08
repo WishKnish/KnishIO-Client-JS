@@ -1,8 +1,7 @@
 import Base58 from './libraries/Base58';
-import { Wallet } from "./index";
 
 
-export default class WalletShadow extends Wallet {
+export default class WalletShadow {
 
   /**
    * @param {string} bundleHash
@@ -12,7 +11,6 @@ export default class WalletShadow extends Wallet {
    */
   constructor ( bundleHash, token = null, batchId = null, characters = null ) {
 
-    super();
     this.token = token || 'USER';
     this.balance = 0;
     this.molecules = {};
@@ -26,7 +24,5 @@ export default class WalletShadow extends Wallet {
     this.position = null;
     this.privkey = null;
     this.pubkey = null;
-
   }
-
 }

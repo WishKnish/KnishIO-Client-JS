@@ -16,7 +16,7 @@ module.exports = ( env, argv ) => ({
           loader: 'babel-loader',
           options: {
             presets: [
-              '@babel/preset-env',
+              [ '@babel/preset-env', { 'modules': false }],
             ],
             plugins: [
               // Stage 0
@@ -48,7 +48,9 @@ module.exports = ( env, argv ) => ({
               "@babel/plugin-transform-shorthand-properties",
               "@babel/plugin-transform-for-of",
               "@babel/plugin-transform-arrow-functions",
-              "@babel/plugin-transform-classes"
+              "@babel/plugin-transform-classes",
+              "@babel/plugin-transform-async-to-generator",
+              ["@babel/plugin-transform-runtime", { "regenerator": true }]
             ]
           }
         }

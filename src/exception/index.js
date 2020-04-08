@@ -13,6 +13,7 @@ import SignatureMismatchException from './SignatureMismatchException';
 import AtomIndexException from './AtomIndexException';
 import MetaMissingException from './MetaMissingException';
 import WrongTokenTypeException from './WrongTokenTypeException'
+import UnauthenticatedException from './UnauthenticatedException'
 
 export {
   AtomsMissingException,
@@ -30,4 +31,5 @@ export {
   AtomIndexException,
   MetaMissingException,
   WrongTokenTypeException,
+  UnauthenticatedException,
 };
