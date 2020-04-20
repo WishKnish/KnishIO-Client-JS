@@ -38,8 +38,8 @@ export default class Atom {
    * @param {Array | Object | null} meta
    * @param {string | null} pubkey
    * @param {string | null} characters
-   * @param {number | null} index
    * @param {string | null} otsFragment
+   * @param {number | null} index
    */
   constructor (
     position,
