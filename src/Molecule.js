@@ -55,19 +55,19 @@ export default class Molecule {
     // Remainder atom
     this.atoms.push(
       new Atom(
-        userRemainderWallet.position,
-        userRemainderWallet.address,
-        'C',
-        userRemainderWallet.token,
-        null,
-        null,
-        'walletBundle',
-        userRemainderWallet.bundle,
-        null,
-        userRemainderWallet.pubkey,
-        userRemainderWallet.characters,
-        null,
-        this.generateIndex()
+        userRemainderWallet.position,   // {string} position
+        userRemainderWallet.address,    // {string} walletAddress
+        'C',                    // {string} isotope
+        userRemainderWallet.token,      // {string | null} token
+        null,                     // {string | number | null} value
+        null,                   // {string} batchId
+        'wallet',             // {string | null} metaType
+        userRemainderWallet.bundle,     // {string | null} metaId
+        null,                     // {Array | Object | null} meta
+        userRemainderWallet.pubkey,     // {string | null} pubkey
+        userRemainderWallet.characters, // {string | null} characters
+        null,               // {string | null} otsFragment
+        this.generateIndex()            // {number | null} index
       )
     );
 
