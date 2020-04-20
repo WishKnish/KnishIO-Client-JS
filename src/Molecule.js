@@ -60,7 +60,7 @@ export default class Molecule {
         userRemainderWallet.token,      // {string | null} token
         null,                     // {string | number | null} value
         null,                   // {string} batchId
-        'wallet',             // {string | null} metaType
+        'walletBundle',        // {string | null} metaType
         userRemainderWallet.bundle,     // {string | null} metaId
         null,                     // {Array | Object | null} meta
         userRemainderWallet.pubkey,     // {string | null} pubkey
