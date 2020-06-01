@@ -11,6 +11,8 @@ import { generateBundleHash } from "./libraries/crypto";
 import {
   AtomsMissingException,
   BalanceInsufficientException,
+  NegativeMeaningException,
+  TransferMismatchedException,
 } from './exception/index';
 
 /**
@@ -73,6 +75,73 @@ export default class Molecule {
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
+  }
+
+  /**
+   *
+   * @param {Wallet} sourceWallet
+   * @param {Wallet} remainderWallet
+   * @param {number} value
+   * @param {string} walletBundle
+   * @returns {Molecule}
+   */
+  burningTokens ( sourceWallet, remainderWallet, value, walletBundle = null  ) {
+
+    if ( value < 0.0 ) {
+      throw new NegativeMeaningException( 'It is impossible to use a negative value for the number of tokens' );
+    }
+
+    if ( sourceWallet.token !== remainderWallet.token ) {
+      throw new TransferMismatchedException();
+    }
+
+    if ( ( sourceWallet.balance - value ) < 0 ) {
+      throw new BalanceInsufficientException();
+    }
+
+    this.molecularHash = null;
+
+    // Initializing a new Atom to remove tokens from source
+    this.atoms.push(
+      new Atom(
+        sourceWallet.position,
+        sourceWallet.address,
+        'V',
+        sourceWallet.token,
+        -value,
+        sourceWallet.batchId,
+        null,
+        null,
+        null,
+        sourceWallet.pubkey,
+        sourceWallet.characters,
+        null,
+        this.generateIndex()
+      )
+    );
+
+    this.atoms.push(
+      new Atom(
+        remainderWallet.position,
+        remainderWallet.address,
+        'V',
+        sourceWallet.token,
+        sourceWallet.balance - value,
+        remainderWallet.batchId,
+        walletBundle ? 'walletBundle' : null,
+        walletBundle,
+        null,
+        remainderWallet.pubkey,
+        remainderWallet.characters,
+        null,
+        this.generateIndex()
+      )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+
   }
 
   /**

@@ -14,6 +14,7 @@ import AtomIndexException from './AtomIndexException';
 import MetaMissingException from './MetaMissingException';
 import WrongTokenTypeException from './WrongTokenTypeException'
 import UnauthenticatedException from './UnauthenticatedException'
+import NegativeMeaningException from './NegativeMeaningException'
 
 export {
   AtomsMissingException,
@@ -32,4 +33,5 @@ export {
   MetaMissingException,
   WrongTokenTypeException,
   UnauthenticatedException,
+  NegativeMeaningException,
 };

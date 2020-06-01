@@ -144,7 +144,7 @@ export default class CheckMolecule {
 
     CheckMolecule.missing( molecule );
 
-    for ( let atom of CheckMolecule.isotopeFilter( 'V', molecule.atoms ) ) {
+    for ( let atom of CheckMolecule.isotopeFilter( 'T', molecule.atoms ) ) {
       const meta = Meta.aggregateMeta( Meta.normalizeMeta( atom.meta ) ),
         metaType = String( atom.metaType ).toLowerCase();
 
@@ -184,11 +184,29 @@ export default class CheckMolecule {
 
     CheckMolecule.missing( molecule );
 
-    if ( CheckMolecule.isotopeFilter( 'V', molecule.atoms ).length === 0 ) {
+    const isotopeV = CheckMolecule.isotopeFilter( 'V', molecule.atoms );
+
+    if ( isotopeV.length === 0 ) {
       return true;
     }
 
     const firstAtom = molecule.atoms[ 0 ];
+
+    if ( firstAtom.isotope === 'V' &&  isotopeV.length === 2 ) {
+
+      const endAtom = isotopeV[ isotopeV.length - 1 ];
+
+      if ( firstAtom.token !== endAtom.token ) {
+        throw new TransferMismatchedException();
+      }
+
+      if ( endAtom.value < 0 ) {
+        throw new TransferMalformedException();
+      }
+
+      return true;
+    }
+
 
     let sum = 0,
       value = 0;
