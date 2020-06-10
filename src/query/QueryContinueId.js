@@ -6,7 +6,7 @@ export default class QueryContinueId extends Query {
 
   constructor ( client, url ) {
     super( client, url );
-    this.$__query = 'query ($bundle: String!) { ContinueId(bundle: $bundle) { address, bundleHash, tokenSlug, position, batchId, characters, pubkey, amount, createdAt } }';
+    this.$__query = 'query ($bundle: String!) { ContinuId(bundle: $bundle) { address, bundleHash, tokenSlug, position, batchId, characters, pubkey, amount, createdAt } }';
   }
   /**
    *
