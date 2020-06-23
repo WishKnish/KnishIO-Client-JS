@@ -7,6 +7,6 @@ export default class ResponseAuthentication extends ResponseMolecule {
   payload () {
     const molecule = this.data();
 
-    return molecule[ 'status' ] === 'rejected' ? {} : JSON.parse( molecule[ 'reasonPayload' ] );
+    return !molecule || molecule[ 'status' ] === 'rejected' ? {} : JSON.parse( molecule[ 'reasonPayload' ] );
   }
 }
