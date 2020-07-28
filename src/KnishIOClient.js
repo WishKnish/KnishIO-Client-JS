@@ -1,18 +1,23 @@
 import QueryContinueId from "./query/QueryContinueId";
 import { generateBundleHash, } from "./libraries/crypto";
-import { Wallet, WalletShadow, Meta } from "./index";
+import { Wallet, WalletShadow } from "./index";
 import QueryAuthentication from "./query/QueryAuthentication";
 import QueryBalance from "./query/QueryBalance";
 import QueryTokenCreate from "./query/QueryTokenCreate";
 import Dot from "./libraries/Dot";
 import QueryTokenReceive from "./query/QueryTokenReceive";
 import WalletShadowException from "./exception/WalletShadowException";
-import QueryWalletClaim from "./query/QueryWalletClaim";
 import Decimal from "./libraries/Decimal";
 import TransferBalanceException from "./exception/TransferBalanceException";
 import QueryTokenTransfer from "./query/QueryTokenTransfer";
-
-const axios = require( 'axios' ).default;
+import HttpClient from '../src/httpClient/HttpClient';
+import Molecule from "./Molecule";
+import QueryMoleculePropose from "./query/QueryMoleculePropose";
+import CodeException from "./exception/CodeException";
+import QueryIdentifierCreate from "./query/QueryIdentifierCreate";
+import QueryWalletList from "./query/QueryWalletList";
+import QueryShadowWalletClaim from "./query/QueryShadowWalletClaim";
+import UnauthenticatedException from "./exception/UnauthenticatedException";
 
 /**
  *
@@ -21,73 +26,64 @@ export default class KnishIOClient
 {
   /**
    * @param {string} url
-   * @param client
+   * @param {HttpClient} client
    */
   constructor ( url, client = null ) {
-    const self = this;
+    this.$__url = url;
+    this.$__secret = '';
+    this.$__client = client || new HttpClient( this.$__url );
+    this.remainderWallet = null;
+  }
 
-    this.url = url;
-    this.replay = 1;
-    this.pendingRequest = null;
-    this.__secret = '';
-    this.client = client || axios.create( {
-      baseURL: this.url,
-      headers: {
-        'Accept': 'application/json',
-      }
-    } );
+  cellSlug () {
+    return this.$__cellSlug || null;
+  }
 
-    this.client.interceptors.response.use(
-      response => response,
-      error => {
-        const status = error.response ? error.response.status : null;
-
-        if ( status === 401 ) {
-
-          return this.authentication( this.getSecret() )
-            .then( response => {
-              const authToken = response.payload();
-
-              self.setAuthToken( authToken );
-              error.config.headers[ 'X-Auth-Token' ] = authToken || '';
-              error.config.baseURL = undefined;
-
-              return self.pendingRequest !== null ? self.pendingRequest() : axios.request( error.config );
-            } )
-            .catch( error => Promise.reject( error ) );
-        }
-
-        return Promise.reject( error );
-      },
-    );
+  setCellSlug ( cellSlug ) {
+    this.$__cellSlug = cellSlug;
   }
 
   /**
    * @param {string} authToken
    */
   setAuthToken ( authToken ) {
-    this.client.defaults.headers.common[ 'X-Auth-Token' ] = authToken || '';
+    this.client().setAuthToken( authToken );
   }
 
   /**
    * @return {string}
    */
   getAuthToken () {
-    return this.client.defaults.headers.common[ 'X-Auth-Token' ];
+    return this.client().getAuthToken();
+  }
+
+  url () {
+    return this.client().getUrl();
   }
 
   /**
-   * @param {string} url
+   * @returns {HttpClient}
    */
-  setUrl ( url ) {
-    this.url = url;
+  client () {
+    return this.$__client;
   }
 
-  /**
-   * @return {string}
-   */
-  getSecret () {
-    return this.__secret;
+  async createMolecule ( secret = null, sourceWallet = null, remainderWallet = null ) {
+
+    const _secret = secret || this.secret();
+    let _sourceWallet = sourceWallet;
+
+    if ( !sourceWallet && this.lastMoleculeQuery && this.lastMoleculeQuery.response().success() ) {
+      _sourceWallet = this.getRemainderWallet();
+    }
+
+    if ( _sourceWallet === null ) {
+      _sourceWallet = await this.getSourceWallet();
+    }
+
+    this.remainderWallet = remainderWallet || Wallet.create( _secret, _sourceWallet.token, _sourceWallet.batchId, _sourceWallet.characters );
+
+    return new Molecule( _secret, _sourceWallet, this.getRemainderWallet(), this.cellSlug() );
   }
 
   /**
@@ -95,63 +91,51 @@ export default class KnishIOClient
    * @return {*}
    */
   createQuery ( cls ) {
-    return new cls( this.client, this.url )
+    return new cls( this )
   }
 
   /**
-   * @param {string} name
-   * @param {Array} variables
-   * @returns {boolean}
+   *
+   * @param cls
+   * @param molecule
    */
-  addPending( name, variables = [] ) {
+  async createMoleculeQuery ( cls, molecule = null ) {
+    const _molecule = molecule || await this.createMolecule(),
+      query = new cls( this, _molecule );
 
-    if ( this.pendingRequest !== null ) {
-      this.pendingRequest = null;
-      return true;
+    if ( !( query instanceof QueryMoleculePropose ) ) {
+      throw new CodeException( `${ this.constructor.name }::createMoleculeQuery - required class instance of QueryMoleculePropose.` );
     }
 
-    this.pending( name, variables );
+    this.lastMoleculeQuery = query;
 
-    return false;
+    return query;
   }
 
   /**
-   * @param {string} name
-   * @param {Array} variables
-   */
-  pending ( name, variables ) {
-    const self = this;
-    this.pendingRequest = function () { return self[ name ]( ...variables ); };
-  }
-
-  /**
-   * @param {string} bundleOrSecret
+   * @param {string|null} secret
+   * @param {string|null} cell_slug
    * @return {Promise<Response>}
    */
-  async getContinueId ( bundleOrSecret ) {
+  async authentication ( secret = null, cell_slug = null ) {
 
-    this.__secret = bundleOrSecret;
+    this.$__secret = secret || this.secret();
+    this.$__cellSlug = cell_slug || this.cellSlug();
 
-    return await ( this.createQuery( QueryContinueId ) ).execute( {
-      'bundle': Wallet.isBundleHash( bundleOrSecret ) ? bundleOrSecret : generateBundleHash( bundleOrSecret ),
-    } );
-  }
+    const query = await this.createMoleculeQuery( QueryAuthentication );
 
-  /**
-   * @param {string} secret
-   * @return {Promise<Response>}
-   */
-  async authentication ( secret ) {
+    query.fillMolecule();
 
-    this.__secret = secret;
+    const response = await query.execute();
 
-    const query = this.createQuery( QueryAuthentication ),
-      continueId = await this.getContinueId( secret ),
-      wallet = continueId.payload();
+    if ( response.success() ) {
+      this.client().setAuthToken( response.token() )
+    }
+    else {
+      throw new UnauthenticatedException( response.reason() );
+    }
 
-    query.initMolecule( secret, wallet );
-
-    return query.execute();
+    return response;
   }
 
   /**
@@ -161,118 +145,141 @@ export default class KnishIOClient
    */
   async getBalance ( code, token ) {
 
-    this.__secret = code;
-
     const query = this.createQuery( QueryBalance );
 
-    return query.execute( {
+    return await query.execute( {
       'bundleHash': Wallet.isBundleHash( code ) ? code : generateBundleHash( code ),
       'token': token,
-    }, this.addPending( 'getBalance', arguments ) );
+    } );
+  }
+
+  secret () {
+    if ( !this.$__secret ) {
+      throw new UnauthenticatedException( `Expected ${ this.constructor.name }::authentication call before.` );
+    }
+    return this.$__secret;
   }
 
   /**
-   * @param {string} secret
    * @param {string} token
    * @param {number} amount
    * @param {Array|Object} metas
    * @return {Promise<Response>}
    */
-  async createToken ( secret, token, amount, metas ) {
+  async createToken ( token, amount, metas= null ) {
 
-    this.__secret = secret;
+    const recipientWallet = new Wallet( this.secret(), token );
 
-    const sourceWallet = ( await this.getContinueId( secret ) ).payload() || new Wallet( secret ),
-      recipientWallet = new Wallet( secret, token ),
-      query = this.createQuery( QueryTokenCreate ),
-      aggregateMeta = Meta.aggregateMeta( metas || {} );
-
-    if ( Dot.get( aggregateMeta, 'fungibility' ) === 'stackable' ) {
+    if ( Dot.get( metas || {}, 'fungibility' ) === 'stackable' ) {
       recipientWallet.batchId = Wallet.generateBatchId();
     }
 
-    query.initMolecule( secret, sourceWallet, recipientWallet, amount, aggregateMeta );
+    const query = await this.createMoleculeQuery( QueryTokenCreate );
 
-    return query.execute( null, this.addPending( 'createToken', arguments ) );
+    query.fillMolecule( recipientWallet, amount, metas || {} );
+
+    return await query.execute ();
   }
 
   /**
-   * @param {string} secret
    * @param {string} type
    * @param {string} contact
    * @param {string} code
    * @return {Promise<Response>}
    */
-  async createIdentifier ( secret, type, contact, code ) {
+  async createIdentifier ( type, contact, code ) {
 
-    this.__secret = secret;
+    const query = await this.createMoleculeQuery( QueryIdentifierCreate );
 
-    const sourceWallet = ( await this.getContinueId( secret ) ).payload() || new Wallet( secret ),
-      query = this.createQuery( QueryIdentifierCreate );
+    query.fillMolecule( type, contact, code );
 
-    query.initMolecule( secret, sourceWallet, type, contact, code );
+    return await query.execute();
+  }
 
-    return query.execute( null, this.addPending( 'createIdentifier', arguments ) );
+  async getShadowWallets ( token ) {
+
+    const query = this.createQuery( QueryWalletList ),
+      response = await query.execute( {
+        'bundleHash': generateBundleHash( this.secret() ),
+        'token': token,
+      } ),
+      shadowWallets = response.payload();
+
+    if ( !shadowWallets ) {
+      throw new WalletShadowException();
+    }
+
+    for ( let shadowWallet of shadowWallets ) {
+      if (!shadowWallet instanceof WalletShadow ) {
+        throw new WalletShadowException();
+      }
+    }
+
+    return shadowWallets;
   }
 
   /**
-   * @param secret
    * @param token
    * @param value
    * @param to
    * @param metas
    * @return {Promise<Response>}
    */
-  async receiveToken ( secret, token, value, to, metas ) {
+  async receiveToken ( token, value, to, metas = null ) {
 
-    this.__secret = secret;
+    let metaType,
+      metaId;
 
-    const sourceWallet = ( await this.getContinueId( secret ) ).payload() || new Wallet( secret ),
-      metaType = Wallet.isBundleHash( to ) ? 'walletbundle' : 'wallet',
-      query = this.createQuery( QueryTokenReceive );
-
-    query.initMolecule( secret, sourceWallet, token, value, metaType, to, metas || {} );
-
-    return query.execute( null, this.addPending( 'receiveToken', arguments ) );
-  }
-
-  /**
-   * @param {string} secret
-   * @param {string} token
-   * @param {Wallet} sourceWallet
-   * @param {Wallet} shadowWallet
-   * @param {Wallet|null} recipientWallet
-   * @return {Promise<Response>}
-   */
-  async claimShadowWallet ( secret, token, sourceWallet, shadowWallet, recipientWallet ) {
-    this.__secret = secret;
-
-    const wallet = sourceWallet || ( await this.getContinueId( secret ) ).payload() || new Wallet( secret ),
-      hiddenWallet = shadowWallet || ( await this.getBalance( secret ) ).payload(),
-      query = this.createQuery( QueryWalletClaim );
-
-    if ( hiddenWallet === null || !( hiddenWallet instanceof WalletShadow ) ) {
-      throw new WalletShadowException();
+    if ( Object.prototype.toString.call( to ) === '[object String]' ) {
+      if ( Wallet.isBundleHash( to ) ) {
+        metaType = 'walletbundle';
+        metaId = to;
+      }
+      else {
+        to = Wallet.create( to, token );
+      }
     }
 
-    query.initMolecule( secret, wallet, hiddenWallet, token, recipientWallet );
+    if ( to instanceof Wallet ) {
+      metaType = 'wallet';
+      metas = Molecule.mergeMetas( metas || {}, {
+        'position': to.position,
+        'bundle': to.bundle,
+      } );
+      metaId = to.address;
+    }
 
-    return query.execute( null, this.addPending( 'claimShadowWallet', arguments ) );
+    const query = await this.createMoleculeQuery( QueryTokenReceive );
+
+    query.fillMolecule( token, value, metaType, metaId, metas );
+
+    return await query.execute();
   }
 
   /**
-   * @param {string} fromSecret
+   *
+   * @param token
+   * @param molecule
+   * @returns {Promise<Response>}
+   */
+  async claimShadowWallet ( token, molecule = null ) {
+
+    const shadowWallets = this.getShadowWallets( token ),
+      query = await this.createMoleculeQuery( QueryShadowWalletClaim, molecule );
+    query.fillMolecule( token, shadowWallets );
+
+    return await query.execute( );
+  }
+
+  /**
    * @param {Wallet|string} to
    * @param {string} token
    * @param {number} amount
-   * @param {Wallet|null} remainderWallet
    * @return {Promise<Response>}
    */
-  async transferToken ( fromSecret, to, token, amount, remainderWallet ) {
-    this.__secret = fromSecret;
+  async transferToken ( to, token, amount ) {
 
-    const fromWallet = ( await this.getBalance( fromSecret ) ).payload(),
-      query = this.createQuery( QueryTokenTransfer );
+    const fromWallet = ( await this.getBalance( this.secret(), token ) ).payload();
 
     if ( fromWallet === null || Decimal.cmp( fromWallet.balance, amount ) < 0 ) {
       throw new TransferBalanceException( 'The transfer amount cannot be greater than the sender\'s balance' );
@@ -285,8 +292,33 @@ export default class KnishIOClient
     }
 
     toWallet.initBatchId( fromWallet, amount );
-    query.initMolecule( fromSecret, fromWallet, toWallet, amount, remainderWallet );
 
-    return query.execute( null, this.addPending( 'transferToken', arguments ) );
+    this.remainderWallet = Wallet.create( this.secret(), token, toWallet.batchId, fromWallet.characters );
+
+    const molecule = await this.createMolecule( null, fromWallet, this.getRemainderWallet()  ),
+      query = await this.createMoleculeQuery( QueryTokenTransfer, molecule );
+
+    query.fillMolecule( toWallet, amount );
+
+    return await query.execute();
   }
+
+  async getSourceWallet () {
+    let sourceWallet = ( await this.getContinuId( generateBundleHash( this.secret() ) ) ).payload();
+
+    if ( !sourceWallet ) {
+      sourceWallet = new Wallet( this.secret() );
+    }
+
+    return sourceWallet;
+  }
+
+  async getContinuId ( bundleHash ) {
+    return await this.createQuery( QueryContinueId ).execute( { 'bundle': bundleHash } );
+  }
+
+  getRemainderWallet () {
+    return this.remainderWallet;
+  }
+
 }

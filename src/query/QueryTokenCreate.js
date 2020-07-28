@@ -7,19 +7,10 @@ import ResponseTokenCreate from "../response/ResponseTokenCreate";
  *
  */
 export default class QueryTokenCreate extends QueryMoleculePropose {
-  /**
-   * @param {string} secret
-   * @param {Wallet} sourceWallet
-   * @param {Wallet} recipientWallet
-   * @param {number} amount
-   * @param {Array|Object} metas
-   * @param {Wallet|null} remainderWallet
-   */
-  initMolecule ( secret, sourceWallet, recipientWallet, amount, metas, remainderWallet ) {
-    this.$__remainderWallet = remainderWallet || new Wallet( secret );
-    this.$__molecule = new Molecule();
-    this.$__molecule.initTokenCreation( sourceWallet, recipientWallet, this.$__remainderWallet, amount,  metas || {} );
-    this.$__molecule.sign( secret );
+
+  fillMolecule ( recipientWallet, amount, metas = null) {
+    this.$__molecule.initTokenCreation( recipientWallet, amount, metas || {} );
+    this.$__molecule.sign();
     this.$__molecule.check();
   }
 

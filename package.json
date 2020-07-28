@@ -36,12 +36,14 @@
 	"dependencies": {
 		"@stablelib/base64": "^1.0.0",
 		"@stablelib/utf8": "^1.0.0",
-		"axios": "^0.19.2",
 		"base-x": "^3.0.7",
 		"big-integer": "peterolson/BigInteger.js",
 		"buffer": "^5.4.3",
 		"js-sha3": "^0.8.0",
+		"lodash.clonedeep": "^4.5.0",
 		"lodash.merge": "^4.6.2",
+		"popsicle": "^12.0.5",
+		"servie": "^4.3.2",
 		"tweetnacl": "^1.0.2",
 		"tweetnacl-sealedbox-js": "^1.2.0"
 	},

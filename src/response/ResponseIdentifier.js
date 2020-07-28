@@ -8,7 +8,8 @@ export default class ResponseIdentifier extends Response {
    */
   constructor ( query, json ) {
     super( query, json );
-    this.dataKey = 'data.data.LinkIdentifier'
+    this.dataKey = 'data.LinkIdentifier';
+    this.init();
   }
 
   success () {

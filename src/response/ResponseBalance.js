@@ -9,7 +9,8 @@ export default class ResponseBalance extends Response {
    */
   constructor ( query, json ) {
     super( query, json );
-    this.dataKey = 'data.data.Balance'
+    this.dataKey = 'data.Balance';
+    this.init();
   }
 
   payload () {
