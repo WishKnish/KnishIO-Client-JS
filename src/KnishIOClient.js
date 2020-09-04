@@ -100,8 +100,13 @@ export default class KnishIOClient
    * @param molecule
    */
   async createMoleculeQuery ( cls, molecule = null ) {
-    const _molecule = molecule || await this.createMolecule(),
-      query = new cls( this, _molecule );
+    let _molecule = molecule;
+
+    if ( _molecule === null ) {
+      _molecule = ( cls.name === QueryAuthentication.name ) ? await this.createMolecule( this.secret(), new Wallet( this.secret(), 'AUTH' ) ): await this.createMolecule();
+    }
+
+    const query = new cls( this, _molecule );
 
     if ( !( query instanceof QueryMoleculePropose ) ) {
       throw new CodeException( `${ this.constructor.name }::createMoleculeQuery - required class instance of QueryMoleculePropose.` );

@@ -619,9 +619,6 @@ export default class Molecule extends MoleculeStructure {
       )
     );
 
-    // User remainder atom
-    this.addUserRemainderAtom( this.remainderWallet );
-
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;

@@ -76,7 +76,7 @@ export default class CheckMolecule {
     CheckMolecule.missing( molecule );
 
     for ( let atom of CheckMolecule.isotopeFilter( 'U', molecule.atoms ) ) {
-      if ( atom.token !== 'USER' ) {
+      if ( atom.token !== 'AUTH' ) {
         throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
       }
 
