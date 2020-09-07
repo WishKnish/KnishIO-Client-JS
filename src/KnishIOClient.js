@@ -73,7 +73,7 @@ export default class KnishIOClient
     const _secret = secret || this.secret();
     let _sourceWallet = sourceWallet;
 
-    if ( !sourceWallet && this.lastMoleculeQuery && this.lastMoleculeQuery.response().success() ) {
+    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery.response().success() ) {
       _sourceWallet = this.getRemainderWallet();
     }
 
