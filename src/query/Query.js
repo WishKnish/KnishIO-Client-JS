@@ -1,6 +1,5 @@
 import Response from "../response/Response";
 import { Request } from 'servie';
-import KnishIOClient from "../KnishIOClient";
 
 /**
  *

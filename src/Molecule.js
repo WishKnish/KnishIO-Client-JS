@@ -3,16 +3,17 @@
 // https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 // This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
 
-import { Atom, Wallet, Meta } from './index';
+import Atom from './Atom';
+import Wallet from './Wallet';
+import Meta from './Meta';
 import { shake256, } from 'js-sha3';
 import { chunkSubstr, hexToBase64, base64ToHex, } from './libraries/strings';
 import CheckMolecule from './libraries/check';
 import { generateBundleHash } from "./libraries/crypto";
-import {
-  AtomsMissingException,
-  BalanceInsufficientException, MetaMissingException,
-  NegativeMeaningException,
-} from './exception/index';
+import AtomsMissingException from "./exception/AtomsMissingException";
+import BalanceInsufficientException from "./exception/BalanceInsufficientException";
+import MetaMissingException from "./exception/MetaMissingException";
+import NegativeMeaningException from "./exception/NegativeMeaningException";
 import MoleculeStructure from "./MoleculeStructure";
 
 const merge = require( 'lodash.merge' );

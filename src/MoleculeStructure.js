@@ -1,6 +1,6 @@
 import CheckMolecule from "./libraries/check";
-import {AtomsMissingException,} from "./exception";
-import {Atom,} from "./index";
+import AtomsMissingException from "./exception/AtomsMissingException";
+import Atom from "./Atom";
 
 const cloneDeep = require('lodash.clonedeep');
 const merge = require( 'lodash.merge' );

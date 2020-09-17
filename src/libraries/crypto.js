@@ -5,7 +5,7 @@
 
 import { shake256 } from 'js-sha3';
 import { randomString } from './strings';
-import Soda from "./Soda";
+import Soda from "./../libraries/Soda";
 
 /**
  * Generates a secret based on an optional seed

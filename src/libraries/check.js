@@ -1,20 +1,19 @@
-import {
-  AtomIndexException,
-  AtomsMissingException,
-  MolecularHashMismatchException,
-  MolecularHashMissingException,
-  SignatureMalformedException,
-  SignatureMismatchException,
-  TransferBalanceException,
-  TransferMalformedException,
-  TransferMismatchedException,
-  TransferRemainderException,
-  TransferToSelfException,
-  TransferUnbalancedException,
-  MetaMissingException,
-  WrongTokenTypeException,
-} from "../exception";
-import { Atom, Meta } from "../index";
+import AtomIndexException from "./../exception/AtomIndexException";
+import AtomsMissingException from "./../exception/AtomsMissingException";
+import MolecularHashMismatchException from "./../exception/MolecularHashMismatchException";
+import MolecularHashMissingException from "./../exception/MolecularHashMissingException";
+import SignatureMalformedException from "./../exception/SignatureMalformedException";
+import SignatureMismatchException from "./../exception/SignatureMismatchException";
+import TransferBalanceException from "./../exception/TransferBalanceException";
+import TransferMalformedException from "./../exception/TransferMalformedException";
+import TransferMismatchedException from "./../exception/TransferMismatchedException";
+import TransferRemainderException from "./../exception/TransferRemainderException";
+import TransferToSelfException from "./../exception/TransferToSelfException";
+import TransferUnbalancedException from "./../exception/TransferUnbalancedException";
+import MetaMissingException from "./../exception/MetaMissingException";
+import WrongTokenTypeException from "./../exception/WrongTokenTypeException";
+import Atom from "./../Atom";
+import Meta from "./../Meta";
 import { base64ToHex, chunkSubstr } from "./strings";
 import { shake256 } from "js-sha3";
 

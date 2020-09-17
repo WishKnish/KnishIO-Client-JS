@@ -5,7 +5,8 @@
 
 import { shake256, } from 'js-sha3';
 import { charsetBaseConvert } from './libraries/strings';
-import { Meta } from "./index";
+import Meta from "./Meta";
+
 
 /**
  * class Atom

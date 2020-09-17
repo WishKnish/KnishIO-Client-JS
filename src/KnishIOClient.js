@@ -1,6 +1,7 @@
 import QueryContinueId from "./query/QueryContinueId";
 import { generateBundleHash, } from "./libraries/crypto";
-import { Wallet, WalletShadow } from "./index";
+import Wallet from "./Wallet";
+import WalletShadow from "./WalletShadow";
 import QueryAuthentication from "./query/QueryAuthentication";
 import QueryBalance from "./query/QueryBalance";
 import QueryTokenCreate from "./query/QueryTokenCreate";
