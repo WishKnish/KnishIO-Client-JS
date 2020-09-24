@@ -14,13 +14,13 @@ export default class Response {
   constructor ( query, json ) {
 
     this.dataKey = null;
-    this.errorKey = 'error';
+    this.errorKey = 'exception';
     this.$__payload = null;
     this.$__query = query;
     this.$__originResponse = json;
     this.$__response = json;
 
-    if ( typeof this.$__response === 'undefined' ) {
+    if ( typeof this.$__response === 'undefined' || this.$__response === null ) {
       throw new InvalidResponseException();
     }
 
@@ -34,6 +34,8 @@ export default class Response {
 
       throw new InvalidResponseException();
     }
+
+    this.init();
   }
 
   /**
@@ -72,5 +74,9 @@ export default class Response {
    */
   query () {
     return this.$__query;
+  }
+
+  init () {
+    return null;
   }
 }

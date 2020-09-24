@@ -1,5 +1,5 @@
 import Response from "../response/Response";
-const axios = require( 'axios' ).default;
+import { Request } from 'servie';
 
 /**
  *
@@ -7,45 +7,97 @@ const axios = require( 'axios' ).default;
 export default class Query {
 
   /**
-   * @param client
-   * @param {string} url
+   * @param {KnishIOClient} knishIO
    */
-  constructor ( client, url ) {
-    this.$__url = url;
-    this.client = client;
+  constructor ( knishIO ) {
+    this.knishIO = knishIO;
+    this.$__fields = null;
     this.$__variables = null;
+    this.$__request = null;
+    this.$__response = null;
     this.$__query = null;
   }
 
-  /**
-   * @param {*} variables
-   * @param {boolean} request
-   * @return {Promise<Response>}
-   */
-  async execute ( variables = null, request = false ) {
-    this.$__variables = variables;
+  request () {
+    return this.$__request;
+  }
 
-    if ( request ) {
-      return axios.request( {
-        baseURL: this.url(),
-        method: 'post',
-        headers: {
-          'Accept': 'application/json',
-          'X-Auth-Token': this.client.defaults.headers.common[ 'X-Auth-Token' ] || '',
-        },
-        data: {
-          query: this.$__query,
-          variables: this.variables()
-        }
-      } );
+  response () {
+    return this.$__response;
+  }
+
+  /**
+   * @returns {HttpClient}
+   */
+  client () {
+    return this.knishIO.client();
+  }
+
+  createRequest ( variables = null, fields = null ) {
+    this.$__variables = this.compiledVariables( variables );
+
+    return new Request(
+      this.url(),
+      { body: JSON.stringify( { query: this.compiledQuery( fields ), variables: this.variables() } ) }
+    );
+  }
+
+  compiledVariables ( variables = null ) {
+    return variables || {}
+  }
+
+  /**
+   * @param {Object} fields
+   * @returns {*|void|string}
+   */
+  compiledQuery ( fields = null ) {
+
+    if ( fields !== null ) {
+      this.$__fields = fields;
     }
 
-    const response = await this.client.post( this.url(), {
-      query: this.$__query,
-      variables: this.variables()
-    } );
+    return this.$__query.replace( new RegExp( '@fields', 'g' ), this.compiledFields( this.$__fields ) );
+  }
 
-    return this.createResponse( response );
+  /**
+   *
+   * @param {Object} fields
+   * @returns {string}
+   */
+  compiledFields ( fields ) {
+
+    const target = [];
+
+    for ( let key of Object.keys( fields ) ) {
+      target.push( fields[ key ] ? `${ key } ${ this.compiledFields( fields[ key ] ) }` : `${ key }` );
+    }
+
+    return `{ ${ target.join( ', ' ) } }`;
+  }
+
+  /**
+   * @param {Object} variables
+   * @param {Array|Object|null} fields
+   * @return {Promise<Response>}
+   */
+  async execute ( variables = null, fields = null ) {
+
+    this.$__request = this.createRequest( variables, fields );
+
+    let response = await this.client().send( this.$__request );
+
+    if ( this.constructor.name !== 'QueryAuthentication' && response.status === 401 ) {
+      await this.knishIO.authentication();
+      response = await this.client().send( this.$__request );
+    }
+
+    this.$__response = await this.createResponseRaw( response );
+
+    return this.$__response;
+  }
+
+  async createResponseRaw ( response ) {
+    return this.createResponse( JSON.parse( await response.text() ) );
   }
 
   /**
@@ -60,13 +112,14 @@ export default class Query {
    * @return {string}
    */
   url () {
-    return this.$__url;
+    return this.knishIO.client().getUrl();
   }
 
   /**
-   * @return {null}
+   * @return {Object|null}
    */
   variables () {
     return this.$__variables;
   }
+
 }

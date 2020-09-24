@@ -39,26 +39,20 @@ export default class Meta {
    */
   static normalizeMeta ( meta ) {
 
-    if ( toString.call( meta ) === '[object Object]' ) {
+    if ( Object.prototype.toString.call( meta ) === '[object Object]' ) {
 
       const target = [];
 
       for ( const property in meta ) {
-
         if ( meta.hasOwnProperty( property ) ) {
-
           target.push( { key: property, value: meta[ property ] } );
-
         }
-
       }
 
       return target;
-
     }
 
     return meta;
-
   }
 
   /**
@@ -68,19 +62,16 @@ export default class Meta {
   static aggregateMeta ( meta ) {
     const aggregate = {};
 
-    if ( meta.length > 0 ) {
-
-      meta.forEach(function(metaEntry) {
-        if ( metaEntry.key ) {
-          aggregate[ metaEntry.key ] = metaEntry.value;
-        }
-      });
-
+    if ( Object.prototype.toString.call( meta ) === '[object Array]' ) {
+      for ( let metaEntry of meta ) {
+        aggregate[ metaEntry.key ] = metaEntry.value;
+      }
     }
 
     // Making sure we actually have anything to return
-    if ( Object.keys( aggregate ).length > 0 )
+    if ( Object.keys( aggregate ).length > 0 ) {
       return aggregate;
+    }
 
     return meta;
   }

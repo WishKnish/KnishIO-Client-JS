@@ -5,7 +5,8 @@
 
 import { shake256, } from 'js-sha3';
 import { charsetBaseConvert } from './libraries/strings';
-import { Meta } from "./index";
+import Meta from "./Meta";
+
 
 /**
  * class Atom
@@ -19,8 +20,6 @@ import { Meta } from "./index";
  * @property {string | null} metaId
  * @property {Array | Object | null} meta
  * @property {number | null} index
- * @property {string | null} pubkey
- * @property {string | null} characters
  * @property {string | null} otsFragment
  * @property {string} createdAt
  */
@@ -36,8 +35,6 @@ export default class Atom {
    * @param {string | null} metaType
    * @param {string | null} metaId
    * @param {Array | Object | null} meta
-   * @param {string | null} pubkey
-   * @param {string | null} characters
    * @param {string | null} otsFragment
    * @param {number | null} index
    */
@@ -51,8 +48,6 @@ export default class Atom {
     metaType = null,
     metaId = null,
     meta = null,
-    pubkey = null,
-    characters = null,
     otsFragment = null,
     index = null ) {
 
@@ -66,8 +61,6 @@ export default class Atom {
     this.metaType = metaType;
     this.metaId = metaId;
     this.meta = meta ? Meta.normalizeMeta( meta ) : [];
-    this.pubkey = pubkey;
-    this.characters = characters;
 
     this.index = index;
     this.otsFragment = otsFragment;
@@ -122,7 +115,7 @@ export default class Atom {
         if ( atom.hasOwnProperty( property ) ) {
 
           // Old atoms support (without batch_id field)
-          if ( [ 'batchId', 'pubkey', 'characters', ].includes( property ) && atom[ property ] === null ) {
+          if ( [ 'batchId', ].includes( property ) && atom[ property ] === null ) {
 
             continue;
 

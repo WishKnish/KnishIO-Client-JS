@@ -6,21 +6,15 @@ import ResponseTokenTransfer from "../response/ResponseTokenTransfer";
 export default class QueryTokenTransfer extends QueryMoleculePropose {
 
   /**
-   * @param $fromSecret
-   * @param {Wallet} fromWallet
-   * @param {Wallet} toWallet
-   * @param {string} token
-   * @param {number} amount
-   * @param {Wallet|null} remainderWallet
+   *
+   * @param toWallet
+   * @param amount
    */
-  initMolecule ( $fromSecret, fromWallet, toWallet, token, amount, remainderWallet ) {
+  fillMolecule ( toWallet, amount ) {
 
-    this.$__remainderWallet = remainderWallet || Wallet.create( $fromSecret, token, toWallet.batchId, fromWallet.characters  );
-
-    this.$__molecule = new Molecule();
-    this.$__molecule.initValue( fromWallet, toWallet, this.$__remainderWallet, amount );
-    this.$__molecule.sign( secret );
-    this.$__molecule.check( fromWallet );
+    this.$__molecule.initValue( toWallet, amount );
+    this.$__molecule.sign();
+    this.$__molecule.check( this.$__molecule.sourceWallet() );
   }
 
   /**
