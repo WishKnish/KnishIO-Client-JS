@@ -1,6 +1,7 @@
 import InvalidResponseException from "../exception/InvalidResponseException";
 import UnauthenticatedException from "../exception/UnauthenticatedException";
 import Dot from "../libraries/Dot";
+import DecryptException from "../exception/DecryptException";
 
 /**
  *
@@ -33,6 +34,20 @@ export default class Response {
       }
 
       throw new InvalidResponseException();
+    }
+
+    if ( query.constructor.name !== 'QueryAuthentication' ) {
+      const wallet = query.getKnishIOClient().getAuthorizationWallet();
+
+      if ( wallet === null ) {
+       throw new UnauthenticatedException();
+      }
+
+      this.$__response = wallet.decryptMyMessage( this.$__response )
+
+      if ( this.$__response === null ) {
+        throw new DecryptException();
+      }
     }
 
     this.init();

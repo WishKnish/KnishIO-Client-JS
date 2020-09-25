@@ -19,6 +19,7 @@ import QueryIdentifierCreate from "./query/QueryIdentifierCreate";
 import QueryWalletList from "./query/QueryWalletList";
 import QueryShadowWalletClaim from "./query/QueryShadowWalletClaim";
 import UnauthenticatedException from "./exception/UnauthenticatedException";
+import {getSignedAtom} from "./libraries/array";
 
 /**
  *
@@ -34,6 +35,8 @@ export default class KnishIOClient
     this.$__secret = '';
     this.$__client = client || new HttpClient( this.$__url );
     this.remainderWallet = null;
+    this.$__authorizationWallet = null;
+    this.$__serverKey = null;
   }
 
   cellSlug () {
@@ -135,7 +138,9 @@ export default class KnishIOClient
     const response = await query.execute();
 
     if ( response.success() ) {
-      this.client().setAuthToken( response.token() )
+      this.$__authorizationWallet = this.extractingAuthorizationWallet( query.molecule() );
+      this.client().setAuthToken( response.token() );
+      this.$__serverKey = response.pubkey();
     }
     else {
       throw new UnauthenticatedException( response.reason() );
@@ -325,6 +330,31 @@ export default class KnishIOClient
 
   getRemainderWallet () {
     return this.remainderWallet;
+  }
+
+  /**
+   * @returns {Wallet|null}
+   */
+  getAuthorizationWallet () {
+    return this.$__authorizationWallet;
+  }
+
+  /**
+   * @returns {string|null}
+   */
+  getServerKey () {
+    return this.$__serverKey;
+  }
+
+  /**
+   *
+   * @param {Molecule} molecule
+   * @returns {Atom|null}
+   */
+  extractingAuthorizationWallet ( molecule ) {
+    const atom = getSignedAtom( molecule );
+
+    return ( atom !== null ) ? new Wallet( this.secret(), atom.token, atom.position ): null;
   }
 
 }

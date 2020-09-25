@@ -18,4 +18,8 @@ export default class ResponseAuthentication extends ResponseMolecule {
   time () {
     return this.payloadKey( 'time' );
   }
+
+  pubkey () {
+    return this.payloadKey( 'pubkey' );
+  }
 }

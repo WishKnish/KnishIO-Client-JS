@@ -1,5 +1,6 @@
 import Response from "../response/Response";
 import { Request } from 'servie';
+import UnauthenticatedException from "../exception/UnauthenticatedException";
 
 /**
  *
@@ -38,7 +39,7 @@ export default class Query {
 
     return new Request(
       this.url(),
-      { body: JSON.stringify( { query: this.compiledQuery( fields ), variables: this.variables() } ) }
+      this.getRequestBody( fields, this.variables() )
     );
   }
 
@@ -120,6 +121,35 @@ export default class Query {
    */
   variables () {
     return this.$__variables;
+  }
+
+  /**
+   * @returns {KnishIOClient}
+   */
+  getKnishIOClient () {
+    return this.knishIO;
+  }
+
+  /**
+   * @param {Array} fields
+   * @param {Array} variables
+   * @returns {{body: string}}
+   */
+  getRequestBody ( fields, variables ) {
+    const target = { query: this.compiledQuery( fields ), variables: variables };
+
+    if ( this.constructor.name === 'QueryAuthentication' ) {
+      return { body: JSON.stringify( target ) };
+    }
+
+    const wallet = this.knishIO.getAuthorizationWallet(),
+      privkey = this.knishIO.getServerKey();
+
+    if ( ![ wallet, privkey, ].includes( null ) ) {
+      return { body: JSON.stringify( wallet.encryptMyMessage( target, privkey ) ) };
+    }
+
+    throw new UnauthenticatedException( 'Unauthorized query' );
   }
 
 }
