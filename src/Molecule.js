@@ -657,7 +657,7 @@ export default class Molecule extends MoleculeStructure {
     // Do we have atoms?
     if ( 0 === this.atoms.length ||
       0 !== this.atoms.filter(
-        atom => !( atom instanceof Atom )
+        atom => !( atom instanceof Atom || atom instanceof Object )
       ).length
     ) {
       throw new AtomsMissingException();
