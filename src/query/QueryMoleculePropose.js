@@ -1,13 +1,63 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import Query from "./Query";
 import ResponseMolecule from "../response/ResponseMolecule";
 
 const merge = require('lodash.merge');
 
 /**
- *
+ * Query for proposing a new Molecule
  */
 export default class QueryMoleculePropose extends Query {
+
   /**
+   * Class constructor
+   *
    * @param knishIO
    * @param molecule
    */
@@ -30,6 +80,12 @@ export default class QueryMoleculePropose extends Query {
     };
   }
 
+  /**
+   * Returns an object of query variables
+   *
+   * @param variables
+   * @returns {*}
+   */
   compiledVariables ( variables ) {
     const _variables = super.compiledVariables( variables );
 
@@ -37,6 +93,7 @@ export default class QueryMoleculePropose extends Query {
   }
 
   /**
+   * Creates a new response from a JSON string
    *
    * @param {string} response
    * @return {ResponseMolecule}
@@ -46,6 +103,8 @@ export default class QueryMoleculePropose extends Query {
   }
 
   /**
+   * Executes the query
+   *
    * @param {Object} variables
    * @param {Object|null} fields
    * @return {Promise<Response>}
@@ -54,10 +113,20 @@ export default class QueryMoleculePropose extends Query {
     return await super.execute( merge( variables || {}, { 'molecule': this.molecule() } ), fields );
   }
 
+  /**
+   * Returns the remainder wallet
+   *
+   * @returns {null}
+   */
   remainderWallet () {
     return this.$__remainderWallet;
   }
 
+  /**
+   * Returns the molecule we are proposing
+   *
+   * @returns {null}
+   */
   molecule () {
     return this.$__molecule;
   }

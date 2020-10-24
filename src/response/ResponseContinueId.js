@@ -1,11 +1,61 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import Response from "./Response";
 import Wallet from "../Wallet";
 
 /**
- *
+ * Response for ContinuID query
  */
 export default class ResponseContinueId extends Response {
+
   /**
+   * Class constructor
+   *
    * @param query
    * @param json
    */
@@ -16,6 +66,8 @@ export default class ResponseContinueId extends Response {
   }
 
   /**
+   * Returns the ContinuID wallet
+   *
    * @return {Wallet|null}
    */
   payload () {

@@ -1,31 +1,62 @@
-// Copyright 2019 WishKnish Corp. All rights reserved.
-// You may use, distribute, and modify this code under the GPLV3 license, which is provided at:
-// https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
-// This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
 
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import { shake256, } from 'js-sha3';
 import { charsetBaseConvert } from './libraries/strings';
 import Meta from "./Meta";
 
-
 /**
- * class Atom
- *
- * @property {string} position
- * @property {string} walletAddress
- * @property {string} isotope
- * @property {string | null} token
- * @property {string | number | null} value
- * @property {string | null} metaType
- * @property {string | null} metaId
- * @property {Array | Object | null} meta
- * @property {number | null} index
- * @property {string | null} otsFragment
- * @property {string} createdAt
+ * Atom class used to form micro-transactions within a Molecule
  */
 export default class Atom {
 
   /**
+   * Class constructor
+   *
    * @param {string} position
    * @param {string} walletAddress
    * @param {string} isotope
@@ -69,6 +100,8 @@ export default class Atom {
   }
 
   /**
+   * Converts a compliant JSON string into an Atom class instance
+   *
    * @param {string} json
    * @return {Object}
    */
@@ -107,93 +140,63 @@ export default class Atom {
 
     // Hashing each atom in the molecule to produce a molecular hash
     for ( const atom of atomList ) {
-
       molecularSponge.update( String( numberOfAtoms ) );
 
       for ( const property in atom ) {
-
         if ( atom.hasOwnProperty( property ) ) {
 
           // Old atoms support (without batch_id field)
           if ( [ 'batchId', ].includes( property ) && atom[ property ] === null ) {
-
             continue;
-
           }
 
+          // Not hashing OTS fragment or index
           if ( [ 'otsFragment', 'index', ].includes( property ) ) {
-
             continue;
-
           }
 
-          if ( 'meta' === property ) {
-
+          // Hashing individual meta keys and values
+          if ( property === 'meta' ) {
             atom[ property ] = Meta.normalizeMeta( atom[ property ] );
-
             for ( const meta of atom[ property ] ) {
-
               if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
-
                 molecularSponge.update( String( meta.key ) );
                 molecularSponge.update( String( meta.value ) );
-
               }
-
             }
-
             continue;
-
           }
 
+          // Hash position, wallet address, or isotope
           if ( [ 'position', 'walletAddress', 'isotope' ].includes( property ) ) {
-
             molecularSponge.update( String( atom[ property ] ) );
-
             continue;
-
           }
 
+          // Some other property that we haven't anticipated
           if ( atom[ property ] !== null ) {
-
             molecularSponge.update( String( atom[ property ] ) );
-
           }
-
         }
-
       }
-
     }
 
+    // Return the hash in the requested format
     switch ( output ) {
-
       case 'hex': {
-
         return molecularSponge.hex();
-
       }
       case 'array': {
-
         return molecularSponge.array();
-
-      }
-      case 'base17': {
-
-        return charsetBaseConvert( molecularSponge.hex(), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
-
       }
       default: {
-
-        return null;
-
+        return charsetBaseConvert( molecularSponge.hex(), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
       }
-
     }
-
   }
 
   /**
+   * Sort the atoms in a Molecule
    *
    * @param {Array} atoms
    * @return {Array}
@@ -202,20 +205,14 @@ export default class Atom {
 
     const atomList = [ ...atoms ];
 
+    // Sort based on atomic index
     atomList.sort( ( first, second ) => {
-
       if ( first.index === second.index ) {
-
         return 0;
-
       }
-
       return first.index < second.index ? -1 : 1;
-
     } );
 
     return atomList;
-
   }
-
 }

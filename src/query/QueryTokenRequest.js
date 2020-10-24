@@ -46,33 +46,26 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import QueryMoleculePropose from "./QueryMoleculePropose";
-import ResponseTokenTransfer from "../response/ResponseTokenTransfer";
 
 /**
- * Query for moving tokens between wallets
+ * Query for requesting tokens from a node
  */
-export default class QueryTokenTransfer extends QueryMoleculePropose {
+export default class QueryTokenRequest extends QueryMoleculePropose {
 
   /**
-   * Fills the Molecule with provided wallet and amount data
+   * Fills a Molecule with the appropriate atoms and prepares for broadcast
    *
-   * @param toWallet
-   * @param amount
+   * @param token
+   * @param value
+   * @param metaType
+   * @param metaId
+   * @param metas
    */
-  fillMolecule ( toWallet, amount ) {
+  fillMolecule ( token, value, metaType, metaId, metas = null ) {
 
-    this.$__molecule.initValue( toWallet, amount );
+    this.$__molecule.initTokenRequest( token, value, metaType, metaId, metas || {} );
     this.$__molecule.sign();
-    this.$__molecule.check( this.$__molecule.sourceWallet() );
-  }
-
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param response
-   * @return {ResponseTokenTransfer}
-   */
-  createResponse ( response ) {
-    return new ResponseTokenTransfer( this, response );
+    console.log( this.$__molecule );
+    this.$__molecule.check();
   }
 }

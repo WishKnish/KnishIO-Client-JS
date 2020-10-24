@@ -18,7 +18,9 @@ export default class Dot {
 
     const numberKey = Number( this.key );
 
-    if ( Number.isInteger( numberKey ) ) { this.key = numberKey; }
+    if ( Number.isInteger( numberKey ) ) {
+      this.key = numberKey;
+    }
 
     this.__nextKey = this.arr.length;
     this.__next = this.__tic( obj );
@@ -31,7 +33,9 @@ export default class Dot {
    */
   static __tic ( obj ) {
 
-    if ( !Array.isArray( obj ) && !( obj instanceof Object ) ) { return false; }
+    if ( !Array.isArray( obj ) && !( obj instanceof Object ) ) {
+      return false;
+    }
 
     return typeof obj[ this.key ] !== 'undefined';
   }
@@ -45,8 +49,12 @@ export default class Dot {
 
     this.__init( obj, keys );
 
-    if ( !this.__next ) { return false; }
-    if ( this.__nextKey === 0 ) { return true; }
+    if ( !this.__next ) {
+      return false;
+    }
+    if ( this.__nextKey === 0 ) {
+      return true;
+    }
 
     return this.has( obj[ this.key ], this.arr.join( '.' ) );
   }
@@ -61,8 +69,12 @@ export default class Dot {
 
     this.__init( obj, keys );
 
-    if ( !this.__next ) { return def; }
-    if ( this.__nextKey === 0 ) { return obj[ this.key ]; }
+    if ( !this.__next ) {
+      return def;
+    }
+    if ( this.__nextKey === 0 ) {
+      return obj[ this.key ];
+    }
 
     return this.get( obj[ this.key ], this.arr.join( '.' ), def );
   }

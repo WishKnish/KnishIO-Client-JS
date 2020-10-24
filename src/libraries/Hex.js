@@ -50,7 +50,7 @@ export default class Hex {
 
     for ( let i = 0; i < arr.length; ++i ) {
 
-      str += numberToHex( arr[i], opts.uppercase );
+      str += numberToHex( arr[ i ], opts.uppercase );
 
       if ( i === arr.length - 1 ) {
         break;
@@ -64,8 +64,7 @@ export default class Hex {
 
           column = 0;
           str += "\n";
-        }
-        else {
+        } else {
           str += " ";
         }
       }
@@ -107,8 +106,7 @@ export default class Hex {
 
       if ( curr === -1 ) {
         curr = 16 * val;
-      }
-      else {
+      } else {
 
         buffer[ Math.floor( i / 2 ) ] = curr + val;
         curr = -1;

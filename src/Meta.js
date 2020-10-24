@@ -1,22 +1,57 @@
-// Copyright 2019 WishKnish Corp. All rights reserved.
-// You may use, distribute, and modify this code under the GPLV3 license, which is provided at:
-// https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
-// This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
 
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+ */
 /**
- * class Meta
- *
- * @property {string} modelType
- * @property {string} modelId
- * @property {Array} meta
- * @property {null|} snapshotMolecule
- * @property {number} createdAt
- *
- *
+ * Meta class to represent metadata conveyed by Atoms
  */
 export default class Meta {
 
   /**
+   * Class constructor
    *
    * @param {string} modelType
    * @param {string} modelId
@@ -34,6 +69,8 @@ export default class Meta {
   }
 
   /**
+   * Normalizes the meta array into the standard {key: ..., value: ...} format
+   *
    * @param {Array | Object} meta
    * @return {Array}
    */
@@ -56,6 +93,8 @@ export default class Meta {
   }
 
   /**
+   * Condenses metadata array into object-based key: value notation
+   *
    * @param {Array | Object} meta
    * @return {Array | Object}
    */
@@ -75,5 +114,4 @@ export default class Meta {
 
     return meta;
   }
-
 }

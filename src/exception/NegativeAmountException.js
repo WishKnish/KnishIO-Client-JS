@@ -45,34 +45,22 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import QueryMoleculePropose from "./QueryMoleculePropose";
-import ResponseTokenTransfer from "../response/ResponseTokenTransfer";
+import BaseException from './BaseException';
 
 /**
- * Query for moving tokens between wallets
+ * Thrown when a negative amount is provided
  */
-export default class QueryTokenTransfer extends QueryMoleculePropose {
+export default class NegativeAmountException extends BaseException {
 
   /**
-   * Fills the Molecule with provided wallet and amount data
+   * Class constructor
    *
-   * @param toWallet
-   * @param amount
+   * @param {string} message
+   * @param {string|null} fileName
+   * @param {number|null} lineNumber
    */
-  fillMolecule ( toWallet, amount ) {
-
-    this.$__molecule.initValue( toWallet, amount );
-    this.$__molecule.sign();
-    this.$__molecule.check( this.$__molecule.sourceWallet() );
-  }
-
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param response
-   * @return {ResponseTokenTransfer}
-   */
-  createResponse ( response ) {
-    return new ResponseTokenTransfer( this, response );
+  constructor ( message = 'Amount cannot be negative!', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber );
+    this.name = 'NegativeAmountException';
   }
 }

@@ -36,8 +36,7 @@ export default class Soda {
   decrypt ( decrypted, privateKey, publicKey ) {
     try {
       return JSON.parse( decodeUTF8( open( this.decode( decrypted ), this.decode( publicKey ), this.decode( privateKey ) ) ) );
-    }
-    catch ( e ) {
+    } catch ( e ) {
       return null;
     }
   }
@@ -58,7 +57,7 @@ export default class Soda {
    * @returns {string}
    */
   generatePublicKey ( key ) {
-    const boxKey = box.keyPair.fromSecretKey(  this.decode( key ) );
+    const boxKey = box.keyPair.fromSecretKey( this.decode( key ) );
     return this.encode( boxKey.publicKey );
   }
 

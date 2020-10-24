@@ -1,8 +1,50 @@
-// Copyright 2019 WishKnish Corp. All rights reserved.
-// You may use, distribute, and modify this code under the GPLV3 license, which is provided at:
-// https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
-// This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
 
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import { shake256 } from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
 import Base58 from './libraries/Base58';
@@ -22,22 +64,14 @@ import {
 import WalletShadow from "./WalletShadow";
 
 /**
- * class Wallet
- *
- * @property {string} position
- * @property {string} token
- * @property {string} key
- * @property {string} address
- * @property {number} balance
- * @property {string|null} batchId
- * @property {Object} molecules
- * @property {string} bundle
- * @property {string|null} characters
- * @property {string|null} pubkey
+ * Wallet class represents the set of public and private
+ * keys to sign Molecules
  */
 export default class Wallet {
 
   /**
+   * Class constructor
+   *
    * @param {string | null} secret - typically a 2048-character biometric hash
    * @param {string} token - slug for the token this wallet is intended for
    * @param {string | null} position - hexadecimal string used to salt the secret and produce one-time signatures
@@ -61,12 +95,13 @@ export default class Wallet {
     this.pubkey = null;
 
     if ( secret ) {
-      this.sign( secret );
+      this.prepareKeys( secret );
     }
 
   }
 
   /**
+   * Creates a new Wallet instance
    *
    * @param {string} secretOrBundle
    * @param {string} token
@@ -91,26 +126,29 @@ export default class Wallet {
   }
 
   /**
+   * Determines if the provided string is a bundle hash
    *
-   * @param {string} code
+   * @param {string} maybeBundleHash
    * @returns {boolean}
    */
-  static isBundleHash ( code ) {
+  static isBundleHash ( maybeBundleHash ) {
 
-    if ( typeof code !== 'string' ) {
+    if ( typeof maybeBundleHash !== 'string' ) {
       return false;
     }
 
-    return code.length === 64 && isHex( code );
+    return maybeBundleHash.length === 64 && isHex( maybeBundleHash );
   }
 
   /**
+   * Prepares wallet for signing by generating all required keys
+   *
    * @param {string} secret
    */
-  sign ( secret ) {
+  prepareKeys ( secret ) {
     if ( this.key === null && this.address === null && this.bundle === null ) {
-      this.key = Wallet.generateWalletKey( secret, this.token, this.position );
-      this.address = Wallet.generateWalletAddress( this.key );
+      this.key = Wallet.generatePrivateKey( secret, this.token, this.position );
+      this.address = Wallet.generatePublicKey( this.key );
       this.bundle = generateBundleHash( secret );
       this.getMyEncPrivateKey();
       this.getMyEncPublicKey();
@@ -118,6 +156,8 @@ export default class Wallet {
   }
 
   /**
+   * Returns a new batch ID for stackable tokens
+   *
    * @returns {string}
    */
   static generateBatchId () {
@@ -125,6 +165,8 @@ export default class Wallet {
   }
 
   /**
+   * Sets up a batch ID - either using the sender's, or a new one
+   *
    * @param {Wallet} senderWallet
    * @param {number} transferAmount
    */
@@ -172,6 +214,8 @@ export default class Wallet {
   }
 
   /**
+   * Encrypts a message for this wallet instance
+   *
    * @param {Object|Array} message
    * @returns {Object}
    */
@@ -208,13 +252,14 @@ export default class Wallet {
   }
 
   /**
+   * Generates a private key for the given parameters
    *
    * @param {string} secret
    * @param {string} token
    * @param {string} position
    * @return {string}
    */
-  static generateWalletKey ( secret, token, position ) {
+  static generatePrivateKey ( secret, token, position ) {
 
     // Converting secret to bigInt
     const bigIntSecret = bigInt( secret, 16 ),
@@ -234,10 +279,12 @@ export default class Wallet {
   }
 
   /**
+   * Generates a public key (wallet address)
+   *
    * @param {string} key
    * @return {string}
    */
-  static generateWalletAddress ( key ) {
+  static generatePublicKey ( key ) {
 
     // Subdivide private key into 16 fragments of 128 characters each
     const keyFragments = chunkSubstr( key, 128 ),

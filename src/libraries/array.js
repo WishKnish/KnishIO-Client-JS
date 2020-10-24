@@ -7,7 +7,7 @@
  */
 export function chunkArray ( arr, size ) {
 
-  if ( ! arr.length ) {
+  if ( !arr.length ) {
     return [];
   }
 

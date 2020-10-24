@@ -1,12 +1,61 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import Response from "../response/Response";
 import { Request } from 'servie';
 
 /**
- *
+ * Base class used to construct various GraphQL queries and mutations
  */
 export default class Query {
 
   /**
+   * Class constructor
+   *
    * @param {KnishIOClient} knishIO
    */
   constructor ( knishIO ) {
@@ -18,21 +67,40 @@ export default class Query {
     this.$__query = null;
   }
 
+  /**
+   * Returns request object
+   *
+   * @returns {null}
+   */
   request () {
     return this.$__request;
   }
 
+  /**
+   * Returns response object
+   *
+   * @returns {null}
+   */
   response () {
     return this.$__response;
   }
 
   /**
+   * Returns the HTTP client for our KnishIO class instance
+   *
    * @returns {HttpClient}
    */
   client () {
     return this.knishIO.client();
   }
 
+  /**
+   * Creates a new Request for the given parameters
+   *
+   * @param variables
+   * @param fields
+   * @returns {any}
+   */
   createRequest ( variables = null, fields = null ) {
     this.$__variables = this.compiledVariables( variables );
 
@@ -42,11 +110,19 @@ export default class Query {
     );
   }
 
+  /**
+   * Returns a variables object for the Query
+   *
+   * @param variables
+   * @returns {{}}
+   */
   compiledVariables ( variables = null ) {
     return variables || {}
   }
 
   /**
+   * Returns the compiled Query
+   *
    * @param {Object} fields
    * @returns {*|void|string}
    */
@@ -60,6 +136,7 @@ export default class Query {
   }
 
   /**
+   * Returns a JSON string of compiled fields
    *
    * @param {Object} fields
    * @returns {string}
@@ -76,6 +153,8 @@ export default class Query {
   }
 
   /**
+   * Sends the Query to a Knish.IO node and returns the Response
+   *
    * @param {Object} variables
    * @param {Array|Object|null} fields
    * @return {Promise<Response>}
@@ -86,6 +165,7 @@ export default class Query {
 
     let response = await this.client().send( this.$__request );
 
+    // Do we need to get an auth token?
     if ( this.constructor.name !== 'QueryAuthentication' && response.status === 401 ) {
       await this.knishIO.authentication();
       response = await this.client().send( this.$__request );
@@ -96,11 +176,19 @@ export default class Query {
     return this.$__response;
   }
 
+  /**
+   * Builds a Response based on JSON input
+   *
+   * @param response
+   * @returns {Promise<Response>}
+   */
   async createResponseRaw ( response ) {
     return this.createResponse( JSON.parse( await response.text() ) );
   }
 
   /**
+   * Returns a Response object
+   *
    * @param response
    * @return {Response}
    */
@@ -109,6 +197,8 @@ export default class Query {
   }
 
   /**
+   * Returns the Knish.IO endpoint URL
+   *
    * @return {string}
    */
   url () {
@@ -116,6 +206,8 @@ export default class Query {
   }
 
   /**
+   * Returns the query variables object
+   *
    * @return {Object|null}
    */
   variables () {

@@ -1,20 +1,74 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import CheckMolecule from "./libraries/check";
 import AtomsMissingException from "./exception/AtomsMissingException";
 import Atom from "./Atom";
 
-const cloneDeep = require('lodash.clonedeep');
+const cloneDeep = require( 'lodash.clonedeep' );
 const merge = require( 'lodash.merge' );
 
 /**
- * @property {string | null} cellSlug
+ * MoleculeStructure class to formalize the creation of Molecules
  */
 export default class MoleculeStructure {
 
+  /**
+   * Class constructor
+   *
+   * @property {string | null} cellSlug
+   */
   constructor ( cellSlug = null ) {
     this.cellSlugOrigin = this.cellSlug = cellSlug;
   }
 
   /**
+   * Returns the cell slug delimiter
+   *
    * @returns {string}
    */
   get cellSlugDelimiter () {
@@ -22,10 +76,12 @@ export default class MoleculeStructure {
   }
 
   /**
+   * Returns the base cell slug portion
+   *
    * @returns {string}
    */
   cellSlugBase () {
-    return ( this.cellSlug || '' ).split( this.cellSlugDelimiter )[0];
+    return ( this.cellSlug || '' ).split( this.cellSlugDelimiter )[ 0 ];
   }
 
   /**
@@ -42,6 +98,7 @@ export default class MoleculeStructure {
   }
 
   /**
+   * Validates the current molecular structure
    *
    * @param {Wallet} senderWallet
    * @returns {boolean}
@@ -51,6 +108,9 @@ export default class MoleculeStructure {
   }
 
   /**
+   *
+   * Verifies a specified molecule
+   *
    * @param {Molecule} molecule
    * @param {Wallet} senderWallet
    * @return {boolean}
@@ -70,6 +130,8 @@ export default class MoleculeStructure {
   }
 
   /**
+   * Converts a JSON object into a Molecule Structure instance
+   *
    * @param {string} json
    * @return {Object}
    * @throws {AtomsMissingException}

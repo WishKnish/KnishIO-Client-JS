@@ -28,8 +28,7 @@ export default class CheckMolecule {
    * @returns {boolean}
    * @throws {AtomsMissingException}
    */
-  static continueId ( molecule )
-  {
+  static continueId ( molecule ) {
     CheckMolecule.missing( molecule );
 
     const firstAtom = molecule.atoms[ 0 ];
@@ -191,7 +190,7 @@ export default class CheckMolecule {
 
     const firstAtom = molecule.atoms[ 0 ];
 
-    if ( firstAtom.isotope === 'V' &&  isotopeV.length === 2 ) {
+    if ( firstAtom.isotope === 'V' && isotopeV.length === 2 ) {
 
       const endAtom = isotopeV[ isotopeV.length - 1 ];
 
