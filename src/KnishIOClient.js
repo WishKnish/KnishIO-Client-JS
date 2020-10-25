@@ -311,7 +311,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Returns a list of active wallets for the current session
+   * Retrieves a list of your active wallets (unspent)
    *
    * @returns {Promise<Response>}
    */
@@ -331,26 +331,14 @@ export default class KnishIOClient {
    * @param {string} tokenSlug
    * @returns {Promise<*>}
    */
-  async getShadowWallets ( tokenSlug ) {
-
-    const query = this.createQuery( QueryWalletList ),
-      response = await query.execute( {
-        'bundleHash': generateBundleHash( this.secret() ),
-        'token': tokenSlug,
-      } ),
-      shadowWallets = response.payload();
-
-    if ( !shadowWallets ) {
-      throw new WalletShadowException();
-    }
-
-    for ( let shadowWallet of shadowWallets ) {
-      if ( !shadowWallet instanceof WalletShadow ) {
-        throw new WalletShadowException();
-      }
-    }
-
-    return shadowWallets;
+  getShadowWallets ( tokenSlug ) {
+    const shadowWalletQuery = this.createQuery( QueryWalletList );
+    return shadowWalletQuery.execute( {
+      bundleHash: this.bundle(),
+      token: tokenSlug,
+    } ).then ( (response) => {
+      return response.payload();
+    });
   }
 
   /**
