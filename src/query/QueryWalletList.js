@@ -60,7 +60,7 @@ export default class QueryWalletList extends Query {
    */
   constructor ( knishIO ) {
     super( knishIO );
-    this.$__query = `query( $address: String, $bundleHash: String, $token: String, $position: String ) { Wallet( address: $address, bundleHash: $bundleHash, token: $token, position: $position ) @fields }`;
+    this.$__query = `query( $address: String, $bundleHash: String, $token: String, $position: String, $unspent: Boolean ) { Wallet( address: $address, bundleHash: $bundleHash, token: $token, position: $position, unspent: $unspent ) @fields }`;
     this.$__fields = {
       'address': null,
       'bundleHash': null,
