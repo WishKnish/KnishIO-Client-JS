@@ -261,6 +261,15 @@ export default class KnishIOClient {
   }
 
   /**
+   * Returns the bundle hash for this session
+   *
+   * @returns {string}
+   */
+  bundle () {
+    return generateBundleHash( this.secret() );
+  }
+
+  /**
    * Builds and executes a molecule to issue a new token on the ledger
    *
    * @param {string} tokenSlug
@@ -299,6 +308,21 @@ export default class KnishIOClient {
     query.fillMolecule( type, contact, code );
 
     return await query.execute();
+  }
+
+  /**
+   * Returns a list of active wallets for the current session
+   *
+   * @returns {Promise<Response>}
+   */
+  getWallets() {
+    const walletQuery = this.createQuery( QueryWalletList );
+    return walletQuery.execute( {
+      bundleHash: this.bundle(),
+      unspent: true,
+    } ).then ( (response) => {
+      return response.payload();
+    })
   }
 
   /**
