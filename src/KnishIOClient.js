@@ -49,7 +49,7 @@ import QueryContinuId from "./query/QueryContinuId";
 import { generateBundleHash, } from "./libraries/crypto";
 import Wallet from "./Wallet";
 import WalletShadow from "./WalletShadow";
-import QueryAuthentication from "./query/QueryAuthentication";
+import QueryAuthorization from "./query/QueryAuthorization";
 import QueryBalance from "./query/QueryBalance";
 import QueryTokenCreate from "./query/QueryTokenCreate";
 import Dot from "./libraries/Dot";
@@ -189,7 +189,7 @@ export default class KnishIOClient {
 
     // If you don't supply the molecule, we'll generate one for you
     if ( _molecule === null ) {
-      _molecule = ( queryClass.name === QueryAuthentication.name ) ? await this.createMolecule( this.secret(), new Wallet( this.secret(), 'AUTH' ) ) : await this.createMolecule();
+      _molecule = ( queryClass.name === QueryAuthorization.name ) ? await this.createMolecule( this.secret(), new Wallet( this.secret(), 'AUTH' ) ) : await this.createMolecule();
     }
 
     const query = new queryClass( this, _molecule );
@@ -204,18 +204,18 @@ export default class KnishIOClient {
   }
 
   /**
-   * Obtains an authentication token from the node endpoint
+   * Obtains an authorization token from the node endpoint
    *
    * @param {string|null} secret
    * @param {string|null} cell_slug
    * @return {Promise<Response>}
    */
-  async authentication ( secret = null, cell_slug = null ) {
+  async authorization ( secret = null, cell_slug = null ) {
 
     this.$__secret = secret || this.secret();
     this.$__cellSlug = cell_slug || this.cellSlug();
 
-    const query = await this.createMoleculeQuery( QueryAuthentication );
+    const query = await this.createMoleculeQuery( QueryAuthorization );
 
     query.fillMolecule();
 
@@ -255,7 +255,7 @@ export default class KnishIOClient {
    */
   secret () {
     if ( !this.$__secret ) {
-      throw new UnauthenticatedException( `Expected ${ this.constructor.name }::authentication call before.` );
+      throw new UnauthenticatedException( `Expected ${ this.constructor.name }::authorization call before.` );
     }
     return this.$__secret;
   }

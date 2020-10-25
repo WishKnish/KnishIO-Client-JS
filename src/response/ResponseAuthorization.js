@@ -52,17 +52,17 @@ import InvalidResponseException from "../exception/InvalidResponseException";
 /**
  * Response for auth token query
  */
-export default class ResponseAuthentication extends ResponseMolecule {
+export default class ResponseAuthorization extends ResponseMolecule {
 
   /**
-   * Returns the auth key
+   * Returns the authorization key
    *
    * @param key
    * @returns {*}
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthentication: '${ key }' key is not found in the payload.` );
+      throw new InvalidResponseException( `ResponseAuthorization: '${ key }' key is not found in the payload.` );
     }
     return Dot.get( this.payload(), key );
   }

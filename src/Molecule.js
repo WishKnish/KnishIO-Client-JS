@@ -674,11 +674,11 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
-   * Arranges atoms to request an authentication token from the node
+   * Arranges atoms to request an authorization token from the node
    *
    * @returns {Molecule}
    */
-  initAuthentication () {
+  initAuthorization () {
     this.molecularHash = null;
 
     // Initializing a new Atom to hold our metadata
