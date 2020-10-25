@@ -110,7 +110,7 @@ export default class Molecule extends MoleculeStructure {
     return CheckMolecule.molecularHash( molecule )
       && CheckMolecule.ots( molecule )
       && CheckMolecule.index( molecule )
-      && CheckMolecule.continueId( molecule )
+      && CheckMolecule.continuId( molecule )
       && CheckMolecule.isotopeM( molecule )
       && CheckMolecule.isotopeT( molecule )
       && CheckMolecule.isotopeC( molecule )

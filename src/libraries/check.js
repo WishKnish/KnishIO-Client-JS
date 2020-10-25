@@ -28,13 +28,13 @@ export default class CheckMolecule {
    * @returns {boolean}
    * @throws {AtomsMissingException}
    */
-  static continueId ( molecule ) {
+  static continuId ( molecule ) {
     CheckMolecule.missing( molecule );
 
     const firstAtom = molecule.atoms[ 0 ];
 
     if ( firstAtom.token === 'USER' && CheckMolecule.isotopeFilter( 'I', molecule.atoms ).length < 1 ) {
-      throw new AtomsMissingException( 'Missing atom ContinueID' );
+      throw new AtomsMissingException( 'Missing atom ContinuID' );
     }
 
     return true;

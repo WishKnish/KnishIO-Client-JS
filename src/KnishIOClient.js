@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
-import QueryContinueId from "./query/QueryContinueId";
+import QueryContinuId from "./query/QueryContinuId";
 import { generateBundleHash, } from "./libraries/crypto";
 import Wallet from "./Wallet";
 import WalletShadow from "./WalletShadow";
@@ -451,7 +451,7 @@ export default class KnishIOClient {
    * @returns {Promise<Response>}
    */
   async getContinuId ( bundleHash ) {
-    return await this.createQuery( QueryContinueId ).execute( { 'bundle': bundleHash } );
+    return await this.createQuery( QueryContinuId ).execute( { 'bundle': bundleHash } );
   }
 
   /**
