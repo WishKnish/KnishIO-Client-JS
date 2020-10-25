@@ -167,7 +167,7 @@ export default class Query {
 
     // Do we need to get an auth token?
     if ( this.constructor.name !== 'QueryAuthorization' && response.status === 401 ) {
-      await this.knishIO.authorization();
+      await this.knishIO.getAuthToken();
       response = await this.client().send( this.$__request );
     }
 

@@ -66,6 +66,7 @@ import QueryIdentifierCreate from "./query/QueryIdentifierCreate";
 import QueryWalletList from "./query/QueryWalletList";
 import QueryShadowWalletClaim from "./query/QueryShadowWalletClaim";
 import UnauthenticatedException from "./exception/UnauthenticatedException";
+import QueryWalletBundle from "./query/QueryWalletBundle";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -79,6 +80,9 @@ export default class KnishIOClient {
    * @param {HttpClient} client
    */
   constructor ( url, client = null ) {
+
+    console.log( 'KnishIOClient::constructor() - Initializing new Knish.IO client instance...' );
+
     this.$__url = url;
     this.$__secret = '';
     this.$__client = client || new HttpClient( this.$__url );
@@ -149,6 +153,8 @@ export default class KnishIOClient {
    */
   async createMolecule ( secret = null, sourceWallet = null, remainderWallet = null ) {
 
+    console.log( 'KnishIOClient::createMolecule() - Creating a new molecule...' );
+
     const _secret = secret || this.secret();
     let _sourceWallet = sourceWallet;
 
@@ -185,6 +191,9 @@ export default class KnishIOClient {
    * @param molecule
    */
   async createMoleculeQuery ( queryClass, molecule = null ) {
+
+    console.log( `KnishIOClient::createMoleculeQuery() - Creating a new ${ queryClass.name } query...` );
+
     let _molecule = molecule;
 
     // If you don't supply the molecule, we'll generate one for you
@@ -210,7 +219,9 @@ export default class KnishIOClient {
    * @param {string|null} cell_slug
    * @return {Promise<Response>}
    */
-  async authorization ( secret = null, cell_slug = null ) {
+  async getAuthToken ( secret = null, cell_slug = null ) {
+
+    console.log( 'KnishIOClient::getAuthToken() - Requesting authorization token...' );
 
     this.$__secret = secret || this.secret();
     this.$__cellSlug = cell_slug || this.cellSlug();
@@ -222,9 +233,17 @@ export default class KnishIOClient {
     const response = await query.execute();
 
     if ( response.success() ) {
-      this.client().setAuthToken( response.token() )
+
+      const token = response.token();
+      this.client().setAuthToken( token )
+
+      console.log( `KnishIOClient::getAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
+
     } else {
+
+      console.log( 'KnishIOClient::getAuthToken() - Unable to retrieve auth token...' );
       throw new UnauthenticatedException( response.reason() );
+
     }
 
     return response;
@@ -257,6 +276,9 @@ export default class KnishIOClient {
     if ( !this.$__secret ) {
       throw new UnauthenticatedException( `Expected ${ this.constructor.name }::authorization call before.` );
     }
+
+    console.log( 'KnishIOClient::secret() - Retrieving stored secret...' );
+
     return this.$__secret;
   }
 
@@ -316,6 +338,9 @@ export default class KnishIOClient {
    * @returns {Promise<Response>}
    */
   getWallets() {
+
+    console.log( 'KnishIOClient::getWallets() - Querying wallets...' );
+
     const walletQuery = this.createQuery( QueryWalletList );
     return walletQuery.execute( {
       bundleHash: this.bundle(),
@@ -332,6 +357,9 @@ export default class KnishIOClient {
    * @returns {Promise<*>}
    */
   getShadowWallets ( tokenSlug ) {
+
+    console.log( 'KnishIOClient::getShadowWallets() - Querying shadow wallets...' );
+
     const shadowWalletQuery = this.createQuery( QueryWalletList );
     return shadowWalletQuery.execute( {
       bundleHash: this.bundle(),
@@ -340,6 +368,24 @@ export default class KnishIOClient {
       return response.payload();
     });
   }
+
+  /**
+   * Retrieves your wallet bundle's metadata from the ledger
+   *
+   * @returns {Promise<Response>}
+   */
+  getBundleMeta() {
+
+    console.log( 'KnishIOClient::getBundleMeta() - Querying wallet bundle metadata...' );
+
+    const bundleQuery = this.createQuery( QueryWalletBundle );
+    return bundleQuery.execute( {
+      bundleHash: this.bundle(),
+    } ).then ( (response) => {
+      return response.payload();
+    })
+  }
+
 
   /**
    * Builds and executes a Molecule that requests token payment from the node

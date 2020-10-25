@@ -1,8 +1,50 @@
-// Copyright 2019 WishKnish Corp. All rights reserved.
-// You may use, distribute, and modify this code under the GPLV3 license, which is provided at:
-// https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
-// This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
 
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+ */
 import { shake256 } from 'js-sha3';
 import { randomString } from './strings';
 import Soda from "./../libraries/Soda";
@@ -16,6 +58,8 @@ import Soda from "./../libraries/Soda";
  */
 export function generateSecret ( seed = null, length = 2048 ) {
 
+  console.log( `Crypto::generateSecret() - Computing new secret${ seed ? ' from existing seed' : '' }...` );
+
   if ( seed ) {
 
     const sponge = shake256.create( length * 2 );
@@ -23,8 +67,11 @@ export function generateSecret ( seed = null, length = 2048 ) {
     sponge.update( seed );
 
     return sponge.hex();
+
   } else {
+
     return randomString( length );
+
   }
 }
 
@@ -36,11 +83,12 @@ export function generateSecret ( seed = null, length = 2048 ) {
  */
 export function generateBundleHash ( secret ) {
 
+  console.log( 'Crypto::bundle() - Computing wallet bundle from secret...' );
+
   const sponge = shake256.create( 256 );
-
   sponge.update( secret );
-
   return sponge.hex();
+
 }
 
 /**
