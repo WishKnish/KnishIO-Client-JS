@@ -49,7 +49,7 @@ import Response from "./Response";
 import Dot from "../libraries/Dot";
 
 /**
- * Response for Identifier query
+ * Response for mutation to create / link an Identifier to a Wallet Bundle
  */
 export default class ResponseIdentifier extends Response {
 

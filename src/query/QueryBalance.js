@@ -58,7 +58,7 @@ export default class QueryBalance extends Query {
    *
    * @param knishIO
    */
-  constructor( knishIO ) {
+  constructor ( knishIO ) {
     super( knishIO );
 
     this.$__query = `query( $address: String, $bundleHash: String, $token: String, $position: String ) { Balance( address: $address, bundleHash: $bundleHash, token: $token, position: $position ) @fields }`;

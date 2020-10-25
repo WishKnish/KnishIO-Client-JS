@@ -75,10 +75,9 @@ export default class ResponseWalletList extends Response {
   toClientWallet ( data ) {
     let wallet;
 
-    if ( data[ 'position' ] === null || typeof data[ 'position' ] === 'undefined') {
-      wallet = new WalletShadow( data['bundleHash'], data['tokenSlug'], data['batchId'] );
-    }
-    else {
+    if ( data[ 'position' ] === null || typeof data[ 'position' ] === 'undefined' ) {
+      wallet = new WalletShadow( data[ 'bundleHash' ], data[ 'tokenSlug' ], data[ 'batchId' ] );
+    } else {
       wallet = new Wallet( null, data[ 'tokenSlug' ] );
       wallet.address = data[ 'address' ];
       wallet.position = data[ 'position' ];

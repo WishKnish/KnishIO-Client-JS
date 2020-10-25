@@ -59,7 +59,7 @@ export default class QueryShadowWalletClaim extends QueryMoleculePropose {
       wallets.push( Wallet.create( this.$__molecule.secret(), token, shadowWallet.batchId ) );
     }
 
-    this.$__molecule.initShadowWalletClaimAtom ( token, wallets );
+    this.$__molecule.initShadowWalletClaimAtom( token, wallets );
     this.$__molecule.sign();
     this.$__molecule.check();
   }

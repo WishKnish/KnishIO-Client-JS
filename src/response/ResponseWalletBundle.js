@@ -61,7 +61,7 @@ export default class ResponseWalletBundle extends Response {
   constructor ( query, json ) {
     super( query, json );
     this.dataKey = 'data.WalletBundle';
-    this.init ()
+    this.init()
   }
 
 }

@@ -82,7 +82,7 @@ export default class ResponseBalance extends Response {
 
     // Shadow wallet
     if ( balance[ 'position' ] === null ) {
-      wallet = new WalletShadow( balance['bundleHash'], balance['tokenSlug'], balance['batchId'] );
+      wallet = new WalletShadow( balance[ 'bundleHash' ], balance[ 'tokenSlug' ], balance[ 'batchId' ] );
     }
     // Regular wallet
     else {

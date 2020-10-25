@@ -23,8 +23,7 @@ export function generateSecret ( seed = null, length = 2048 ) {
     sponge.update( seed );
 
     return sponge.hex();
-  }
-  else {
+  } else {
     return randomString( length );
   }
 }

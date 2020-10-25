@@ -48,7 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Query from "./Query";
 import ResponseMolecule from "../response/ResponseMolecule";
 
-const merge = require('lodash.merge');
+const merge = require( 'lodash.merge' );
 
 /**
  * Query for proposing a new Molecule

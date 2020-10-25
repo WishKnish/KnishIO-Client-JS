@@ -63,7 +63,7 @@ export default class ResponseMolecule extends Response {
   constructor ( query, json ) {
     super( query, json );
     this.dataKey = 'data.ProposeMolecule';
-    this.init ();
+    this.init();
   }
 
   /**
@@ -73,8 +73,7 @@ export default class ResponseMolecule extends Response {
     const payload_json = Dot.get( this.data(), 'payload' );
     try {
       this.$__payload = JSON.parse( payload_json );
-    }
-    catch ( err ) {
+    } catch ( err ) {
       this.$__payload = null;
     }
   }
