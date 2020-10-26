@@ -48,13 +48,11 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import QueryContinuId from "./query/QueryContinuId";
 import { generateBundleHash, } from "./libraries/crypto";
 import Wallet from "./Wallet";
-import WalletShadow from "./WalletShadow";
 import QueryAuthorization from "./query/QueryAuthorization";
 import QueryBalance from "./query/QueryBalance";
 import QueryTokenCreate from "./query/QueryTokenCreate";
 import Dot from "./libraries/Dot";
 import QueryTokenRequest from "./query/QueryTokenRequest";
-import WalletShadowException from "./exception/WalletShadowException";
 import Decimal from "./libraries/Decimal";
 import TransferBalanceException from "./exception/TransferBalanceException";
 import QueryTokenTransfer from "./query/QueryTokenTransfer";
@@ -78,14 +76,17 @@ export default class KnishIOClient {
    *
    * @param {string} url
    * @param {HttpClient} client
+   * @param {number} serverSdkVersion
    */
-  constructor ( url, client = null ) {
+  constructor ( url, client = null, serverSdkVersion = 3 ) {
 
-    console.log( 'KnishIOClient::constructor() - Initializing new Knish.IO client instance...' );
+    console.log( `KnishIOClient::constructor() - Initializing new Knish.IO client instance for SDK version ${ serverSdkVersion }...` );
 
     this.$__url = url;
     this.$__secret = '';
+    this.$__bundle = '';
     this.$__client = client || new HttpClient( this.$__url );
+    this.$__serverSdkVersion = serverSdkVersion;
     this.remainderWallet = null;
   }
 
@@ -213,40 +214,47 @@ export default class KnishIOClient {
   }
 
   /**
-   * Obtains an authorization token from the node endpoint
+   * Requests an authorization token from the node endpoint
    *
    * @param {string|null} secret
    * @param {string|null} cell_slug
    * @return {Promise<Response>}
    */
-  async getAuthToken ( secret = null, cell_slug = null ) {
+  async requestAuthToken ( secret = null, cell_slug = null ) {
 
-    console.log( 'KnishIOClient::getAuthToken() - Requesting authorization token...' );
+    console.log( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
 
     this.$__secret = secret || this.secret();
+    this.$__bundle = generateBundleHash( this.$__secret );
     this.$__cellSlug = cell_slug || this.cellSlug();
 
-    const query = await this.createMoleculeQuery( QueryAuthorization );
+    // SDK versions 2 and below do not utilize an authorization token
+    if ( this.$__serverSdkVersion > 2 ) {
 
-    query.fillMolecule();
+      const query = await this.createMoleculeQuery( QueryAuthorization );
+      query.fillMolecule();
+      const response = await query.execute();
 
-    const response = await query.execute();
+      if ( response.success() ) {
 
-    if ( response.success() ) {
+        const token = response.token();
+        this.client().setAuthToken( token )
 
-      const token = response.token();
-      this.client().setAuthToken( token )
+        console.log( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
 
-      console.log( `KnishIOClient::getAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
+      } else {
 
+        console.log( 'KnishIOClient::requestAuthToken() - Unable to retrieve auth token...' );
+        throw new UnauthenticatedException( response.reason() );
+
+      }
+
+      return response;
     } else {
 
-      console.log( 'KnishIOClient::getAuthToken() - Unable to retrieve auth token...' );
-      throw new UnauthenticatedException( response.reason() );
+      console.log( 'KnishIOClient::requestAuthToken() - Server SDK version does not require an auth token...' );
 
     }
-
-    return response;
   }
 
   /**
@@ -274,11 +282,8 @@ export default class KnishIOClient {
    */
   secret () {
     if ( !this.$__secret ) {
-      throw new UnauthenticatedException( `Expected ${ this.constructor.name }::authorization call before.` );
+      throw new UnauthenticatedException( 'KnishIOClient::secret() - Unable to find a stored secret!' );
     }
-
-    console.log( 'KnishIOClient::secret() - Retrieving stored secret...' );
-
     return this.$__secret;
   }
 
@@ -288,7 +293,10 @@ export default class KnishIOClient {
    * @returns {string}
    */
   bundle () {
-    return generateBundleHash( this.secret() );
+    if ( !this.$__bundle ) {
+      throw new UnauthenticatedException( 'KnishIOClient::bundle() - Unable to find a stored bundle!' );
+    }
+    return this.$__bundle;
   }
 
   /**
@@ -337,7 +345,7 @@ export default class KnishIOClient {
    *
    * @returns {Promise<Response>}
    */
-  getWallets() {
+  getWallets () {
 
     console.log( 'KnishIOClient::getWallets() - Querying wallets...' );
 
@@ -345,9 +353,46 @@ export default class KnishIOClient {
     return walletQuery.execute( {
       bundleHash: this.bundle(),
       unspent: true,
-    } ).then ( (response) => {
-      return response.payload();
-    })
+    } ).then( ( response ) => {
+      const walletData = response.payload();
+      const wallets = [];
+
+      console.log( `KnishIOClient::getWallets() - Discovered ${ walletData.length } remote wallets...` );
+
+      walletData.forEach( wallet => {
+
+        const tokenSlug = wallet.tokenSlug;
+        let walletObj = null;
+
+        // If we have an address, it's a regular wallet; otherwise, it's a show wallet
+        if ( wallet.address ) {
+
+          console.log( `KnishIOClient::getWallets() - Restoring ${ wallet.token } wallet with balance of ${ wallet.balance }...` );
+
+          walletObj = new Wallet( this.$__secret, wallet.token, wallet.position );
+          walletObj.balance = Number( wallet.balance );
+          walletObj.molecules = wallet.molecules;
+          walletObj.createdAt = wallet.createdAt;
+          walletObj.tokenName = wallet.tokenName;
+          walletObj.tokenIcon = wallet.tokenIcon;
+
+        } else {
+
+          console.log( `Wallet::import() - Restoring ${ tokenSlug } shadow wallet...` );
+          walletObj = new Wallet( this.$__secret, tokenSlug, '' );
+          walletObj.balance = wallet.balance;
+          walletObj.createdAt = wallet.createdAt;
+
+        }
+
+        // Flagging wallet as remote
+        wallet.remote = true;
+
+        wallets.push( walletObj );
+      } )
+
+      return wallets;
+    } )
   }
 
   /**
@@ -364,9 +409,9 @@ export default class KnishIOClient {
     return shadowWalletQuery.execute( {
       bundleHash: this.bundle(),
       token: tokenSlug,
-    } ).then ( (response) => {
+    } ).then( ( response ) => {
       return response.payload();
-    });
+    } );
   }
 
   /**
@@ -374,16 +419,16 @@ export default class KnishIOClient {
    *
    * @returns {Promise<Response>}
    */
-  getBundleMeta() {
+  getBundleMeta () {
 
     console.log( 'KnishIOClient::getBundleMeta() - Querying wallet bundle metadata...' );
 
     const bundleQuery = this.createQuery( QueryWalletBundle );
     return bundleQuery.execute( {
       bundleHash: this.bundle(),
-    } ).then ( (response) => {
+    } ).then( ( response ) => {
       return response.payload();
-    })
+    } )
   }
 
 
@@ -493,7 +538,7 @@ export default class KnishIOClient {
    * @returns {Promise<*|Wallet|null>}
    */
   async getSourceWallet () {
-    let sourceWallet = ( await this.getContinuId( generateBundleHash( this.secret() ) ) ).payload();
+    let sourceWallet = ( await this.getContinuId( this.bundle() ) ).payload();
 
     if ( !sourceWallet ) {
       sourceWallet = new Wallet( this.secret() );
