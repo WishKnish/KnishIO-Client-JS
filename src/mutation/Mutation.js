@@ -45,27 +45,11 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import QueryMoleculePropose from "./QueryMoleculePropose";
+import Query from "../query/Query";
 
 /**
- * Query for requesting tokens from a node
+ * Base class used to construct various GraphQL mutations
  */
-export default class QueryTokenRequest extends QueryMoleculePropose {
+export default class Mutation extends Query {
 
-  /**
-   * Fills a Molecule with the appropriate atoms and prepares for broadcast
-   *
-   * @param token
-   * @param value
-   * @param metaType
-   * @param metaId
-   * @param metas
-   */
-  fillMolecule ( token, value, metaType, metaId, metas = null ) {
-
-    this.$__molecule.initTokenRequest( token, value, metaType, metaId, metas || {} );
-    this.$__molecule.sign();
-    console.log( this.$__molecule );
-    this.$__molecule.check();
-  }
 }

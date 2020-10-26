@@ -60,7 +60,7 @@ This document will explain both ways.
   
 - Return a customized Query instance (via Promise) that can be used to generate arbitrary transactions to the ledger for the supplied Query class (more on these below):
     ```javascript
-    client.createMoleculeQuery ( myQueryClass )
+    client.createMoleculeMutation ( myQueryClass )
     ```
   
 - Retrieves the active balance (in the form of a Wallet object:
@@ -99,7 +99,7 @@ Here are the most commonly used ones:
 
 ```javascript
 // Build the query
-const query = await client.createMoleculeQuery(QueryMetaType);
+const query = await client.createMoleculeMutation(QueryMetaType);
 
 // Define variable parameters
 // (eg: which MetaType we are querying)
@@ -125,7 +125,7 @@ console.log(result.data());
 
 ```javascript
 // Build the query
-const query = await client.createMoleculeQuery(QueryWalletBundle);
+const query = await client.createMoleculeMutation(QueryWalletBundle);
 
 // Define variable parameters
 // (eg: how we want to filter Wallet Bundles)
@@ -152,7 +152,7 @@ console.log(result.data());
 
 ```javascript
 // Build the query
-const query = await client.createMoleculeQuery( QueryWalletList );
+const query = await client.createMoleculeMutation( QueryWalletList );
 
 // Define variable parameters
 // (eg: how we want to filter Wallet Bundles)
@@ -276,7 +276,7 @@ This method involves individually building Atoms and Molecules, triggering the s
 8. Broadcast the molecule to a Knish.IO node:
     ```javascript
     // Build our query object using the KnishIOClient wrapper
-    const query = new QueryMoleculePropose( client, molecule );
+    const query = new MutationProposeMolecule( client, molecule );
    
     // Send the query to the node and get a response
     const response = await query.execute();
@@ -301,8 +301,8 @@ This method involves individually building Atoms and Molecules, triggering the s
     ```
     Payloads are provided by responses to the following queries:
     1. `QueryBalance` and `QueryContinuId` -> returns a `Wallet` instance
-    2. `QueryMoleculePropose`, `QueryAuthentication`, `QueryIdentifierCreate`, `QueryLinkIdentifier`, `QueryShadowWalletClaim`, `QueryTokenCreate`, `QueryTokenRequest`, and `QueryTokenTransfer` -> returns molecule metadata
-    3. `QueryWalletList` -> returns a list of `Wallet` instances
+    2. `QueryWalletList` -> returns a list of `Wallet` instances
+    3. `MutationProposeMolecule`, `MutationRequestAuthorization`, `MutationCreateIdentifier`, `MutationLinkIdentifier`, `MutationClaimShadowWallet`, `MutationCreateToken`, `MutationRequestTokens`, and `MutationTransferTokens` -> returns molecule metadata
 
 ## Getting Help
 Knish.IO is active development, and our team is ready to assist with integration questions. The best way to seek help is to stop by our [Telegram Support Channel](https://t.me/wishknish). You can also [send us a contact request](https://knish.io/contact) via our website.

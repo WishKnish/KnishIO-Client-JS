@@ -45,39 +45,22 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "./Query";
-import ResponseIdentifier from "../response/ResponseIdentifier";
+import MutationProposeMolecule from "./MutationProposeMolecule";
+import Wallet from "../Wallet";
 
 /**
- * Query for linking an Identifier to a Wallet Bundle
+ * Query for claiming a Shadow Wallet
  */
-export default class QueryLinkIdentifierMutation extends Query {
+export default class MutationClaimShadowWallet extends MutationProposeMolecule {
+  fillMolecule ( token, shadowWallets ) {
+    const wallets = [];
 
-  /**
-   * Class constructor
-   *
-   * @param knishIO
-   */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = `mutation( $bundle: String!, $type: String!, $content: String! ) { LinkIdentifier( bundle: $bundle, type: $type, content: $content ) @fields }`;
-    this.$__fields = {
-      'type': null,
-      'bundle': null,
-      'content': null,
-      'set': null,
-      'message': null,
-    };
+    for ( let shadowWallet of shadowWallets ) {
+      wallets.push( Wallet.create( this.$__molecule.secret(), token, shadowWallet.batchId ) );
+    }
+
+    this.$__molecule.initShadowWalletClaimAtom( token, wallets );
+    this.$__molecule.sign();
+    this.$__molecule.check();
   }
-
-  /**
-   * Returns a Response object
-   *
-   * @param {string} response
-   * @return {ResponseIdentifier}
-   */
-  createResponse ( response ) {
-    return new ResponseIdentifier( this, response );
-  }
-
 }
