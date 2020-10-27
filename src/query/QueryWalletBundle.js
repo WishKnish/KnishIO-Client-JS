@@ -83,4 +83,36 @@ export default class QueryWalletBundle extends Query {
   createResponse ( response ) {
     return new ResponseWalletBundle( this, response );
   }
+
+  /**
+   * Builds a GraphQL-friendly variables object based on input fields
+   *
+   * @param {string|array|null} metaType
+   * @param {string|array|null} metaId
+   * @param {string|array|null} key
+   * @param {string|array|null} value
+   * @param {boolean} latest
+   * @returns {{}}
+   */
+  static createVariables ( bundleHash = null, key = null, value = null, latest = true ) {
+
+    const variables = {
+      latest,
+    };
+
+    if ( bundleHash ) {
+      variables[ typeof bundleHash === "string" ? 'bundleHash' : 'bundleHashes' ] = bundleHash;
+    }
+
+    if ( key ) {
+      variables[ typeof key === "string" ? 'key' : 'keys' ] = key;
+    }
+
+    if ( value ) {
+      variables[ typeof value === "string" ? 'value' : 'values' ] = value;
+    }
+
+    return variables;
+
+  }
 }

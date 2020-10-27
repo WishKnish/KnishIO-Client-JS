@@ -55,6 +55,7 @@ import QueryContinuId from "./query/QueryContinuId";
 import QueryWalletBundle from "./query/QueryWalletBundle";
 import QueryWalletList from "./query/QueryWalletList";
 import QueryBalance from "./query/QueryBalance";
+import QueryMetaType from "./query/QueryMetaType";
 import MutationRequestAuthorization from "./mutation/MutationRequestAuthorization";
 import MutationCreateToken from "./mutation/MutationCreateToken";
 import MutationRequestTokens from "./mutation/MutationRequestTokens";
@@ -182,7 +183,7 @@ export default class KnishIOClient {
     let _sourceWallet = sourceWallet;
 
     // Sets the source wallet as the last remainder wallet (to maintain ContinuID)
-    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery.response().success() ) {
+    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() ) {
       _sourceWallet = this.getRemainderWallet();
     }
 
@@ -286,7 +287,7 @@ export default class KnishIOClient {
    * @param {string} tokenSlug
    * @return {Promise<Response>}
    */
-  async getBalance ( bundleOrSecret, tokenSlug ) {
+  async queryBalance ( bundleOrSecret, tokenSlug ) {
 
     const query = this.createQuery( QueryBalance );
 
@@ -295,6 +296,20 @@ export default class KnishIOClient {
       'bundleHash': Wallet.isBundleHash( bundleOrSecret ) ? bundleOrSecret : generateBundleHash( bundleOrSecret ),
       'token': tokenSlug,
     } );
+  }
+
+  /**
+   * Retrieves metadata for the given metaType and provided parameters
+   *
+   * @param {string} metaType
+   * @param {string|array} metaId
+   * @param {string|array} key
+   * @param {string|array} value
+   * @returns {Promise<Response|*>}
+   */
+  async queryMeta ( metaType, metaId = null, key = null, value = null ) {
+    const query = this.createQuery( QueryMetaType );
+    return await query.execute( QueryMetaType.createVariables( metaType, metaId, key, value ) );
   }
 
   /**
@@ -365,15 +380,16 @@ export default class KnishIOClient {
   /**
    * Retrieves a list of your active wallets (unspent)
    *
+   * @param {string|null} bundleHash
    * @returns {Promise<Response>}
    */
-  getWallets () {
+  queryWallets ( bundleHash = null ) {
 
-    console.log( 'KnishIOClient::getWallets() - Querying wallets...' );
+    console.log( `KnishIOClient::queryWallets() - Querying wallets${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
 
     const walletQuery = this.createQuery( QueryWalletList );
     return walletQuery.execute( {
-      bundleHash: this.bundle(),
+      bundleHash: bundleHash ? bundleHash : this.bundle(),
       unspent: true,
     } ).then( ( response ) => {
       const walletData = response.payload();
@@ -409,8 +425,8 @@ export default class KnishIOClient {
 
         // Flagging wallet as remote
         wallet.remote = true;
-
         wallets.push( walletObj );
+
       } )
 
       return wallets;
@@ -421,15 +437,16 @@ export default class KnishIOClient {
    * Retrieves a list of your shadow wallets (balance, but no keys)
    *
    * @param {string} tokenSlug
+   * @param {string|null} bundleHash
    * @returns {Promise<*>}
    */
-  getShadowWallets ( tokenSlug ) {
+  queryShadowWallets ( tokenSlug = 'KNISH', bundleHash = null ) {
 
-    console.log( 'KnishIOClient::getShadowWallets() - Querying shadow wallets...' );
+    console.log( `KnishIOClient::queryShadowWallets() - Querying shadow wallets${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
 
     const shadowWalletQuery = this.createQuery( QueryWalletList );
     return shadowWalletQuery.execute( {
-      bundleHash: this.bundle(),
+      bundleHash: bundleHash ? bundleHash : this.bundle(),
       token: tokenSlug,
     } ).then( ( response ) => {
       return response.payload();
@@ -439,20 +456,24 @@ export default class KnishIOClient {
   /**
    * Retrieves your wallet bundle's metadata from the ledger
    *
+   * @param {string|boolean|null} bundleHash
+   * @param {string|array|null} key
+   * @param {string|array|null} value
+   * @param {boolean} latest
+   * @param {object|null} fields
    * @returns {Promise<Response>}
    */
-  getBundleMeta () {
+  queryBundle ( bundleHash = null, key = null, value = null, latest = true, fields = null ) {
 
-    console.log( 'KnishIOClient::getBundleMeta() - Querying wallet bundle metadata...' );
+    console.log( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
 
     const bundleQuery = this.createQuery( QueryWalletBundle );
-    return bundleQuery.execute( {
-      bundleHash: this.bundle(),
-    } ).then( ( response ) => {
-      return response.payload();
-    } )
+    const variables = QueryWalletBundle.createVariables( bundleHash !== null ? bundleHash : this.bundle(), key, value, latest );
+    return bundleQuery.execute( variables, fields )
+      .then( ( response ) => {
+        return response.payload();
+      } )
   }
-
 
   /**
    * Builds and executes a Molecule that requests token payment from the node
@@ -505,7 +526,7 @@ export default class KnishIOClient {
    */
   async claimShadowWallet ( tokenSlug, molecule = null ) {
 
-    const shadowWallets = this.getShadowWallets( tokenSlug ),
+    const shadowWallets = this.queryShadowWallets( tokenSlug ),
       query = await this.createMoleculeMutation( MutationClaimShadowWallet, molecule );
     query.fillMolecule( tokenSlug, shadowWallets );
 
@@ -522,7 +543,7 @@ export default class KnishIOClient {
    */
   async transferToken ( walletObjectOrBundleHash, tokenSlug, amount ) {
 
-    const fromWallet = ( await this.getBalance( this.secret(), tokenSlug ) ).payload();
+    const fromWallet = ( await this.queryBalance( this.secret(), tokenSlug ) ).payload();
 
     // Do you have enough tokens?
     if ( fromWallet === null || Decimal.cmp( fromWallet.balance, amount ) < 0 ) {
@@ -530,7 +551,7 @@ export default class KnishIOClient {
     }
 
     // Attempt to get the recipient's wallet, if not provided
-    let toWallet = walletObjectOrBundleHash instanceof Wallet ? walletObjectOrBundleHash : ( await this.getBalance( walletObjectOrBundleHash, tokenSlug ) ).payload();
+    let toWallet = walletObjectOrBundleHash instanceof Wallet ? walletObjectOrBundleHash : ( await this.queryBalance( walletObjectOrBundleHash, tokenSlug ) ).payload();
 
     // If no wallet was found, prepare to send to bundle
     // This will typically result in a shadow wallet
@@ -560,7 +581,7 @@ export default class KnishIOClient {
    * @returns {Promise<*|Wallet|null>}
    */
   async getSourceWallet () {
-    let sourceWallet = ( await this.getContinuId( this.bundle() ) ).payload();
+    let sourceWallet = ( await this.queryContinuId( this.bundle() ) ).payload();
 
     if ( !sourceWallet ) {
       sourceWallet = new Wallet( this.secret() );
@@ -575,7 +596,7 @@ export default class KnishIOClient {
    * @param bundleHash
    * @returns {Promise<Response>}
    */
-  async getContinuId ( bundleHash ) {
+  async queryContinuId ( bundleHash ) {
     return await this.createQuery( QueryContinuId ).execute( { 'bundle': bundleHash } );
   }
 
