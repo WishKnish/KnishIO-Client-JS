@@ -459,15 +459,17 @@ export default class KnishIOClient {
    * @param {string|boolean|null} bundleHash
    * @param {string|array|null} key
    * @param {string|array|null} value
+   * @param {boolean} latest
+   * @param {object|null} fields
    * @returns {Promise<Response>}
    */
-  queryBundle ( bundleHash = null, key = null, value = null ) {
+  queryBundle ( bundleHash = null, key = null, value = null, latest = true, fields = null ) {
 
     console.log( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
 
     const bundleQuery = this.createQuery( QueryWalletBundle );
-    const variables = QueryWalletBundle.createVariables( bundleHash !== null ? bundleHash : this.bundle(), key, value );
-    return bundleQuery.execute( variables )
+    const variables = QueryWalletBundle.createVariables( bundleHash !== null ? bundleHash : this.bundle(), key, value, latest );
+    return bundleQuery.execute( variables, fields )
       .then( ( response ) => {
         return response.payload();
       } )
