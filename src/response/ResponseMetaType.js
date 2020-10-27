@@ -46,6 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "./Response";
+import Meta from "../Meta";
 
 /**
  * Response for MetaType Query
@@ -64,4 +65,25 @@ export default class ResponseMetaType extends Response {
     this.init();
   }
 
+  /**
+   * Returns meta type results with normalized metadata
+   *
+   * @returns {null|*}
+   */
+  payload () {
+    const metaTypeData = this.data();
+
+    if ( !metaTypeData || metaTypeData.length === 0 ) {
+      return null;
+    }
+
+    const aggregate = [];
+
+    metaTypeData.pop().instances.forEach( meta => {
+      meta.metas = Meta.aggregateMeta( meta.metas );
+      aggregate.push( meta );
+    });
+
+    return aggregate;
+  }
 }
