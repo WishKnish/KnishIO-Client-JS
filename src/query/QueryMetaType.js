@@ -125,4 +125,36 @@ export default class QueryMetaType extends Query {
     return new ResponseMetaType( this, response );
   }
 
+  /**
+   * Builds a GraphQL-friendly variables object based on input fields
+   *
+   * @param {string|array|null} metaType
+   * @param {string|array|null} metaId
+   * @param {string|array|null} key
+   * @param {string|array|null} value
+   * @returns {{}}
+   */
+  static createVariables ( metaType = null, metaId = null, key = null, value = null ) {
+
+    const variables = {};
+
+    if ( metaType ) {
+      variables[ typeof metaType === "string" ? 'metaType' : 'metaTypes' ] = metaType;
+    }
+
+    if ( metaId ) {
+      variables[ typeof metaId === "string" ? 'metaId' : 'metaIds' ] = metaId;
+    }
+
+    if ( key ) {
+      variables[ typeof key === "string" ? 'key' : 'keys' ] = key;
+    }
+
+    if ( value ) {
+      variables[ typeof value === "string" ? 'value' : 'values' ] = value;
+    }
+
+    return variables;
+
+  }
 }
