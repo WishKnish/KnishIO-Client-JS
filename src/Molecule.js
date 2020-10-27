@@ -78,6 +78,7 @@ export default class Molecule extends MoleculeStructure {
     super( cellSlug );
     this.secret = secret;
     this.sourceWallet = sourceWallet;
+    this.atoms = [];
 
     // Set the remainder wallet for this transaction
     if ( remainderWallet || sourceWallet ) {
@@ -177,11 +178,9 @@ export default class Molecule extends MoleculeStructure {
    * @returns {Molecule}
    */
   addAtom ( atom ) {
-
     this.molecularHash = null;
-    this.atoms.push( atoms );
+    this.atoms.push( atom );
     this.atoms = Atom.sortAtoms( this.atoms );
-
     return this;
   }
 
