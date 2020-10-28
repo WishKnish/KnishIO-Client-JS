@@ -68,18 +68,22 @@ export default class ResponseWalletBundle extends Response {
   /**
    * Returns a wallet bundle with normalized metadata
    *
-   * @returns {null|*}
+   * @returns {{}|null}
    */
-  payload () {
+  payload ( ) {
     const bundleData = this.data();
 
     if ( !bundleData || bundleData.length === 0 ) {
       return null;
     }
 
-    const aggregateBundle = bundleData.pop();
-    aggregateBundle.metas = Meta.aggregateMeta( aggregateBundle.metas );
+    const aggregate = {};
 
-    return aggregateBundle;
+    bundleData.forEach( bundle => {
+      bundle.metas = Meta.aggregateMeta( bundle.metas );
+      aggregate[ bundle.bundleHash ] = bundle;
+    } );
+
+    return aggregate;
   }
 }
