@@ -313,6 +313,15 @@ export default class KnishIOClient {
   }
 
   /**
+   * Returns whether or not a secret is being stored for this session
+   *
+   * @returns {boolean}
+   */
+  hasSecret() {
+    return !!this.$__secret;
+  }
+
+  /**
    * Retrieves the stored secret for this session
    *
    * @returns {string}
