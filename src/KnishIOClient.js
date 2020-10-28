@@ -66,6 +66,7 @@ import MutationClaimShadowWallet from "./mutation/MutationClaimShadowWallet";
 import TransferBalanceException from "./exception/TransferBalanceException";
 import CodeException from "./exception/CodeException";
 import UnauthenticatedException from "./exception/UnauthenticatedException";
+import MutationCreateMeta from "./mutation/MutationCreateMeta";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -365,6 +366,23 @@ export default class KnishIOClient {
     const query = await this.createMoleculeMutation( MutationCreateToken );
 
     query.fillMolecule( recipientWallet, initialAmount, tokenMetadata || {} );
+
+    return await query.execute();
+  }
+
+  /**
+   * Builds and executes a molecule to convey new metadata to the ledger
+   *
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {Array|Object} metadata
+   * @return {Promise<Response>}
+   */
+  async createMeta ( metaType, metaId, metadata = null ) {
+
+    const query = await this.createMoleculeMutation( MutationCreateMeta );
+
+    query.fillMolecule( metaType, metaId, metadata );
 
     return await query.execute();
   }
