@@ -306,11 +306,12 @@ export default class KnishIOClient {
    * @param {string|array} metaId
    * @param {string|array} key
    * @param {string|array} value
+   * @param {object|null} fields
    * @returns {Promise<Response|*>}
    */
-  async queryMeta ( metaType, metaId = null, key = null, value = null ) {
+  async queryMeta ( metaType, metaId = null, key = null, value = null, fields = null ) {
     const query = this.createQuery( QueryMetaType );
-    return await query.execute( QueryMetaType.createVariables( metaType, metaId, key, value ) );
+    return await query.execute( QueryMetaType.createVariables( metaType, metaId, key, value ), fields );
   }
 
   /**
