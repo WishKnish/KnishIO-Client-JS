@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "./Response";
-import { Meta } from "@wishknish/knishio-client-js/src";
+import Meta from "../Meta";
 
 /**
  * Response for Wallet Bundle query
