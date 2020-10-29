@@ -45,45 +45,35 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Meta from "../Meta";
+import MutationProposeMolecule from "./MutationProposeMolecule";
+import ResponseMetaCreate from "../response/ResponseMetaCreate";
 
 /**
- * Response for Wallet Bundle query
+ * Query for creating new Meta attached to some MetaType
  */
-export default class ResponseWalletBundle extends Response {
+export default class MutationCreateMeta extends MutationProposeMolecule {
+
 
   /**
-   * Class constructor
+   * Fills a molecule with an appropriate metadata atom
    *
-   * @param query
-   * @param json
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {array|object} metadata
    */
-  constructor ( query, json ) {
-    super( query, json );
-    this.dataKey = 'data.WalletBundle';
-    this.init()
+  fillMolecule ( metaType, metaId, metadata ) {
+    this.$__molecule.initMeta( metadata, metaType, metaId );
+    this.$__molecule.sign();
+    this.$__molecule.check();
   }
 
   /**
-   * Returns a wallet bundle with normalized metadata
+   * Builds a new Response object from a JSON string
    *
-   * @returns {{}|null}
+   * @param response
+   * @return {ResponseMetaCreate}
    */
-  payload ( ) {
-    const bundleData = this.data();
-
-    if ( !bundleData || bundleData.length === 0 ) {
-      return null;
-    }
-
-    const aggregate = {};
-
-    bundleData.forEach( bundle => {
-      bundle.metas = Meta.aggregateMeta( bundle.metas );
-      aggregate[ bundle.bundleHash ] = bundle;
-    } );
-
-    return aggregate;
+  createResponse ( response ) {
+    return new ResponseMetaCreate( this, response );
   }
 }
