@@ -46,7 +46,7 @@ This document will explain both ways.
 
 5. Request authorization token from the node:
     ```javascript
-    client.getAuthToken ( mySecret )
+    client.requestAuthToken ( mySecret )
     ```
    
 6. Begin using `client` to trigger commands described below...
