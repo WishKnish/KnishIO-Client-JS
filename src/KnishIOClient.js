@@ -302,19 +302,20 @@ export default class KnishIOClient {
   /**
    * Retrieves metadata for the given metaType and provided parameters
    *
-   * @param {string} metaType
-   * @param {string|array} metaId
-   * @param {string|array} key
-   * @param {string|array} value
+   * @param {string|array|null} metaType
+   * @param {string|array|null} metaId
+   * @param {string|array|null} key
+   * @param {string|array|null} value
+   * @param {boolean|null} latest
    * @param {object|null} fields
    * @returns {Promise<Response|*>}
    */
-  queryMeta ( metaType, metaId = null, key = null, value = null, fields = null ) {
+  queryMeta ( metaType, metaId = null, key = null, value = null, latest = null, fields = null ) {
 
     console.info( `KnishIOClient::queryMeta() - Querying meta type data for metaType: ${ metaType }, metaId: ${ metaId }, key: ${ key }, value: ${ value }...` );
 
     const query = this.createQuery( QueryMetaType );
-    const variables = QueryMetaType.createVariables( metaType, metaId, key, value );
+    const variables = QueryMetaType.createVariables( metaType, metaId, key, value, latest );
 
     return query.execute( variables, fields )
       .then( ( response ) => {
