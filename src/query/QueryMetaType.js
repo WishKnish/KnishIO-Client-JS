@@ -70,8 +70,6 @@ export default class QueryMetaType extends Query {
         'metas': {
           'molecularHash': null,
           'position': null,
-          'metaType': null,
-          'metaId': null,
           'key': null,
           'value': null,
           'createdAt': null,
@@ -80,8 +78,6 @@ export default class QueryMetaType extends Query {
       'metas': {
         'molecularHash': null,
         'position': null,
-        'metaType': null,
-        'metaId': null,
         'key': null,
         'value': null,
         'createdAt': null,
