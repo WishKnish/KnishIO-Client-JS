@@ -284,17 +284,17 @@ export default class KnishIOClient {
   /**
    * Retrieves the balance wallet for a specified Knish.IO identity and token slug
    *
-   * @param {string} bundleOrSecret
    * @param {string} tokenSlug
+   * @param {string|null} bundleHash
    * @return {Promise<Response>}
    */
-  async queryBalance ( bundleOrSecret, tokenSlug ) {
+  async queryBalance ( tokenSlug, bundleHash = null ) {
 
     const query = this.createQuery( QueryBalance );
 
-    // Execute query with either the bundle hash or secret (depending on which one you provide)
+    // Execute query with either the provided bundle hash or the active client's bundle
     return await query.execute( {
-      'bundleHash': Wallet.isBundleHash( bundleOrSecret ) ? bundleOrSecret : generateBundleHash( bundleOrSecret ),
+      'bundleHash': bundleHash ? bundleHash : this.bundle(),
       'token': tokenSlug,
     } );
   }
@@ -581,7 +581,7 @@ export default class KnishIOClient {
    */
   async transferToken ( walletObjectOrBundleHash, tokenSlug, amount ) {
 
-    const fromWallet = ( await this.queryBalance( this.secret(), tokenSlug ) ).payload();
+    const fromWallet = ( await this.queryBalance( tokenSlug ) ).payload();
 
     // Do you have enough tokens?
     if ( fromWallet === null || Decimal.cmp( fromWallet.balance, amount ) < 0 ) {
@@ -589,7 +589,7 @@ export default class KnishIOClient {
     }
 
     // Attempt to get the recipient's wallet, if not provided
-    let toWallet = walletObjectOrBundleHash instanceof Wallet ? walletObjectOrBundleHash : ( await this.queryBalance( walletObjectOrBundleHash, tokenSlug ) ).payload();
+    let toWallet = walletObjectOrBundleHash instanceof Wallet ? walletObjectOrBundleHash : ( await this.queryBalance( tokenSlug, walletObjectOrBundleHash ) ).payload();
 
     // If no wallet was found, prepare to send to bundle
     // This will typically result in a shadow wallet
