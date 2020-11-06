@@ -312,7 +312,7 @@ export default class KnishIOClient {
    */
   queryMeta ( metaType, metaId = null, key = null, value = null, latest = null, fields = null ) {
 
-    console.info( `KnishIOClient::queryMeta() - Querying meta type data for metaType: ${ metaType }, metaId: ${ metaId }, key: ${ key }, value: ${ value }...` );
+    console.info( `KnishIOClient::queryMeta() - Querying meta type data for metaType: ${ metaType }, metaId: ${ metaId }, key: ${ key }, value: ${ value }, latest: ${ latest }...` );
 
     const query = this.createQuery( QueryMetaType );
     const variables = QueryMetaType.createVariables( metaType, metaId, key, value, latest );
