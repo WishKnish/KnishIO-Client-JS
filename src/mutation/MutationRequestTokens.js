@@ -65,7 +65,6 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
 
     this.$__molecule.initTokenRequest( token, value, metaType, metaId, metas || {} );
     this.$__molecule.sign();
-    console.log( this.$__molecule );
     this.$__molecule.check();
   }
 }

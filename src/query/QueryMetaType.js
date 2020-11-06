@@ -60,53 +60,24 @@ export default class QueryMetaType extends Query {
    */
   constructor ( knishIO ) {
     super( knishIO );
-    this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count ) @fields }`;
+    this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count ) @fields }`;
     this.$__fields = {
       'metaType': null,
       'instances': {
         'metaType': null,
         'metaId': null,
         'createdAt': null,
-        'metas': {
+        'metas(latest:$latest)': {
           'molecularHash': null,
           'position': null,
-          'metaType': null,
-          'metaId': null,
           'key': null,
           'value': null,
           'createdAt': null,
-        },
-        'atoms': {
-          'molecularHash': null,
-          'position': null,
-          'isotope': null,
-          'walletAddress': null,
-          'tokenSlug': null,
-          'batchId': null,
-          'value': null,
-          'index': null,
-          'metaType': null,
-          'metaId': null,
-          'otsFragment': null,
-          'createdAt': null,
-        },
-        'molecules': {
-          'molecularHash': null,
-          'cellSlug': null,
-          'bundleHash': null,
-          'status': null,
-          'height': null,
-          'createdAt': null,
-          'receivedAt': null,
-          'processedAt': null,
-          'broadcastedAt': null,
         },
       },
       'metas': {
         'molecularHash': null,
         'position': null,
-        'metaType': null,
-        'metaId': null,
         'key': null,
         'value': null,
         'createdAt': null,
@@ -132,9 +103,10 @@ export default class QueryMetaType extends Query {
    * @param {string|array|null} metaId
    * @param {string|array|null} key
    * @param {string|array|null} value
+   * @param {boolean|null} latest
    * @returns {{}}
    */
-  static createVariables ( metaType = null, metaId = null, key = null, value = null ) {
+  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null ) {
 
     const variables = {};
 
@@ -152,6 +124,10 @@ export default class QueryMetaType extends Query {
 
     if ( value ) {
       variables[ typeof value === "string" ? 'value' : 'values' ] = value;
+    }
+
+    if( latest ) {
+      variables[ 'latest' ] = !!latest;
     }
 
     return variables;

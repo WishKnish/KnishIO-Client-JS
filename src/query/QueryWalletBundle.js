@@ -64,6 +64,8 @@ export default class QueryWalletBundle extends Query {
     this.$__fields = {
       'bundleHash': null,
       'metas': {
+        'molecularHash': null,
+        'position': null,
         'key': null,
         'value': null,
         'createdAt': null,

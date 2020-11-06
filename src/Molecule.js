@@ -506,21 +506,16 @@ export default class Molecule extends MoleculeStructure {
 
     this.molecularHash = null;
 
-    const metas = Meta.normalizeMeta( tokenMeta );
-
     for ( const walletKey of [ 'walletAddress', 'walletPosition', 'walletPubkey', 'walletCharacters' ] ) {
-
-      if ( 0 === metas.filter(
-        meta => toString.call( meta ) === '[object Object]'
-          && typeof meta.key !== 'undefined'
-          && meta.key === walletKey ).length
-      ) {
-        metas.push( {
-          key: walletKey,
-          value: recipientWallet[ walletKey.toLowerCase().substr( 6 ) ]
-        } );
+      // Importing wallet fields into meta object
+      if( !tokenMeta[ walletKey ] ) {
+        tokenMeta[ walletKey ] = recipientWallet[ walletKey.toLowerCase().substr( 6 ) ]
       }
     }
+
+    // Adding our latest public key
+    tokenMeta.pubkey = this.sourceWallet.pubkey;
+    tokenMeta.characters = this.sourceWallet.characters;
 
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
     this.atoms.push(
@@ -533,10 +528,7 @@ export default class Molecule extends MoleculeStructure {
         recipientWallet.batchId,
         'token',
         recipientWallet.token,
-        Molecule.mergeMetas( {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-        }, metas ),
+        tokenMeta,
         null,
         this.generateIndex()
       )
