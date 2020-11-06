@@ -51,6 +51,7 @@ import Base58 from './libraries/Base58';
 import Decimal from './libraries/Decimal';
 import {
   chunkSubstr,
+  isHex,
   randomString
 } from './libraries/strings';
 import {

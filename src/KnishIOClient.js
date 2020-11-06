@@ -599,7 +599,9 @@ export default class KnishIOClient {
 
     // Compute the batch ID for the recipient
     // (typically used by stackable tokens)
-    toWallet.initBatchId( fromWallet, amount );
+    if(typeof toWallet.initBatchId === 'function') {
+      toWallet.initBatchId( fromWallet, amount );
+    }
 
     // Generate a remainder wallet to receive the signing wallet's tokens
     this.remainderWallet = Wallet.create( this.secret(), tokenSlug, toWallet.batchId, fromWallet.characters );
