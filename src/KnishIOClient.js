@@ -390,7 +390,10 @@ export default class KnishIOClient {
    */
   async createMeta ( metaType, metaId, metadata = null ) {
 
-    const query = await this.createMoleculeMutation( MutationCreateMeta );
+    const query = await this.createMoleculeMutation(
+      MutationCreateMeta,
+      await this.createMolecule( this.secret(), await this.getSourceWallet() )
+    );
 
     query.fillMolecule( metaType, metaId, metadata );
 
@@ -603,11 +606,12 @@ export default class KnishIOClient {
       toWallet.initBatchId( fromWallet, amount );
     }
 
-    // Generate a remainder wallet to receive the signing wallet's tokens
-    this.remainderWallet = Wallet.create( this.secret(), tokenSlug, toWallet.batchId, fromWallet.characters );
-
     // Build the molecule itself
-    const molecule = await this.createMolecule( null, fromWallet, this.getRemainderWallet() ),
+    const molecule = await this.createMolecule(
+      null,
+      fromWallet,
+      Wallet.create( this.secret(), tokenSlug, toWallet.batchId, fromWallet.characters )
+    ),
       query = await this.createMoleculeMutation( MutationTransferTokens, molecule );
 
     query.fillMolecule( toWallet, amount );
