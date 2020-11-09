@@ -146,7 +146,7 @@ export default class Atom {
         if ( atom.hasOwnProperty( property ) ) {
 
           // Old atoms support (without batch_id field)
-          if ( [ 'batchId', ].includes( property ) && atom[ property ] === null ) {
+          if ( [ 'batchId', 'pubkey', 'characters', ].includes( property ) && atom[ property ] === null ) {
             continue;
           }
 
