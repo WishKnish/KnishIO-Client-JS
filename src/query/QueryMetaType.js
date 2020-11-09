@@ -75,14 +75,6 @@ export default class QueryMetaType extends Query {
           'createdAt': null,
         },
       },
-      'metas': {
-        'molecularHash': null,
-        'position': null,
-        'key': null,
-        'value': null,
-        'createdAt': null,
-      },
-      'createdAt': null,
     };
   }
 

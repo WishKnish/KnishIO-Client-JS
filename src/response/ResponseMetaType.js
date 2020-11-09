@@ -66,7 +66,7 @@ export default class ResponseMetaType extends Response {
   }
 
   /**
-   * Returns meta type results with normalized metadata
+   * Returns meta type instance results
    *
    * @returns {null|*}
    */
@@ -77,13 +77,6 @@ export default class ResponseMetaType extends Response {
       return null;
     }
 
-    const aggregate = [];
-
-    metaTypeData.pop().instances.forEach( meta => {
-      meta.metas = Meta.aggregateMeta( meta.metas );
-      aggregate.push( meta );
-    });
-
-    return aggregate;
+    return metaTypeData.pop().instances;
   }
 }
