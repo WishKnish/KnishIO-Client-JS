@@ -169,13 +169,13 @@ export default class Atom {
 
           // Hash position, wallet address, or isotope
           if ( [ 'position', 'walletAddress', 'isotope' ].includes( property ) ) {
-            molecularSponge.update( String( atom[ property ] ) );
+            molecularSponge.update( atom[ property ] === null ? '' : String( atom[ property ] ) );
             continue;
           }
 
           // Some other property that we haven't anticipated
           if ( atom[ property ] !== null ) {
-            molecularSponge.update( String( atom[ property ] ) );
+            molecularSponge.update( atom[ property ] === null ? '' : String( atom[ property ] ) );
           }
         }
       }
