@@ -74,7 +74,7 @@ export default class ResponseBalance extends Response {
   payload () {
     const balance = this.data();
 
-    if ( !balance ) {
+    if ( !balance || !balance[ 'bundleHash' ] || !balance[ 'tokenSlug' ] ) {
       return null;
     }
 
