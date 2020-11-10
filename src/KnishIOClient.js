@@ -457,9 +457,7 @@ export default class KnishIOClient {
         } else {
 
           console.info( `Wallet::import() - Restoring ${ tokenSlug } shadow wallet...` );
-          walletObj = new Wallet( this.$__secret, tokenSlug, '' );
-          walletObj.balance = wallet.balance;
-          walletObj.createdAt = wallet.createdAt;
+          walletObj = wallet;
 
         }
 

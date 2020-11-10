@@ -85,9 +85,9 @@ export default class ResponseWalletList extends Response {
       wallet.batchId = data[ 'batchId' ];
       wallet.characters = data[ 'characters' ];
       wallet.pubkey = data[ 'pubkey' ];
-      wallet.createdAt = data[ 'createdAt' ];
     }
 
+    wallet.createdAt = data[ 'createdAt' ];
     wallet.balance = data[ 'amount' ];
 
     return wallet;
