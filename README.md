@@ -53,6 +53,130 @@ This document will explain both ways.
 
 ### KnishIOClient Methods
 
+- Query metadata for a **Wallet Bundle**. Leave the `bundleHash` parameter `null` to query your own Wallet Bundle:
+
+```javascript
+const result = await client.queryBundle (
+  // Bundle hash we are querying for
+  'c47e20f99df190e418f0cc5ddfa2791e9ccc4eb297cfa21bd317dc0f98313b1d'
+);
+
+// Raw Metadata
+console.log( result );
+```
+
+- Query metadata for a **Meta Asset**. Leave any parameters `null` to widen the search:
+
+```javascript
+const result = await client.queryMeta (
+  'Vehicle', // MetaType
+  null, // Meta ID
+  'LicensePlate', // Key
+  '1H17P', // Value
+  true // Limit meta values to latest per key
+);
+
+// Raw Metadata
+console.log( result );
+```
+
+- Writing new metadata for a **Meta Asset**.
+
+```javascript
+const result = await client.createMeta (
+  'Pokemon', // MetaType
+  'Charizard', // Meta ID
+  {
+    type: 'fire',
+    weaknesses: [
+      'rock',
+      'water',
+      'electric'
+    ],
+    immunities: [
+      'ground',
+    ],
+    hp: 78,
+    attack: 84,
+  } // Metadata JSON
+);
+
+if( result.success() ) {
+  // Do things!
+}
+
+console.log( result.data() ); // Raw response
+
+```
+
+- Query Wallets associated with a Wallet Bundle:
+
+```javascript
+const result = await client.queryWallets (
+  // owner's bundle hash
+  'c47e20f99df190e418f0cc5ddfa2791e9ccc4eb297cfa21bd317dc0f98313b1d',
+  true // limit results to unspent wallets?
+);
+
+console.log( results ); // Raw response
+```
+
+- Declaring new **Wallets**. If Tokens are sent to undeclared Wallets, **Shadow Wallets** will be used (placeholder Wallets that can receive, but cannot send) to store tokens until they are claimed.
+
+```javascript
+const result = await client.createWallet (
+  'FOO' // Token Slug for the wallet we are declaring
+);
+
+if( result.success() ) {
+  // Do things!
+}
+
+console.log( result.data() ); // Raw response
+```
+
+- Issuing new **Tokens**:
+
+```javascript
+const tokenMeta = {
+  name: 'CrazyCoin', // Public name for the token
+  fungibility: 'fungible', // Fungibility style (fungible / nonfungible / stackable)
+  supply: 'limited', // Supply style (limited / replenishable)
+  decimals: '2', // Decimal places
+};
+
+const result = await client.createToken (
+  'CRZY', // Token slug (ticker symbol)
+  '100000000', // Initial amount to issue
+  tokenMeta // Metadata JSON
+);
+
+if( result.success() ) {
+  // Do things!
+}
+
+console.log( result.data() ); // Raw response
+```
+
+- Transferring **Tokens** to other users:
+
+```javascript
+const result = await client.transferToken (
+  // Recipient's bundle hash
+  '7bf38257401eb3b0f20cabf5e6cf3f14c76760386473b220d95fa1c38642b61d',
+  'CRZY', // Token slug
+  '100' // Transfer amount
+);
+
+if( result.success() ) {
+  // Do things!
+}
+
+console.log( result.data() ); // Raw response
+```
+
+## The Hard Way: working directly with Molecules
+
 - Return a Molecule instance (via Promise) that you can manually add atoms to:
     ```javascript
     client.createMolecule ()
@@ -99,7 +223,7 @@ Here are the most commonly used ones:
 
 ```javascript
 // Build the query
-const query = await client.createMoleculeMutation(QueryMetaType);
+const query = await client.createQuery(QueryMetaType);
 
 // Define variable parameters
 // (eg: which MetaType we are querying)
@@ -125,7 +249,7 @@ console.log(result.data());
 
 ```javascript
 // Build the query
-const query = await client.createMoleculeMutation(QueryWalletBundle);
+const query = await client.createQuery(QueryWalletBundle);
 
 // Define variable parameters
 // (eg: how we want to filter Wallet Bundles)
@@ -152,7 +276,7 @@ console.log(result.data());
 
 ```javascript
 // Build the query
-const query = await client.createMoleculeMutation( QueryWalletList );
+const query = await client.createQuery( QueryWalletList );
 
 // Define variable parameters
 // (eg: how we want to filter Wallet Bundles)
@@ -171,7 +295,7 @@ const result = await query.execute( variables, fields );
 console.log( result.data() );
 ```
 
-## The Granular Way: DIY Everything
+## The Extreme Way: DIY Everything
 This method involves individually building Atoms and Molecules, triggering the signature and validation processes, and communicating the resulting signed Molecule mutation or Query to a Knish.IO node via your favorite GraphQL client.
 
 1. Include the relevant classes in your application code:
