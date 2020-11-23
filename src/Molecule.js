@@ -593,6 +593,14 @@ export default class Molecule extends MoleculeStructure {
 
     this.molecularHash = null;
 
+    const walletMeta = {};
+    if(this.sourceWallet.pubkey) {
+      walletMeta.pubkey = this.sourceWallet.pubkey;
+    }
+    if(this.sourceWallet.characters) {
+      walletMeta.characters = this.sourceWallet.characters;
+    }
+
     // Initializing a new Atom to hold our metadata
     this.atoms.push(
       new Atom(
@@ -604,10 +612,7 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.batchId,
         metaType,
         metaId,
-        Molecule.mergeMetas( {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-        }, meta ),
+        Molecule.mergeMetas( walletMeta, meta ),
         null,
         this.generateIndex()
       )

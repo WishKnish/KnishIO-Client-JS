@@ -81,7 +81,7 @@ export default class Meta {
       const target = [];
 
       for ( const property in meta ) {
-        if ( meta.hasOwnProperty( property ) ) {
+        if ( meta.hasOwnProperty( property ) && meta[ property ] !== null ) {
           target.push( { key: property, value: meta[ property ] } );
         }
       }
