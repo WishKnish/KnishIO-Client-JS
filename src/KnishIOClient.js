@@ -185,7 +185,7 @@ export default class KnishIOClient {
     let _sourceWallet = sourceWallet;
 
     // Sets the source wallet as the last remainder wallet (to maintain ContinuID)
-    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() ) {
+    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() ) {
       _sourceWallet = this.getRemainderWallet();
     }
 
@@ -207,7 +207,7 @@ export default class KnishIOClient {
    * @return {*}
    */
   createQuery ( queryClass ) {
-    return new queryClass( this )
+    return new queryClass( this.client() )
   }
 
   /**
@@ -220,12 +220,8 @@ export default class KnishIOClient {
 
     console.info( `KnishIOClient::createMoleculeQuery() - Creating a new ${ mutationClass.name } query...` );
 
-    let _molecule = molecule;
-
     // If you don't supply the molecule, we'll generate one for you
-    if ( _molecule === null ) {
-      _molecule = ( mutationClass.name === MutationRequestAuthorization.name ) ? await this.createMolecule( this.secret(), new Wallet( this.secret(), 'AUTH' ) ) : await this.createMolecule();
-    }
+    let _molecule = molecule || await this.createMolecule();
 
     const mutation = new mutationClass( this, _molecule );
 
@@ -256,7 +252,9 @@ export default class KnishIOClient {
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion > 2 ) {
 
-      const query = await this.createMoleculeMutation( MutationRequestAuthorization );
+      let molecule = await this.createMolecule( this.secret(), new Wallet( this.secret(), 'AUTH' ) );
+
+      const query = await this.createMoleculeMutation( MutationRequestAuthorization, molecule );
       query.fillMolecule();
       const response = await query.execute();
 

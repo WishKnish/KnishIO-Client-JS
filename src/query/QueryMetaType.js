@@ -56,10 +56,10 @@ export default class QueryMetaType extends Query {
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param httpClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
+  constructor ( httpClient ) {
+    super( httpClient );
     this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count ) @fields }`;
     this.$__fields = {
       'metaType': null,

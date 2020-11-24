@@ -56,10 +56,10 @@ export default class Query {
   /**
    * Class constructor
    *
-   * @param {KnishIOClient} knishIO
+   * @param {httpClient} httpClient
    */
-  constructor ( knishIO ) {
-    this.knishIO = knishIO;
+  constructor ( httpClient ) {
+    this.client = httpClient;
     this.$__fields = null;
     this.$__variables = null;
     this.$__request = null;
@@ -83,15 +83,6 @@ export default class Query {
    */
   response () {
     return this.$__response;
-  }
-
-  /**
-   * Returns the HTTP client for our KnishIO class instance
-   *
-   * @returns {HttpClient}
-   */
-  client () {
-    return this.knishIO.client();
   }
 
   /**
@@ -163,13 +154,7 @@ export default class Query {
 
     this.$__request = this.createRequest( variables, fields );
 
-    let response = await this.client().send( this.$__request );
-
-    // Do we need to get an auth token?
-    if ( this.knishIO.$__serverSdkVersion > 2 && this.constructor.name !== 'MutationRequestAuthorization' && response.status === 401 ) {
-      await this.knishIO.requestAuthToken();
-      response = await this.client().send( this.$__request );
-    }
+    let response = await this.client.send( this.$__request );
 
     this.$__response = await this.createResponseRaw( response );
 
@@ -202,7 +187,7 @@ export default class Query {
    * @return {string}
    */
   url () {
-    return this.knishIO.client().getUrl();
+    return this.client.getUrl();
   }
 
   /**
