@@ -99,7 +99,7 @@ export default class QueryWalletBundle extends Query {
   static createVariables ( bundleHash = null, key = null, value = null, latest = true ) {
 
     const variables = {
-      latest,
+      latest: latest,
     };
 
     if ( bundleHash ) {

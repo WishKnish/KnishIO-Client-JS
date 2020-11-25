@@ -237,16 +237,15 @@ export default class KnishIOClient {
   /**
    * Requests an authorization token from the node endpoint
    *
-   * @param {string|null} secret
+   * @param {string} secret
    * @param {string|null} cell_slug
    * @return {Promise<Response>}
    */
-  async requestAuthToken ( secret = null, cell_slug = null ) {
+  async requestAuthToken ( secret, cell_slug = null ) {
 
     console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
 
-    this.$__secret = secret || this.secret();
-    this.$__bundle = generateBundleHash( this.$__secret );
+    this.setSecret( secret );
     this.$__cellSlug = cell_slug || this.cellSlug();
 
     // SDK versions 2 and below do not utilize an authorization token
@@ -330,6 +329,17 @@ export default class KnishIOClient {
   hasSecret () {
     return !!this.$__secret;
   }
+
+
+    /**
+     * Set the client's secret
+     * @param secret
+     */
+  setSecret ( secret ) {
+      this.$__secret = secret;
+      this.$__bundle = generateBundleHash( secret );
+  }
+
 
   /**
    * Retrieves the stored secret for this session
