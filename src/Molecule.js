@@ -637,7 +637,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @returns {Molecule}
    */
-  initTokenRequest ( token, amount, metaType, metaId, meta = {} ) {
+  initTokenRequest ( tokenSlug, requestedAmount, metaType, metaId, meta = {} ) {
 
     this.molecularHash = null;
 
@@ -647,14 +647,14 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.address,
         'T',
         this.sourceWallet.token,
-        amount,
+        requestedAmount,
         null,
         metaType,
         metaId,
         Molecule.mergeMetas( {
           'pubkey': this.sourceWallet.pubkey,
           'characters': this.sourceWallet.characters,
-          'token': token,
+          'token': tokenSlug,
         }, meta ),
         null,
         this.generateIndex()

@@ -58,14 +58,5 @@ export default class MutationCreateWallet extends MutationProposeMolecule {
     this.$__molecule.sign();
     this.$__molecule.check();
   }
-
-  /**
-   * Builds a new Response object from a JSON string
-   *
-   * @param response
-   * @return {ResponseTokenCreate}
-   */
-  createResponse ( response ) {
-    return new ResponseTokenCreate( this, response );
-  }
+  
 }

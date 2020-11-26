@@ -96,12 +96,10 @@ export default class KnishIOClient {
 
     console.info( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
 
-    this.$__url = url;
-    this.$__secret = '';
-    this.$__bundle = '';
-    this.$__client = client || new HttpClient( this.$__url );
+    this.reset();
+
+    this.$__client = client || new HttpClient( url );
     this.$__serverSdkVersion = serverSdkVersion;
-    this.remainderWallet = null;
   }
 
   /**
@@ -110,9 +108,17 @@ export default class KnishIOClient {
   deinitialize () {
     console.info( 'KnishIOClient::deinitialize() - Clearing the Knish.IO client session...' );
 
-    this.$__secret = '';
-    this.$__bundle = '';
-    this.remainderWallet = null;
+    this.reset();
+  }
+
+
+    /**
+     * Reset common properties
+     */
+  reset () {
+      this.$__secret = '';
+      this.$__bundle = '';
+      this.remainderWallet = null;
   }
 
   /**
@@ -134,29 +140,11 @@ export default class KnishIOClient {
   }
 
   /**
-   * Sets the authorization token for this session
-   *
-   * @param {string} authToken
-   */
-  setAuthToken ( authToken ) {
-    this.client().setAuthToken( authToken );
-  }
-
-  /**
-   * Retrieves the authorization token for this session
-   *
-   * @return {string}
-   */
-  getAuthToken () {
-    return this.client().getAuthToken();
-  }
-
-  /**
    * Retrieves the endpoint URL for this session
    *
    * @returns {string}
    */
-  getUrl () {
+  url () {
     return this.client().getUrl();
   }
 
@@ -168,6 +156,50 @@ export default class KnishIOClient {
   client () {
     return this.$__client;
   }
+
+    /**
+     * Returns whether or not a secret is being stored for this session
+     *
+     * @returns {boolean}
+     */
+    hasSecret () {
+        return !!this.$__secret;
+    }
+
+
+    /**
+     * Set the client's secret
+     * @param secret
+     */
+    setSecret ( secret ) {
+        this.$__secret = secret;
+        this.$__bundle = generateBundleHash( secret );
+    }
+
+
+    /**
+     * Retrieves the stored secret for this session
+     *
+     * @returns {string}
+     */
+    secret () {
+        if ( !this.$__secret ) {
+            throw new UnauthenticatedException( 'KnishIOClient::secret() - Unable to find a stored secret!' );
+        }
+        return this.$__secret;
+    }
+
+    /**
+     * Returns the bundle hash for this session
+     *
+     * @returns {string}
+     */
+    bundle () {
+        if ( !this.$__bundle ) {
+            throw new UnauthenticatedException( 'KnishIOClient::bundle() - Unable to find a stored bundle!' );
+        }
+        return this.$__bundle;
+    }
 
   /**
    * Instantiates a new Molecule and prepares this client session to operate on it
@@ -319,50 +351,6 @@ export default class KnishIOClient {
       .then( ( response ) => {
         return response.payload();
       } );
-  }
-
-  /**
-   * Returns whether or not a secret is being stored for this session
-   *
-   * @returns {boolean}
-   */
-  hasSecret () {
-    return !!this.$__secret;
-  }
-
-
-    /**
-     * Set the client's secret
-     * @param secret
-     */
-  setSecret ( secret ) {
-      this.$__secret = secret;
-      this.$__bundle = generateBundleHash( secret );
-  }
-
-
-  /**
-   * Retrieves the stored secret for this session
-   *
-   * @returns {string}
-   */
-  secret () {
-    if ( !this.$__secret ) {
-      throw new UnauthenticatedException( 'KnishIOClient::secret() - Unable to find a stored secret!' );
-    }
-    return this.$__secret;
-  }
-
-  /**
-   * Returns the bundle hash for this session
-   *
-   * @returns {string}
-   */
-  bundle () {
-    if ( !this.$__bundle ) {
-      throw new UnauthenticatedException( 'KnishIOClient::bundle() - Unable to find a stored bundle!' );
-    }
-    return this.$__bundle;
   }
 
   /**
@@ -543,13 +531,13 @@ export default class KnishIOClient {
   /**
    * Builds and executes a Molecule that requests token payment from the node
    *
-   * @param token
+   * @param tokenSlug
    * @param value
    * @param to
    * @param metas
    * @return {Promise<Response>}
    */
-  async requestTokens ( token, value, to, metas = null ) {
+  async requestTokens ( tokenSlug, requestedAmount, to, metas = null ) {
 
     let metaType,
       metaId;
@@ -560,7 +548,7 @@ export default class KnishIOClient {
         metaType = 'walletbundle';
         metaId = to;
       } else {
-        to = Wallet.create( to, token );
+        to = Wallet.create( to, tokenSlug );
       }
     }
 
@@ -577,7 +565,7 @@ export default class KnishIOClient {
 
     const query = await this.createMoleculeMutation( MutationRequestTokens );
 
-    query.fillMolecule( token, value, metaType, metaId, metas );
+    query.fillMolecule( tokenSlug, requestedAmount, metaType, metaId, metas );
 
     return await query.execute();
   }
@@ -591,8 +579,20 @@ export default class KnishIOClient {
    */
   async claimShadowWallet ( tokenSlug, molecule = null ) {
 
-    const shadowWallets = this.queryShadowWallets( tokenSlug ),
-      query = await this.createMoleculeMutation( MutationClaimShadowWallet, molecule );
+    const shadowWallets = this.queryShadowWallets( tokenSlug );
+
+      // --- Check shadow wallets
+      if (!shadowWallets) {
+          throw new WalletShadowException();
+      }
+      shadowWallets.forEach( shadowWallet => {
+          if( !shadowWallet instanceof WalletShadow ) {
+              throw new WalletShadowException();
+          }
+      }
+      // ---
+
+    const  query = await this.createMoleculeMutation( MutationClaimShadowWallet, molecule );
     query.fillMolecule( tokenSlug, shadowWallets );
 
     return await query.execute();
@@ -626,15 +626,15 @@ export default class KnishIOClient {
 
     // Compute the batch ID for the recipient
     // (typically used by stackable tokens)
-    if ( typeof toWallet.initBatchId === 'function' ) {
-      toWallet.initBatchId( fromWallet, amount );
-    }
+    toWallet.initBatchId( fromWallet, amount );
+
+    this.remainderWallet = Wallet.create( this.secret(), tokenSlug, toWallet.batchId, fromWallet.characters );
 
     // Build the molecule itself
     const molecule = await this.createMolecule(
       null,
       fromWallet,
-      Wallet.create( this.secret(), tokenSlug, toWallet.batchId, fromWallet.characters )
+      this.remainderWallet
       ),
       query = await this.createMoleculeMutation( MutationTransferTokens, molecule );
 
