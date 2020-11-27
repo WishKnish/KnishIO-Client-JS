@@ -116,6 +116,15 @@ export default class KnishIOClient {
   }
 
   /**
+   * Gets the client's SDK version
+   *
+   * @param cellSlug
+   */
+  getServerSdkVersion () {
+    return this.$__serverSdkVersion;
+  }
+
+  /**
    * Returns the currently defined Cell identifier for this session
    *
    * @returns {string|*|null}
@@ -541,30 +550,40 @@ export default class KnishIOClient {
    * @param metas
    * @return {Promise<Response>}
    */
-  async requestTokens ( token, value, to, metas = null ) {
+  async requestTokens ( token, value, to = null, metas = null ) {
 
     let metaType,
       metaId;
 
-    // If the recipient is provided as an object, try to figure out the actual recipient
-    if ( Object.prototype.toString.call( to ) === '[object String]' ) {
-      if ( Wallet.isBundleHash( to ) ) {
-        metaType = 'walletbundle';
-        metaId = to;
-      } else {
-        to = Wallet.create( to, token );
-      }
-    }
+    // Are we specifying a specific recipient?
+    if ( to ) {
 
-    // If recipient is a Wallet, we need to help the node triangulate
-    // the transfer by providing position and bundle hash
-    if ( to instanceof Wallet ) {
-      metaType = 'wallet';
-      metas = Molecule.mergeMetas( metas || {}, {
-        'position': to.position,
-        'bundle': to.bundle,
-      } );
-      metaId = to.address;
+      // If the recipient is provided as an object, try to figure out the actual recipient
+      if ( Object.prototype.toString.call( to ) === '[object String]' ) {
+        if ( Wallet.isBundleHash( to ) ) {
+          metaType = 'walletBundle';
+          metaId = to;
+        } else {
+          to = Wallet.create( to, token );
+        }
+      }
+
+      // If recipient is a Wallet, we need to help the node triangulate
+      // the transfer by providing position and bundle hash
+      if ( to instanceof Wallet ) {
+        metaType = 'wallet';
+        metas = Molecule.mergeMetas( metas || {}, {
+          'position': to.position,
+          'bundle': to.bundle,
+        } );
+        metaId = to.address;
+      }
+    } else {
+
+      // No recipient, so request tokens for ourselves
+      metaType = 'walletBundle';
+      metaId = this.bundle();
+
     }
 
     const query = await this.createMoleculeMutation( MutationRequestTokens );
