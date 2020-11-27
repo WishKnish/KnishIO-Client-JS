@@ -64,7 +64,10 @@ export default class HttpClient {
   constructor ( url, config = {} ) {
 
     this.$__headers = new Headers( config.headers || {} );
-
+    this.$__needHeaders = {
+      'accept': 'application/json',
+      'content-type': 'application/json; charset=UTF-8'
+    };
     this.$__config = merge( config, {
       method: 'POST',
       headers: this.$__headers,
@@ -128,11 +131,12 @@ export default class HttpClient {
   async send ( request, options = {} ) {
 
     request.headers.extend( options );
-
     this.$__headers.extend( request.headers.asObject() );
-    this.$__headers.delete( 'content-type' );
-    this.$__headers.append( 'Accept', 'application/json' );
-    this.$__headers.append( 'Content-Type', 'application/json;charset=UTF-8' );
+
+    for ( let header in this.$__needHeaders ) {
+      this.$__headers.set( header, this.$__needHeaders[ header ] );
+    }
+
     this.setAuthToken( this.getAuthToken() );
 
     const req = new Request( request, this.$__config );
