@@ -72,25 +72,48 @@ export default class ResponseWalletList extends Response {
    * @param data
    * @returns {Wallet|WalletShadow}
    */
-  toClientWallet ( data ) {
+  toClientWallet ( data, secret = null ) {
     let wallet;
 
     if ( data[ 'position' ] === null || typeof data[ 'position' ] === 'undefined' ) {
       wallet = new WalletShadow( data[ 'bundleHash' ], data[ 'tokenSlug' ], data[ 'batchId' ] );
+      wallet.remote = true;
     } else {
-      wallet = new Wallet( null, data[ 'tokenSlug' ] );
-      wallet.address = data[ 'address' ];
-      wallet.position = data[ 'position' ];
-      wallet.bundle = data[ 'bundleHash' ];
-      wallet.batchId = data[ 'batchId' ];
-      wallet.characters = data[ 'characters' ];
-      wallet.pubkey = data[ 'pubkey' ];
+        wallet = new Wallet( secret, data[ 'tokenSlug' ], data[ 'position' ] );
+        wallet.address = data[ 'address' ];
+        wallet.bundle = data[ 'bundleHash' ];
+        wallet.batchId = data[ 'batchId' ];
+        wallet.remote = false;
+
+        // !! @todo Absent properties
+        // wallet.tokenName = data[ 'tokenName' ];
+        // wallet.tokenIcon = data[ 'tokenIcon' ];
     }
 
+    wallet.balance = Number( data[ 'amount' ] );
+    wallet.characters = data[ 'characters' ];
+    wallet.pubkey = data[ 'pubkey' ];
     wallet.createdAt = data[ 'createdAt' ];
-    wallet.balance = data[ 'amount' ];
 
     return wallet;
+  }
+
+
+  getWallets( secret ) {
+
+      const list = this.data();
+
+      if ( !list ) {
+          return null;
+      }
+
+      const wallets = [];
+
+      for ( let item of list ) {
+          wallets.push( this.toClientWallet( item, secret ) );
+      }
+
+      return wallets;
   }
 
   /**

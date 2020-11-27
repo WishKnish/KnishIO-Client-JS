@@ -201,6 +201,15 @@ export default class KnishIOClient {
         return this.$__bundle;
     }
 
+    /**
+     * Retrieves this session's remainder wallet
+     *
+     * @returns {null}
+     */
+    getRemainderWallet () {
+        return this.remainderWallet;
+    }
+
   /**
    * Instantiates a new Molecule and prepares this client session to operate on it
    *
@@ -404,10 +413,7 @@ export default class KnishIOClient {
    */
   async createMeta ( metaType, metaId, metadata = null ) {
 
-    const query = await this.createMoleculeMutation(
-      MutationCreateMeta,
-      await this.createMolecule( this.secret(), await this.getSourceWallet() )
-    );
+    const query = await this.createMoleculeMutation( MutationCreateMeta );
 
     query.fillMolecule( metaType, metaId, metadata );
 
@@ -446,42 +452,7 @@ export default class KnishIOClient {
       bundleHash: bundleHash ? bundleHash : this.bundle(),
       unspent: unspent,
     } ).then( ( response ) => {
-      const walletData = response.payload();
-      const wallets = [];
-
-      console.info( `KnishIOClient::getWallets() - Discovered ${ walletData.length } remote wallets...` );
-
-      walletData.forEach( wallet => {
-
-        const tokenSlug = wallet.tokenSlug;
-        let walletObj = null;
-
-        // If we have an address, it's a regular wallet; otherwise, it's a show wallet
-        if ( wallet.address ) {
-
-          console.info( `KnishIOClient::getWallets() - Restoring ${ wallet.token } wallet with balance of ${ wallet.balance }...` );
-
-          walletObj = new Wallet( this.$__secret, wallet.token, wallet.position );
-          walletObj.balance = Number( wallet.balance );
-          walletObj.molecules = wallet.molecules;
-          walletObj.createdAt = wallet.createdAt;
-          walletObj.tokenName = wallet.tokenName;
-          walletObj.tokenIcon = wallet.tokenIcon;
-
-        } else {
-
-          console.info( `Wallet::import() - Restoring ${ tokenSlug } shadow wallet...` );
-          walletObj = wallet;
-
-        }
-
-        // Flagging wallet as remote
-        wallet.remote = true;
-        wallets.push( walletObj );
-
-      } )
-
-      return wallets;
+      return response.getWallets();
     } )
   }
 
@@ -581,16 +552,16 @@ export default class KnishIOClient {
 
     const shadowWallets = this.queryShadowWallets( tokenSlug );
 
-      // --- Check shadow wallets
-      if (!shadowWallets) {
+    // --- Check shadow wallets
+    if (!shadowWallets) {
+      throw new WalletShadowException();
+    }
+    shadowWallets.forEach( shadowWallet => {
+      if( !shadowWallet instanceof WalletShadow ) {
           throw new WalletShadowException();
       }
-      shadowWallets.forEach( shadowWallet => {
-          if( !shadowWallet instanceof WalletShadow ) {
-              throw new WalletShadowException();
-          }
-      }
-      // ---
+    }
+    // ---
 
     const  query = await this.createMoleculeMutation( MutationClaimShadowWallet, molecule );
     query.fillMolecule( tokenSlug, shadowWallets );
@@ -616,7 +587,8 @@ export default class KnishIOClient {
     }
 
     // Attempt to get the recipient's wallet, if not provided
-    let toWallet = walletObjectOrBundleHash instanceof Wallet ? walletObjectOrBundleHash : ( await this.queryBalance( tokenSlug, walletObjectOrBundleHash ) ).payload();
+    let toWallet = walletObjectOrBundleHash instanceof Wallet ?
+        walletObjectOrBundleHash : ( await this.queryBalance( tokenSlug, walletObjectOrBundleHash ) ).payload();
 
     // If no wallet was found, prepare to send to bundle
     // This will typically result in a shadow wallet
@@ -658,6 +630,7 @@ export default class KnishIOClient {
     return sourceWallet;
   }
 
+
   /**
    * Queries the ledger for the next ContinuID wallet
    *
@@ -668,13 +641,5 @@ export default class KnishIOClient {
     return await this.createQuery( QueryContinuId ).execute( { 'bundle': bundleHash } );
   }
 
-  /**
-   * Retrieves this session's remainder wallet
-   *
-   * @returns {null}
-   */
-  getRemainderWallet () {
-    return this.remainderWallet;
-  }
 
 }
