@@ -202,6 +202,21 @@ export default class KnishIOClient {
     }
 
     /**
+     * Retrieves this session's wallet used for signing the next Molecule
+     *
+     * @returns {Promise<*|Wallet|null>}
+     */
+    async getSourceWallet () {
+        let sourceWallet = ( await this.queryContinuId( this.bundle() ) ).payload();
+
+        if ( !sourceWallet ) {
+            sourceWallet = new Wallet( this.secret() );
+        }
+
+        return sourceWallet;
+    }
+
+    /**
      * Retrieves this session's remainder wallet
      *
      * @returns {null}
@@ -499,6 +514,16 @@ export default class KnishIOClient {
       } )
   }
 
+    /**
+     * Queries the ledger for the next ContinuID wallet
+     *
+     * @param bundleHash
+     * @returns {Promise<Response>}
+     */
+    async queryContinuId ( bundleHash ) {
+        return await this.createQuery( QueryContinuId ).execute( { 'bundle': bundleHash } );
+    }
+
   /**
    * Builds and executes a Molecule that requests token payment from the node
    *
@@ -560,7 +585,7 @@ export default class KnishIOClient {
       if( !shadowWallet instanceof WalletShadow ) {
           throw new WalletShadowException();
       }
-    }
+    } );
     // ---
 
     const  query = await this.createMoleculeMutation( MutationClaimShadowWallet, molecule );
@@ -613,32 +638,6 @@ export default class KnishIOClient {
     query.fillMolecule( toWallet, amount );
 
     return await query.execute();
-  }
-
-  /**
-   * Retrieves this session's wallet used for signing the next Molecule
-   *
-   * @returns {Promise<*|Wallet|null>}
-   */
-  async getSourceWallet () {
-    let sourceWallet = ( await this.queryContinuId( this.bundle() ) ).payload();
-
-    if ( !sourceWallet ) {
-      sourceWallet = new Wallet( this.secret() );
-    }
-
-    return sourceWallet;
-  }
-
-
-  /**
-   * Queries the ledger for the next ContinuID wallet
-   *
-   * @param bundleHash
-   * @returns {Promise<Response>}
-   */
-  async queryContinuId ( bundleHash ) {
-    return await this.createQuery( QueryContinuId ).execute( { 'bundle': bundleHash } );
   }
 
 
