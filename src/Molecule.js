@@ -481,7 +481,7 @@ export default class Molecule extends MoleculeStructure {
           'pubkey': this.sourceWallet.pubkey,
           'characters': this.sourceWallet.characters,
           'code': code,
-          'hash': generateBundleHash( source.trim() ),
+          'hash': generateBundleHash( contact.trim() ),
         },
         null,
         this.generateIndex()

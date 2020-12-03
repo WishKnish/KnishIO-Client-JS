@@ -1,9 +1,7 @@
-/*
 import KnishIOClient from "../KnishIOClient";
 import Dot from "../libraries/Dot";
 import { generateBundleHash, generateSecret } from "../libraries/crypto";
-*/
-import "../index.js";
+import ResponseMolecule from "../response/ResponseMolecule";
 
 export default class Test
 {
@@ -23,19 +21,21 @@ export default class Test
     /**
      * Test all KnishIOClient functions
      */
-    testAll() {
-        this.testCreateToken();
-        this.testCreateWallet();
-        this.testCreateMeta();
-        this.testCreateIdentifier();
-        this.testRequestTokens();
-        this.testTransferToken();
-        this.testClaimShadowWallet();
-        this.testQueryMeta();
-        this.testQueryWallets();
-        this.testQueryShadowWallets();
-        this.testQueryBundle();
-        this.testQueryBalance();
+    async testAll() {
+      await this.client( this.secrets[ 0 ] )
+      await this.client( this.secrets[ 1 ] )
+      await this.testCreateToken();
+      await this.testCreateWallet();
+      await this.testCreateMeta();
+      await this.testCreateIdentifier();
+      await this.testRequestTokens();
+      await this.testTransferToken();
+      await this.testClaimShadowWallet();
+      await this.testQueryMeta();
+      await this.testQueryWallets();
+      await this.testQueryShadowWallets();
+      await this.testQueryBundle();
+      await this.testQueryBalance();
     }
 
     /**
@@ -43,16 +43,18 @@ export default class Test
      */
     testCreateToken () {
         let tokenSlug = this.tokenSlugs[ 0 ];
-        let response = this.client( this.secrets[ 0 ] )
-            .createToken ( tokenSlug, 1000, {
-                name: tokenSlug,
-                fungibility: 'stackable',
-                splittable: 1,
-                supply: 'limited',
-                decimals: 0,
-                icon: 'icon',
-            } );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .createToken ( tokenSlug, 1000, {
+              name: tokenSlug,
+              fungibility: 'stackable',
+              splittable: 1,
+              supply: 'limited',
+              decimals: 0,
+              icon: 'icon',
+          } )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -60,9 +62,11 @@ export default class Test
      */
     testCreateWallet()
     {
-        let response = this.client( this.secrets[ 0 ] )
-            .createWallet ( this.tokenSlugs[ 0 ] );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .createWallet ( this.tokenSlugs[ 0 ] )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -70,12 +74,14 @@ export default class Test
      */
     testCreateMeta()
     {
-        let response = this.client( this.secrets[ 0 ] )
-            .createMeta ( 'metaType', 'metaId', {
-                key1: 'value1',
-                key2: 'value2',
-            } )
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .createMeta ( 'metaType', 'metaId', {
+              key1: 'value1',
+              key2: 'value2',
+          } )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
 
@@ -83,9 +89,11 @@ export default class Test
      *
      */
     testCreateIdentifier() {
-        let response = this.client( this.secrets[ 0 ] )
-            .createIdentifier ( 'email', 'test@test.com', 1234 );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .createIdentifier ( 'email', 'test@test.com', 1234 )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -93,9 +101,11 @@ export default class Test
      */
     testRequestTokens()
     {
-        let response = this.client( this.secrets[ 0 ] )
-            .requestTokens ( this.tokenSlugs[ 0 ], 10, this.secrets[ 0 ] );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .requestTokens ( this.tokenSlugs[ 0 ], 10, this.secrets[ 0 ] )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -104,9 +114,11 @@ export default class Test
     testTransferToken()
     {
         let walletObjectOrBundleHash = generateBundleHash( this.secrets[ 1 ] );
-        let response = this.client( this.secrets[ 0 ] )
-            .transferToken ( walletObjectOrBundleHash, tokenSlug, amount );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .transferToken ( walletObjectOrBundleHash, this.tokenSlugs[ 0 ], 10 )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -114,9 +126,11 @@ export default class Test
      */
     testClaimShadowWallet()
     {
-        let response = this.client( this.secrets[ 1 ] )
-            .claimShadowWallet ( this.tokenSlugs[ 0 ] );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 1 ] )
+          .claimShadowWallet ( this.tokenSlugs[ 0 ] )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -124,9 +138,11 @@ export default class Test
      */
     testQueryMeta()
     {
-        let response = this.client( this.secrets[ 0 ] )
-            .queryMeta ( 'metaType', 'metaId' );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .queryMeta ( 'metaType', 'metaId' )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -134,9 +150,11 @@ export default class Test
      */
     testQueryWallets()
     {
-        let response = this.client( this.secrets[ 0 ] )
-            .queryWallets ();
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .queryWallets()
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -144,9 +162,11 @@ export default class Test
      */
     testQueryShadowWallets()
     {
-        let response = this.client( this.secrets[ 1 ] )
-            .queryShadowWallets ( this.tokenSlugs[ 0 ] );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 1 ] )
+          .queryShadowWallets ( this.tokenSlugs[ 0 ] )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
@@ -154,9 +174,11 @@ export default class Test
      */
     testQueryBundle()
     {
-        let response = this.client( this.secrets[ 0 ] )
-            .queryBundle();
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .queryBundle()
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
 
@@ -166,18 +188,22 @@ export default class Test
     testQueryContinuId()
     {
         let bundleHash = generateBundleHash( this.secrets[ 0 ] );
-        let response = this.client( this.secrets[ 0 ] )
-            .queryContinuId( bundleHash );
-        this.checkResponse( response );
+        return this.client( this.secrets[ 0 ] )
+          .queryContinuId( bundleHash )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
     /**
      * @throws \Exception
      */
     testQueryBalance () {
-        let response = this.client( this.secrets[ 0 ] )
-            .queryBalance( this.tokenSlugs[ 0 ] );
-        this.checkResponse( response );
+       return this.client( this.secrets[ 0 ] )
+          .queryBalance( this.tokenSlugs[ 0 ] )
+          .then( ( response ) => {
+            this.checkResponse( response );
+          } );
     }
 
 
@@ -189,14 +215,17 @@ export default class Test
     client( secret, cellSlug = 'unit_test' ) {
 
         // Create new client
-        if ( this.clients[ secret ] ) {
+        if ( !this.clients[ secret ] ) {
 
             // Create a client
             this.clients[ secret ] = new KnishIOClient( this.graphqlUrl );
 
             // Auth the client
-            let response = this.clients[ secret ].requestAuthToken( secret, cellSlug );
-            this.checkResponse( response );
+            return this.clients[ secret ]
+              .requestAuthToken( secret, cellSlug )
+              .then( ( response ) => {
+                this.checkResponse( response );
+              } );
         }
 
         // Return the client by secret
@@ -210,6 +239,8 @@ export default class Test
      */
     checkResponse ( response ) {
 
+      console.log(response);
+
         // Check molecule response
         if (response instanceof ResponseMolecule) {
             if ( !response.success() ) {
@@ -220,9 +251,7 @@ export default class Test
 
         // Default response
         else {
-            if ( !response.data() ) {
-                this.debug( response );
-            }
+          this.debug( response );
         }
     }
 
@@ -233,6 +262,7 @@ export default class Test
      */
     debug ( response ) {
 
+      /*
         // Debug output
         let output = {
             'query': response.query().constructor.name,
@@ -249,7 +279,9 @@ export default class Test
         output[ 'variables' ] = response.query().variables();
         output[ 'response' ] = response.response();
 
-        console.log( output );
+       */
+
+        console.log( response );
     }
 
 }

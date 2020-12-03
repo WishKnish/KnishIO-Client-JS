@@ -66,6 +66,7 @@ import MutationClaimShadowWallet from "./mutation/MutationClaimShadowWallet";
 import TransferBalanceException from "./exception/TransferBalanceException";
 import CodeException from "./exception/CodeException";
 import UnauthenticatedException from "./exception/UnauthenticatedException";
+import WalletShadowException from "./exception/WalletShadowException";
 import MutationCreateMeta from "./mutation/MutationCreateMeta";
 import MutationCreateWallet from "./mutation/MutationCreateWallet";
 
@@ -279,7 +280,7 @@ export default class KnishIOClient {
     // If you don't supply the molecule, we'll generate one for you
     let _molecule = molecule || await this.createMolecule();
 
-    const mutation = new mutationClass( this, _molecule );
+    const mutation = new mutationClass( this.client(), _molecule );
 
     if ( !( mutation instanceof MutationProposeMolecule ) ) {
       throw new CodeException( `${ this.constructor.name }::createMoleculeMutation - required class instance of MutationProposeMolecule.` );
@@ -578,7 +579,7 @@ export default class KnishIOClient {
     const shadowWallets = this.queryShadowWallets( tokenSlug );
 
     // --- Check shadow wallets
-    if (!shadowWallets) {
+    if (!shadowWallets || !Array.isArray( shadowWallets )) {
       throw new WalletShadowException();
     }
     shadowWallets.forEach( shadowWallet => {

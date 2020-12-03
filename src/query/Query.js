@@ -187,7 +187,7 @@ export default class Query {
    * @return {string}
    */
   url () {
-    return this.client.url();
+    return this.client.getUrl();
   }
 
   /**

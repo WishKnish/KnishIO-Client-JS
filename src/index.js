@@ -52,6 +52,7 @@ import Wallet from './Wallet';
 import Meta from './Meta';
 import WalletShadow from "./WalletShadow";
 import KnishIOClient from "./KnishIOClient";
+import Test from "./test/Test";
 import {
   base64ToHex,
   bufferToHexString,
@@ -79,6 +80,7 @@ export {
   Meta,
   WalletShadow,
   KnishIOClient,
+  Test,
 
   // strings
   chunkSubstr,
