@@ -73,14 +73,14 @@ export default class Soda {
 
   /**
    * @param {string} data
-   * @returns {string}
+   * @returns {string|Buffer}
    */
   decode ( data ) {
     return this.base.decode( data );
   }
 
   /**
-   * @param {string} data
+   * @param {string|Buffer|Uint8Array} data
    * @returns {string}
    */
   encode ( data ) {

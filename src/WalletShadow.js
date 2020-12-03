@@ -59,7 +59,7 @@ export default class WalletShadow {
    * Class constructor
    *
    * @param {string} bundleHash
-   * @param {string} token
+   * @param {string|null} token
    * @param {string|null} batchId
    * @param {string|null} characters
    */

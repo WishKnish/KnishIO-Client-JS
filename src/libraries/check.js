@@ -161,7 +161,7 @@ export default class CheckMolecule {
       }
 
       if ( atom.token !== 'USER' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ $atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
       }
 
       if ( atom.index !== 0 ) {
@@ -266,7 +266,7 @@ export default class CheckMolecule {
         throw new TypeError( 'Invalid isotope "V" values' );
       }
 
-      const remainder = ( 1 * senderWallet.balance ) + value;
+      const remainder = senderWallet.balance + value;
 
       // Is there enough balance to send?
       if ( remainder < 0 ) {

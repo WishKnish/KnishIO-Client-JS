@@ -120,7 +120,7 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
  * @returns {string}
  */
 export function bufferToHexString ( byteArray ) {
-  return Hex.toHex( byteArray );
+  return Hex.toHex( byteArray, {} );
 }
 
 /**
@@ -150,7 +150,7 @@ export function hexToBase64 ( string ) {
  * @returns {string}
  */
 export function base64ToHex ( string ) {
-  return Hex.toHex( decodeBase64( string ) );
+  return Hex.toHex( decodeBase64( string ), {} );
 }
 
 /**

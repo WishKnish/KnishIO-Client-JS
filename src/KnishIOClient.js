@@ -118,7 +118,7 @@ export default class KnishIOClient {
   /**
    * Gets the client's SDK version
    *
-   * @param cellSlug
+   * @return {number}
    */
   getServerSdkVersion () {
     return this.$__serverSdkVersion;
@@ -127,7 +127,7 @@ export default class KnishIOClient {
   /**
    * Returns the currently defined Cell identifier for this session
    *
-   * @returns {string|*|null}
+   * @returns {string|null}
    */
   cellSlug () {
     return this.$__cellSlug || null;
@@ -449,7 +449,8 @@ export default class KnishIOClient {
    * Retrieves a list of your active wallets (unspent)
    *
    * @param {string|null} bundleHash
-   * @returns {Promise<Response>}
+   * @param {boolean|null} unspent
+   * @return {Promise<[]>}
    */
   queryWallets ( bundleHash = null, unspent = true ) {
 
@@ -468,7 +469,7 @@ export default class KnishIOClient {
       walletData.forEach( wallet => {
 
         const tokenSlug = wallet.tokenSlug;
-        let walletObj = null;
+        let walletObj;
 
         // If we have an address, it's a regular wallet; otherwise, it's a show wallet
         if ( wallet.address ) {
@@ -504,7 +505,7 @@ export default class KnishIOClient {
    *
    * @param {string} tokenSlug
    * @param {string|null} bundleHash
-   * @returns {Promise<*>}
+   * @return {Promise<Response>}
    */
   queryShadowWallets ( tokenSlug = 'KNISH', bundleHash = null ) {
 

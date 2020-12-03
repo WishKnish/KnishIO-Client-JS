@@ -78,7 +78,7 @@ export default class ResponseBalance extends Response {
       return null;
     }
 
-    let wallet = null;
+    let wallet;
 
     // Shadow wallet
     if ( balance[ 'position' ] === null ) {

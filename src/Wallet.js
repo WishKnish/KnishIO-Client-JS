@@ -207,7 +207,7 @@ export default class Wallet {
 
     const privateKey = this.getMyEncPrivateKey();
 
-    if ( this.pubkey === null && privateKey !== null ) {
+    if ( !this.pubkey && privateKey ) {
       this.pubkey = generateEncPublicKey( privateKey, this.characters );
     }
 
@@ -251,6 +251,58 @@ export default class Wallet {
 
     return decryptMessage( encrypt, this.getMyEncPrivateKey(), pubKey, this.characters );
   }
+
+  /**
+   * Encrypts a string for the given public keys
+   *
+   * @param {string} data
+   * @param {string|array} publicKeys
+   * @returns {string}
+   */
+  encryptString ( data, publicKeys ) {
+
+    if ( data ) {
+
+      // Retrieving sender's encryption public key
+      const publicKey = this.getMyEncPublicKey();
+
+      // If the additional public keys is supplied as a string, convert to array
+      if ( typeof publicKeys === 'string' ) {
+        publicKeys = new Array( publicKeys );
+      }
+
+      // Encrypting message
+      const encryptedData = this.encryptMyMessage( data, publicKey, ...publicKeys );
+      return btoa( JSON.stringify( encryptedData ) );
+
+    }
+  };
+
+  /**
+   * Attempts to decrypt the given string
+   *
+   * @param {string} data
+   * @param {string|null} fallbackValue
+   * @returns {Array|Object}
+   */
+  decryptString ( data, fallbackValue = null ) {
+
+    if ( data ) {
+      try {
+
+        const decrypted = JSON.parse( atob( data ) );
+        return this.decryptMyMessage( decrypted ) || fallbackValue;
+
+      } catch ( e ) {
+
+        // Probably not actually encrypted
+        console.error( e );
+        return fallbackValue || data;
+
+      }
+    }
+
+  };
 
   /**
    * Generates a private key for the given parameters

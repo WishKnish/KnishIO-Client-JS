@@ -119,7 +119,7 @@ export default class QueryMetaType extends Query {
       variables[ typeof value === "string" ? 'value' : 'values' ] = value;
     }
 
-    if( latest ) {
+    if ( latest ) {
       variables[ 'latest' ] = !!latest;
     }
 
