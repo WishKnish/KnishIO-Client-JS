@@ -47,10 +47,11 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
 import Dot from "./libraries/Dot";
 import Decimal from "./libraries/Decimal";
-import { generateBundleHash, } from "./libraries/crypto";
+import { generateBundleHash, generateBatchId } from "./libraries/crypto";
 import HttpClient from '../src/httpClient/HttpClient';
 import Molecule from "./Molecule";
 import Wallet from "./Wallet";
+import WalletShadow from "./WalletShadow";
 import QueryContinuId from "./query/QueryContinuId";
 import QueryWalletBundle from "./query/QueryWalletBundle";
 import QueryWalletList from "./query/QueryWalletList";
@@ -409,7 +410,7 @@ export default class KnishIOClient {
 
     // Stackable tokens need a new batch for every transfer
     if ( Dot.get( tokenMetadata || {}, 'fungibility' ) === 'stackable' ) {
-      recipientWallet.batchId = Wallet.generateBatchId();
+      recipientWallet.batchId = generateBatchId();
     }
 
     const query = await this.createMoleculeMutation( MutationCreateToken );
@@ -481,11 +482,12 @@ export default class KnishIOClient {
    */
   queryShadowWallets ( tokenSlug = 'KNISH', bundleHash = null ) {
 
-    console.info( `KnishIOClient::queryShadowWallets() - Querying shadow wallets${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
+    bundleHash = bundleHash ? bundleHash : this.bundle();
+    console.info( `KnishIOClient::queryShadowWallets() - Querying ${ tokenSlug } shadow wallets for ${ bundleHash }...` );
 
     const shadowWalletQuery = this.createQuery( QueryWalletList );
     return shadowWalletQuery.execute( {
-      bundleHash: bundleHash ? bundleHash : this.bundle(),
+      bundleHash: bundleHash,
       token: tokenSlug,
     } ).then( ( response ) => {
       return response.payload();
@@ -576,7 +578,7 @@ export default class KnishIOClient {
    */
   async claimShadowWallet ( tokenSlug, molecule = null ) {
 
-    const shadowWallets = this.queryShadowWallets( tokenSlug );
+    const shadowWallets = await this.queryShadowWallets( tokenSlug );
 
     // --- Check shadow wallets
     if (!shadowWallets || !Array.isArray( shadowWallets )) {

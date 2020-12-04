@@ -12,7 +12,7 @@ export default class Test
      */
     constructor ( graphqlUrl ) {
         this.secrets = [ generateSecret(), generateSecret() ];
-        this.tokenSlugs = [ 'TestToken' ];
+        this.tokenSlugs = [ 'TESTTOKEN', 'TESTTOKEN2' ];
         this.graphqlUrl = graphqlUrl;
         this.clients = {};
     }
@@ -63,7 +63,7 @@ export default class Test
     testCreateWallet()
     {
         return this.client( this.secrets[ 0 ] )
-          .createWallet ( this.tokenSlugs[ 0 ] )
+          .createWallet ( this.tokenSlugs[ 1 ] )
           .then( ( response ) => {
             this.checkResponse( response );
           } );
@@ -239,8 +239,6 @@ export default class Test
      */
     checkResponse ( response ) {
 
-      console.log(response);
-
         // Check molecule response
         if (response instanceof ResponseMolecule) {
             if ( !response.success() ) {
@@ -262,26 +260,15 @@ export default class Test
      */
     debug ( response ) {
 
-      /*
-        // Debug output
-        let output = {
-            'query': response.query().constructor.name,
-            'url': response.query().url(),
-        };
 
-        // Reason data on the top of the output
-        if ( Dot.get( response.data || {}, 'reason' ) ) {
-            output['reason'] = response.data.reason;
-            output['payload'] = response.data.payload;
-        }
-
-        // Other debug info
-        output[ 'variables' ] = response.query().variables();
-        output[ 'response' ] = response.response();
-
-       */
-
+      // Reason data on the top of the output
+      if ( Dot.get( response.data() || {}, 'reason' ) ) {
+        console.log( response.data().reason );
+      }
+      else {
         console.log( response );
+      }
+
     }
 
 }

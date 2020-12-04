@@ -46,6 +46,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Base58 from './libraries/Base58';
+import Decimal from "./libraries/Decimal";
+import { generateBatchId, } from './libraries/crypto';
 
 /**
  * Shadow Wallet class to represent wallets that contain tokens
@@ -79,4 +81,26 @@ export default class WalletShadow {
     this.privkey = null;
     this.pubkey = null;
   }
+
+
+  /**
+   * Sets up a batch ID - either using the sender's, or a new one
+   *
+   * @param {Wallet} senderWallet
+   * @param {number} transferAmount
+   */
+  initBatchId ( senderWallet, transferAmount ) {
+
+    if ( senderWallet.batchId ) {
+
+      // Set batchID to recipient wallet
+      this.batchId = ( !this.batchId && Decimal.cmp( senderWallet.balance, transferAmount ) > 0 ) ?
+        // Has a remainder value (source balance is bigger than a transfer value)
+        generateBatchId() :
+        // Has no remainder? use batch ID from the source wallet
+        senderWallet.batchId;
+    }
+  }
+
+
 }

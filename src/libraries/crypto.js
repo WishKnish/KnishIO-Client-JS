@@ -92,6 +92,15 @@ export function generateBundleHash ( secret ) {
 }
 
 /**
+ * Returns a new batch ID for stackable tokens
+ *
+ * @returns {string}
+ */
+export function generateBatchId () {
+  return randomString( 64 );
+}
+
+/**
  * Encrypts the given message or data with the recipient's public key
  *
  * @param message

@@ -68,7 +68,7 @@ import WalletShadow from "./WalletShadow";
  * Wallet class represents the set of public and private
  * keys to sign Molecules
  */
-export default class Wallet {
+export default class Wallet extends WalletShadow {
 
   /**
    * Class constructor
@@ -80,20 +80,10 @@ export default class Wallet {
    * @param {string|null} characters
    */
   constructor ( secret = null, token = 'USER', position = null, saltLength = 64, characters = null ) {
+    super( secret ? generateBundleHash( secret ) : null, token, null, characters );
 
     // Position via which (combined with token) we will generate the one-time keys
     this.position = position ? position : randomString( saltLength, 'abcdef0123456789' );
-    this.token = token;
-    this.balance = 0;
-    this.molecules = {};
-    this.batchId = null;
-    this.characters = ( new Base58() )[ characters ] !== 'undefined' ? characters : null;
-
-    this.key = null;
-    this.address = null;
-    this.bundle = null;
-    this.privkey = null;
-    this.pubkey = null;
 
     if ( secret ) {
       this.prepareKeys( secret );
@@ -147,40 +137,11 @@ export default class Wallet {
    * @param {string} secret
    */
   prepareKeys ( secret ) {
-    if ( this.key === null && this.address === null && this.bundle === null ) {
+    if ( this.key === null && this.address === null ) {
       this.key = Wallet.generatePrivateKey( secret, this.token, this.position );
       this.address = Wallet.generatePublicKey( this.key );
-      this.bundle = generateBundleHash( secret );
       this.getMyEncPrivateKey();
       this.getMyEncPublicKey();
-    }
-  }
-
-  /**
-   * Returns a new batch ID for stackable tokens
-   *
-   * @returns {string}
-   */
-  static generateBatchId () {
-    return randomString( 64 );
-  }
-
-  /**
-   * Sets up a batch ID - either using the sender's, or a new one
-   *
-   * @param {Wallet} senderWallet
-   * @param {number} transferAmount
-   */
-  initBatchId ( senderWallet, transferAmount ) {
-
-    if ( senderWallet.batchId ) {
-
-      // Set batchID to recipient wallet
-      this.batchId = ( !this.batchId && Decimal.cmp( senderWallet.balance, transferAmount ) > 0 ) ?
-        // Has a remainder value (source balance is bigger than a transfer value)
-        Wallet.generateBatchId() :
-        // Has no remainder? use batch ID from the source wallet
-        senderWallet.batchId;
     }
   }
 
