@@ -67,7 +67,7 @@ export default class QueryMetaType extends Query {
         'metaType': null,
         'metaId': null,
         'createdAt': null,
-        'metas(latest:$latest)': {
+        'metas(latest:$latest, $key: String, $keys: [ String! ], $value: String, $values: [ String! ])': {
           'molecularHash': null,
           'position': null,
           'key': null,
