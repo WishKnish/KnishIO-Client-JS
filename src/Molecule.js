@@ -542,16 +542,28 @@ export default class Molecule extends MoleculeStructure {
     return this;
   }
 
+
   /**
-   * Arranges Atoms to claim a shadow wallet
+   * Init shadow wallet claim
    *
-   * @param {Wallet} shadowWallet
-   * @param {Array|Object} tokenMeta
-   * @returns {Molecule}
+   * @param $token
+   * @param $wallets array of Client objectd
    */
-  initShadowWalletClaim ( shadowWallet, tokenMeta = {} ) {
+  initShadowWalletClaimAtom ( tokenSlug, wallets ) {
 
     this.molecularHash = null;
+
+    // Generate a wallet metas
+    let walletMetas = [];
+    wallets.forEach( wallet => {
+      walletMetas.push({
+        walletAddress: wallet.address,
+        walletPosition: wallet.position,
+        batchId: wallet.batchId
+      });
+    } );
+
+    let metas = { 'wallets': JSON.stringify( walletMetas ) };
 
     // Create an 'C' atom
     this.atoms.push(
@@ -561,13 +573,13 @@ export default class Molecule extends MoleculeStructure {
         'C',
         this.sourceWallet.token,
         null,
-        shadowWallet.batchId,
+        null,
         'shadowWallet',
-        shadowWallet.token,
+        tokenSlug,
         Molecule.mergeMetas( {
           'pubkey': this.sourceWallet.pubkey,
           'characters': this.sourceWallet.characters,
-        }, tokenMeta ),
+        }, metas ),
         null,
         this.generateIndex()
       )

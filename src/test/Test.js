@@ -12,7 +12,7 @@ export default class Test
      */
     constructor ( graphqlUrl ) {
         this.secrets = [ generateSecret(), generateSecret() ];
-        this.tokenSlugs = [ 'TESTTOKEN', 'TESTTOKEN2' ];
+        this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE' ];
         this.graphqlUrl = graphqlUrl;
         this.clients = {};
     }
@@ -102,7 +102,7 @@ export default class Test
     testRequestTokens()
     {
         return this.client( this.secrets[ 0 ] )
-          .requestTokens ( this.tokenSlugs[ 0 ], 10, this.secrets[ 0 ] )
+          .requestTokens ( this.tokenSlugs[ 1 ], 10, this.secrets[ 0 ] )
           .then( ( response ) => {
             this.checkResponse( response );
           } );
@@ -262,7 +262,7 @@ export default class Test
 
 
       // Reason data on the top of the output
-      if ( Dot.get( response.data() || {}, 'reason' ) ) {
+      if ( response.data && Dot.get( response.data() || {}, 'reason' ) ) {
         console.log( response.data().reason );
       }
       else {
