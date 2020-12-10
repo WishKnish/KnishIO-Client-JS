@@ -51,7 +51,6 @@ import { generateBundleHash, generateBatchId } from "./libraries/crypto";
 import HttpClient from '../src/httpClient/HttpClient';
 import Molecule from "./Molecule";
 import Wallet from "./Wallet";
-import WalletShadow from "./WalletShadow";
 import QueryContinuId from "./query/QueryContinuId";
 import QueryWalletBundle from "./query/QueryWalletBundle";
 import QueryWalletList from "./query/QueryWalletList";
@@ -585,7 +584,7 @@ export default class KnishIOClient {
       throw new WalletShadowException();
     }
     shadowWallets.forEach( shadowWallet => {
-      if( !shadowWallet instanceof WalletShadow ) {
+      if( !shadowWallet.isShadow() ) {
           throw new WalletShadowException();
       }
     } );

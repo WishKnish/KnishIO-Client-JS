@@ -46,7 +46,6 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "./Response";
-import WalletShadow from "../WalletShadow";
 import Wallet from "../Wallet";
 
 /**
@@ -70,20 +69,28 @@ export default class ResponseWalletList extends Response {
    * Returns a Knish.IO client Wallet class instance out of object data
    *
    * @param data
-   * @returns {Wallet|WalletShadow}
+   * @returns {Wallet}
    */
-  toClientWallet ( data, secret = null ) {
+  static toClientWallet ( data, secret = null ) {
     let wallet;
 
     if ( data[ 'position' ] === null || typeof data[ 'position' ] === 'undefined' ) {
-      wallet = new WalletShadow( data[ 'bundleHash' ], data[ 'tokenSlug' ], data[ 'batchId' ] );
-      wallet.remote = true;
+      wallet = Wallet.create(
+        data[ 'bundleHash' ],
+        data[ 'tokenSlug' ],
+        data[ 'batchId' ],
+        data[ 'characters' ]
+      );
     } else {
-        wallet = new Wallet( secret, data[ 'tokenSlug' ], data[ 'position' ] );
+        wallet = new Wallet(
+          secret,
+          data[ 'tokenSlug' ],
+          data[ 'position' ],
+          data[ 'batchId' ],
+          data[ 'characters' ]
+        );
         wallet.address = data[ 'address' ];
         wallet.bundle = data[ 'bundleHash' ];
-        wallet.batchId = data[ 'batchId' ];
-        wallet.remote = false;
 
         // !! @todo Absent properties
         // wallet.tokenName = data[ 'tokenName' ];
@@ -91,7 +98,6 @@ export default class ResponseWalletList extends Response {
     }
 
     wallet.balance = Number( data[ 'amount' ] );
-    wallet.characters = data[ 'characters' ];
     wallet.pubkey = data[ 'pubkey' ];
     wallet.createdAt = data[ 'createdAt' ];
 
@@ -110,7 +116,7 @@ export default class ResponseWalletList extends Response {
       const wallets = [];
 
       for ( let item of list ) {
-          wallets.push( this.toClientWallet( item, secret ) );
+          wallets.push( ResponseWalletList.toClientWallet( item, secret ) );
       }
 
       return wallets;
@@ -131,7 +137,7 @@ export default class ResponseWalletList extends Response {
     const wallets = [];
 
     for ( let item of list ) {
-      wallets.push( this.toClientWallet( item ) );
+      wallets.push( ResponseWalletList.toClientWallet( item ) );
     }
 
     return wallets;
