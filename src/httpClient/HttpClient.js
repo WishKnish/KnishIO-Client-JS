@@ -1,21 +1,73 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import { Request, Headers } from 'servie';
 import { fetch, } from 'popsicle';
 
 const merge = require( 'lodash.merge' );
 
 /**
- *
+ * HTTP Client for communicating with a node
  */
 export default class HttpClient {
 
   /**
+   * Class constructor
+   *
    * @param {string} url
    * @param {Object} config
    */
   constructor ( url, config = {} ) {
 
     this.$__headers = new Headers( config.headers || {} );
-
+    this.$__needHeaders = {
+      'accept': 'application/json',
+      'content-type': 'application/json; charset=UTF-8'
+    };
     this.$__config = merge( config, {
       method: 'POST',
       headers: this.$__headers,
@@ -25,6 +77,8 @@ export default class HttpClient {
   }
 
   /**
+   * Returns configuration object
+   *
    * @returns {Object}
    */
   getConfig () {
@@ -32,6 +86,7 @@ export default class HttpClient {
   }
 
   /**
+   * Sets the endpoint URL
    *
    * @param {string} url
    */
@@ -40,6 +95,8 @@ export default class HttpClient {
   }
 
   /**
+   * Gets the endpoint URL
+   *
    * @returns {string}
    */
   getUrl () {
@@ -47,13 +104,17 @@ export default class HttpClient {
   }
 
   /**
+   * Sets the authorization token for this session
+   *
    * @param {string} authToken
    */
   setAuthToken ( authToken ) {
-    this.$__headers.set( 'X-Auth-Token',  authToken || '' );
+    this.$__headers.set( 'X-Auth-Token', authToken || '' );
   }
 
   /**
+   * Gets the current auth token
+   *
    * @return {string|null}
    */
   getAuthToken () {
@@ -61,6 +122,7 @@ export default class HttpClient {
   }
 
   /**
+   * Sends the request
    *
    * @param {Request} request
    * @param {Object} options
@@ -69,11 +131,12 @@ export default class HttpClient {
   async send ( request, options = {} ) {
 
     request.headers.extend( options );
-
     this.$__headers.extend( request.headers.asObject() );
-    this.$__headers.delete( 'content-type' );
-    this.$__headers.append( 'Accept', 'application/json' );
-    this.$__headers.append( 'Content-Type', 'application/json;charset=UTF-8' );
+
+    for ( let header in this.$__needHeaders ) {
+      this.$__headers.set( header, this.$__needHeaders[ header ] );
+    }
+
     this.setAuthToken( this.getAuthToken() );
 
     const req = new Request( request, this.$__config );

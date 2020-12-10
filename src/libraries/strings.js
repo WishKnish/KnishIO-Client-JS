@@ -1,8 +1,3 @@
-// Copyright 2019 WishKnish Corp. All rights reserved.
-// You may use, distribute, and modify this code under the GPLV3 license, which is provided at:
-// https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
-// This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
-
 import bigInt from 'big-integer';
 import Hex from './Hex';
 import {
@@ -125,7 +120,7 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
  * @returns {string}
  */
 export function bufferToHexString ( byteArray ) {
-  return Hex.toHex( byteArray );
+  return Hex.toHex( byteArray, {} );
 }
 
 /**
@@ -155,13 +150,13 @@ export function hexToBase64 ( string ) {
  * @returns {string}
  */
 export function base64ToHex ( string ) {
-  return Hex.toHex( decodeBase64( string ) );
+  return Hex.toHex( decodeBase64( string ), {} );
 }
 
 /**
  * @param {string} str
  * @return {boolean}
  */
-export function isHex( str ) {
+export function isHex ( str ) {
   return /^[A-F0-9]+$/i.test( str );
 }

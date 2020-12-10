@@ -1,3 +1,50 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import AtomsMissingException from './AtomsMissingException';
 import BalanceInsufficientException from './BalanceInsufficientException';
 import MolecularHashMissingException from './MolecularHashMissingException';
@@ -14,7 +61,7 @@ import AtomIndexException from './AtomIndexException';
 import MetaMissingException from './MetaMissingException';
 import WrongTokenTypeException from './WrongTokenTypeException'
 import UnauthenticatedException from './UnauthenticatedException'
-import NegativeMeaningException from './NegativeMeaningException'
+import NegativeAmountException from './NegativeAmountException'
 
 export {
   AtomsMissingException,
@@ -33,5 +80,5 @@ export {
   MetaMissingException,
   WrongTokenTypeException,
   UnauthenticatedException,
-  NegativeMeaningException,
+  NegativeAmountException,
 };

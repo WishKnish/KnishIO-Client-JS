@@ -1,49 +1,86 @@
-// Copyright 2019 WishKnish Corp. All rights reserved.
-// You may use, distribute, and modify this code under the GPLV3 license, which is provided at:
-// https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
-// This experimental code is part of the Knish.IO API Client and is provided AS IS with no warranty whatsoever.
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
 
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import Atom from './Atom';
 import Wallet from './Wallet';
 import Meta from './Meta';
 import { shake256, } from 'js-sha3';
-import { chunkSubstr, hexToBase64, base64ToHex, } from './libraries/strings';
+import { chunkSubstr, hexToBase64, } from './libraries/strings';
 import CheckMolecule from './libraries/check';
 import { generateBundleHash } from "./libraries/crypto";
 import AtomsMissingException from "./exception/AtomsMissingException";
 import BalanceInsufficientException from "./exception/BalanceInsufficientException";
 import MetaMissingException from "./exception/MetaMissingException";
-import NegativeMeaningException from "./exception/NegativeMeaningException";
+import NegativeAmountException from "./exception/NegativeAmountException";
 import MoleculeStructure from "./MoleculeStructure";
 
 const merge = require( 'lodash.merge' );
 
-
 /**
- * class Molecule
- *
- * @property {string | null} molecularHash
- * @property {string | null} bundle
- * @property {string | null} status
- * @property {string} createdAt
- * @property {Array} atoms
+ * Molecule class used for committing changes to the ledger
  */
 export default class Molecule extends MoleculeStructure {
 
   /**
-   * Molecule constructor.
+   * Class constructor
+   *
    * @param {string} secret
    * @param {Wallet} sourceWallet
    * @param {Wallet} remainderWallet
    * @param {string|null} cellSlug
    */
-  constructor ( secret, sourceWallet= null, remainderWallet = null, cellSlug = null ) {
+  constructor ( secret, sourceWallet = null, remainderWallet = null, cellSlug = null ) {
 
     super( cellSlug );
-
     this.secret = secret;
     this.sourceWallet = sourceWallet;
+    this.atoms = [];
 
+    // Set the remainder wallet for this transaction
     if ( remainderWallet || sourceWallet ) {
       this.remainderWallet = remainderWallet || Wallet.create( secret, sourceWallet.batchId, sourceWallet.characters );
     }
@@ -52,53 +89,7 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
-   *
-   * @returns {string}
-   */
-  continuIdMetaType () {
-    return 'walletBundle';
-  }
-
-  /**
-   *
-   * @param {MoleculeStructure} moleculeStructure
-   */
-  fill ( moleculeStructure ) {
-    for ( let key in Object.keys( moleculeStructure ) ) {
-      this[ key ] = moleculeStructure[ key ];
-    }
-  }
-
-  /**
-   *
-   * @param {Array} data
-   * @param {Array} shared_wallets
-   */
-  encryptMessage ( data, shared_wallets = []) {
-    const target = [ data, this.sourceWallet.pubkey, ];
-
-    for ( let wallet of shared_wallets ) {
-      target.push( wallet.pubkey );
-    }
-
-    return this.sourceWallet.encryptMessage( ...target );
-  }
-
-  /**
-   *
-   * @param {Atom} atom
-   * @returns {Molecule}
-   */
-  addAtom ( atom ) {
-
-    this.molecularHash = null;
-    this.atoms.push( atom );
-    this.atoms = Atom.sortAtoms( this.atoms );
-
-    return this;
-  }
-
-  /**
+   * Merge two metadata arrays or objects
    *
    * @param {Array|Object} first
    * @param {Array|Object} second
@@ -109,19 +100,87 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Verifies the validity of a Molecule
+   *
+   * @param {Molecule} molecule
+   * @param {Wallet} senderWallet
+   * @return {boolean}
+   */
+  static verify ( molecule, senderWallet = null ) {
+
+    return CheckMolecule.molecularHash( molecule )
+      && CheckMolecule.ots( molecule )
+      && CheckMolecule.index( molecule )
+      && CheckMolecule.continuId( molecule )
+      && CheckMolecule.isotopeM( molecule )
+      && CheckMolecule.isotopeT( molecule )
+      && CheckMolecule.isotopeC( molecule )
+      && CheckMolecule.isotopeU( molecule )
+      && CheckMolecule.isotopeI( molecule )
+      && CheckMolecule.isotopeV( molecule, senderWallet );
+  }
+
+  /**
+   * Generates the next atomic index
+   *
+   * @param {Array} atoms
+   * @returns {number}
+   */
+  static generateNextAtomIndex ( atoms ) {
+
+    const length = atoms.length - 1;
+
+    return ( length > -1 ) ? atoms[ length ].index + 1 : 0;
+  }
+
+  /**
+   * Returns the Meta Type for ContinuID
+   *
+   * @returns {string}
+   */
+  continuIdMetaType () {
+    return 'walletBundle';
+  }
+
+  /**
+   * Fills a Molecule's properties with the provided object
+   *
+   * @param {MoleculeStructure} moleculeStructure
+   */
+  fill ( moleculeStructure ) {
+    for ( let key in Object.keys( moleculeStructure ) ) {
+      this[ key ] = moleculeStructure[ key ];
+    }
+  }
+
+  /**
+   * Adds an atom to an existing Molecule
+   *
+   * @param {Atom} atom
+   * @returns {Molecule}
+   */
+  addAtom ( atom ) {
+    this.molecularHash = null;
+    this.atoms.push( atom );
+    this.atoms = Atom.sortAtoms( this.atoms );
+    return this;
+  }
+
+  /**
+   * Replenishes non-finite token supplies
    *
    * @param {number} value
    * @param {string} token
    * @param {Array|Object} metas
    * @returns {Molecule}
    */
-  replenishingTokens ( value, token, metas ) {
+  replenishTokens ( value, token, metas ) {
     const aggregateMeta = Meta.aggregateMeta( Meta.normalizeMeta( metas ) );
     aggregateMeta.action = 'add';
 
     for ( let key of [ 'address', 'position', 'batchId', ] ) {
       if ( typeof aggregateMeta[ key ] === 'undefined' ) {
-        throw new MetaMissingException( `No or not defined  ${ key }  in meta` );
+        throw new MetaMissingException( `Missing ${ key } in meta` );
       }
     }
 
@@ -156,7 +215,7 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
-   * Add user remainder atom
+   * Add user remainder atom for ContinuID
    *
    * @param {Wallet} userRemainderWallet
    * @returns {Molecule}
@@ -170,17 +229,17 @@ export default class Molecule extends MoleculeStructure {
       new Atom(
         userRemainderWallet.position,   // {string} position
         userRemainderWallet.address,    // {string} walletAddress
-        'I',                    // {string} isotope
+        'I',                     // {string} isotope
         userRemainderWallet.token,      // {string | null} token
         null,                     // {string | number | null} value
         null,                   // {string} batchId
-        'walletBundle',        // {string | null} metaType
-        userRemainderWallet.bundle,     // {string | null} metaId
+        'walletBundle',       // {string | null} metaType
+        userRemainderWallet.bundle,    // {string | null} metaId
         {
           'pubkey': userRemainderWallet.pubkey,
           'characters': userRemainderWallet.characters,
-        },                     // {Array | Object | null} meta
-        null,               // {string | null} otsFragment
+        },                             // {Array | Object | null} meta
+        null,                // {string | null} otsFragment
         this.generateIndex()            // {number | null} index
       )
     );
@@ -191,15 +250,16 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Burns some amount of tokens from a wallet
    *
    * @param {number} value
-   * @param {string} walletBundle
+   * @param {string|null} walletBundle
    * @returns {Molecule}
    */
-  burningTokens ( value, walletBundle = null  ) {
+  burnTokens ( value, walletBundle = null ) {
 
     if ( value < 0.0 ) {
-      throw new NegativeMeaningException( 'It is impossible to use a negative value for the number of tokens' );
+      throw new NegativeAmountException( 'Amount to burn must be positive!' );
     }
 
     if ( ( this.sourceWallet.balance - value ) < 0 ) {
@@ -263,7 +323,7 @@ export default class Molecule extends MoleculeStructure {
    */
   initValue ( recipientWallet, value ) {
 
-    if ( sourceWallet.balance - value < 0 ) {
+    if ( this.sourceWallet.balance - value < 0 ) {
       throw new BalanceInsufficientException();
     }
 
@@ -295,7 +355,7 @@ export default class Molecule extends MoleculeStructure {
         recipientWallet.position,
         recipientWallet.address,
         'V',
-        sourceWallet.token,
+        this.sourceWallet.token,
         value,
         recipientWallet.batchId,
         'walletBundle',
@@ -323,8 +383,6 @@ export default class Molecule extends MoleculeStructure {
           'pubkey': this.remainderWallet.pubkey,
           'characters': this.remainderWallet.characters,
         },
-        this.remainderWallet.pubkey,
-        this.remainderWallet.characters,
         null,
         this.generateIndex()
       )
@@ -336,6 +394,7 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Builds Atoms to define a new wallet on the ledger
    *
    * @param {Wallet} newWallet
    * @returns {Molecule}
@@ -378,6 +437,7 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Builds Atoms to define a new identifier on the ledger
    *
    * @param {string} type - phone or email
    * @param {string} contact - phone number or email string
@@ -428,21 +488,16 @@ export default class Molecule extends MoleculeStructure {
 
     this.molecularHash = null;
 
-    const metas = Meta.normalizeMeta( tokenMeta );
-
     for ( const walletKey of [ 'walletAddress', 'walletPosition', 'walletPubkey', 'walletCharacters' ] ) {
-
-      if ( 0 === metas.filter(
-        meta => toString.call( meta ) === '[object Object]'
-          && typeof meta.key !== 'undefined'
-          && meta.key === walletKey ).length
-      ) {
-        metas.push( {
-          key: walletKey,
-          value: recipientWallet[ walletKey.toLowerCase().substr( 6 ) ]
-        } );
+      // Importing wallet fields into meta object
+      if ( !tokenMeta[ walletKey ] ) {
+        tokenMeta[ walletKey ] = recipientWallet[ walletKey.toLowerCase().substr( 6 ) ]
       }
     }
+
+    // Adding our latest public key
+    tokenMeta.pubkey = this.sourceWallet.pubkey;
+    tokenMeta.characters = this.sourceWallet.characters;
 
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
     this.atoms.push(
@@ -455,10 +510,7 @@ export default class Molecule extends MoleculeStructure {
         recipientWallet.batchId,
         'token',
         recipientWallet.token,
-        Molecule.mergeMetas( {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-        }, metas ),
+        tokenMeta,
         null,
         this.generateIndex()
       )
@@ -473,6 +525,7 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Arranges Atoms to claim a shadow wallet
    *
    * @param {Wallet} shadowWallet
    * @param {Array|Object} tokenMeta
@@ -522,6 +575,14 @@ export default class Molecule extends MoleculeStructure {
 
     this.molecularHash = null;
 
+    const walletMeta = {};
+    if ( this.sourceWallet.pubkey ) {
+      walletMeta.pubkey = this.sourceWallet.pubkey;
+    }
+    if ( this.sourceWallet.characters ) {
+      walletMeta.characters = this.sourceWallet.characters;
+    }
+
     // Initializing a new Atom to hold our metadata
     this.atoms.push(
       new Atom(
@@ -533,10 +594,7 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.batchId,
         metaType,
         metaId,
-        Molecule.mergeMetas( {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-        }, meta ),
+        Molecule.mergeMetas( walletMeta, meta ),
         null,
         this.generateIndex()
       )
@@ -551,6 +609,7 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Arranges atoms to request tokens from the node itself
    *
    * @param {string} token
    * @param {number} amount
@@ -560,7 +619,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @returns {Molecule}
    */
-  initTokenTransfer ( token, amount, metaType, metaId, meta = {} ) {
+  initTokenRequest ( token, amount, metaType, metaId, meta = {} ) {
 
     this.molecularHash = null;
 
@@ -593,11 +652,11 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Arranges atoms to request an authorization token from the node
    *
    * @returns {Molecule}
    */
-  initAuthentication (  )
-  {
+  initAuthorization () {
     this.molecularHash = null;
 
     // Initializing a new Atom to hold our metadata
@@ -655,10 +714,10 @@ export default class Molecule extends MoleculeStructure {
   sign ( anonymous = false, compressed = true ) {
 
     // Do we have atoms?
-    if ( 0 === this.atoms.length ||
-      0 !== this.atoms.filter(
-        atom => !( atom instanceof Atom || atom instanceof Object )
-      ).length
+    if ( this.atoms.length === 0 ||
+      this.atoms.filter(
+        atom => !( atom instanceof Atom )
+      ).length !== 0
     ) {
       throw new AtomsMissingException();
     }
@@ -674,7 +733,7 @@ export default class Molecule extends MoleculeStructure {
     // Determine first atom
     const firstAtom = this.atoms[ 0 ],
       // Generate the private signing key for this molecule
-      key = Wallet.generateWalletKey( this.secret, firstAtom.token, firstAtom.position ),
+      key = Wallet.generatePrivateKey( this.secret, firstAtom.token, firstAtom.position ),
       // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
       keyChunks = chunkSubstr( key, 128 ),
       // Convert Hm to numeric notation, and then normalize
@@ -712,6 +771,7 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Verifies the current Molecule
    *
    * @param {Wallet} senderWallet
    * @returns {boolean}
@@ -721,41 +781,11 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
-   * @param {Molecule} molecule
-   * @param {Wallet} senderWallet
-   * @return {boolean}
-   */
-  static verify ( molecule, senderWallet = null ) {
-
-    return CheckMolecule.molecularHash( molecule )
-      && CheckMolecule.ots( molecule )
-      && CheckMolecule.index( molecule )
-      && CheckMolecule.continueId( molecule )
-      && CheckMolecule.isotopeM( molecule )
-      && CheckMolecule.isotopeT( molecule )
-      && CheckMolecule.isotopeC( molecule )
-      && CheckMolecule.isotopeU( molecule )
-      && CheckMolecule.isotopeI( molecule )
-      && CheckMolecule.isotopeV( molecule, senderWallet );
-  }
-
-  /**
+   * Generates the next atomic index
    *
    * @returns {number}
    */
   generateIndex () {
     return Molecule.generateNextAtomIndex( this.atoms );
-  }
-
-  /**
-   *
-   * @param {Array} atoms
-   * @returns {number}
-   */
-  static generateNextAtomIndex ( atoms ) {
-
-    const length = atoms.length - 1;
-
-    return ( length > -1 ) ? atoms[length].index + 1 : 0;
   }
 }

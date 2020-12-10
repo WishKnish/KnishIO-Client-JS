@@ -1,30 +1,88 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import Response from "./Response";
 import Dot from "../libraries/Dot";
 import MoleculeStructure from "../MoleculeStructure";
 
-
+/**
+ * Response for proposing new Molecules
+ */
 export default class ResponseMolecule extends Response {
 
   /**
+   * Class constructor
+   *
    * @param query
    * @param json
    */
   constructor ( query, json ) {
     super( query, json );
     this.dataKey = 'data.ProposeMolecule';
-    this.init ();
+    this.init();
   }
 
+  /**
+   * Initialize response object with payload data
+   */
   init () {
     const payload_json = Dot.get( this.data(), 'payload' );
     try {
       this.$__payload = JSON.parse( payload_json );
-    }
-    catch ( err ) {
+    } catch ( err ) {
       this.$__payload = null;
     }
   }
 
+  /**
+   * Returns the resulting molecule
+   *
+   * @returns {MoleculeStructure|null}
+   */
   molecule () {
 
     const data = this.data();
@@ -43,6 +101,8 @@ export default class ResponseMolecule extends Response {
   }
 
   /**
+   * Returns whether molecule was accepted or not
+   *
    * @returns {boolean}
    */
   success () {
@@ -50,6 +110,8 @@ export default class ResponseMolecule extends Response {
   }
 
   /**
+   * Returns the status of the proposal
+   *
    * @returns {string}
    */
   status () {
@@ -57,12 +119,19 @@ export default class ResponseMolecule extends Response {
   }
 
   /**
+   * Returns the reason for rejection
+   *
    * @returns {string}
    */
   reason () {
     return Dot.get( this.data(), 'reason', 'Invalid response from server' );
   }
 
+  /**
+   * Returns payload object
+   *
+   * @returns {null}
+   */
   payload () {
     return this.$__payload;
   }

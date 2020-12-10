@@ -1,6 +1,6 @@
 {
 	"name": "@wishknish/knishio-client-js",
-	"version": "0.3.0",
+	"version": "0.3.20",
 	"description": "Knish.IO Javascript API Client",
 	"license": "GPL-3.0-or-later",
 	"repository": {
@@ -114,6 +114,6 @@
 		"build:webpack": "webpack --mode production --progress --colors --verbose"
 	},
 	"nodemonConfig": {
-		"delay": "5500"
+		"delay": 5500
 	}
 }

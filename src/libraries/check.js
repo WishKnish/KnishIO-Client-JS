@@ -28,14 +28,13 @@ export default class CheckMolecule {
    * @returns {boolean}
    * @throws {AtomsMissingException}
    */
-  static continueId ( molecule )
-  {
+  static continuId ( molecule ) {
     CheckMolecule.missing( molecule );
 
     const firstAtom = molecule.atoms[ 0 ];
 
     if ( firstAtom.token === 'USER' && CheckMolecule.isotopeFilter( 'I', molecule.atoms ).length < 1 ) {
-      throw new AtomsMissingException( 'Missing atom ContinueID' );
+      throw new AtomsMissingException( 'Missing atom ContinuID' );
     }
 
     return true;
@@ -162,7 +161,7 @@ export default class CheckMolecule {
       }
 
       if ( atom.token !== 'USER' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ $atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
       }
 
       if ( atom.index !== 0 ) {
@@ -191,7 +190,7 @@ export default class CheckMolecule {
 
     const firstAtom = molecule.atoms[ 0 ];
 
-    if ( firstAtom.isotope === 'V' &&  isotopeV.length === 2 ) {
+    if ( firstAtom.isotope === 'V' && isotopeV.length === 2 ) {
 
       const endAtom = isotopeV[ isotopeV.length - 1 ];
 
@@ -267,7 +266,7 @@ export default class CheckMolecule {
         throw new TypeError( 'Invalid isotope "V" values' );
       }
 
-      const remainder = ( 1 * senderWallet.balance ) + value;
+      const remainder = senderWallet.balance + value;
 
       // Is there enough balance to send?
       if ( remainder < 0 ) {
