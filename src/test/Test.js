@@ -53,6 +53,8 @@ export default class Test
               icon: 'icon',
           } )
           .then( ( response ) => {
+            console.log('########### CREATE TOKEN ################');
+            console.log(response.clientMolecule());
             this.checkResponse( response );
           } );
     }
