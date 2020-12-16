@@ -480,7 +480,8 @@ export default class KnishIOClient {
           walletObj.balance = Number( wallet.balance );
           walletObj.molecules = wallet.molecules;
           walletObj.createdAt = wallet.createdAt;
-          walletObj.tokenName = wallet.tokenName;
+          walletObj.tokenName = wallet.tokenData.name;
+          walletObj.tokenSupply = wallet.tokenData.amount;
           walletObj.tokenIcon = wallet.tokenIcon;
 
         } else {

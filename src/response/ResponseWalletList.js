@@ -90,6 +90,8 @@ export default class ResponseWalletList extends Response {
     wallet.createdAt = data[ 'createdAt' ];
     wallet.balance = data[ 'amount' ];
 
+    wallet.tokenData = data['token'];
+
     return wallet;
   }
 
