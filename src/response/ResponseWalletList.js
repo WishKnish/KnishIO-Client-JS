@@ -74,55 +74,58 @@ export default class ResponseWalletList extends Response {
   static toClientWallet ( data, secret = null ) {
     let wallet;
 
-    if ( data[ 'position' ] === null || typeof data[ 'position' ] === 'undefined' ) {
+    if ( data.position === null || typeof data.position === 'undefined' ) {
       wallet = Wallet.create(
-        data[ 'bundleHash' ],
-        data[ 'tokenSlug' ],
-        data[ 'batchId' ],
-        data[ 'characters' ]
+        data.bundleHash,
+        data.tokenSlug,
+        data.batchId,
+        data.characters
       );
     } else {
-        wallet = new Wallet(
-          secret,
-          data[ 'tokenSlug' ],
-          data[ 'position' ],
-          data[ 'batchId' ],
-          data[ 'characters' ]
-        );
-        wallet.address = data[ 'address' ];
-        wallet.bundle = data[ 'bundleHash' ];
-
-        // !! @todo Absent properties
-        // wallet.tokenName = data[ 'tokenName' ];
-        // wallet.tokenIcon = data[ 'tokenIcon' ];
-       // ???  Temporarily enabling explicit querying of token object meta
-        // wallet.tokenName = data.tokenData.name;
-        // wallet.tokenSupply = data.tokenData.amount;
+      wallet = new Wallet(
+        secret,
+        data.tokenSlug,
+        data.position,
+        data.batchId,
+        data.characters
+      );
+      wallet.address = data.address;
+      wallet.bundle = data.bundleHash;
     }
 
-    wallet.balance = Number( data[ 'amount' ] );
-    wallet.pubkey = data[ 'pubkey' ];
-    wallet.createdAt = data[ 'createdAt' ];
+    if ( data.token ) {
+      wallet.tokenName = data.token.name;
+      wallet.tokenSupply = data.token.amount;
+    }
+
+    wallet.balance = Number( data.amount );
+    wallet.pubkey = data.pubkey;
+    wallet.createdAt = data.createdAt;
 
     return wallet;
   }
 
+  /**
+   * Returns a list of Wallet class instances
+   *
+   * @param secret
+   * @returns {null|[]}
+   */
+  getWallets ( secret ) {
 
-  getWallets( secret ) {
+    const list = this.data();
 
-      const list = this.data();
+    if ( !list ) {
+      return null;
+    }
 
-      if ( !list ) {
-          return null;
-      }
+    const wallets = [];
 
-      const wallets = [];
+    for ( let item of list ) {
+      wallets.push( ResponseWalletList.toClientWallet( item, secret ) );
+    }
 
-      for ( let item of list ) {
-          wallets.push( ResponseWalletList.toClientWallet( item, secret ) );
-      }
-
-      return wallets;
+    return wallets;
   }
 
   /**
