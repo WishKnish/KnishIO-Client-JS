@@ -95,6 +95,9 @@ export default class ResponseWalletList extends Response {
         // !! @todo Absent properties
         // wallet.tokenName = data[ 'tokenName' ];
         // wallet.tokenIcon = data[ 'tokenIcon' ];
+       // ???  Temporarily enabling explicit querying of token object meta
+        // wallet.tokenName = data.tokenData.name;
+        // wallet.tokenSupply = data.tokenData.amount;
     }
 
     wallet.balance = Number( data[ 'amount' ] );

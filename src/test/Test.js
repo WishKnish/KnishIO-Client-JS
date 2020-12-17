@@ -44,7 +44,7 @@ export default class Test
     testCreateToken () {
         let tokenSlug = this.tokenSlugs[ 0 ];
         return this.client( this.secrets[ 0 ] )
-          .createToken ( tokenSlug, 1000, {
+          .createToken ( tokenSlug, 1000.000000000000, {
               name: tokenSlug,
               fungibility: 'stackable',
               splittable: 1,
@@ -119,6 +119,8 @@ export default class Test
         return this.client( this.secrets[ 0 ] )
           .transferToken ( walletObjectOrBundleHash, this.tokenSlugs[ 0 ], 10 )
           .then( ( response ) => {
+            console.log( '######### testTransferToken ###############' );
+            console.log( response );
             this.checkResponse( response );
           } );
     }
