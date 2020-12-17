@@ -595,26 +595,44 @@ export default class KnishIOClient {
    * Creates and executes a Molecule that assigns keys to an unclaimed shadow wallet
    *
    * @param {string} tokenSlug
-   * @param molecule
+   * @param {string} batchId
+   * @param {Molecule} molecule
    * @returns {Promise<Response>}
    */
-  async claimShadowWallet ( tokenSlug, molecule = null ) {
+  async claimShadowWallet ( tokenSlug, batchId = null, molecule = null ) {
 
-    const shadowWallets = await this.queryShadowWallets( tokenSlug );
+    if ( !batchId ) {
 
-    // --- Check shadow wallets
-    if ( !shadowWallets || !Array.isArray( shadowWallets ) ) {
-      throw new WalletShadowException();
-    }
-    shadowWallets.forEach( shadowWallet => {
-      if ( !shadowWallet.isShadow() ) {
+      // --- Get & check a shadow wallet list
+      const shadowWallets = await this.queryShadowWallets( tokenSlug );
+      if ( !shadowWallets || !Array.isArray( shadowWallets ) ) {
         throw new WalletShadowException();
       }
-    } );
+      shadowWallets.forEach( shadowWallet => {
+        if ( !shadowWallet.isShadow() ) {
+          throw new WalletShadowException();
+        }
+      } );
+      // ----
+
+      // Has only one shadow wallet => continue shadow wallet claim executing with is's batch ID
+      if ( shadowWallets.length === 1 ) {
+        batchId = shadowWallets[ 0 ].batchId;
+      }
+
+      // Claim for a list of shadow wallets
+      else {
+        let responses = [];
+        for ( const shadowWallet of shadowWallets ) {
+          responses.push( await this.claimShadowWallet( tokenSlug, shadowWallet.batchId ) );
+        }
+        return responses;
+      }
+    }
     // ---
 
     const query = await this.createMoleculeMutation( MutationClaimShadowWallet, molecule );
-    query.fillMolecule( tokenSlug, shadowWallets );
+    query.fillMolecule( tokenSlug, batchId );
 
     return await query.execute();
   }
