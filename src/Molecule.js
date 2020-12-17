@@ -463,7 +463,7 @@ export default class Molecule extends MoleculeStructure {
           'pubkey': this.sourceWallet.pubkey,
           'characters': this.sourceWallet.characters,
           'code': code,
-          'hash': generateBundleHash( source.trim() ),
+          'hash': generateBundleHash( contact.trim() ),
         },
         null,
         this.generateIndex()
@@ -524,16 +524,24 @@ export default class Molecule extends MoleculeStructure {
     return this;
   }
 
+
   /**
-   * Arranges Atoms to claim a shadow wallet
+   * Init shadow wallet claim
    *
-   * @param {Wallet} shadowWallet
-   * @param {Array|Object} tokenMeta
-   * @returns {Molecule}
+   * @param $token
+   * @param $wallet
    */
-  initShadowWalletClaim ( shadowWallet, tokenMeta = {} ) {
+  initShadowWalletClaim ( tokenSlug, wallet ) {
 
     this.molecularHash = null;
+
+    // Generate a wallet metas
+    let metas = {
+      tokenSlug: tokenSlug,
+      walletAddress: wallet.address,
+      walletPosition: wallet.position,
+      batchId: wallet.batchId
+    };
 
     // Create an 'C' atom
     this.atoms.push(
@@ -543,13 +551,13 @@ export default class Molecule extends MoleculeStructure {
         'C',
         this.sourceWallet.token,
         null,
-        shadowWallet.batchId,
-        'shadowWallet',
-        shadowWallet.token,
+        null,
+        'wallet',
+        wallet.address,
         Molecule.mergeMetas( {
           'pubkey': this.sourceWallet.pubkey,
           'characters': this.sourceWallet.characters,
-        }, tokenMeta ),
+        }, metas ),
         null,
         this.generateIndex()
       )
@@ -619,7 +627,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @returns {Molecule}
    */
-  initTokenRequest ( token, amount, metaType, metaId, meta = {} ) {
+  initTokenRequest ( tokenSlug, requestedAmount, metaType, metaId, meta = {} ) {
 
     this.molecularHash = null;
 
@@ -629,14 +637,14 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.address,
         'T',
         this.sourceWallet.token,
-        amount,
+        requestedAmount,
         null,
         metaType,
         metaId,
         Molecule.mergeMetas( {
           'pubkey': this.sourceWallet.pubkey,
           'characters': this.sourceWallet.characters,
-          'token': token,
+          'token': tokenSlug,
         }, meta ),
         null,
         this.generateIndex()

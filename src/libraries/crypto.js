@@ -92,6 +92,25 @@ export function generateBundleHash ( secret ) {
 }
 
 /**
+ * Returns a new batch ID for stackable tokens
+ *
+ * @returns {string}
+ */
+export function generateBatchId () {
+  return randomString( 64 );
+}
+
+
+/**
+ * Generate wallet position
+ *
+ * @returns {string}
+ */
+export function generateWalletPosition ( saltLength = 64 ) {
+  return randomString( saltLength, 'abcdef0123456789' );
+}
+
+/**
  * Encrypts the given message or data with the recipient's public key
  *
  * @param message

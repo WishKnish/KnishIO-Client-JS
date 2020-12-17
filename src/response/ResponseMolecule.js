@@ -63,6 +63,7 @@ export default class ResponseMolecule extends Response {
   constructor ( query, json ) {
     super( query, json );
     this.dataKey = 'data.ProposeMolecule';
+    this.$__clientMolecule = query.molecule();
     this.init();
   }
 
@@ -76,6 +77,15 @@ export default class ResponseMolecule extends Response {
     } catch ( err ) {
       this.$__payload = null;
     }
+  }
+
+
+  /**
+   * Returns the client molecule
+   */
+  clientMolecule()
+  {
+    return this.$__clientMolecule;
   }
 
   /**

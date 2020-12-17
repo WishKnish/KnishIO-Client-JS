@@ -46,7 +46,6 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "./Response";
-import WalletShadow from "../WalletShadow";
 import Wallet from "../Wallet";
 
 /**
@@ -70,30 +69,60 @@ export default class ResponseWalletList extends Response {
    * Returns a Knish.IO client Wallet class instance out of object data
    *
    * @param data
-   * @returns {Wallet|WalletShadow}
+   * @returns {Wallet}
    */
-  toClientWallet ( data ) {
+  static toClientWallet ( data, secret = null ) {
     let wallet;
 
     if ( data[ 'position' ] === null || typeof data[ 'position' ] === 'undefined' ) {
-      wallet = new WalletShadow( data[ 'bundleHash' ], data[ 'tokenSlug' ], data[ 'batchId' ] );
+      wallet = Wallet.create(
+        data[ 'bundleHash' ],
+        data[ 'tokenSlug' ],
+        data[ 'batchId' ],
+        data[ 'characters' ]
+      );
     } else {
-      wallet = new Wallet( null, data[ 'tokenSlug' ] );
-      wallet.address = data[ 'address' ];
-      wallet.position = data[ 'position' ];
-      wallet.bundle = data[ 'bundleHash' ];
-      wallet.batchId = data[ 'batchId' ];
-      wallet.characters = data[ 'characters' ];
-      wallet.pubkey = data[ 'pubkey' ];
+        wallet = new Wallet(
+          secret,
+          data[ 'tokenSlug' ],
+          data[ 'position' ],
+          data[ 'batchId' ],
+          data[ 'characters' ]
+        );
+        wallet.address = data[ 'address' ];
+        wallet.bundle = data[ 'bundleHash' ];
+
+        // !! @todo Absent properties
+        // wallet.tokenName = data[ 'tokenName' ];
+        // wallet.tokenIcon = data[ 'tokenIcon' ];
+       // ???  Temporarily enabling explicit querying of token object meta
+        // wallet.tokenName = data.tokenData.name;
+        // wallet.tokenSupply = data.tokenData.amount;
     }
 
-    wallet.molecules = data['molecules'];
+    wallet.balance = Number( data[ 'amount' ] );
+    wallet.pubkey = data[ 'pubkey' ];
     wallet.createdAt = data[ 'createdAt' ];
-    wallet.balance = data[ 'amount' ];
-
-    wallet.tokenData = data['token'];
 
     return wallet;
+  }
+
+
+  getWallets( secret ) {
+
+      const list = this.data();
+
+      if ( !list ) {
+          return null;
+      }
+
+      const wallets = [];
+
+      for ( let item of list ) {
+          wallets.push( ResponseWalletList.toClientWallet( item, secret ) );
+      }
+
+      return wallets;
   }
 
   /**
@@ -111,7 +140,7 @@ export default class ResponseWalletList extends Response {
     const wallets = [];
 
     for ( let item of list ) {
-      wallets.push( this.toClientWallet( item ) );
+      wallets.push( ResponseWalletList.toClientWallet( item ) );
     }
 
     return wallets;

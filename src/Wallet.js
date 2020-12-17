@@ -60,9 +60,10 @@ import {
   decryptMessage,
   encryptMessage,
   generateBundleHash,
+  generateWalletPosition,
+  generateBatchId,
   hashShare,
 } from './libraries/crypto';
-import WalletShadow from "./WalletShadow";
 
 /**
  * Wallet class represents the set of public and private
@@ -76,27 +77,32 @@ export default class Wallet {
    * @param {string | null} secret - typically a 2048-character biometric hash
    * @param {string} token - slug for the token this wallet is intended for
    * @param {string | null} position - hexadecimal string used to salt the secret and produce one-time signatures
-   * @param {number} saltLength - length of the position parameter that should be generated if position is not provided
+   * @param {string} batchID
    * @param {string|null} characters
    */
-  constructor ( secret = null, token = 'USER', position = null, saltLength = 64, characters = null ) {
+  constructor ( secret = null, token = 'USER', position = null, batchId = null, characters = null ) {
 
-    // Position via which (combined with token) we will generate the one-time keys
-    this.position = position ? position : randomString( saltLength, 'abcdef0123456789' );
     this.token = token;
     this.balance = 0;
     this.molecules = {};
-    this.batchId = null;
-    this.characters = ( new Base58() )[ characters ] !== 'undefined' ? characters : null;
 
+    // Empty values
     this.key = null;
     this.address = null;
-    this.bundle = null;
     this.privkey = null;
     this.pubkey = null;
 
+    this.bundle = secret ? generateBundleHash( secret ) : null;
+    this.batchId = batchId;
+    this.position = position;
+    this.characters = ( new Base58() )[ characters ] !== 'undefined' ? characters : null;
+
     if ( secret ) {
+
+      this.position = this.position || generateWalletPosition();
+
       this.prepareKeys( secret );
+
     }
 
   }
@@ -108,21 +114,17 @@ export default class Wallet {
    * @param {string} token
    * @param {string|null} batchId
    * @param {string|null} characters
-   * @returns {Wallet|WalletShadow}
+   * @returns {Wallet}
    */
   static create ( secretOrBundle, token, batchId = null, characters = null ) {
 
-    // Shadow wallet
-    if ( Wallet.isBundleHash( secretOrBundle ) ) {
-      return new WalletShadow( secretOrBundle, token, batchId, characters );
-    }
+    let secret = Wallet.isBundleHash( secretOrBundle ) ? null : secretOrBundle;
+    let bundle = secret ? generateBundleHash( secret ) : secretOrBundle;
+    let position = secret ? generateWalletPosition() : null;
 
-    // Base wallet
-    const wallet = new Wallet( secretOrBundle, token );
-
-    wallet.batchId = batchId;
-    wallet.characters = ( new Base58() )[ characters ] !== 'undefined' ? characters : null;
-
+    // Wallet initialization
+    let wallet = new Wallet( secret, token, position, batchId, characters );
+    wallet.bundle = bundle;
     return wallet;
   }
 
@@ -142,27 +144,13 @@ export default class Wallet {
   }
 
   /**
-   * Prepares wallet for signing by generating all required keys
-   *
-   * @param {string} secret
+   * @return bool
    */
-  prepareKeys ( secret ) {
-    if ( this.key === null && this.address === null && this.bundle === null ) {
-      this.key = Wallet.generatePrivateKey( secret, this.token, this.position );
-      this.address = Wallet.generatePublicKey( this.key );
-      this.bundle = generateBundleHash( secret );
-      this.getMyEncPrivateKey();
-      this.getMyEncPublicKey();
-    }
-  }
-
-  /**
-   * Returns a new batch ID for stackable tokens
-   *
-   * @returns {string}
-   */
-  static generateBatchId () {
-    return randomString( 64 );
+  isShadow() {
+    return (
+      ( typeof this.position === 'undefined' || null === this.position ) &&
+      ( typeof this.address === 'undefined' || null === this.address )
+    )
   }
 
   /**
@@ -178,9 +166,23 @@ export default class Wallet {
       // Set batchID to recipient wallet
       this.batchId = ( !this.batchId && Decimal.cmp( senderWallet.balance, transferAmount ) > 0 ) ?
         // Has a remainder value (source balance is bigger than a transfer value)
-        Wallet.generateBatchId() :
+        generateBatchId() :
         // Has no remainder? use batch ID from the source wallet
         senderWallet.batchId;
+    }
+  }
+
+  /**
+   * Prepares wallet for signing by generating all required keys
+   *
+   * @param {string} secret
+   */
+  prepareKeys ( secret ) {
+    if ( this.key === null && this.address === null ) {
+      this.key = Wallet.generatePrivateKey( secret, this.token, this.position );
+      this.address = Wallet.generatePublicKey( this.key );
+      this.getMyEncPrivateKey();
+      this.getMyEncPublicKey();
     }
   }
 

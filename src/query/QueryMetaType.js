@@ -56,10 +56,10 @@ export default class QueryMetaType extends Query {
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param httpClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
+  constructor ( httpClient ) {
+    super( httpClient );
     this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ] ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter ) @fields }`;
     this.$__fields = {
       'metaType': null,
@@ -119,7 +119,7 @@ export default class QueryMetaType extends Query {
       variables[ typeof value === "string" ? 'value' : 'values' ] = value;
     }
 
-    if ( latest ) {
+    if( latest ) {
       variables[ 'latest' ] = !!latest;
     }
 
