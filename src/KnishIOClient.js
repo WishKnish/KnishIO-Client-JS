@@ -476,13 +476,17 @@ export default class KnishIOClient {
 
           console.info( `KnishIOClient::getWallets() - Restoring ${ wallet.token } wallet with balance of ${ wallet.balance }...` );
 
-          walletObj = new Wallet( this.$__secret, wallet.token, wallet.position );
-          walletObj.balance = Number( wallet.balance );
-          walletObj.molecules = wallet.molecules;
-          walletObj.createdAt = wallet.createdAt;
-          walletObj.tokenName = wallet.tokenData.name;
-          walletObj.tokenSupply = wallet.tokenData.amount;
-          walletObj.tokenIcon = wallet.tokenIcon;
+          // If this is our wallet, we can build a proper wallet object
+          if( wallet.bundle === this.$__bundle ) {
+            walletObj = new Wallet( this.$__secret, wallet.token, wallet.position );
+            walletObj.balance = Number( wallet.balance );
+            walletObj.molecules = wallet.molecules;
+            walletObj.createdAt = wallet.createdAt;
+            walletObj.tokenIcon = wallet.tokenIcon;
+          }
+          else {
+            walletObj = wallet;
+          }
 
         } else {
 
@@ -490,6 +494,10 @@ export default class KnishIOClient {
           walletObj = wallet;
 
         }
+
+        // Adding extended token metadata
+        walletObj.tokenName = wallet.tokenData.name;
+        walletObj.tokenSupply = wallet.tokenData.amount;
 
         // Flagging wallet as remote
         wallet.remote = true;

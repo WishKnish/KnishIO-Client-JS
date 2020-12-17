@@ -87,6 +87,7 @@ export default class ResponseWalletList extends Response {
       wallet.pubkey = data[ 'pubkey' ];
     }
 
+    wallet.molecules = data['molecules'];
     wallet.createdAt = data[ 'createdAt' ];
     wallet.balance = data[ 'amount' ];
 

@@ -68,6 +68,10 @@ export default class QueryWalletList extends Query {
         name: null,
         amount: null,
       },
+      'molecules': {
+        molecularHash: null,
+        createdAt: null,
+      },
       'tokenSlug': null,
       'batchId': null,
       'position': null,
