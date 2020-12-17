@@ -100,7 +100,7 @@ export default class MoleculeStructure {
   /**
    * Validates the current molecular structure
    *
-   * @param {Wallet} senderWallet
+   * @param {Wallet|null} senderWallet
    * @returns {boolean}
    */
   check ( senderWallet = null ) {
@@ -111,8 +111,8 @@ export default class MoleculeStructure {
    *
    * Verifies a specified molecule
    *
-   * @param {Molecule} molecule
-   * @param {Wallet} senderWallet
+   * @param {Molecule|MoleculeStructure} molecule
+   * @param {Wallet|null} senderWallet
    * @return {boolean}
    */
   static verify ( molecule, senderWallet = null ) {

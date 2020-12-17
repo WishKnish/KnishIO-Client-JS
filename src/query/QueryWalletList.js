@@ -64,6 +64,14 @@ export default class QueryWalletList extends Query {
     this.$__fields = {
       'address': null,
       'bundleHash': null,
+      'token': {
+        name: null,
+        amount: null,
+      },
+      'molecules': {
+        molecularHash: null,
+        createdAt: null,
+      },
       'tokenSlug': null,
       'batchId': null,
       'position': null,

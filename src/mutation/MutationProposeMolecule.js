@@ -59,7 +59,7 @@ export default class MutationProposeMolecule extends Mutation {
    * Class constructor
    *
    * @param knishIO
-   * @param molecule
+   * @param {Molecule|null} molecule
    */
   constructor ( knishIO, molecule = null ) {
     super( knishIO );

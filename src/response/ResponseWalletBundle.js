@@ -70,7 +70,7 @@ export default class ResponseWalletBundle extends Response {
    *
    * @returns {{}|null}
    */
-  payload ( ) {
+  payload () {
     const bundleData = this.data();
 
     if ( !bundleData || bundleData.length === 0 ) {

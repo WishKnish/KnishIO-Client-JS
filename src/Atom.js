@@ -57,22 +57,22 @@ export default class Atom {
   /**
    * Class constructor
    *
-   * @param {string} position
-   * @param {string} walletAddress
-   * @param {string} isotope
-   * @param {string | null} token
-   * @param {string | number | null} value
-   * @param {string} batchId
-   * @param {string | null} metaType
-   * @param {string | null} metaId
-   * @param {Array | Object | null} meta
-   * @param {string | null} otsFragment
-   * @param {number | null} index
+   * @param {string|null} position
+   * @param {string|null} walletAddress
+   * @param {string|null} isotope
+   * @param {string|null} token
+   * @param {string|number|null} value
+   * @param {string|null} batchId
+   * @param {string|null} metaType
+   * @param {string|null} metaId
+   * @param {Array|Object|null} meta
+   * @param {string|null} otsFragment
+   * @param {number|null} index
    */
   constructor (
-    position,
-    walletAddress,
-    isotope,
+    position = null,
+    walletAddress = null,
+    isotope = null,
     token = null,
     value = null,
     batchId = null,
@@ -107,8 +107,8 @@ export default class Atom {
    */
   static jsonToObject ( json ) {
 
-    const target = Object.assign( new Atom( null, null, null ), JSON.parse( json ) ),
-      properties = Object.keys( new Atom( null, null, null ) );
+    const target = Object.assign( new Atom(), JSON.parse( json ) ),
+      properties = Object.keys( new Atom() );
 
     for ( const property in target ) {
 

@@ -89,12 +89,11 @@ export default class QueryWalletBundle extends Query {
   /**
    * Builds a GraphQL-friendly variables object based on input fields
    *
-   * @param {string|array|null} metaType
-   * @param {string|array|null} metaId
+   * @param {string|array|null} bundleHash
    * @param {string|array|null} key
    * @param {string|array|null} value
-   * @param {boolean} latest
-   * @returns {{}}
+   * @param {boolean|null} latest
+   * @return {{}}
    */
   static createVariables ( bundleHash = null, key = null, value = null, latest = true ) {
 

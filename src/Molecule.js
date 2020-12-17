@@ -154,24 +154,6 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
-   * Encrypts data for yourself or for sharing with an
-   * arbitrary number of third parties
-   *
-   * @param {Array} data
-   * @param {Array} shared_wallets
-   */
-  encryptMessage ( data, shared_wallets = [] ) {
-    const target = [ data, this.sourceWallet.pubkey, ];
-
-    // If we have a list of third-party wallets, add their keys to the list
-    for ( let wallet of shared_wallets ) {
-      target.push( wallet.pubkey );
-    }
-
-    return this.sourceWallet.encryptMessage( ...target );
-  }
-
-  /**
    * Adds an atom to an existing Molecule
    *
    * @param {Atom} atom
@@ -271,7 +253,7 @@ export default class Molecule extends MoleculeStructure {
    * Burns some amount of tokens from a wallet
    *
    * @param {number} value
-   * @param {string} walletBundle
+   * @param {string|null} walletBundle
    * @returns {Molecule}
    */
   burnTokens ( value, walletBundle = null ) {
@@ -508,7 +490,7 @@ export default class Molecule extends MoleculeStructure {
 
     for ( const walletKey of [ 'walletAddress', 'walletPosition', 'walletPubkey', 'walletCharacters' ] ) {
       // Importing wallet fields into meta object
-      if( !tokenMeta[ walletKey ] ) {
+      if ( !tokenMeta[ walletKey ] ) {
         tokenMeta[ walletKey ] = recipientWallet[ walletKey.toLowerCase().substr( 6 ) ]
       }
     }
@@ -606,10 +588,10 @@ export default class Molecule extends MoleculeStructure {
     this.molecularHash = null;
 
     const walletMeta = {};
-    if(this.sourceWallet.pubkey) {
+    if ( this.sourceWallet.pubkey ) {
       walletMeta.pubkey = this.sourceWallet.pubkey;
     }
-    if(this.sourceWallet.characters) {
+    if ( this.sourceWallet.characters ) {
       walletMeta.characters = this.sourceWallet.characters;
     }
 
