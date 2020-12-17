@@ -83,8 +83,7 @@ export default class ResponseMolecule extends Response {
   /**
    * Returns the client molecule
    */
-  clientMolecule()
-  {
+  clientMolecule () {
     return this.$__clientMolecule;
   }
 

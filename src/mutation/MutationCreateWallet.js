@@ -58,5 +58,5 @@ export default class MutationCreateWallet extends MutationProposeMolecule {
     this.$__molecule.sign();
     this.$__molecule.check();
   }
-  
+
 }

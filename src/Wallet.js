@@ -146,7 +146,7 @@ export default class Wallet {
   /**
    * @return bool
    */
-  isShadow() {
+  isShadow () {
     return (
       ( typeof this.position === 'undefined' || null === this.position ) &&
       ( typeof this.address === 'undefined' || null === this.address )
