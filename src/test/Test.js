@@ -46,7 +46,6 @@ export default class Test {
       .createToken( tokenSlug, 1000.000000000000, {
         name: tokenSlug,
         fungibility: 'stackable',
-        splittable: 1,
         supply: 'limited',
         decimals: 0,
         icon: 'icon',
