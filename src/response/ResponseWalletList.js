@@ -98,6 +98,7 @@ export default class ResponseWalletList extends Response {
       wallet.tokenSupply = data.token.amount;
     }
 
+    wallet.molecules = data.molecules;
     wallet.balance = Number( data.amount );
     wallet.pubkey = data.pubkey;
     wallet.createdAt = data.createdAt;
