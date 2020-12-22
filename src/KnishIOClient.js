@@ -440,7 +440,10 @@ export default class KnishIOClient {
    */
   async createMeta ( metaType, metaId, metadata = null ) {
 
-    const query = await this.createMoleculeMutation( MutationCreateMeta );
+    const query = await this.createMoleculeMutation(
+      MutationCreateMeta,
+      await this.createMolecule( this.secret(), await this.getSourceWallet() )
+    );
 
     query.fillMolecule( metaType, metaId, metadata );
 
@@ -599,42 +602,40 @@ export default class KnishIOClient {
    * @param {Molecule} molecule
    * @returns {Promise<Response>}
    */
-  async claimShadowWallet ( tokenSlug, batchId = null, molecule = null ) {
-
-    if ( !batchId ) {
-
-      // --- Get & check a shadow wallet list
-      const shadowWallets = await this.queryShadowWallets( tokenSlug );
-      if ( !shadowWallets || !Array.isArray( shadowWallets ) ) {
-        throw new WalletShadowException();
-      }
-      shadowWallets.forEach( shadowWallet => {
-        if ( !shadowWallet.isShadow() ) {
-          throw new WalletShadowException();
-        }
-      } );
-      // ----
-
-      // Has only one shadow wallet => continue shadow wallet claim executing with is's batch ID
-      if ( shadowWallets.length === 1 ) {
-        batchId = shadowWallets[ 0 ].batchId;
-      }
-
-      // Claim for a list of shadow wallets
-      else {
-        let responses = [];
-        for ( const shadowWallet of shadowWallets ) {
-          responses.push( await this.claimShadowWallet( tokenSlug, shadowWallet.batchId ) );
-        }
-        return responses;
-      }
-    }
-    // ---
+  async claimShadowWallet ( tokenSlug, batchId, molecule = null ) {
 
     const query = await this.createMoleculeMutation( MutationClaimShadowWallet, molecule );
     query.fillMolecule( tokenSlug, batchId );
 
     return await query.execute();
+  }
+
+
+  /**
+   * Claim shadow wallets
+   *
+   * @param tokenSlug
+   * @returns {Promise<Response|*|[]>}
+   */
+  async claimShadowWallets ( tokenSlug ) {
+
+    // --- Get & check a shadow wallet list
+    const shadowWallets = await this.queryShadowWallets( tokenSlug );
+    if ( !shadowWallets || !Array.isArray( shadowWallets ) ) {
+      throw new WalletShadowException();
+    }
+    shadowWallets.forEach( shadowWallet => {
+      if ( !shadowWallet.isShadow() ) {
+        throw new WalletShadowException();
+      }
+    } );
+    // ----
+
+    let responses = [];
+    for ( const shadowWallet of shadowWallets ) {
+      responses.push( await this.claimShadowWallet( tokenSlug, shadowWallet.batchId ) );
+    }
+    return responses;
   }
 
   /**
@@ -674,7 +675,7 @@ export default class KnishIOClient {
     const molecule = await this.createMolecule(
       null,
       fromWallet,
-      this.remainderWallet
+      Wallet.create( this.secret(), tokenSlug, toWallet.batchId, fromWallet.characters )
       ),
       query = await this.createMoleculeMutation( MutationTransferTokens, molecule );
 
