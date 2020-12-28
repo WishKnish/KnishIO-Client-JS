@@ -163,12 +163,15 @@ export default class Wallet {
 
     if ( senderWallet.batchId ) {
 
+      this.batchId = generateBatchId();
+      /*
       // Set batchID to recipient wallet
       this.batchId = ( !this.batchId && Decimal.cmp( senderWallet.balance, transferAmount ) > 0 ) ?
         // Has a remainder value (source balance is bigger than a transfer value)
         generateBatchId() :
         // Has no remainder? use batch ID from the source wallet
         senderWallet.batchId;
+      */
     }
   }
 
