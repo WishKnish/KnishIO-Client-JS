@@ -56,10 +56,10 @@ export default class QueryWalletBundle extends Query {
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param httpClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
+  constructor ( httpClient ) {
+    super( httpClient );
     this.$__query = `query( $bundleHash: String, $bundleHashes: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $keys_values: [ MetaInput ], $latest: Boolean, $limit: Int, $skip: Int, $order: String ) { WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, skip: $skip, order: $order ) @fields }`;
     this.$__fields = {
       'bundleHash': null,
@@ -98,7 +98,7 @@ export default class QueryWalletBundle extends Query {
   static createVariables ( bundleHash = null, key = null, value = null, latest = true ) {
 
     const variables = {
-      latest,
+      latest: latest,
     };
 
     if ( bundleHash ) {

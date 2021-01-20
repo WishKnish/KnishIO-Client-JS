@@ -55,15 +55,15 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
   /**
    * Fills a Molecule with the appropriate atoms and prepares for broadcast
    *
-   * @param token
-   * @param value
+   * @param tokenSlug
+   * @param requestedAmount
    * @param metaType
    * @param metaId
    * @param metas
    */
-  fillMolecule ( token, value, metaType, metaId, metas = null ) {
+  fillMolecule ( tokenSlug, requestedAmount, metaType, metaId, metas = null ) {
 
-    this.$__molecule.initTokenRequest( token, value, metaType, metaId, metas || {} );
+    this.$__molecule.initTokenRequest( tokenSlug, requestedAmount, metaType, metaId, metas || {} );
     this.$__molecule.sign();
     this.$__molecule.check();
   }

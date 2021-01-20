@@ -1,6 +1,6 @@
 {
 	"name": "@wishknish/knishio-client-js",
-	"version": "0.3.21",
+	"version": "0.3.27",
 	"description": "Knish.IO Javascript API Client",
 	"license": "GPL-3.0-or-later",
 	"repository": {
@@ -96,7 +96,8 @@
 		"rollup-plugin-uglify": "^6.0.4",
 		"uglify-es": "^3.3.9",
 		"webpack": "^4.41.5",
-		"webpack-cli": "^3.3.10"
+		"webpack-cli": "^3.3.10",
+		"webpack-merge": "^5.4.0"
 	},
 	"browserslist": [
 		"> 1%",

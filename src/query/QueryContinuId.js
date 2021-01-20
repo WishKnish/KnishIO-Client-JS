@@ -56,10 +56,10 @@ export default class QueryContinuId extends Query {
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param httpClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
+  constructor ( httpClient ) {
+    super( httpClient );
     this.$__query = `query ($bundle: String!) { ContinuId(bundle: $bundle) @fields }`;
     this.$__fields = {
       'address': null,

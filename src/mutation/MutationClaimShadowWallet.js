@@ -53,14 +53,12 @@ import Wallet from "../Wallet";
  */
 export default class MutationClaimShadowWallet extends MutationProposeMolecule {
 
-  /**
-   *
-   * @param {Wallet} shadowWallet
-   * @param {Object|null} tokenMeta
-   */
-  fillMolecule ( shadowWallet, tokenMeta = {} ) {
-    this.$__molecule.initShadowWalletClaim( shadowWallet, tokenMeta );
+  fillMolecule ( tokenSlug, batchId ) {
+    let wallet = Wallet.create( this.$__molecule.secret, tokenSlug, batchId );
+
+    this.$__molecule.initShadowWalletClaim( tokenSlug, wallet );
     this.$__molecule.sign();
     this.$__molecule.check();
   }
+
 }
