@@ -60,7 +60,7 @@ export default class QueryMetaType extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ] ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter ) @fields }`;
+    this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas ) @fields }`;
     this.$__fields = {
       'metaType': null,
       'instances': {
@@ -97,9 +97,10 @@ export default class QueryMetaType extends Query {
    * @param {string|array|null} value
    * @param {boolean|null} latest
    * @param {object|null} filter
+   * @param latestMetas
    * @returns {{}}
    */
-  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null ) {
+  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true ) {
 
     const variables = {};
 
@@ -121,6 +122,10 @@ export default class QueryMetaType extends Query {
 
     if ( latest ) {
       variables[ 'latest' ] = !!latest;
+    }
+
+    if ( latestMetas ) {
+      variables[ 'latestMetas' ] = !!latestMetas;
     }
 
     if ( filter ) {
