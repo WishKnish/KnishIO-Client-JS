@@ -390,7 +390,6 @@ export default class KnishIOClient {
       } );
   }
 
-
   /**
    * Query meta batch to get cascade meta instances by batchID
    *
@@ -403,7 +402,7 @@ export default class KnishIOClient {
 
     const query = this.createQuery( QueryMetaBatch );
 
-    return await query.execute();
+    return await query.execute( { batchId: batchId, } );
   }
 
   /**

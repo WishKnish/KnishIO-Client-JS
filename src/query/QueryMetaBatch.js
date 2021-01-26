@@ -46,6 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from "./Query";
+import Response from "../response/Response";
 import ResponseMetaType from "../response/ResponseMetaBatch";
 
 /**
@@ -66,11 +67,8 @@ export default class QueryMetaType extends Query {
       'metaId': null,
       'createdAt': null,
       'metas': {
-        'molecularHash': null,
-        'position': null,
         'key': null,
         'value': null,
-        'createdAt': null,
       },
     };
   }
@@ -82,7 +80,9 @@ export default class QueryMetaType extends Query {
    * @return {ResponseMetaType}
    */
   createResponse ( response ) {
-    return new ResponseMetaBatch( this, response );
+    let responseObject = new Response( this, response );
+    responseObject.dataKey = 'data.MetaBatch';
+    return responseObject;
   }
 
 }
