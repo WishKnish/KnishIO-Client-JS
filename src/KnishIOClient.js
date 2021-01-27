@@ -56,7 +56,7 @@ import QueryWalletBundle from "./query/QueryWalletBundle";
 import QueryWalletList from "./query/QueryWalletList";
 import QueryBalance from "./query/QueryBalance";
 import QueryMetaType from "./query/QueryMetaType";
-import QueryMetaBatch from "./query/QueryMetaBatch";
+import QueryBatch from "./query/QueryBatch";
 import MutationRequestAuthorization from "./mutation/MutationRequestAuthorization";
 import MutationCreateToken from "./mutation/MutationCreateToken";
 import MutationRequestTokens from "./mutation/MutationRequestTokens";
@@ -391,16 +391,16 @@ export default class KnishIOClient {
   }
 
   /**
-   * Query meta batch to get cascade meta instances by batchID
+   * Query batch to get cascade meta instances by batchID
    *
    * @param batchId
    * @returns {Promise<*>}
    */
-  async queryMetaBatch ( batchId ) {
+  async queryBatch ( batchId ) {
 
-    console.info( `KnishIOClient::queryMetaBatch() - Querying cascade meta instance data for batchId: ${ batchId }...` );
+    console.info( `KnishIOClient::queryBatch() - Querying cascade meta instance data for batchId: ${ batchId }...` );
 
-    const query = this.createQuery( QueryMetaBatch );
+    const query = this.createQuery( QueryBatch );
 
     return await query.execute( { batchId: batchId, } );
   }

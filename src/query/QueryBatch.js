@@ -52,7 +52,7 @@ import ResponseMetaType from "../response/ResponseMetaBatch";
 /**
  * Query for retrieving Meta Asset information
  */
-export default class QueryMetaType extends Query {
+export default class QueryBatch extends Query {
 
   /**
    * Class constructor
@@ -61,11 +61,16 @@ export default class QueryMetaType extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $batchId: String ) { MetaBatch( batchId: $batchId ) @fields }`;
+    this.$__query = `query( $batchId: String ) { Batch( batchId: $batchId ) @fields }`;
     this.$__fields = {
-      'metaType': null,
-      'metaId': null,
+      'batchId': null,
+      'type': null,
       'createdAt': null,
+      'wallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null
+      },
       'metas': {
         'key': null,
         'value': null,
@@ -81,7 +86,7 @@ export default class QueryMetaType extends Query {
    */
   createResponse ( response ) {
     let responseObject = new Response( this, response );
-    responseObject.dataKey = 'data.MetaBatch';
+    responseObject.dataKey = 'data.Batch';
     return responseObject;
   }
 
