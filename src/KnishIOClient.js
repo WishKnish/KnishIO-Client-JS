@@ -446,6 +446,27 @@ export default class KnishIOClient {
     return await query.execute();
   }
 
+
+  /**
+   * Create a token with units
+   * @param slug
+   * @param units
+   * @param metadata
+   * @param batchId
+   * @returns {Promise<Response>}
+   */
+  async createUnitableToken ( slug, units, metadata = null, batchId = null ) {
+    batchId = batchId ?? Wallet::generateBatchId();
+
+    // Set custom default metadata
+    metadata[ 'tokenUnits' ] = $.JSON.stringify( units );
+    metadata[ 'fungibility' ] = 'stackable';
+    metadata[ 'splittable' ] = 1;
+    metadata[ 'decimals' ] = 0;
+
+    return this.createToken( slug, units.length, metadata, batchId );
+  }
+
   /**
    * Builds and executes a molecule to convey new metadata to the ledger
    *

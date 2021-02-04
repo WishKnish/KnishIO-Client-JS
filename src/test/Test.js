@@ -5,13 +5,28 @@ import ResponseMolecule from "../response/ResponseMolecule";
 
 export default class Test {
 
+  // All token units
+  tokenUnits = [
+    [ 'unit_id_1', 'unit_name_1', 'unit_meta_1', ],
+    [ 'unit_id_2', 'unit_name_2', 'unit_meta_2', ],
+    [ 'unit_id_3', 'unit_name_3', 'unit_meta_3', ],
+    [ 'unit_id_4', 'unit_name_4', 'unit_meta_4', ],
+    [ 'unit_id_5', 'unit_name_5', 'unit_meta_5', ],
+    [ 'unit_id_6', 'unit_name_6', 'unit_meta_6', ],
+    [ 'unit_id_7', 'unit_name_7', 'unit_meta_7', ],
+    [ 'unit_id_8', 'unit_name_8', 'unit_meta_8', ],
+    [ 'unit_id_9', 'unit_name_9', 'unit_meta_9', ],
+    [ 'unit_id_10','unit_name_10','unit_meta_10', ],
+    [ 'unit_id_11','unit_name_11','unit_meta_11', ],
+  ];
+
   /**
    * Constructor
    * @param graphqlUrl
    */
   constructor ( graphqlUrl ) {
     this.secrets = [ generateSecret(), generateSecret() ];
-    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE' ];
+    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', ];
     this.graphqlUrl = graphqlUrl;
     this.clients = {};
   }
@@ -41,18 +56,35 @@ export default class Test {
    * @throws \Exception
    */
   testCreateToken () {
-    let tokenSlug = this.tokenSlugs[ 0 ];
-    return this.client( this.secrets[ 0 ] )
-      .createToken( tokenSlug, 1000.000000000000, {
-        name: tokenSlug,
+
+    // Regular stackable token
+    this.client( this.secrets[ 0 ] )
+      .createToken( this.tokenSlugs[ 0 ], 1000.000000000000, {
+        name: this.tokenSlugs[ 0 ],
         fungibility: 'stackable',
         supply: 'limited',
         decimals: 0,
         icon: 'icon',
       } )
       .then( ( response ) => {
-        this.checkResponse( response, 'testCreateToken' );
+        this.checkResponse( response, 'testCreateToken.0' );
       } );
+
+    // Server stackable token
+    this.client( this.secrets[ 0 ] )
+      .createToken( this.tokenSlugs[ 1 ], 1000.000000000000, {
+        name: this.tokenSlugs[ 1 ],
+        fungibility: 'stackable',
+        supply: 'limited',
+        decimals: 0,
+        icon: 'icon',
+      } )
+      .then( ( response ) => {
+        this.checkResponse( response, 'testCreateToken.1' );
+      } );
+
+
+    // createUnitableToken
   }
 
   /**
@@ -96,6 +128,7 @@ export default class Test {
    *
    */
   testRequestTokens () {
+    return;
     return this.client( this.secrets[ 0 ] )
       .requestTokens( this.tokenSlugs[ 1 ], 10, this.secrets[ 0 ] )
       .then( ( response ) => {
@@ -115,12 +148,26 @@ export default class Test {
       } );
   }
 
+
   /**
    *
    */
-  testClaimShadowWallet () {
-    return this.client( this.secrets[ 1 ] )
-      .claimShadowWallet( this.tokenSlugs[ 0 ] )
+  testTransferUnitToken () {
+
+  }
+
+  /**
+   *
+   */
+  async testClaimShadowWallet () {
+
+    let response = await this.client( this.secrets[ 1 ] )
+      .queryBalance( this.tokenSlugs[ 0 ] );
+
+    let wallet = await response.payload();
+
+    return await this.client( this.secrets[ 1 ] )
+      .claimShadowWallet( this.tokenSlugs[ 0 ], wallet.batchId )
       .then( ( response ) => {
         this.checkResponse( response, 'testClaimShadowWallet' );
       } );
