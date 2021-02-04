@@ -102,11 +102,11 @@ export default class QueryMetaType extends Query {
    * @param {boolean|null} latest
    * @param {object|null} filter
    * @param latestMetas
-   * @param {int} limit
-   * @param {int} offset
+   * @param {int|null} limit
+   * @param {int|null} offset
    * @returns {{}}
    */
-  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true, limit= 15, offset = null ) {
+  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true, limit = 15, offset = null ) {
 
     const variables = {};
 
