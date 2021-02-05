@@ -58,7 +58,8 @@ import MetaMissingException from "./exception/MetaMissingException";
 import NegativeAmountException from "./exception/NegativeAmountException";
 import MoleculeStructure from "./MoleculeStructure";
 
-const merge = require( 'lodash.merge' );
+const USE_META_CONTEXT = false;
+const DEFAULT_META_CONTEXT = 'http://www.schema.org';
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -86,17 +87,6 @@ export default class Molecule extends MoleculeStructure {
     }
 
     this.clear();
-  }
-
-  /**
-   * Merge two metadata arrays or objects
-   *
-   * @param {Array|Object} first
-   * @param {Array|Object} second
-   * @returns {Object}
-   */
-  static mergeMetas ( first, second = {} ) {
-    return merge( first || {}, second );
   }
 
   /**
@@ -167,6 +157,45 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
+   * Final metas array
+   * @param metas
+   * @param wallet
+   * @returns {{}}
+   */
+  finalMetas ( metas = null, wallet = null ) {
+    metas = metas || {};
+    wallet = wallet || this.sourceWallet;
+
+    if ( wallet.hasTokenUnits() ) {
+      metas[ 'tokenUnits' ] = wallet.tokenUnitsJson();
+    }
+
+    metas[ 'pubkey' ] = wallet.pubkey;
+    metas[ 'characters' ] = wallet.characters;
+
+    return metas;
+  }
+
+
+  /**
+   * @param array $metas
+   * @param null $context
+   *
+   * @return array
+   */
+  contextMetas ( metas = null, context = null ) {
+    metas = metas || {};
+
+    // Add context key if it is enabled
+    if ( USE_META_CONTEXT ) {
+      metas[ 'context' ] = context || DEFAULT_META_CONTEXT;
+    }
+
+    return metas;
+  }
+
+
+/**
    * Replenishes non-finite token supplies
    *
    * @param {number} value
@@ -196,13 +225,7 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.batchId,
         'token',
         token,
-        Molecule.mergeMetas(
-          {
-            'pubkey': this.sourceWallet.pubkey,
-            'characters': this.sourceWallet.characters
-          },
-          aggregateMeta
-        ),
+        this.finalMetas( this.contextMetas( aggregateMeta ) ),
         null,
         this.generateIndex()
       )
@@ -235,10 +258,7 @@ export default class Molecule extends MoleculeStructure {
         null,                   // {string} batchId
         'walletBundle',       // {string | null} metaType
         userRemainderWallet.bundle,    // {string | null} metaId
-        {
-          'pubkey': userRemainderWallet.pubkey,
-          'characters': userRemainderWallet.characters,
-        },                             // {Array | Object | null} meta
+        this.finalMetas( {}, userRemainderWallet ), // {Array | Object | null} meta
         null,                // {string | null} otsFragment
         this.generateIndex()            // {number | null} index
       )
@@ -279,10 +299,7 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.batchId,
         null,
         null,
-        {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-        },
+        this.finalMetas( {} ),
         null,
         this.generateIndex()
       )
@@ -298,10 +315,7 @@ export default class Molecule extends MoleculeStructure {
         this.remainderWallet.batchId,
         walletBundle ? 'walletBundle' : null,
         walletBundle,
-        {
-          'pubkey': this.remainderWallet.pubkey,
-          'characters': this.remainderWallet.characters,
-        },
+        this.finalMetas( {}, this.remainderWallet ),
         null,
         this.generateIndex()
       )
@@ -340,10 +354,7 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.batchId,
         null,
         null,
-        {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-        },
+        this.finalMetas( {} ),
         null,
         this.generateIndex()
       )
@@ -360,10 +371,7 @@ export default class Molecule extends MoleculeStructure {
         recipientWallet.batchId,
         'walletBundle',
         recipientWallet.bundle,
-        {
-          'pubkey': recipientWallet.pubkey,
-          'characters': recipientWallet.characters,
-        },
+        this.finalMetas( {}, recipientWallet ),
         null,
         this.generateIndex()
       )
@@ -379,10 +387,7 @@ export default class Molecule extends MoleculeStructure {
         this.remainderWallet.batchId,
         'walletBundle',
         this.sourceWallet.bundle,
-        {
-          'pubkey': this.remainderWallet.pubkey,
-          'characters': this.remainderWallet.characters,
-        },
+        this.finalMetas( {}, this.remainderWallet ),
         null,
         this.generateIndex()
       )
@@ -424,7 +429,7 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.batchId,
         'wallet',
         newWallet.address,
-        metas,
+        this.finalMetas( this.contextMetas( metas ), newWallet ),
         null,
         this.generateIndex()
       )
@@ -436,45 +441,6 @@ export default class Molecule extends MoleculeStructure {
     return this;
   }
 
-  /**
-   * Builds Atoms to define a new identifier on the ledger
-   *
-   * @param {string} type - phone or email
-   * @param {string} contact - phone number or email string
-   * @param {string} code -
-   *
-   * @returns {Molecule}
-   */
-  initIdentifierCreation ( type, contact, code ) {
-
-    this.molecularHash = null;
-
-    this.atoms.push(
-      new Atom(
-        this.sourceWallet.position,
-        this.sourceWallet.address,
-        'C',
-        this.sourceWallet.token,
-        null,
-        null,
-        'identifier',
-        type,
-        {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-          'code': code,
-          'hash': generateBundleHash( contact.trim() ),
-        },
-        null,
-        this.generateIndex()
-      )
-    );
-
-    this.addUserRemainderAtom( this.remainderWallet );
-    this.atoms = Atom.sortAtoms( this.atoms );
-
-    return this;
-  }
 
   /**
    * Initialize a C-type molecule to issue a new type of token
@@ -510,7 +476,7 @@ export default class Molecule extends MoleculeStructure {
         recipientWallet.batchId,
         'token',
         recipientWallet.token,
-        tokenMeta,
+        this.finalMetas( this.contextMetas( tokenMeta ) ),
         null,
         this.generateIndex()
       )
@@ -554,10 +520,7 @@ export default class Molecule extends MoleculeStructure {
         null,
         'wallet',
         wallet.address,
-        Molecule.mergeMetas( {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-        }, metas ),
+        this.finalMetas( this.contextMetas( metas ) ),
         null,
         this.generateIndex()
       )
@@ -571,6 +534,48 @@ export default class Molecule extends MoleculeStructure {
     return this;
   }
 
+
+  /**
+   * Builds Atoms to define a new identifier on the ledger
+   *
+   * @param {string} type - phone or email
+   * @param {string} contact - phone number or email string
+   * @param {string} code -
+   *
+   * @returns {Molecule}
+   */
+  initIdentifierCreation ( type, contact, code ) {
+
+    this.molecularHash = null;
+
+    let metas = {
+      'code': code,
+      'hash': generateBundleHash( contact.trim() ),
+    };
+
+    this.atoms.push(
+      new Atom(
+        this.sourceWallet.position,
+        this.sourceWallet.address,
+        'C',
+        this.sourceWallet.token,
+        null,
+        null,
+        'identifier',
+        type,
+        this.finalMetas( this.contextMetas( metas ) ),
+        null,
+        this.generateIndex()
+      )
+    );
+
+    this.addUserRemainderAtom( this.remainderWallet );
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+  }
+
+
   /**
    * Initialize an M-type molecule with the given data
    *
@@ -583,14 +588,6 @@ export default class Molecule extends MoleculeStructure {
 
     this.molecularHash = null;
 
-    const walletMeta = {};
-    if ( this.sourceWallet.pubkey ) {
-      walletMeta.pubkey = this.sourceWallet.pubkey;
-    }
-    if ( this.sourceWallet.characters ) {
-      walletMeta.characters = this.sourceWallet.characters;
-    }
-
     // Initializing a new Atom to hold our metadata
     this.atoms.push(
       new Atom(
@@ -602,7 +599,7 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.batchId,
         metaType,
         metaId,
-        Molecule.mergeMetas( walletMeta, meta ),
+        this.finalMetas( meta ),
         null,
         this.generateIndex()
       )
@@ -631,6 +628,8 @@ export default class Molecule extends MoleculeStructure {
 
     this.molecularHash = null;
 
+    meta.token = tokenSlug;
+
     this.atoms.push(
       new Atom(
         this.sourceWallet.position,
@@ -641,11 +640,7 @@ export default class Molecule extends MoleculeStructure {
         null,
         metaType,
         metaId,
-        Molecule.mergeMetas( {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-          'token': tokenSlug,
-        }, meta ),
+        this.finalMetas( meta ),
         null,
         this.generateIndex()
       )
@@ -678,10 +673,7 @@ export default class Molecule extends MoleculeStructure {
         this.sourceWallet.batchId,
         null,
         null,
-        {
-          'pubkey': this.sourceWallet.pubkey,
-          'characters': this.sourceWallet.characters,
-        },
+        this.finalMetas(),
         null,
         this.generateIndex()
       )

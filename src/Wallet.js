@@ -144,6 +144,42 @@ export default class Wallet {
   }
 
   /**
+   * Get formatted token units from the raw data
+   *
+   * @param unitsData
+   * @returns {[]}
+   */
+  static getTokenUnits ( unitsData ) {
+    let result = [];
+    unitsData.forEach( unitData => {
+      result.push( { id: unitData.shift(), name: unitData.shift(), metas: unitData, } );
+    } );
+    return result;
+  }
+
+  /**
+   * Has token units?
+   * @returns {boolean}
+   */
+  hasTokenUnits () {
+    return 'tokenUnits' in this;
+  }
+
+  /**
+   * @return string
+   */
+  tokenUnitsJson () {
+    if ( !this.hasTokenUnits() ) {
+      return null;
+    }
+    let result = [];
+    this.tokenUnits.forEach( tokenUnit => {
+      result.push( [ tokenUnit.id, tokenUnit.name ].concat( tokenUnit.metas ) )
+    } );
+    return JSON.stringify( result );
+  }
+
+  /**
    * @return bool
    */
   isShadow () {

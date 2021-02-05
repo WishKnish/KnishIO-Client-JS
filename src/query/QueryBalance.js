@@ -72,6 +72,11 @@ export default class QueryBalance extends Query {
       'characters': null,
       'pubkey': null,
       'createdAt': null,
+      'tokenUnits': {
+        'id': null,
+        'name': null,
+        'metas': null,
+      },
     };
   }
 
