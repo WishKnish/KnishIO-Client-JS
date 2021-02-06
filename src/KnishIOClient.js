@@ -84,16 +84,19 @@ export default class KnishIOClient {
    * @param {string} url
    * @param {HttpClient} client
    * @param {number} serverSdkVersion
+   * @param {boolean} logging
    */
   constructor ( {
     url,
     client = null,
     serverSdkVersion = 3,
+    logging = false,
   } ) {
     this.initialize( {
       url,
       client,
       serverSdkVersion,
+      logging,
     } );
   }
 
@@ -103,14 +106,20 @@ export default class KnishIOClient {
    * @param {string} url
    * @param {HttpClient} client
    * @param {number} serverSdkVersion
+   * @param {boolean} logging
    */
   initialize ( {
     url,
     client = null,
     serverSdkVersion = 3,
+    logging = false,
   } ) {
 
-    console.info( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
+    this.$__logging = logging;
+
+    if( this.$__logging ) {
+      console.info( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
+    }
 
     this.reset();
 
@@ -122,7 +131,9 @@ export default class KnishIOClient {
    * Deinitializes the Knish.IO client session so that a new session can replace it
    */
   deinitialize () {
-    console.info( 'KnishIOClient::deinitialize() - Clearing the Knish.IO client session...' );
+    if( this.$__logging ) {
+      console.info( 'KnishIOClient::deinitialize() - Clearing the Knish.IO client session...' );
+    }
     this.reset();
   }
 
@@ -266,7 +277,9 @@ export default class KnishIOClient {
     remainderWallet = null,
   } ) {
 
-    console.info( 'KnishIOClient::createMolecule() - Creating a new molecule...' );
+    if( this.$__logging ) {
+      console.info( 'KnishIOClient::createMolecule() - Creating a new molecule...' );
+    }
 
     const _secret = secret || this.secret();
     let _sourceWallet = sourceWallet;
@@ -318,7 +331,9 @@ export default class KnishIOClient {
     molecule = null,
   } ) {
 
-    console.info( `KnishIOClient::createMoleculeQuery() - Creating a new ${ mutationClass.name } query...` );
+    if( this.$__logging ) {
+      console.info( `KnishIOClient::createMoleculeQuery() - Creating a new ${ mutationClass.name } query...` );
+    }
 
     // If you don't supply the molecule, we'll generate one for you
     let _molecule = molecule || await this.createMolecule( {} );
@@ -346,7 +361,9 @@ export default class KnishIOClient {
     cellSlug = null,
   } ) {
 
-    console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
+    if( this.$__logging ) {
+      console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
+    }
 
     this.setSecret( secret );
     this.$__cellSlug = cellSlug || this.cellSlug();
@@ -381,11 +398,16 @@ export default class KnishIOClient {
         const token = response.token();
         this.client().setAuthToken( token )
 
-        console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
+        if( this.$__logging ) {
+          console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
+        }
 
       } else {
 
-        console.warn( 'KnishIOClient::requestAuthToken() - Unable to retrieve auth token...' );
+        if( this.$__logging ) {
+          console.warn( 'KnishIOClient::requestAuthToken() - Unable to retrieve auth token...' );
+        }
+
         throw new UnauthenticatedException( response.reason() );
 
       }
@@ -393,7 +415,9 @@ export default class KnishIOClient {
       return response;
     } else {
 
-      console.warn( 'KnishIOClient::requestAuthToken() - Server SDK version does not require an auth token...' );
+      if( this.$__logging ) {
+        console.warn( 'KnishIOClient::requestAuthToken() - Server SDK version does not require an auth token...' );
+      }
 
     }
   }
@@ -446,7 +470,9 @@ export default class KnishIOClient {
     filter = null
   } ) {
 
-    console.info( `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
+    if( this.$__logging ) {
+      console.info( `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
+    }
 
     /**
      * @type {QueryMetaType}
@@ -608,7 +634,9 @@ export default class KnishIOClient {
     unspent = true,
   } ) {
 
-    console.info( `KnishIOClient::queryWallets() - Querying wallets${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
+    if( this.$__logging ) {
+      console.info( `KnishIOClient::queryWallets() - Querying wallets${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
+    }
 
     /**
      * @type {QueryWalletList}
@@ -637,7 +665,10 @@ export default class KnishIOClient {
   } ) {
 
     bundleHash = bundleHash ? bundleHash : this.bundle();
-    console.info( `KnishIOClient::queryShadowWallets() - Querying ${ tokenSlug } shadow wallets for ${ bundleHash }...` );
+
+    if( this.$__logging ) {
+      console.info( `KnishIOClient::queryShadowWallets() - Querying ${ tokenSlug } shadow wallets for ${ bundleHash }...` );
+    }
 
     /**
      * @type {QueryWalletList}
@@ -672,7 +703,9 @@ export default class KnishIOClient {
     fields = null
   } ) {
 
-    console.info( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
+    if( this.$__logging ) {
+      console.info( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
+    }
 
     /**
      * @type {QueryWalletBundle}
