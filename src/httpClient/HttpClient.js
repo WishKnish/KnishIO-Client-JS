@@ -45,7 +45,10 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { Request, Headers } from 'servie';
+import {
+  Request,
+  Headers
+} from 'servie';
 import { fetch, } from 'popsicle';
 
 const merge = require( 'lodash.merge' );

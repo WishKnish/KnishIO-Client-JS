@@ -58,7 +58,12 @@ export default class Meta {
    * @param {Array} meta
    * @param {null|} snapshotMolecule
    */
-  constructor ( modelType, modelId, meta, snapshotMolecule = null ) {
+  constructor ( {
+    modelType,
+    modelId,
+    meta,
+    snapshotMolecule = null,
+  } ) {
 
     this.modelType = modelType;
     this.modelId = modelId;
@@ -71,7 +76,7 @@ export default class Meta {
   /**
    * Normalizes the meta array into the standard {key: ..., value: ...} format
    *
-   * @param {Array | Object} meta
+   * @param {Array|Object} meta
    * @return {Array}
    */
   static normalizeMeta ( meta ) {
@@ -82,7 +87,10 @@ export default class Meta {
 
       for ( const property in meta ) {
         if ( meta.hasOwnProperty( property ) && meta[ property ] !== null ) {
-          target.push( { key: property, value: meta[ property ] } );
+          target.push( {
+            key: property,
+            value: meta[ property ]
+          } );
         }
       }
 
@@ -95,8 +103,8 @@ export default class Meta {
   /**
    * Condenses metadata array into object-based key: value notation
    *
-   * @param {Array | Object} meta
-   * @return {Array | Object}
+   * @param {Array|Object} meta
+   * @return {Array|Object}
    */
   static aggregateMeta ( meta ) {
     const aggregate = {};

@@ -89,7 +89,10 @@ export default class QueryMetaType extends Query {
    * @return {ResponseMetaType}
    */
   createResponse ( response ) {
-    return new ResponseMetaType( this, response );
+    return new ResponseMetaType( {
+      query: this,
+      response,
+    } );
   }
 
   /**
@@ -106,7 +109,17 @@ export default class QueryMetaType extends Query {
    * @param {int|null} offset
    * @returns {{}}
    */
-  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true, limit = 15, offset = null ) {
+  static createVariables ( {
+    metaType = null,
+    metaId = null,
+    key = null,
+    value = null,
+    latest = null,
+    filter = null,
+    latestMetas = true,
+    limit = 15,
+    offset = null,
+  } ) {
 
     const variables = {};
 

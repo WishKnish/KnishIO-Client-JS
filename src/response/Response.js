@@ -60,7 +60,10 @@ export default class Response {
    * @param query
    * @param json
    */
-  constructor ( query, json ) {
+  constructor ( {
+    query,
+    json,
+  } ) {
 
     this.dataKey = null;
     this.errorKey = 'exception';

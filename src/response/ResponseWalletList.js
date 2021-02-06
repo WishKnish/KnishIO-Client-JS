@@ -59,8 +59,14 @@ export default class ResponseWalletList extends Response {
    * @param query
    * @param json
    */
-  constructor ( query, json ) {
-    super( query, json );
+  constructor ( {
+    query,
+    json,
+  } ) {
+    super( {
+      query,
+      json,
+    } );
     this.dataKey = 'data.Wallet';
     this.init();
   }
@@ -68,27 +74,31 @@ export default class ResponseWalletList extends Response {
   /**
    * Returns a Knish.IO client Wallet class instance out of object data
    *
-   * @param data
+   * @param {Object} data
+   * @param {string|null} secret
    * @returns {Wallet}
    */
-  static toClientWallet ( data, secret = null ) {
+  static toClientWallet ( {
+    data,
+    secret = null,
+  } ) {
     let wallet;
 
     if ( data.position === null || typeof data.position === 'undefined' ) {
-      wallet = Wallet.create(
-        data.bundleHash,
-        data.tokenSlug,
-        data.batchId,
-        data.characters
-      );
+      wallet = Wallet.create( {
+        secretOrBundle: data.bundleHash,
+        token: data.tokenSlug,
+        batchId: data.batchId,
+        characters: data.characters,
+      } );
     } else {
-      wallet = new Wallet(
+      wallet = new Wallet( {
         secret,
-        data.tokenSlug,
-        data.position,
-        data.batchId,
-        data.characters
-      );
+        token: data.tokenSlug,
+        position: data.position,
+        batchId: data.batchId,
+        characters: data.characters,
+      } );
       wallet.address = data.address;
       wallet.bundle = data.bundleHash;
     }
@@ -112,7 +122,7 @@ export default class ResponseWalletList extends Response {
    * @param secret
    * @returns {null|[]}
    */
-  getWallets ( secret ) {
+  getWallets ( secret = null ) {
 
     const list = this.data();
 
@@ -122,8 +132,11 @@ export default class ResponseWalletList extends Response {
 
     const wallets = [];
 
-    for ( let item of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( item, secret ) );
+    for ( let data of list ) {
+      wallets.push( ResponseWalletList.toClientWallet( {
+        data,
+        secret,
+      } ) );
     }
 
     return wallets;

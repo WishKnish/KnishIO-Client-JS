@@ -69,7 +69,7 @@ export default class Atom {
    * @param {string|null} otsFragment
    * @param {number|null} index
    */
-  constructor (
+  constructor ( {
     position = null,
     walletAddress = null,
     isotope = null,
@@ -80,7 +80,8 @@ export default class Atom {
     metaId = null,
     meta = null,
     otsFragment = null,
-    index = null ) {
+    index = null,
+  } ) {
 
     this.position = position;
     this.walletAddress = walletAddress;
@@ -107,8 +108,8 @@ export default class Atom {
    */
   static jsonToObject ( json ) {
 
-    const target = Object.assign( new Atom(), JSON.parse( json ) ),
-      properties = Object.keys( new Atom() );
+    const target = Object.assign( new Atom( {} ), JSON.parse( json ) ),
+      properties = Object.keys( new Atom( {} ) );
 
     for ( const property in target ) {
 
@@ -130,9 +131,12 @@ export default class Atom {
    *
    * @param {Array} atoms
    * @param {string} output
-   * @returns {number[] | *}
+   * @returns {number[]|*}
    */
-  static hashAtoms ( atoms, output = 'base17' ) {
+  static hashAtoms ( {
+    atoms,
+    output = 'base17',
+  } ) {
 
     const molecularSponge = shake256.create( 256 ),
       numberOfAtoms = atoms.length,

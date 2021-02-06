@@ -1,6 +1,9 @@
 import KnishIOClient from "../KnishIOClient";
 import Dot from "../libraries/Dot";
-import { generateBundleHash, generateSecret } from "../libraries/crypto";
+import {
+  generateBundleHash,
+  generateSecret
+} from "../libraries/crypto";
 import ResponseMolecule from "../response/ResponseMolecule";
 
 export default class Test {
@@ -41,14 +44,18 @@ export default class Test {
    * @throws \Exception
    */
   testCreateToken () {
-    let tokenSlug = this.tokenSlugs[ 0 ];
+    let token = this.tokenSlugs[ 0 ];
     return this.client( this.secrets[ 0 ] )
-      .createToken( tokenSlug, 1000.000000000000, {
-        name: tokenSlug,
-        fungibility: 'stackable',
-        supply: 'limited',
-        decimals: 0,
-        icon: 'icon',
+      .createToken( {
+        token,
+        amount: 1000.000000000000,
+        tokenMetadata: {
+          name: token,
+          fungibility: 'stackable',
+          supply: 'limited',
+          decimals: 0,
+          icon: 'icon',
+        },
       } )
       .then( ( response ) => {
         this.checkResponse( response, 'testCreateToken' );
@@ -71,9 +78,13 @@ export default class Test {
    */
   testCreateMeta () {
     return this.client( this.secrets[ 0 ] )
-      .createMeta( 'metaType', 'metaId', {
-        key1: 'value1',
-        key2: 'value2',
+      .createMeta( {
+        metaType: 'metaType',
+        metaId: 'metaId',
+        meta: {
+          key1: 'value1',
+          key2: 'value2',
+        },
       } )
       .then( ( response ) => {
         this.checkResponse( response, 'testCreateMeta' );
@@ -86,7 +97,11 @@ export default class Test {
    */
   testCreateIdentifier () {
     return this.client( this.secrets[ 0 ] )
-      .createIdentifier( 'email', 'test@test.com', 1234 )
+      .createIdentifier( {
+        type: 'email',
+        contact: 'test@test.com',
+        code: '1234'
+      } )
       .then( ( response ) => {
         this.checkResponse( response, 'testCreateIdentifier' );
       } );
@@ -97,7 +112,11 @@ export default class Test {
    */
   testRequestTokens () {
     return this.client( this.secrets[ 0 ] )
-      .requestTokens( this.tokenSlugs[ 1 ], 10, this.secrets[ 0 ] )
+      .requestTokens( {
+        token: this.tokenSlugs[ 1 ],
+        requestedAmount: 10,
+        to: this.secrets[ 0 ]
+      } )
       .then( ( response ) => {
         this.checkResponse( response, 'testRequestTokens' );
       } );
@@ -109,7 +128,11 @@ export default class Test {
   testTransferToken () {
     let walletObjectOrBundleHash = generateBundleHash( this.secrets[ 1 ] );
     return this.client( this.secrets[ 0 ] )
-      .transferToken( walletObjectOrBundleHash, this.tokenSlugs[ 0 ], 10 )
+      .transferToken( {
+        walletObjectOrBundleHash,
+        token: this.tokenSlugs[ 0 ],
+        amount: 10,
+      } )
       .then( ( response ) => {
         this.checkResponse( response, 'testTransferToken' );
       } );
@@ -120,7 +143,9 @@ export default class Test {
    */
   testClaimShadowWallet () {
     return this.client( this.secrets[ 1 ] )
-      .claimShadowWallet( this.tokenSlugs[ 0 ] )
+      .claimShadowWallet( {
+        token: this.tokenSlugs[ 0 ],
+      } )
       .then( ( response ) => {
         this.checkResponse( response, 'testClaimShadowWallet' );
       } );
@@ -131,7 +156,10 @@ export default class Test {
    */
   testQueryMeta () {
     return this.client( this.secrets[ 0 ] )
-      .queryMeta( 'metaType', 'metaId' )
+      .queryMeta( {
+        metaType: 'metaType',
+        metaId: 'metaId',
+      } )
       .then( ( response ) => {
         this.checkResponse( response, 'testQueryMeta' );
       } );
@@ -142,7 +170,7 @@ export default class Test {
    */
   testQueryWallets () {
     return this.client( this.secrets[ 0 ] )
-      .queryWallets()
+      .queryWallets( {} )
       .then( ( response ) => {
         this.checkResponse( response, 'testQueryWallets' );
       } );
@@ -153,7 +181,9 @@ export default class Test {
    */
   testQueryShadowWallets () {
     return this.client( this.secrets[ 1 ] )
-      .queryShadowWallets( this.tokenSlugs[ 0 ] )
+      .queryShadowWallets( {
+        tokenSlug: this.tokenSlugs[ 0 ],
+      } )
       .then( ( response ) => {
         this.checkResponse( response, 'testQueryShadowWallets' );
       } );
@@ -164,7 +194,7 @@ export default class Test {
    */
   testQueryBundle () {
     return this.client( this.secrets[ 0 ] )
-      .queryBundle()
+      .queryBundle( {} )
       .then( ( response ) => {
         this.checkResponse( response, 'testQueryBundle' );
       } );
@@ -188,7 +218,9 @@ export default class Test {
    */
   testQueryBalance () {
     return this.client( this.secrets[ 0 ] )
-      .queryBalance( this.tokenSlugs[ 0 ] )
+      .queryBalance( {
+        token: this.tokenSlugs[ 0 ],
+      } )
       .then( ( response ) => {
         this.checkResponse( response, 'testQueryBalance' );
       } );
@@ -210,7 +242,10 @@ export default class Test {
 
       // Auth the client
       return this.clients[ secret ]
-        .requestAuthToken( secret, cellSlug )
+        .requestAuthToken( {
+          secret,
+          cellSlug,
+        } )
         .then( ( response ) => {
           this.checkResponse( response, 'requestAuthToken' );
         } );
@@ -224,6 +259,7 @@ export default class Test {
   /**
    * Check a response
    * @param response
+   * @param key
    */
   checkResponse ( response, key ) {
 
@@ -235,7 +271,7 @@ export default class Test {
       if ( !response.success() ) {
         this.debug( response );
       }
-      console.assert( response.status() == 'accepted', response )
+      console.assert( response.status() === 'accepted', response )
     }
 
     // Default response

@@ -89,6 +89,9 @@ export default class QueryWalletList extends Query {
    * @return {ResponseWalletList}
    */
   createResponse ( response ) {
-    return new ResponseWalletList( this, response );
+    return new ResponseWalletList( {
+      query: this,
+      response,
+    } );
   }
 }

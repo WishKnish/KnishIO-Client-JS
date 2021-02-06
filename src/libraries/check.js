@@ -14,7 +14,10 @@ import MetaMissingException from "./../exception/MetaMissingException";
 import WrongTokenTypeException from "./../exception/WrongTokenTypeException";
 import Atom from "./../Atom";
 import Meta from "./../Meta";
-import { base64ToHex, chunkSubstr } from "./strings";
+import {
+  base64ToHex,
+  chunkSubstr
+} from "./strings";
 import { shake256 } from "js-sha3";
 
 /**
@@ -189,10 +192,10 @@ export default class CheckMolecule {
 
         for ( let condition of conditions ) {
           const keys = Object.keys( condition ),
-            property = keys.filter( function( n) {
+            property = keys.filter( function ( n ) {
               return [ 'key', 'value', 'comparison', ].indexOf( n ) !== -1;
             } ),
-            property2 = keys.filter( function( n) {
+            property2 = keys.filter( function ( n ) {
               return [ 'managedBy', ].indexOf( n ) !== -1;
             } );
           if ( property.length < 3 && property2.length < 1 ) {
@@ -410,7 +413,7 @@ export default class CheckMolecule {
    *
    * @param {Molecule} molecule
    * @return {boolean}
-   * @throws {MolecularHashMissingException | AtomsMissingException | AtomIndexException}
+   * @throws {MolecularHashMissingException|AtomsMissingException|AtomIndexException}
    */
   static index ( molecule ) {
 
@@ -429,8 +432,8 @@ export default class CheckMolecule {
   /**
    *
    * @param {string} isotope
-   * @param {Int32Array | Uint32Array | Array | Int8Array | Float64Array | BigUint64Array | Uint8Array | Int16Array | BigInt64Array | Float32Array | Uint8ClampedArray | Uint16Array} atoms
-   * @returns {Int32Array | Uint32Array | Array | Int8Array | Float64Array | BigUint64Array | Uint8Array | Int16Array | BigInt64Array | Float32Array | Uint8ClampedArray | Uint16Array}
+   * @param {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array} atoms
+   * @returns {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array}
    */
   static isotopeFilter ( isotope, atoms ) {
 

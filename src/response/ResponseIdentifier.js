@@ -59,8 +59,14 @@ export default class ResponseIdentifier extends Response {
    * @param query
    * @param json
    */
-  constructor ( query, json ) {
-    super( query, json );
+  constructor ( {
+    query,
+    json,
+  } ) {
+    super( {
+      query,
+      json,
+    } );
     this.dataKey = 'data.LinkIdentifier';
     this.init();
   }

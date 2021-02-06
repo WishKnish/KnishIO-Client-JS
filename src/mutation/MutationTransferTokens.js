@@ -57,12 +57,18 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
    * Fills the Molecule with provided wallet and amount data
    *
    * @param toWallet
-   * @param amount
+   * @param value
    */
-  fillMolecule ( toWallet, amount ) {
+  fillMolecule ( {
+    toWallet,
+    value
+  } ) {
 
-    this.$__molecule.initValue( toWallet, amount );
-    this.$__molecule.sign();
+    this.$__molecule.initValue( {
+      recipientWallet: toWallet,
+      value,
+    } );
+    this.$__molecule.sign( {} );
     this.$__molecule.check( this.$__molecule.sourceWallet );
   }
 
@@ -73,6 +79,9 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
    * @return {ResponseTokenTransfer}
    */
   createResponse ( response ) {
-    return new ResponseTokenTransfer( this, response );
+    return new ResponseTokenTransfer( {
+      query: this,
+      response,
+    } );
   }
 }

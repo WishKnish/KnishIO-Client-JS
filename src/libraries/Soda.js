@@ -2,7 +2,10 @@ import Base58 from './Base58'
 import { shake256 } from "js-sha3";
 import { box } from "tweetnacl";
 import { Buffer } from "buffer";
-import { open, seal, } from 'tweetnacl-sealedbox-js';
+import {
+  open,
+  seal,
+} from 'tweetnacl-sealedbox-js';
 import {
   decode as decodeUTF8,
   encode as encodeUTF8,

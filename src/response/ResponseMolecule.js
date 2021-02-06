@@ -60,8 +60,14 @@ export default class ResponseMolecule extends Response {
    * @param query
    * @param json
    */
-  constructor ( query, json ) {
-    super( query, json );
+  constructor ( {
+    query,
+    json,
+  } ) {
+    super( {
+      query,
+      json,
+    } );
     this.dataKey = 'data.ProposeMolecule';
     this.$__clientMolecule = query.molecule();
     this.init();

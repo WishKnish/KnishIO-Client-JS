@@ -80,6 +80,9 @@ export default class QueryBalance extends Query {
    * @return {ResponseBalance}
    */
   createResponse ( response ) {
-    return new ResponseBalance( this, response );
+    return new ResponseBalance( {
+      query: this,
+      response,
+    } );
   }
 }

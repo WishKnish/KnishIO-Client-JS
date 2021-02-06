@@ -99,7 +99,10 @@ export default class MutationProposeMolecule extends Mutation {
    * @return {ResponseMolecule}
    */
   createResponse ( response ) {
-    return new ResponseMolecule( this, response );
+    return new ResponseMolecule( {
+      query: this,
+      response,
+    } );
   }
 
   /**
@@ -107,10 +110,16 @@ export default class MutationProposeMolecule extends Mutation {
    *
    * @param {Object} variables
    * @param {Object|null} fields
-   * @return {Promise<Response>}
+   * @return {Promise}
    */
-  async execute ( variables = null, fields = null ) {
-    return await super.execute( merge( variables || {}, { 'molecule': this.molecule() } ), fields );
+  async execute ( {
+    variables = null,
+    fields = null
+  } ) {
+    return await super.execute( {
+      variables: merge( variables || {}, { 'molecule': this.molecule() } ),
+      fields,
+    } );
   }
 
   /**

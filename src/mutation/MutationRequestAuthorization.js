@@ -55,11 +55,14 @@ export default class MutationRequestAuthorization extends MutationProposeMolecul
 
   fillMolecule () {
     this.$__molecule.initAuthorization();
-    this.$__molecule.sign();
+    this.$__molecule.sign( {} );
     this.$__molecule.check()
   }
 
   createResponse ( response ) {
-    return new ResponseAuthorization( this, response );
+    return new ResponseAuthorization( {
+      query: this,
+      response,
+    } );
   }
 }

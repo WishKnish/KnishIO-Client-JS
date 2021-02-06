@@ -56,7 +56,7 @@ export default class Query {
   /**
    * Class constructor
    *
-   * @param {httpClient} httpClient
+   * @param {HttpClient} httpClient
    */
   constructor ( httpClient ) {
     this.client = httpClient;
@@ -92,12 +92,20 @@ export default class Query {
    * @param fields
    * @returns {any}
    */
-  createRequest ( variables = null, fields = null ) {
+  createRequest ( {
+    variables = null,
+    fields = null,
+  } ) {
     this.$__variables = this.compiledVariables( variables );
 
     return new Request(
       this.url(),
-      { body: JSON.stringify( { query: this.compiledQuery( fields ), variables: this.variables() } ) }
+      {
+        body: JSON.stringify( {
+          query: this.compiledQuery( fields ),
+          variables: this.variables()
+        } )
+      }
     );
   }
 
@@ -148,11 +156,17 @@ export default class Query {
    *
    * @param {Object} variables
    * @param {Array|Object|null} fields
-   * @return {Promise<Response>}
+   * @return {Promise}
    */
-  async execute ( variables = null, fields = null ) {
+  async execute ( {
+    variables = null,
+    fields = null,
+  } ) {
 
-    this.$__request = this.createRequest( variables, fields );
+    this.$__request = this.createRequest( {
+      variables,
+      fields,
+    } );
 
     let response = await this.client.send( this.$__request );
 
@@ -178,7 +192,10 @@ export default class Query {
    * @return {Response}
    */
   createResponse ( response ) {
-    return new Response( this, response );
+    return new Response( {
+      query: this,
+      response,
+    } );
   }
 
   /**

@@ -79,6 +79,9 @@ export default class QueryContinuId extends Query {
    * @returns {ResponseContinuId}
    */
   createResponse ( response ) {
-    return new ResponseContinuId( this, response );
+    return new ResponseContinuId( {
+      query: this,
+      response,
+    } );
   }
 }
