@@ -95,7 +95,7 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Creates a new response from a JSON string
    *
-   * @param {string} json
+   * @param {object} json
    * @return {ResponseProposeMolecule}
    */
   createResponse ( json ) {
