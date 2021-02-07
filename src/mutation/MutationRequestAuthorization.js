@@ -59,10 +59,16 @@ export default class MutationRequestAuthorization extends MutationProposeMolecul
     this.$__molecule.check()
   }
 
-  createResponse ( response ) {
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseRequestAuthorization}
+   */
+  createResponse ( json ) {
     return new ResponseRequestAuthorization( {
       query: this,
-      response,
+      json,
     } );
   }
 }

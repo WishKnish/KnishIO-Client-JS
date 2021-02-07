@@ -70,13 +70,13 @@ export default class MutationCreateIdentifier extends MutationProposeMolecule {
   /**
    * Builds a Response object out of a JSON string
    *
-   * @param response
+   * @param {object} json
    * @return {ResponseCreateIdentifier}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseCreateIdentifier( {
       query: this,
-      response,
+      json,
     } );
   }
 }

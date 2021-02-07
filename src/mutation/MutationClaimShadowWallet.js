@@ -75,13 +75,13 @@ export default class MutationClaimShadowWallet extends MutationProposeMolecule {
   /**
    * Builds a Response object out of a JSON string
    *
-   * @param response
+   * @param {object} json
    * @return {ResponseClaimShadowWallet}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseClaimShadowWallet( {
       query: this,
-      response,
+      json,
     } );
   }
 }

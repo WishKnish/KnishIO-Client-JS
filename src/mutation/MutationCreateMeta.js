@@ -78,13 +78,13 @@ export default class MutationCreateMeta extends MutationProposeMolecule {
   /**
    * Builds a new Response object from a JSON string
    *
-   * @param response
+   * @param {object} json
    * @return {ResponseCreateMeta}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseCreateMeta( {
       query: this,
-      response,
+      json,
     } );
   }
 }

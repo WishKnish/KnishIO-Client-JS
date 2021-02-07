@@ -75,13 +75,13 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
   /**
    * Builds a Response object out of a JSON string
    *
-   * @param response
+   * @param {object} json
    * @return {ResponseTransferTokens}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseTransferTokens( {
       query: this,
-      response,
+      json,
     } );
   }
 }

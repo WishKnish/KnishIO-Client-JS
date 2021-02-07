@@ -59,8 +59,8 @@ export default class ResponseTransferTokens extends ResponseProposeMolecule {
    */
   payload () {
     const result = {
-        'reason': null,
-        'status': null,
+        reason: null,
+        status: null,
       },
       data = this.data();
 

@@ -73,13 +73,13 @@ export default class MutationLinkIdentifier extends Query {
   /**
    * Returns a Response object
    *
-   * @param {string} response
+   * @param {object} json
    * @return {ResponseLinkIdentifier}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseLinkIdentifier( {
       query: this,
-      response,
+      json,
     } );
   }
 

@@ -62,13 +62,13 @@ export default class MutationCreateWallet extends MutationProposeMolecule {
   /**
    * Returns a Response object
    *
-   * @param {string} response
+   * @param {object} json
    * @return {ResponseCreateWallet}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseCreateWallet( {
       query: this,
-      response,
+      json,
     } );
   }
 }

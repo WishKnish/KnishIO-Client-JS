@@ -824,7 +824,9 @@ export default class Molecule extends MoleculeStructure {
     }
 
     // Hash atoms to get molecular hash
-    this.molecularHash = Atom.hashAtoms( this.atoms );
+    this.molecularHash = Atom.hashAtoms( {
+      atoms: this.atoms,
+    } );
 
     // Determine first atom
     const firstAtom = this.atoms[ 0 ],

@@ -79,13 +79,13 @@ export default class QueryWalletBundle extends Query {
   /**
    * Builds a Response object out of a JSON string
    *
-   * @param response
+   * @param {object} json
    * @returns {ResponseWalletBundle}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseWalletBundle( {
       query: this,
-      response,
+      json,
     } );
   }
 

@@ -85,13 +85,13 @@ export default class QueryWalletList extends Query {
   /**
    * Builds a Response object out of a JSON string
    *
-   * @param {string} response
+   * @param {object} json
    * @return {ResponseWalletList}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseWalletList( {
       query: this,
-      response,
+      json,
     } );
   }
 }

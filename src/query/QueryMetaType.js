@@ -85,13 +85,13 @@ export default class QueryMetaType extends Query {
   /**
    * Returns a Response object
    *
-   * @param {string} response
+   * @param {object} json
    * @return {ResponseMetaType}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseMetaType( {
       query: this,
-      response,
+      json,
     } );
   }
 

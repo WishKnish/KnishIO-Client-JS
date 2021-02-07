@@ -188,13 +188,13 @@ export default class Query {
   /**
    * Returns a Response object
    *
-   * @param response
+   * @param {object} json
    * @return {Response}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new Response( {
       query: this,
-      response,
+      json,
     } );
   }
 

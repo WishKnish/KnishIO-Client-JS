@@ -334,7 +334,9 @@ export default class CheckMolecule {
 
     CheckMolecule.missing( molecule );
 
-    if ( molecule.molecularHash !== Atom.hashAtoms( molecule.atoms ) ) {
+    if ( molecule.molecularHash !== Atom.hashAtoms( {
+      atoms: molecule.atoms,
+    } ) ) {
       throw new MolecularHashMismatchException();
     }
 

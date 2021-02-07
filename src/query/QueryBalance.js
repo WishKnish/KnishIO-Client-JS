@@ -76,13 +76,13 @@ export default class QueryBalance extends Query {
   }
 
   /**
-   * @param response
+   * @param {object} json
    * @return {ResponseBalance}
    */
-  createResponse ( response ) {
+  createResponse ( json ) {
     return new ResponseBalance( {
       query: this,
-      response,
+      json,
     } );
   }
 }

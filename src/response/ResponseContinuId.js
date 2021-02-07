@@ -56,8 +56,8 @@ export default class ResponseContinuId extends Response {
   /**
    * Class constructor
    *
-   * @param query
-   * @param json
+   * @param {Query} query
+   * @param {object} json
    */
   constructor ( {
     query,
