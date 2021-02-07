@@ -423,6 +423,15 @@ export default class KnishIOClient {
   }
 
   /**
+   * Returns the current authorization token
+   *
+   * @returns {string|null}
+   */
+  getAuthToken() {
+    return this.client().getAuthToken();
+  }
+
+  /**
    * Retrieves the balance wallet for a specified Knish.IO identity and token slug
    *
    * @param {string} token
@@ -524,13 +533,13 @@ export default class KnishIOClient {
    *
    * @param {string} token
    * @param {number} amount
-   * @param {Array|Object} tokenMetadata
+   * @param {array|object} meta
    * @return {Promise<ResponseCreateToken>}
    */
   async createToken ( {
     token,
     amount,
-    tokenMetadata = null,
+    meta = null,
   } ) {
 
     const recipientWallet = new Wallet( {
@@ -539,7 +548,7 @@ export default class KnishIOClient {
     } );
 
     // Stackable tokens need a new batch for every transfer
-    if ( Dot.get( tokenMetadata || {}, 'fungibility' ) === 'stackable' ) {
+    if ( Dot.get( meta || {}, 'fungibility' ) === 'stackable' ) {
       recipientWallet.batchId = generateBatchId();
     }
 
@@ -553,7 +562,7 @@ export default class KnishIOClient {
     query.fillMolecule( {
       recipientWallet,
       amount,
-      meta: tokenMetadata || {},
+      meta: meta || {},
     } );
 
     return await query.execute( {} );
@@ -564,7 +573,7 @@ export default class KnishIOClient {
    *
    * @param {string} metaType
    * @param {string} metaId
-   * @param {Array|Object} metadata
+   * @param {array|object} metadata
    * @return {Promise<ResponseCreateMeta>}
    */
   async createMeta ( {
@@ -739,7 +748,7 @@ export default class KnishIOClient {
      */
     const query = this.createQuery( QueryContinuId );
     return await query.execute( {
-      fields: {
+      variables: {
         bundle: bundleHash,
       }
     } );
@@ -879,13 +888,13 @@ export default class KnishIOClient {
   /**
    * Creates and executes a Molecule that moves tokens from one user to another
    *
-   * @param {Wallet|string} walletObjectOrBundleHash
+   * @param {Wallet|string} recipient
    * @param {string} token
    * @param {number} amount
    * @return {Promise<Response>}
    */
   async transferToken ( {
-    walletObjectOrBundleHash,
+    recipient,
     token,
     amount,
   } ) {
@@ -900,17 +909,17 @@ export default class KnishIOClient {
     }
 
     // Attempt to get the recipient's wallet, if not provided
-    let toWallet = walletObjectOrBundleHash instanceof Wallet ?
-      walletObjectOrBundleHash : ( await this.queryBalance( {
+    let toWallet = recipient instanceof Wallet ?
+      recipient : ( await this.queryBalance( {
         token,
-        bundleHash: walletObjectOrBundleHash,
+        bundleHash: recipient,
       } ) ).payload();
 
     // If no wallet was found, prepare to send to bundle
     // This will typically result in a shadow wallet
     if ( toWallet === null ) {
       toWallet = Wallet.create( {
-        secretOrBundle: walletObjectOrBundleHash,
+        secretOrBundle: recipient,
         token
       } );
     }
