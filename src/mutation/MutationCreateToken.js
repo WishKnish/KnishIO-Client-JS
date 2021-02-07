@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import MutationProposeMolecule from "./MutationProposeMolecule";
-import ResponseTokenCreate from "../response/ResponseTokenCreate";
+import ResponseCreateToken from "../response/ResponseCreateToken";
 
 /**
  * Query for creating new Tokens
@@ -71,10 +71,10 @@ export default class MutationCreateToken extends MutationProposeMolecule {
    * Builds a new Response object from a JSON string
    *
    * @param response
-   * @return {ResponseTokenCreate}
+   * @return {ResponseCreateToken}
    */
   createResponse ( response ) {
-    return new ResponseTokenCreate( {
+    return new ResponseCreateToken( {
       query: this,
       response,
     } );

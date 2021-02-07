@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "../response/ResponseMolecule";
+import ResponseProposeMolecule from "../response/ResponseProposeMolecule";
 import Mutation from "./Mutation";
 
 const merge = require( 'lodash.merge' );
@@ -96,10 +96,10 @@ export default class MutationProposeMolecule extends Mutation {
    * Creates a new response from a JSON string
    *
    * @param {string} response
-   * @return {ResponseMolecule}
+   * @return {ResponseProposeMolecule}
    */
   createResponse ( response ) {
-    return new ResponseMolecule( {
+    return new ResponseProposeMolecule( {
       query: this,
       response,
     } );

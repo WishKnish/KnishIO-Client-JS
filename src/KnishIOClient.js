@@ -389,7 +389,7 @@ export default class KnishIOClient {
       query.fillMolecule();
 
       /**
-       * @type {ResponseAuthorization}
+       * @type {ResponseRequestAuthorization}
        */
       const response = await query.execute( {} );
 
@@ -525,7 +525,7 @@ export default class KnishIOClient {
    * @param {string} token
    * @param {number} amount
    * @param {Array|Object} tokenMetadata
-   * @return {Promise<ResponseTokenCreate>}
+   * @return {Promise<ResponseCreateToken>}
    */
   async createToken ( {
     token,
@@ -565,7 +565,7 @@ export default class KnishIOClient {
    * @param {string} metaType
    * @param {string} metaId
    * @param {Array|Object} metadata
-   * @return {Promise<ResponseMetaCreate>}
+   * @return {Promise<ResponseCreateMeta>}
    */
   async createMeta ( {
     metaType,
@@ -600,7 +600,7 @@ export default class KnishIOClient {
    * @param {string} type
    * @param {string} contact
    * @param {string} code
-   * @return {Promise<ResponseIdentifierCreate>}
+   * @return {Promise<ResponseCreateIdentifier>}
    */
   async createIdentifier ( {
     type,

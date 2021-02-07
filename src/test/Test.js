@@ -4,7 +4,7 @@ import {
   generateBundleHash,
   generateSecret
 } from "../libraries/crypto";
-import ResponseMolecule from "../response/ResponseMolecule";
+import ResponseProposeMolecule from "../response/ResponseProposeMolecule";
 
 export default class Test {
 
@@ -267,7 +267,7 @@ export default class Test {
     console.log( response );
 
     // Check molecule response
-    if ( response instanceof ResponseMolecule ) {
+    if ( response instanceof ResponseProposeMolecule ) {
       if ( !response.success() ) {
         this.debug( response );
       }

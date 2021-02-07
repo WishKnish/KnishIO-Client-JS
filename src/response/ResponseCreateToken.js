@@ -45,11 +45,11 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "./ResponseMolecule";
+import ResponseProposeMolecule from "./ResponseProposeMolecule";
 
 /**
- * Response for Wallet creation
+ * Response for token creation
  */
-export default class ResponseWalletCreate extends ResponseMolecule {
+export default class ResponseCreateToken extends ResponseProposeMolecule {
 
 }

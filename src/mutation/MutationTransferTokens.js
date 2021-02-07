@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import MutationProposeMolecule from "./MutationProposeMolecule";
-import ResponseTokenTransfer from "../response/ResponseTokenTransfer";
+import ResponseTransferTokens from "../response/ResponseTransferTokens";
 
 /**
  * Query for moving tokens between wallets
@@ -76,10 +76,10 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
    * Builds a Response object out of a JSON string
    *
    * @param response
-   * @return {ResponseTokenTransfer}
+   * @return {ResponseTransferTokens}
    */
   createResponse ( response ) {
-    return new ResponseTokenTransfer( {
+    return new ResponseTransferTokens( {
       query: this,
       response,
     } );

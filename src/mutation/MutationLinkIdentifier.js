@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from "../query/Query";
-import ResponseIdentifier from "../response/ResponseIdentifier";
+import ResponseLinkIdentifier from "../response/ResponseLinkIdentifier";
 
 /**
  * Query for linking an Identifier to a Wallet Bundle
@@ -74,10 +74,10 @@ export default class MutationLinkIdentifier extends Query {
    * Returns a Response object
    *
    * @param {string} response
-   * @return {ResponseIdentifier}
+   * @return {ResponseLinkIdentifier}
    */
   createResponse ( response ) {
-    return new ResponseIdentifier( {
+    return new ResponseLinkIdentifier( {
       query: this,
       response,
     } );

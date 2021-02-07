@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import MutationProposeMolecule from "./MutationProposeMolecule";
-import ResponseAuthorization from "../response/ResponseAuthorization";
+import ResponseRequestAuthorization from "../response/ResponseRequestAuthorization";
 
 /**
  * Query for requesting an authorization token from the node
@@ -60,7 +60,7 @@ export default class MutationRequestAuthorization extends MutationProposeMolecul
   }
 
   createResponse ( response ) {
-    return new ResponseAuthorization( {
+    return new ResponseRequestAuthorization( {
       query: this,
       response,
     } );
