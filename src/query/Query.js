@@ -99,7 +99,7 @@ export default class Query {
     this.$__variables = this.compiledVariables( variables );
 
     return new Request(
-      this.url(),
+      this.uri(),
       {
         body: JSON.stringify( {
           query: this.compiledQuery( fields ),
@@ -203,12 +203,12 @@ export default class Query {
   }
 
   /**
-   * Returns the Knish.IO endpoint URL
+   * Returns the Knish.IO endpoint URI
    *
    * @return {string}
    */
-  url () {
-    return this.client.getUrl();
+  uri () {
+    return this.client.getUri();
   }
 
   /**

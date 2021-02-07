@@ -83,7 +83,7 @@ export function generateSecret ( seed = null, length = 2048 ) {
  */
 export function generateBundleHash ( secret ) {
 
-  console.info( 'Crypto::bundle() - Computing wallet bundle from secret...' );
+  console.info( 'Crypto::generateBundleHash() - Computing wallet bundle from secret...' );
 
   const sponge = shake256.create( 256 );
   sponge.update( secret );
