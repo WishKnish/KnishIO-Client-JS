@@ -134,7 +134,7 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Returns the molecule we are proposing
    *
-   * @returns {null}
+   * @returns {Molecule}
    */
   molecule () {
     return this.$__molecule;
