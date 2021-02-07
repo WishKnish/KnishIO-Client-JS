@@ -85,7 +85,7 @@ export default class MoleculeStructure {
   }
 
   /**
-   * @returns {Object}
+   * @returns {object}
    */
   toJSON () {
     let clone = cloneDeep( this );
@@ -139,7 +139,7 @@ export default class MoleculeStructure {
    * Converts a JSON object into a Molecule Structure instance
    *
    * @param {string} json
-   * @return {Object}
+   * @return {object}
    * @throws {AtomsMissingException}
    */
   static jsonToObject ( json ) {

@@ -62,7 +62,7 @@ export default class HttpClient {
    * Class constructor
    *
    * @param {string} url
-   * @param {Object} config
+   * @param {object} config
    */
   constructor ( url, config = {} ) {
 
@@ -82,7 +82,7 @@ export default class HttpClient {
   /**
    * Returns configuration object
    *
-   * @returns {Object}
+   * @returns {object}
    */
   getConfig () {
     return this.$__config;
@@ -128,7 +128,7 @@ export default class HttpClient {
    * Sends the request
    *
    * @param {Request} request
-   * @param {Object} options
+   * @param {object} options
    * @returns {Promise<XhrResponse|HttpResponse>}
    */
   async send ( request, options = {} ) {

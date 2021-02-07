@@ -108,8 +108,8 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Executes the query
    *
-   * @param {Object} variables
-   * @param {Object|null} fields
+   * @param {object} variables
+   * @param {object|null} fields
    * @return {Promise}
    */
   async execute ( {

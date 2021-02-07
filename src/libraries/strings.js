@@ -22,7 +22,7 @@ if ( !String.prototype.trim ) {
 export function chunkSubstr ( str, size ) {
 
   const numChunks = Math.ceil( str.length / size ),
-    chunks = new Array( numChunks );
+    chunks = [];
 
   for ( let i = 0, o = 0; i < numChunks; ++i, o += size ) {
     chunks[ i ] = str.substr( o, size );

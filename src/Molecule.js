@@ -104,9 +104,9 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Merge two metadata arrays or objects
    *
-   * @param {Array|Object} first
-   * @param {Array|Object} second
-   * @returns {Object}
+   * @param {array|object} first
+   * @param {array|object} second
+   * @returns {object}
    */
   static mergeMetas ( first, second = {} ) {
     return merge( first || {}, second );
@@ -140,7 +140,7 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Generates the next atomic index
    *
-   * @param {Array} atoms
+   * @param {array} atoms
    * @returns {number}
    */
   static generateNextAtomIndex ( atoms ) {
@@ -188,7 +188,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @param {number} value
    * @param {string} token
-   * @param {Array|Object} metas
+   * @param {array|object} metas
    * @returns {Molecule}
    */
   replenishTokens ( {
@@ -503,7 +503,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @param {Wallet} recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
    * @param {number} amount - how many of the token we are initially issuing (for fungible tokens only)
-   * @param {Array|Object} meta - additional fields to configure the token
+   * @param {array|object} meta - additional fields to configure the token
    * @returns {Molecule}
    */
   initTokenCreation ( {
@@ -554,7 +554,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @param {string} metaType
    * @param {string} metaId
-   * @param {Object|Array} meta
+   * @param {object|array} meta
    * @returns {Molecule}
    */
   createRule ( {
@@ -654,7 +654,7 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Initialize an M-type molecule with the given data
    *
-   * @param {Array|Object} meta
+   * @param {array|object} meta
    * @param {string} metaType
    * @param {string} metaId
    * @returns {Molecule}
@@ -706,7 +706,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {Number} requestedAmount
    * @param {string} metaType
    * @param {string} metaId
-   * @param {Array|Object} meta
+   * @param {array|object} meta
    *
    * @returns {Molecule}
    */

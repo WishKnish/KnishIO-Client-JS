@@ -88,8 +88,8 @@ export default class Query {
   /**
    * Creates a new Request for the given parameters
    *
-   * @param variables
-   * @param fields
+   * @param {object} variables
+   * @param {array|object|null} fields
    * @returns {any}
    */
   createRequest ( {
@@ -122,7 +122,7 @@ export default class Query {
   /**
    * Returns the compiled Query
    *
-   * @param {Object} fields
+   * @param {object} fields
    * @returns {*|void|string}
    */
   compiledQuery ( fields = null ) {
@@ -137,10 +137,14 @@ export default class Query {
   /**
    * Returns a JSON string of compiled fields
    *
-   * @param {Object} fields
+   * @param {object} fields
    * @returns {string}
    */
   compiledFields ( fields ) {
+
+    if( typeof fields === 'string' ) {
+      return fields;
+    }
 
     const target = [];
 
@@ -154,8 +158,8 @@ export default class Query {
   /**
    * Sends the Query to a Knish.IO node and returns the Response
    *
-   * @param {Object} variables
-   * @param {Array|Object|null} fields
+   * @param {object} variables
+   * @param {array|object|null} fields
    * @return {Promise}
    */
   async execute ( {
@@ -210,7 +214,7 @@ export default class Query {
   /**
    * Returns the query variables object
    *
-   * @return {Object|null}
+   * @return {object|null}
    */
   variables () {
     return this.$__variables;

@@ -74,7 +74,7 @@ export default class ResponseWalletList extends Response {
   /**
    * Returns a Knish.IO client Wallet class instance out of object data
    *
-   * @param {Object} data
+   * @param {object} data
    * @param {string|null} secret
    * @returns {Wallet}
    */

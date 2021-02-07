@@ -57,9 +57,9 @@ export default class MutationCreateMeta extends MutationProposeMolecule {
   /**
    * Fills a molecule with an appropriate metadata atom
    *
-   * @param {string} meta
+   * @param {string} metaType
    * @param {string} metaId
-   * @param {array|object} metadata
+   * @param {array|object} meta
    */
   fillMolecule ( {
     metaType,

@@ -244,8 +244,8 @@ export default class Wallet {
   /**
    * Encrypts a message for this wallet instance
    *
-   * @param {Object|Array} message
-   * @returns {Object}
+   * @param {object|array} message
+   * @returns {object}
    */
   encryptMyMessage ( message ) {
 
@@ -261,8 +261,8 @@ export default class Wallet {
   /**
    * Uses the current wallet's private key to decrypt the given message
    *
-   * @param {string|Object} message
-   * @returns {Array|Object|null}
+   * @param {string|object} message
+   * @returns {array|object|null}
    */
   decryptMyMessage ( message ) {
 
@@ -298,7 +298,7 @@ export default class Wallet {
 
       // If the additional public keys is supplied as a string, convert to array
       if ( typeof publicKeys === 'string' ) {
-        publicKeys = new Array( publicKeys );
+        publicKeys = [ publicKeys ];
       }
 
       // Encrypting message
@@ -313,7 +313,7 @@ export default class Wallet {
    *
    * @param {string} data
    * @param {string|null} fallbackValue
-   * @returns {Array|Object}
+   * @returns {array|object}
    */
   decryptString ( {
     data,

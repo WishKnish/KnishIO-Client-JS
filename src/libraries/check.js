@@ -448,7 +448,7 @@ export default class CheckMolecule {
    * Convert Hm to numeric notation via EnumerateMolecule(Hm)
    *
    * @param {string} hash
-   * @returns {Array}
+   * @returns {array}
    */
   static normalizedHash ( hash ) {
 
@@ -466,7 +466,7 @@ export default class CheckMolecule {
    * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
    *
    * @param {string} hash
-   * @returns {Array}
+   * @returns {array}
    */
   static enumerate ( hash ) {
 
@@ -514,7 +514,7 @@ export default class CheckMolecule {
    *    If m<0 and Im<8 , let Im=Im+1
    *    If m=0, stop the iteration
    *
-   * @param {Array} mappedHashArray
+   * @param {array} mappedHashArray
    * @returns {*}
    */
   static normalize ( mappedHashArray ) {

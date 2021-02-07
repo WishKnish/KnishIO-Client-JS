@@ -65,7 +65,7 @@ export default class Atom {
    * @param {string|null} batchId
    * @param {string|null} metaType
    * @param {string|null} metaId
-   * @param {Array|Object|null} meta
+   * @param {array|object|null} meta
    * @param {string|null} otsFragment
    * @param {number|null} index
    */
@@ -104,7 +104,7 @@ export default class Atom {
    * Converts a compliant JSON string into an Atom class instance
    *
    * @param {string} json
-   * @return {Object}
+   * @return {object}
    */
   static jsonToObject ( json ) {
 
@@ -129,7 +129,7 @@ export default class Atom {
    * Produces a hash of the atoms inside a molecule.
    * Used to generate the molecularHash field for Molecules.
    *
-   * @param {Array} atoms
+   * @param {array} atoms
    * @param {string} output
    * @returns {number[]|*}
    */
@@ -202,8 +202,8 @@ export default class Atom {
   /**
    * Sort the atoms in a Molecule
    *
-   * @param {Array} atoms
-   * @return {Array}
+   * @param {array} atoms
+   * @return {array}
    */
   static sortAtoms ( atoms ) {
 

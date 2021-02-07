@@ -55,7 +55,7 @@ export default class Meta {
    *
    * @param {string} modelType
    * @param {string} modelId
-   * @param {Array} meta
+   * @param {array} meta
    * @param {null|} snapshotMolecule
    */
   constructor ( {
@@ -76,8 +76,8 @@ export default class Meta {
   /**
    * Normalizes the meta array into the standard {key: ..., value: ...} format
    *
-   * @param {Array|Object} meta
-   * @return {Array}
+   * @param {array|object} meta
+   * @return {array}
    */
   static normalizeMeta ( meta ) {
 
@@ -103,8 +103,8 @@ export default class Meta {
   /**
    * Condenses metadata array into object-based key: value notation
    *
-   * @param {Array|Object} meta
-   * @return {Array|Object}
+   * @param {array|object} meta
+   * @return {array|object}
    */
   static aggregateMeta ( meta ) {
     const aggregate = {};

@@ -60,7 +60,7 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
    * @param {Number} requestedAmount
    * @param {string} metaType
    * @param {string} metaId
-   * @param {Object} meta
+   * @param {object} meta
    */
   fillMolecule ( {
     token,
