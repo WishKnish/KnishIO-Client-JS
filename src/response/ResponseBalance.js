@@ -83,6 +83,8 @@ export default class ResponseBalance extends Response {
       return null;
     }
 
-    return ResponseWalletList.toClientWallet( walletData );
+    return ResponseWalletList.toClientWallet( {
+      data: walletData,
+    } );
   }
 }
