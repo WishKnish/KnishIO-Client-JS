@@ -269,6 +269,7 @@ export default class Molecule extends MoleculeStructure {
     return this;
   }
 
+
   /**
    * Burns some amount of tokens from a wallet
    *
@@ -276,7 +277,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {string|null} walletBundle
    * @returns {Molecule}
    */
-  burnTokens ( value, walletBundle = null ) {
+  burnToken ( value, walletBundle = null ) {
 
     if ( value < 0.0 ) {
       throw new NegativeAmountException( 'Amount to burn must be positive!' );
@@ -616,15 +617,15 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Arranges atoms to request tokens from the node itself
    *
-   * @param {string} token
-   * @param {number} amount
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {Array|Object} meta
-   *
+   * @param tokenSlug
+   * @param requestedAmount
+   * @param metaType
+   * @param metaId
+   * @param meta
+   * @param batchId
    * @returns {Molecule}
    */
-  initTokenRequest ( tokenSlug, requestedAmount, metaType, metaId, meta = {} ) {
+  initTokenRequest ( tokenSlug, requestedAmount, metaType, metaId, meta = {}, batchId = null ) {
 
     this.molecularHash = null;
 
@@ -637,7 +638,7 @@ export default class Molecule extends MoleculeStructure {
         'T',
         this.sourceWallet.token,
         requestedAmount,
-        null,
+        batchId,
         metaType,
         metaId,
         this.finalMetas( meta ),

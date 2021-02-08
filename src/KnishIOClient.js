@@ -671,10 +671,11 @@ export default class KnishIOClient {
 
     const query = await this.createMoleculeMutation( MutationRequestTokens );
 
-    query.fillMolecule( tokenSlug, requestedAmount, metaType, metaId, metas );
+    query.fillMolecule( tokenSlug, requestedAmount, metaType, metaId, metas, batchId );
 
     return await query.execute();
   }
+
 
   /**
    * Creates and executes a Molecule that assigns keys to an unclaimed shadow wallet
@@ -731,7 +732,7 @@ export default class KnishIOClient {
   async transferToken ( walletObjectOrBundleHash, tokenSlug, amount, batchId = null ) {
 
     const fromWallet = ( await this.queryBalance( tokenSlug ) ).payload();
-    
+
     // --- Token units splitting
     let recipientTokenUnits, remainderTokenUnits;
     [ amount, recipientTokenUnits, remainderTokenUnits ] = KnishIOClient.splitTokenUnits( fromWallet, amount );
@@ -771,13 +772,38 @@ export default class KnishIOClient {
       fromWallet,
       this.remainderWallet
       ),
-      query = await this.createMoleculeMutation( MutationTransferTokens, molecule );
+    query = await this.createMoleculeMutation( MutationTransferTokens, molecule );
 
     query.fillMolecule( toWallet, amount );
 
     return await query.execute();
   }
 
+
+  async burnToken ( tokenSlug, amount, batchId = null ) {
+
+    const fromWallet = ( await this.queryBalance( tokenSlug ) ).payload();
+
+    // Batch ID default initialization
+    batchId = batchId || Wallet.generateBatchId();
+
+    // --- Token units splitting
+    let recipientTokenUnits, remainderTokenUnits;
+    [ amount, recipientTokenUnits, remainderTokenUnits ] = KnishIOClient.splitTokenUnits( fromWallet, amount );
+    // ---
+
+    // Remainder wallet
+    let remainderWallet = Wallet.create( this.secret(), tokenSlug, batchId, fromWallet.characters );
+    remainderWallet.tokenUnits = remainderTokenUnits;
+
+    // Burn tokens
+    let molecule = await this.createMolecule( null, fromWallet, remainderWallet );
+    molecule.burnToken( amount );
+    molecule.sign();
+    molecule.check();
+
+    return ( new MutationProposeMolecule( this.client(), molecule ) ).execute();
+  }
 
 
 

@@ -42,6 +42,7 @@ export default class Test {
     await this.testCreateIdentifier();
     await this.testRequestTokens();
     await this.testTransferToken();
+    await this.testBurnToken();
     await this.testClaimShadowWallet();
     await this.testQueryMeta();
     await this.testQueryWallets();
@@ -138,12 +139,18 @@ export default class Test {
    */
   async testRequestTokens () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.requestTokens( this.tokenSlugs[ 1 ], 10, this.secrets[ 0 ] );
-    this.checkResponse( response, 'testRequestTokens' );
+    let response = await client.requestTokens( this.tokenSlugs[ 1 ], 10, this.secrets[ 0 ], null, 'batch_5' );
+    this.checkResponse( response, 'testRequestTokens.1' );
+
+    let requestTokenUnits = [ 'unit_id_10', 'unit_id_11' ];
+    response = await client.requestTokens( this.tokenSlugs[ 3 ], requestTokenUnits, this.secrets[ 0 ], null, 'batch_6' );
+    this.checkResponse( response, 'testRequestTokens.2' );
   }
+
 
   /**
    *
+   * @returns {Promise<void>}
    */
   async testTransferToken () {
 
@@ -155,8 +162,26 @@ export default class Test {
     this.checkResponse( response, 'testTransferToken' );
 
     let sendingTokenUnits = [ 'unit_id_1', 'unit_id_2' ];
-    response = await client.transferToken( bundleHash, this.tokenSlugs[ 2 ], sendingTokenUnits, 'batch_1' );
+    response = await client.transferToken( bundleHash, this.tokenSlugs[ 2 ], sendingTokenUnits, 'batch_2' );
     this.checkResponse( response, 'testTransferUnitToken' );
+  }
+
+
+  /**
+   *
+   */
+  async testBurnToken () {
+
+    let bundleHash = generateBundleHash( this.secrets[ 1 ] );
+    let response;
+
+    let client = await this.client( this.secrets[ 0 ] );
+    response = await client.burnToken( this.tokenSlugs[ 0 ], 10, 'batch_3' );
+    this.checkResponse( response, 'testBurnToken' );
+
+    let sendingTokenUnits = [ 'unit_id_3', 'unit_id_4' ];
+    response = await client.burnToken( this.tokenSlugs[ 2 ], sendingTokenUnits, 'batch_4' );
+    this.checkResponse( response, 'testBurnUnitToken' );
   }
 
 
