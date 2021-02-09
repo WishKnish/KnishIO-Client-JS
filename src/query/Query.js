@@ -103,7 +103,7 @@ export default class Query {
       {
         body: JSON.stringify( {
           query: this.compiledQuery( fields ),
-          variables: this.variables()
+          variables: this.$__variables
         } )
       }
     );

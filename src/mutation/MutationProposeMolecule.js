@@ -116,8 +116,11 @@ export default class MutationProposeMolecule extends Mutation {
     variables = null,
     fields = null
   } ) {
+    variables = variables || {};
+    variables.molecule = this.molecule();
+
     return await super.execute( {
-      variables: merge( variables || {}, { 'molecule': this.molecule() } ),
+      variables,
       fields,
     } );
   }

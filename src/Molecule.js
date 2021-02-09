@@ -174,23 +174,23 @@ export default class Molecule extends MoleculeStructure {
   }
 
   /**
-   * Final metas array
-   * @param metas
+   * Final meta array
+   * @param meta
    * @param wallet
    * @returns {{}}
    */
-  finalMetas ( metas = null, wallet = null ) {
-    metas = metas || {};
+  finalMetas ( meta = null, wallet = null ) {
+    meta = meta || {};
     wallet = wallet || this.sourceWallet;
 
     if ( wallet.hasTokenUnits() ) {
-      metas[ 'tokenUnits' ] = wallet.tokenUnitsJson();
+      meta[ 'tokenUnits' ] = wallet.tokenUnitsJson();
     }
 
-    metas[ 'pubkey' ] = wallet.pubkey;
-    metas[ 'characters' ] = wallet.characters;
+    meta[ 'pubkey' ] = wallet.pubkey;
+    meta[ 'characters' ] = wallet.characters;
 
-    return metas;
+    return meta;
   }
 
 
@@ -212,6 +212,7 @@ export default class Molecule extends MoleculeStructure {
   }
 
 
+  /*
    * Replenishes non-finite token supplies
    *
    * @param {number} value
@@ -303,7 +304,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {string|null} walletBundle
    * @returns {Molecule}
    */
-  burnTokens ( {
+  burnToken ( {
     value,
     walletBundle = null,
   } ) {
@@ -457,7 +458,7 @@ export default class Molecule extends MoleculeStructure {
           batchId: this.sourceWallet.batchId,
           metaType: 'wallet',
           metaId: newWallet.address,
-          metas: this.finalMetas( this.contextMetas( metas ), newWallet ),
+          meta: this.finalMetas( this.contextMetas( metas ), newWallet ),
           index: this.generateIndex(),
         }
       )
@@ -507,7 +508,7 @@ export default class Molecule extends MoleculeStructure {
           batchId: recipientWallet.batchId,
           metaType: 'token',
           metaId: recipientWallet.token,
-          this.finalMetas( this.contextMetas( meta ) ),
+          meta: this.finalMetas( this.contextMetas( meta ) ),
           index: this.generateIndex(),
         }
       )
@@ -582,7 +583,7 @@ export default class Molecule extends MoleculeStructure {
    * @param wallet
    */
   initShadowWalletClaim ( {
-    tokenSlug,
+    token,
     wallet,
   } ) {
 
@@ -590,7 +591,7 @@ export default class Molecule extends MoleculeStructure {
 
     // Generate a wallet metas
     let metas = {
-      tokenSlug: tokenSlug,
+      tokenSlug: token,
       walletAddress: wallet.address,
       walletPosition: wallet.position,
       batchId: wallet.batchId
@@ -605,7 +606,7 @@ export default class Molecule extends MoleculeStructure {
           token: this.sourceWallet.token,
           metaType: 'wallet',
           metaId: wallet.address,
-          this.finalMetas( this.contextMetas( metas ) ),
+          meta: this.finalMetas( this.contextMetas( metas ) ),
           index: this.generateIndex(),
         }
       )
@@ -688,7 +689,7 @@ export default class Molecule extends MoleculeStructure {
           batchId: this.sourceWallet.batchId,
           metaType,
           metaId,
-          this.finalMetas( meta ),
+          meta: this.finalMetas( meta ),
           index: this.generateIndex(),
         }
       )
@@ -719,11 +720,13 @@ export default class Molecule extends MoleculeStructure {
     metaType,
     metaId,
     meta = {},
+    batchId = null
   } ) {
 
     this.molecularHash = null;
 
-	meta.token = tokenSlug;
+	  meta.token = token;
+
     this.atoms.push(
       new Atom( {
           position: this.sourceWallet.position,
@@ -731,6 +734,7 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'T',
           token: this.sourceWallet.token,
           value: requestedAmount,
+          batchId,
           metaType,
           metaId,
           meta: this.finalMetas( meta ),

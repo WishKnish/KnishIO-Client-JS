@@ -1,7 +1,7 @@
 import KnishIOClient from "../KnishIOClient";
 import Dot from "../libraries/Dot";
 import { generateBundleHash, generateSecret } from "../libraries/crypto";
-import ResponseMolecule from "../response/ResponseMolecule";
+import ResponseMolecule from "../response/ResponseProposeMolecule";
 
 export default class Test {
 
@@ -62,23 +62,31 @@ export default class Test {
     let responses = {};
 
     // Regular stackable token
-    responses[ 0 ] = await client.createToken( this.tokenSlugs[ 0 ], 1000.000000000000, {
+    responses[ 0 ] = await client.createToken( {
+      token: this.tokenSlugs[ 0 ],
+      amount: 1000.000000000000,
+      meta: {
         name: this.tokenSlugs[ 0 ],
         fungibility: 'stackable',
         supply: 'limited',
         decimals: 0,
         icon: 'icon',
-      } );
+      },
+    } );
     this.checkResponse( responses[ 0 ], 'testCreateToken.0' );
 
     // Server stackable token
-    responses[ 1 ] = await serverClient.createToken( this.tokenSlugs[ 1 ], 1000.000000000000, {
+    responses[ 1 ] = await serverClient.createToken( {
+      token: this.tokenSlugs[ 1 ],
+      amount: 1000.000000000000,
+      meta: {
         name: this.tokenSlugs[ 1 ],
         fungibility: 'stackable',
         supply: 'limited',
         decimals: 0,
         icon: 'icon',
-      } );
+      },
+    } );
     this.checkResponse( responses[ 1 ], 'testCreateToken.1' );
 
 
@@ -86,20 +94,30 @@ export default class Test {
     // --------- UNITABLE TOKENS ----------
 
     // Create stackable unit token
-    responses[ 2 ] = await client.createUnitableToken( this.tokenSlugs[ 2 ], this.tokenUnits, {
-      name: this.tokenSlugs[ 2 ],
-      supply: 'limited',
-    }, 'batch_0' );
+    responses[ 2 ] = await client.createUnitableToken( {
+      token: this.tokenSlugs[ 2 ],
+      units: this.tokenUnits,
+      meta: {
+        name: this.tokenSlugs[ 2 ],
+        supply: 'limited',
+      },
+      batchId: 'batch_0',
+    } );
     this.checkResponse( responses[ 2 ], 'testCreateToken.2' );
 
 
     // --- SERVER CLIENT (used only for the testing - SECRET_TOKEN_KNISH is server var only!)
 
     // Create server stackable unit token
-    responses[ 3 ] = await serverClient.createUnitableToken( this.tokenSlugs[ 3 ], this.tokenUnits, {
-      name: this.tokenSlugs[ 3 ],
-      supply: 'limited',
-    }, 'batch_0' );
+    responses[ 3 ] = await serverClient.createUnitableToken( {
+      token: this.tokenSlugs[ 3 ],
+      units: this.tokenUnits,
+      meta: {
+        name: this.tokenSlugs[ 3 ],
+        supply: 'limited',
+      },
+      batchId: 'batch_0',
+    } );
     this.checkResponse( responses[ 3 ], 'testCreateToken.3' );
   }
 
@@ -117,9 +135,13 @@ export default class Test {
    */
   async testCreateMeta () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.createMeta( 'metaType', 'metaId', {
-      key1: 'value1',
-      key2: 'value2',
+    let response = await client.createMeta( {
+      metaType: 'metaType',
+      metaId: 'metaId',
+      meta: {
+        key1: 'value1',
+        key2: 'value2',
+      },
     } );
     this.checkResponse( response, 'testCreateMeta' );
   }
@@ -130,7 +152,11 @@ export default class Test {
    */
   async testCreateIdentifier () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.createIdentifier( 'email', 'test@test.com', 1234 );
+    let response = await client.createIdentifier( {
+      type: 'email',
+      contact: 'test@test.com',
+      code: 1234,
+    } );
     this.checkResponse( response, 'testCreateIdentifier' );
   }
 
@@ -139,11 +165,21 @@ export default class Test {
    */
   async testRequestTokens () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.requestTokens( this.tokenSlugs[ 1 ], 10, this.secrets[ 0 ], null, 'batch_5' );
+    let response = await client.requestTokens( {
+      token: this.tokenSlugs[ 1 ],
+      requestedAmount: 10,
+      to: this.secrets[ 0 ],
+      batchId: 'batch_5'
+    } );
     this.checkResponse( response, 'testRequestTokens.1' );
 
     let requestTokenUnits = [ 'unit_id_10', 'unit_id_11' ];
-    response = await client.requestTokens( this.tokenSlugs[ 3 ], requestTokenUnits, this.secrets[ 0 ], null, 'batch_6' );
+    response = await client.requestTokens( {
+      token: this.tokenSlugs[ 3 ],
+      requestedAmount: requestTokenUnits,
+      to: this.secrets[ 0 ],
+      batchId: 'batch_6',
+    } );
     this.checkResponse( response, 'testRequestTokens.2' );
   }
 
@@ -158,11 +194,21 @@ export default class Test {
     let response;
 
     let client = await this.client( this.secrets[ 0 ] );
-    response = await client.transferToken( bundleHash, this.tokenSlugs[ 0 ], 10, 'batch_1' );
+    response = await client.transferToken( {
+      recipient: bundleHash,
+      token: this.tokenSlugs[ 0 ],
+      amount: 10,
+      batchId: 'batch_1'
+    } );
     this.checkResponse( response, 'testTransferToken' );
 
     let sendingTokenUnits = [ 'unit_id_1', 'unit_id_2' ];
-    response = await client.transferToken( bundleHash, this.tokenSlugs[ 2 ], sendingTokenUnits, 'batch_2' );
+    response = await client.transferToken( {
+      recipient: bundleHash,
+      token: this.tokenSlugs[ 2 ],
+      amount: sendingTokenUnits,
+      batchId: 'batch_2'
+    } );
     this.checkResponse( response, 'testTransferUnitToken' );
   }
 
@@ -176,11 +222,19 @@ export default class Test {
     let response;
 
     let client = await this.client( this.secrets[ 0 ] );
-    response = await client.burnToken( this.tokenSlugs[ 0 ], 10, 'batch_3' );
+    response = await client.burnToken( {
+      token: this.tokenSlugs[ 0 ],
+      amount: 10,
+      batchId: 'batch_3'
+    } );
     this.checkResponse( response, 'testBurnToken' );
 
     let sendingTokenUnits = [ 'unit_id_3', 'unit_id_4' ];
-    response = await client.burnToken( this.tokenSlugs[ 2 ], sendingTokenUnits, 'batch_4' );
+    response = await client.burnToken( {
+      token: this.tokenSlugs[ 2 ],
+      amount: sendingTokenUnits,
+      batchId: 'batch_4'
+    } );
     this.checkResponse( response, 'testBurnUnitToken' );
   }
 
@@ -192,9 +246,14 @@ export default class Test {
    */
   async testClaimShadowWallet () {
     let client = await this.client( this.secrets[ 1 ] );
-    let balanceResponse = await client.queryBalance( this.tokenSlugs[ 0 ] );
+    let balanceResponse = await client.queryBalance( {
+      token: this.tokenSlugs[ 0 ]
+    } );
 
-    let response = await client.claimShadowWallet( this.tokenSlugs[ 0 ], balanceResponse.payload().batchId );
+    let response = await client.claimShadowWallet( {
+      token: this.tokenSlugs[ 0 ],
+      batchId: balanceResponse.payload().batchId
+    } );
     this.checkResponse( response, 'testClaimShadowWallet' );
   }
 
@@ -203,7 +262,10 @@ export default class Test {
    */
   async testQueryMeta () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.queryMeta( 'metaType', 'metaId' );
+    let response = await client.queryMeta({
+      metaType: 'metaType',
+      metaId: 'metaId'
+    } );
     this.checkResponse( response, 'testQueryMeta' );
   }
 
@@ -221,7 +283,9 @@ export default class Test {
    */
   async testQueryShadowWallets () {
     let client = await this.client( this.secrets[ 1 ] );
-    let response = await client.queryShadowWallets( this.tokenSlugs[ 0 ] );
+    let response = await client.queryShadowWallets( {
+      token: this.tokenSlugs[ 0 ]
+    } );
     this.checkResponse( response, 'testQueryShadowWallets' );
   }
 
@@ -250,7 +314,9 @@ export default class Test {
    */
   async testQueryBalance () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.queryBalance( this.tokenSlugs[ 0 ] );
+    let response = await client.queryBalance( {
+      token: this.tokenSlugs[ 0 ]
+    } );
     this.checkResponse( response, 'testQueryBalance' );
   }
 
@@ -266,11 +332,16 @@ export default class Test {
     if ( !this.clients[ secret ] ) {
 
       // Create a client
-      this.clients[ secret ] = new KnishIOClient( this.graphqlUrl );
+      this.clients[ secret ] = new KnishIOClient( {
+        uri: this.graphqlUrl
+      } );
 
       // Auth the client
       let response = await this.clients[ secret ]
-        .requestAuthToken( secret, cellSlug );
+        .requestAuthToken( {
+          secret: secret,
+          cellSlug: cellSlug,
+        } );
 
       this.checkResponse( response, 'requestAuthToken' );
     }
