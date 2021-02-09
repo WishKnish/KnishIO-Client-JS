@@ -15,8 +15,8 @@ export default class Hex {
    *
    * return a hexadecimal string representing the buffer.
    *
-   * @param {Array|ArrayBuffer|Uint8Array} arr
-   * @param {Object} options
+   * @param {array|ArrayBuffer|Uint8Array} arr
+   * @param {object} options
    * @returns {string}
    */
   static toHex ( arr, options ) {

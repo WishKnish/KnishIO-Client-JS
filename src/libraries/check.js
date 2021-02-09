@@ -14,7 +14,10 @@ import MetaMissingException from "./../exception/MetaMissingException";
 import WrongTokenTypeException from "./../exception/WrongTokenTypeException";
 import Atom from "./../Atom";
 import Meta from "./../Meta";
-import { base64ToHex, chunkSubstr } from "./strings";
+import {
+  base64ToHex,
+  chunkSubstr
+} from "./strings";
 import { shake256 } from "js-sha3";
 
 /**
@@ -172,6 +175,39 @@ export default class CheckMolecule {
     return true;
   }
 
+  static isotopeR ( molecule ) {
+    CheckMolecule.missing( molecule );
+
+    for ( let atom of CheckMolecule.isotopeFilter( 'R', molecule.atoms ) ) {
+      const metas = Meta.aggregateMeta( Meta.normalizeMeta( atom.meta ) );
+      for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
+
+        if ( !metas.hasOwnProperty( key ) ) {
+          throw new MetaMissingException( `Missing "${ key }" field in meta.` );
+        }
+      }
+
+      try {
+        const conditions = JSON.parse( metas[ 'conditions' ] );
+
+        for ( let condition of conditions ) {
+          const keys = Object.keys( condition ),
+            property = keys.filter( function ( n ) {
+              return [ 'key', 'value', 'comparison', ].indexOf( n ) !== -1;
+            } ),
+            property2 = keys.filter( function ( n ) {
+              return [ 'managedBy', ].indexOf( n ) !== -1;
+            } );
+          if ( property.length < 3 && property2.length < 1 ) {
+            throw new MetaMissingException( `Missing field in conditions.` );
+          }
+        }
+      } catch ( err ) {
+        throw new MetaMissingException( `Invalid format for conditions.` );
+      }
+    }
+  }
+
   /**
    * @param {Molecule} molecule
    * @param {Wallet} senderWallet
@@ -298,7 +334,9 @@ export default class CheckMolecule {
 
     CheckMolecule.missing( molecule );
 
-    if ( molecule.molecularHash !== Atom.hashAtoms( molecule.atoms ) ) {
+    if ( molecule.molecularHash !== Atom.hashAtoms( {
+      atoms: molecule.atoms,
+    } ) ) {
       throw new MolecularHashMismatchException();
     }
 
@@ -377,7 +415,7 @@ export default class CheckMolecule {
    *
    * @param {Molecule} molecule
    * @return {boolean}
-   * @throws {MolecularHashMissingException | AtomsMissingException | AtomIndexException}
+   * @throws {MolecularHashMissingException|AtomsMissingException|AtomIndexException}
    */
   static index ( molecule ) {
 
@@ -396,8 +434,8 @@ export default class CheckMolecule {
   /**
    *
    * @param {string} isotope
-   * @param {Int32Array | Uint32Array | Array | Int8Array | Float64Array | BigUint64Array | Uint8Array | Int16Array | BigInt64Array | Float32Array | Uint8ClampedArray | Uint16Array} atoms
-   * @returns {Int32Array | Uint32Array | Array | Int8Array | Float64Array | BigUint64Array | Uint8Array | Int16Array | BigInt64Array | Float32Array | Uint8ClampedArray | Uint16Array}
+   * @param {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array} atoms
+   * @returns {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array}
    */
   static isotopeFilter ( isotope, atoms ) {
 
@@ -410,7 +448,7 @@ export default class CheckMolecule {
    * Convert Hm to numeric notation via EnumerateMolecule(Hm)
    *
    * @param {string} hash
-   * @returns {Array}
+   * @returns {array}
    */
   static normalizedHash ( hash ) {
 
@@ -428,7 +466,7 @@ export default class CheckMolecule {
    * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
    *
    * @param {string} hash
-   * @returns {Array}
+   * @returns {array}
    */
   static enumerate ( hash ) {
 
@@ -476,7 +514,7 @@ export default class CheckMolecule {
    *    If m<0 and Im<8 , let Im=Im+1
    *    If m=0, stop the iteration
    *
-   * @param {Array} mappedHashArray
+   * @param {array} mappedHashArray
    * @returns {*}
    */
   static normalize ( mappedHashArray ) {

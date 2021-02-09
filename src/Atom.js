@@ -65,11 +65,11 @@ export default class Atom {
    * @param {string|null} batchId
    * @param {string|null} metaType
    * @param {string|null} metaId
-   * @param {Array|Object|null} meta
+   * @param {array|object|null} meta
    * @param {string|null} otsFragment
    * @param {number|null} index
    */
-  constructor (
+  constructor ( {
     position = null,
     walletAddress = null,
     isotope = null,
@@ -80,7 +80,8 @@ export default class Atom {
     metaId = null,
     meta = null,
     otsFragment = null,
-    index = null ) {
+    index = null,
+  } ) {
 
     this.position = position;
     this.walletAddress = walletAddress;
@@ -103,12 +104,12 @@ export default class Atom {
    * Converts a compliant JSON string into an Atom class instance
    *
    * @param {string} json
-   * @return {Object}
+   * @return {object}
    */
   static jsonToObject ( json ) {
 
-    const target = Object.assign( new Atom(), JSON.parse( json ) ),
-      properties = Object.keys( new Atom() );
+    const target = Object.assign( new Atom( {} ), JSON.parse( json ) ),
+      properties = Object.keys( new Atom( {} ) );
 
     for ( const property in target ) {
 
@@ -128,11 +129,14 @@ export default class Atom {
    * Produces a hash of the atoms inside a molecule.
    * Used to generate the molecularHash field for Molecules.
    *
-   * @param {Array} atoms
+   * @param {array} atoms
    * @param {string} output
-   * @returns {number[] | *}
+   * @returns {number[]|*}
    */
-  static hashAtoms ( atoms, output = 'base17' ) {
+  static hashAtoms ( {
+    atoms,
+    output = 'base17',
+  } ) {
 
     const molecularSponge = shake256.create( 256 ),
       numberOfAtoms = atoms.length,
@@ -198,8 +202,8 @@ export default class Atom {
   /**
    * Sort the atoms in a Molecule
    *
-   * @param {Array} atoms
-   * @return {Array}
+   * @param {array} atoms
+   * @return {array}
    */
   static sortAtoms ( atoms ) {
 

@@ -48,11 +48,9 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import { shake256 } from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
 import Base58 from './libraries/Base58';
-import Decimal from './libraries/Decimal';
 import {
   chunkSubstr,
   isHex,
-  randomString
 } from './libraries/strings';
 import {
   generateEncPrivateKey,
@@ -74,13 +72,19 @@ export default class Wallet {
   /**
    * Class constructor
    *
-   * @param {string | null} secret - typically a 2048-character biometric hash
+   * @param {string|null} secret - typically a 2048-character biometric hash
    * @param {string} token - slug for the token this wallet is intended for
-   * @param {string | null} position - hexadecimal string used to salt the secret and produce one-time signatures
-   * @param {string} batchID
+   * @param {string|null} position - hexadecimal string used to salt the secret and produce one-time signatures
+   * @param {string|null} batchId
    * @param {string|null} characters
    */
-  constructor ( secret = null, token = 'USER', position = null, batchId = null, characters = null ) {
+  constructor ( {
+    secret = null,
+    token = 'USER',
+    position = null,
+    batchId = null,
+    characters = null,
+  } ) {
 
     this.token = token;
     this.balance = 0;
@@ -116,14 +120,25 @@ export default class Wallet {
    * @param {string|null} characters
    * @returns {Wallet}
    */
-  static create ( secretOrBundle, token, batchId = null, characters = null ) {
+  static create ( {
+    secretOrBundle,
+    token,
+    batchId = null,
+    characters = null,
+  } ) {
 
     let secret = Wallet.isBundleHash( secretOrBundle ) ? null : secretOrBundle;
     let bundle = secret ? generateBundleHash( secret ) : secretOrBundle;
     let position = secret ? generateWalletPosition() : null;
 
     // Wallet initialization
-    let wallet = new Wallet( secret, token, position, batchId, characters );
+    let wallet = new Wallet( {
+      secret,
+      token,
+      position,
+      batchId,
+      characters,
+    } );
     wallet.bundle = bundle;
     return wallet;
   }
@@ -193,18 +208,24 @@ export default class Wallet {
    * Sets up a batch ID - either using the sender's, or a new one
    *
    * @param {Wallet} senderWallet
-   * @param {number} transferAmount
+   * @param {number} amount
    */
-  initBatchId ( senderWallet, transferAmount ) {
+  initBatchId ( {
+    senderWallet,
+    amount,
+  } ) {
 
     if ( senderWallet.batchId ) {
 
+      this.batchId = generateBatchId();
+      /*
       // Set batchID to recipient wallet
-      this.batchId = ( !this.batchId && Decimal.cmp( senderWallet.balance, transferAmount ) > 0 ) ?
+      this.batchId = ( !this.batchId && Decimal.cmp( senderWallet.balance, amount ) > 0 ) ?
         // Has a remainder value (source balance is bigger than a transfer value)
         generateBatchId() :
         // Has no remainder? use batch ID from the source wallet
         senderWallet.batchId;
+      */
     }
   }
 
@@ -215,7 +236,11 @@ export default class Wallet {
    */
   prepareKeys ( secret ) {
     if ( this.key === null && this.address === null ) {
-      this.key = Wallet.generatePrivateKey( secret, this.token, this.position );
+      this.key = Wallet.generatePrivateKey( {
+        secret,
+        token: this.token,
+        position: this.position,
+      } );
       this.address = Wallet.generatePublicKey( this.key );
       this.getMyEncPrivateKey();
       this.getMyEncPublicKey();
@@ -237,7 +262,7 @@ export default class Wallet {
   }
 
   /**
-   * Dervies a public key for encrypting data for this wallet's consumption
+   * Derives a public key for encrypting data for this wallet's consumption
    *
    * @returns {string}
    */
@@ -255,8 +280,8 @@ export default class Wallet {
   /**
    * Encrypts a message for this wallet instance
    *
-   * @param {Object|Array} message
-   * @returns {Object}
+   * @param {object|array} message
+   * @returns {object}
    */
   encryptMyMessage ( message ) {
 
@@ -272,8 +297,8 @@ export default class Wallet {
   /**
    * Uses the current wallet's private key to decrypt the given message
    *
-   * @param {string | Object} message
-   * @returns {Array | Object | null}
+   * @param {string|object} message
+   * @returns {array|object|null}
    */
   decryptMyMessage ( message ) {
 
@@ -297,7 +322,10 @@ export default class Wallet {
    * @param {string|array} publicKeys
    * @returns {string}
    */
-  encryptString ( data, publicKeys ) {
+  encryptString ( {
+    data,
+    publicKeys,
+  } ) {
 
     if ( data ) {
 
@@ -306,7 +334,7 @@ export default class Wallet {
 
       // If the additional public keys is supplied as a string, convert to array
       if ( typeof publicKeys === 'string' ) {
-        publicKeys = new Array( publicKeys );
+        publicKeys = [ publicKeys ];
       }
 
       // Encrypting message
@@ -321,9 +349,12 @@ export default class Wallet {
    *
    * @param {string} data
    * @param {string|null} fallbackValue
-   * @returns {Array|Object}
+   * @returns {array|object}
    */
-  decryptString ( data, fallbackValue = null ) {
+  decryptString ( {
+    data,
+    fallbackValue = null,
+  } ) {
 
     if ( data ) {
       try {
@@ -350,7 +381,11 @@ export default class Wallet {
    * @param {string} position
    * @return {string}
    */
-  static generatePrivateKey ( secret, token, position ) {
+  static generatePrivateKey ( {
+    secret,
+    token,
+    position,
+  } ) {
 
     // Converting secret to bigInt
     const bigIntSecret = bigInt( secret, 16 ),

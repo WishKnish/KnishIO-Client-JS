@@ -81,10 +81,13 @@ export default class QueryBalance extends Query {
   }
 
   /**
-   * @param response
+   * @param {object} json
    * @return {ResponseBalance}
    */
-  createResponse ( response ) {
-    return new ResponseBalance( this, response );
+  createResponse ( json ) {
+    return new ResponseBalance( {
+      query: this,
+      json,
+    } );
   }
 }

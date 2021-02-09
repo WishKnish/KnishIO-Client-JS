@@ -75,10 +75,13 @@ export default class QueryContinuId extends Query {
   }
 
   /**
-   * @param response
+   * @param {object} json
    * @returns {ResponseContinuId}
    */
-  createResponse ( response ) {
-    return new ResponseContinuId( this, response );
+  createResponse ( json ) {
+    return new ResponseContinuId( {
+      query: this,
+      json,
+    } );
   }
 }

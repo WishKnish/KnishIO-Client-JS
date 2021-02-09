@@ -45,43 +45,11 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "./ResponseMolecule";
-import Dot from "../libraries/Dot";
-import InvalidResponseException from "../exception/InvalidResponseException";
+import ResponseProposeMolecule from "./ResponseProposeMolecule";
 
 /**
- * Response for auth token query
+ * Response for identifier creation
  */
-export default class ResponseAuthorization extends ResponseMolecule {
+export default class ResponseClaimShadowWallet extends ResponseProposeMolecule {
 
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @returns {*}
-   */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorization: '${ key }' key is not found in the payload.` );
-    }
-    return Dot.get( this.payload(), key );
-  }
-
-  /**
-   * Returns the auth token
-   *
-   * @returns {*}
-   */
-  token () {
-    return this.payloadKey( 'token' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @returns {*}
-   */
-  time () {
-    return this.payloadKey( 'time' );
-  }
 }

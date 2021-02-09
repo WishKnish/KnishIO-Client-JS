@@ -45,122 +45,43 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Wallet from "../Wallet";
+import ResponseProposeMolecule from "./ResponseProposeMolecule";
+import Dot from "../libraries/Dot";
+import InvalidResponseException from "../exception/InvalidResponseException";
 
 /**
- * Response for Wallet List query
+ * Response for auth token query
  */
-export default class ResponseWalletList extends Response {
+export default class ResponseRequestAuthorization extends ResponseProposeMolecule {
 
   /**
-   * Class constructor
+   * Returns the authorization key
    *
-   * @param {Query} query
-   * @param {object} json
+   * @param key
+   * @returns {*}
    */
-  constructor ( {
-    query,
-    json,
-  } ) {
-    super( {
-      query,
-      json,
-    } );
-    this.dataKey = 'data.Wallet';
-    this.init();
+  payloadKey ( key ) {
+    if ( !Dot.has( this.payload(), key ) ) {
+      throw new InvalidResponseException( `ResponseAuthorization: '${ key }' key is not found in the payload.` );
+    }
+    return Dot.get( this.payload(), key );
   }
 
   /**
-   * Returns a Knish.IO client Wallet class instance out of object data
+   * Returns the auth token
    *
-   * @param {object} data
-   * @param {string|null} secret
-   * @returns {Wallet}
+   * @returns {*}
    */
-  static toClientWallet ( {
-    data,
-    secret = null,
-  } ) {
-    let wallet;
-
-    if ( data.position === null || typeof data.position === 'undefined' ) {
-      wallet = Wallet.create( {
-        secretOrBundle: data.bundleHash,
-        token: data.tokenSlug,
-        batchId: data.batchId,
-        characters: data.characters,
-      } );
-    } else {
-      wallet = new Wallet( {
-        secret,
-        token: data.tokenSlug,
-        position: data.position,
-        batchId: data.batchId,
-        characters: data.characters,
-      } );
-      wallet.address = data.address;
-      wallet.bundle = data.bundleHash;
-    }
-
-    if ( data.token ) {
-      wallet.tokenName = data.token.name;
-      wallet.tokenSupply = data.token.amount;
-    }
-
-    wallet.tokenUnits = data.tokenUnits;
-    wallet.molecules = data.molecules;
-    wallet.balance = Number( data.amount );
-    wallet.pubkey = data.pubkey;
-    wallet.createdAt = data.createdAt;
-
-    return wallet;
+  token () {
+    return this.payloadKey( 'token' );
   }
 
   /**
-   * Returns a list of Wallet class instances
+   * Returns timestamp
    *
-   * @param secret
-   * @returns {null|[]}
+   * @returns {*}
    */
-  getWallets ( secret = null ) {
-
-    const list = this.data();
-
-    if ( !list ) {
-      return null;
-    }
-
-    const wallets = [];
-
-    for ( let data of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( {
-        data,
-        secret,
-      } ) );
-    }
-
-    return wallets;
-  }
-
-  /**
-   * Returns response payload
-   *
-   * @returns {null|[]}
-   */
-  payload () {
-    const list = this.data();
-
-    if ( !list ) {
-      return null;
-    }
-
-    const wallets = [];
-
-    for ( let item of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( item ) );
-    }
-
-    return wallets;
+  time () {
+    return this.payloadKey( 'time' );
   }
 }

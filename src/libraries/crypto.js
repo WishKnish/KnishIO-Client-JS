@@ -83,7 +83,7 @@ export function generateSecret ( seed = null, length = 2048 ) {
  */
 export function generateBundleHash ( secret ) {
 
-  console.info( 'Crypto::bundle() - Computing wallet bundle from secret...' );
+  console.info( 'Crypto::generateBundleHash() - Computing wallet bundle from secret...' );
 
   const sponge = shake256.create( 256 );
   sponge.update( secret );
@@ -129,7 +129,7 @@ export function encryptMessage ( message, recipientPublicKey, characters = null 
  * @param {string} privateKey
  * @param {string} publicKey
  * @param {string|null} characters
- * @returns {Array | Object | null}
+ * @returns {array|object|null}
  */
 export function decryptMessage ( message, privateKey, publicKey, characters = null ) {
   return ( new Soda( characters ) ).decrypt( message, privateKey, publicKey );

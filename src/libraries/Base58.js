@@ -5,7 +5,7 @@ import { Buffer } from 'buffer';
 export default class Base58 {
 
   /**
-   * @param {Object} options
+   * @param {object} options
    */
   constructor ( options = {} ) {
     this.$options = Object.assign( { "characters": 'GMP', }, options );

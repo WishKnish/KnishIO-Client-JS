@@ -60,7 +60,7 @@ export default class QueryWalletBundle extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $bundleHash: String, $bundleHashes: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $keys_values: [ MetaInput ], $latest: Boolean, $limit: Int, $skip: Int, $order: String ) { WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, skip: $skip, order: $order ) @fields }`;
+    this.$__query = `query( $bundleHash: String, $bundleHashes: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $keys_values: [ MetaInput ], $latest: Boolean, $limit: Int, $order: String ) { WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, order: $order ) @fields }`;
     this.$__fields = {
       'bundleHash': null,
       'metas': {
@@ -79,11 +79,14 @@ export default class QueryWalletBundle extends Query {
   /**
    * Builds a Response object out of a JSON string
    *
-   * @param response
+   * @param {object} json
    * @returns {ResponseWalletBundle}
    */
-  createResponse ( response ) {
-    return new ResponseWalletBundle( this, response );
+  createResponse ( json ) {
+    return new ResponseWalletBundle( {
+      query: this,
+      json,
+    } );
   }
 
   /**
@@ -95,7 +98,12 @@ export default class QueryWalletBundle extends Query {
    * @param {boolean|null} latest
    * @return {{}}
    */
-  static createVariables ( bundleHash = null, key = null, value = null, latest = true ) {
+  static createVariables ( {
+    bundleHash = null,
+    key = null,
+    value = null,
+    latest = true,
+  } ) {
 
     const variables = {
       latest: latest,
