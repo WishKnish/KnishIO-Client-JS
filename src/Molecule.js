@@ -82,7 +82,7 @@ export default class Molecule extends MoleculeStructure {
 
     // Set the remainder wallet for this transaction
     if ( remainderWallet || sourceWallet ) {
-      this.remainderWallet = remainderWallet || Wallet.create( secret, sourceWallet.batchId, sourceWallet.characters );
+      this.remainderWallet = remainderWallet || Wallet.create( secret, sourceWallet.token, sourceWallet.batchId, sourceWallet.characters );
     }
 
     this.clear();
@@ -117,6 +117,7 @@ export default class Molecule extends MoleculeStructure {
       && CheckMolecule.isotopeC( molecule )
       && CheckMolecule.isotopeU( molecule )
       && CheckMolecule.isotopeI( molecule )
+      && CheckMolecule.isotopeR( molecule )
       && CheckMolecule.isotopeV( molecule, senderWallet );
   }
 
@@ -511,6 +512,58 @@ export default class Molecule extends MoleculeStructure {
         'token',
         recipientWallet.token,
         tokenMeta,
+        null,
+        this.generateIndex()
+      )
+    );
+
+    // User remainder atom
+    this.addUserRemainderAtom( this.remainderWallet );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+  }
+
+
+  /**
+   *
+   * @param {String} metaType
+   * @param {String} metaId
+   * @param {Object|Array} meta
+   * @returns {Molecule}
+   */
+  crateRule ( metaType, metaId, meta ) {
+    const aggregateMeta = Meta.aggregateMeta( Meta.normalizeMeta( meta ) );
+
+    for ( let key of [ 'conditions', 'callback', 'rule' ] ) {
+
+      if ( typeof aggregateMeta[ key ] === 'undefined' ) {
+        throw new MetaMissingException( `No or not defined ${ key } in meta` );
+      }
+
+      for ( let item of [ '[object Object]', '[object Array]', ] ) {
+        if ( Object.prototype.toString.call( aggregateMeta[ key ] ) === item ) {
+          aggregateMeta[ key ] = JSON.stringify( aggregateMeta[ key ] );
+        }
+      }
+    }
+
+    // Adding our latest public key
+    aggregateMeta.pubkey = this.sourceWallet.pubkey;
+    aggregateMeta.characters = this.sourceWallet.characters;
+
+    this.addAtom(
+      new Atom(
+        this.sourceWallet.position,
+        this.sourceWallet.address,
+        'R',
+        this.sourceWallet.token,
+        null,
+        null,
+        metaType,
+        metaId,
+        aggregateMeta,
         null,
         this.generateIndex()
       )

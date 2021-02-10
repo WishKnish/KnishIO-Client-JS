@@ -172,6 +172,39 @@ export default class CheckMolecule {
     return true;
   }
 
+  static isotopeR ( molecule ) {
+    CheckMolecule.missing( molecule );
+
+    for ( let atom of CheckMolecule.isotopeFilter( 'R', molecule.atoms ) ) {
+      const metas = Meta.aggregateMeta( Meta.normalizeMeta( atom.meta ) );
+      for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
+
+        if ( !metas.hasOwnProperty( key ) ) {
+          throw new MetaMissingException( `Missing "${ key }" field in meta.` );
+        }
+      }
+
+      try {
+        const conditions = JSON.parse( metas[ 'conditions' ] );
+
+        for ( let condition of conditions ) {
+          const keys = Object.keys( condition ),
+            property = keys.filter( function( n) {
+              return [ 'key', 'value', 'comparison', ].indexOf( n ) !== -1;
+            } ),
+            property2 = keys.filter( function( n) {
+              return [ 'managedBy', ].indexOf( n ) !== -1;
+            } );
+          if ( property.length < 3 && property2.length < 1 ) {
+            throw new MetaMissingException( `Missing field in conditions.` );
+          }
+        }
+      } catch ( err ) {
+        throw new MetaMissingException( `Invalid format for conditions.` );
+      }
+    }
+  }
+
   /**
    * @param {Molecule} molecule
    * @param {Wallet} senderWallet
