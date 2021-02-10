@@ -194,6 +194,39 @@ export default class Wallet {
     return JSON.stringify( result );
   }
 
+
+  /**
+   * Split token units
+   *
+   * @param units
+   * @param remainderWallet
+   * @param recipientWallet
+   */
+  splitUnits( units, remainderWallet, recipientWallet = null ) {
+
+    // Has no token units => do not use the code below
+    if ( units === null ) {
+      return;
+    }
+
+    // Init recipient & remainder token units
+    let recipientTokenUnits = []; let remainderTokenUnits = [];
+    this.tokenUnits.forEach( tokenUnit => {
+      if ( units.includes( tokenUnit.id ) ) {
+        recipientTokenUnits.push( tokenUnit );
+      }
+      else {
+        remainderTokenUnits.push( tokenUnit );
+      }
+    } );
+
+    // Set token units to recipient & remainder
+    if ( recipientWallet !== null ) {
+      recipientWallet.tokenUnits = recipientTokenUnits;
+    }
+    remainderWallet.tokenUnits = remainderTokenUnits;
+  }
+
   /**
    * @return bool
    */

@@ -158,7 +158,9 @@ export default class ResponseWalletList extends Response {
     const wallets = [];
 
     for ( let item of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( item ) );
+      wallets.push( ResponseWalletList.toClientWallet( {
+        data: item
+      } ) );
     }
 
     return wallets;

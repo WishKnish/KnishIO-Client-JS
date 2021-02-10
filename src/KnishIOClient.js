@@ -75,45 +75,14 @@ import MutationCreateMeta from "./mutation/MutationCreateMeta";
 import MutationCreateWallet from "./mutation/MutationCreateWallet";
 import AuthenticationMissingException from "./exception/AuthenticationMissingException";
 
+const TOKEN_UNITS_META_KEY = 'tokenUnits';
+
 /**
  * Base client class providing a powerful but user-friendly wrapper
  * around complex Knish.IO ledger transactions.
  */
 export default class KnishIOClient {
-  /**
-   * @param $amount
-   *
-   * @return array
-   */
-  static splitTokenUnits( sourceWallet, amount ) {
 
-    // Token units initialization
-    let sendTokenUnits;
-    [ amount, sendTokenUnits ] =  KnishIOClient.splitUnitAmount( amount );
-
-    // Init recipient & remainder token units
-    let recipientTokenUnits = []; let remainderTokenUnits = [];
-    sourceWallet.tokenUnits.forEach( tokenUnit => {
-      if ( sendTokenUnits.includes( tokenUnit.id ) ) {
-        recipientTokenUnits.push( tokenUnit );
-      }
-      else {
-        remainderTokenUnits.push( tokenUnit );
-      }
-    } );
-
-    return [ amount, recipientTokenUnits, remainderTokenUnits, ];
-  }
-
-
-  static splitUnitAmount( amount ) {
-    let tokenUnits = [];
-    if ( Array.isArray( amount ) ) {
-      tokenUnits = amount;
-      amount = amount.length;
-    }
-    return [ amount, tokenUnits, ];
-  }
 
   /*
    * Class constructor
@@ -280,7 +249,9 @@ export default class KnishIOClient {
    * @returns {Promise<*|Wallet|null>}
    */
   async getSourceWallet () {
-    let sourceWallet = ( await this.queryContinuId( this.getBundle() ) ).payload();
+    let sourceWallet = ( await this.queryContinuId( {
+      bundle: this.getBundle()
+    } ) ).payload();
 
     if ( !sourceWallet ) {
       sourceWallet = new Wallet( {
@@ -562,7 +533,9 @@ export default class KnishIOClient {
    * @param batchId
    * @returns {Promise<*>}
    */
-  async queryBatch ( batchId ) {
+  async queryBatch ( {
+    batchId
+  } ) {
 
     console.info( `KnishIOClient::queryBatch() - Querying cascade meta instance data for batchId: ${ batchId }...` );
 
@@ -577,7 +550,9 @@ export default class KnishIOClient {
    * @param {string} token
    * @return {Promise<Response>}
    */
-  async createWallet ( token ) {
+  async createWallet ( {
+    token
+  } ) {
 
     const newWallet = new Wallet( {
       secret: this.getSecret(),
@@ -656,7 +631,7 @@ export default class KnishIOClient {
     batchId = batchId || Wallet.generateBatchId();
 
     // Set custom default meta
-    meta[ 'tokenUnits' ] = JSON.stringify( units );
+    meta[ TOKEN_UNITS_META_KEY ] = JSON.stringify( units );
     meta[ 'fungibility' ] = 'stackable';
     meta[ 'splittable' ] = 1;
     meta[ 'decimals' ] = 0;
@@ -776,7 +751,7 @@ export default class KnishIOClient {
     bundle = null,
   } ) {
 
-    bundle = bundle ? bundle : this.getBundle();
+    bundle = bundle || this.getBundle();
 
     if( this.$__logging ) {
       console.info( `KnishIOClient::queryShadowWallets() - Querying ${ token } shadow wallets for ${ bundle }...` );
@@ -788,11 +763,12 @@ export default class KnishIOClient {
     const shadowWalletQuery = this.createQuery( QueryWalletList );
     return shadowWalletQuery.execute( {
       variables: {
-        bundleHash: bundleHash,
+        bundleHash: bundle,
         token: token,
       }
     } )
       .then( ( /** ResponseWalletList */ response ) => {
+        console.log( response );
         return response.payload();
       } );
   }
@@ -847,14 +823,16 @@ export default class KnishIOClient {
    * @param bundleHash
    * @returns {Promise<ResponseContinuId>}
    */
-  async queryContinuId ( bundleHash ) {
+  async queryContinuId ( {
+    bundle
+  } ) {
     /**
      * @type {QueryContinuId}
      */
     const query = this.createQuery( QueryContinuId );
     return await query.execute( {
       variables: {
-        bundle: bundleHash,
+        bundle: bundle,
       }
     } );
   }
@@ -863,15 +841,16 @@ export default class KnishIOClient {
    * Builds and executes a Molecule that requests token payment from the node
    *
    * @param token
-   * @param requestedAmount
+   * @param amount
    * @param to
    * @param meta
    * @return {Promise<ResponseRequestTokens>}
    */
   async requestTokens ( {
     token,
-    requestedAmount,
     to,
+    amount = null,
+    units = null,
     meta = null,
     batchId = null
   } ) {
@@ -880,6 +859,12 @@ export default class KnishIOClient {
       metaId;
 
     meta = meta || {};
+
+    // Calculate amount & set meta key
+    if ( units !== null && Array.isArray( units ) ) {
+      amount = units.length;
+      meta[ TOKEN_UNITS_META_KEY ] = JSON.stringify( units );
+    }
 
     // Are we specifying a specific recipient?
     if ( to ) {
@@ -913,21 +898,13 @@ export default class KnishIOClient {
 
     }
 
-    // --- Token units initialization
-    let tokenUnits;
-    [ requestedAmount, tokenUnits ] = KnishIOClient.splitUnitAmount( requestedAmount );
-    if ( tokenUnits ) {
-      meta[ 'tokenUnits' ] = JSON.stringify( tokenUnits );
-    }
-    // ---
-
     const query = await this.createMoleculeMutation( {
       mutationClass: MutationRequestTokens
     } );
 
     query.fillMolecule( {
       token,
-      requestedAmount,
+      amount,
       metaType,
       metaId,
       meta,
@@ -974,7 +951,9 @@ export default class KnishIOClient {
    * @param token
    * @returns {[]}
    */
-  async claimShadowWallets ( token ) {
+  async claimShadowWallets ( {
+    token
+  } ) {
 
     // --- Get & check a shadow wallet list
     const shadowWallets = await this.queryShadowWallets( token );
@@ -1010,16 +989,17 @@ export default class KnishIOClient {
   async transferToken ( {
     recipient,
     token,
-    amount,
+    amount = null,
+    units = null,
     batchId = null,
   } ) {
 
     const fromWallet = (await this.queryBalance( { token } )).payload();
 
-    // --- Token units splitting
-    let recipientTokenUnits, remainderTokenUnits;
-    [amount, recipientTokenUnits, remainderTokenUnits] = KnishIOClient.splitTokenUnits(fromWallet, amount);
-    // ---
+    // Check if units has been passed
+    if ( units !== null && Array.isArray( units ) ) {
+      amount = units.length;
+    }
 
     // Do you have enough tokens?
     if (fromWallet === null || Decimal.cmp(fromWallet.balance, amount) < 0) {
@@ -1049,7 +1029,6 @@ export default class KnishIOClient {
     } else {
       toWallet.initBatchId(fromWallet, amount);
     }
-    toWallet.tokenUnits = recipientTokenUnits;
 
     this.remainderWallet = Wallet.create({
       secretOrBundle: this.getSecret(),
@@ -1057,7 +1036,10 @@ export default class KnishIOClient {
       batchId: toWallet.batchId,
       characters: fromWallet.characters,
     });
-    this.remainderWallet.tokenUnits = remainderTokenUnits;
+
+    // --- Token units splitting
+    fromWallet.splitUnits( units, this.remainderWallet, toWallet );
+    // ---
 
     // Build the molecule itself
     const molecule = await this.createMolecule({
@@ -1092,7 +1074,8 @@ export default class KnishIOClient {
    */
   async burnToken ( {
     token,
-    amount,
+    amount = null,
+    units = null,
     batchId = null
   } ) {
 
@@ -1101,11 +1084,6 @@ export default class KnishIOClient {
     // Batch ID default initialization
     batchId = batchId || Wallet.generateBatchId();
 
-    // --- Token units splitting
-    let recipientTokenUnits, remainderTokenUnits;
-    [ amount, recipientTokenUnits, remainderTokenUnits ] = KnishIOClient.splitTokenUnits( fromWallet, amount );
-    // ---
-
     // Remainder wallet
     let remainderWallet = Wallet.create( {
       secretOrBundle: this.getSecret(),
@@ -1113,7 +1091,15 @@ export default class KnishIOClient {
       batchId,
       characters: fromWallet.characters
     } );
-    remainderWallet.tokenUnits = remainderTokenUnits;
+
+    // Check if units has been passed
+    if ( units !== null && Array.isArray( units ) ) {
+      amount = units.length;
+    }
+    
+    // --- Token units splitting
+    fromWallet.splitUnits( units, remainderWallet );
+    // ---
 
     // Burn tokens
     let molecule = await this.createMolecule( {

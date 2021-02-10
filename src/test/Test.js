@@ -126,7 +126,9 @@ export default class Test {
    */
   async testCreateWallet () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.createWallet( this.tokenSlugs[ 1 ] );
+    let response = await client.createWallet( {
+      token: this.tokenSlugs[ 1 ]
+    } );
     this.checkResponse( response, 'testCreateWallet' );
   }
 
@@ -167,16 +169,15 @@ export default class Test {
     let client = await this.client( this.secrets[ 0 ] );
     let response = await client.requestTokens( {
       token: this.tokenSlugs[ 1 ],
-      requestedAmount: 10,
+      amount: 10,
       to: this.secrets[ 0 ],
-      batchId: 'batch_5'
+      batchId: 'batch_5',
     } );
     this.checkResponse( response, 'testRequestTokens.1' );
 
-    let requestTokenUnits = [ 'unit_id_10', 'unit_id_11' ];
     response = await client.requestTokens( {
       token: this.tokenSlugs[ 3 ],
-      requestedAmount: requestTokenUnits,
+      units: [ 'unit_id_10', 'unit_id_11' ],
       to: this.secrets[ 0 ],
       batchId: 'batch_6',
     } );
@@ -202,11 +203,10 @@ export default class Test {
     } );
     this.checkResponse( response, 'testTransferToken' );
 
-    let sendingTokenUnits = [ 'unit_id_1', 'unit_id_2' ];
     response = await client.transferToken( {
       recipient: bundleHash,
       token: this.tokenSlugs[ 2 ],
-      amount: sendingTokenUnits,
+      units: [ 'unit_id_1', 'unit_id_2' ],
       batchId: 'batch_2'
     } );
     this.checkResponse( response, 'testTransferUnitToken' );
@@ -229,17 +229,13 @@ export default class Test {
     } );
     this.checkResponse( response, 'testBurnToken' );
 
-    let sendingTokenUnits = [ 'unit_id_3', 'unit_id_4' ];
     response = await client.burnToken( {
       token: this.tokenSlugs[ 2 ],
-      amount: sendingTokenUnits,
+      units: [ 'unit_id_3', 'unit_id_4' ],
       batchId: 'batch_4'
     } );
     this.checkResponse( response, 'testBurnUnitToken' );
   }
-
-
-
 
   /**
    *
@@ -262,7 +258,7 @@ export default class Test {
    */
   async testQueryMeta () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.queryMeta({
+    let response = await client.queryMeta( {
       metaType: 'metaType',
       metaId: 'metaId'
     } );
@@ -274,7 +270,7 @@ export default class Test {
    */
   async testQueryWallets () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.queryWallets();
+    let response = await client.queryWallets( {} );
     this.checkResponse( response, 'testQueryWallets' );
   }
 
@@ -294,7 +290,7 @@ export default class Test {
    */
   async testQueryBundle () {
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.queryBundle();
+    let response = await client.queryBundle( {} );
     this.checkResponse( response, 'testQueryBundle' );
   }
 
@@ -305,7 +301,9 @@ export default class Test {
     let bundleHash = generateBundleHash( this.secrets[ 0 ] );
 
     let client = await this.client( this.secrets[ 0 ] );
-    let response = await client.queryContinuId( bundleHash );
+    let response = await client.queryContinuId( {
+      bundle: bundleHash
+    } );
     this.checkResponse( response, 'testQueryContinuId' );
   }
 
@@ -333,7 +331,8 @@ export default class Test {
 
       // Create a client
       this.clients[ secret ] = new KnishIOClient( {
-        uri: this.graphqlUrl
+        uri: this.graphqlUrl,
+        logging: true,
       } );
 
       // Auth the client
@@ -380,7 +379,6 @@ export default class Test {
    * @param response
    */
   debug ( response ) {
-
 
     // Reason data on the top of the output
     if ( response.data && Dot.get( response.data() || {}, 'reason' ) ) {

@@ -707,7 +707,7 @@ export default class Molecule extends MoleculeStructure {
    * Arranges atoms to request tokens from the node itself
    *
    * @param {string} token
-   * @param {Number} requestedAmount
+   * @param {Number} amount
    * @param {string} metaType
    * @param {string} metaId
    * @param {array|object} meta
@@ -716,7 +716,7 @@ export default class Molecule extends MoleculeStructure {
    */
   initTokenRequest ( {
     token,
-    requestedAmount,
+    amount,
     metaType,
     metaId,
     meta = {},
@@ -733,7 +733,7 @@ export default class Molecule extends MoleculeStructure {
           walletAddress: this.sourceWallet.address,
           isotope: 'T',
           token: this.sourceWallet.token,
-          value: requestedAmount,
+          value: amount,
           batchId,
           metaType,
           metaId,
