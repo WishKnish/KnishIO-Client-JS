@@ -76,6 +76,17 @@ export default class ResponseMetaType extends Response {
       return null;
     }
 
-    return metaTypeData.pop().instances;
+    let metaData = metaTypeData.pop();
+    let response = metaData.instances;
+
+    if (metaData.instanceCount) {
+      response.instanceCount = metaData.instanceCount;
+    }
+
+    if (metaData.paginatorInfo) {
+      response.paginatorInfo = metaData.paginatorInfo;
+    }
+
+    return response;
   }
 }
