@@ -63,6 +63,10 @@ export default class QueryMetaType extends Query {
     this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean, $limit: Int, $offset: Int ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas, limit: $limit, offset: $offset ) @fields }`;
     this.$__fields = {
       'metaType': null,
+      'instanceCount': {
+        'key': null,
+        'value': null,
+      },
       'instances': {
         'metaType': null,
         'metaId': null,
@@ -102,11 +106,12 @@ export default class QueryMetaType extends Query {
    * @param {boolean|null} latest
    * @param {object|null} filter
    * @param latestMetas
-   * @param {int|null} limit
-   * @param {int|null} offset
+   * @param {int} limit
+   * @param {int} offset
+   * @param {string} count
    * @returns {{}}
    */
-  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true, limit = 15, offset = null ) {
+  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true, limit = 15, offset = null, count = null ) {
 
     const variables = {};
 
@@ -144,6 +149,10 @@ export default class QueryMetaType extends Query {
 
     if ( offset ) {
       variables[ 'offset' ] = offset;
+    }
+
+    if ( count ) {
+      variables[ 'count' ] = count;
     }
 
     return variables;
