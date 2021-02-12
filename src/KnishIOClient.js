@@ -74,6 +74,7 @@ import WalletShadowException from "./exception/WalletShadowException";
 import MutationCreateMeta from "./mutation/MutationCreateMeta";
 import MutationCreateWallet from "./mutation/MutationCreateWallet";
 import AuthenticationMissingException from "./exception/AuthenticationMissingException";
+import QueryBatch from "@wishknish/knishio-client-js/src/query/QueryBatch";
 
 const TOKEN_UNITS_META_KEY = 'tokenUnits';
 
@@ -457,12 +458,12 @@ export default class KnishIOClient {
    * Retrieves the balance wallet for a specified Knish.IO identity and token slug
    *
    * @param {string} token
-   * @param {string|null} bundleHash
+   * @param {string|null} bundle
    * @return {Promise<ResponseBalance>}
    */
   async queryBalance ( {
     token,
-    bundleHash = null,
+    bundle = null,
   } ) {
 
     /**
@@ -473,7 +474,7 @@ export default class KnishIOClient {
     // Execute query with either the provided bundle hash or the active client's bundle
     return await query.execute( {
       variables: {
-        bundleHash: bundleHash ? bundleHash : this.getBundle(),
+        bundleHash: bundle || this.getBundle(),
         token,
       }
     } );
@@ -541,7 +542,9 @@ export default class KnishIOClient {
 
     const query = this.createQuery( QueryBatch );
 
-    return await query.execute( { batchId: batchId, } );
+    return await query.execute( {
+      variables: { batchId: batchId, }
+    } );
   }
 
   /*
@@ -712,17 +715,17 @@ export default class KnishIOClient {
   /**
    * Retrieves a list of your active wallets (unspent)
    *
-   * @param {string|null} bundleHash
+   * @param {string|null} bundle
    * @param {boolean|null} unspent
    * @return {Promise<[]>}
    */
   queryWallets ( {
-    bundleHash = null,
+    bundle = null,
     unspent = true,
   } ) {
 
     if( this.$__logging ) {
-      console.info( `KnishIOClient::queryWallets() - Querying wallets${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
+      console.info( `KnishIOClient::queryWallets() - Querying wallets${ bundle ? ` for ${ bundle }` : '' }...` );
     }
 
     /**
@@ -731,7 +734,7 @@ export default class KnishIOClient {
     const walletQuery = this.createQuery( QueryWalletList );
     return walletQuery.execute( {
       variables: {
-        bundleHash: bundleHash ? bundleHash : this.getBundle(),
+        bundleHash: bundle ? bundle : this.getBundle(),
         unspent: unspent,
       },
     } ).then( ( response ) => {
@@ -743,7 +746,7 @@ export default class KnishIOClient {
    * Retrieves a list of your shadow wallets (balance, but no keys)
    *
    * @param {string} tokenSlug
-   * @param {string|null} bundleHash
+   * @param {string|null} bundle
    * @return {Promise<[]>}
    */
   queryShadowWallets ( {
@@ -776,7 +779,7 @@ export default class KnishIOClient {
   /**
    * Retrieves your wallet bundle's metadata from the ledger
    *
-   * @param {string|boolean|null} bundleHash
+   * @param {string|boolean|null} bundle
    * @param {string|array|null} key
    * @param {string|array|null} value
    * @param {boolean} latest
@@ -785,7 +788,7 @@ export default class KnishIOClient {
    * @returns {Promise<ResponseWalletBundle|{}>}
    */
   queryBundle ( {
-    bundleHash = null,
+    bundle = null,
     key = null,
     value = null,
     latest = true,
@@ -794,7 +797,7 @@ export default class KnishIOClient {
   } ) {
 
     if( this.$__logging ) {
-      console.info( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundleHash ? ` for ${ bundleHash }` : '' }...` );
+      console.info( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundle ? ` for ${ bundle }` : '' }...` );
     }
 
     /**
@@ -802,7 +805,7 @@ export default class KnishIOClient {
      */
     const query = this.createQuery( QueryWalletBundle );
     const variables = QueryWalletBundle.createVariables( {
-      bundleHash: bundleHash !== null ? bundleHash : this.getBundle(),
+      bundleHash: bundle || this.getBundle(),
       key,
       value,
       latest,
@@ -820,7 +823,7 @@ export default class KnishIOClient {
   /**
    * Queries the ledger for the next ContinuId wallet
    *
-   * @param bundleHash
+   * @param bundle
    * @returns {Promise<ResponseContinuId>}
    */
   async queryContinuId ( {
@@ -1096,7 +1099,7 @@ export default class KnishIOClient {
     if ( units !== null && Array.isArray( units ) ) {
       amount = units.length;
     }
-    
+
     // --- Token units splitting
     fromWallet.splitUnits( units, remainderWallet );
     // ---

@@ -84,8 +84,11 @@ export default class QueryBatch extends Query {
    * @param {string} response
    * @return {ResponseMetaType}
    */
-  createResponse ( response ) {
-    let responseObject = new Response( this, response );
+  createResponse ( json ) {
+    let responseObject = new Response( {
+      query: this,
+      json,
+    } );
     responseObject.dataKey = 'data.Batch';
     return responseObject;
   }
