@@ -1030,7 +1030,10 @@ export default class KnishIOClient {
     if (batchId !== null) {
       toWallet.batchId = batchId;
     } else {
-      toWallet.initBatchId(fromWallet, amount);
+      toWallet.initBatchId( {
+        senderWallet: fromWallet,
+        amount,
+      });
     }
 
     this.remainderWallet = Wallet.create({
