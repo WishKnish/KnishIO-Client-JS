@@ -374,17 +374,16 @@ export default class KnishIOClient {
    * @param {boolean|null} latest
    * @param {object|null} fields
    * @param {object|null} filter
-   * @param {int|null} limit
-   * @param {int|null} offset
+   * @param {object|null} queryArgs
    * @param {string|null} count
    * @returns {Promise<Response|*>}
    */
-  queryMeta ( metaType, metaId = null, key = null, value = null, latest = null, fields = null, filter = null, limit = null, offset = null, count = null, ) {
+  queryMeta ( metaType, metaId = null, key = null, value = null, latest = null, fields = null, filter = null, queryArgs = {}, count = null, ) {
 
     console.info( `KnishIOClient::queryMeta() - Querying meta type data for metaType: ${ metaType }, metaId: ${ metaId }, key: ${ key }, value: ${ value }, latest: ${ latest }...` );
 
     const query = this.createQuery( QueryMetaType );
-    const variables = QueryMetaType.createVariables( metaType, metaId, key, value, latest, filter, true, limit, offset, count );
+    const variables = QueryMetaType.createVariables( metaType, metaId, key, value, latest, filter, true, queryArgs, count );
 
     return query.execute( variables, fields )
       .then( ( response ) => {
