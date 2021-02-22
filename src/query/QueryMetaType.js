@@ -60,7 +60,7 @@ export default class QueryMetaType extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean, $queryArgs: QueryArgs ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas, queryArgs: $queryArgs ) @fields }`;
+    this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean, $queryArgs: QueryArgs, $countBy: String ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas, queryArgs: $queryArgs, countBy: $countBy ) @fields }`;
     this.$__fields = {
       'metaType': null,
       'instanceCount': {
@@ -108,9 +108,10 @@ export default class QueryMetaType extends Query {
    * @param latestMetas
    * @param {object|null} queryArgs
    * @param {string} count
+   * @param {string} countBy
    * @returns {{}}
    */
-  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true, queryArgs = {}, count = null ) {
+  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true, queryArgs = {}, count = null, countBy = null ) {
 
     const variables = {};
 
@@ -148,6 +149,10 @@ export default class QueryMetaType extends Query {
 
     if ( count ) {
       variables[ 'count' ] = count;
+    }
+
+    if ( countBy ) {
+      variables[ 'countBy' ] = countBy;
     }
 
     return variables;
