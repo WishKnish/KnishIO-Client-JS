@@ -80,7 +80,7 @@ export default class ResponseMetaType extends Response {
     let response = metaData.instances;
 
     if (metaData.instanceCount) {
-      response.instanceCount = metaData.instanceCount;
+      response = metaData.instanceCount;
     }
 
     if (metaData.paginatorInfo) {
