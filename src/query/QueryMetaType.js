@@ -81,7 +81,7 @@ export default class QueryMetaType extends Query {
       },
       'paginatorInfo': {
         'currentPage': null,
-        'lastPage': null,
+        'total': null,
       }
     };
   }
