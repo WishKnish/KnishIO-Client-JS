@@ -528,6 +528,56 @@ export default class KnishIOClient {
       } );
   }
 
+
+  /**
+   * Retrieves metadata for the given metaType and provided parameters
+   *
+   * @param {string|array|null} metaType
+   * @param {string|array|null} metaId
+   * @param {string|array|null} key
+   * @param {string|array|null} value
+   * @param {boolean|null} latest
+   * @param {object|null} fields
+   * @param {object|null} filter
+   * @returns {Promise<ResponseMetaType>}
+   */
+  queryMetaInstance ( {
+                metaType,
+                metaId = null,
+                key = null,
+                value = null,
+                latest = null,
+                filter = null,
+                fields = null
+              } ) {
+
+    if( this.$__logging ) {
+      console.info( `KnishIOClient::queryMetaInstance() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
+    }
+
+    /**
+     * @type {QueryMetaType}
+     */
+    const query = this.createQuery( QueryMetaType );
+    const variables = {
+      metaType: metaType,
+      metaIds: [ metaId ],
+      keys: [ key ],
+      values: [ value ],
+      latest: latest,
+      filter: filter,
+    };
+
+    return query.execute( {
+      variables,
+      fields
+    } )
+      .then( ( response ) => {
+        return response.data();
+      } );
+  }
+
+
   /**
    * Query batch to get cascade meta instances by batchID
    *
@@ -1010,11 +1060,11 @@ export default class KnishIOClient {
     }
 
     // Attempt to get the recipient's wallet, if not provided
-    let toWallet = recipient instanceof Wallet ?
-      recipient : (await this.queryBalance({
-        token,
-        bundleHash: recipient,
-      })).payload();
+    let toWallet = recipient instanceof Wallet ? recipient : (await this.queryBalance({
+      token,
+      bundle: recipient,
+    })).payload();
+
 
     // If no wallet was found, prepare to send to bundle
     // This will typically result in a shadow wallet

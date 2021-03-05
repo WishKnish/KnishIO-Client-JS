@@ -45,91 +45,60 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import InvalidResponseException from "../exception/InvalidResponseException";
-import UnauthenticatedException from "../exception/UnauthenticatedException";
-import Dot from "../libraries/Dot";
+import Query from "./Query";
+import Response from '@wishknish/knishio-client-js/src/response/Response';
 
 /**
- * Base Response class for processing node responses
+ * Query for retrieving Meta Asset information
  */
-export default class Response {
+export default class QueryMetaInstance extends Query {
 
   /**
    * Class constructor
    *
-   * @param {Query} query
-   * @param {object} json
+   * @param httpClient
    */
-  constructor ( {
-    query,
-    json,
-    dataKey = null,
-  } ) {
+  constructor ( httpClient ) {
+    super( httpClient );
 
-    this.dataKey = dataKey;
-    this.errorKey = 'exception';
-    this.$__payload = null;
-    this.$__query = query;
-    this.$__originResponse = json;
-    this.$__response = json;
-
-    if ( typeof this.$__response === 'undefined' || this.$__response === null ) {
-      throw new InvalidResponseException();
-    }
-
-    if ( Dot.has( this.$__response, this.errorKey ) ) {
-
-      const error = Dot.get( this.$__response, this.errorKey );
-
-      if ( String( error ).includes( 'Unauthenticated' ) ) {
-        throw new UnauthenticatedException();
+    this.$__query = `query( $metaType: String!, $metaIds: [ String! ], $keys: [ String! ], $values: [ String! ], $filter: [ MetaFilter! ], $countBy: String, $queryArgs: QueryArgs, $latestMetas: Boolean) { MetaInstance( metaType: $metaType, metaIds: $metaIds, keys: $keys, values: $values, filter: $filter, countBy: $countBy, queryArgs: $queryArgs, latestMetas: $latestMetas ) @fields }`;
+    this.$__fields = {
+      'nodes': {
+        'metaType': null,
+        'metaId': null,
+        'createdAt': null,
+        'metas(latest:$latest)': {
+          'molecularHash': null,
+          'position': null,
+          'key': null,
+          'value': null,
+          'createdAt': null,
+        },
+      },
+      'counts': {
+        'key': null,
+        'value': null,
+      },
+      'paginator': {
+        'offset': null,
+        'total': null,
       }
-
-      throw new InvalidResponseException();
-    }
-
-    this.init();
+    };
   }
 
   /**
-   * @return {*}
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseMetaType}
    */
-  data () {
-
-    if ( !this.dataKey ) {
-      return this.response();
-    }
-
-    // Check key & return custom data from the response
-    if ( !Dot.has( this.response(), this.dataKey ) ) {
-      throw new InvalidResponseException();
-    }
-
-    return Dot.get( this.response(), this.dataKey );
+  createResponse ( json ) {
+    return new Response( {
+      query: this,
+      json,
+      dataKey: 'MetaInstance',
+    } );
   }
 
-  /**
-   * @return {*}
-   */
-  response () {
-    return this.$__response;
-  }
 
-  /**
-   * @return {*}
-   */
-  payload () {
-    return null;
-  }
-
-  /**
-   * @return {*}
-   */
-  query () {
-    return this.$__query;
-  }
-
-  init () {
-    return null;
-  }
 }
