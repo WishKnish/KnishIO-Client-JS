@@ -119,6 +119,8 @@ export default class QueryMetaType extends Query {
     latestMetas = true,
     limit = 15,
     offset = null,
+    queryArgs = null,
+    countBy = null,
   } ) {
 
     const variables = {};
@@ -157,6 +159,14 @@ export default class QueryMetaType extends Query {
 
     if ( offset ) {
       variables[ 'offset' ] = offset;
+    }
+
+    if ( queryArgs ) {
+      variables[ 'queryArgs' ] = queryArgs;
+    }
+
+    if ( countBy ) {
+      variables[ 'countBy' ] = countBy;
     }
 
     return variables;

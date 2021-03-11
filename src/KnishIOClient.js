@@ -499,7 +499,9 @@ export default class KnishIOClient {
     value = null,
     latest = null,
     fields = null,
-    filter = null
+    filter = null,
+    queryArgs = null,
+    countBy = null
   } ) {
 
     if( this.$__logging ) {
@@ -517,6 +519,8 @@ export default class KnishIOClient {
       value,
       latest,
       filter,
+      queryArgs,
+      countBy,
     } );
 
     return query.execute( {
