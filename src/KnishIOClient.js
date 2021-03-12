@@ -69,7 +69,7 @@ import UnauthenticatedException from "./exception/UnauthenticatedException";
 import WalletShadowException from "./exception/WalletShadowException";
 import MutationCreateMeta from "./mutation/MutationCreateMeta";
 import MutationCreateWallet from "./mutation/MutationCreateWallet";
-import MutationAccessToken from "./mutation/MutationAccessToken";
+import MutationRequestAuthorizationGuest from "./mutation/MutationRequestAuthorizationGuest";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -331,7 +331,7 @@ export default class KnishIOClient {
         response = await query.execute();
       }
       else {
-        const query = this.createQuery( MutationAccessToken );
+        const query = this.createQuery( MutationRequestAuthorizationGuest );
         response = await query.execute( {
           cellSlug: this.$__cellSlug,
         } );

@@ -3,7 +3,7 @@ import Dot from "../libraries/Dot";
 import InvalidResponseException from "../exception/InvalidResponseException";
 
 
-export default class ResponseAccessToken extends Response {
+export default class ResponseAuthorizationGuest extends Response {
   /**
    * Class constructor
    *
@@ -51,7 +51,7 @@ export default class ResponseAccessToken extends Response {
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAccessToken: '${ key }' key is not found in the payload.` );
+      throw new InvalidResponseException( `ResponseAuthorizationGuest: '${ key }' key is not found in the payload.` );
     }
     return Dot.get( this.payload(), key );
   }
