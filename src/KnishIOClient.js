@@ -69,6 +69,7 @@ import UnauthenticatedException from "./exception/UnauthenticatedException";
 import WalletShadowException from "./exception/WalletShadowException";
 import MutationCreateMeta from "./mutation/MutationCreateMeta";
 import MutationCreateWallet from "./mutation/MutationCreateWallet";
+import MutationAccessToken from "./mutation/MutationAccessToken";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -304,25 +305,37 @@ export default class KnishIOClient {
   /**
    * Requests an authorization token from the node endpoint
    *
-   * @param {string} secret
+   * @param {string|null} secret
    * @param {string|null} cell_slug
    * @return {Promise<Response>}
    */
-  async requestAuthToken ( secret, cell_slug = null ) {
+  async requestAuthToken ( secret = null, cell_slug = null ) {
 
     console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
+    const isSecret = !!secret;
 
-    this.setSecret( secret );
     this.$__cellSlug = cell_slug || this.cellSlug();
+
+    if ( isSecret ) {
+      this.setSecret( secret );
+    }
 
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion > 2 ) {
+      let response;
 
-      let molecule = await this.createMolecule( this.secret(), new Wallet( this.secret(), 'AUTH' ) );
-
-      const query = await this.createMoleculeMutation( MutationRequestAuthorization, molecule );
-      query.fillMolecule();
-      const response = await query.execute();
+      if ( isSecret ) {
+        const molecule = await this.createMolecule( this.secret(), new Wallet( this.secret(), 'AUTH' ) );
+        const query = await this.createMoleculeMutation( MutationRequestAuthorization, molecule );
+        query.fillMolecule();
+        response = await query.execute();
+      }
+      else {
+        const query = this.createQuery( MutationAccessToken );
+        response = await query.execute( {
+          cellSlug: this.$__cellSlug,
+        } );
+      }
 
       if ( response.success() ) {
 
