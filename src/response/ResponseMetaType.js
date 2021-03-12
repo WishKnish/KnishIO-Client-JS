@@ -55,11 +55,17 @@ export default class ResponseMetaType extends Response {
   /**
    * Class constructor
    *
-   * @param query
-   * @param json
+   * @param {Query} query
+   * @param {object} json
    */
-  constructor ( query, json ) {
-    super( query, json );
+  constructor ( {
+    query,
+    json,
+  } ) {
+    super( {
+      query,
+      json,
+    } );
     this.dataKey = 'data.MetaType';
     this.init();
   }

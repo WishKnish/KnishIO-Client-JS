@@ -46,6 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import MutationProposeMolecule from "./MutationProposeMolecule";
+import ResponseRequestTokens from "../response/ResponseRequestTokens";
 
 /**
  * Query for requesting tokens from a node
@@ -55,16 +56,43 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
   /**
    * Fills a Molecule with the appropriate atoms and prepares for broadcast
    *
-   * @param tokenSlug
-   * @param requestedAmount
-   * @param metaType
-   * @param metaId
-   * @param metas
+   * @param {string} token
+   * @param {Number} amount
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {object} meta
    */
-  fillMolecule ( tokenSlug, requestedAmount, metaType, metaId, metas = null ) {
+  fillMolecule ( {
+    token,
+    amount,
+    metaType,
+    metaId,
+    meta = null,
+    batchId = null
+  } ) {
 
-    this.$__molecule.initTokenRequest( tokenSlug, requestedAmount, metaType, metaId, metas || {} );
-    this.$__molecule.sign();
+    this.$__molecule.initTokenRequest( {
+      token,
+      amount,
+      metaType,
+      metaId,
+      meta: meta || {},
+      batchId,
+    } );
+    this.$__molecule.sign( {} );
     this.$__molecule.check();
+  }
+
+  /**
+   * Builds a Response object out of a JSON string
+   *
+   * @param {object} json
+   * @return {ResponseRequestTokens}
+   */
+  createResponse ( json ) {
+    return new ResponseRequestTokens( {
+      query: this,
+      json,
+    } );
   }
 }

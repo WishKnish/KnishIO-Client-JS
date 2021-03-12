@@ -4,7 +4,7 @@
 export default class Dot {
 
   /**
-   * @param {Object|Array} obj
+   * @param {object|array} obj
    * @param {string} keys
    * @private
    */
@@ -27,7 +27,7 @@ export default class Dot {
   }
 
   /**
-   * @param {Object|Array} obj
+   * @param {object|array} obj
    * @return {boolean}
    * @private
    */
@@ -41,7 +41,7 @@ export default class Dot {
   }
 
   /**
-   * @param {Object|Array} obj
+   * @param {object|array} obj
    * @param {string} keys
    * @return {boolean}
    */
@@ -60,7 +60,7 @@ export default class Dot {
   }
 
   /**
-   * @param {Object|Array} obj
+   * @param {object|array} obj
    * @param {string} keys
    * @param {*} def
    * @return {*}

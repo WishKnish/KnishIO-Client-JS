@@ -45,56 +45,43 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Wallet from "../Wallet";
+import ResponseProposeMolecule from "./ResponseProposeMolecule";
+import Dot from "../libraries/Dot";
+import InvalidResponseException from "../exception/InvalidResponseException";
 
 /**
- * Response for ContinuID query
+ * Response for auth token query
  */
-export default class ResponseContinuId extends Response {
+export default class ResponseRequestAuthorization extends ResponseProposeMolecule {
 
   /**
-   * Class constructor
+   * Returns the authorization key
    *
-   * @param {Query} query
-   * @param {object} json
+   * @param key
+   * @returns {*}
    */
-  constructor ( {
-    query,
-    json,
-  } ) {
-    super( {
-      query,
-      json,
-    } );
-    this.dataKey = 'data.ContinuId';
-    this.init();
+  payloadKey ( key ) {
+    if ( !Dot.has( this.payload(), key ) ) {
+      throw new InvalidResponseException( `ResponseAuthorization: '${ key }' key is not found in the payload.` );
+    }
+    return Dot.get( this.payload(), key );
   }
 
   /**
-   * Returns the ContinuID wallet
+   * Returns the auth token
    *
-   * @return {Wallet|null}
+   * @returns {*}
    */
-  payload () {
-    let wallet = null;
+  token () {
+    return this.payloadKey( 'token' );
+  }
 
-    const continuId = this.data();
-
-    if ( continuId ) {
-      wallet = new Wallet( {
-        secret: null,
-        token: continuId[ 'tokenSlug' ],
-      } );
-      wallet.address = continuId[ 'address' ];
-      wallet.position = continuId[ 'position' ];
-      wallet.bundle = continuId[ 'bundleHash' ];
-      wallet.batchId = continuId[ 'batchId' ];
-      wallet.characters = continuId[ 'characters' ];
-      wallet.pubkey = continuId[ 'pubkey' ];
-      wallet.balance = continuId[ 'amount' ] * 1.0;
-    }
-
-    return wallet;
+  /**
+   * Returns timestamp
+   *
+   * @returns {*}
+   */
+  time () {
+    return this.payloadKey( 'time' );
   }
 }

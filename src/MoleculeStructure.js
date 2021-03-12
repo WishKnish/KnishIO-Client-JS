@@ -60,7 +60,7 @@ export default class MoleculeStructure {
   /**
    * Class constructor
    *
-   * @property {string | null} cellSlug
+   * @property {string|null} cellSlug
    */
   constructor ( cellSlug = null ) {
     this.cellSlugOrigin = this.cellSlug = cellSlug;
@@ -85,7 +85,7 @@ export default class MoleculeStructure {
   }
 
   /**
-   * @returns {Object}
+   * @returns {object}
    */
   toJSON () {
     let clone = cloneDeep( this );
@@ -104,7 +104,10 @@ export default class MoleculeStructure {
    * @returns {boolean}
    */
   check ( senderWallet = null ) {
-    return MoleculeStructure.verify( this, senderWallet )
+    return MoleculeStructure.verify( {
+      molecule: this,
+      senderWallet,
+    } )
   }
 
   /**
@@ -115,7 +118,10 @@ export default class MoleculeStructure {
    * @param {Wallet|null} senderWallet
    * @return {boolean}
    */
-  static verify ( molecule, senderWallet = null ) {
+  static verify ( {
+    molecule,
+    senderWallet = null,
+  } ) {
 
     return CheckMolecule.molecularHash( molecule )
       && CheckMolecule.ots( molecule )
@@ -133,7 +139,7 @@ export default class MoleculeStructure {
    * Converts a JSON object into a Molecule Structure instance
    *
    * @param {string} json
-   * @return {Object}
+   * @return {object}
    * @throws {AtomsMissingException}
    */
   static jsonToObject ( json ) {

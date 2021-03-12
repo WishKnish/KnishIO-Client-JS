@@ -45,11 +45,47 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "./ResponseMolecule";
+import Response from "./Response";
+import Dot from "../libraries/Dot";
 
 /**
- * Response for Wallet creation
+ * Response for mutation to create / link an Identifier to a Wallet Bundle
  */
-export default class ResponseWalletCreate extends ResponseMolecule {
+export default class ResponseLinkIdentifier extends Response {
 
+  /**
+   * Class constructor
+   *
+   * @param {Query} query
+   * @param {object} json
+   */
+  constructor ( {
+    query,
+    json,
+  } ) {
+    super( {
+      query,
+      json,
+    } );
+    this.dataKey = 'data.LinkIdentifier';
+    this.init();
+  }
+
+  /**
+   * Returns success status
+   *
+   * @returns {*}
+   */
+  success () {
+    return Dot.get( this.data(), 'set' );
+  }
+
+  /**
+   * Returns message
+   *
+   * @returns {*}
+   */
+  message () {
+    return Dot.get( this.data(), 'message' );
+  }
 }

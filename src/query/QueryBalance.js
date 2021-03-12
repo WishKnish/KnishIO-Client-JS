@@ -72,14 +72,22 @@ export default class QueryBalance extends Query {
       'characters': null,
       'pubkey': null,
       'createdAt': null,
+      'tokenUnits': {
+        'id': null,
+        'name': null,
+        'metas': null,
+      },
     };
   }
 
   /**
-   * @param response
+   * @param {object} json
    * @return {ResponseBalance}
    */
-  createResponse ( response ) {
-    return new ResponseBalance( this, response );
+  createResponse ( json ) {
+    return new ResponseBalance( {
+      query: this,
+      json,
+    } );
   }
 }

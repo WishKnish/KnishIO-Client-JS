@@ -45,41 +45,60 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Dot from "../libraries/Dot";
+import Query from "./Query";
+import Response from '@wishknish/knishio-client-js/src/response/Response';
 
 /**
- * Response for mutation to create / link an Identifier to a Wallet Bundle
+ * Query for retrieving Meta Asset information
  */
-export default class ResponseIdentifier extends Response {
+export default class QueryMetaInstance extends Query {
 
   /**
    * Class constructor
    *
-   * @param query
-   * @param json
+   * @param httpClient
    */
-  constructor ( query, json ) {
-    super( query, json );
-    this.dataKey = 'data.LinkIdentifier';
-    this.init();
+  constructor ( httpClient ) {
+    super( httpClient );
+
+    this.$__query = `query( $metaType: String!, $metaIds: [ String! ], $keys: [ String! ], $values: [ String! ], $filter: [ MetaFilter! ], $countBy: String, $queryArgs: QueryArgs, $latestMetas: Boolean) { MetaInstance( metaType: $metaType, metaIds: $metaIds, keys: $keys, values: $values, filter: $filter, countBy: $countBy, queryArgs: $queryArgs, latestMetas: $latestMetas ) @fields }`;
+    this.$__fields = {
+      'nodes': {
+        'metaType': null,
+        'metaId': null,
+        'createdAt': null,
+        'metas(latest:$latest)': {
+          'molecularHash': null,
+          'position': null,
+          'key': null,
+          'value': null,
+          'createdAt': null,
+        },
+      },
+      'counts': {
+        'key': null,
+        'value': null,
+      },
+      'paginator': {
+        'offset': null,
+        'total': null,
+      }
+    };
   }
 
   /**
-   * Returns success status
+   * Returns a Response object
    *
-   * @returns {*}
+   * @param {object} json
+   * @return {ResponseMetaType}
    */
-  success () {
-    return Dot.get( this.data(), 'set' );
+  createResponse ( json ) {
+    return new Response( {
+      query: this,
+      json,
+      dataKey: 'MetaInstance',
+    } );
   }
 
-  /**
-   * Returns message
-   *
-   * @returns {*}
-   */
-  message () {
-    return Dot.get( this.data(), 'message' );
-  }
+
 }

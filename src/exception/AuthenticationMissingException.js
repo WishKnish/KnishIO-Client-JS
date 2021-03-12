@@ -45,56 +45,22 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Wallet from "../Wallet";
+import BaseException from './BaseException';
 
 /**
- * Response for ContinuID query
+ * Thrown when attempting to authorize without authentication parameters
  */
-export default class ResponseContinuId extends Response {
+export default class AuthenticationMissingException extends BaseException {
 
   /**
    * Class constructor
    *
-   * @param {Query} query
-   * @param {object} json
+   * @param {string} message
+   * @param {string|null} fileName
+   * @param {number|null} lineNumber
    */
-  constructor ( {
-    query,
-    json,
-  } ) {
-    super( {
-      query,
-      json,
-    } );
-    this.dataKey = 'data.ContinuId';
-    this.init();
-  }
-
-  /**
-   * Returns the ContinuID wallet
-   *
-   * @return {Wallet|null}
-   */
-  payload () {
-    let wallet = null;
-
-    const continuId = this.data();
-
-    if ( continuId ) {
-      wallet = new Wallet( {
-        secret: null,
-        token: continuId[ 'tokenSlug' ],
-      } );
-      wallet.address = continuId[ 'address' ];
-      wallet.position = continuId[ 'position' ];
-      wallet.bundle = continuId[ 'bundleHash' ];
-      wallet.batchId = continuId[ 'batchId' ];
-      wallet.characters = continuId[ 'characters' ];
-      wallet.pubkey = continuId[ 'pubkey' ];
-      wallet.balance = continuId[ 'amount' ] * 1.0;
-    }
-
-    return wallet;
+  constructor ( message = 'No secret or seed provided for authorization.', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber );
+    this.name = 'AuthenticationMissingException';
   }
 }

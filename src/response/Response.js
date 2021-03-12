@@ -57,12 +57,16 @@ export default class Response {
   /**
    * Class constructor
    *
-   * @param query
-   * @param json
+   * @param {Query} query
+   * @param {object} json
    */
-  constructor ( query, json ) {
+  constructor ( {
+    query,
+    json,
+    dataKey = null,
+  } ) {
 
-    this.dataKey = null;
+    this.dataKey = dataKey;
     this.errorKey = 'exception';
     this.$__payload = null;
     this.$__query = query;

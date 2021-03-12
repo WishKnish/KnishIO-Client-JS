@@ -79,11 +79,14 @@ export default class QueryWalletBundle extends Query {
   /**
    * Builds a Response object out of a JSON string
    *
-   * @param response
+   * @param {object} json
    * @returns {ResponseWalletBundle}
    */
-  createResponse ( response ) {
-    return new ResponseWalletBundle( this, response );
+  createResponse ( json ) {
+    return new ResponseWalletBundle( {
+      query: this,
+      json,
+    } );
   }
 
   /**
@@ -95,7 +98,12 @@ export default class QueryWalletBundle extends Query {
    * @param {boolean|null} latest
    * @return {{}}
    */
-  static createVariables ( bundleHash = null, key = null, value = null, latest = true ) {
+  static createVariables ( {
+    bundleHash = null,
+    key = null,
+    value = null,
+    latest = true,
+  } ) {
 
     const variables = {
       latest: latest,

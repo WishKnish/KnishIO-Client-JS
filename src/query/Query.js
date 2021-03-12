@@ -47,6 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "../response/Response";
 import { Request } from 'servie';
+import CodeException from "@wishknish/knishio-client-js/src/exception/CodeException";
 
 /**
  * Base class used to construct various GraphQL queries and mutations
@@ -56,7 +57,7 @@ export default class Query {
   /**
    * Class constructor
    *
-   * @param {httpClient} httpClient
+   * @param {HttpClient} httpClient
    */
   constructor ( httpClient ) {
     this.client = httpClient;
@@ -88,16 +89,30 @@ export default class Query {
   /**
    * Creates a new Request for the given parameters
    *
-   * @param variables
-   * @param fields
+   * @param {object} variables
+   * @param {array|object|null} fields
    * @returns {any}
    */
-  createRequest ( variables = null, fields = null ) {
+  createRequest ( {
+    variables = null,
+    fields = null,
+  } ) {
     this.$__variables = this.compiledVariables( variables );
 
+    // Uri is a required parameter
+    let uri = this.uri();
+    if ( !uri ) {
+      throw new CodeException( 'Query::createRequest => Uri does not initialized.' );
+    }
+
     return new Request(
-      this.url(),
-      { body: JSON.stringify( { query: this.compiledQuery( fields ), variables: this.variables() } ) }
+      uri,
+      {
+        body: JSON.stringify( {
+          query: this.compiledQuery( fields ),
+          variables: this.$__variables
+        } )
+      }
     );
   }
 
@@ -114,7 +129,7 @@ export default class Query {
   /**
    * Returns the compiled Query
    *
-   * @param {Object} fields
+   * @param {object} fields
    * @returns {*|void|string}
    */
   compiledQuery ( fields = null ) {
@@ -129,10 +144,14 @@ export default class Query {
   /**
    * Returns a JSON string of compiled fields
    *
-   * @param {Object} fields
+   * @param {object} fields
    * @returns {string}
    */
   compiledFields ( fields ) {
+
+    if( typeof fields === 'string' ) {
+      return fields;
+    }
 
     const target = [];
 
@@ -146,13 +165,19 @@ export default class Query {
   /**
    * Sends the Query to a Knish.IO node and returns the Response
    *
-   * @param {Object} variables
-   * @param {Array|Object|null} fields
-   * @return {Promise<Response>}
+   * @param {object} variables
+   * @param {array|object|null} fields
+   * @return {Promise}
    */
-  async execute ( variables = null, fields = null ) {
+  async execute ( {
+    variables = null,
+    fields = null,
+  } ) {
 
-    this.$__request = this.createRequest( variables, fields );
+    this.$__request = this.createRequest( {
+      variables,
+      fields,
+    } );
 
     let response = await this.client.send( this.$__request );
 
@@ -174,26 +199,29 @@ export default class Query {
   /**
    * Returns a Response object
    *
-   * @param response
+   * @param {object} json
    * @return {Response}
    */
-  createResponse ( response ) {
-    return new Response( this, response );
+  createResponse ( json ) {
+    return new Response( {
+      query: this,
+      json,
+    } );
   }
 
   /**
-   * Returns the Knish.IO endpoint URL
+   * Returns the Knish.IO endpoint URI
    *
    * @return {string}
    */
-  url () {
-    return this.client.getUrl();
+  uri () {
+    return this.client.getUri();
   }
 
   /**
    * Returns the query variables object
    *
-   * @return {Object|null}
+   * @return {object|null}
    */
   variables () {
     return this.$__variables;

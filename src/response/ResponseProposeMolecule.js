@@ -46,12 +46,13 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "./Response";
-import Wallet from "../Wallet";
+import Dot from "../libraries/Dot";
+import MoleculeStructure from "../MoleculeStructure";
 
 /**
- * Response for ContinuID query
+ * Response for proposing new Molecules
  */
-export default class ResponseContinuId extends Response {
+export default class ResponseProposeMolecule extends Response {
 
   /**
    * Class constructor
@@ -67,34 +68,87 @@ export default class ResponseContinuId extends Response {
       query,
       json,
     } );
-    this.dataKey = 'data.ContinuId';
+    this.dataKey = 'data.ProposeMolecule';
+    this.$__clientMolecule = query.molecule();
     this.init();
   }
 
   /**
-   * Returns the ContinuID wallet
-   *
-   * @return {Wallet|null}
+   * Initialize response object with payload data
    */
-  payload () {
-    let wallet = null;
+  init () {
+    const payload_json = Dot.get( this.data(), 'payload' );
+    try {
+      this.$__payload = JSON.parse( payload_json );
+    } catch ( err ) {
+      this.$__payload = null;
+    }
+  }
 
-    const continuId = this.data();
 
-    if ( continuId ) {
-      wallet = new Wallet( {
-        secret: null,
-        token: continuId[ 'tokenSlug' ],
-      } );
-      wallet.address = continuId[ 'address' ];
-      wallet.position = continuId[ 'position' ];
-      wallet.bundle = continuId[ 'bundleHash' ];
-      wallet.batchId = continuId[ 'batchId' ];
-      wallet.characters = continuId[ 'characters' ];
-      wallet.pubkey = continuId[ 'pubkey' ];
-      wallet.balance = continuId[ 'amount' ] * 1.0;
+  /**
+   * Returns the client molecule
+   */
+  clientMolecule () {
+    return this.$__clientMolecule;
+  }
+
+  /**
+   * Returns the resulting molecule
+   *
+   * @returns {MoleculeStructure|null}
+   */
+  molecule () {
+
+    const data = this.data();
+
+    if ( !data ) {
+      return null;
     }
 
-    return wallet;
+    const molecule = new MoleculeStructure();
+
+    molecule.molecularHash = Dot.get( data, 'molecularHash' );
+    molecule.status = Dot.get( data, 'status' );
+    molecule.status = Dot.get( data, 'createdAt' );
+
+    return molecule;
   }
+
+  /**
+   * Returns whether molecule was accepted or not
+   *
+   * @returns {boolean}
+   */
+  success () {
+    return this.status() === 'accepted';
+  }
+
+  /**
+   * Returns the status of the proposal
+   *
+   * @returns {string}
+   */
+  status () {
+    return Dot.get( this.data(), 'status', 'rejected' );
+  }
+
+  /**
+   * Returns the reason for rejection
+   *
+   * @returns {string}
+   */
+  reason () {
+    return Dot.get( this.data(), 'reason', 'Invalid response from server' );
+  }
+
+  /**
+   * Returns payload object
+   *
+   * @returns {null}
+   */
+  payload () {
+    return this.$__payload;
+  }
+
 }
