@@ -55,11 +55,14 @@ import {
 import HttpClient from '../src/httpClient/HttpClient';
 import Molecule from "./Molecule";
 import Wallet from "./Wallet";
+
 import QueryContinuId from "./query/QueryContinuId";
 import QueryWalletBundle from "./query/QueryWalletBundle";
 import QueryWalletList from "./query/QueryWalletList";
 import QueryBalance from "./query/QueryBalance";
 import QueryMetaType from "./query/QueryMetaType";
+import QueryBatch from "./query/QueryBatch";
+
 import MutationRequestAuthorization from "./mutation/MutationRequestAuthorization";
 import MutationCreateToken from "./mutation/MutationCreateToken";
 import MutationRequestTokens from "./mutation/MutationRequestTokens";
@@ -67,14 +70,14 @@ import MutationTransferTokens from "./mutation/MutationTransferTokens";
 import MutationProposeMolecule from "./mutation/MutationProposeMolecule";
 import MutationCreateIdentifier from "./mutation/MutationCreateIdentifier";
 import MutationClaimShadowWallet from "./mutation/MutationClaimShadowWallet";
+import MutationCreateMeta from "./mutation/MutationCreateMeta";
+import MutationCreateWallet from "./mutation/MutationCreateWallet";
+
 import TransferBalanceException from "./exception/TransferBalanceException";
 import CodeException from "./exception/CodeException";
 import UnauthenticatedException from "./exception/UnauthenticatedException";
 import WalletShadowException from "./exception/WalletShadowException";
-import MutationCreateMeta from "./mutation/MutationCreateMeta";
-import MutationCreateWallet from "./mutation/MutationCreateWallet";
 import AuthenticationMissingException from "./exception/AuthenticationMissingException";
-import QueryBatch from "@wishknish/knishio-client-js/src/query/QueryBatch";
 
 const TOKEN_UNITS_META_KEY = 'tokenUnits';
 
@@ -124,7 +127,7 @@ export default class KnishIOClient {
 
     this.$__logging = logging;
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
     }
 
@@ -138,7 +141,7 @@ export default class KnishIOClient {
    * Deinitializes the Knish.IO client session so that a new session can replace it
    */
   deinitialize () {
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( 'KnishIOClient::deinitialize() - Clearing the Knish.IO client session...' );
     }
     this.reset();
@@ -286,7 +289,7 @@ export default class KnishIOClient {
     remainderWallet = null,
   } ) {
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( 'KnishIOClient::createMolecule() - Creating a new molecule...' );
     }
 
@@ -340,7 +343,7 @@ export default class KnishIOClient {
     molecule = null,
   } ) {
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( `KnishIOClient::createMoleculeQuery() - Creating a new ${ mutationClass.name } query...` );
     }
 
@@ -367,21 +370,21 @@ export default class KnishIOClient {
    * @return {Promise<Response>}
    */
   async requestAuthToken ( {
-    secret= null,
+    secret = null,
     seed = null,
     cellSlug = null,
   } ) {
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
     }
 
     // Do we have a seed we need to hash?
-    if( seed ) {
+    if ( seed ) {
       this.setSecret( generateSecret( seed ) );
     }
     // Do we have a secret pre-hashed?
-    else if( secret ) {
+    else if ( secret ) {
       this.setSecret( secret );
     }
     // Neither seed nor secret
@@ -421,13 +424,13 @@ export default class KnishIOClient {
         const token = response.token();
         this.client().setAuthToken( token )
 
-        if( this.$__logging ) {
+        if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
         }
 
       } else {
 
-        if( this.$__logging ) {
+        if ( this.$__logging ) {
           console.warn( 'KnishIOClient::requestAuthToken() - Unable to retrieve auth token...' );
         }
 
@@ -438,7 +441,7 @@ export default class KnishIOClient {
       return response;
     } else {
 
-      if( this.$__logging ) {
+      if ( this.$__logging ) {
         console.warn( 'KnishIOClient::requestAuthToken() - Server SDK version does not require an auth token...' );
       }
 
@@ -450,7 +453,7 @@ export default class KnishIOClient {
    *
    * @returns {string|null}
    */
-  getAuthToken() {
+  getAuthToken () {
     return this.client().getAuthToken();
   }
 
@@ -504,7 +507,7 @@ export default class KnishIOClient {
     countBy = null
   } ) {
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
     }
 
@@ -546,16 +549,16 @@ export default class KnishIOClient {
    * @returns {Promise<ResponseMetaType>}
    */
   queryMetaInstance ( {
-                metaType,
-                metaId = null,
-                key = null,
-                value = null,
-                latest = null,
-                filter = null,
-                fields = null
-              } ) {
+    metaType,
+    metaId = null,
+    key = null,
+    value = null,
+    latest = null,
+    filter = null,
+    fields = null
+  } ) {
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( `KnishIOClient::queryMetaInstance() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
     }
 
@@ -693,7 +696,7 @@ export default class KnishIOClient {
     meta[ 'splittable' ] = 1;
     meta[ 'decimals' ] = 0;
 
-    return await this.createToken({
+    return await this.createToken( {
       token,
       amount: units.length,
       meta,
@@ -778,7 +781,7 @@ export default class KnishIOClient {
     unspent = true,
   } ) {
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( `KnishIOClient::queryWallets() - Querying wallets${ bundle ? ` for ${ bundle }` : '' }...` );
     }
 
@@ -810,7 +813,7 @@ export default class KnishIOClient {
 
     bundle = bundle || this.getBundle();
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( `KnishIOClient::queryShadowWallets() - Querying ${ token } shadow wallets for ${ bundle }...` );
     }
 
@@ -850,7 +853,7 @@ export default class KnishIOClient {
     raw = false,
   } ) {
 
-    if( this.$__logging ) {
+    if ( this.$__logging ) {
       console.info( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundle ? ` for ${ bundle }` : '' }...` );
     }
 
@@ -1051,7 +1054,7 @@ export default class KnishIOClient {
     batchId = null,
   } ) {
 
-    const fromWallet = (await this.queryBalance( { token } )).payload();
+    const fromWallet = ( await this.queryBalance( { token } ) ).payload();
 
     // Check if units has been passed
     if ( units !== null && Array.isArray( units ) ) {
@@ -1059,66 +1062,66 @@ export default class KnishIOClient {
     }
 
     // Do you have enough tokens?
-    if (fromWallet === null || Decimal.cmp(fromWallet.balance, amount) < 0) {
+    if ( fromWallet === null || Decimal.cmp( fromWallet.balance, amount ) < 0 ) {
       throw new TransferBalanceException();
     }
 
     // Attempt to get the recipient's wallet, if not provided
-    let toWallet = recipient instanceof Wallet ? recipient : (await this.queryBalance({
+    let toWallet = recipient instanceof Wallet ? recipient : ( await this.queryBalance( {
       token,
       bundle: recipient,
-    })).payload();
+    } ) ).payload();
 
 
     // If no wallet was found, prepare to send to bundle
     // This will typically result in a shadow wallet
-    if (toWallet === null) {
-      toWallet = Wallet.create({
+    if ( toWallet === null ) {
+      toWallet = Wallet.create( {
         secretOrBundle: recipient,
         token
-      });
+      } );
     }
 
     // Compute the batch ID for the recipient
     // (typically used by stackable tokens)
-    if (batchId !== null) {
+    if ( batchId !== null ) {
       toWallet.batchId = batchId;
     } else {
       toWallet.initBatchId( {
         senderWallet: fromWallet,
         amount,
-      });
+      } );
     }
 
-    this.remainderWallet = Wallet.create({
+    this.remainderWallet = Wallet.create( {
       secretOrBundle: this.getSecret(),
       token,
       batchId: toWallet.batchId,
       characters: fromWallet.characters,
-    });
+    } );
 
     // --- Token units splitting
     fromWallet.splitUnits( units, this.remainderWallet, toWallet );
     // ---
 
     // Build the molecule itself
-    const molecule = await this.createMolecule({
+    const molecule = await this.createMolecule( {
         sourceWallet: fromWallet,
         remainderWallet: this.remainderWallet,
-      }),
+      } ),
 
-    /**
-     * @type {MutationTransferTokens}
-     */
-    query = await this.createMoleculeMutation({
-      mutationClass: MutationTransferTokens,
-      molecule,
-    });
+      /**
+       * @type {MutationTransferTokens}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationTransferTokens,
+        molecule,
+      } );
 
-    query.fillMolecule({
+    query.fillMolecule( {
       toWallet,
       value: amount,
-    })
+    } )
 
 
     return await query.execute( {} );

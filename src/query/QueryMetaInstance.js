@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from "./Query";
-import Response from '@wishknish/knishio-client-js/src/response/Response';
+import Response from '../response/Response';
 
 /**
  * Query for retrieving Meta Asset information
