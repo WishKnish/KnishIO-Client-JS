@@ -45,63 +45,87 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
+import ResponseProposeMolecule from "./ResponseProposeMolecule";
+import Dot from "../libraries/Dot";
+import InvalidResponseException from "../exception/InvalidResponseException";
 
 /**
- * Response for MetaType Query
+ * Response for guest auth mutation
  */
-export default class ResponseMetaType extends Response {
-
+export default class ResponseRequestAuthorizationGuest extends ResponseProposeMolecule {
   /**
    * Class constructor
    *
-   * @param {Query} query
-   * @param {object} json
+   * @param query
+   * @param json
    */
   constructor ( {
     query,
-    json,
+    json
   } ) {
     super( {
       query,
-      json,
+      json
     } );
-    this.dataKey = 'data.MetaType';
+    this.dataKey = 'data.AccessToken';
     this.init();
   }
 
   /**
-   * Returns meta type instance results
+   * Returns the reason for rejection
    *
-   * @returns {null|*}
+   * @returns {string}
+   */
+  reason () {
+    return 'Invalid response from server';
+  }
+
+  /**
+   * Returns whether molecule was accepted or not
+   *
+   * @returns {boolean}
+   */
+  success () {
+    return this.payload() !== null;
+  }
+
+  /**
+   * Returns a wallet with balance
+   *
+   * @returns {null|Wallet}
    */
   payload () {
-    const metaTypeData = this.data();
+    return this.data();
+  }
 
-    if ( !metaTypeData || metaTypeData.length === 0 ) {
-      return null;
+  /**
+   * Returns the authorization key
+   *
+   * @param key
+   * @returns {*}
+   */
+  payloadKey ( key ) {
+    if ( !Dot.has( this.payload(), key ) ) {
+      throw new InvalidResponseException( `ResponseAuthorizationGuest: '${ key }' key is not found in the payload.` );
     }
+    return Dot.get( this.payload(), key );
+  }
 
-    let response = {
-      instances: {},
-      instanceCount: {},
-      paginatorInfo: {},
-    };
+  /**
+   * Returns the auth token
+   *
+   * @returns {*}
+   */
+  token () {
+    return this.payloadKey( 'token' );
+  }
 
-    let metaData = metaTypeData.pop();
-
-    if ( metaData.instances ) {
-      response.instances = metaData.instances;
-    }
-
-    if (metaData.instanceCount) {
-      response.instanceCount = metaData.instanceCount;
-    }
-
-    if (metaData.paginatorInfo) {
-      response.paginatorInfo = metaData.paginatorInfo;
-    }
-
-    return response;
+  /**
+   * Returns timestamp
+   *
+   * @returns {*}
+   */
+  time () {
+    return this.payloadKey( 'time' );
   }
 }

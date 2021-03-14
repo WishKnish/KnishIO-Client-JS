@@ -53,9 +53,6 @@ import ResponseRequestAuthorization from "../response/ResponseRequestAuthorizati
  */
 export default class MutationRequestAuthorization extends MutationProposeMolecule {
 
-  /**
-   * 
-   */
   fillMolecule () {
     this.$__molecule.initAuthorization();
     this.$__molecule.sign( {} );

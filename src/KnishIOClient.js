@@ -72,6 +72,7 @@ import MutationCreateIdentifier from "./mutation/MutationCreateIdentifier";
 import MutationClaimShadowWallet from "./mutation/MutationClaimShadowWallet";
 import MutationCreateMeta from "./mutation/MutationCreateMeta";
 import MutationCreateWallet from "./mutation/MutationCreateWallet";
+import MutationRequestAuthorizationGuest from "./mutation/MutationRequestAuthorizationGuest";
 
 import TransferBalanceException from "./exception/TransferBalanceException";
 import CodeException from "./exception/CodeException";
@@ -379,6 +380,8 @@ export default class KnishIOClient {
       console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
     }
 
+    let guestMode = false;
+
     // Do we have a seed we need to hash?
     if ( seed ) {
       this.setSecret( generateSecret( seed ) );
@@ -389,7 +392,10 @@ export default class KnishIOClient {
     }
     // Neither seed nor secret
     else {
-      throw new AuthenticationMissingException();
+      if ( this.$__logging ) {
+        console.info( 'KnishIOClient::requestAuthToken() - Guest mode enabled...' );
+      }
+      guestMode = true;
     }
 
     this.$__cellSlug = cellSlug || this.cellSlug();
@@ -397,27 +403,48 @@ export default class KnishIOClient {
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion > 2 ) {
 
-      let molecule = await this.createMolecule( {
-        secret: this.getSecret(),
-        sourceWallet: new Wallet( {
+      let query, response;
+
+      if( guestMode ){
+
+        /**
+         * @type {MutationRequestAuthorizationGuest}
+         */
+        query = await this.createQuery( MutationRequestAuthorizationGuest );
+
+        /**
+         * @type {ResponseRequestAuthorization}
+         */
+        response = await query.execute( {
+          variables: {
+            cellSlug: this.$__cellSlug,
+          }
+        } );
+      }
+      else {
+        const molecule = await this.createMolecule( {
           secret: this.getSecret(),
-          token: 'AUTH',
-        } ),
-      } );
+          sourceWallet: new Wallet( {
+            secret: this.getSecret(),
+            token: 'AUTH',
+          } ),
+        } );
 
-      /**
-       * @type {MutationRequestAuthorization}
-       */
-      const query = await this.createMoleculeMutation( {
-        mutationClass: MutationRequestAuthorization,
-        molecule,
-      } );
-      query.fillMolecule();
+        /**
+         * @type {MutationRequestAuthorization}
+         */
+        query = await this.createMoleculeMutation( {
+          mutationClass: MutationRequestAuthorization,
+          molecule,
+        } );
 
-      /**
-       * @type {ResponseRequestAuthorization}
-       */
-      const response = await query.execute( {} );
+        query.fillMolecule();
+
+        /**
+         * @type {ResponseRequestAuthorization}
+         */
+        response = await query.execute( {} );
+      }
 
       if ( response.success() ) {
 
@@ -493,6 +520,9 @@ export default class KnishIOClient {
    * @param {boolean|null} latest
    * @param {object|null} fields
    * @param {object|null} filter
+   * @param {object|null} queryArgs
+   * @param {string|null} count
+   * @param {string|null} countBy
    * @returns {Promise<ResponseMetaType>}
    */
   queryMeta ( {
@@ -504,6 +534,7 @@ export default class KnishIOClient {
     fields = null,
     filter = null,
     queryArgs = null,
+    count = null,
     countBy = null
   } ) {
 
@@ -523,6 +554,7 @@ export default class KnishIOClient {
       latest,
       filter,
       queryArgs,
+      count,
       countBy,
     } );
 
