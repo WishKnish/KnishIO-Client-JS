@@ -78,9 +78,9 @@ import TransferBalanceException from "./exception/TransferBalanceException";
 import CodeException from "./exception/CodeException";
 import UnauthenticatedException from "./exception/UnauthenticatedException";
 import WalletShadowException from "./exception/WalletShadowException";
-import AuthenticationMissingException from "./exception/AuthenticationMissingException";
-
-const TOKEN_UNITS_META_KEY = 'tokenUnits';
+import Meta from "./Meta";
+import StackableUnitDecimalsException from "./exception/StackableUnitDecimalsException";
+import StackableUnitAmountException from "./exception/StackableUnitAmountException";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -405,12 +405,12 @@ export default class KnishIOClient {
     }
 
     // SDK versions 2 and below do not utilize an authorization token
-    if ( this.$__serverSdkVersion > 2 ) {
-      let response;
+    if ( this.$__serverSdkVersion >= 3 ) {
 
-      let query, response;
+      let query,
+        response;
 
-      if( guestMode ){
+      if ( guestMode ) {
 
         /**
          * @type {MutationRequestAuthorizationGuest}
@@ -425,8 +425,7 @@ export default class KnishIOClient {
             cellSlug: this.$__cellSlug,
           }
         } );
-      }
-      else {
+      } else {
         const molecule = await this.createMolecule( {
           secret: this.getSecret(),
           sourceWallet: new Wallet( {
@@ -528,7 +527,7 @@ export default class KnishIOClient {
    * @param {object|null} queryArgs
    * @param {string|null} count
    * @param {string|null} countBy
-* @returns {Promise<ResponseMetaType>}
+   * @returns {Promise<ResponseMetaType>}
    */
   queryMeta ( {
     metaType,
@@ -674,25 +673,46 @@ export default class KnishIOClient {
    * @param {string} token
    * @param {number} amount
    * @param {array|object} meta
+   * @param {string|null} batchId
+   * @param {array} units
    * @return {Promise<ResponseCreateToken>}
    */
   async createToken ( {
     token,
     amount,
     meta = null,
-    batchId = null
+    batchId = null,
+    units = [],
   } ) {
 
+    // Stackable tokens need a new batch for every transfer
+    if ( Dot.get( meta || {}, 'fungibility' ) === 'stackable' ) {
+
+      // No batch ID specified? Create a random one
+      if ( !batchId ) {
+        batchId = generateBatchId();
+      }
+
+      // Adding unit IDs to the token
+      if ( units.length > 0 ) {
+        meta = Meta.aggregateMeta( meta );
+
+        // Stackable tokens with Unit IDs must not use decimals
+        if ( Dot.get( meta || {}, 'decimals' ) > 0 ) {
+          throw new StackableUnitDecimalsException();
+        }
+
+        meta.splittable = 1;
+        meta.tokenUnits = JSON.stringify( units );
+      }
+    }
+
+    // Creating the wallet that will receive the new tokens
     const recipientWallet = new Wallet( {
       secret: this.getSecret(),
       token,
       batchId: batchId,
     } );
-
-    // Stackable tokens need a new batch for every transfer
-    if ( Dot.get( meta || {}, 'fungibility' ) === 'stackable' ) {
-      recipientWallet.batchId = generateBatchId();
-    }
 
     /**
      * @type {MutationCreateToken}
@@ -708,37 +728,6 @@ export default class KnishIOClient {
     } );
 
     return await query.execute( {} );
-  }
-
-  /**
-   * Create a token with units
-   * @param token
-   * @param units
-   * @param meta
-   * @param batchId
-   * @returns {Promise<ResponseCreateToken>}
-   */
-  async createUnitableToken ( {
-    token,
-    units,
-    meta = null,
-    batchId = null
-  } ) {
-    meta = meta || {};
-    batchId = batchId || Wallet.generateBatchId();
-
-    // Set custom default meta
-    meta[ TOKEN_UNITS_META_KEY ] = JSON.stringify( units );
-    meta[ 'fungibility' ] = 'stackable';
-    meta[ 'splittable' ] = 1;
-    meta[ 'decimals' ] = 0;
-
-    return await this.createToken( {
-      token,
-      amount: units.length,
-      meta,
-      batchId
-    } );
   }
 
   /*
@@ -937,17 +926,19 @@ export default class KnishIOClient {
   /**
    * Builds and executes a Molecule that requests token payment from the node
    *
-   * @param token
-   * @param amount
-   * @param to
-   * @param meta
+   * @param {string} token
+   * @param {string|Wallet} to
+   * @param {number|null} amount
+   * @param {array|null} units
+   * @param {array|object} meta
+   * @param {string|null} batchId
    * @return {Promise<ResponseRequestTokens>}
    */
   async requestTokens ( {
     token,
     to,
     amount = null,
-    units = null,
+    units = [],
     meta = null,
     batchId = null
   } ) {
@@ -958,9 +949,17 @@ export default class KnishIOClient {
     meta = meta || {};
 
     // Calculate amount & set meta key
-    if ( units !== null && Array.isArray( units ) ) {
+    if ( units.length > 0 ) {
+
+      // Can't move stackable units AND provide amount
+      if( amount > 0) {
+        throw new StackableUnitAmountException();
+      }
+
+      // Calculating amount based on Unit IDs
       amount = units.length;
-      meta[ TOKEN_UNITS_META_KEY ] = JSON.stringify( units );
+      meta = Meta.aggregateMeta( meta );
+      meta.tokenUnits = JSON.stringify( units );
     }
 
     // Are we specifying a specific recipient?
@@ -1045,7 +1044,7 @@ export default class KnishIOClient {
   /**
    * Claim shadow wallets
    *
-   * @param token
+   * @param {string} token
    * @returns {[]}
    */
   async claimShadowWallets ( {
@@ -1080,21 +1079,29 @@ export default class KnishIOClient {
    *
    * @param {Wallet|string} recipient
    * @param {string} token
-   * @param {number} amount
+   * @param {number|null} amount
+   * @param {array|null} units
+   * @param {string|null} batchId
    * @return {Promise<Response>}
    */
   async transferToken ( {
     recipient,
     token,
     amount = null,
-    units = null,
+    units = [],
     batchId = null,
   } ) {
 
     const fromWallet = ( await this.queryBalance( { token } ) ).payload();
 
-    // Check if units has been passed
-    if ( units !== null && Array.isArray( units ) ) {
+    // Calculate amount & set meta key
+    if ( units.length > 0 ) {
+
+      // Can't move stackable units AND provide amount
+      if ( amount > 0 ) {
+        throw new StackableUnitAmountException();
+      }
+
       amount = units.length;
     }
 
