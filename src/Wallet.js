@@ -95,6 +95,7 @@ export default class Wallet {
     this.address = null;
     this.privkey = null;
     this.pubkey = null;
+    this.tokenUnits = null;
 
     this.bundle = secret ? generateBundleHash( secret ) : null;
     this.batchId = batchId;
