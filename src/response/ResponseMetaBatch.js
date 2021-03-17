@@ -60,7 +60,10 @@ export default class ResponseMetaBatch extends Response {
    * @param json
    */
   constructor ( query, json ) {
-    super( query, json );
+    super( {
+      query,
+      json
+    } );
     this.dataKey = 'data.MetaBatch';
     this.init();
   }

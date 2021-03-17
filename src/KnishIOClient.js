@@ -667,7 +667,7 @@ export default class KnishIOClient {
    * Builds and executes a molecule to issue a new token on the ledger
    *
    * @param {string} token
-   * @param {number} amount
+   * @param {number|null} amount
    * @param {array|object} meta
    * @param {string|null} batchId
    * @param {array} units
@@ -675,7 +675,7 @@ export default class KnishIOClient {
    */
   async createToken ( {
     token,
-    amount,
+    amount = null,
     meta = null,
     batchId = null,
     units = [],
@@ -698,6 +698,13 @@ export default class KnishIOClient {
           throw new StackableUnitDecimalsException();
         }
 
+        // Can't create stackable units AND provide amount
+        if ( amount > 0 ) {
+          throw new StackableUnitAmountException();
+        }
+
+        // Calculating amount based on Unit IDs
+        amount = units.length;
         meta.splittable = 1;
         meta.tokenUnits = JSON.stringify( units );
       }

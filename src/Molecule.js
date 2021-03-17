@@ -195,8 +195,8 @@ export default class Molecule extends MoleculeStructure {
 
 
   /**
-   * @param array $metas
-   * @param null $context
+   * @param {object|array|null} metas
+   * @param {string|null} context
    *
    * @return array
    */
@@ -246,13 +246,7 @@ export default class Molecule extends MoleculeStructure {
           batchId: this.sourceWallet.batchId,
           metaType: 'token',
           metaId: token,
-          meta: Molecule.mergeMetas(
-            {
-              pubkey: this.sourceWallet.pubkey,
-              characters: this.sourceWallet.characters
-            },
-            aggregateMeta
-          ),
+          meta: this.finalMetas( aggregateMeta ),
           index: this.generateIndex(),
         }
       )
@@ -711,6 +705,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {string} metaType
    * @param {string} metaId
    * @param {array|object} meta
+   * @param {string|null} batchId
    *
    * @returns {Molecule}
    */

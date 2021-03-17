@@ -90,7 +90,7 @@ export default class QueryMetaInstance extends Query {
    * Returns a Response object
    *
    * @param {object} json
-   * @return {ResponseMetaType}
+   * @return {Response}
    */
   createResponse ( json ) {
     return new Response( {
