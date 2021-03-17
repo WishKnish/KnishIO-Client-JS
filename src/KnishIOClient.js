@@ -1170,15 +1170,16 @@ export default class KnishIOClient {
 
   /**
    *
-   * @param token
-   * @param amount
-   * @param batchId
+   * @param {string} token
+   * @param {number|null} amount
+   * @param {array} units
+   * @param {string|null} batchId
    * @returns {Promise<unknown>}
    */
-  async burnToken ( {
+  async burnTokens ( {
     token,
     amount = null,
-    units = null,
+    units = [],
     batchId = null
   } ) {
 
@@ -1195,14 +1196,22 @@ export default class KnishIOClient {
       characters: fromWallet.characters
     } );
 
-    // Check if units has been passed
-    if ( units !== null && Array.isArray( units ) ) {
-      amount = units.length;
-    }
+    // Calculate amount & set meta key
+    if ( units.length > 0 ) {
 
-    // --- Token units splitting
-    fromWallet.splitUnits( units, remainderWallet );
-    // ---
+      // Can't burn stackable units AND provide amount
+      if ( amount > 0 ) {
+        throw new StackableUnitAmountException();
+      }
+
+      // Calculating amount based on Unit IDs
+      amount = units.length;
+
+      // --- Token units splitting
+      fromWallet.splitUnits( units, remainderWallet );
+      // ---
+
+    }
 
     // Burn tokens
     let molecule = await this.createMolecule( {

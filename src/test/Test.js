@@ -222,14 +222,14 @@ export default class Test {
     let response;
 
     let client = await this.client( this.secrets[ 0 ] );
-    response = await client.burnToken( {
+    response = await client.burnTokens( {
       token: this.tokenSlugs[ 0 ],
       amount: 10,
       batchId: 'batch_3'
     } );
     this.checkResponse( response, 'testBurnToken' );
 
-    response = await client.burnToken( {
+    response = await client.burnTokens( {
       token: this.tokenSlugs[ 2 ],
       units: [ 'unit_id_3', 'unit_id_4' ],
       batchId: 'batch_4'
