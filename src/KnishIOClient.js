@@ -400,8 +400,13 @@ export default class KnishIOClient {
 
     this.$__cellSlug = cellSlug || this.cellSlug();
 
+    if ( isSecret ) {
+      this.setSecret( secret );
+    }
+
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion > 2 ) {
+      let response;
 
       let query, response;
 
@@ -523,7 +528,7 @@ export default class KnishIOClient {
    * @param {object|null} queryArgs
    * @param {string|null} count
    * @param {string|null} countBy
-   * @returns {Promise<ResponseMetaType>}
+* @returns {Promise<ResponseMetaType>}
    */
   queryMeta ( {
     metaType,
