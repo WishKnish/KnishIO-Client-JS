@@ -400,10 +400,6 @@ export default class KnishIOClient {
 
     this.$__cellSlug = cellSlug || this.cellSlug();
 
-    if ( isSecret ) {
-      this.setSecret( secret );
-    }
-
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion >= 3 ) {
 
@@ -1189,7 +1185,7 @@ export default class KnishIOClient {
     const fromWallet = ( await this.queryBalance( { token } ) ).payload();
 
     // Batch ID default initialization
-    batchId = batchId || Wallet.generateBatchId();
+    batchId = batchId || generateBatchId();
 
     // Remainder wallet
     let remainderWallet = Wallet.create( {

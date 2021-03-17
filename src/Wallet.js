@@ -181,7 +181,7 @@ export default class Wallet {
   }
 
   /**
-   * @return string
+   * @return string|null
    */
   tokenUnitsJson () {
     if ( !this.hasTokenUnits() ) {
@@ -228,7 +228,7 @@ export default class Wallet {
   }
 
   /**
-   * @return bool
+   * @return boolean
    */
   isShadow () {
     return (
