@@ -95,7 +95,7 @@ export default class Wallet {
     this.address = null;
     this.privkey = null;
     this.pubkey = null;
-    this.tokenUnits = null;
+    this.tokenUnits = [];
 
     this.bundle = secret ? generateBundleHash( secret ) : null;
     this.batchId = batchId;
@@ -182,7 +182,7 @@ export default class Wallet {
    * @returns {boolean}
    */
   hasTokenUnits () {
-    return 'tokenUnits' in this;
+    return !!this.tokenUnits && this.tokenUnits.length > 0;
   }
 
   /**
