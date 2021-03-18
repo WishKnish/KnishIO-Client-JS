@@ -694,7 +694,7 @@ export default class KnishIOClient {
         meta = Meta.aggregateMeta( meta );
 
         // Stackable tokens with Unit IDs must not use decimals
-        if ( Dot.get( meta || {}, 'decimals' ) > 0 ) {
+        if ( meta.decimals && meta.decimals > 0 ) {
           throw new StackableUnitDecimalsException();
         }
 
