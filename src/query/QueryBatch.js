@@ -64,8 +64,14 @@ export default class QueryBatch extends Query {
     this.$__fields = {
       'batchId': null,
       'type': null,
+      'status': null,
       'createdAt': null,
       'wallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null
+      },
+      'fromWallet': {
         'address': null,
         'bundleHash': null,
         'amount': null
