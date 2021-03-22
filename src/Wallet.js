@@ -95,6 +95,7 @@ export default class Wallet {
     this.address = null;
     this.privkey = null;
     this.pubkey = null;
+    this.tokenUnits = [];
 
     this.bundle = secret ? generateBundleHash( secret ) : null;
     this.batchId = batchId;
@@ -159,7 +160,84 @@ export default class Wallet {
   }
 
   /**
-   * @return {boolean}
+   * Get formatted token units from the raw data
+   *
+   * @param unitsData
+   * @returns {[]}
+   */
+  static getTokenUnits ( unitsData ) {
+    let result = [];
+    unitsData.forEach( unitData => {
+      result.push( {
+        id: unitData.shift(),
+        name: unitData.shift(),
+        metas: unitData,
+      } );
+    } );
+    return result;
+  }
+
+  /**
+   * Has token units?
+   * @returns {boolean}
+   */
+  hasTokenUnits () {
+    return !!this.tokenUnits && this.tokenUnits.length > 0;
+  }
+
+  /**
+   * @return string|null
+   */
+  tokenUnitsJson () {
+    if ( !this.hasTokenUnits() ) {
+      return null;
+    }
+    let result = [];
+    this.tokenUnits.forEach( tokenUnit => {
+      result.push( [ tokenUnit.id, tokenUnit.name ].concat( tokenUnit.metas ) )
+    } );
+    return JSON.stringify( result );
+  }
+
+
+  /**
+   * Split token units
+   *
+   * @param {array} units
+   * @param remainderWallet
+   * @param recipientWallet
+   */
+  splitUnits (
+    units,
+    remainderWallet,
+    recipientWallet = null,
+  ) {
+
+    // No units supplied, nothing to split
+    if ( units.length === 0 ) {
+      return;
+    }
+
+    // Init recipient & remainder token units
+    let recipientTokenUnits = [];
+    let remainderTokenUnits = [];
+    this.tokenUnits.forEach( tokenUnit => {
+      if ( units.includes( tokenUnit.id ) ) {
+        recipientTokenUnits.push( tokenUnit );
+      } else {
+        remainderTokenUnits.push( tokenUnit );
+      }
+    } );
+
+    // Set token units to recipient & remainder
+    if ( recipientWallet !== null ) {
+      recipientWallet.tokenUnits = recipientTokenUnits;
+    }
+    remainderWallet.tokenUnits = remainderTokenUnits;
+  }
+
+  /**
+   * @return boolean
    */
   isShadow () {
     return (
@@ -171,24 +249,24 @@ export default class Wallet {
   /**
    * Sets up a batch ID - either using the sender's, or a new one
    *
-   * @param {Wallet} senderWallet
+   * @param {Wallet} sourceWallet
    * @param {number} amount
    */
   initBatchId ( {
-    senderWallet,
+    sourceWallet,
     amount,
   } ) {
 
-    if ( senderWallet.batchId ) {
+    if ( sourceWallet.batchId ) {
 
       this.batchId = generateBatchId();
       /*
       // Set batchID to recipient wallet
-      this.batchId = ( !this.batchId && Decimal.cmp( senderWallet.balance, amount ) > 0 ) ?
+      this.batchId = ( !this.batchId && Decimal.cmp( sourceWallet.balance, amount ) > 0 ) ?
         // Has a remainder value (source balance is bigger than a transfer value)
         generateBatchId() :
         // Has no remainder? use batch ID from the source wallet
-        senderWallet.batchId;
+        sourceWallet.batchId;
       */
     }
   }

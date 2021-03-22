@@ -45,37 +45,27 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import ResponseRequestAuthorizationGuest from "../response/ResponseRequestAuthorizationGuest";
+
+import Response from "./Response";
 
 /**
- * Query for requesting a guest authorization token from the node
+ * Response for MetaBatch Query
  */
-export default class MutationRequestAuthorizationGuest extends Query {
+export default class ResponseMetaBatch extends Response {
+
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param query
+   * @param json
    */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = `mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }`;
-    this.$__fields = {
-      'token': null,
-      'time': null,
-    };
-  }
-
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseRequestAuthorizationGuest}
-   */
-  createResponse ( json ) {
-    return new ResponseRequestAuthorizationGuest( {
-      query: this,
+  constructor ( query, json ) {
+    super( {
+      query,
       json
     } );
+    this.dataKey = 'data.MetaBatch';
+    this.init();
   }
+
 }

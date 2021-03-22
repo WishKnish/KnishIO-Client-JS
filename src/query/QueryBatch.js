@@ -45,24 +45,41 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import ResponseRequestAuthorizationGuest from "../response/ResponseRequestAuthorizationGuest";
+import Query from "./Query";
+import Response from "../response/Response";
 
 /**
- * Query for requesting a guest authorization token from the node
+ * Query for retrieving Meta Asset information
  */
-export default class MutationRequestAuthorizationGuest extends Query {
+export default class QueryBatch extends Query {
+
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param httpClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = `mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }`;
+  constructor ( httpClient ) {
+    super( httpClient );
+    this.$__query = `query( $batchId: String ) { Batch( batchId: $batchId ) @fields }`;
     this.$__fields = {
-      'token': null,
-      'time': null,
+      'batchId': null,
+      'type': null,
+      'status': null,
+      'createdAt': null,
+      'wallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null
+      },
+      'fromWallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null
+      },
+      'metas': {
+        'key': null,
+        'value': null,
+      },
     };
   }
 
@@ -70,12 +87,15 @@ export default class MutationRequestAuthorizationGuest extends Query {
    * Returns a Response object
    *
    * @param {object} json
-   * @return {ResponseRequestAuthorizationGuest}
+   * @return {Response}
    */
   createResponse ( json ) {
-    return new ResponseRequestAuthorizationGuest( {
+    let responseObject = new Response( {
       query: this,
-      json
+      json,
     } );
+    responseObject.dataKey = 'data.Batch';
+    return responseObject;
   }
+
 }

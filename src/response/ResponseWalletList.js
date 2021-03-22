@@ -108,6 +108,7 @@ export default class ResponseWalletList extends Response {
       wallet.tokenSupply = data.token.amount;
     }
 
+    wallet.tokenUnits = data.tokenUnits;
     wallet.molecules = data.molecules;
     wallet.balance = Number( data.amount );
     wallet.pubkey = data.pubkey;
@@ -157,7 +158,9 @@ export default class ResponseWalletList extends Response {
     const wallets = [];
 
     for ( let item of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( item ) );
+      wallets.push( ResponseWalletList.toClientWallet( {
+        data: item
+      } ) );
     }
 
     return wallets;

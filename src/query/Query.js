@@ -47,6 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "../response/Response";
 import { Request } from 'servie';
+import CodeException from "../exception/CodeException";
 
 /**
  * Base class used to construct various GraphQL queries and mutations
@@ -98,12 +99,18 @@ export default class Query {
   } ) {
     this.$__variables = this.compiledVariables( variables );
 
+    // Uri is a required parameter
+    let uri = this.uri();
+    if ( !uri ) {
+      throw new CodeException( 'Query::createRequest => Uri does not initialized.' );
+    }
+
     return new Request(
-      this.uri(),
+      uri,
       {
         body: JSON.stringify( {
           query: this.compiledQuery( fields ),
-          variables: this.variables()
+          variables: this.$__variables
         } )
       }
     );

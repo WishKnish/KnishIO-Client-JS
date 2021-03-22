@@ -45,37 +45,87 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import ResponseRequestAuthorizationGuest from "../response/ResponseRequestAuthorizationGuest";
+import Response from "./Response";
+import Dot from "../libraries/Dot";
+import InvalidResponseException from "../exception/InvalidResponseException";
 
 /**
- * Query for requesting a guest authorization token from the node
+ * Response for guest auth mutation
  */
-export default class MutationRequestAuthorizationGuest extends Query {
+export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param query
+   * @param json
    */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = `mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }`;
-    this.$__fields = {
-      'token': null,
-      'time': null,
-    };
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
+    } );
+    this.dataKey = 'data.AccessToken';
+    this.init();
   }
 
   /**
-   * Returns a Response object
+   * Returns the reason for rejection
    *
-   * @param {object} json
-   * @return {ResponseRequestAuthorizationGuest}
+   * @returns {string}
    */
-  createResponse ( json ) {
-    return new ResponseRequestAuthorizationGuest( {
-      query: this,
-      json
-    } );
+  reason () {
+    return 'Invalid response from server';
+  }
+
+  /**
+   * Returns whether molecule was accepted or not
+   *
+   * @returns {boolean}
+   */
+  success () {
+    return this.payload() !== null;
+  }
+
+  /**
+   * Returns a wallet with balance
+   *
+   * @returns {null|Wallet}
+   */
+  payload () {
+    return this.data();
+  }
+
+  /**
+   * Returns the authorization key
+   *
+   * @param key
+   * @returns {*}
+   */
+  payloadKey ( key ) {
+    if ( !Dot.has( this.payload(), key ) ) {
+      throw new InvalidResponseException( `ResponseAuthorizationGuest: '${ key }' key is not found in the payload.` );
+    }
+    return Dot.get( this.payload(), key );
+  }
+
+  /**
+   * Returns the auth token
+   *
+   * @returns {*}
+   */
+  token () {
+    return this.payloadKey( 'token' );
+  }
+
+  /**
+   * Returns timestamp
+   *
+   * @returns {*}
+   */
+  time () {
+    return this.payloadKey( 'time' );
   }
 }

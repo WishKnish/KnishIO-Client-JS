@@ -45,24 +45,44 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import ResponseRequestAuthorizationGuest from "../response/ResponseRequestAuthorizationGuest";
+import Query from "./Query";
+import Response from '../response/Response';
 
 /**
- * Query for requesting a guest authorization token from the node
+ * Query for retrieving Meta Asset information
  */
-export default class MutationRequestAuthorizationGuest extends Query {
+export default class QueryMetaInstance extends Query {
+
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param httpClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = `mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }`;
+  constructor ( httpClient ) {
+    super( httpClient );
+
+    this.$__query = `query( $metaType: String!, $metaIds: [ String! ], $keys: [ String! ], $values: [ String! ], $filter: [ MetaFilter! ], $countBy: String, $queryArgs: QueryArgs, $latestMetas: Boolean) { MetaInstance( metaType: $metaType, metaIds: $metaIds, keys: $keys, values: $values, filter: $filter, countBy: $countBy, queryArgs: $queryArgs, latestMetas: $latestMetas ) @fields }`;
     this.$__fields = {
-      'token': null,
-      'time': null,
+      'nodes': {
+        'metaType': null,
+        'metaId': null,
+        'createdAt': null,
+        'metas(latest:$latest)': {
+          'molecularHash': null,
+          'position': null,
+          'key': null,
+          'value': null,
+          'createdAt': null,
+        },
+      },
+      'counts': {
+        'key': null,
+        'value': null,
+      },
+      'paginator': {
+        'offset': null,
+        'total': null,
+      }
     };
   }
 
@@ -70,12 +90,15 @@ export default class MutationRequestAuthorizationGuest extends Query {
    * Returns a Response object
    *
    * @param {object} json
-   * @return {ResponseRequestAuthorizationGuest}
+   * @return {Response}
    */
   createResponse ( json ) {
-    return new ResponseRequestAuthorizationGuest( {
+    return new Response( {
       query: this,
-      json
+      json,
+      dataKey: 'MetaInstance',
     } );
   }
+
+
 }

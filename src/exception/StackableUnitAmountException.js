@@ -45,37 +45,22 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import ResponseRequestAuthorizationGuest from "../response/ResponseRequestAuthorizationGuest";
+import BaseException from './BaseException';
 
 /**
- * Query for requesting a guest authorization token from the node
+ * Thrown when a stackable token is being transferred with both unit IDs AND an amount specified (ambiguous)
  */
-export default class MutationRequestAuthorizationGuest extends Query {
+export default class StackableUnitAmountException extends BaseException {
+
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param {string} message
+   * @param {string|null} fileName
+   * @param {number|null} lineNumber
    */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = `mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }`;
-    this.$__fields = {
-      'token': null,
-      'time': null,
-    };
-  }
-
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseRequestAuthorizationGuest}
-   */
-  createResponse ( json ) {
-    return new ResponseRequestAuthorizationGuest( {
-      query: this,
-      json
-    } );
+  constructor ( message = 'Stackable tokens with unit IDs cannot have decimal places!', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber );
+    this.name = 'StackableUnitAmountException';
   }
 }

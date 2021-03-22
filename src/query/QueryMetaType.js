@@ -89,11 +89,14 @@ export default class QueryMetaType extends Query {
   /**
    * Returns a Response object
    *
-   * @param {string} response
+   * @param {object} json
    * @return {ResponseMetaType}
    */
-  createResponse ( response ) {
-    return new ResponseMetaType( this, response );
+  createResponse ( json ) {
+    return new ResponseMetaType( {
+      query: this,
+      json,
+    } );
   }
 
   /**
@@ -107,11 +110,22 @@ export default class QueryMetaType extends Query {
    * @param {object|null} filter
    * @param latestMetas
    * @param {object|null} queryArgs
-   * @param {string} count
-   * @param {string} countBy
+   * @param {string|null} count
+   * @param {string|null} countBy
    * @returns {{}}
    */
-  static createVariables ( metaType = null, metaId = null, key = null, value = null, latest = null, filter = null, latestMetas = true, queryArgs = {}, count = null, countBy = null ) {
+  static createVariables ( {
+    metaType = null,
+    metaId = null,
+    key = null,
+    value = null,
+    latest = null,
+    filter = null,
+    latestMetas = true,
+    queryArgs = null,
+    count = null,
+    countBy = null,
+  } ) {
 
     const variables = {};
 

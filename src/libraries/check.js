@@ -210,11 +210,11 @@ export default class CheckMolecule {
 
   /**
    * @param {Molecule} molecule
-   * @param {Wallet} senderWallet
+   * @param {Wallet} sourceWallet
    * @return {boolean}
    * @throws {TransferRemainderException|TransferRemainderException|TypeError|TransferMismatchedException|TransferMalformedException|TransferToSelfException|TransferUnbalancedException|TransferBalanceException}
    */
-  static isotopeV ( molecule, senderWallet = null ) {
+  static isotopeV ( molecule, sourceWallet = null ) {
 
     CheckMolecule.missing( molecule );
 
@@ -293,8 +293,8 @@ export default class CheckMolecule {
       throw new TransferUnbalancedException();
     }
 
-    // If we're provided with a senderWallet argument, we can perform additional checks
-    if ( senderWallet ) {
+    // If we're provided with a sourceWallet argument, we can perform additional checks
+    if ( sourceWallet ) {
 
       value = firstAtom.value * 1;
 
@@ -302,7 +302,7 @@ export default class CheckMolecule {
         throw new TypeError( 'Invalid isotope "V" values' );
       }
 
-      const remainder = ( senderWallet.balance * 1.0 ) + ( value * 1.0 );
+      const remainder = ( sourceWallet.balance * 1.0 ) + ( value * 1.0 );
 
       // Is there enough balance to send?
       if ( remainder < 0 ) {
@@ -314,7 +314,7 @@ export default class CheckMolecule {
         throw new TransferRemainderException();
       }
 
-    } // No senderWallet, but have a remainder?
+    } // No sourceWallet, but have a remainder?
     else if ( value !== 0 ) {
       throw new TransferRemainderException();
     }

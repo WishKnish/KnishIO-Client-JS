@@ -57,7 +57,7 @@ export default class ResponseProposeMolecule extends Response {
   /**
    * Class constructor
    *
-   * @param {Query} query
+   * @param {MutationProposeMolecule} query
    * @param {object} json
    */
   constructor ( {
