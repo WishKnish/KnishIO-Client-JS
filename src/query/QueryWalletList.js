@@ -79,6 +79,11 @@ export default class QueryWalletList extends Query {
       'characters': null,
       'pubkey': null,
       'createdAt': null,
+      'tokenUnits': {
+        'id': null,
+        'name': null,
+        'metas': null,
+      },
     };
   }
 
