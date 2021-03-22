@@ -100,6 +100,7 @@ export default class Test {
       meta: {
         name: this.tokenSlugs[ 2 ],
         supply: 'limited',
+        fungibility: 'stackable',
       },
       batchId: 'batch_0',
     } );
@@ -115,6 +116,7 @@ export default class Test {
       meta: {
         name: this.tokenSlugs[ 3 ],
         supply: 'limited',
+        fungibility: 'stackable',
       },
       batchId: 'batch_0',
     } );
