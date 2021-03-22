@@ -27,6 +27,19 @@ export default class Test {
       [ 'unit_id_10','unit_name_10','unit_meta_10', ],
       [ 'unit_id_11','unit_name_11','unit_meta_11', ],
     ];
+    this.tokenUnits = [
+      [ 'unit_id_1', ],
+      [ 'unit_id_2', ],
+      [ 'unit_id_3', ],
+      [ 'unit_id_4', ],
+      [ 'unit_id_5', ],
+      [ 'unit_id_6', ],
+      [ 'unit_id_7', ],
+      [ 'unit_id_8', ],
+      [ 'unit_id_9', ],
+      [ 'unit_id_10', ],
+      [ 'unit_id_11', ],
+    ];
   }
 
 
