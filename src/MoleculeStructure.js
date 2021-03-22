@@ -100,13 +100,13 @@ export default class MoleculeStructure {
   /**
    * Validates the current molecular structure
    *
-   * @param {Wallet|null} senderWallet
+   * @param {Wallet|null} sourceWallet
    * @returns {boolean}
    */
-  check ( senderWallet = null ) {
+  check ( sourceWallet = null ) {
     return MoleculeStructure.verify( {
       molecule: this,
-      senderWallet,
+      sourceWallet,
     } )
   }
 
@@ -115,12 +115,12 @@ export default class MoleculeStructure {
    * Verifies a specified molecule
    *
    * @param {Molecule|MoleculeStructure} molecule
-   * @param {Wallet|null} senderWallet
+   * @param {Wallet|null} sourceWallet
    * @return {boolean}
    */
   static verify ( {
     molecule,
-    senderWallet = null,
+    sourceWallet = null,
   } ) {
 
     return CheckMolecule.molecularHash( molecule )
@@ -132,7 +132,7 @@ export default class MoleculeStructure {
       && CheckMolecule.isotopeC( molecule )
       && CheckMolecule.isotopeU( molecule )
       && CheckMolecule.isotopeI( molecule )
-      && CheckMolecule.isotopeV( molecule, senderWallet );
+      && CheckMolecule.isotopeV( molecule, sourceWallet );
   }
 
   /**

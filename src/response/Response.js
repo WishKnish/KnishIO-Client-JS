@@ -59,6 +59,7 @@ export default class Response {
    *
    * @param {Query} query
    * @param {object} json
+   * @param {string|null} dataKey
    */
   constructor ( {
     query,

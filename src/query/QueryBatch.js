@@ -47,7 +47,6 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from "./Query";
 import Response from "../response/Response";
-import ResponseMetaType from "../response/ResponseMetaBatch";
 
 /**
  * Query for retrieving Meta Asset information
@@ -65,8 +64,14 @@ export default class QueryBatch extends Query {
     this.$__fields = {
       'batchId': null,
       'type': null,
+      'status': null,
       'createdAt': null,
       'wallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null
+      },
+      'fromWallet': {
         'address': null,
         'bundleHash': null,
         'amount': null
@@ -81,8 +86,8 @@ export default class QueryBatch extends Query {
   /**
    * Returns a Response object
    *
-   * @param {string} response
-   * @return {ResponseMetaType}
+   * @param {object} json
+   * @return {Response}
    */
   createResponse ( json ) {
     let responseObject = new Response( {

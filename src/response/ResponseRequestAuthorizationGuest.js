@@ -47,90 +47,28 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "./Response";
 import Dot from "../libraries/Dot";
-import MoleculeStructure from "../MoleculeStructure";
+import InvalidResponseException from "../exception/InvalidResponseException";
 
 /**
- * Response for proposing new Molecules
+ * Response for guest auth mutation
  */
-export default class ResponseProposeMolecule extends Response {
-
+export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Class constructor
    *
-   * @param {MutationProposeMolecule} query
-   * @param {object} json
+   * @param query
+   * @param json
    */
   constructor ( {
     query,
-    json,
+    json
   } ) {
     super( {
       query,
-      json,
+      json
     } );
-    this.dataKey = 'data.ProposeMolecule';
-    this.$__clientMolecule = query.molecule();
+    this.dataKey = 'data.AccessToken';
     this.init();
-  }
-
-  /**
-   * Initialize response object with payload data
-   */
-  init () {
-    const payload_json = Dot.get( this.data(), 'payload' );
-    try {
-      this.$__payload = JSON.parse( payload_json );
-    } catch ( err ) {
-      this.$__payload = null;
-    }
-  }
-
-
-  /**
-   * Returns the client molecule
-   */
-  clientMolecule () {
-    return this.$__clientMolecule;
-  }
-
-  /**
-   * Returns the resulting molecule
-   *
-   * @returns {MoleculeStructure|null}
-   */
-  molecule () {
-
-    const data = this.data();
-
-    if ( !data ) {
-      return null;
-    }
-
-    const molecule = new MoleculeStructure();
-
-    molecule.molecularHash = Dot.get( data, 'molecularHash' );
-    molecule.status = Dot.get( data, 'status' );
-    molecule.status = Dot.get( data, 'createdAt' );
-
-    return molecule;
-  }
-
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @returns {boolean}
-   */
-  success () {
-    return this.status() === 'accepted';
-  }
-
-  /**
-   * Returns the status of the proposal
-   *
-   * @returns {string}
-   */
-  status () {
-    return Dot.get( this.data(), 'status', 'rejected' );
   }
 
   /**
@@ -139,16 +77,55 @@ export default class ResponseProposeMolecule extends Response {
    * @returns {string}
    */
   reason () {
-    return Dot.get( this.data(), 'reason', 'Invalid response from server' );
+    return 'Invalid response from server';
   }
 
   /**
-   * Returns payload object
+   * Returns whether molecule was accepted or not
    *
-   * @returns {null}
+   * @returns {boolean}
    */
-  payload () {
-    return this.$__payload;
+  success () {
+    return this.payload() !== null;
   }
 
+  /**
+   * Returns a wallet with balance
+   *
+   * @returns {null|Wallet}
+   */
+  payload () {
+    return this.data();
+  }
+
+  /**
+   * Returns the authorization key
+   *
+   * @param key
+   * @returns {*}
+   */
+  payloadKey ( key ) {
+    if ( !Dot.has( this.payload(), key ) ) {
+      throw new InvalidResponseException( `ResponseAuthorizationGuest: '${ key }' key is not found in the payload.` );
+    }
+    return Dot.get( this.payload(), key );
+  }
+
+  /**
+   * Returns the auth token
+   *
+   * @returns {*}
+   */
+  token () {
+    return this.payloadKey( 'token' );
+  }
+
+  /**
+   * Returns timestamp
+   *
+   * @returns {*}
+   */
+  time () {
+    return this.payloadKey( 'time' );
+  }
 }

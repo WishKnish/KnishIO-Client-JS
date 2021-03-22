@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from "../response/Response";
 import { Request } from 'servie';
-import CodeException from "@wishknish/knishio-client-js/src/exception/CodeException";
+import CodeException from "../exception/CodeException";
 
 /**
  * Base class used to construct various GraphQL queries and mutations

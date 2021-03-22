@@ -94,7 +94,7 @@ export default class Test {
     // --------- UNITABLE TOKENS ----------
 
     // Create stackable unit token
-    responses[ 2 ] = await client.createUnitableToken( {
+    responses[ 2 ] = await client.createToken( {
       token: this.tokenSlugs[ 2 ],
       units: this.tokenUnits,
       meta: {
@@ -109,7 +109,7 @@ export default class Test {
     // --- SERVER CLIENT (used only for the testing - SECRET_TOKEN_KNISH is server var only!)
 
     // Create server stackable unit token
-    responses[ 3 ] = await serverClient.createUnitableToken( {
+    responses[ 3 ] = await serverClient.createToken( {
       token: this.tokenSlugs[ 3 ],
       units: this.tokenUnits,
       meta: {
@@ -157,7 +157,7 @@ export default class Test {
     let response = await client.createIdentifier( {
       type: 'email',
       contact: 'test@test.com',
-      code: 1234,
+      code: '1234',
     } );
     this.checkResponse( response, 'testCreateIdentifier' );
   }
@@ -222,14 +222,14 @@ export default class Test {
     let response;
 
     let client = await this.client( this.secrets[ 0 ] );
-    response = await client.burnToken( {
+    response = await client.burnTokens( {
       token: this.tokenSlugs[ 0 ],
       amount: 10,
       batchId: 'batch_3'
     } );
     this.checkResponse( response, 'testBurnToken' );
 
-    response = await client.burnToken( {
+    response = await client.burnTokens( {
       token: this.tokenSlugs[ 2 ],
       units: [ 'unit_id_3', 'unit_id_4' ],
       batchId: 'batch_4'
@@ -242,6 +242,10 @@ export default class Test {
    */
   async testClaimShadowWallet () {
     let client = await this.client( this.secrets[ 1 ] );
+
+    /**
+     * @type {ResponseBalance}
+     */
     let balanceResponse = await client.queryBalance( {
       token: this.tokenSlugs[ 0 ]
     } );
@@ -353,6 +357,7 @@ export default class Test {
   /**
    * Check a response
    * @param response
+   * @param key
    */
   checkResponse ( response, key ) {
 
@@ -364,7 +369,7 @@ export default class Test {
       if ( !response.success() ) {
         this.debug( response );
       }
-      console.assert( response.status() == 'accepted', response )
+      console.assert( response.status() === 'accepted', response )
     }
 
     // Default response
