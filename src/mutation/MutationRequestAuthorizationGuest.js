@@ -45,63 +45,31 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
+import Query from "../query/Query";
+import ResponseAuthorizationGuest from "../response/ResponseAuthorizationGuest";
 
-/**
- * Response for MetaType Query
- */
-export default class ResponseMetaType extends Response {
-
+export default class MutationRequestAuthorizationGuest extends Query {
   /**
    * Class constructor
    *
-   * @param {Query} query
-   * @param {object} json
+   * @param knishIO
    */
-  constructor ( {
-    query,
-    json,
-  } ) {
-    super( {
-      query,
-      json,
-    } );
-    this.dataKey = 'data.MetaType';
-    this.init();
+  constructor ( knishIO ) {
+    super( knishIO );
+    this.$__query = `mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }`;
+    this.$__fields = {
+      'token': null,
+      'time': null,
+    };
   }
 
   /**
-   * Returns meta type instance results
+   * Returns a Response object
    *
-   * @returns {null|*}
+   * @param {string} response
+   * @return {ResponseAuthorizationGuest}
    */
-  payload () {
-    const metaTypeData = this.data();
-
-    if ( !metaTypeData || metaTypeData.length === 0 ) {
-      return null;
-    }
-
-    let response = {
-      instances: {},
-      instanceCount: {},
-      paginatorInfo: {},
-    };
-
-    let metaData = metaTypeData.pop();
-
-    if ( metaData.instances ) {
-      response.instances = metaData.instances;
-    }
-
-    if (metaData.instanceCount) {
-      response.instanceCount = metaData.instanceCount;
-    }
-
-    if (metaData.paginatorInfo) {
-      response.paginatorInfo = metaData.paginatorInfo;
-    }
-
-    return response;
+  createResponse ( response ) {
+    return new ResponseAuthorizationGuest( this, response );
   }
 }
