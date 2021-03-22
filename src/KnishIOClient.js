@@ -1151,26 +1151,26 @@ export default class KnishIOClient {
     } );
 
     // --- Token units splitting
-    sourceWallet.splitUnits( {
+    sourceWallet.splitUnits(
       units,
-      remainderWallet: this.remainderWallet,
+      this.remainderWallet,
       recipientWallet
-    } );
+    );
     // ---
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-        sourceWallet: sourceWallet,
-        remainderWallet: this.remainderWallet,
-      } ),
+      sourceWallet: sourceWallet,
+      remainderWallet: this.remainderWallet,
+    } ),
 
-      /**
-       * @type {MutationTransferTokens}
-       */
-      query = await this.createMoleculeMutation( {
-        mutationClass: MutationTransferTokens,
-        molecule,
-      } );
+    /**
+     * @type {MutationTransferTokens}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationTransferTokens,
+      molecule,
+    } );
 
     query.fillMolecule( {
       recipientWallet,
@@ -1222,10 +1222,10 @@ export default class KnishIOClient {
       amount = units.length;
 
       // --- Token units splitting
-      fromWallet.splitUnits( {
+      fromWallet.splitUnits(
         units,
         remainderWallet,
-      } );
+      );
       // ---
 
     }

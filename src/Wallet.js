@@ -207,11 +207,11 @@ export default class Wallet {
    * @param remainderWallet
    * @param recipientWallet
    */
-  splitUnits ( {
-    units= [],
+  splitUnits (
+    units,
     remainderWallet,
     recipientWallet = null,
-  } ) {
+  ) {
 
     // No units supplied, nothing to split
     if ( units.length === 0 ) {
