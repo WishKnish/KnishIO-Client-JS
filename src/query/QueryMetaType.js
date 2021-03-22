@@ -110,8 +110,8 @@ export default class QueryMetaType extends Query {
    * @param {object|null} filter
    * @param latestMetas
    * @param {object|null} queryArgs
-   * @param {string} count
-   * @param {string} countBy
+   * @param {string|null} count
+   * @param {string|null} countBy
    * @returns {{}}
    */
   static createVariables ( {
