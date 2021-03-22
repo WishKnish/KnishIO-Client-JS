@@ -1099,6 +1099,7 @@ export default class KnishIOClient {
   } ) {
 
     const sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+    console.log( sourceWallet );
 
     // Calculate amount & set meta key
     if ( units.length > 0 ) {

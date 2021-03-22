@@ -108,7 +108,7 @@ export default class ResponseWalletList extends Response {
       wallet.tokenSupply = data.token.amount;
     }
 
-    wallet.tokenUnits = Wallet.getTokenUnits( data.tokenUnits );
+    wallet.tokenUnits = data.tokenUnits;
     wallet.molecules = data.molecules;
     wallet.balance = Number( data.amount );
     wallet.pubkey = data.pubkey;
