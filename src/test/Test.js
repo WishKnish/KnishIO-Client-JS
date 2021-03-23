@@ -2,6 +2,7 @@ import KnishIOClient from "../KnishIOClient";
 import Dot from "../libraries/Dot";
 import { generateBundleHash, generateSecret } from "../libraries/crypto";
 import ResponseMolecule from "../response/ResponseProposeMolecule";
+import { KNISHIO_SETTINGS, } from 'src/constants/knishio';
 
 export default class Test {
 
@@ -9,10 +10,12 @@ export default class Test {
    * Constructor
    * @param graphqlUrl
    */
-  constructor ( graphqlUrl ) {
+  constructor ( graphqlUrl = null ) {
     this.secrets = [ generateSecret(), generateSecret() ];
     this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', ];
-    this.graphqlUrl = graphqlUrl;
+    this.graphqlUrl = graphqlUrl || KNISHIO_SETTINGS.serverUri;
+    console.log(`---------- GraphQL URI: ${ this.graphqlUrl }`);
+
     this.clients = {};
     this.tokenUnits = [
       [ 'unit_id_1', 'unit_name_1', 'unit_meta_1', ],
@@ -27,6 +30,19 @@ export default class Test {
       [ 'unit_id_10','unit_name_10','unit_meta_10', ],
       [ 'unit_id_11','unit_name_11','unit_meta_11', ],
     ];
+    this.tokenUnits = [
+      [ 'unit_id_1', ],
+      [ 'unit_id_2', ],
+      [ 'unit_id_3', ],
+      [ 'unit_id_4', ],
+      [ 'unit_id_5', ],
+      [ 'unit_id_6', ],
+      [ 'unit_id_7', ],
+      [ 'unit_id_8', ],
+      [ 'unit_id_9', ],
+      [ 'unit_id_10', ],
+      [ 'unit_id_11', ],
+    ];
   }
 
 
@@ -36,6 +52,7 @@ export default class Test {
   async testAll () {
     await this.client( this.secrets[ 0 ] )
     await this.client( this.secrets[ 1 ] )
+
     await this.testCreateToken();
     await this.testCreateWallet();
     await this.testCreateMeta();
@@ -100,6 +117,7 @@ export default class Test {
       meta: {
         name: this.tokenSlugs[ 2 ],
         supply: 'limited',
+        fungibility: 'stackable',
       },
       batchId: 'batch_0',
     } );
@@ -115,6 +133,7 @@ export default class Test {
       meta: {
         name: this.tokenSlugs[ 3 ],
         supply: 'limited',
+        fungibility: 'stackable',
       },
       batchId: 'batch_0',
     } );
