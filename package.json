@@ -1,7 +1,7 @@
 {
 	"name": "@wishknish/knishio-client-js",
 	"version": "0.4.5",
-  "description": "Knish.IO Javascript API Client",
+    "description": "Knish.IO Javascript API Client",
 	"license": "GPL-3.0-or-later",
 	"repository": {
 		"type": "git",
@@ -111,8 +111,8 @@
 		"build:umd": "rollup --config build/rollup.config.umd.js",
 		"build:cjs": "rollup --config build/rollup.config.cjs.js",
 		"dev": "nodemon --exec \"yarn build:es && yarn build:umd && yarn build:cjs\" --watch",
-		"build:webpack:dev": "webpack --mode development --watch --colors --verbose",
-		"build:webpack": "webpack --mode production --progress --colors --verbose"
+		"build:webpack:dev": "webpack --mode development --watch --stats-colors --profile",
+		"build:webpack": "webpack --mode production --progress --stats-colors --profile"
 	},
 	"nodemonConfig": {
 		"delay": 5500

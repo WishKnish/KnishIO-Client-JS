@@ -802,11 +802,13 @@ export default class KnishIOClient {
    * Retrieves a list of your active wallets (unspent)
    *
    * @param {string|null} bundle
+   * @param {string|null} token
    * @param {boolean|null} unspent
    * @return {Promise<[]>}
    */
   queryWallets ( {
     bundle = null,
+    token = null,
     unspent = true,
   } ) {
 
@@ -821,6 +823,7 @@ export default class KnishIOClient {
     return walletQuery.execute( {
       variables: {
         bundleHash: bundle ? bundle : this.getBundle(),
+        token: token,
         unspent: unspent,
       },
     } ).then( ( response ) => {
@@ -1088,6 +1091,7 @@ export default class KnishIOClient {
    * @param {number|null} amount
    * @param {array|null} units
    * @param {string|null} batchId
+   * @param {Wallet|null} source
    * @return {Promise<Response>}
    */
   async transferToken ( {
@@ -1096,9 +1100,10 @@ export default class KnishIOClient {
     amount = null,
     units = [],
     batchId = null,
+    source= null,
   } ) {
 
-    const sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+    const sourceWallet = source || ( await this.queryBalance( { token } ) ).payload();
 
     // Calculate amount & set meta key
     if ( units.length > 0 ) {
@@ -1146,7 +1151,6 @@ export default class KnishIOClient {
     this.remainderWallet = Wallet.create( {
       secretOrBundle: this.getSecret(),
       token,
-      batchId: recipientWallet.batchId,
       characters: sourceWallet.characters,
     } );
 
@@ -1188,16 +1192,18 @@ export default class KnishIOClient {
    * @param {number|null} amount
    * @param {array} units
    * @param {string|null} batchId
+   * @param {Wallet|null} source
    * @returns {Promise<unknown>}
    */
   async burnTokens ( {
     token,
     amount = null,
     units = [],
-    batchId = null
+    batchId = null,
+    source= null,
   } ) {
 
-    const fromWallet = ( await this.queryBalance( { token } ) ).payload();
+    const fromWallet = source || ( await this.queryBalance( { token } ) ).payload();
 
     // Batch ID default initialization
     batchId = batchId || generateBatchId();
