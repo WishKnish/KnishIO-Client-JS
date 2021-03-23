@@ -720,7 +720,7 @@ export default class Molecule extends MoleculeStructure {
 
     this.molecularHash = null;
 
-	  meta.token = token;
+    meta.token = token;
 
     this.atoms.push(
       new Atom( {

@@ -1,6 +1,9 @@
 import KnishIOClient from "../KnishIOClient";
 import Dot from "../libraries/Dot";
-import { generateBundleHash, generateSecret } from "../libraries/crypto";
+import {
+  generateBundleHash,
+  generateSecret
+} from "../libraries/crypto";
 import ResponseMolecule from "../response/ResponseProposeMolecule";
 import { KNISHIO_SETTINGS, } from 'src/constants/knishio';
 
@@ -14,7 +17,7 @@ export default class Test {
     this.secrets = [ generateSecret(), generateSecret() ];
     this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', ];
     this.graphqlUrl = graphqlUrl || KNISHIO_SETTINGS.serverUri;
-    console.log(`---------- GraphQL URI: ${ this.graphqlUrl }`);
+    console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` );
 
     this.clients = {};
     this.tokenUnits = [
@@ -27,8 +30,8 @@ export default class Test {
       [ 'unit_id_7', 'unit_name_7', 'unit_meta_7', ],
       [ 'unit_id_8', 'unit_name_8', 'unit_meta_8', ],
       [ 'unit_id_9', 'unit_name_9', 'unit_meta_9', ],
-      [ 'unit_id_10','unit_name_10','unit_meta_10', ],
-      [ 'unit_id_11','unit_name_11','unit_meta_11', ],
+      [ 'unit_id_10', 'unit_name_10', 'unit_meta_10', ],
+      [ 'unit_id_11', 'unit_name_11', 'unit_meta_11', ],
     ];
     this.tokenUnits = [
       [ 'unit_id_1', ],
@@ -105,7 +108,6 @@ export default class Test {
       },
     } );
     this.checkResponse( responses[ 1 ], 'testCreateToken.1' );
-
 
 
     // --------- UNITABLE TOKENS ----------

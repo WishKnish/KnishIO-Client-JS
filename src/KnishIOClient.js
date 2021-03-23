@@ -1100,10 +1100,10 @@ export default class KnishIOClient {
     amount = null,
     units = [],
     batchId = null,
-    sourceWallet= null,
+    sourceWallet = null,
   } ) {
 
-    if( sourceWallet === null ) {
+    if ( sourceWallet === null ) {
       sourceWallet = ( await this.queryBalance( { token } ) ).payload();
     }
 
@@ -1166,17 +1166,17 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-      sourceWallet: sourceWallet,
-      remainderWallet: this.remainderWallet,
-    } ),
+        sourceWallet: sourceWallet,
+        remainderWallet: this.remainderWallet,
+      } ),
 
-    /**
-     * @type {MutationTransferTokens}
-     */
-    query = await this.createMoleculeMutation( {
-      mutationClass: MutationTransferTokens,
-      molecule,
-    } );
+      /**
+       * @type {MutationTransferTokens}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationTransferTokens,
+        molecule,
+      } );
 
     query.fillMolecule( {
       recipientWallet,
@@ -1202,10 +1202,10 @@ export default class KnishIOClient {
     amount = null,
     units = [],
     batchId = null,
-    sourceWallet= null,
+    sourceWallet = null,
   } ) {
 
-    if( sourceWallet === null ) {
+    if ( sourceWallet === null ) {
       sourceWallet = ( await this.queryBalance( { token } ) ).payload();
     }
 

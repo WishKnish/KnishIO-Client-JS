@@ -149,7 +149,7 @@ export default class Query {
    */
   compiledFields ( fields ) {
 
-    if( typeof fields === 'string' ) {
+    if ( typeof fields === 'string' ) {
       return fields;
     }
 

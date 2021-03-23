@@ -94,11 +94,11 @@ export default class ResponseMetaType extends Response {
       response.instances = metaData.instances;
     }
 
-    if (metaData.instanceCount) {
+    if ( metaData.instanceCount ) {
       response.instanceCount = metaData.instanceCount;
     }
 
-    if (metaData.paginatorInfo) {
+    if ( metaData.paginatorInfo ) {
       response.paginatorInfo = metaData.paginatorInfo;
     }
 
