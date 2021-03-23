@@ -229,6 +229,10 @@ export default class Wallet {
       }
     } );
 
+
+    // Reset token units to the sending value
+    this.tokenUnits = recipientTokenUnits;
+
     // Set token units to recipient & remainder
     if ( recipientWallet !== null ) {
       recipientWallet.tokenUnits = recipientTokenUnits;
