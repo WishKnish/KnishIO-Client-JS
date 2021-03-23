@@ -1091,7 +1091,7 @@ export default class KnishIOClient {
    * @param {number|null} amount
    * @param {array|null} units
    * @param {string|null} batchId
-   * @param {Wallet|null} source
+   * @param {Wallet|null} sourceWallet
    * @return {Promise<Response>}
    */
   async transferToken ( {
@@ -1100,10 +1100,12 @@ export default class KnishIOClient {
     amount = null,
     units = [],
     batchId = null,
-    source= null,
+    sourceWallet= null,
   } ) {
 
-    const sourceWallet = source || ( await this.queryBalance( { token } ) ).payload();
+    if( sourceWallet === null ) {
+      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+    }
 
     // Calculate amount & set meta key
     if ( units.length > 0 ) {
@@ -1192,7 +1194,7 @@ export default class KnishIOClient {
    * @param {number|null} amount
    * @param {array} units
    * @param {string|null} batchId
-   * @param {Wallet|null} source
+   * @param {Wallet|null} sourceWallet
    * @returns {Promise<unknown>}
    */
   async burnTokens ( {
@@ -1200,10 +1202,12 @@ export default class KnishIOClient {
     amount = null,
     units = [],
     batchId = null,
-    source= null,
+    sourceWallet= null,
   } ) {
 
-    const fromWallet = source || ( await this.queryBalance( { token } ) ).payload();
+    if( sourceWallet === null ) {
+      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+    }
 
     // Batch ID default initialization
     batchId = batchId || generateBatchId();
@@ -1213,7 +1217,7 @@ export default class KnishIOClient {
       secretOrBundle: this.getSecret(),
       token,
       batchId,
-      characters: fromWallet.characters
+      characters: sourceWallet.characters
     } );
 
     // Calculate amount & set meta key
@@ -1228,7 +1232,7 @@ export default class KnishIOClient {
       amount = units.length;
 
       // --- Token units splitting
-      fromWallet.splitUnits(
+      sourceWallet.splitUnits(
         units,
         remainderWallet,
       );
@@ -1239,7 +1243,7 @@ export default class KnishIOClient {
     // Burn tokens
     let molecule = await this.createMolecule( {
       secret: null,
-      sourceWallet: fromWallet,
+      sourceWallet,
       remainderWallet
     } );
     molecule.burnToken( {
