@@ -104,7 +104,7 @@ export default class Meta {
    * Condenses metadata array into object-based key: value notation
    *
    * @param {array|object} meta
-   * @return {array|object}
+   * @return {object}
    */
   static aggregateMeta ( meta ) {
     const aggregate = {};
