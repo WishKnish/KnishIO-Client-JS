@@ -1153,9 +1153,12 @@ export default class KnishIOClient {
     this.remainderWallet = Wallet.create( {
       secretOrBundle: this.getSecret(),
       token,
-      batchId: generateBatchId(),
       characters: sourceWallet.characters,
     } );
+    this.remainderWallet.initBatchId({
+      sourceWallet,
+      amount,
+    } )
 
     // --- Token units splitting
     sourceWallet.splitUnits(
