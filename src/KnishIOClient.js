@@ -1153,6 +1153,7 @@ export default class KnishIOClient {
     this.remainderWallet = Wallet.create( {
       secretOrBundle: this.getSecret(),
       token,
+      batchId: generateBatchId(),
       characters: sourceWallet.characters,
     } );
 
