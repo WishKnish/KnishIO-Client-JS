@@ -81,6 +81,11 @@ export default class QueryBatch extends Query {
         'bundleHash': null,
         'amount': null
       },
+      'toWallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null
+      },
       'sourceTokenUnits': {
         'id': null,
         'name': null,
