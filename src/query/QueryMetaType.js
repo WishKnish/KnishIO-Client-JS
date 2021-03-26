@@ -107,8 +107,8 @@ export default class QueryMetaType extends Query {
    * @param {string|array|null} key
    * @param {string|array|null} value
    * @param {boolean|null} latest
+   * @param {boolean|null} latestMetas
    * @param {object|null} filter
-   * @param latestMetas
    * @param {object|null} queryArgs
    * @param {string|null} count
    * @param {string|null} countBy
@@ -120,8 +120,8 @@ export default class QueryMetaType extends Query {
     key = null,
     value = null,
     latest = null,
-    filter = null,
     latestMetas = true,
+    filter = null,
     queryArgs = null,
     count = null,
     countBy = null,
