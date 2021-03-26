@@ -70,6 +70,11 @@ export default class QueryBatch extends Query {
         'address': null,
         'bundleHash': null,
         'amount': null,
+        'tokenSlug': null,
+        'token': {
+          name: null,
+          amount: null,
+        },
         'tokenUnits': {
           'id': null,
           'name': null,
