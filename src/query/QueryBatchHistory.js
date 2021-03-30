@@ -60,8 +60,8 @@ export default class QueryBatch extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $batchId: String ) { Batch( batchId: $batchId ) @fields }`;
-    this.$__batch_fields = {
+    this.$__query = `query( $batchId: String ) { BatchHistory( batchId: $batchId ) @fields }`;
+    this.$__fields = {
       'batchId': null,
       'type': null,
       'status': null,
@@ -106,8 +106,6 @@ export default class QueryBatch extends Query {
         'value': null,
       },
     };
-    this.$__fields = $__batch_fields;
-    this.$__fields[ 'children' ] = $__batch_fields;
   }
 
   /**
@@ -121,7 +119,7 @@ export default class QueryBatch extends Query {
       query: this,
       json,
     } );
-    responseObject.dataKey = 'data.Batch';
+    responseObject.dataKey = 'data.BatchHistory';
     return responseObject;
   }
 
