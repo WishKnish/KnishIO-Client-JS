@@ -635,7 +635,7 @@ export default class KnishIOClient {
       console.info(`KnishIOClient::queryBatch() - Querying cascade meta instance data for batchId: ${batchId}...`);
     }
 
-    const query = this.createQuery( queryBatch );
+    const query = this.createQuery( QueryBatch );
 
     return await query.execute( {
       variables: { batchId: batchId, }

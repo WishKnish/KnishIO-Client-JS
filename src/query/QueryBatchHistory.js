@@ -46,12 +46,13 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from "./Query";
+import QueryBatch from "./QueryBatch";
 import Response from "../response/Response";
 
 /**
  * Query for retrieving Meta Asset information
  */
-export default class QueryBatch extends Query {
+export default class QueryBatchHistory extends Query {
 
   /**
    * Class constructor
@@ -61,51 +62,7 @@ export default class QueryBatch extends Query {
   constructor ( httpClient ) {
     super( httpClient );
     this.$__query = `query( $batchId: String ) { BatchHistory( batchId: $batchId ) @fields }`;
-    this.$__fields = {
-      'batchId': null,
-      'type': null,
-      'status': null,
-      'createdAt': null,
-      'wallet': {
-        'address': null,
-        'bundleHash': null,
-        'amount': null,
-        'tokenSlug': null,
-        'token': {
-          name: null,
-          amount: null,
-        },
-        'tokenUnits': {
-          'id': null,
-          'name': null,
-          'metas': null,
-        },
-      },
-      'fromWallet': {
-        'address': null,
-        'bundleHash': null,
-        'amount': null
-      },
-      'toWallet': {
-        'address': null,
-        'bundleHash': null,
-        'amount': null
-      },
-      'sourceTokenUnits': {
-        'id': null,
-        'name': null,
-        'metas': null,
-      },
-      'transferTokenUnits': {
-        'id': null,
-        'name': null,
-        'metas': null,
-      },
-      'metas': {
-        'key': null,
-        'value': null,
-      },
-    };
+    this.$__fields = QueryBatch.getFields();
   }
 
   /**
