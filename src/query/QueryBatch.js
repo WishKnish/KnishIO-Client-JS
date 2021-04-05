@@ -94,6 +94,10 @@ export const BATCH_FIELDS = {
     'key': null,
     'value': null,
   },
+  'throughMetas': {
+    'key': null,
+    'value': null,
+  },
 };
 
 /**
