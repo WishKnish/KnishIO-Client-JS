@@ -631,7 +631,7 @@ export default class KnishIOClient {
   } ) {
 
     if ( this.$__logging ) {
-      console.info(`KnishIOClient::queryBatch() - Querying cascade meta instance data for batchId: ${batchId}...`);
+      console.info( `KnishIOClient::queryBatch() - Querying cascade meta instance data for batchId: ${ batchId }...` );
     }
 
     const query = this.createQuery( QueryBatch );
@@ -653,7 +653,7 @@ export default class KnishIOClient {
   } ) {
 
     if ( this.$__logging ) {
-      console.info(`KnishIOClient::queryBatchHistory() - Querying cascade meta instance data for batchId: ${batchId}...`);
+      console.info( `KnishIOClient::queryBatchHistory() - Querying cascade meta instance data for batchId: ${ batchId }...` );
     }
 
     const query = this.createQuery( QueryBatchHistory );
@@ -866,7 +866,7 @@ export default class KnishIOClient {
     token = 'KNISH',
     bundle = null,
   } ) {
-    console.log('queryShadowWallets', token);
+    console.log( 'queryShadowWallets', token );
     const bundleHash = bundle || this.getBundle();
 
     if ( this.$__logging ) {

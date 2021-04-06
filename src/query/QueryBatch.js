@@ -57,7 +57,7 @@ export default class QueryBatch extends Query {
    * Get cloned fields
    * @returns {any}
    */
-  static getFields() {
+  static getFields () {
     return {
       'batchId': null,
       'type': null,

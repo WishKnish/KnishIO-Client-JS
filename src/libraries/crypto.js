@@ -99,7 +99,10 @@ export function generateBundleHash ( secret ) {
  *
  * @returns {string}
  */
-export function generateBatchId ( { molecularHash = null, index = null } ) {
+export function generateBatchId ( {
+  molecularHash = null,
+  index = null
+} ) {
 
   if ( ![ molecularHash, index ].includes( null ) ) {
     return generateBundleHash( String( molecularHash ) + String( index ) );

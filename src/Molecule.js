@@ -54,7 +54,7 @@ import {
   hexToBase64,
 } from './libraries/strings';
 import CheckMolecule from './libraries/check';
-import {generateBatchId, generateBundleHash} from "./libraries/crypto";
+import { generateBundleHash } from "./libraries/crypto";
 import AtomsMissingException from "./exception/AtomsMissingException";
 import BalanceInsufficientException from "./exception/BalanceInsufficientException";
 import MetaMissingException from "./exception/MetaMissingException";
@@ -757,8 +757,6 @@ export default class Molecule extends MoleculeStructure {
     ) {
       throw new AtomsMissingException();
     }
-
-    this.atoms.forEach( atom => atom.batchId = null );
 
     // Derive the user's bundle
     if ( !anonymous ) {
