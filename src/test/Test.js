@@ -6,23 +6,6 @@ import {
 } from "../libraries/crypto";
 import ResponseMolecule from "../response/ResponseProposeMolecule";
 
-// Knish.IO-specific constants
-const KNISHIO_SETTINGS = {
-  salt: process.env.KNISHIO_APP_SALT,
-  appSlug: process.env.KNISHIO_APP_SLUG,
-  appToken: process.env.KNISHIO_APP_TOKEN,
-  pubKeyField: process.env.KNISHIO_APP_PUBKEY_FIELD,
-  messageType: process.env.KNISHIO_APP_MESSAGE_TYPE,
-  masterToken: process.env.KNISHIO_APP_MASTER_TOKEN,
-  encryptionToken: process.env.KNISHIO_APP_ENCRYPTION_TOKEN,
-  encryptionPosition: process.env.KNISHIO_APP_ENCRYPTION_POSITION,
-  serverUri: `${ [ true, 'true', ].includes( process.env.KNISHIO_SERVER_HTTPS ) ? 'https' : 'http' }://${ process.env.KNISHIO_SERVER_HOST }:${ process.env.KNISHIO_SERVER_PORT }/${ process.env.KNISHIO_SERVER_PATH }`,
-  socketUri: `${ [ true, 'true', ].includes( process.env.KNISHIO_SERVER_HTTPS ) ? 'https' : 'http' }://${ process.env.KNISHIO_SERVER_HOST }:${ process.env.KNISHIO_SERVER_SOCKET_PORT }`,
-
-  types: {
-    bundle: 'walletBundle',
-  },
-};
 
 export default class Test {
 
@@ -30,10 +13,10 @@ export default class Test {
    * Constructor
    * @param graphqlUrl
    */
-  constructor ( graphqlUrl = null ) {
+  constructor ( graphqlUrl ) {
     this.secrets = [ generateSecret(), generateSecret() ];
     this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', ];
-    this.graphqlUrl = graphqlUrl || KNISHIO_SETTINGS.serverUri;
+    this.graphqlUrl = graphqlUrl;
     console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` );
 
     this.clients = {};

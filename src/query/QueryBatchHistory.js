@@ -46,70 +46,13 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from "./Query";
+import QueryBatch from "./QueryBatch";
 import Response from "../response/Response";
-const cloneDeep = require( 'lodash.clonedeep' );
-
-
-export const BATCH_FIELDS = {
-  'batchId': null,
-  'type': null,
-  'status': null,
-  'createdAt': null,
-  'wallet': {
-    'address': null,
-    'bundleHash': null,
-    'amount': null,
-    'tokenSlug': null,
-    'token': {
-      name: null,
-      amount: null,
-    },
-    'tokenUnits': {
-      'id': null,
-      'name': null,
-      'metas': null,
-    },
-  },
-  'fromWallet': {
-    'address': null,
-    'bundleHash': null,
-    'amount': null
-  },
-  'toWallet': {
-    'address': null,
-    'bundleHash': null,
-    'amount': null
-  },
-  'sourceTokenUnits': {
-    'id': null,
-    'name': null,
-    'metas': null,
-  },
-  'transferTokenUnits': {
-    'id': null,
-    'name': null,
-    'metas': null,
-  },
-  'metas': {
-    'key': null,
-    'value': null,
-  },
-};
 
 /**
  * Query for retrieving Meta Asset information
  */
-export default class QueryBatch extends Query {
-
-
-  /**
-   * Get cloned fields
-   * @returns {any}
-   */
-  static getFields() {
-    return cloneDeep( BATCH_FIELDS );
-  }
-
+export default class QueryBatchHistory extends Query {
 
   /**
    * Class constructor
@@ -118,11 +61,8 @@ export default class QueryBatch extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $batchId: String ) { Batch( batchId: $batchId ) @fields }`;
-
+    this.$__query = `query( $batchId: String ) { BatchHistory( batchId: $batchId ) @fields }`;
     this.$__fields = QueryBatch.getFields();
-    this.$__fields[ 'children' ] = QueryBatch.getFields();
-    console.log(this.$__fields);
   }
 
   /**
@@ -136,7 +76,7 @@ export default class QueryBatch extends Query {
       query: this,
       json,
     } );
-    responseObject.dataKey = 'data.Batch';
+    responseObject.dataKey = 'data.BatchHistory';
     return responseObject;
   }
 
