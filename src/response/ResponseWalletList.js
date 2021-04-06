@@ -105,7 +105,9 @@ export default class ResponseWalletList extends Response {
 
     if ( data.token ) {
       wallet.tokenName = data.token.name;
-      wallet.tokenSupply = data.token.amount;
+      wallet.tokenAmount = data.token.amount;
+      wallet.tokenSupply = data.token.supply;
+      wallet.tokenFungibility = data.token.fungibility;
     }
 
     wallet.tokenUnits = data.tokenUnits;

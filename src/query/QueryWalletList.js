@@ -66,7 +66,9 @@ export default class QueryWalletList extends Query {
       'bundleHash': null,
       'token': {
         name: null,
-        amount: null
+        amount: null,
+        fungibility: null,
+        supply: null
       },
       'molecules': {
         molecularHash: null,
