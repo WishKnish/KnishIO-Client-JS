@@ -706,6 +706,8 @@ export default class KnishIOClient {
     meta = null,
     units = [],
   } ) {
+
+    // Transforming meta into object format
     meta = Meta.aggregateMeta( meta );
 
     // Stackable tokens need a new batch for every transfer
@@ -865,7 +867,7 @@ export default class KnishIOClient {
     bundle = null,
   } ) {
     console.log('queryShadowWallets', token);
-    bundle = bundle || this.getBundle();
+    const bundleHash = bundle || this.getBundle();
 
     if ( this.$__logging ) {
       console.info( `KnishIOClient::queryShadowWallets() - Querying ${ token } shadow wallets for ${ bundle }...` );
@@ -877,8 +879,8 @@ export default class KnishIOClient {
     const shadowWalletQuery = this.createQuery( QueryWalletList );
     return shadowWalletQuery.execute( {
       variables: {
-        bundleHash: bundle,
-        token: token,
+        bundleHash,
+        token,
       }
     } )
       .then( ( /** ResponseWalletList */ response ) => {
@@ -911,12 +913,14 @@ export default class KnishIOClient {
       console.info( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundle ? ` for ${ bundle }` : '' }...` );
     }
 
+    const bundleHash = bundle || this.getBundle();
+
     /**
      * @type {QueryWalletBundle}
      */
     const query = this.createQuery( QueryWalletBundle );
     const variables = QueryWalletBundle.createVariables( {
-      bundleHash: bundle || this.getBundle(),
+      bundleHash,
       key,
       value,
       latest,
@@ -1081,8 +1085,6 @@ export default class KnishIOClient {
 
     // --- Get & check a shadow wallet list
     const shadowWallets = await this.queryShadowWallets( { token } );
-    console.log(token);
-    console.log(shadowWallets);
     if ( !shadowWallets || !Array.isArray( shadowWallets ) ) {
       throw new WalletShadowException();
     }

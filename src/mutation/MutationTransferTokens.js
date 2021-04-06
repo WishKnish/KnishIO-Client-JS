@@ -70,7 +70,6 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check( this.$__molecule.sourceWallet );
-    console.log(JSON.stringify(this.$__molecule.toJSON()));
   }
 
   /**

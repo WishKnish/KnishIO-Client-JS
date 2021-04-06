@@ -20,7 +20,6 @@ import {
   chunkSubstr
 } from "./strings";
 import { shake256 } from "js-sha3";
-import {generateBatchId} from "./crypto";
 
 /**
  *

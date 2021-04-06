@@ -250,7 +250,7 @@ export default class Molecule extends MoleculeStructure {
           token: userRemainderWallet.token,
           metaType: 'walletBundle',
           metaId: userRemainderWallet.bundle,
-          meta: this.finalMetas({}, userRemainderWallet ),
+          meta: this.finalMetas( {}, userRemainderWallet ),
           index: this.generateIndex(),
         }
       )
@@ -581,6 +581,11 @@ export default class Molecule extends MoleculeStructure {
 
     this.molecularHash = null;
 
+    const meta = {
+      code: code,
+      hash: generateBundleHash( contact.trim() ),
+    };
+
     this.atoms.push(
       new Atom( {
           position: this.sourceWallet.position,
@@ -589,10 +594,7 @@ export default class Molecule extends MoleculeStructure {
           token: this.sourceWallet.token,
           metaType: 'identifier',
           metaId: type,
-          meta: this.finalMetas({
-            code: code,
-            hash: generateBundleHash( contact.trim() ),
-          }, this.sourceWallet ),
+          meta: this.finalMetas( meta, this.sourceWallet ),
           index: this.generateIndex(),
         }
       )
