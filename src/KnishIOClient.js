@@ -49,7 +49,6 @@ import Dot from "./libraries/Dot";
 import Decimal from "./libraries/Decimal";
 import {
   generateBundleHash,
-  generateBatchId,
   generateSecret
 } from "./libraries/crypto";
 import HttpClient from '../src/httpClient/HttpClient';
@@ -677,21 +676,17 @@ export default class KnishIOClient {
     token,
     amount = null,
     meta = null,
-    batchId = null,
     units = [],
   } ) {
+    meta = Meta.aggregateMeta( meta );
 
     // Stackable tokens need a new batch for every transfer
     if ( Dot.get( meta || {}, 'fungibility' ) === 'stackable' ) {
 
       // No batch ID specified? Create a random one
-      if ( !batchId ) {
-        batchId = generateBatchId();
-      }
 
       // Adding unit IDs to the token
       if ( units.length > 0 ) {
-        meta = Meta.aggregateMeta( meta );
 
         // Stackable tokens with Unit IDs must not use decimals
         if ( meta.decimals && meta.decimals > 0 ) {
@@ -714,7 +709,6 @@ export default class KnishIOClient {
     const recipientWallet = new Wallet( {
       secret: this.getSecret(),
       token,
-      batchId: batchId,
     } );
 
     /**
@@ -834,7 +828,7 @@ export default class KnishIOClient {
   /**
    * Retrieves a list of your shadow wallets (balance, but no keys)
    *
-   * @param {string} tokenSlug
+   * @param {string} token
    * @param {string|null} bundle
    * @return {Promise<[]>}
    */
@@ -842,7 +836,7 @@ export default class KnishIOClient {
     token = 'KNISH',
     bundle = null,
   } ) {
-
+    console.log('queryShadowWallets', token);
     bundle = bundle || this.getBundle();
 
     if ( this.$__logging ) {
@@ -937,7 +931,6 @@ export default class KnishIOClient {
    * @param {number|null} amount
    * @param {array|null} units
    * @param {array|object} meta
-   * @param {string|null} batchId
    * @return {Promise<ResponseRequestTokens>}
    */
   async requestTokens ( {
@@ -946,7 +939,6 @@ export default class KnishIOClient {
     amount = null,
     units = [],
     meta = null,
-    batchId = null
   } ) {
 
     let metaType,
@@ -1013,7 +1005,6 @@ export default class KnishIOClient {
       metaType,
       metaId,
       meta,
-      batchId
     } );
 
     return await query.execute( {} );
@@ -1061,7 +1052,9 @@ export default class KnishIOClient {
   } ) {
 
     // --- Get & check a shadow wallet list
-    const shadowWallets = await this.queryShadowWallets( token );
+    const shadowWallets = await this.queryShadowWallets( { token } );
+    console.log(token);
+    console.log(shadowWallets);
     if ( !shadowWallets || !Array.isArray( shadowWallets ) ) {
       throw new WalletShadowException();
     }
@@ -1099,7 +1092,6 @@ export default class KnishIOClient {
     token,
     amount = null,
     units = [],
-    batchId = null,
     sourceWallet = null,
   } ) {
 
@@ -1139,26 +1131,11 @@ export default class KnishIOClient {
       } );
     }
 
-    // Compute the batch ID for the recipient
-    // (typically used by stackable tokens)
-    if ( batchId !== null ) {
-      recipientWallet.batchId = batchId;
-    } else {
-      recipientWallet.initBatchId( {
-        sourceWallet,
-        amount,
-      } );
-    }
-
     this.remainderWallet = Wallet.create( {
       secretOrBundle: this.getSecret(),
       token,
       characters: sourceWallet.characters,
     } );
-    this.remainderWallet.initBatchId({
-      sourceWallet,
-      amount,
-    } )
 
     // --- Token units splitting
     sourceWallet.splitUnits(
@@ -1185,8 +1162,7 @@ export default class KnishIOClient {
     query.fillMolecule( {
       recipientWallet,
       amount,
-    } )
-
+    } );
 
     return await query.execute( {} );
   }
@@ -1205,7 +1181,6 @@ export default class KnishIOClient {
     token,
     amount = null,
     units = [],
-    batchId = null,
     sourceWallet = null,
   } ) {
 
@@ -1213,14 +1188,10 @@ export default class KnishIOClient {
       sourceWallet = ( await this.queryBalance( { token } ) ).payload();
     }
 
-    // Batch ID default initialization
-    batchId = batchId || generateBatchId();
-
     // Remainder wallet
     let remainderWallet = Wallet.create( {
       secretOrBundle: this.getSecret(),
       token,
-      batchId,
       characters: sourceWallet.characters
     } );
 

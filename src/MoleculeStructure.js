@@ -111,11 +111,10 @@ export default class MoleculeStructure {
   }
 
   /**
+   * Verifies the validity of a Molecule
    *
-   * Verifies a specified molecule
-   *
-   * @param {Molecule|MoleculeStructure} molecule
-   * @param {Wallet|null} sourceWallet
+   * @param {Molecule} molecule
+   * @param {Wallet} sourceWallet
    * @return {boolean}
    */
   static verify ( {
@@ -126,12 +125,14 @@ export default class MoleculeStructure {
     return CheckMolecule.molecularHash( molecule )
       && CheckMolecule.ots( molecule )
       && CheckMolecule.index( molecule )
+      && CheckMolecule.batchId( molecule )
       && CheckMolecule.continuId( molecule )
       && CheckMolecule.isotopeM( molecule )
       && CheckMolecule.isotopeT( molecule )
       && CheckMolecule.isotopeC( molecule )
       && CheckMolecule.isotopeU( molecule )
       && CheckMolecule.isotopeI( molecule )
+      && CheckMolecule.isotopeR( molecule )
       && CheckMolecule.isotopeV( molecule, sourceWallet );
   }
 

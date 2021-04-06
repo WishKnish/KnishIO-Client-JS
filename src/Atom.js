@@ -150,12 +150,12 @@ export default class Atom {
         if ( atom.hasOwnProperty( property ) ) {
 
           // Old atoms support (without batch_id field)
-          if ( [ 'batchId', 'pubkey', 'characters', ].includes( property ) && atom[ property ] === null ) {
+          if ( [ 'pubkey', 'characters', ].includes( property ) && atom[ property ] === null ) {
             continue;
           }
 
           // Not hashing OTS fragment or index
-          if ( [ 'otsFragment', 'index', ].includes( property ) ) {
+          if ( [ 'batchId', 'otsFragment', 'index', ].includes( property ) ) {
             continue;
           }
 

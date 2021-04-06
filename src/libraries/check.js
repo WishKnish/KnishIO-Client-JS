@@ -12,6 +12,7 @@ import TransferToSelfException from "./../exception/TransferToSelfException";
 import TransferUnbalancedException from "./../exception/TransferUnbalancedException";
 import MetaMissingException from "./../exception/MetaMissingException";
 import WrongTokenTypeException from "./../exception/WrongTokenTypeException";
+import BatchIdException from "./../exception/BatchIdException";
 import Atom from "./../Atom";
 import Meta from "./../Meta";
 import {
@@ -19,6 +20,7 @@ import {
   chunkSubstr
 } from "./strings";
 import { shake256 } from "js-sha3";
+import {generateBatchId} from "./crypto";
 
 /**
  *
@@ -41,6 +43,22 @@ export default class CheckMolecule {
     }
 
     return true;
+  }
+
+  /**
+   * @param {Molecule} molecule
+   *
+   * @return {boolean}
+   */
+  static batchId ( molecule ) {
+
+    for ( const atom of molecule.atoms ) {
+      if ( atom.batchId !== null ) {
+        throw new BatchIdException();
+      }
+    }
+
+    return true
   }
 
   /**

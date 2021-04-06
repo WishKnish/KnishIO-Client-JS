@@ -61,7 +61,6 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
    * @param {string} metaType
    * @param {string} metaId
    * @param {object} meta
-   * @param {string|null} batchId
    */
   fillMolecule ( {
     token,
@@ -69,7 +68,6 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
     metaType,
     metaId,
     meta = null,
-    batchId = null
   } ) {
 
     this.$__molecule.initTokenRequest( {
@@ -78,7 +76,6 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
       metaType,
       metaId,
       meta: meta || {},
-      batchId,
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
