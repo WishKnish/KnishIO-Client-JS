@@ -62,7 +62,7 @@ export default class Meta {
     modelType,
     modelId,
     meta,
-    snapshotMolecule = null,
+    snapshotMolecule = null
   } ) {
 
     this.modelType = modelType;

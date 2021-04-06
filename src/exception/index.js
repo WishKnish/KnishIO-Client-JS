@@ -59,10 +59,10 @@ import SignatureMalformedException from './SignatureMalformedException';
 import SignatureMismatchException from './SignatureMismatchException';
 import AtomIndexException from './AtomIndexException';
 import MetaMissingException from './MetaMissingException';
-import WrongTokenTypeException from './WrongTokenTypeException'
-import UnauthenticatedException from './UnauthenticatedException'
-import NegativeAmountException from './NegativeAmountException'
-import BatchIdException from './BatchIdException'
+import WrongTokenTypeException from './WrongTokenTypeException';
+import UnauthenticatedException from './UnauthenticatedException';
+import NegativeAmountException from './NegativeAmountException';
+import BatchIdException from './BatchIdException';
 
 export {
   AtomsMissingException,
@@ -82,5 +82,5 @@ export {
   WrongTokenTypeException,
   UnauthenticatedException,
   NegativeAmountException,
-  BatchIdException,
+  BatchIdException
 };

@@ -49,7 +49,7 @@ import {
   Request,
   Headers
 } from 'servie';
-import { fetch, } from 'popsicle';
+import { fetch } from 'popsicle';
 
 const merge = require( 'lodash.merge' );
 
@@ -73,7 +73,7 @@ export default class HttpClient {
     };
     this.$__config = merge( config, {
       method: 'POST',
-      headers: this.$__headers,
+      headers: this.$__headers
     } );
 
     this.setUri( uri );

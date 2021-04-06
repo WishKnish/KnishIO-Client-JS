@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
 import { shake256 } from 'js-sha3';
 import { randomString } from './strings';
-import Soda from "./../libraries/Soda";
+import Soda from './../libraries/Soda';
 
 /**
  * Generates a secret based on an optional seed
@@ -104,7 +104,7 @@ export function generateBatchId ( {
   index = null
 } ) {
 
-  if ( ![ molecularHash, index ].includes( null ) ) {
+  if ( molecularHash !== null && index !== null ) {
     return generateBundleHash( String( molecularHash ) + String( index ) );
   }
 

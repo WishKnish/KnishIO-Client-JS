@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "../response/Response";
+import Response from '../response/Response';
 import { Request } from 'servie';
-import CodeException from "../exception/CodeException";
+import CodeException from '../exception/CodeException';
 
 /**
  * Base class used to construct various GraphQL queries and mutations
@@ -95,7 +95,7 @@ export default class Query {
    */
   createRequest ( {
     variables = null,
-    fields = null,
+    fields = null
   } ) {
     this.$__variables = this.compiledVariables( variables );
 
@@ -123,7 +123,7 @@ export default class Query {
    * @returns {{}}
    */
   compiledVariables ( variables = null ) {
-    return variables || {}
+    return variables || {};
   }
 
   /**
@@ -171,12 +171,12 @@ export default class Query {
    */
   async execute ( {
     variables = null,
-    fields = null,
+    fields = null
   } ) {
 
     this.$__request = this.createRequest( {
       variables,
-      fields,
+      fields
     } );
 
     let response = await this.client.send( this.$__request );
@@ -205,7 +205,7 @@ export default class Query {
   createResponse ( json ) {
     return new Response( {
       query: this,
-      json,
+      json
     } );
   }
 

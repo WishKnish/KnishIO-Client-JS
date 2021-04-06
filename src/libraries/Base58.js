@@ -8,7 +8,7 @@ export default class Base58 {
    * @param {object} options
    */
   constructor ( options = {} ) {
-    this.$options = Object.assign( { "characters": 'GMP', }, options );
+    this.$options = Object.assign( { 'characters': 'GMP' }, options );
     this.$encoder = base( this[ this.$options[ 'characters' ] ] || this[ 'GMP' ] );
   }
 
@@ -37,7 +37,7 @@ export default class Base58 {
    * @constructor
    */
   get GMP () {
-    return "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv";
+    return '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv';
   }
 
   /**
@@ -45,7 +45,7 @@ export default class Base58 {
    * @constructor
    */
   get BITCOIN () {
-    return "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    return '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
   }
 
   /**
@@ -53,7 +53,7 @@ export default class Base58 {
    * @constructor
    */
   get FLICKR () {
-    return "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
+    return '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
   }
 
   /**
@@ -61,7 +61,7 @@ export default class Base58 {
    * @constructor
    */
   get RIPPLE () {
-    return "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
+    return 'rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz';
   }
 
   /**
@@ -69,7 +69,7 @@ export default class Base58 {
    * @constructor
    */
   get IPFS () {
-    return "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    return '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
   }
 
 }

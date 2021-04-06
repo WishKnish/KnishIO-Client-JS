@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "./Query";
-import Response from "../response/Response";
+import Query from './Query';
+import Response from '../response/Response';
 
 /**
  * Query for retrieving Meta Asset information
@@ -70,13 +70,13 @@ export default class QueryBatch extends Query {
         'tokenSlug': null,
         'token': {
           name: null,
-          amount: null,
+          amount: null
         },
         'tokenUnits': {
           'id': null,
           'name': null,
-          'metas': null,
-        },
+          'metas': null
+        }
       },
       'fromWallet': {
         'address': null,
@@ -91,17 +91,17 @@ export default class QueryBatch extends Query {
       'sourceTokenUnits': {
         'id': null,
         'name': null,
-        'metas': null,
+        'metas': null
       },
       'transferTokenUnits': {
         'id': null,
         'name': null,
-        'metas': null,
+        'metas': null
       },
       'metas': {
         'key': null,
-        'value': null,
-      },
+        'value': null
+      }
     };
   }
 
@@ -112,7 +112,7 @@ export default class QueryBatch extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $batchId: String ) { Batch( batchId: $batchId ) @fields }`;
+    this.$__query = 'query( $batchId: String ) { Batch( batchId: $batchId ) @fields }';
 
     this.$__fields = QueryBatch.getFields();
     this.$__fields[ 'children' ] = QueryBatch.getFields();
@@ -127,7 +127,7 @@ export default class QueryBatch extends Query {
   createResponse ( json ) {
     let responseObject = new Response( {
       query: this,
-      json,
+      json
     } );
     responseObject.dataKey = 'data.Batch';
     return responseObject;

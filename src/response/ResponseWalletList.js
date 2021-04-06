@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Wallet from "../Wallet";
+import Response from './Response';
+import Wallet from '../Wallet';
 
 /**
  * Response for Wallet List query
@@ -61,11 +61,11 @@ export default class ResponseWalletList extends Response {
    */
   constructor ( {
     query,
-    json,
+    json
   } ) {
     super( {
       query,
-      json,
+      json
     } );
     this.dataKey = 'data.Wallet';
     this.init();
@@ -80,7 +80,7 @@ export default class ResponseWalletList extends Response {
    */
   static toClientWallet ( {
     data,
-    secret = null,
+    secret = null
   } ) {
     let wallet;
 
@@ -89,7 +89,7 @@ export default class ResponseWalletList extends Response {
         secretOrBundle: data.bundleHash,
         token: data.tokenSlug,
         batchId: data.batchId,
-        characters: data.characters,
+        characters: data.characters
       } );
     } else {
       wallet = new Wallet( {
@@ -97,7 +97,7 @@ export default class ResponseWalletList extends Response {
         token: data.tokenSlug,
         position: data.position,
         batchId: data.batchId,
-        characters: data.characters,
+        characters: data.characters
       } );
       wallet.address = data.address;
       wallet.bundle = data.bundleHash;
@@ -136,7 +136,7 @@ export default class ResponseWalletList extends Response {
     for ( let data of list ) {
       wallets.push( ResponseWalletList.toClientWallet( {
         data,
-        secret,
+        secret
       } ) );
     }
 
