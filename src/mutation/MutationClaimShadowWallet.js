@@ -70,6 +70,7 @@ export default class MutationClaimShadowWallet extends MutationProposeMolecule {
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
+    console.log(JSON.stringify(this.$__molecule.toJSON()));
   }
 
   /**

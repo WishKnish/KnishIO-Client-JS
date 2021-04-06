@@ -54,7 +54,7 @@ import {
   hexToBase64,
 } from './libraries/strings';
 import CheckMolecule from './libraries/check';
-import { generateBundleHash } from "./libraries/crypto";
+import {generateBatchId, generateBundleHash} from "./libraries/crypto";
 import AtomsMissingException from "./exception/AtomsMissingException";
 import BalanceInsufficientException from "./exception/BalanceInsufficientException";
 import MetaMissingException from "./exception/MetaMissingException";
@@ -94,37 +94,11 @@ export default class Molecule extends MoleculeStructure {
       this.remainderWallet = remainderWallet || Wallet.create( {
         secretOrBundle: secret,
         token: sourceWallet.token,
-        batchId: sourceWallet.batchId,
         characters: sourceWallet.characters,
       } );
     }
 
     this.clear();
-  }
-
-  /**
-   * Verifies the validity of a Molecule
-   *
-   * @param {Molecule} molecule
-   * @param {Wallet} sourceWallet
-   * @return {boolean}
-   */
-  static verify ( {
-    molecule,
-    sourceWallet = null,
-  } ) {
-
-    return CheckMolecule.molecularHash( molecule )
-      && CheckMolecule.ots( molecule )
-      && CheckMolecule.index( molecule )
-      && CheckMolecule.continuId( molecule )
-      && CheckMolecule.isotopeM( molecule )
-      && CheckMolecule.isotopeT( molecule )
-      && CheckMolecule.isotopeC( molecule )
-      && CheckMolecule.isotopeU( molecule )
-      && CheckMolecule.isotopeI( molecule )
-      && CheckMolecule.isotopeR( molecule )
-      && CheckMolecule.isotopeV( molecule, sourceWallet );
   }
 
   /**
@@ -228,7 +202,7 @@ export default class Molecule extends MoleculeStructure {
     const aggregateMeta = Meta.aggregateMeta( Meta.normalizeMeta( metas ) );
     aggregateMeta.action = 'add';
 
-    for ( let key of [ 'address', 'position', 'batchId', ] ) {
+    for ( let key of [ 'address', 'position', ] ) {
       if ( typeof aggregateMeta[ key ] === 'undefined' ) {
         throw new MetaMissingException( `Missing ${ key } in meta` );
       }
@@ -243,7 +217,6 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'C',
           token: this.sourceWallet.token,
           amount,
-          batchId: this.sourceWallet.batchId,
           metaType: 'token',
           metaId: token,
           meta: this.finalMetas( aggregateMeta ),
@@ -277,10 +250,7 @@ export default class Molecule extends MoleculeStructure {
           token: userRemainderWallet.token,
           metaType: 'walletBundle',
           metaId: userRemainderWallet.bundle,
-          meta: {
-            pubkey: userRemainderWallet.pubkey,
-            characters: userRemainderWallet.characters,
-          },
+          meta: this.finalMetas({}, userRemainderWallet ),
           index: this.generateIndex(),
         }
       )
@@ -321,7 +291,6 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: -amount,
-          batchId: this.sourceWallet.batchId,
           meta: this.finalMetas( {} ),
           index: this.generateIndex(),
         }
@@ -335,7 +304,6 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: this.sourceWallet.balance - amount,
-          batchId: this.remainderWallet.batchId,
           metaType: walletBundle ? 'walletBundle' : null,
           metaId: walletBundle,
           meta: this.finalMetas( {}, this.remainderWallet ),
@@ -377,7 +345,6 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: -amount,
-          batchId: this.sourceWallet.batchId,
           meta: this.finalMetas( {} ),
           index: this.generateIndex(),
         }
@@ -392,7 +359,6 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: amount,
-          batchId: recipientWallet.batchId,
           metaType: 'walletBundle',
           metaId: recipientWallet.bundle,
           meta: this.finalMetas( {}, recipientWallet ),
@@ -408,7 +374,6 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: this.sourceWallet.balance - amount,
-          batchId: this.remainderWallet.batchId,
           metaType: 'walletBundle',
           metaId: this.sourceWallet.bundle,
           meta: this.finalMetas( {}, this.remainderWallet ),
@@ -438,7 +403,6 @@ export default class Molecule extends MoleculeStructure {
       bundle: newWallet.bundle,
       position: newWallet.position,
       amount: 0,
-      batch_id: newWallet.batchId,
       pubkey: newWallet.pubkey,
       characters: newWallet.characters,
     };
@@ -449,7 +413,6 @@ export default class Molecule extends MoleculeStructure {
           walletAddress: this.sourceWallet.address,
           isotope: 'C',
           token: this.sourceWallet.token,
-          batchId: this.sourceWallet.batchId,
           metaType: 'wallet',
           metaId: newWallet.address,
           meta: this.finalMetas( this.contextMetas( metas ), newWallet ),
@@ -487,10 +450,6 @@ export default class Molecule extends MoleculeStructure {
       }
     }
 
-    // Adding our latest public key
-    meta.pubkey = this.sourceWallet.pubkey;
-    meta.characters = this.sourceWallet.characters;
-
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
     this.atoms.push(
       new Atom( {
@@ -499,10 +458,9 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'C',
           token: this.sourceWallet.token,
           value: amount,
-          batchId: recipientWallet.batchId,
           metaType: 'token',
           metaId: recipientWallet.token,
-          meta: this.finalMetas( this.contextMetas( meta ) ),
+          meta: this.finalMetas( this.contextMetas( meta ), this.sourceWallet ),
           index: this.generateIndex(),
         }
       )
@@ -510,7 +468,6 @@ export default class Molecule extends MoleculeStructure {
 
     // User remainder atom
     this.addUserRemainderAtom( this.remainderWallet );
-
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -543,10 +500,6 @@ export default class Molecule extends MoleculeStructure {
       }
     }
 
-    // Adding our latest public key
-    aggregateMeta.pubkey = this.sourceWallet.pubkey;
-    aggregateMeta.characters = this.sourceWallet.characters;
-
     this.addAtom(
       new Atom( {
           position: this.sourceWallet.position,
@@ -555,7 +508,7 @@ export default class Molecule extends MoleculeStructure {
           token: this.sourceWallet.token,
           metaType,
           metaId,
-          meta: aggregateMeta,
+          meta: this.finalMetas( aggregateMeta, this.sourceWallet ),
           index: this.generateIndex(),
         }
       )
@@ -563,7 +516,6 @@ export default class Molecule extends MoleculeStructure {
 
     // User remainder atom
     this.addUserRemainderAtom( this.remainderWallet );
-
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -588,7 +540,6 @@ export default class Molecule extends MoleculeStructure {
       tokenSlug: token,
       walletAddress: wallet.address,
       walletPosition: wallet.position,
-      batchId: wallet.batchId
     };
 
     // Create an 'C' atom
@@ -608,7 +559,6 @@ export default class Molecule extends MoleculeStructure {
 
     // User remainder atom
     this.addUserRemainderAtom( this.remainderWallet );
-
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -639,12 +589,10 @@ export default class Molecule extends MoleculeStructure {
           token: this.sourceWallet.token,
           metaType: 'identifier',
           metaId: type,
-          meta: {
-            pubkey: this.sourceWallet.pubkey,
-            characters: this.sourceWallet.characters,
+          meta: this.finalMetas({
             code: code,
             hash: generateBundleHash( contact.trim() ),
-          },
+          }, this.sourceWallet ),
           index: this.generateIndex(),
         }
       )
@@ -680,10 +628,9 @@ export default class Molecule extends MoleculeStructure {
           walletAddress: this.sourceWallet.address,
           isotope: 'M',
           token: this.sourceWallet.token,
-          batchId: this.sourceWallet.batchId,
           metaType,
           metaId,
-          meta: this.finalMetas( meta ),
+          meta: this.finalMetas( meta, this.sourceWallet ),
           index: this.generateIndex(),
         }
       )
@@ -691,7 +638,6 @@ export default class Molecule extends MoleculeStructure {
 
     // User remainder atom
     this.addUserRemainderAtom( this.remainderWallet );
-
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -715,7 +661,6 @@ export default class Molecule extends MoleculeStructure {
     metaType,
     metaId,
     meta = {},
-    batchId = null
   } ) {
 
     this.molecularHash = null;
@@ -729,7 +674,6 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'T',
           token: this.sourceWallet.token,
           value: amount,
-          batchId,
           metaType,
           metaId,
           meta: this.finalMetas( meta ),
@@ -740,7 +684,6 @@ export default class Molecule extends MoleculeStructure {
 
     // User remainder atom
     this.addUserRemainderAtom( this.remainderWallet );
-
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -761,7 +704,6 @@ export default class Molecule extends MoleculeStructure {
           walletAddress: this.sourceWallet.address,
           isotope: 'U',
           token: this.sourceWallet.token,
-          batchId: this.sourceWallet.batchId,
           meta: this.finalMetas(),
           index: this.generateIndex(),
         }
@@ -813,6 +755,8 @@ export default class Molecule extends MoleculeStructure {
     ) {
       throw new AtomsMissingException();
     }
+
+    this.atoms.forEach( atom => atom.batchId = null );
 
     // Derive the user's bundle
     if ( !anonymous ) {
@@ -866,19 +810,6 @@ export default class Molecule extends MoleculeStructure {
     }
 
     return lastPosition;
-  }
-
-  /**
-   * Verifies the current Molecule
-   *
-   * @param {Wallet} sourceWallet
-   * @returns {boolean}
-   */
-  check ( sourceWallet = null ) {
-    return Molecule.verify( {
-      molecule: this,
-      sourceWallet,
-    } )
   }
 
   /**

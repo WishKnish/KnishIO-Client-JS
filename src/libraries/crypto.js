@@ -94,9 +94,17 @@ export function generateBundleHash ( secret ) {
 /**
  * Returns a new batch ID for stackable tokens
  *
+ * @param {string|null} molecularHash
+ * @param {number|null} index
+ *
  * @returns {string}
  */
-export function generateBatchId () {
+export function generateBatchId ( { molecularHash = null, index = null } ) {
+
+  if ( ![ molecularHash, index ].includes( null ) ) {
+    return generateBundleHash( String( molecularHash ) + String( index ) );
+  }
+
   return randomString( 64 );
 }
 

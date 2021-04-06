@@ -189,14 +189,16 @@ export default class Wallet {
    * @return string|null
    */
   tokenUnitsJson () {
-    if ( !this.hasTokenUnits() ) {
-      return null;
+
+    if ( this.hasTokenUnits() ) {
+      const result = [];
+      this.tokenUnits.forEach( tokenUnit => {
+        result.push( [ tokenUnit.id, tokenUnit.name ].concat( tokenUnit.metas ) )
+      } );
+      return JSON.stringify( result );
     }
-    let result = [];
-    this.tokenUnits.forEach( tokenUnit => {
-      result.push( [ tokenUnit.id, tokenUnit.name ].concat( tokenUnit.metas ) )
-    } );
-    return JSON.stringify( result );
+
+    return null;
   }
 
 
@@ -254,24 +256,13 @@ export default class Wallet {
    * Sets up a batch ID - either using the sender's, or a new one
    *
    * @param {Wallet} sourceWallet
-   * @param {number} amount
    */
   initBatchId ( {
     sourceWallet,
-    amount,
   } ) {
 
     if ( sourceWallet.batchId ) {
-
-      this.batchId = generateBatchId();
-      /*
-      // Set batchID to recipient wallet
-      this.batchId = ( !this.batchId && Decimal.cmp( sourceWallet.balance, amount ) > 0 ) ?
-        // Has a remainder value (source balance is bigger than a transfer value)
-        generateBatchId() :
-        // Has no remainder? use batch ID from the source wallet
-        sourceWallet.batchId;
-      */
+      this.batchId = generateBatchId( {} );
     }
   }
 
