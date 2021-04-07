@@ -111,7 +111,7 @@ export default class QueryBatch extends Query {
    * @returns {any}
    */
   static getFields() {
-    return cloneDeep( BATCH_FIELDS );
+    return BATCH_FIELDS;
   }
 
 
