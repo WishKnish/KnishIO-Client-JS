@@ -29,8 +29,8 @@ export default class Hex {
     const numberToHex = ( val, uppercase ) => {
 
         const set = uppercase ?
-          [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" ] :
-          [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" ];
+          [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' ] :
+          [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ];
 
         return set[ Math.floor( val / 16 ) ] + set[ val % 16 ];
 
@@ -39,12 +39,12 @@ export default class Hex {
         {
           grouping: 0,
           rowlength: 0,
-          uppercase: false,
+          uppercase: false
         },
         options || {}
       );
 
-    let str = "",
+    let str = '',
       group = 0,
       column = 0;
 
@@ -63,9 +63,9 @@ export default class Hex {
         if ( opts.rowlength > 0 && ++column === opts.rowlength ) {
 
           column = 0;
-          str += "\n";
+          str += '\n';
         } else {
-          str += " ";
+          str += ' ';
         }
       }
     }
@@ -86,10 +86,10 @@ export default class Hex {
    */
   static toUint8Array ( str ) {
 
-    let target = str.toLowerCase().replace( /\s/g, "" );
+    let target = str.toLowerCase().replace( /\s/g, '' );
 
     if ( target.length % 2 === 1 ) {
-      target = "0" + target;
+      target = `0${ target}`;
     }
 
     let buffer = new Uint8Array( Math.floor( target.length / 2 ) ),
@@ -98,10 +98,10 @@ export default class Hex {
     for ( let i = 0; i < target.length; ++i ) {
 
       let c = target[ i ],
-        val = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" ].indexOf( c );
+        val = [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ].indexOf( c );
 
       if ( val === -1 ) {
-        throw Error( "unexpected character" );
+        throw Error( 'unexpected character' );
       }
 
       if ( curr === -1 ) {

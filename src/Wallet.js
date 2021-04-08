@@ -50,7 +50,7 @@ import bigInt from 'big-integer/BigInteger';
 import Base58 from './libraries/Base58';
 import {
   chunkSubstr,
-  isHex,
+  isHex
 } from './libraries/strings';
 import {
   generateEncPrivateKey,
@@ -60,7 +60,7 @@ import {
   generateBundleHash,
   generateWalletPosition,
   generateBatchId,
-  hashShare,
+  hashShare
 } from './libraries/crypto';
 
 /**
@@ -83,7 +83,7 @@ export default class Wallet {
     token = 'USER',
     position = null,
     batchId = null,
-    characters = null,
+    characters = null
   } ) {
 
     this.token = token;
@@ -125,7 +125,7 @@ export default class Wallet {
     secretOrBundle,
     token,
     batchId = null,
-    characters = null,
+    characters = null
   } ) {
 
     let secret = Wallet.isBundleHash( secretOrBundle ) ? null : secretOrBundle;
@@ -138,7 +138,7 @@ export default class Wallet {
       token,
       position,
       batchId,
-      characters,
+      characters
     } );
     wallet.bundle = bundle;
     return wallet;
@@ -171,7 +171,7 @@ export default class Wallet {
       result.push( {
         id: unitData.shift(),
         name: unitData.shift(),
-        metas: unitData,
+        metas: unitData
       } );
     } );
     return result;
@@ -189,14 +189,16 @@ export default class Wallet {
    * @return string|null
    */
   tokenUnitsJson () {
-    if ( !this.hasTokenUnits() ) {
-      return null;
+
+    if ( this.hasTokenUnits() ) {
+      const result = [];
+      this.tokenUnits.forEach( tokenUnit => {
+        result.push( [ tokenUnit.id, tokenUnit.name ].concat( tokenUnit.metas ) );
+      } );
+      return JSON.stringify( result );
     }
-    let result = [];
-    this.tokenUnits.forEach( tokenUnit => {
-      result.push( [ tokenUnit.id, tokenUnit.name ].concat( tokenUnit.metas ) )
-    } );
-    return JSON.stringify( result );
+
+    return null;
   }
 
 
@@ -210,7 +212,7 @@ export default class Wallet {
   splitUnits (
     units,
     remainderWallet,
-    recipientWallet = null,
+    recipientWallet = null
   ) {
 
     // No units supplied, nothing to split
@@ -247,31 +249,20 @@ export default class Wallet {
     return (
       ( typeof this.position === 'undefined' || null === this.position ) &&
       ( typeof this.address === 'undefined' || null === this.address )
-    )
+    );
   }
 
   /**
    * Sets up a batch ID - either using the sender's, or a new one
    *
    * @param {Wallet} sourceWallet
-   * @param {number} amount
    */
   initBatchId ( {
-    sourceWallet,
-    amount,
+    sourceWallet
   } ) {
 
     if ( sourceWallet.batchId ) {
-
-      this.batchId = generateBatchId();
-      /*
-      // Set batchID to recipient wallet
-      this.batchId = ( !this.batchId && Decimal.cmp( sourceWallet.balance, amount ) > 0 ) ?
-        // Has a remainder value (source balance is bigger than a transfer value)
-        generateBatchId() :
-        // Has no remainder? use batch ID from the source wallet
-        sourceWallet.batchId;
-      */
+      this.batchId = generateBatchId( {} );
     }
   }
 
@@ -285,7 +276,7 @@ export default class Wallet {
       this.key = Wallet.generatePrivateKey( {
         secret,
         token: this.token,
-        position: this.position,
+        position: this.position
       } );
       this.address = Wallet.generatePublicKey( this.key );
       this.getMyEncPrivateKey();
@@ -370,7 +361,7 @@ export default class Wallet {
    */
   encryptString ( {
     data,
-    publicKeys,
+    publicKeys
   } ) {
 
     if ( data ) {
@@ -399,7 +390,7 @@ export default class Wallet {
    */
   decryptString ( {
     data,
-    fallbackValue = null,
+    fallbackValue = null
   } ) {
 
     if ( data ) {
@@ -430,7 +421,7 @@ export default class Wallet {
   static generatePrivateKey ( {
     secret,
     token,
-    position,
+    position
   } ) {
 
     // Converting secret to bigInt

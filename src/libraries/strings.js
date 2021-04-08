@@ -2,7 +2,7 @@ import bigInt from 'big-integer';
 import Hex from './Hex';
 import {
   decode as decodeBase64,
-  encode as encodeBase64,
+  encode as encodeBase64
 } from '@stablelib/base64';
 
 if ( !String.prototype.trim ) {

@@ -1,24 +1,25 @@
-import AtomIndexException from "./../exception/AtomIndexException";
-import AtomsMissingException from "./../exception/AtomsMissingException";
-import MolecularHashMismatchException from "./../exception/MolecularHashMismatchException";
-import MolecularHashMissingException from "./../exception/MolecularHashMissingException";
-import SignatureMalformedException from "./../exception/SignatureMalformedException";
-import SignatureMismatchException from "./../exception/SignatureMismatchException";
-import TransferBalanceException from "./../exception/TransferBalanceException";
-import TransferMalformedException from "./../exception/TransferMalformedException";
-import TransferMismatchedException from "./../exception/TransferMismatchedException";
-import TransferRemainderException from "./../exception/TransferRemainderException";
-import TransferToSelfException from "./../exception/TransferToSelfException";
-import TransferUnbalancedException from "./../exception/TransferUnbalancedException";
-import MetaMissingException from "./../exception/MetaMissingException";
-import WrongTokenTypeException from "./../exception/WrongTokenTypeException";
-import Atom from "./../Atom";
-import Meta from "./../Meta";
+import AtomIndexException from './../exception/AtomIndexException';
+import AtomsMissingException from './../exception/AtomsMissingException';
+import MolecularHashMismatchException from './../exception/MolecularHashMismatchException';
+import MolecularHashMissingException from './../exception/MolecularHashMissingException';
+import SignatureMalformedException from './../exception/SignatureMalformedException';
+import SignatureMismatchException from './../exception/SignatureMismatchException';
+import TransferBalanceException from './../exception/TransferBalanceException';
+import TransferMalformedException from './../exception/TransferMalformedException';
+import TransferMismatchedException from './../exception/TransferMismatchedException';
+import TransferRemainderException from './../exception/TransferRemainderException';
+import TransferToSelfException from './../exception/TransferToSelfException';
+import TransferUnbalancedException from './../exception/TransferUnbalancedException';
+import MetaMissingException from './../exception/MetaMissingException';
+import WrongTokenTypeException from './../exception/WrongTokenTypeException';
+import BatchIdException from './../exception/BatchIdException';
+import Atom from './../Atom';
+import Meta from './../Meta';
 import {
   base64ToHex,
   chunkSubstr
-} from "./strings";
-import { shake256 } from "js-sha3";
+} from './strings';
+import { shake256 } from 'js-sha3';
 
 /**
  *
@@ -27,7 +28,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {AtomsMissingException}
    */
@@ -44,8 +45,24 @@ export default class CheckMolecule {
   }
 
   /**
+   * @param {MoleculeStructure} molecule
    *
-   * @param {Molecule} molecule
+   * @return {boolean}
+   */
+  static batchId ( molecule ) {
+
+    for ( const atom of molecule.atoms ) {
+      if ( atom.batchId !== null ) {
+        throw new BatchIdException();
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   *
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -68,7 +85,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -91,7 +108,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException}
    */
@@ -114,7 +131,7 @@ export default class CheckMolecule {
   }
 
   /**
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @return {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -137,7 +154,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @return {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException|AtomIndexException}
    */
@@ -157,7 +174,7 @@ export default class CheckMolecule {
         }
       }
 
-      for ( let key of [ 'token', ] ) {
+      for ( let key of [ 'token' ] ) {
         if ( !meta.hasOwnProperty( key ) || !Boolean( meta[ key ] ) ) {
           throw new MetaMissingException( `No or not defined "${ key }" in meta` );
         }
@@ -193,23 +210,23 @@ export default class CheckMolecule {
         for ( let condition of conditions ) {
           const keys = Object.keys( condition ),
             property = keys.filter( function ( n ) {
-              return [ 'key', 'value', 'comparison', ].indexOf( n ) !== -1;
+              return [ 'key', 'value', 'comparison' ].indexOf( n ) !== -1;
             } ),
             property2 = keys.filter( function ( n ) {
-              return [ 'managedBy', ].indexOf( n ) !== -1;
+              return [ 'managedBy' ].indexOf( n ) !== -1;
             } );
           if ( property.length < 3 && property2.length < 1 ) {
-            throw new MetaMissingException( `Missing field in conditions.` );
+            throw new MetaMissingException( 'Missing field in conditions.' );
           }
         }
       } catch ( err ) {
-        throw new MetaMissingException( `Invalid format for conditions.` );
+        throw new MetaMissingException( 'Invalid format for conditions.' );
       }
     }
   }
 
   /**
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @param {Wallet} sourceWallet
    * @return {boolean}
    * @throws {TransferRemainderException|TransferRemainderException|TypeError|TransferMismatchedException|TransferMalformedException|TransferToSelfException|TransferUnbalancedException|TransferBalanceException}
@@ -326,7 +343,7 @@ export default class CheckMolecule {
   /**
    * Verifies if the hash of all the atoms matches the molecular hash to ensure content has not been messed with
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @return {boolean}
    * @throws {MolecularHashMismatchException}
    */
@@ -335,7 +352,7 @@ export default class CheckMolecule {
     CheckMolecule.missing( molecule );
 
     if ( molecule.molecularHash !== Atom.hashAtoms( {
-      atoms: molecule.atoms,
+      atoms: molecule.atoms
     } ) ) {
       throw new MolecularHashMismatchException();
     }
@@ -349,7 +366,7 @@ export default class CheckMolecule {
    * fragments from its atoms and its molecular hash into a single-use wallet address to be matched
    * against the sender’s address. If it matches, the molecule was correctly signed.
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {SignatureMalformedException|SignatureMismatchException}
    */
@@ -413,7 +430,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @return {boolean}
    * @throws {MolecularHashMissingException|AtomsMissingException|AtomIndexException}
    */
@@ -453,7 +470,7 @@ export default class CheckMolecule {
   static normalizedHash ( hash ) {
 
     // Convert Hm to numeric notation via EnumerateMolecule(Hm)
-    return CheckMolecule.normalize( CheckMolecule.enumerate( hash ) )
+    return CheckMolecule.normalize( CheckMolecule.enumerate( hash ) );
   }
 
   /**
@@ -487,7 +504,7 @@ export default class CheckMolecule {
         'd': 5,
         'e': 6,
         'f': 7,
-        'g': 8,
+        'g': 8
       },
       target = [],
       hashList = hash.toLowerCase().split( '' );
@@ -545,7 +562,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @throws {MolecularHashMissingException|AtomsMissingException}
    */
   static missing ( molecule ) {

@@ -1,10 +1,10 @@
-import KnishIOClient from "../KnishIOClient";
-import Dot from "../libraries/Dot";
+import KnishIOClient from '../KnishIOClient';
+import Dot from '../libraries/Dot';
 import {
   generateBundleHash,
   generateSecret
-} from "../libraries/crypto";
-import ResponseMolecule from "../response/ResponseProposeMolecule";
+} from '../libraries/crypto';
+import ResponseMolecule from '../response/ResponseProposeMolecule';
 
 
 export default class Test {
@@ -15,36 +15,36 @@ export default class Test {
    */
   constructor ( graphqlUrl ) {
     this.secrets = [ generateSecret(), generateSecret() ];
-    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', ];
+    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT' ];
     this.graphqlUrl = graphqlUrl;
     console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` );
 
     this.clients = {};
     this.tokenUnits = [
-      [ 'unit_id_1', 'unit_name_1', 'unit_meta_1', ],
-      [ 'unit_id_2', 'unit_name_2', 'unit_meta_2', ],
-      [ 'unit_id_3', 'unit_name_3', 'unit_meta_3', ],
-      [ 'unit_id_4', 'unit_name_4', 'unit_meta_4', ],
-      [ 'unit_id_5', 'unit_name_5', 'unit_meta_5', ],
-      [ 'unit_id_6', 'unit_name_6', 'unit_meta_6', ],
-      [ 'unit_id_7', 'unit_name_7', 'unit_meta_7', ],
-      [ 'unit_id_8', 'unit_name_8', 'unit_meta_8', ],
-      [ 'unit_id_9', 'unit_name_9', 'unit_meta_9', ],
-      [ 'unit_id_10', 'unit_name_10', 'unit_meta_10', ],
-      [ 'unit_id_11', 'unit_name_11', 'unit_meta_11', ],
+      [ 'unit_id_1', 'unit_name_1', 'unit_meta_1' ],
+      [ 'unit_id_2', 'unit_name_2', 'unit_meta_2' ],
+      [ 'unit_id_3', 'unit_name_3', 'unit_meta_3' ],
+      [ 'unit_id_4', 'unit_name_4', 'unit_meta_4' ],
+      [ 'unit_id_5', 'unit_name_5', 'unit_meta_5' ],
+      [ 'unit_id_6', 'unit_name_6', 'unit_meta_6' ],
+      [ 'unit_id_7', 'unit_name_7', 'unit_meta_7' ],
+      [ 'unit_id_8', 'unit_name_8', 'unit_meta_8' ],
+      [ 'unit_id_9', 'unit_name_9', 'unit_meta_9' ],
+      [ 'unit_id_10', 'unit_name_10', 'unit_meta_10' ],
+      [ 'unit_id_11', 'unit_name_11', 'unit_meta_11' ]
     ];
     this.tokenUnits = [
-      [ 'unit_id_1', ],
-      [ 'unit_id_2', ],
-      [ 'unit_id_3', ],
-      [ 'unit_id_4', ],
-      [ 'unit_id_5', ],
-      [ 'unit_id_6', ],
-      [ 'unit_id_7', ],
-      [ 'unit_id_8', ],
-      [ 'unit_id_9', ],
-      [ 'unit_id_10', ],
-      [ 'unit_id_11', ],
+      [ 'unit_id_1' ],
+      [ 'unit_id_2' ],
+      [ 'unit_id_3' ],
+      [ 'unit_id_4' ],
+      [ 'unit_id_5' ],
+      [ 'unit_id_6' ],
+      [ 'unit_id_7' ],
+      [ 'unit_id_8' ],
+      [ 'unit_id_9' ],
+      [ 'unit_id_10' ],
+      [ 'unit_id_11' ]
     ];
   }
 
@@ -53,8 +53,8 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
-    await this.client( this.secrets[ 0 ] )
-    await this.client( this.secrets[ 1 ] )
+    await this.client( this.secrets[ 0 ] );
+    await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
     await this.testCreateWallet();
@@ -90,8 +90,8 @@ export default class Test {
         fungibility: 'stackable',
         supply: 'limited',
         decimals: 0,
-        icon: 'icon',
-      },
+        icon: 'icon'
+      }
     } );
     this.checkResponse( responses[ 0 ], 'testCreateToken.0' );
 
@@ -104,8 +104,8 @@ export default class Test {
         fungibility: 'stackable',
         supply: 'limited',
         decimals: 0,
-        icon: 'icon',
-      },
+        icon: 'icon'
+      }
     } );
     this.checkResponse( responses[ 1 ], 'testCreateToken.1' );
 
@@ -119,9 +119,9 @@ export default class Test {
       meta: {
         name: this.tokenSlugs[ 2 ],
         supply: 'limited',
-        fungibility: 'stackable',
+        fungibility: 'stackable'
       },
-      batchId: 'batch_0',
+      batchId: 'batch_0'
     } );
     this.checkResponse( responses[ 2 ], 'testCreateToken.2' );
 
@@ -135,9 +135,9 @@ export default class Test {
       meta: {
         name: this.tokenSlugs[ 3 ],
         supply: 'limited',
-        fungibility: 'stackable',
+        fungibility: 'stackable'
       },
-      batchId: 'batch_0',
+      batchId: 'batch_0'
     } );
     this.checkResponse( responses[ 3 ], 'testCreateToken.3' );
   }
@@ -163,8 +163,8 @@ export default class Test {
       metaId: 'metaId',
       meta: {
         key1: 'value1',
-        key2: 'value2',
-      },
+        key2: 'value2'
+      }
     } );
     this.checkResponse( response, 'testCreateMeta' );
   }
@@ -178,7 +178,7 @@ export default class Test {
     let response = await client.createIdentifier( {
       type: 'email',
       contact: 'test@test.com',
-      code: '1234',
+      code: '1234'
     } );
     this.checkResponse( response, 'testCreateIdentifier' );
   }
@@ -192,7 +192,7 @@ export default class Test {
       token: this.tokenSlugs[ 1 ],
       amount: 10,
       to: this.secrets[ 0 ],
-      batchId: 'batch_5',
+      batchId: 'batch_5'
     } );
     this.checkResponse( response, 'testRequestTokens.1' );
 
@@ -200,7 +200,7 @@ export default class Test {
       token: this.tokenSlugs[ 3 ],
       units: [ 'unit_id_10', 'unit_id_11' ],
       to: this.secrets[ 0 ],
-      batchId: 'batch_6',
+      batchId: 'batch_6'
     } );
     this.checkResponse( response, 'testRequestTokens.2' );
   }
@@ -357,14 +357,14 @@ export default class Test {
       // Create a client
       this.clients[ secret ] = new KnishIOClient( {
         uri: this.graphqlUrl,
-        logging: true,
+        logging: true
       } );
 
       // Auth the client
       let response = await this.clients[ secret ]
         .requestAuthToken( {
           secret: secret,
-          cellSlug: cellSlug,
+          cellSlug: cellSlug
         } );
 
       this.checkResponse( response, 'requestAuthToken' );
@@ -382,7 +382,7 @@ export default class Test {
    */
   checkResponse ( response, key ) {
 
-    console.log( ' ############### ' + key + ' ###############' );
+    console.log( ` ############### ${ key } ###############` );
     console.log( response );
 
     // Check molecule response
@@ -390,7 +390,7 @@ export default class Test {
       if ( !response.success() ) {
         this.debug( response );
       }
-      console.assert( response.status() === 'accepted', response )
+      console.assert( response.status() === 'accepted', response );
     }
 
     // Default response

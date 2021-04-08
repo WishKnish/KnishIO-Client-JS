@@ -1,6 +1,6 @@
-import Response from "./Response";
-import Dot from "../libraries/Dot";
-import InvalidResponseException from "../exception/InvalidResponseException";
+import Response from './Response';
+import Dot from '../libraries/Dot';
+import InvalidResponseException from '../exception/InvalidResponseException';
 
 
 export default class ResponseAuthorizationGuest extends Response {
