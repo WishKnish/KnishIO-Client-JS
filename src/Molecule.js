@@ -539,7 +539,8 @@ export default class Molecule extends MoleculeStructure {
     let metas = {
       tokenSlug: token,
       walletAddress: wallet.address,
-      walletPosition: wallet.position
+      walletPosition: wallet.position,
+      batchId: wallet.batchId,
     };
 
     // Create an 'C' atom
