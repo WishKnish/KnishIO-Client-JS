@@ -53,7 +53,7 @@ export default class CheckMolecule {
 
     for ( const atom of molecule.atoms ) {
       if ( atom.batchId !== null ) {
-        throw new BatchIdException();
+        // throw new BatchIdException();
       }
     }
 

@@ -135,7 +135,8 @@ export default class Atom {
    */
   static hashAtoms ( {
     atoms,
-    output = 'base17'
+    output = 'base17',
+    excludeFields = [],
   } ) {
 
     const molecularSponge = shake256.create( 256 ),
@@ -154,8 +155,14 @@ export default class Atom {
             continue;
           }
 
+
+          // Exclude fields
+          excludeFields.push( 'otsFragment' );
+          excludeFields.push( 'index' );
+          
+
           // Not hashing OTS fragment or index
-          if ( [ 'batchId', 'otsFragment', 'index' ].includes( property ) ) {
+          if ( excludeFields.includes( property ) ) {
             continue;
           }
 

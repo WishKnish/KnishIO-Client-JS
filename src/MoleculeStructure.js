@@ -48,6 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import CheckMolecule from './libraries/check';
 import AtomsMissingException from './exception/AtomsMissingException';
 import Atom from './Atom';
+import {generateBatchId} from '@wishknish/knishio-client-js/src/libraries/crypto';
 
 const cloneDeep = require( 'lodash.clonedeep' );
 const merge = require( 'lodash.merge' );
@@ -64,6 +65,25 @@ export default class MoleculeStructure {
    */
   constructor ( cellSlug = null ) {
     this.cellSlugOrigin = this.cellSlug = cellSlug;
+  }
+
+  /**
+   * Get batch ID from molecular hash (without batchID) & index
+   * @param index
+   * @returns {number[]|*}
+   */
+  getBatchId ( index ) {
+
+    let molecularHash = Atom.hashAtoms( {
+      atoms: this.atoms,
+      excludeFields: [ 'batchId' ],
+    } );
+
+    return generateBatchId( {
+      molecularHash,
+      index,
+    } );
+
   }
 
   /**

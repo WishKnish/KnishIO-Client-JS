@@ -54,7 +54,7 @@ import {
   hexToBase64
 } from './libraries/strings';
 import CheckMolecule from './libraries/check';
-import { generateBundleHash } from './libraries/crypto';
+import {generateBatchId, generateBundleHash} from './libraries/crypto';
 import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
 import MetaMissingException from './exception/MetaMissingException';
@@ -113,6 +113,7 @@ export default class Molecule extends MoleculeStructure {
 
     return ( length > -1 ) ? atoms[ length ].index + 1 : 0;
   }
+
 
   /**
    * Returns the Meta Type for ContinuID
@@ -291,6 +292,7 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: -amount,
+          batchId: this.sourceWallet.batchId,
           meta: this.finalMetas( {} ),
           index: this.generateIndex()
         }
@@ -304,6 +306,7 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: this.sourceWallet.balance - amount,
+          batchId: this.sourceWallet.batchId,
           metaType: walletBundle ? 'walletBundle' : null,
           metaId: walletBundle,
           meta: this.finalMetas( {}, this.remainderWallet ),
@@ -345,6 +348,7 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: -amount,
+          batchId: this.sourceWallet.batchId,
           meta: this.finalMetas( {} ),
           index: this.generateIndex()
         }
@@ -374,6 +378,7 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'V',
           token: this.sourceWallet.token,
           value: this.sourceWallet.balance - amount,
+          batchId: this.sourceWallet.batchId,
           metaType: 'walletBundle',
           metaId: this.sourceWallet.bundle,
           meta: this.finalMetas( {}, this.remainderWallet ),
@@ -383,6 +388,9 @@ export default class Molecule extends MoleculeStructure {
     );
 
     this.atoms = Atom.sortAtoms( this.atoms );
+
+    // Set a batch ID
+    this.atoms[ 1 ].batchId = this.getBatchId( 1 );
 
     return this;
   }
@@ -469,6 +477,9 @@ export default class Molecule extends MoleculeStructure {
     // User remainder atom
     this.addUserRemainderAtom( this.remainderWallet );
     this.atoms = Atom.sortAtoms( this.atoms );
+
+    // Set a batch ID
+    this.atoms[ 0 ].batchId = this.getBatchId( 0 );
 
     return this;
   }
