@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import ResponseContinuId from '../response/ResponseContinuId';
+import Query from "./Query";
+import ResponseContinuId from "../response/ResponseContinuId";
 
 /**
  * Queries the node for the next wallet to sign with for ContinuID
@@ -60,7 +60,7 @@ export default class QueryContinuId extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = 'query ($bundle: String!) { ContinuId(bundle: $bundle) @fields }';
+    this.$__query = `query ($bundle: String!) { ContinuId(bundle: $bundle) @fields }`;
     this.$__fields = {
       'address': null,
       'bundleHash': null,
@@ -70,7 +70,7 @@ export default class QueryContinuId extends Query {
       'characters': null,
       'pubkey': null,
       'amount': null,
-      'createdAt': null
+      'createdAt': null,
     };
   }
 
@@ -81,7 +81,7 @@ export default class QueryContinuId extends Query {
   createResponse ( json ) {
     return new ResponseContinuId( {
       query: this,
-      json
+      json,
     } );
   }
 }

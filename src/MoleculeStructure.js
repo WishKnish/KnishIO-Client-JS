@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import CheckMolecule from './libraries/check';
-import AtomsMissingException from './exception/AtomsMissingException';
-import Atom from './Atom';
+import CheckMolecule from "./libraries/check";
+import AtomsMissingException from "./exception/AtomsMissingException";
+import Atom from "./Atom";
 
 const cloneDeep = require( 'lodash.clonedeep' );
 const merge = require( 'lodash.merge' );
@@ -91,7 +91,7 @@ export default class MoleculeStructure {
     let clone = cloneDeep( this );
     for ( let key of [ 'remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin' ] ) {
       if ( clone.hasOwnProperty( key ) ) {
-        delete clone[ key ];
+        delete clone[ key ]
       }
     }
     return clone;
@@ -106,20 +106,21 @@ export default class MoleculeStructure {
   check ( sourceWallet = null ) {
     return MoleculeStructure.verify( {
       molecule: this,
-      sourceWallet
-    } );
+      sourceWallet,
+    } )
   }
 
   /**
-   * Verifies the validity of a Molecule
    *
-   * @param {MoleculeStructure} molecule
-   * @param {Wallet} sourceWallet
+   * Verifies a specified molecule
+   *
+   * @param {Molecule|MoleculeStructure} molecule
+   * @param {Wallet|null} sourceWallet
    * @return {boolean}
    */
   static verify ( {
     molecule,
-    sourceWallet = null
+    sourceWallet = null,
   } ) {
 
     return CheckMolecule.molecularHash( molecule )

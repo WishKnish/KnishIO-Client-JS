@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from './Response';
-import Meta from '../Meta';
+import Response from "./Response";
+import Meta from "../Meta";
 
 /**
  * Response for Wallet Bundle query
@@ -61,14 +61,14 @@ export default class ResponseWalletBundle extends Response {
    */
   constructor ( {
     query,
-    json
+    json,
   } ) {
     super( {
       query,
-      json
+      json,
     } );
     this.dataKey = 'data.WalletBundle';
-    this.init();
+    this.init()
   }
 
   /**
