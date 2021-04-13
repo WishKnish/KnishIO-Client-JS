@@ -745,7 +745,7 @@ export default class KnishIOClient {
     const recipientWallet = new Wallet( {
       secret: this.getSecret(),
       token,
-      batchId: batchId,
+      batchId,
     } );
 
     /**
