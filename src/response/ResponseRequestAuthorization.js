@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
-import ResponseProposeMolecule from './ResponseProposeMolecule';
+import Dot from "../libraries/Dot";
+import InvalidResponseException from "../exception/InvalidResponseException";
+import ResponseProposeMolecule from "./ResponseProposeMolecule";
 
 /**
  * Response for auth token mutation

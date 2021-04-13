@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule';
-import Wallet from '../Wallet';
-import ResponseClaimShadowWallet from '../response/ResponseClaimShadowWallet';
+import MutationProposeMolecule from "./MutationProposeMolecule";
+import Wallet from "../Wallet";
+import ResponseClaimShadowWallet from "../response/ResponseClaimShadowWallet";
 
 /**
  * Query for claiming a Shadow Wallet
@@ -56,17 +56,17 @@ export default class MutationClaimShadowWallet extends MutationProposeMolecule {
 
   fillMolecule ( {
     token,
-    batchId
+    batchId,
   } ) {
     let wallet = Wallet.create( {
       secretOrBundle: this.$__molecule.secret,
       token,
-      batchId
+      batchId,
     } );
 
     this.$__molecule.initShadowWalletClaim( {
       token,
-      wallet
+      wallet,
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
@@ -81,7 +81,7 @@ export default class MutationClaimShadowWallet extends MutationProposeMolecule {
   createResponse ( json ) {
     return new ResponseClaimShadowWallet( {
       query: this,
-      json
+      json,
     } );
   }
 }

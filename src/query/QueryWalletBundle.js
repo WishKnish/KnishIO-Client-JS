@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import ResponseWalletBundle from '../response/ResponseWalletBundle';
+import Query from "./Query";
+import ResponseWalletBundle from "../response/ResponseWalletBundle";
 
 /**
  * Query for retrieving information about Wallet Bundles
@@ -60,7 +60,7 @@ export default class QueryWalletBundle extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = 'query( $bundleHash: String, $bundleHashes: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $keys_values: [ MetaInput ], $latest: Boolean, $limit: Int, $order: String ) { WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, order: $order ) @fields }';
+    this.$__query = `query( $bundleHash: String, $bundleHashes: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $keys_values: [ MetaInput ], $latest: Boolean, $limit: Int, $order: String ) { WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, order: $order ) @fields }`;
     this.$__fields = {
       'bundleHash': null,
       'metas': {
@@ -68,11 +68,11 @@ export default class QueryWalletBundle extends Query {
         'position': null,
         'key': null,
         'value': null,
-        'createdAt': null
+        'createdAt': null,
       },
       //	'molecules',
       //	'wallets',
-      'createdAt': null
+      'createdAt': null,
     };
   }
 
@@ -85,7 +85,7 @@ export default class QueryWalletBundle extends Query {
   createResponse ( json ) {
     return new ResponseWalletBundle( {
       query: this,
-      json
+      json,
     } );
   }
 
@@ -102,23 +102,23 @@ export default class QueryWalletBundle extends Query {
     bundleHash = null,
     key = null,
     value = null,
-    latest = true
+    latest = true,
   } ) {
 
     const variables = {
-      latest: latest
+      latest: latest,
     };
 
     if ( bundleHash ) {
-      variables[ typeof bundleHash === 'string' ? 'bundleHash' : 'bundleHashes' ] = bundleHash;
+      variables[ typeof bundleHash === "string" ? 'bundleHash' : 'bundleHashes' ] = bundleHash;
     }
 
     if ( key ) {
-      variables[ typeof key === 'string' ? 'key' : 'keys' ] = key;
+      variables[ typeof key === "string" ? 'key' : 'keys' ] = key;
     }
 
     if ( value ) {
-      variables[ typeof value === 'string' ? 'value' : 'values' ] = value;
+      variables[ typeof value === "string" ? 'value' : 'values' ] = value;
     }
 
     return variables;

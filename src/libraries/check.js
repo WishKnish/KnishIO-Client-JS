@@ -51,13 +51,28 @@ export default class CheckMolecule {
    */
   static batchId ( molecule ) {
 
-    for ( const atom of molecule.atoms ) {
-      if ( atom.batchId !== null ) {
-        // throw new BatchIdException();
+    if ( molecule.atoms.length > 0 ) {
+      const subscription = molecule.atoms[0];
+
+      if ( subscription.isotope === 'V' && subscription.batchId !== null ) {
+        const atoms = CheckMolecule.isotopeFilter( 'V', molecule.atoms );
+        const remainder = atoms[ atoms.length - 1 ];
+
+        if ( subscription.batchId !== remainder.batchId ) {
+          throw new BatchIdException();
+        }
+
+        for ( const atom of atoms ) {
+          if ( atom.batchId === null ) {
+            throw new BatchIdException();
+          }
+        }
       }
+
+      return true;
     }
 
-    return true;
+    throw new BatchIdException();
   }
 
   /**
