@@ -82,6 +82,8 @@ import WalletShadowException from './exception/WalletShadowException';
 import Meta from './Meta';
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException';
 import StackableUnitAmountException from './exception/StackableUnitAmountException';
+import SocketClient from "./httpClient/SocketClient";
+import CreateMoleculeSubscribe from "./subscribe/CreateMoleculeSubscribe";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -116,12 +118,14 @@ export default class KnishIOClient {
    * Initializes a new Knish.IO client session
    *
    * @param {string} uri
+   * @param {string} socketUri
    * @param {HttpClient} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    */
   initialize ( {
     uri,
+    socketUri,
     client = null,
     serverSdkVersion = 3,
     logging = false,
@@ -135,6 +139,10 @@ export default class KnishIOClient {
 
     this.reset();
 
+    this.$__subscribe = new SocketClient({
+      socketUri: socketUri,
+      serverUri: uri
+    });
     this.$__client = client || new HttpClient( uri );
     this.$__serverSdkVersion = serverSdkVersion;
   }
@@ -147,6 +155,10 @@ export default class KnishIOClient {
       console.info( 'KnishIOClient::deinitialize() - Clearing the Knish.IO client session...' );
     }
     this.reset();
+  }
+
+  subscribe () {
+    return this.$__subscribe;
   }
 
 
@@ -335,6 +347,14 @@ export default class KnishIOClient {
   }
 
   /**
+   * @param subscribeClass
+   * @return {*}
+   */
+  createSubscribe ( subscribeClass ) {
+    return new subscribeClass( this.subscribe() )
+  }
+
+  /**
    * Uses the supplied Mutation class to build a new tailored Molecule
    *
    * @param mutationClass
@@ -440,7 +460,8 @@ export default class KnishIOClient {
         } );
 
         query.fillMolecule();
-
+        //console.log(JSON.stringify(query.$__molecule.toJSON()));
+        //throw new Error();
         /**
          * @type {ResponseRequestAuthorization}
          */
@@ -450,7 +471,8 @@ export default class KnishIOClient {
       if ( response.success() ) {
 
         const token = response.token();
-        this.client().setAuthToken( token )
+        this.client().setAuthToken( token );
+        this.subscribe().setAuthToken( token );
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
@@ -508,6 +530,20 @@ export default class KnishIOClient {
         bundleHash: bundle || this.getBundle(),
         token,
       }
+    } );
+  }
+
+  createMoleculeSubscribe ( {
+    bundle,
+    closure
+  } ) {
+    const subscribe = this.createSubscribe( CreateMoleculeSubscribe );
+
+    subscribe.execute( {
+      variables: {
+        bundle: bundle || this.getBundle()
+      },
+      closure
     } );
   }
 
