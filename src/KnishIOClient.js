@@ -96,6 +96,7 @@ export default class KnishIOClient {
    * Class constructor
    *
    * @param {string} uri
+   * @param {string} socketUri
    * @param {HttpClient} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
@@ -103,11 +104,13 @@ export default class KnishIOClient {
   constructor ( {
     uri,
     client = null,
+    socketUri = null,
     serverSdkVersion = 3,
     logging = false,
   } ) {
     this.initialize( {
       uri,
+      socketUri,
       client,
       serverSdkVersion,
       logging,
