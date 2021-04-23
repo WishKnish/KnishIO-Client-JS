@@ -73,12 +73,14 @@ export const BATCH_FIELDS = {
   'fromWallet': {
     'address': null,
     'bundleHash': null,
-    'amount': null
+    'amount': null,
+    'batchId': null,
   },
   'toWallet': {
     'address': null,
     'bundleHash': null,
-    'amount': null
+    'amount': null,
+    'batchId': null,
   },
   'sourceTokenUnits': {
     'id': null,
@@ -110,7 +112,7 @@ export default class QueryBatch extends Query {
    * Get cloned fields
    * @returns {any}
    */
-  static getFields() {
+  static getFields()  {
     return BATCH_FIELDS;
   }
 
