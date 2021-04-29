@@ -1,13 +1,14 @@
-import ApolloClient from "apollo-client";
+import { ApolloClient as RootApolloClient, } from "apollo-client";
 import { createHttpLink, } from 'apollo-link-http';
 import { onError, } from 'apollo-link-error';
 import fetch from 'isomorphic-fetch';
-import { ApolloLink, } from 'apollo-link';
+import { ApolloLink, Operation, } from 'apollo-link';
 import { InMemoryCache, } from 'apollo-cache-inmemory';
-import EchoLink from '../libraries/EchoLink';
+import EchoLink from '../libraries/ApolloLink/EchoLink';
+import { operationName, } from '../libraries/ApolloLink/handler';
 
 
-export default class SocketClient {
+export default class ApolloClient {
 
   /**
    *
@@ -30,22 +31,22 @@ export default class SocketClient {
           },
         });
         // Call the next link in the middleware chain.
-        return forward(operation);
+        return forward( operation );
       }),
-      errorLink = onError(({graphQLErrors, networkError, operation, forward,}) => {
+      errorLink = onError( ( { graphQLErrors, networkError, operation, forward, } ) => {
 
-        if (graphQLErrors) {
-          graphQLErrors.map(({message, debugMessage, locations, path,}) => console.error(
+        if ( graphQLErrors ) {
+          graphQLErrors.map( ( { message, debugMessage, locations, path, } ) => console.error(
             `[GraphQL error]: ${message}\r\n`,
             `  Message : ${debugMessage}\r\n`,
             `  Path    : ${path}\r\n`,
             `  Location: ${locations}\r\n`,
-          ));
+          ) );
         }
 
-        if (networkError) {
+        if ( networkError ) {
 
-          if (networkError.name === 'ServerError' && networkError.statusCode === 401) {
+          if ( networkError.name === 'ServerError' && networkError.statusCode === 401 ) {
 
             operation.setContext({
               headers: {
@@ -54,20 +55,21 @@ export default class SocketClient {
               },
             });
             // retry the request, returning the new observable
-            return forward(operation);
+            return forward( operation );
           }
 
-          console.error(`[Network error]: ${networkError}`);
+          console.error( `[Network error]: ${ networkError }` );
           // if you would also like to retry automatically on
           // network errors, we recommend that you use
           // apollo-link-retry
         }
       });
 
+    this.$__subscribers = {};
     this.$__authorization = authorization;
     this.$__uri = socketUri;
-    this.$__echo = new EchoLink( { socketUri, serverUri, } );
-    this.$__client = new ApolloClient( {
+    this.$__echo = new EchoLink( { socketUri, } );
+    this.$__client = new RootApolloClient( {
       link: ApolloLink.from( [ authLink, this.$__echo, errorLink.concat( httpLink ), ] ),
       cache: new InMemoryCache(),
       connectToDevTools: true,
@@ -75,20 +77,39 @@ export default class SocketClient {
   }
 
   /**
-   * @param {object} request
+   *
+   * @param {string} operationName
+   */
+  unsubscribe ( operationName ) {
+    if ( this.$__subscribers[ operationName ] ) {
+      this.$__subscribers[ operationName ].unsubscribe();
+    }
+  }
+
+  unsubscribeAll () {
+    for ( let subscribe in this.$__subscribers ) {
+      if ( this.$__subscribers.hasOwnProperty( subscribe ) ) {
+        this.unsubscribe( subscribe );
+      }
+    }
+  }
+
+  /**
+   * @param {Operation} request
    * @param {function} closure
+   *
+   * @return {string}
    */
   subscribe ( request, closure ) {
-    const subscriber = this.$__client.subscribe( request );
+    const operation = operationName( request );
 
-    subscriber.subscribe( {
-      next ( data ) {
-        closure( data );
-      },
-      error ( error ) {
-        console.log( error );
-      },
-    } );
+    this.unsubscribe( operation );
+
+    this.$__subscribers[ operation ] = this.$__client
+      .subscribe( request )
+      .subscribe(data => closure( data ) );
+
+    return operation;
   }
 
   /**

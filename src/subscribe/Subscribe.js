@@ -1,13 +1,13 @@
 import CodeException from "../exception/CodeException";
-
+import { Operation, } from 'apollo-link';
 
 export default class Subscribe {
   /**
    *
-   * @param {SocketClient} socketClient
+   * @param {ApolloClient} apolloClient
    */
-  constructor ( socketClient ) {
-    this.client = socketClient;
+  constructor ( apolloClient ) {
+    this.client = apolloClient;
     this.$__variables = null;
     this.$__subscribe = null;
   }
@@ -17,7 +17,7 @@ export default class Subscribe {
    *
    * @param {object} variables
    * @param {array|object|null} fields
-   * @returns {object}
+   * @returns {Operation}
    */
   createSubscribe ( {
     variables = null,
@@ -47,7 +47,7 @@ export default class Subscribe {
    *
    * @param {object} variables
    * @param {function} closure
-   * @return {Promise}
+   * @return {string}
    */
   async execute ( {
     variables = null,
@@ -58,7 +58,7 @@ export default class Subscribe {
       variables,
     } );
 
-    this.client.subscribe( this.$__request, closure );
+    return this.client.subscribe( this.$__request, closure );
   }
 
   /**

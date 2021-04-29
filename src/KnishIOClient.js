@@ -82,7 +82,7 @@ import WalletShadowException from './exception/WalletShadowException';
 import Meta from './Meta';
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException';
 import StackableUnitAmountException from './exception/StackableUnitAmountException';
-import SocketClient from "./httpClient/SocketClient";
+import ApolloClient from "./httpClient/ApolloClient";
 import CreateMoleculeSubscribe from "./subscribe/CreateMoleculeSubscribe";
 
 /**
@@ -121,19 +121,20 @@ export default class KnishIOClient {
    * Initializes a new Knish.IO client session
    *
    * @param {string} uri
-   * @param {string} socketUri
+   * @param {string|null} socketUri
    * @param {HttpClient} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    */
   initialize ( {
     uri,
-    socketUri,
+    socketUri= null,
     client = null,
     serverSdkVersion = 3,
     logging = false,
   } ) {
 
+    this.$__subscribe = null;
     this.$__logging = logging;
 
     if ( this.$__logging ) {
@@ -142,10 +143,13 @@ export default class KnishIOClient {
 
     this.reset();
 
-    this.$__subscribe = new SocketClient({
-      socketUri: socketUri,
-      serverUri: uri
-    });
+    if ( socketUri !== null ) {
+      this.$__subscribe = new ApolloClient({
+        socketUri: socketUri,
+        serverUri: uri
+      });
+    }
+
     this.$__client = client || new HttpClient( uri );
     this.$__serverSdkVersion = serverSdkVersion;
   }
@@ -161,6 +165,9 @@ export default class KnishIOClient {
   }
 
   subscribe () {
+    if ( !this.$__subscribe ) {
+      throw new CodeException( 'KnishIOClient::subscribe() - socket client not initialized!' );
+    }
     return this.$__subscribe;
   }
 
@@ -475,7 +482,10 @@ export default class KnishIOClient {
 
         const token = response.token();
         this.client().setAuthToken( token );
-        this.subscribe().setAuthToken( token );
+
+        if ( this.$__subscribe !== null ) {
+          this.subscribe().setAuthToken( token );
+        }
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
@@ -536,18 +546,31 @@ export default class KnishIOClient {
     } );
   }
 
-  createMoleculeSubscribe ( {
+  /**
+   * @param bundle
+   * @param closure
+   * @return {string}
+   */
+  subscribeCreateMolecule ( {
     bundle,
     closure
   } ) {
     const subscribe = this.createSubscribe( CreateMoleculeSubscribe );
 
-    subscribe.execute( {
+    return subscribe.execute( {
       variables: {
         bundle: bundle || this.getBundle()
       },
       closure
     } );
+  }
+
+  unsubscribe ( operationName ) {
+    this.subscribe().unsubscribe( operationName );
+  }
+
+  unsubscribeAll () {
+    this.subscribe().unsubscribeAll();
   }
 
   /**
@@ -659,7 +682,6 @@ export default class KnishIOClient {
       } );
   }
 
-
   /**
    * Query batch to get cascade meta instances by batchID
    *
@@ -680,7 +702,6 @@ export default class KnishIOClient {
       variables: { batchId: batchId, }
     } );
   }
-
 
   /**
    * Query batch history to get cascade meta instances by batchID
