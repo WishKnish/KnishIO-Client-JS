@@ -80,24 +80,18 @@ export default class Meta {
    * @return {array}
    */
   static normalizeMeta ( meta ) {
+    const target = [];
 
-    if ( Object.prototype.toString.call( meta ) === '[object Object]' ) {
-
-      const target = [];
-
-      for ( const property in meta ) {
-        if ( meta.hasOwnProperty( property ) && meta[ property ] !== null ) {
-          target.push( {
-            key: property,
-            value: meta[ property ]
-          } );
-        }
+    for ( const property in meta ) {
+      if ( meta.hasOwnProperty( property ) && meta[ property ] !== null ) {
+        target.push( {
+          key: property,
+          value: meta[ property ]
+        } );
       }
-
-      return target;
     }
 
-    return meta;
+    return target;
   }
 
   /**
@@ -109,17 +103,10 @@ export default class Meta {
   static aggregateMeta ( meta ) {
     const aggregate = {};
 
-    if ( Object.prototype.toString.call( meta ) === '[object Array]' ) {
-      for ( let metaEntry of meta ) {
-        aggregate[ metaEntry.key ] = metaEntry.value;
-      }
+    for ( let metaEntry of meta ) {
+      aggregate[ metaEntry.key ] = metaEntry.value;
     }
 
-    // Making sure we actually have anything to return
-    if ( Object.keys( aggregate ).length > 0 ) {
-      return aggregate;
-    }
-
-    return meta;
+    return aggregate;
   }
 }
