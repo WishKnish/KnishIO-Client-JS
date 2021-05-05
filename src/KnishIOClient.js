@@ -363,117 +363,65 @@ export default class KnishIOClient {
     return mutation;
   }
 
+
+  /**
+   * Requests a guest authorization token from the node endpoint
+   *
+   * @param cellSlug
+   * @returns {Promise<*>}
+   */
+  async requestGuestAuthToken ( {
+    cellSlug = null,
+  } ) {
+    if ( this.$__logging ) {
+      console.info( 'KnishIOClient::requestGuestAuthToken() - Requesting authorization token...' );
+    }
+
+    /**
+     * @type {MutationRequestAuthorizationGuest}
+     */
+    let query = await this.createQuery( MutationRequestAuthorizationGuest );
+
+    return await query.execute( {
+      variables: {
+        cellSlug: cellSlug,
+      }
+    } );
+  }
+
+
   /**
    * Requests an authorization token from the node endpoint
    *
-   * @param {string|null} secret
-   * @param {string|null} seed
-   * @param {string|null} cellSlug
-   * @return {Promise<Response>}
+   * @param secret
+   * @returns {Promise<*>}
    */
   async requestAuthToken ( {
     secret = null,
-    seed = null,
-    cellSlug = null,
   } ) {
-
     if ( this.$__logging ) {
       console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
     }
 
-    let guestMode = false;
+    // Init molecule
+    const molecule = await this.createMolecule( {
+      secret: secret,
+      sourceWallet: new Wallet( {
+        secret: secret,
+        token: 'AUTH',
+      } ),
+    } );
 
-    // Do we have a seed we need to hash?
-    if ( seed ) {
-      this.setSecret( generateSecret( seed ) );
-    }
-    // Do we have a secret pre-hashed?
-    else if ( secret ) {
-      this.setSecret( secret );
-    }
-    // Neither seed nor secret
-    else {
-      if ( this.$__logging ) {
-        console.info( 'KnishIOClient::requestAuthToken() - Guest mode enabled...' );
-      }
-      guestMode = true;
-    }
+    /**
+     * @type {MutationRequestAuthorization}
+     */
+    let query = await this.createMoleculeMutation( {
+      mutationClass: MutationRequestAuthorization,
+      molecule,
+    } );
+    query.fillMolecule();
 
-    this.$__cellSlug = cellSlug || this.cellSlug();
-
-    // SDK versions 2 and below do not utilize an authorization token
-    if ( this.$__serverSdkVersion >= 3 ) {
-
-      let query,
-        response;
-
-      if ( guestMode ) {
-
-        /**
-         * @type {MutationRequestAuthorizationGuest}
-         */
-        query = await this.createQuery( MutationRequestAuthorizationGuest );
-
-        /**
-         * @type {ResponseRequestAuthorization}
-         */
-        response = await query.execute( {
-          variables: {
-            cellSlug: this.$__cellSlug,
-          }
-        } );
-      } else {
-        const molecule = await this.createMolecule( {
-          secret: this.getSecret(),
-          sourceWallet: new Wallet( {
-            secret: this.getSecret(),
-            token: 'AUTH',
-          } ),
-        } );
-
-        /**
-         * @type {MutationRequestAuthorization}
-         */
-        query = await this.createMoleculeMutation( {
-          mutationClass: MutationRequestAuthorization,
-          molecule,
-        } );
-
-        query.fillMolecule();
-
-        /**
-         * @type {ResponseRequestAuthorization}
-         */
-        response = await query.execute( {} );
-      }
-
-      if ( response.success() ) {
-
-        const token = response.token();
-        this.client().setAuthToken( token )
-
-        if ( this.$__logging ) {
-          console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
-        }
-
-      } else {
-
-        if ( this.$__logging ) {
-          console.warn( 'KnishIOClient::requestAuthToken() - Unable to retrieve auth token...' );
-        }
-
-        throw new UnauthenticatedException( response.reason() );
-
-      }
-
-      return response;
-    } else {
-
-      if ( this.$__logging ) {
-        console.warn( 'KnishIOClient::requestAuthToken() - Server SDK version does not require an auth token...' );
-      }
-
-    }
+    return await query.execute( {} );
   }
 
   /**
@@ -1282,6 +1230,78 @@ export default class KnishIOClient {
     molecule.check();
 
     return ( new MutationProposeMolecule( this.client(), molecule ) ).execute( {} );
+  }
+
+
+  /**
+   * Authorize with auth token
+   *
+   * @param secret
+   * @param cellSlug
+   * @param authToken
+   * @returns {Promise<void>}
+   */
+  async authorize( {
+    secret,
+    cellSlug,
+  } ) {
+
+    // SDK versions 2 and below do not utilize an authorization token
+    if ( this.$__serverSdkVersion >= 3 ) {
+      if ( this.$__logging ) {
+        console.warn( 'KnishIOClient::authorize() - Server SDK version does not require an authorization...' );
+      }
+      return;
+    }
+
+    // Do we have a secret pre-hashed?
+    if ( secret ) {
+      this.setSecret( secret );
+    }
+
+    // Set a cell slug
+    if ( cellSlug ) {
+      this.setCellSlug( cellSlug );
+    }
+
+
+    let response;
+
+    // Authorized user
+    if ( secret ) {
+      response = await this.requestAuthToken( {
+        secret,
+      } );
+    }
+
+    // Guest
+    else {
+      response = await this.requestGuestAuthToken( {
+        cellSlug: this.$__cellSlug,
+      } );
+    }
+
+    // Have errors with auth token query
+    if ( !response.success() ) {
+      if ( this.$__logging ) {
+        console.warn( 'KnishIOClient::authorize() - Unable to retrieve auth token...' );
+      }
+      throw new UnauthenticatedException( response.reason() );
+    }
+
+    // Retrieve auth token from the response
+    let authToken = response.token();
+
+    // Set auth token
+    if ( this.$__logging ) {
+      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ authToken }...` );
+    }
+
+    // Set client auth token
+    // this.client().setAuthToken( authToken );
+
+    // Return full response
+    return response;
   }
 
 }
