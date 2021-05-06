@@ -63,6 +63,7 @@ export default class MutationRequestAuthorizationGuest extends Query {
     this.$__fields = {
       'token': null,
       'time': null,
+      'expiresAt': null,
     };
   }
 

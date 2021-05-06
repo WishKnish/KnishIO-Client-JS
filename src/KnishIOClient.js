@@ -188,6 +188,21 @@ export default class KnishIOClient {
   }
 
   /**
+   * Sets the auth token
+   *
+   * @param authToken
+   */
+  setAuthToken ( authToken ) {
+
+    // Set client auth token
+    this.client().setAuthToken( authToken.token );
+
+    // Save a full auth token object with expireAt key
+    this.__authToken = authToken;
+  }
+
+
+  /**
    * Retrieves the endpoint URI for this session
    *
    * @returns {string}
@@ -1247,7 +1262,7 @@ export default class KnishIOClient {
   } ) {
 
     // SDK versions 2 and below do not utilize an authorization token
-    if ( this.$__serverSdkVersion >= 3 ) {
+    if ( this.$__serverSdkVersion < 3 ) {
       if ( this.$__logging ) {
         console.warn( 'KnishIOClient::authorize() - Server SDK version does not require an authorization...' );
       }
@@ -1289,19 +1304,21 @@ export default class KnishIOClient {
       throw new UnauthenticatedException( response.reason() );
     }
 
-    // Retrieve auth token from the response
-    let authToken = response.token();
+
+    // Get an auth token info & set a expireAt key
+    let authToken = response.payload();
+    console.log( response );
 
     // Set auth token
     if ( this.$__logging ) {
-      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ authToken }...` );
+      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ authToken.token }...` );
     }
 
-    // Set client auth token
-    // this.client().setAuthToken( authToken );
+    // Set an authToken full info
+    this.setAuthToken( authToken );
 
     // Return full response
-    return response;
+    return authToken;
   }
 
 }
