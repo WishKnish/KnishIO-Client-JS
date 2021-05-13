@@ -78,6 +78,7 @@ export default class HttpClient {
 
     this.setUri( uri );
   }
+  
 
   /**
    * Returns configuration object
@@ -116,15 +117,6 @@ export default class HttpClient {
   }
 
   /**
-   * Gets the current auth token
-   *
-   * @return {string|null}
-   */
-  getAuthToken () {
-    return this.$__headers.get( 'X-Auth-Token' ) || '';
-  }
-
-  /**
    * Sends the request
    *
    * @param {Request} request
@@ -139,8 +131,6 @@ export default class HttpClient {
     for ( let header in this.$__needHeaders ) {
       this.$__headers.set( header, this.$__needHeaders[ header ] );
     }
-
-    this.setAuthToken( this.getAuthToken() );
 
     const req = new Request( request, this.$__config );
 

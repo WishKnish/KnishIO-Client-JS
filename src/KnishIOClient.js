@@ -79,7 +79,6 @@ import TransferBalanceException from './exception/TransferBalanceException';
 import CodeException from './exception/CodeException';
 import UnauthenticatedException from './exception/UnauthenticatedException';
 import WalletShadowException from './exception/WalletShadowException';
-import Meta from './Meta';
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException';
 import StackableUnitAmountException from './exception/StackableUnitAmountException';
 
@@ -186,21 +185,6 @@ export default class KnishIOClient {
   setCellSlug ( cellSlug ) {
     this.$__cellSlug = cellSlug;
   }
-
-  /**
-   * Sets the auth token
-   *
-   * @param authToken
-   */
-  setAuthToken ( authToken ) {
-
-    // Set client auth token
-    this.client().setAuthToken( authToken.token );
-
-    // Save a full auth token object with expireAt key
-    this.__authToken = authToken;
-  }
-
 
   /**
    * Retrieves the endpoint URI for this session
@@ -346,7 +330,7 @@ export default class KnishIOClient {
    * @return {*}
    */
   createQuery ( queryClass ) {
-    return new queryClass( this.client() )
+    return new queryClass( this.client() );
   }
 
   /**
@@ -440,12 +424,35 @@ export default class KnishIOClient {
   }
 
   /**
+   * Sets the auth token
+   *
+   * @param authToken
+   */
+  setAuthToken ( authToken ) {
+
+    // Set client auth token
+    this.client().setAuthToken( authToken.token );
+
+    // Save a full auth token object with expireAt key
+    this.$__authToken = authToken;
+  }
+
+
+  /**
+   *
+   * @returns {boolean}
+   */
+  isAuthTokenExpired() {
+    return !this.$__authToken.expiresAt || this.$__authToken.expiresAt * 1000 <= Date.now();
+  }
+
+  /**
    * Returns the current authorization token
    *
    * @returns {string|null}
    */
   getAuthToken () {
-    return this.client().getAuthToken();
+    return this.$__authToken;
   }
 
   /**
@@ -1307,7 +1314,6 @@ export default class KnishIOClient {
 
     // Get an auth token info & set a expireAt key
     let authToken = response.payload();
-    console.log( response );
 
     // Set auth token
     if ( this.$__logging ) {
@@ -1320,5 +1326,6 @@ export default class KnishIOClient {
     // Return full response
     return authToken;
   }
+
 
 }
