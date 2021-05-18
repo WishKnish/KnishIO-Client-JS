@@ -84,6 +84,10 @@ import StackableUnitDecimalsException from './exception/StackableUnitDecimalsExc
 import StackableUnitAmountException from './exception/StackableUnitAmountException';
 import ApolloClient from "./httpClient/ApolloClient";
 import CreateMoleculeSubscribe from "./subscribe/CreateMoleculeSubscribe";
+import WalletStatusSubscribe from "./subscribe/WalletStatusSubscribe";
+import ActiveWalletSubscribe from "./subscribe/ActiveWalletSubscribe";
+import ActiveSessionSubscribe from "./subscribe/ActiveSessionSubscribe";
+import MutationActiveSession from "./mutation/MutationActiveSession";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -547,8 +551,8 @@ export default class KnishIOClient {
   }
 
   /**
-   * @param bundle
-   * @param closure
+   * @param {string|null} bundle
+   * @param {function} closure
    * @return {string}
    */
   subscribeCreateMolecule ( {
@@ -565,6 +569,80 @@ export default class KnishIOClient {
     } );
   }
 
+  /**
+   * @param {string|null} bundle
+   * @param {string} token
+   * @param {function} closure
+   * @return {string}
+   */
+  subscribeWalletStatus( {
+    bundle,
+    token,
+    closure
+  } ) {
+
+    if ( !token ) {
+      throw new CodeException( `${ this.constructor.name }::subscribeWalletStatus - token parameter is required.` );
+    }
+
+    const subscribe = this.createSubscribe( WalletStatusSubscribe );
+
+    return subscribe.execute( {
+      variables: {
+        bundle: bundle || this.getBundle(),
+        token
+      },
+      closure
+    } );
+  }
+
+  /**
+   *
+   * @param {string|null} bundle
+   * @param {function} closure
+   * @return {string}
+   */
+  subscribeActiveWallet ( {
+    bundle,
+    closure
+  } ) {
+    const subscribe = this.createSubscribe( ActiveWalletSubscribe );
+
+    return subscribe.execute( {
+      variables: {
+        bundle: bundle || this.getBundle(),
+      },
+      closure
+    } );
+  }
+
+  /**
+   *
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {function} closure
+   * @return {*}
+   */
+  subscribeActiveSession ( {
+    metaType,
+    metaId,
+    closure
+  } ) {
+    const subscribe = this.createSubscribe( ActiveSessionSubscribe );
+
+    return subscribe.execute( {
+      variables: {
+        metaType,
+        metaId,
+      },
+      closure
+    } );
+  }
+
+  /**
+   *
+   * @param {string} operationName
+   */
   unsubscribe ( operationName ) {
     this.subscribe().unsubscribe( operationName );
   }
@@ -749,6 +827,27 @@ export default class KnishIOClient {
     query.fillMolecule( newWallet );
 
     return await query.execute( {} );
+  }
+
+  /**
+   *
+   * @param {string} bundle
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {object|array} json
+   * @return {Promise<void>}
+   */
+  async activeSession ( {
+    bundle,
+    metaType,
+    metaId,
+    json = {}
+  } ) {
+    const query = this.createQuery( MutationActiveSession );
+
+    return await query.execute( {
+      variables: { bundleHash: bundle, metaType, metaId, json: JSON.stringify( json ) }
+    } );
   }
 
   /**

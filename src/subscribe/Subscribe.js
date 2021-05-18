@@ -53,6 +53,9 @@ export default class Subscribe {
     variables = null,
     closure,
   } ) {
+    if ( !closure ) {
+      throw new CodeException( `${ this.constructor.name }::execute - closure parameter is required.` );
+    }
 
     this.$__request = this.createSubscribe( {
       variables,
