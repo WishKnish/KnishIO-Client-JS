@@ -59,7 +59,7 @@ export default class BaseException extends TypeError {
     super( message, fileName, lineNumber );
 
     if ( null === message ) {
-      throw new this( `Unknown ${ this.constructor.name}` );
+      throw new this( `Unknown ${ this.constructor.name }` );
     }
 
     this.name = 'BaseException';

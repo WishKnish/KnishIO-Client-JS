@@ -1,10 +1,10 @@
 import {
   ApolloLink,
   Operation,
-  NextLink,
-} from "apollo-link";
-import Echo from "laravel-echo";
-import createRequestHandler from "./handler";
+  NextLink
+} from 'apollo-link';
+import Echo from 'laravel-echo';
+import createRequestHandler from './handler';
 import io from 'socket.io-client';
 
 /**
@@ -14,10 +14,10 @@ class EchoLink extends ApolloLink {
   /**
    * @param {string} socketUri
    */
-  constructor ( { socketUri} ) {
+  constructor ( { socketUri } ) {
     super();
 
-    console.log( `EchoLink::constructor()...` );
+    console.log( 'EchoLink::constructor()...' );
 
     this.echo = null;
     this.socketUri = null;
@@ -59,15 +59,15 @@ class EchoLink extends ApolloLink {
     this.echo = new Echo( {
       broadcaster: 'socket.io',
       client: io,
-      authEndpoint: `graphql/subscriptions/auth`,
+      authEndpoint: 'graphql/subscriptions/auth',
       host: this.getSocketUri(),
-      transports: [ 'websocket', ],
+      transports: [ 'websocket' ],
       auth: {
         headers: {
           'X-Auth-Token': this.getAuthToken(),
-          Accept: 'application/json',
-        },
-      },
+          Accept: 'application/json'
+        }
+      }
     } );
   }
 

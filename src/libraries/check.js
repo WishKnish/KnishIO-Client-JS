@@ -52,7 +52,7 @@ export default class CheckMolecule {
   static batchId ( molecule ) {
 
     if ( molecule.atoms.length > 0 ) {
-      const subscription = molecule.atoms[0];
+      const subscription = molecule.atoms[ 0 ];
 
       if ( subscription.isotope === 'V' && subscription.batchId !== null ) {
         const atoms = CheckMolecule.isotopeFilter( 'V', molecule.atoms );

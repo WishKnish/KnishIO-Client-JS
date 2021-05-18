@@ -1,9 +1,9 @@
-import Subscribe from "./Subscribe";
-import gql from "graphql-tag";
+import Subscribe from './Subscribe';
+import gql from 'graphql-tag';
 
 
 export default class ActiveWalletSubscribe extends Subscribe {
-  constructor( apolloClient ) {
+  constructor ( apolloClient ) {
     super( apolloClient );
     this.$__subscribe = gql`
         subscription onActiveWallet ( $bundle: String! ) {

@@ -89,7 +89,7 @@ export default class Hex {
     let target = str.toLowerCase().replace( /\s/g, '' );
 
     if ( target.length % 2 === 1 ) {
-      target = `0${ target}`;
+      target = `0${ target }`;
     }
 
     let buffer = new Uint8Array( Math.floor( target.length / 2 ) ),
