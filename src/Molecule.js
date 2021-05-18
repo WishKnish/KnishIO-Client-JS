@@ -200,11 +200,10 @@ export default class Molecule extends MoleculeStructure {
     token,
     metas,
   } ) {
-    const aggregateMeta = Meta.aggregateMeta( Meta.normalizeMeta( metas ) );
-    aggregateMeta.action = 'add';
+    metas.action = 'add';
 
     for ( let key of [ 'address', 'position', 'batchId', ] ) {
-      if ( typeof aggregateMeta[ key ] === 'undefined' ) {
+      if ( typeof metas[ key ] === 'undefined' ) {
         throw new MetaMissingException( `Missing ${ key } in meta` );
       }
     }
@@ -221,7 +220,7 @@ export default class Molecule extends MoleculeStructure {
           batchId: this.sourceWallet.batchId,
           metaType: 'token',
           metaId: token,
-          meta: this.finalMetas( aggregateMeta ),
+          meta: this.finalMetas( metas ),
           index: this.generateIndex(),
         }
       )
@@ -495,17 +494,15 @@ export default class Molecule extends MoleculeStructure {
     metaId,
     meta,
   } ) {
-    const aggregateMeta = Meta.aggregateMeta( Meta.normalizeMeta( meta ) );
-
     for ( let key of [ 'conditions', 'callback', 'rule' ] ) {
 
-      if ( typeof aggregateMeta[ key ] === 'undefined' ) {
+      if ( typeof meta[ key ] === 'undefined' ) {
         throw new MetaMissingException( `No or not defined ${ key } in meta` );
       }
 
       for ( let item of [ '[object Object]', '[object Array]', ] ) {
-        if ( Object.prototype.toString.call( aggregateMeta[ key ] ) === item ) {
-          aggregateMeta[ key ] = JSON.stringify( aggregateMeta[ key ] );
+        if ( Object.prototype.toString.call( meta[ key ] ) === item ) {
+          meta[ key ] = JSON.stringify( meta[ key ] );
         }
       }
     }
@@ -518,7 +515,7 @@ export default class Molecule extends MoleculeStructure {
           token: this.sourceWallet.token,
           metaType,
           metaId,
-          meta: this.finalMetas( aggregateMeta, this.sourceWallet ),
+          meta: this.finalMetas( meta, this.sourceWallet ),
           index: this.generateIndex(),
         }
       )

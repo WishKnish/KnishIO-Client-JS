@@ -47,58 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from "./Query";
 import Response from "../response/Response";
-const cloneDeep = require( 'lodash.clonedeep' );
 
-
-export const BATCH_FIELDS = {
-  'batchId': null,
-  'type': null,
-  'status': null,
-  'createdAt': null,
-  'wallet': {
-    'address': null,
-    'bundleHash': null,
-    'amount': null,
-    'tokenSlug': null,
-    'token': {
-      name: null,
-      amount: null,
-    },
-    'tokenUnits': {
-      'id': null,
-      'name': null,
-      'metas': null,
-    },
-  },
-  'fromWallet': {
-    'address': null,
-    'bundleHash': null,
-    'amount': null
-  },
-  'toWallet': {
-    'address': null,
-    'bundleHash': null,
-    'amount': null
-  },
-  'sourceTokenUnits': {
-    'id': null,
-    'name': null,
-    'metas': null,
-  },
-  'transferTokenUnits': {
-    'id': null,
-    'name': null,
-    'metas': null,
-  },
-  'metas': {
-    'key': null,
-    'value': null,
-  },
-  'throughMetas': {
-    'key': null,
-    'value': null,
-  },
-};
 
 /**
  * Query for retrieving Meta Asset information
@@ -110,8 +59,59 @@ export default class QueryBatch extends Query {
    * Get cloned fields
    * @returns {any}
    */
-  static getFields() {
-    return BATCH_FIELDS;
+  static getFields()  {
+    return {
+      'batchId': null,
+      'molecularHash': null,
+      'type': null,
+      'status': null,
+      'createdAt': null,
+      'wallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null,
+        'tokenSlug': null,
+        'token': {
+          name: null,
+          amount: null,
+        },
+        'tokenUnits': {
+          'id': null,
+          'name': null,
+          'metas': null,
+        },
+      },
+      'fromWallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null,
+        'batchId': null,
+      },
+      'toWallet': {
+        'address': null,
+        'bundleHash': null,
+        'amount': null,
+        'batchId': null,
+      },
+      'sourceTokenUnits': {
+        'id': null,
+        'name': null,
+        'metas': null,
+      },
+      'transferTokenUnits': {
+        'id': null,
+        'name': null,
+        'metas': null,
+      },
+      'metas': {
+        'key': null,
+        'value': null,
+      },
+      'throughMetas': {
+        'key': null,
+        'value': null,
+      },
+    };
   }
 
 

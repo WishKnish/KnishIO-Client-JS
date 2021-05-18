@@ -91,7 +91,8 @@ export default class Test {
         supply: 'limited',
         decimals: 0,
         icon: 'icon'
-      }
+      },
+      batchId: 'batch_0'
     } );
     this.checkResponse( responses[ 0 ], 'testCreateToken.0' );
 
@@ -105,7 +106,8 @@ export default class Test {
         supply: 'limited',
         decimals: 0,
         icon: 'icon'
-      }
+      },
+      batchId: 'server_batch_0'
     } );
     this.checkResponse( responses[ 1 ], 'testCreateToken.1' );
 
@@ -121,7 +123,7 @@ export default class Test {
         supply: 'limited',
         fungibility: 'stackable'
       },
-      batchId: 'batch_0'
+      batchId: 'unit_batch_0'
     } );
     this.checkResponse( responses[ 2 ], 'testCreateToken.2' );
 
@@ -137,7 +139,7 @@ export default class Test {
         supply: 'limited',
         fungibility: 'stackable'
       },
-      batchId: 'batch_0'
+      batchId: 'server_unit_batch_0'
     } );
     this.checkResponse( responses[ 3 ], 'testCreateToken.3' );
   }

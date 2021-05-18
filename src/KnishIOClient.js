@@ -868,8 +868,6 @@ export default class KnishIOClient {
     units = [],
   } ) {
 
-    meta = Meta.aggregateMeta( meta );
-
     // Stackable tokens need a new batch for every transfer
     if ( Dot.get( meta || {}, 'fungibility' ) === 'stackable' ) {
 
@@ -904,7 +902,7 @@ export default class KnishIOClient {
     const recipientWallet = new Wallet( {
       secret: this.getSecret(),
       token,
-      batchId: batchId,
+      batchId,
     } );
 
     /**
@@ -1154,7 +1152,6 @@ export default class KnishIOClient {
 
       // Calculating amount based on Unit IDs
       amount = units.length;
-      meta = Meta.aggregateMeta( meta );
       meta.tokenUnits = JSON.stringify( units );
     }
 

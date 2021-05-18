@@ -178,7 +178,7 @@ export default class CheckMolecule {
     CheckMolecule.missing( molecule );
 
     for ( let atom of CheckMolecule.isotopeFilter( 'T', molecule.atoms ) ) {
-      const meta = Meta.aggregateMeta( Meta.normalizeMeta( atom.meta ) ),
+      const meta = atom.aggregatedMeta(),
         metaType = String( atom.metaType ).toLowerCase();
 
       if ( metaType === 'wallet' ) {
@@ -211,7 +211,7 @@ export default class CheckMolecule {
     CheckMolecule.missing( molecule );
 
     for ( let atom of CheckMolecule.isotopeFilter( 'R', molecule.atoms ) ) {
-      const metas = Meta.aggregateMeta( Meta.normalizeMeta( atom.meta ) );
+      const metas = atom.aggregatedMeta();
       for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
 
         if ( !metas.hasOwnProperty( key ) ) {

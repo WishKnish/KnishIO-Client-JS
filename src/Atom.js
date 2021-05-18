@@ -101,6 +101,13 @@ export default class Atom {
   }
 
   /**
+   * Get aggregated meta from stored normalizaed ones
+   */
+  aggregatedMeta() {
+    return Meta.aggregateMeta( this.meta );
+  }
+
+  /**
    * Converts a compliant JSON string into an Atom class instance
    *
    * @param {string} json
@@ -161,7 +168,6 @@ export default class Atom {
 
           // Hashing individual meta keys and values
           if ( property === 'meta' ) {
-            atom[ property ] = Meta.normalizeMeta( atom[ property ] );
             for ( const meta of atom[ property ] ) {
               if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
                 molecularSponge.update( String( meta.key ) );
