@@ -8,12 +8,12 @@ export default class ActiveSessionSubscribe extends Subscribe {
     this.$__subscribe = gql`
       subscription onActiveWallet ( $metaType: String!, $metaId: String! ) {
         ActiveUser( metaType: $metaType, metaId: $metaId ) {
-            bundle_hash,
-            meta_type,
-            meta_id,
-            json_data,
-            created_at,
-            updated_at
+            bundleHash,
+            metaType,
+            metaId,
+            jsonData,
+            createdAt,
+            updatedAt
         }
       }`;
   }
