@@ -168,7 +168,7 @@ This document will explain both ways.
 
   ```javascript
   const result = await client.transferToken ( {
-    recipient: '7bf38257401eb3b0f20cabf5e6cf3f14c76760386473b220d95fa1c38642b61d' // Recipient's bundle hash,
+    recipient: '7bf38257401eb3b0f20cabf5e6cf3f14c76760386473b220d95fa1c38642b61d', // Recipient's bundle hash,
     token: 'CRZY', // Token slug
     amount: '100'
   } );
