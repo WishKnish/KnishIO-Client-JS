@@ -47,7 +47,6 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Atom from './Atom';
 import Wallet from './Wallet';
-import Meta from './Meta';
 import { shake256 } from 'js-sha3';
 import {
   chunkSubstr,

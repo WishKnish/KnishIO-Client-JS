@@ -101,7 +101,7 @@ export default class Atom {
   }
 
   /**
-   * Get aggregated meta from stored normalizaed ones
+   * Get aggregated meta from stored normalized ones
    */
   aggregatedMeta () {
     return Meta.aggregateMeta( this.meta );

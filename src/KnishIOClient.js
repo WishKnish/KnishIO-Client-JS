@@ -52,7 +52,8 @@ import {
   generateBatchId,
   generateSecret
 } from './libraries/crypto';
-import HttpClient from '../src/httpClient/HttpClient';
+import HttpClient from './httpClient/HttpClient';
+import ApolloClient from './httpClient/ApolloClient';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
 
@@ -79,10 +80,9 @@ import TransferBalanceException from './exception/TransferBalanceException';
 import CodeException from './exception/CodeException';
 import UnauthenticatedException from './exception/UnauthenticatedException';
 import WalletShadowException from './exception/WalletShadowException';
-import Meta from './Meta';
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException';
 import StackableUnitAmountException from './exception/StackableUnitAmountException';
-import ApolloClient from './httpClient/ApolloClient';
+
 import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe';
 import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe';
 import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe';
@@ -1027,7 +1027,7 @@ export default class KnishIOClient {
   /**
    * Retrieves a list of your shadow wallets (balance, but no keys)
    *
-   * @param {string} tokenSlug
+   * @param {string} token
    * @param {string|null} bundle
    * @return {Promise<[]>}
    */

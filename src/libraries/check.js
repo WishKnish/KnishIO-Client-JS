@@ -14,7 +14,6 @@ import MetaMissingException from './../exception/MetaMissingException';
 import WrongTokenTypeException from './../exception/WrongTokenTypeException';
 import BatchIdException from './../exception/BatchIdException';
 import Atom from './../Atom';
-import Meta from './../Meta';
 import {
   base64ToHex,
   chunkSubstr

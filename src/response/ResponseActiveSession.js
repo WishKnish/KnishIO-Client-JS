@@ -1,5 +1,4 @@
 import Response from './Response';
-import Dot from '../libraries/Dot';
 
 export default class ResponseActiveSession extends Response {
   /**
