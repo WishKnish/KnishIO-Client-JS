@@ -380,8 +380,7 @@ communicating the resulting signed Molecule mutation or Query to a Knish.IO node
    } );
    ```
 
-5. Either use one of the shortcut methods provided by the `Molecule` class (which will build `Atom` instances for you,
-   or create `Atom` instances yourself.
+5. Either use one of the shortcut methods provided by the `Molecule` class (which will build `Atom` instances for you), or create `Atom` instances yourself.
 
    DIY example:
     ```javascript
