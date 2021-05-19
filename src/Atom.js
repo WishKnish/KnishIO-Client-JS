@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { shake256, } from 'js-sha3';
+import { shake256 } from 'js-sha3';
 import { charsetBaseConvert } from './libraries/strings';
-import Meta from "./Meta";
+import Meta from './Meta';
 
 /**
  * Atom class used to form micro-transactions within a Molecule
@@ -65,11 +65,11 @@ export default class Atom {
    * @param {string|null} batchId
    * @param {string|null} metaType
    * @param {string|null} metaId
-   * @param {Array|Object|null} meta
+   * @param {array|object|null} meta
    * @param {string|null} otsFragment
    * @param {number|null} index
    */
-  constructor (
+  constructor ( {
     position = null,
     walletAddress = null,
     isotope = null,
@@ -80,7 +80,8 @@ export default class Atom {
     metaId = null,
     meta = null,
     otsFragment = null,
-    index = null ) {
+    index = null
+  } ) {
 
     this.position = position;
     this.walletAddress = walletAddress;
@@ -100,15 +101,22 @@ export default class Atom {
   }
 
   /**
+   * Get aggregated meta from stored normalized ones
+   */
+  aggregatedMeta () {
+    return Meta.aggregateMeta( this.meta );
+  }
+
+  /**
    * Converts a compliant JSON string into an Atom class instance
    *
    * @param {string} json
-   * @return {Object}
+   * @return {object}
    */
   static jsonToObject ( json ) {
 
-    const target = Object.assign( new Atom(), JSON.parse( json ) ),
-      properties = Object.keys( new Atom() );
+    const target = Object.assign( new Atom( {} ), JSON.parse( json ) ),
+      properties = Object.keys( new Atom( {} ) );
 
     for ( const property in target ) {
 
@@ -128,11 +136,14 @@ export default class Atom {
    * Produces a hash of the atoms inside a molecule.
    * Used to generate the molecularHash field for Molecules.
    *
-   * @param {Array} atoms
+   * @param {array} atoms
    * @param {string} output
-   * @returns {number[] | *}
+   * @returns {number[]|*}
    */
-  static hashAtoms ( atoms, output = 'base17' ) {
+  static hashAtoms ( {
+    atoms,
+    output = 'base17'
+  } ) {
 
     const molecularSponge = shake256.create( 256 ),
       numberOfAtoms = atoms.length,
@@ -146,18 +157,17 @@ export default class Atom {
         if ( atom.hasOwnProperty( property ) ) {
 
           // Old atoms support (without batch_id field)
-          if ( [ 'batchId', 'pubkey', 'characters', ].includes( property ) && atom[ property ] === null ) {
+          if ( [ 'batchId', 'pubkey', 'characters' ].includes( property ) && atom[ property ] === null ) {
             continue;
           }
 
           // Not hashing OTS fragment or index
-          if ( [ 'otsFragment', 'index', ].includes( property ) ) {
+          if ( [ 'otsFragment', 'index' ].includes( property ) ) {
             continue;
           }
 
           // Hashing individual meta keys and values
           if ( property === 'meta' ) {
-            atom[ property ] = Meta.normalizeMeta( atom[ property ] );
             for ( const meta of atom[ property ] ) {
               if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
                 molecularSponge.update( String( meta.key ) );
@@ -198,8 +208,8 @@ export default class Atom {
   /**
    * Sort the atoms in a Molecule
    *
-   * @param {Array} atoms
-   * @return {Array}
+   * @param {array} atoms
+   * @return {array}
    */
   static sortAtoms ( atoms ) {
 

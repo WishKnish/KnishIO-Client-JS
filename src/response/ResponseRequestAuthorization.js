@@ -45,14 +45,14 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "./ResponseMolecule";
-import Dot from "../libraries/Dot";
-import InvalidResponseException from "../exception/InvalidResponseException";
+import Dot from '../libraries/Dot';
+import InvalidResponseException from '../exception/InvalidResponseException';
+import ResponseProposeMolecule from './ResponseProposeMolecule';
 
 /**
- * Response for auth token query
+ * Response for auth token mutation
  */
-export default class ResponseAuthorization extends ResponseMolecule {
+export default class ResponseRequestAuthorization extends ResponseProposeMolecule {
 
   /**
    * Returns the authorization key

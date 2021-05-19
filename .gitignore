@@ -5,5 +5,10 @@ package.lock
 package-lock.json
 index.js
 index.html
+subscribe.js
+subscribe.html
+webpack.config.sub.js
 dist/KnishIOClientJSDev.js
 dist/KnishIOClientJSDev.js.map
+dist/subKnishIOClientJSDev.js
+dist/subKnishIOClientJSDev.js.map

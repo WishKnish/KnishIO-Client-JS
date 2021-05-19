@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import InvalidResponseException from "../exception/InvalidResponseException";
-import UnauthenticatedException from "../exception/UnauthenticatedException";
-import Dot from "../libraries/Dot";
+import InvalidResponseException from '../exception/InvalidResponseException';
+import UnauthenticatedException from '../exception/UnauthenticatedException';
+import Dot from '../libraries/Dot';
 
 /**
  * Base Response class for processing node responses
@@ -57,12 +57,17 @@ export default class Response {
   /**
    * Class constructor
    *
-   * @param query
-   * @param json
+   * @param {Query} query
+   * @param {object} json
+   * @param {string|null} dataKey
    */
-  constructor ( query, json ) {
+  constructor ( {
+    query,
+    json,
+    dataKey = null
+  } ) {
 
-    this.dataKey = null;
+    this.dataKey = dataKey;
     this.errorKey = 'exception';
     this.$__payload = null;
     this.$__query = query;

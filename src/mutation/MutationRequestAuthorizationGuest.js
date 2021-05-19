@@ -45,9 +45,12 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import ResponseAuthorizationGuest from "../response/ResponseAuthorizationGuest";
+import Query from '../query/Query';
+import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthorizationGuest';
 
+/**
+ * Query for requesting a guest authorization token from the node
+ */
 export default class MutationRequestAuthorizationGuest extends Query {
   /**
    * Class constructor
@@ -56,20 +59,23 @@ export default class MutationRequestAuthorizationGuest extends Query {
    */
   constructor ( knishIO ) {
     super( knishIO );
-    this.$__query = `mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }`;
+    this.$__query = 'mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }';
     this.$__fields = {
       'token': null,
-      'time': null,
+      'time': null
     };
   }
 
   /**
    * Returns a Response object
    *
-   * @param {string} response
-   * @return {ResponseAuthorizationGuest}
+   * @param {object} json
+   * @return {ResponseRequestAuthorizationGuest}
    */
-  createResponse ( response ) {
-    return new ResponseAuthorizationGuest( this, response );
+  createResponse ( json ) {
+    return new ResponseRequestAuthorizationGuest( {
+      query: this,
+      json
+    } );
   }
 }

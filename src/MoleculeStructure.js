@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import CheckMolecule from "./libraries/check";
-import AtomsMissingException from "./exception/AtomsMissingException";
-import Atom from "./Atom";
+import CheckMolecule from './libraries/check';
+import AtomsMissingException from './exception/AtomsMissingException';
+import Atom from './Atom';
 
 const cloneDeep = require( 'lodash.clonedeep' );
 const merge = require( 'lodash.merge' );
@@ -60,7 +60,7 @@ export default class MoleculeStructure {
   /**
    * Class constructor
    *
-   * @property {string | null} cellSlug
+   * @property {string|null} cellSlug
    */
   constructor ( cellSlug = null ) {
     this.cellSlugOrigin = this.cellSlug = cellSlug;
@@ -85,13 +85,13 @@ export default class MoleculeStructure {
   }
 
   /**
-   * @returns {Object}
+   * @returns {object}
    */
   toJSON () {
     let clone = cloneDeep( this );
     for ( let key of [ 'remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin' ] ) {
       if ( clone.hasOwnProperty( key ) ) {
-        delete clone[ key ]
+        delete clone[ key ];
       }
     }
     return clone;
@@ -100,11 +100,14 @@ export default class MoleculeStructure {
   /**
    * Validates the current molecular structure
    *
-   * @param {Wallet|null} senderWallet
+   * @param {Wallet|null} sourceWallet
    * @returns {boolean}
    */
-  check ( senderWallet = null ) {
-    return MoleculeStructure.verify( this, senderWallet )
+  check ( sourceWallet = null ) {
+    return MoleculeStructure.verify( {
+      molecule: this,
+      sourceWallet
+    } );
   }
 
   /**
@@ -112,28 +115,33 @@ export default class MoleculeStructure {
    * Verifies a specified molecule
    *
    * @param {Molecule|MoleculeStructure} molecule
-   * @param {Wallet|null} senderWallet
+   * @param {Wallet|null} sourceWallet
    * @return {boolean}
    */
-  static verify ( molecule, senderWallet = null ) {
+  static verify ( {
+    molecule,
+    sourceWallet = null
+  } ) {
 
     return CheckMolecule.molecularHash( molecule )
       && CheckMolecule.ots( molecule )
       && CheckMolecule.index( molecule )
+      && CheckMolecule.batchId( molecule )
       && CheckMolecule.continuId( molecule )
       && CheckMolecule.isotopeM( molecule )
       && CheckMolecule.isotopeT( molecule )
       && CheckMolecule.isotopeC( molecule )
       && CheckMolecule.isotopeU( molecule )
       && CheckMolecule.isotopeI( molecule )
-      && CheckMolecule.isotopeV( molecule, senderWallet );
+      && CheckMolecule.isotopeR( molecule )
+      && CheckMolecule.isotopeV( molecule, sourceWallet );
   }
 
   /**
    * Converts a JSON object into a Molecule Structure instance
    *
    * @param {string} json
-   * @return {Object}
+   * @return {object}
    * @throws {AtomsMissingException}
    */
   static jsonToObject ( json ) {

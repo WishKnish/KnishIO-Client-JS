@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
 import { shake256 } from 'js-sha3';
 import { randomString } from './strings';
-import Soda from "./../libraries/Soda";
+import Soda from './../libraries/Soda';
 
 /**
  * Generates a secret based on an optional seed
@@ -83,7 +83,7 @@ export function generateSecret ( seed = null, length = 2048 ) {
  */
 export function generateBundleHash ( secret ) {
 
-  console.info( 'Crypto::bundle() - Computing wallet bundle from secret...' );
+  console.info( 'Crypto::generateBundleHash() - Computing wallet bundle from secret...' );
 
   const sponge = shake256.create( 256 );
   sponge.update( secret );
@@ -94,9 +94,20 @@ export function generateBundleHash ( secret ) {
 /**
  * Returns a new batch ID for stackable tokens
  *
+ * @param {string|null} molecularHash
+ * @param {number|null} index
+ *
  * @returns {string}
  */
-export function generateBatchId () {
+export function generateBatchId ( {
+  molecularHash = null,
+  index = null
+} ) {
+
+  if ( molecularHash !== null && index !== null ) {
+    return generateBundleHash( String( molecularHash ) + String( index ) );
+  }
+
   return randomString( 64 );
 }
 
@@ -129,7 +140,7 @@ export function encryptMessage ( message, recipientPublicKey, characters = null 
  * @param {string} privateKey
  * @param {string} publicKey
  * @param {string|null} characters
- * @returns {Array | Object | null}
+ * @returns {array|object|null}
  */
 export function decryptMessage ( message, privateKey, publicKey, characters = null ) {
   return ( new Soda( characters ) ).decrypt( message, privateKey, publicKey );

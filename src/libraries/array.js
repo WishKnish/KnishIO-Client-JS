@@ -1,9 +1,9 @@
 /**
  * Split an array into chunks
  *
- * @param {Array} arr
+ * @param {array} arr
  * @param {number} size
- * @returns {Array}
+ * @returns {array}
  */
 export function chunkArray ( arr, size ) {
 

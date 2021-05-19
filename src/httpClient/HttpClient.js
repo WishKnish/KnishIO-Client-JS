@@ -45,8 +45,11 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { Request, Headers } from 'servie';
-import { fetch, } from 'popsicle';
+import {
+  Request,
+  Headers
+} from 'servie';
+import { fetch } from 'popsicle';
 
 const merge = require( 'lodash.merge' );
 
@@ -58,10 +61,10 @@ export default class HttpClient {
   /**
    * Class constructor
    *
-   * @param {string} url
-   * @param {Object} config
+   * @param {string} uri
+   * @param {object} config
    */
-  constructor ( url, config = {} ) {
+  constructor ( uri, config = {} ) {
 
     this.$__headers = new Headers( config.headers || {} );
     this.$__needHeaders = {
@@ -70,37 +73,37 @@ export default class HttpClient {
     };
     this.$__config = merge( config, {
       method: 'POST',
-      headers: this.$__headers,
+      headers: this.$__headers
     } );
 
-    this.setUrl( url );
+    this.setUri( uri );
   }
 
   /**
    * Returns configuration object
    *
-   * @returns {Object}
+   * @returns {object}
    */
   getConfig () {
     return this.$__config;
   }
 
   /**
-   * Sets the endpoint URL
+   * Sets the endpoint URI
    *
-   * @param {string} url
+   * @param {string} uri
    */
-  setUrl ( url ) {
-    this.$__url = url;
+  setUri ( uri ) {
+    this.$__uri = uri;
   }
 
   /**
-   * Gets the endpoint URL
+   * Gets the endpoint URI
    *
    * @returns {string}
    */
-  getUrl () {
-    return this.$__url;
+  getUri () {
+    return this.$__uri;
   }
 
   /**
@@ -125,7 +128,7 @@ export default class HttpClient {
    * Sends the request
    *
    * @param {Request} request
-   * @param {Object} options
+   * @param {object} options
    * @returns {Promise<XhrResponse|HttpResponse>}
    */
   async send ( request, options = {} ) {

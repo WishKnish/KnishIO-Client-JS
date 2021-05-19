@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Wallet from "../Wallet";
+import Response from './Response';
+import Wallet from '../Wallet';
 
 /**
  * Response for Wallet List query
@@ -56,11 +56,17 @@ export default class ResponseWalletList extends Response {
   /**
    * Class constructor
    *
-   * @param query
-   * @param json
+   * @param {Query} query
+   * @param {object} json
    */
-  constructor ( query, json ) {
-    super( query, json );
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
+    } );
     this.dataKey = 'data.Wallet';
     this.init();
   }
@@ -68,36 +74,43 @@ export default class ResponseWalletList extends Response {
   /**
    * Returns a Knish.IO client Wallet class instance out of object data
    *
-   * @param data
+   * @param {object} data
+   * @param {string|null} secret
    * @returns {Wallet}
    */
-  static toClientWallet ( data, secret = null ) {
+  static toClientWallet ( {
+    data,
+    secret = null
+  } ) {
     let wallet;
 
     if ( data.position === null || typeof data.position === 'undefined' ) {
-      wallet = Wallet.create(
-        data.bundleHash,
-        data.tokenSlug,
-        data.batchId,
-        data.characters
-      );
+      wallet = Wallet.create( {
+        secretOrBundle: data.bundleHash,
+        token: data.tokenSlug,
+        batchId: data.batchId,
+        characters: data.characters
+      } );
     } else {
-      wallet = new Wallet(
+      wallet = new Wallet( {
         secret,
-        data.tokenSlug,
-        data.position,
-        data.batchId,
-        data.characters
-      );
+        token: data.tokenSlug,
+        position: data.position,
+        batchId: data.batchId,
+        characters: data.characters
+      } );
       wallet.address = data.address;
       wallet.bundle = data.bundleHash;
     }
 
     if ( data.token ) {
       wallet.tokenName = data.token.name;
-      wallet.tokenSupply = data.token.amount;
+      wallet.tokenAmount = data.token.amount;
+      wallet.tokenSupply = data.token.supply;
+      wallet.tokenFungibility = data.token.fungibility;
     }
 
+    wallet.tokenUnits = data.tokenUnits;
     wallet.molecules = data.molecules;
     wallet.balance = Number( data.amount );
     wallet.pubkey = data.pubkey;
@@ -112,7 +125,7 @@ export default class ResponseWalletList extends Response {
    * @param secret
    * @returns {null|[]}
    */
-  getWallets ( secret ) {
+  getWallets ( secret = null ) {
 
     const list = this.data();
 
@@ -122,8 +135,11 @@ export default class ResponseWalletList extends Response {
 
     const wallets = [];
 
-    for ( let item of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( item, secret ) );
+    for ( let data of list ) {
+      wallets.push( ResponseWalletList.toClientWallet( {
+        data,
+        secret
+      } ) );
     }
 
     return wallets;
@@ -144,7 +160,9 @@ export default class ResponseWalletList extends Response {
     const wallets = [];
 
     for ( let item of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( item ) );
+      wallets.push( ResponseWalletList.toClientWallet( {
+        data: item
+      } ) );
     }
 
     return wallets;

@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "./Query";
-import ResponseWalletList from "../response/ResponseWalletList";
+import Query from './Query';
+import ResponseWalletList from '../response/ResponseWalletList';
 
 /**
  * Query for getting a list of Wallets
@@ -60,17 +60,19 @@ export default class QueryWalletList extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $address: String, $bundleHash: String, $token: String, $position: String, $unspent: Boolean ) { Wallet( address: $address, bundleHash: $bundleHash, token: $token, position: $position, unspent: $unspent ) @fields }`;
+    this.$__query = 'query( $address: String, $bundleHash: String, $token: String, $position: String, $unspent: Boolean ) { Wallet( address: $address, bundleHash: $bundleHash, token: $token, position: $position, unspent: $unspent ) @fields }';
     this.$__fields = {
       'address': null,
       'bundleHash': null,
       'token': {
         name: null,
         amount: null,
+        fungibility: null,
+        supply: null
       },
       'molecules': {
         molecularHash: null,
-        createdAt: null,
+        createdAt: null
       },
       'tokenSlug': null,
       'batchId': null,
@@ -79,16 +81,24 @@ export default class QueryWalletList extends Query {
       'characters': null,
       'pubkey': null,
       'createdAt': null,
+      'tokenUnits': {
+        'id': null,
+        'name': null,
+        'metas': null
+      }
     };
   }
 
   /**
    * Builds a Response object out of a JSON string
    *
-   * @param {string} response
+   * @param {object} json
    * @return {ResponseWalletList}
    */
-  createResponse ( response ) {
-    return new ResponseWalletList( this, response );
+  createResponse ( json ) {
+    return new ResponseWalletList( {
+      query: this,
+      json
+    } );
   }
 }

@@ -1,11 +1,14 @@
-import Base58 from './Base58'
-import { shake256 } from "js-sha3";
-import { box } from "tweetnacl";
-import { Buffer } from "buffer";
-import { open, seal, } from 'tweetnacl-sealedbox-js';
+import Base58 from './Base58';
+import { shake256 } from 'js-sha3';
+import { box } from 'tweetnacl';
+import { Buffer } from 'buffer';
+import {
+  open,
+  seal
+} from 'tweetnacl-sealedbox-js';
 import {
   decode as decodeUTF8,
-  encode as encodeUTF8,
+  encode as encodeUTF8
 } from '@stablelib/utf8';
 
 
@@ -19,7 +22,7 @@ export default class Soda {
   }
 
   /**
-   * @param {Array|Object} message
+   * @param {array|object} message
    * @param {string} key
    * @returns {string}
    */
@@ -31,7 +34,7 @@ export default class Soda {
    * @param {string} decrypted
    * @param {string} privateKey
    * @param {string} publicKey
-   * @returns {null|Array|Object}
+   * @returns {null|array|object}
    */
   decrypt ( decrypted, privateKey, publicKey ) {
     try {

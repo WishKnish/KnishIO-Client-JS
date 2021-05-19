@@ -1,21 +1,24 @@
-import AtomIndexException from "./../exception/AtomIndexException";
-import AtomsMissingException from "./../exception/AtomsMissingException";
-import MolecularHashMismatchException from "./../exception/MolecularHashMismatchException";
-import MolecularHashMissingException from "./../exception/MolecularHashMissingException";
-import SignatureMalformedException from "./../exception/SignatureMalformedException";
-import SignatureMismatchException from "./../exception/SignatureMismatchException";
-import TransferBalanceException from "./../exception/TransferBalanceException";
-import TransferMalformedException from "./../exception/TransferMalformedException";
-import TransferMismatchedException from "./../exception/TransferMismatchedException";
-import TransferRemainderException from "./../exception/TransferRemainderException";
-import TransferToSelfException from "./../exception/TransferToSelfException";
-import TransferUnbalancedException from "./../exception/TransferUnbalancedException";
-import MetaMissingException from "./../exception/MetaMissingException";
-import WrongTokenTypeException from "./../exception/WrongTokenTypeException";
-import Atom from "./../Atom";
-import Meta from "./../Meta";
-import { base64ToHex, chunkSubstr } from "./strings";
-import { shake256 } from "js-sha3";
+import AtomIndexException from './../exception/AtomIndexException';
+import AtomsMissingException from './../exception/AtomsMissingException';
+import MolecularHashMismatchException from './../exception/MolecularHashMismatchException';
+import MolecularHashMissingException from './../exception/MolecularHashMissingException';
+import SignatureMalformedException from './../exception/SignatureMalformedException';
+import SignatureMismatchException from './../exception/SignatureMismatchException';
+import TransferBalanceException from './../exception/TransferBalanceException';
+import TransferMalformedException from './../exception/TransferMalformedException';
+import TransferMismatchedException from './../exception/TransferMismatchedException';
+import TransferRemainderException from './../exception/TransferRemainderException';
+import TransferToSelfException from './../exception/TransferToSelfException';
+import TransferUnbalancedException from './../exception/TransferUnbalancedException';
+import MetaMissingException from './../exception/MetaMissingException';
+import WrongTokenTypeException from './../exception/WrongTokenTypeException';
+import BatchIdException from './../exception/BatchIdException';
+import Atom from './../Atom';
+import {
+  base64ToHex,
+  chunkSubstr
+} from './strings';
+import { shake256 } from 'js-sha3';
 
 /**
  *
@@ -24,7 +27,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {AtomsMissingException}
    */
@@ -41,8 +44,39 @@ export default class CheckMolecule {
   }
 
   /**
+   * @param {MoleculeStructure} molecule
    *
-   * @param {Molecule} molecule
+   * @return {boolean}
+   */
+  static batchId ( molecule ) {
+
+    if ( molecule.atoms.length > 0 ) {
+      const subscription = molecule.atoms[ 0 ];
+
+      if ( subscription.isotope === 'V' && subscription.batchId !== null ) {
+        const atoms = CheckMolecule.isotopeFilter( 'V', molecule.atoms );
+        const remainder = atoms[ atoms.length - 1 ];
+
+        if ( subscription.batchId !== remainder.batchId ) {
+          throw new BatchIdException();
+        }
+
+        for ( const atom of atoms ) {
+          if ( atom.batchId === null ) {
+            throw new BatchIdException();
+          }
+        }
+      }
+
+      return true;
+    }
+
+    throw new BatchIdException();
+  }
+
+  /**
+   *
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -65,7 +99,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -88,7 +122,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException}
    */
@@ -111,7 +145,7 @@ export default class CheckMolecule {
   }
 
   /**
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @return {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -134,7 +168,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @return {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException|AtomIndexException}
    */
@@ -143,7 +177,7 @@ export default class CheckMolecule {
     CheckMolecule.missing( molecule );
 
     for ( let atom of CheckMolecule.isotopeFilter( 'T', molecule.atoms ) ) {
-      const meta = Meta.aggregateMeta( Meta.normalizeMeta( atom.meta ) ),
+      const meta = atom.aggregatedMeta(),
         metaType = String( atom.metaType ).toLowerCase();
 
       if ( metaType === 'wallet' ) {
@@ -154,7 +188,7 @@ export default class CheckMolecule {
         }
       }
 
-      for ( let key of [ 'token', ] ) {
+      for ( let key of [ 'token' ] ) {
         if ( !meta.hasOwnProperty( key ) || !Boolean( meta[ key ] ) ) {
           throw new MetaMissingException( `No or not defined "${ key }" in meta` );
         }
@@ -176,7 +210,7 @@ export default class CheckMolecule {
     CheckMolecule.missing( molecule );
 
     for ( let atom of CheckMolecule.isotopeFilter( 'R', molecule.atoms ) ) {
-      const metas = Meta.aggregateMeta( Meta.normalizeMeta( atom.meta ) );
+      const metas = atom.aggregatedMeta();
       for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
 
         if ( !metas.hasOwnProperty( key ) ) {
@@ -189,29 +223,29 @@ export default class CheckMolecule {
 
         for ( let condition of conditions ) {
           const keys = Object.keys( condition ),
-            property = keys.filter( function( n) {
-              return [ 'key', 'value', 'comparison', ].indexOf( n ) !== -1;
+            property = keys.filter( function ( n ) {
+              return [ 'key', 'value', 'comparison' ].indexOf( n ) !== -1;
             } ),
-            property2 = keys.filter( function( n) {
-              return [ 'managedBy', ].indexOf( n ) !== -1;
+            property2 = keys.filter( function ( n ) {
+              return [ 'managedBy' ].indexOf( n ) !== -1;
             } );
           if ( property.length < 3 && property2.length < 1 ) {
-            throw new MetaMissingException( `Missing field in conditions.` );
+            throw new MetaMissingException( 'Missing field in conditions.' );
           }
         }
       } catch ( err ) {
-        throw new MetaMissingException( `Invalid format for conditions.` );
+        throw new MetaMissingException( 'Invalid format for conditions.' );
       }
     }
   }
 
   /**
-   * @param {Molecule} molecule
-   * @param {Wallet} senderWallet
+   * @param {MoleculeStructure} molecule
+   * @param {Wallet} sourceWallet
    * @return {boolean}
    * @throws {TransferRemainderException|TransferRemainderException|TypeError|TransferMismatchedException|TransferMalformedException|TransferToSelfException|TransferUnbalancedException|TransferBalanceException}
    */
-  static isotopeV ( molecule, senderWallet = null ) {
+  static isotopeV ( molecule, sourceWallet = null ) {
 
     CheckMolecule.missing( molecule );
 
@@ -290,8 +324,8 @@ export default class CheckMolecule {
       throw new TransferUnbalancedException();
     }
 
-    // If we're provided with a senderWallet argument, we can perform additional checks
-    if ( senderWallet ) {
+    // If we're provided with a sourceWallet argument, we can perform additional checks
+    if ( sourceWallet ) {
 
       value = firstAtom.value * 1;
 
@@ -299,7 +333,7 @@ export default class CheckMolecule {
         throw new TypeError( 'Invalid isotope "V" values' );
       }
 
-      const remainder = ( senderWallet.balance * 1.0 ) + ( value * 1.0 );
+      const remainder = ( sourceWallet.balance * 1.0 ) + ( value * 1.0 );
 
       // Is there enough balance to send?
       if ( remainder < 0 ) {
@@ -311,7 +345,7 @@ export default class CheckMolecule {
         throw new TransferRemainderException();
       }
 
-    } // No senderWallet, but have a remainder?
+    } // No sourceWallet, but have a remainder?
     else if ( value !== 0 ) {
       throw new TransferRemainderException();
     }
@@ -323,7 +357,7 @@ export default class CheckMolecule {
   /**
    * Verifies if the hash of all the atoms matches the molecular hash to ensure content has not been messed with
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @return {boolean}
    * @throws {MolecularHashMismatchException}
    */
@@ -331,7 +365,9 @@ export default class CheckMolecule {
 
     CheckMolecule.missing( molecule );
 
-    if ( molecule.molecularHash !== Atom.hashAtoms( molecule.atoms ) ) {
+    if ( molecule.molecularHash !== Atom.hashAtoms( {
+      atoms: molecule.atoms
+    } ) ) {
       throw new MolecularHashMismatchException();
     }
 
@@ -344,7 +380,7 @@ export default class CheckMolecule {
    * fragments from its atoms and its molecular hash into a single-use wallet address to be matched
    * against the sender’s address. If it matches, the molecule was correctly signed.
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @returns {boolean}
    * @throws {SignatureMalformedException|SignatureMismatchException}
    */
@@ -408,9 +444,9 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @return {boolean}
-   * @throws {MolecularHashMissingException | AtomsMissingException | AtomIndexException}
+   * @throws {MolecularHashMissingException|AtomsMissingException|AtomIndexException}
    */
   static index ( molecule ) {
 
@@ -429,8 +465,8 @@ export default class CheckMolecule {
   /**
    *
    * @param {string} isotope
-   * @param {Int32Array | Uint32Array | Array | Int8Array | Float64Array | BigUint64Array | Uint8Array | Int16Array | BigInt64Array | Float32Array | Uint8ClampedArray | Uint16Array} atoms
-   * @returns {Int32Array | Uint32Array | Array | Int8Array | Float64Array | BigUint64Array | Uint8Array | Int16Array | BigInt64Array | Float32Array | Uint8ClampedArray | Uint16Array}
+   * @param {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array} atoms
+   * @returns {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array}
    */
   static isotopeFilter ( isotope, atoms ) {
 
@@ -443,12 +479,12 @@ export default class CheckMolecule {
    * Convert Hm to numeric notation via EnumerateMolecule(Hm)
    *
    * @param {string} hash
-   * @returns {Array}
+   * @returns {array}
    */
   static normalizedHash ( hash ) {
 
     // Convert Hm to numeric notation via EnumerateMolecule(Hm)
-    return CheckMolecule.normalize( CheckMolecule.enumerate( hash ) )
+    return CheckMolecule.normalize( CheckMolecule.enumerate( hash ) );
   }
 
   /**
@@ -461,7 +497,7 @@ export default class CheckMolecule {
    * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
    *
    * @param {string} hash
-   * @returns {Array}
+   * @returns {array}
    */
   static enumerate ( hash ) {
 
@@ -482,7 +518,7 @@ export default class CheckMolecule {
         'd': 5,
         'e': 6,
         'f': 7,
-        'g': 8,
+        'g': 8
       },
       target = [],
       hashList = hash.toLowerCase().split( '' );
@@ -509,7 +545,7 @@ export default class CheckMolecule {
    *    If m<0 and Im<8 , let Im=Im+1
    *    If m=0, stop the iteration
    *
-   * @param {Array} mappedHashArray
+   * @param {array} mappedHashArray
    * @returns {*}
    */
   static normalize ( mappedHashArray ) {
@@ -540,7 +576,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {Molecule} molecule
+   * @param {MoleculeStructure} molecule
    * @throws {MolecularHashMissingException|AtomsMissingException}
    */
   static missing ( molecule ) {

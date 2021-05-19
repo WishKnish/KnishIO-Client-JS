@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "../response/ResponseMolecule";
-import Mutation from "./Mutation";
+import ResponseProposeMolecule from '../response/ResponseProposeMolecule';
+import Mutation from './Mutation';
 
 const merge = require( 'lodash.merge' );
 
@@ -65,7 +65,7 @@ export default class MutationProposeMolecule extends Mutation {
     super( knishIO );
     this.$__molecule = molecule;
     this.$__remainderWallet = null;
-    this.$__query = `mutation( $molecule: MoleculeInput! ) { ProposeMolecule( molecule: $molecule ) @fields }`;
+    this.$__query = 'mutation( $molecule: MoleculeInput! ) { ProposeMolecule( molecule: $molecule ) @fields }';
     this.$__fields = {
       'molecularHash': null,
       'height': null,
@@ -76,7 +76,7 @@ export default class MutationProposeMolecule extends Mutation {
       'createdAt': null,
       'receivedAt': null,
       'processedAt': null,
-      'broadcastedAt': null,
+      'broadcastedAt': null
     };
   }
 
@@ -95,22 +95,34 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Creates a new response from a JSON string
    *
-   * @param {string} response
-   * @return {ResponseMolecule}
+   * @param {object} json
+   * @return {ResponseProposeMolecule}
    */
-  createResponse ( response ) {
-    return new ResponseMolecule( this, response );
+  createResponse ( json ) {
+    return new ResponseProposeMolecule( {
+      query: this,
+      json
+    } );
   }
 
   /**
    * Executes the query
    *
-   * @param {Object} variables
-   * @param {Object|null} fields
-   * @return {Promise<Response>}
+   * @param {object} variables
+   * @param {object|null} fields
+   * @return {Promise}
    */
-  async execute ( variables = null, fields = null ) {
-    return await super.execute( merge( variables || {}, { 'molecule': this.molecule() } ), fields );
+  async execute ( {
+    variables = null,
+    fields = null
+  } ) {
+    variables = variables || {};
+    variables.molecule = this.molecule();
+
+    return await super.execute( {
+      variables,
+      fields
+    } );
   }
 
   /**
@@ -125,7 +137,7 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Returns the molecule we are proposing
    *
-   * @returns {null}
+   * @returns {Molecule}
    */
   molecule () {
     return this.$__molecule;

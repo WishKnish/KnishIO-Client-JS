@@ -50,8 +50,8 @@ import Atom from './Atom';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
 import Meta from './Meta';
-import KnishIOClient from "./KnishIOClient";
-import Test from "./test/Test";
+import KnishIOClient from './KnishIOClient';
+import Test from './test/Test';
 import {
   base64ToHex,
   bufferToHexString,
@@ -60,8 +60,8 @@ import {
   hexStringToBuffer,
   hexToBase64,
   isHex,
-  randomString,
-} from "./libraries/strings";
+  randomString
+} from './libraries/strings';
 import {
   decryptMessage,
   encryptMessage,
@@ -69,8 +69,8 @@ import {
   generateEncPrivateKey,
   generateEncPublicKey,
   generateSecret,
-  hashShare,
-} from "./libraries/crypto";
+  hashShare
+} from './libraries/crypto';
 
 export {
   Atom,
@@ -97,5 +97,5 @@ export {
   generateBundleHash,
   generateEncPrivateKey,
   generateEncPublicKey,
-  hashShare,
+  hashShare
 };
