@@ -18,7 +18,7 @@ export default class MutationActiveSession extends Query {
       'metaId': null,
       'jsonData': null,
       'createdAt': null,
-      'updatedAt': null,
+      'updatedAt': null
     };
   }
 
