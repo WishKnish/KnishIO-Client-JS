@@ -14,7 +14,6 @@ import MetaMissingException from './../exception/MetaMissingException';
 import WrongTokenTypeException from './../exception/WrongTokenTypeException';
 import BatchIdException from './../exception/BatchIdException';
 import Atom from './../Atom';
-import Meta from './../Meta';
 import {
   base64ToHex,
   chunkSubstr
@@ -52,7 +51,7 @@ export default class CheckMolecule {
   static batchId ( molecule ) {
 
     if ( molecule.atoms.length > 0 ) {
-      const subscription = molecule.atoms[0];
+      const subscription = molecule.atoms[ 0 ];
 
       if ( subscription.isotope === 'V' && subscription.batchId !== null ) {
         const atoms = CheckMolecule.isotopeFilter( 'V', molecule.atoms );

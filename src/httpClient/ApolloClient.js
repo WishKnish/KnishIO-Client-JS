@@ -1,11 +1,14 @@
-import { ApolloClient as RootApolloClient, } from "apollo-client";
-import { createHttpLink, } from 'apollo-link-http';
-import { onError, } from 'apollo-link-error';
+import { ApolloClient as RootApolloClient } from 'apollo-client';
+import { createHttpLink } from 'apollo-link-http';
+import { onError } from 'apollo-link-error';
 import fetch from 'isomorphic-fetch';
-import { ApolloLink, Operation, } from 'apollo-link';
-import { InMemoryCache, } from 'apollo-cache-inmemory';
+import {
+  ApolloLink,
+  Operation
+} from 'apollo-link';
+import { InMemoryCache } from 'apollo-cache-inmemory';
 import EchoLink from '../libraries/ApolloLink/EchoLink';
-import { operationName, } from '../libraries/ApolloLink/handler';
+import { operationName } from '../libraries/ApolloLink/handler';
 
 
 export default class ApolloClient {
@@ -16,31 +19,45 @@ export default class ApolloClient {
    * @param {string} serverUri
    * @param {string|null} authorization
    */
-  constructor ( { socketUri, serverUri, authorization = null } ) {
+  constructor ( {
+    socketUri,
+    serverUri,
+    authorization = null
+  } ) {
 
-    const httpLink = createHttpLink({
+    const httpLink = createHttpLink( {
         uri: serverUri,
         fetch: fetch,
-        transportBatching: true,
-      }),
-      authLink = new ApolloLink((operation, forward) => {
+        transportBatching: true
+      } ),
+      authLink = new ApolloLink( ( operation, forward ) => {
         // Use the setContext method to set the HTTP headers.
-        operation.setContext({
+        operation.setContext( {
           headers: {
-            'X-Auth-Token': this.getAuthToken(),
-          },
-        });
+            'X-Auth-Token': this.getAuthToken()
+          }
+        } );
         // Call the next link in the middleware chain.
         return forward( operation );
-      }),
-      errorLink = onError( ( { graphQLErrors, networkError, operation, forward, } ) => {
+      } ),
+      errorLink = onError( ( {
+        graphQLErrors,
+        networkError,
+        operation,
+        forward
+      } ) => {
 
         if ( graphQLErrors ) {
-          graphQLErrors.map( ( { message, debugMessage, locations, path, } ) => console.error(
-            `[GraphQL error]: ${message}\r\n`,
-            `  Message : ${debugMessage}\r\n`,
-            `  Path    : ${path}\r\n`,
-            `  Location: ${locations}\r\n`,
+          graphQLErrors.map( ( {
+            message,
+            debugMessage,
+            locations,
+            path
+          } ) => console.error(
+            `[GraphQL error]: ${ message }\r\n`,
+            `  Message : ${ debugMessage }\r\n`,
+            `  Path    : ${ path }\r\n`,
+            `  Location: ${ locations }\r\n`
           ) );
         }
 
@@ -48,12 +65,12 @@ export default class ApolloClient {
 
           if ( networkError.name === 'ServerError' && networkError.statusCode === 401 ) {
 
-            operation.setContext({
+            operation.setContext( {
               headers: {
                 ...operation.getContext().headers,
-                'X-Auth-Token': this.getAuthToken(),
-              },
-            });
+                'X-Auth-Token': this.getAuthToken()
+              }
+            } );
             // retry the request, returning the new observable
             return forward( operation );
           }
@@ -63,16 +80,16 @@ export default class ApolloClient {
           // network errors, we recommend that you use
           // apollo-link-retry
         }
-      });
+      } );
 
     this.$__subscribers = {};
     this.$__authorization = authorization;
     this.$__uri = socketUri;
-    this.$__echo = new EchoLink( { socketUri, } );
+    this.$__echo = new EchoLink( { socketUri } );
     this.$__client = new RootApolloClient( {
-      link: ApolloLink.from( [ authLink, this.$__echo, errorLink.concat( httpLink ), ] ),
+      link: ApolloLink.from( [ authLink, this.$__echo, errorLink.concat( httpLink ) ] ),
       cache: new InMemoryCache(),
-      connectToDevTools: true,
+      connectToDevTools: true
     } );
   }
 
@@ -107,7 +124,7 @@ export default class ApolloClient {
 
     this.$__subscribers[ operation ] = this.$__client
       .subscribe( request )
-      .subscribe(data => closure( data ) );
+      .subscribe( data => closure( data ) );
 
     return operation;
   }

@@ -1,8 +1,8 @@
-import Subscribe from "./Subscribe";
-import gql from "graphql-tag";
+import Subscribe from './Subscribe';
+import gql from 'graphql-tag';
 
 export default class CreateMoleculeSubscribe extends Subscribe {
-  constructor( apolloClient ) {
+  constructor ( apolloClient ) {
     super( apolloClient );
     this.$__subscribe = gql`
         subscription onCreateMolecule ( $bundle: String! ) {
