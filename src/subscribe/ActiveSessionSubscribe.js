@@ -6,7 +6,7 @@ export default class ActiveSessionSubscribe extends Subscribe {
   constructor( apolloClient ) {
     super( apolloClient );
     this.$__subscribe = gql`
-      subscription onActiveWallet ( $metaType: String!, $metaId: String! ) {
+      subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
         ActiveUser( metaType: $metaType, metaId: $metaId ) {
             bundleHash,
             metaType,
