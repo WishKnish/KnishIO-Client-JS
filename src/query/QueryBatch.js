@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "./Query";
-import Response from "../response/Response";
+import Query from './Query';
+import Response from '../response/Response';
 
 
 /**
@@ -59,7 +59,7 @@ export default class QueryBatch extends Query {
    * Get cloned fields
    * @returns {any}
    */
-  static getFields()  {
+  static getFields () {
     return {
       'batchId': null,
       'molecularHash': null,
@@ -73,44 +73,44 @@ export default class QueryBatch extends Query {
         'tokenSlug': null,
         'token': {
           name: null,
-          amount: null,
+          amount: null
         },
         'tokenUnits': {
           'id': null,
           'name': null,
-          'metas': null,
-        },
+          'metas': null
+        }
       },
       'fromWallet': {
         'address': null,
         'bundleHash': null,
         'amount': null,
-        'batchId': null,
+        'batchId': null
       },
       'toWallet': {
         'address': null,
         'bundleHash': null,
         'amount': null,
-        'batchId': null,
+        'batchId': null
       },
       'sourceTokenUnits': {
         'id': null,
         'name': null,
-        'metas': null,
+        'metas': null
       },
       'transferTokenUnits': {
         'id': null,
         'name': null,
-        'metas': null,
+        'metas': null
       },
       'metas': {
         'key': null,
-        'value': null,
+        'value': null
       },
       'throughMetas': {
         'key': null,
-        'value': null,
-      },
+        'value': null
+      }
     };
   }
 
@@ -122,7 +122,7 @@ export default class QueryBatch extends Query {
    */
   constructor ( httpClient ) {
     super( httpClient );
-    this.$__query = `query( $batchId: String ) { Batch( batchId: $batchId ) @fields }`;
+    this.$__query = 'query( $batchId: String ) { Batch( batchId: $batchId ) @fields }';
 
     this.$__fields = QueryBatch.getFields();
     this.$__fields[ 'children' ] = QueryBatch.getFields();
@@ -137,7 +137,7 @@ export default class QueryBatch extends Query {
   createResponse ( json ) {
     let responseObject = new Response( {
       query: this,
-      json,
+      json
     } );
     responseObject.dataKey = 'data.Batch';
     return responseObject;

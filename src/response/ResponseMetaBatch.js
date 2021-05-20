@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Response from "./Response";
+import Response from './Response';
 
 /**
  * Response for MetaBatch Query

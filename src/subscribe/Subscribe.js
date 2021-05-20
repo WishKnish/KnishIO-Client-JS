@@ -1,5 +1,5 @@
-import CodeException from "../exception/CodeException";
-import { Operation, } from 'apollo-link';
+import CodeException from '../exception/CodeException';
+import { Operation } from 'apollo-link';
 
 export default class Subscribe {
   /**
@@ -20,7 +20,7 @@ export default class Subscribe {
    * @returns {Operation}
    */
   createSubscribe ( {
-    variables = null,
+    variables = null
   } ) {
     this.$__variables = this.compiledVariables( variables );
 
@@ -38,8 +38,8 @@ export default class Subscribe {
     return {
       query: this.$__subscribe,
       variables: this.variables(),
-      fetchPolicy: 'no-cache',
-    }
+      fetchPolicy: 'no-cache'
+    };
   }
 
   /**
@@ -51,14 +51,14 @@ export default class Subscribe {
    */
   async execute ( {
     variables = null,
-    closure,
+    closure
   } ) {
     if ( !closure ) {
       throw new CodeException( `${ this.constructor.name }::execute - closure parameter is required.` );
     }
 
     this.$__request = this.createSubscribe( {
-      variables,
+      variables
     } );
 
     return this.client.subscribe( this.$__request, closure );
@@ -71,7 +71,7 @@ export default class Subscribe {
    * @returns {{}}
    */
   compiledVariables ( variables = null ) {
-    return variables || {}
+    return variables || {};
   }
 
   /**

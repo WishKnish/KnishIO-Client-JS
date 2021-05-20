@@ -1,9 +1,9 @@
 import {
   Observable,
   Operation,
-  FetchResult,
-} from "apollo-link";
-import { Observer, } from "apollo-client/util/Observable";
+  FetchResult
+} from 'apollo-link';
+import { Observer } from 'apollo-client/util/Observable';
 
 /**
  * @param {Echo} echoClient
@@ -11,17 +11,17 @@ import { Observer, } from "apollo-client/util/Observable";
  * @param {Observer<FetchResult>} observer
  * @param {string} operationName
  */
-function subscribeToEcho(
+function subscribeToEcho (
   echoClient,
   channelName,
   observer,
   operationName
 ) {
   const channel = echoClient.private(
-    channelName.replace(/^private\-/, '')
+    channelName.replace( /^private\-/, '' )
   );
 
-  channel.listen(".lighthouse-subscription", result => {
+  channel.listen( '.lighthouse-subscription', result => {
     let data = result.data;
 
     if ( data.data ) {
@@ -39,7 +39,7 @@ function subscribeToEcho(
  * @param {Echo} echoClient
  * @param {function(): string} getChannelName
  */
-function unsubscribe( echoClient, getChannelName ) {
+function unsubscribe ( echoClient, getChannelName ) {
   const channelName = getChannelName();
 
   if ( channelName ) {
@@ -58,7 +58,7 @@ function getChannel ( data, subscriptionName ) {
 
     const version = data.extensions.lighthouse_subscriptions.version;
 
-    if ( version < 2) {
+    if ( version < 2 ) {
       if ( data.extensions.lighthouse_subscriptions.channels ) {
         return data.extensions.lighthouse_subscriptions.channels[ subscriptionName ];
       }
@@ -80,7 +80,7 @@ function getChannel ( data, subscriptionName ) {
  *
  * @return {(function(FetchResult): void)|*}
  */
-function createSubscriptionHandler(
+function createSubscriptionHandler (
   echoClient,
   operation,
   observer,
@@ -91,7 +91,7 @@ function createSubscriptionHandler(
       channelName = getChannel( data, nameOperation );
 
     if ( channelName ) {
-      setChannelName(channelName);
+      setChannelName( channelName );
       subscribeToEcho( echoClient, channelName, observer, nameOperation );
     } else {
       observer.next( data );
@@ -106,9 +106,9 @@ function createSubscriptionHandler(
  */
 export function operationName ( operation ) {
   const operationDefinition = operation.query
-    .definitions.find(definitionNode => definitionNode.kind === "OperationDefinition");
+    .definitions.find( definitionNode => definitionNode.kind === 'OperationDefinition' );
   const fieldNode = operationDefinition.selectionSet
-    .selections.find(definitionNode => definitionNode.kind === "Field");
+    .selections.find( definitionNode => definitionNode.kind === 'Field' );
 
   return fieldNode.name.value;
 }
@@ -118,16 +118,16 @@ export function operationName ( operation ) {
  * @param {Echo} echoClient
  * @return {Observable<unknown>|Observable|*}
  */
-export default function createRequestHandler( echoClient ) {
+export default function createRequestHandler ( echoClient ) {
   return ( operation, forward ) => {
     let channelName;
 
-    return new Observable(( observer ) => {
+    return new Observable( ( observer ) => {
       forward( operation ).subscribe(
         createSubscriptionHandler( echoClient, operation, observer, name => channelName = name )
       );
 
       return () => unsubscribe( echoClient, () => channelName );
-    });
+    } );
   };
 }
