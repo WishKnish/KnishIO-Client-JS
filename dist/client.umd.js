@@ -91,7 +91,7 @@
             }
         }
     `}}class wt extends bt{constructor(e){super(e),this.$__subscribe=M.default`
-        subscription onActiveWallet ( $metaType: String!, $metaId: String! ) {
+        subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
             ActiveUser( metaType: $metaType, metaId: $metaId ) {
                 bundleHash,
                 metaType,

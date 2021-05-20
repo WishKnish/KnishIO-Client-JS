@@ -91,7 +91,7 @@ import{shake256 as e}from"js-sha3";import t from"big-integer";import{decode as s
             }
         }
     `}}class bt extends mt{constructor(e){super(e),this.$__subscribe=S`
-        subscription onActiveWallet ( $metaType: String!, $metaId: String! ) {
+        subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
             ActiveUser( metaType: $metaType, metaId: $metaId ) {
                 bundleHash,
                 metaType,
