@@ -237,6 +237,8 @@ export default class CheckMolecule {
         throw new MetaMissingException( 'Invalid format for conditions.' );
       }
     }
+
+    return true;
   }
 
   /**
