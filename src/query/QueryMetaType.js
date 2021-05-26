@@ -47,43 +47,39 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from "./Query";
 import ResponseMetaType from "../response/ResponseMetaType";
+import gql from "graphql-tag";
 
 /**
  * Query for retrieving Meta Asset information
  */
 export default class QueryMetaType extends Query {
-
-  /**
-   * Class constructor
-   *
-   * @param httpClient
-   */
-  constructor ( httpClient ) {
-    super( httpClient );
-    this.$__query = `query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean, $queryArgs: QueryArgs, $countBy: String ) { MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas, queryArgs: $queryArgs, countBy: $countBy ) @fields }`;
-    this.$__fields = {
-      'metaType': null,
-      'instanceCount': {
-        'key': null,
-        'value': null,
-      },
-      'instances': {
-        'metaType': null,
-        'metaId': null,
-        'createdAt': null,
-        'metas(latest:$latest)': {
-          'molecularHash': null,
-          'position': null,
-          'key': null,
-          'value': null,
-          'createdAt': null,
-        },
-      },
-      'paginatorInfo': {
-        'currentPage': null,
-        'total': null,
-      }
-    };
+  constructor( apolloClient ) {
+    super( apolloClient );
+    this.$__query = gql`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean, $queryArgs: QueryArgs, $countBy: String ) {
+        MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas, queryArgs: $queryArgs, countBy: $countBy ) {
+            metaType,
+            instanceCount {
+                key,
+                value
+            },
+            instances {
+                metaType,
+                metaId,
+                createdAt,
+                metas(latest:$latest) {
+                    molecularHash,
+                    position,
+                    key,
+                    value,
+                    createdAt
+                }
+            },
+            paginatorInfo {
+                currentPage,
+                total
+            }
+        }
+    }`;
   }
 
   /**
@@ -170,6 +166,6 @@ export default class QueryMetaType extends Query {
     }
 
     return variables;
-
   }
+
 }

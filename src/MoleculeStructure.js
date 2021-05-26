@@ -50,7 +50,6 @@ import AtomsMissingException from "./exception/AtomsMissingException";
 import Atom from "./Atom";
 
 const cloneDeep = require( 'lodash.clonedeep' );
-const merge = require( 'lodash.merge' );
 
 /**
  * MoleculeStructure class to formalize the creation of Molecules
@@ -146,7 +145,7 @@ export default class MoleculeStructure {
    */
   static jsonToObject ( json ) {
 
-    const target = merge( new this(), JSON.parse( json ) ),
+    const target = { ...( new this() ), ...JSON.parse( json ) },
       properties = Object.keys( new this() );
 
     if ( !Array.isArray( target.atoms ) ) {

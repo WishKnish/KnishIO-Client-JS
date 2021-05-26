@@ -53,11 +53,7 @@ import ResponseCreateToken from "../response/ResponseCreateToken";
  */
 export default class MutationCreateToken extends MutationProposeMolecule {
 
-  fillMolecule ( {
-    recipientWallet,
-    amount,
-    meta = null,
-  } ) {
+  fillMolecule ( { recipientWallet, amount, meta = null, } ) {
     this.$__molecule.initTokenCreation( {
       recipientWallet,
       amount,
@@ -65,7 +61,6 @@ export default class MutationCreateToken extends MutationProposeMolecule {
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
-    console.log(this.$__molecule.toJSON());
   }
 
   /**
@@ -80,4 +75,5 @@ export default class MutationCreateToken extends MutationProposeMolecule {
       json,
     } );
   }
+
 }

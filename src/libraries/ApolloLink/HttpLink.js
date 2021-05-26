@@ -45,54 +45,24 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import { Operation, } from 'apollo-link';
+import { Operation,  NextLink, } from "apollo-link";
+import { HttpLink as RootHttpLink, } from 'apollo-link-http';
 
-/**
- * Base class used to construct various GraphQL mutations
- */
-export default class Mutation extends Query {
-  /**
-   *
-   * @param {ApolloClient} apolloClient
-   */
-  constructor ( apolloClient ) {
-    super( apolloClient );
+class HttpLink extends RootHttpLink {
+
+  constructor( options ) {
+    super( options );
   }
 
   /**
-   * Creates a new Request for the given parameters
    *
-   * @param {object} variables
-   * @param {array|object|null} fields
-   * @returns {Operation}
+   * @param {Operation} operation
+   * @param {NextLink} forward
+   * @return {*}
    */
-  createQuery ( { variables = null, } ) {
-
-    const request = super.createQuery( { variables } );
-
-    request.mutation = request.query;
-
-    delete request.query;
-
-    return request;
-  }
-
-  /**
-   * Sends the Query to a Knish.IO node and returns the Response
-   *
-   * @param {object} variables
-   */
-  async execute ( { variables = null, } ) {
-
-    this.$__request = this.createQuery( {
-      variables,
-    } );
-
-    let response = await this.client.mutate( this.$__request );
-
-    this.$__response = await this.createResponseRaw( response );
-
-    return this.$__response;
+  request ( operation, forward ) {
+    return forward(operation);
   }
 }
+
+export default HttpLink;

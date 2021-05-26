@@ -52,10 +52,8 @@ import {
   generateBatchId,
   generateSecret
 } from './libraries/crypto';
-import HttpClient from '../src/httpClient/HttpClient';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
-
 import QueryContinuId from './query/QueryContinuId';
 import QueryWalletBundle from './query/QueryWalletBundle';
 import QueryWalletList from './query/QueryWalletList';
@@ -63,7 +61,6 @@ import QueryBalance from './query/QueryBalance';
 import QueryMetaType from './query/QueryMetaType';
 import QueryBatch from './query/QueryBatch';
 import QueryBatchHistory from './query/QueryBatchHistory';
-
 import MutationRequestAuthorization from './mutation/MutationRequestAuthorization';
 import MutationCreateToken from './mutation/MutationCreateToken';
 import MutationRequestTokens from './mutation/MutationRequestTokens';
@@ -74,12 +71,10 @@ import MutationClaimShadowWallet from './mutation/MutationClaimShadowWallet';
 import MutationCreateMeta from './mutation/MutationCreateMeta';
 import MutationCreateWallet from './mutation/MutationCreateWallet';
 import MutationRequestAuthorizationGuest from './mutation/MutationRequestAuthorizationGuest';
-
 import TransferBalanceException from './exception/TransferBalanceException';
 import CodeException from './exception/CodeException';
 import UnauthenticatedException from './exception/UnauthenticatedException';
 import WalletShadowException from './exception/WalletShadowException';
-import Meta from './Meta';
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException';
 import StackableUnitAmountException from './exception/StackableUnitAmountException';
 import ApolloClient from "./httpClient/ApolloClient";
@@ -101,7 +96,7 @@ export default class KnishIOClient {
    *
    * @param {string} uri
    * @param {string} socketUri
-   * @param {HttpClient} client
+   * @param {ApolloClient} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    */
@@ -126,7 +121,7 @@ export default class KnishIOClient {
    *
    * @param {string} uri
    * @param {string|null} socketUri
-   * @param {HttpClient} client
+   * @param {ApolloClient} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    */
@@ -138,7 +133,6 @@ export default class KnishIOClient {
     logging = false,
   } ) {
 
-    this.$__subscribe = null;
     this.$__logging = logging;
 
     if ( this.$__logging ) {
@@ -146,15 +140,7 @@ export default class KnishIOClient {
     }
 
     this.reset();
-
-    if ( socketUri !== null ) {
-      this.$__subscribe = new ApolloClient({
-        socketUri: socketUri,
-        serverUri: uri
-      });
-    }
-
-    this.$__client = client || new HttpClient( uri );
+    this.$__client = client || new ApolloClient({ socketUri: socketUri, serverUri: uri, });
     this.$__serverSdkVersion = serverSdkVersion;
   }
 
@@ -169,10 +155,10 @@ export default class KnishIOClient {
   }
 
   subscribe () {
-    if ( !this.$__subscribe ) {
+    if ( !this.client().getSocketUri() ) {
       throw new CodeException( 'KnishIOClient::subscribe() - socket client not initialized!' );
     }
-    return this.$__subscribe;
+    return this.client();
   }
 
 
@@ -223,9 +209,9 @@ export default class KnishIOClient {
   }
 
   /**
-   * Returns the HTTP client class session
+   * Returns the Apollo client class session
    *
-   * @returns {HttpClient}
+   * @returns {ApolloClient}
    */
   client () {
     return this.$__client;
@@ -405,11 +391,7 @@ export default class KnishIOClient {
    * @param {string|null} cellSlug
    * @return {Promise<Response>}
    */
-  async requestAuthToken ( {
-    secret = null,
-    seed = null,
-    cellSlug = null,
-  } ) {
+  async requestAuthToken ( { secret = null, seed = null, cellSlug = null, } ) {
 
     if ( this.$__logging ) {
       console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
@@ -474,8 +456,7 @@ export default class KnishIOClient {
         } );
 
         query.fillMolecule();
-        //console.log(JSON.stringify(query.$__molecule.toJSON()));
-        //throw new Error();
+
         /**
          * @type {ResponseRequestAuthorization}
          */
@@ -486,10 +467,6 @@ export default class KnishIOClient {
 
         const token = response.token();
         this.client().setAuthToken( token );
-
-        if ( this.$__subscribe !== null ) {
-          this.subscribe().setAuthToken( token );
-        }
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
@@ -531,10 +508,7 @@ export default class KnishIOClient {
    * @param {string|null} bundle
    * @return {Promise<ResponseBalance>}
    */
-  async queryBalance ( {
-    token,
-    bundle = null,
-  } ) {
+  async queryBalance ( { token, bundle = null, } ) {
 
     /**
      * @type {QueryBalance}
@@ -1048,7 +1022,6 @@ export default class KnishIOClient {
       }
     } )
       .then( ( /** ResponseWalletList */ response ) => {
-        console.log( response );
         return response.payload();
       } );
   }
@@ -1440,7 +1413,7 @@ export default class KnishIOClient {
     molecule.sign( {} );
     molecule.check();
 
-    return ( new MutationProposeMolecule( this.client(), molecule ) ).execute( {} );
+    return ( new _MutationProposeMolecule( this.client(), molecule ) ).execute( {} );
   }
 
 }

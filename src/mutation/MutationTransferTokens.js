@@ -49,8 +49,8 @@ import MutationProposeMolecule from "./MutationProposeMolecule";
 import ResponseTransferTokens from "../response/ResponseTransferTokens";
 
 /**
- * Query for moving tokens between wallets
- */
+* Query for moving tokens between wallets
+*/
 export default class MutationTransferTokens extends MutationProposeMolecule {
 
   /**
@@ -59,10 +59,7 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
    * @param recipientWallet
    * @param amount
    */
-  fillMolecule ( {
-    recipientWallet,
-    amount
-  } ) {
+  fillMolecule ( { recipientWallet, amount, } ) {
 
     this.$__molecule.initValue( {
       recipientWallet,
@@ -70,7 +67,6 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check( this.$__molecule.sourceWallet );
-    console.log(this.$__molecule.toJSON());
   }
 
   /**
@@ -85,4 +81,5 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
       json,
     } );
   }
+
 }

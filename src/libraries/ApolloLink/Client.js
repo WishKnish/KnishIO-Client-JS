@@ -45,54 +45,89 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import { Operation, } from 'apollo-link';
+import { ApolloClient, } from "apollo-client";
+import fetch from "isomorphic-fetch";
+import { ApolloLink, } from "apollo-link";
+import { InMemoryCache, } from "apollo-cache-inmemory";
 
-/**
- * Base class used to construct various GraphQL mutations
- */
-export default class Mutation extends Query {
-  /**
-   *
-   * @param {ApolloClient} apolloClient
-   */
-  constructor ( apolloClient ) {
-    super( apolloClient );
-  }
+import HttpLink from './HttpLink';
+import ErrorLink from './ErrorLink';
+import EchoLink from './EchoLink';
+import AuthLink from './AuthLink';
+import { errorHandler, } from './handler';
 
-  /**
-   * Creates a new Request for the given parameters
-   *
-   * @param {object} variables
-   * @param {array|object|null} fields
-   * @returns {Operation}
-   */
-  createQuery ( { variables = null, } ) {
 
-    const request = super.createQuery( { variables } );
-
-    request.mutation = request.query;
-
-    delete request.query;
-
-    return request;
-  }
+class Client extends ApolloClient {
 
   /**
-   * Sends the Query to a Knish.IO node and returns the Response
-   *
-   * @param {object} variables
+   * @param {string} serverUri
+   * @param {string} socketUri
    */
-  async execute ( { variables = null, } ) {
+  constructor ( { serverUri, socketUri, } ) {
 
-    this.$__request = this.createQuery( {
-      variables,
+    const links = [];
+    const http = new HttpLink({ uri: serverUri, fetch: fetch, transportBatching: true, } );
+    const error = new ErrorLink( errorHandler );
+    const auth = new AuthLink();
+
+    let echo = null;
+
+    links.push( auth );
+
+    if ( socketUri ) {
+      echo = new EchoLink( { socketUri: socketUri, } );
+      links.push( echo );
+    }
+
+    links.push( error.concat( http ) );
+
+    super( {
+      link: ApolloLink.from( links ),
+      cache: new InMemoryCache(),
+      connectToDevTools: true,
     } );
 
-    let response = await this.client.mutate( this.$__request );
-
-    this.$__response = await this.createResponseRaw( response );
-
-    return this.$__response;
+    this.__serverUri = serverUri;
+    this.__socketUri = socketUri;
+    this.__httpLink = http;
+    this.__errorLink = error;
+    this.__authLink = auth;
+    this.__echoLink = echo;
+    this.auth = '';
   }
+
+  /**
+   * @return {string}
+   */
+  getAuthToken () {
+    return this.auth;
+  }
+
+  /**
+   * @param {string} auth
+   */
+  setAuthToken ( auth ) {
+    this.auth = auth;
+    this.__authLink.setAuthToken( this.getAuthToken() );
+    if ( this.__echoLink ) {
+      this.__echoLink.setAuthToken( this.getAuthToken() );
+    }
+  }
+
+  /**
+   * @return {string}
+   */
+  getServerUri() {
+    return this.__serverUri;
+  }
+
+  /**
+   * @return {string}
+   */
+  getSocketUri() {
+    return this.__socketUri;
+  }
+
 }
+
+export default Client;
