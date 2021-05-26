@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { shake256, } from 'js-sha3';
+import { shake256 } from 'js-sha3';
 import { charsetBaseConvert } from './libraries/strings';
-import Meta from "./Meta";
+import Meta from './Meta';
 
 /**
  * Atom class used to form micro-transactions within a Molecule
@@ -80,7 +80,7 @@ export default class Atom {
     metaId = null,
     meta = null,
     otsFragment = null,
-    index = null,
+    index = null
   } ) {
 
     this.position = position;
@@ -101,9 +101,9 @@ export default class Atom {
   }
 
   /**
-   * Get aggregated meta from stored normalizaed ones
+   * Get aggregated meta from stored normalized ones
    */
-  aggregatedMeta() {
+  aggregatedMeta () {
     return Meta.aggregateMeta( this.meta );
   }
 
@@ -142,7 +142,7 @@ export default class Atom {
    */
   static hashAtoms ( {
     atoms,
-    output = 'base17',
+    output = 'base17'
   } ) {
 
     const molecularSponge = shake256.create( 256 ),
@@ -157,12 +157,12 @@ export default class Atom {
         if ( atom.hasOwnProperty( property ) ) {
 
           // Old atoms support (without batch_id field)
-          if ( [ 'batchId', 'pubkey', 'characters', ].includes( property ) && atom[ property ] === null ) {
+          if ( [ 'batchId', 'pubkey', 'characters' ].includes( property ) && atom[ property ] === null ) {
             continue;
           }
 
           // Not hashing OTS fragment or index
-          if ( [ 'otsFragment', 'index', ].includes( property ) ) {
+          if ( [ 'otsFragment', 'index' ].includes( property ) ) {
             continue;
           }
 

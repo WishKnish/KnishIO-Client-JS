@@ -1,5 +1,4 @@
-import Response from "./Response";
-import Dot from "../libraries/Dot";
+import Response from './Response';
 
 export default class ResponseActiveSession extends Response {
   /**
@@ -10,11 +9,11 @@ export default class ResponseActiveSession extends Response {
    */
   constructor ( {
     query,
-    json,
+    json
   } ) {
     super( {
       query,
-      json,
+      json
     } );
     this.dataKey = 'data.ActiveSession';
     this.init();

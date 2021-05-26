@@ -1,12 +1,12 @@
-import Subscribe from "./Subscribe";
-import gql from "graphql-tag";
+import Subscribe from './Subscribe';
+import gql from 'graphql-tag';
 
 
 export default class ActiveSessionSubscribe extends Subscribe {
-  constructor( apolloClient ) {
+  constructor ( apolloClient ) {
     super( apolloClient );
     this.$__subscribe = gql`
-      subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
+    subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
         ActiveUser( metaType: $metaType, metaId: $metaId ) {
             bundleHash,
             metaType,
