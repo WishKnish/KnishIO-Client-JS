@@ -116,7 +116,7 @@ export default class Query {
    * @param {object} variables
    */
   async execute ( { variables = null, } ) {
-    console.log(variables);
+
     this.$__request = this.createQuery( {
       variables,
     } );

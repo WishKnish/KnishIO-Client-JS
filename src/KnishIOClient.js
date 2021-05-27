@@ -83,6 +83,7 @@ import WalletStatusSubscribe from "./subscribe/WalletStatusSubscribe";
 import ActiveWalletSubscribe from "./subscribe/ActiveWalletSubscribe";
 import ActiveSessionSubscribe from "./subscribe/ActiveSessionSubscribe";
 import MutationActiveSession from "./mutation/MutationActiveSession";
+import QueryActiveSession from "./query/QueryActiveSession";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -801,6 +802,21 @@ export default class KnishIOClient {
     query.fillMolecule( newWallet );
 
     return await query.execute( {} );
+  }
+
+  /**
+   *
+   * @param {string} metaType
+   * @param {string} metaId
+   * @return {Promise<*>}
+   */
+  async queryActiveSession ( { metaType, metaId } ) {
+
+    const query = this.createQuery( QueryActiveSession );
+
+    return await query.execute( {
+      variables: { metaType, metaId }
+    } );
   }
 
   /**
