@@ -79,7 +79,8 @@ export default class ResponseProposeMolecule extends Response {
   init () {
     const payload_json = Dot.get( this.data(), 'payload' );
     try {
-      this.$__payload = JSON.parse( payload_json );
+      this.$__payload = Object.prototype.toString.call( payload_json ) === '[object String]' ?
+        JSON.parse( payload_json ) : payload_json;
     } catch ( err ) {
       this.$__payload = null;
     }
