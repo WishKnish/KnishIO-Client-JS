@@ -60,7 +60,14 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
    * @param {object} meta
    * @param {string|null} batchId
    */
-  fillMolecule ( { token, amount, metaType, metaId, meta = null, batchId = null } ) {
+  fillMolecule ( {
+    token,
+    amount,
+    metaType,
+    metaId,
+    meta = null,
+    batchId = null
+  } ) {
 
     this.$__molecule.initTokenRequest( {
       token,

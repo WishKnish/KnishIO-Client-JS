@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Mutation from "../mutation/Mutation";
-import ResponseActiveSession from "../response/ResponseActiveSession";
-import gql from "graphql-tag";
+import Mutation from '../mutation/Mutation';
+import ResponseActiveSession from '../response/ResponseActiveSession';
+import gql from 'graphql-tag';
 
 
 export default class MutationActiveSession extends Mutation {
@@ -79,7 +79,7 @@ export default class MutationActiveSession extends Mutation {
   createResponse ( json ) {
     return new ResponseActiveSession( {
       query: this,
-      json,
+      json
     } );
   }
 

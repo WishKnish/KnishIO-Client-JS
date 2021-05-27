@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Mutation from "../mutation/Mutation";
-import ResponseLinkIdentifier from "../response/ResponseLinkIdentifier";
-import gql from "graphql-tag";
+import Mutation from '../mutation/Mutation';
+import ResponseLinkIdentifier from '../response/ResponseLinkIdentifier';
+import gql from 'graphql-tag';
 
 /**
  * Query for linking an Identifier to a Wallet Bundle
@@ -68,7 +68,7 @@ export default class MutationLinkIdentifier extends Mutation {
             content,
             set,
             message
-        } 
+        }
     }`;
   }
 
@@ -81,7 +81,7 @@ export default class MutationLinkIdentifier extends Mutation {
   createResponse ( json ) {
     return new ResponseLinkIdentifier( {
       query: this,
-      json,
+      json
     } );
   }
 

@@ -45,16 +45,16 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { ApolloClient, } from "apollo-client";
-import fetch from "isomorphic-fetch";
-import { ApolloLink, } from "apollo-link";
-import { InMemoryCache, } from "apollo-cache-inmemory";
+import { ApolloClient } from 'apollo-client';
+import fetch from 'isomorphic-fetch';
+import { ApolloLink } from 'apollo-link';
+import { InMemoryCache } from 'apollo-cache-inmemory';
 
 import HttpLink from './HttpLink';
 import ErrorLink from './ErrorLink';
 import EchoLink from './EchoLink';
 import AuthLink from './AuthLink';
-import { errorHandler, } from './handler';
+import { errorHandler } from './handler';
 
 
 class Client extends ApolloClient {
@@ -63,10 +63,17 @@ class Client extends ApolloClient {
    * @param {string} serverUri
    * @param {string} socketUri
    */
-  constructor ( { serverUri, socketUri, } ) {
+  constructor ( {
+    serverUri,
+    socketUri
+  } ) {
 
     const links = [];
-    const http = new HttpLink({ uri: serverUri, fetch: fetch, transportBatching: true, } );
+    const http = new HttpLink( {
+      uri: serverUri,
+      fetch: fetch,
+      transportBatching: true
+    } );
     const error = new ErrorLink( errorHandler );
     const auth = new AuthLink();
 
@@ -75,7 +82,7 @@ class Client extends ApolloClient {
     links.push( auth );
 
     if ( socketUri ) {
-      echo = new EchoLink( { socketUri: socketUri, } );
+      echo = new EchoLink( { socketUri: socketUri } );
       links.push( echo );
     }
 
@@ -84,7 +91,7 @@ class Client extends ApolloClient {
     super( {
       link: ApolloLink.from( links ),
       cache: new InMemoryCache(),
-      connectToDevTools: true,
+      connectToDevTools: true
     } );
 
     this.__serverUri = serverUri;
@@ -117,14 +124,14 @@ class Client extends ApolloClient {
   /**
    * @return {string}
    */
-  getServerUri() {
+  getServerUri () {
     return this.__serverUri;
   }
 
   /**
    * @return {string}
    */
-  getSocketUri() {
+  getSocketUri () {
     return this.__socketUri;
   }
 
