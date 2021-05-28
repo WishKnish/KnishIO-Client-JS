@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from "../query/Query";
-import { Operation, } from 'apollo-link';
+import Query from '../query/Query';
+import { Operation } from 'apollo-link';
 
 /**
  * Base class used to construct various GraphQL mutations
@@ -67,7 +67,7 @@ export default class Mutation extends Query {
    * @param {array|object|null} fields
    * @returns {Operation}
    */
-  createQuery ( { variables = null, } ) {
+  createQuery ( { variables = null } ) {
 
     const request = super.createQuery( { variables } );
 
@@ -83,10 +83,10 @@ export default class Mutation extends Query {
    *
    * @param {object} variables
    */
-  async execute ( { variables = null, } ) {
+  async execute ( { variables = null } ) {
 
     this.$__request = this.createQuery( {
-      variables,
+      variables
     } );
 
     let response = await this.client.mutate( this.$__request );

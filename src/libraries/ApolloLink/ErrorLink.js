@@ -45,13 +45,16 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { Operation,  NextLink, } from "apollo-link";
-import { ErrorLink as RootErrorLink, } from 'apollo-link-error';
+import {
+  Operation,
+  NextLink
+} from 'apollo-link';
+import { ErrorLink as RootErrorLink } from 'apollo-link-error';
 
 
 class ErrorLink extends RootErrorLink {
 
-  constructor( errorHandler ) {
+  constructor ( errorHandler ) {
     super( errorHandler );
   }
 

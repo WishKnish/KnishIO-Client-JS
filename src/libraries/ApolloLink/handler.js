@@ -160,13 +160,23 @@ export function operationName ( operation ) {
   return fieldNode.name.value;
 }
 
-export function errorHandler ( { graphQLErrors, networkError, operation, forward, } ) {
+export function errorHandler ( {
+  graphQLErrors,
+  networkError,
+  operation,
+  forward
+} ) {
   if ( graphQLErrors ) {
-    graphQLErrors.map( ( { message, debugMessage, locations, path, } ) => console.error(
-      `[GraphQL error]: ${message}\r\n`,
-      `  Message : ${debugMessage}\r\n`,
-      `  Path    : ${path}\r\n`,
-      `  Location: ${locations}\r\n`,
+    graphQLErrors.map( ( {
+      message,
+      debugMessage,
+      locations,
+      path
+    } ) => console.error(
+      `[GraphQL error]: ${ message }\r\n`,
+      `  Message : ${ debugMessage }\r\n`,
+      `  Path    : ${ path }\r\n`,
+      `  Location: ${ locations }\r\n`
     ) );
   }
 

@@ -59,7 +59,11 @@ export default class MutationCreateMeta extends MutationProposeMolecule {
    * @param {string} metaId
    * @param {array|object} meta
    */
-  fillMolecule ( { metaType, metaId, meta, } ) {
+  fillMolecule ( {
+    metaType,
+    metaId,
+    meta
+  } ) {
     this.$__molecule.initMeta( {
       meta,
       metaType,

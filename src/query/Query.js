@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import CodeException from "../exception/CodeException";
-import { Operation, } from 'apollo-link';
-import Response from "../response/Response";
+import CodeException from '../exception/CodeException';
+import { Operation } from 'apollo-link';
+import Response from '../response/Response';
 
 export default class Query {
   /**
@@ -79,7 +79,7 @@ export default class Query {
   createResponse ( json ) {
     return new Response( {
       query: this,
-      json,
+      json
     } );
   }
 
@@ -90,7 +90,7 @@ export default class Query {
    * @param {array|object|null} fields
    * @returns {Operation}
    */
-  createQuery ( { variables = null, } ) {
+  createQuery ( { variables = null } ) {
     this.$__variables = this.compiledVariables( variables );
 
     // Uri is a required parameter
@@ -106,8 +106,8 @@ export default class Query {
 
     return {
       query: this.$__query,
-      variables: this.variables(),
-    }
+      variables: this.variables()
+    };
   }
 
   /**
@@ -118,7 +118,7 @@ export default class Query {
   async execute ( { variables = null, } ) {
 
     this.$__request = this.createQuery( {
-      variables,
+      variables
     } );
 
     let response = await this.client.query( this.$__request );

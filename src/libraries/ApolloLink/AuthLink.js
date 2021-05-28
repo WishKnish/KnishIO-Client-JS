@@ -48,8 +48,8 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import {
   ApolloLink,
   Operation,
-  NextLink,
-} from "apollo-link";
+  NextLink
+} from 'apollo-link';
 
 
 class AuthLink extends ApolloLink {
@@ -83,10 +83,10 @@ class AuthLink extends ApolloLink {
    */
   request ( operation, forward ) {
 
-    operation.setContext(( { headers = {} } ) => ( {
+    operation.setContext( ( { headers = {} } ) => ( {
       headers: {
         ...headers,
-        'X-Auth-Token': this.getAuthToken(),
+        'X-Auth-Token': this.getAuthToken()
       }
     } ) );
 

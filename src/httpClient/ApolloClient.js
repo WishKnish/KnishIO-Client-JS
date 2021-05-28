@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { Operation, } from 'apollo-link';
-import { operationName, } from '../libraries/ApolloLink/handler';
+import { Operation } from 'apollo-link';
+import { operationName } from '../libraries/ApolloLink/handler';
 import Client from '../libraries/ApolloLink/Client';
 
 
@@ -56,7 +56,10 @@ export default class ApolloClient {
    * @param {string} serverUri
    * @param {string|null} socketUri
    */
-  constructor ( { serverUri, socketUri = null, } ) {
+  constructor ( {
+    serverUri,
+    socketUri = null
+  } ) {
 
     this.$__subscribers = {};
     this.$__authorization = null;
@@ -68,7 +71,10 @@ export default class ApolloClient {
   }
 
   restartTransport () {
-    this.$__client = new Client( { serverUri: this.$__uri, socketUri: this.$__socketUri, } );
+    this.$__client = new Client( {
+      serverUri: this.$__uri,
+      socketUri: this.$__socketUri
+    } );
   }
 
   /**

@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseProposeMolecule from "../response/ResponseProposeMolecule";
-import Mutation from "./Mutation";
-import gql from "graphql-tag";
+import ResponseProposeMolecule from '../response/ResponseProposeMolecule';
+import Mutation from './Mutation';
+import gql from 'graphql-tag';
 
 
 export default class MutationProposeMolecule extends Mutation {
@@ -97,7 +97,7 @@ export default class MutationProposeMolecule extends Mutation {
   createResponse ( json ) {
     return new ResponseProposeMolecule( {
       query: this,
-      json,
+      json
     } );
   }
 
@@ -107,12 +107,12 @@ export default class MutationProposeMolecule extends Mutation {
    * @param {object} variables
    * @return {Promise}
    */
-  async execute ( { variables = null, } ) {
+  async execute ( { variables = null } ) {
     variables = variables || {};
     variables.molecule = this.molecule();
 
-    return super.execute({
-      variables,
+    return super.execute( {
+      variables
     } );
   }
 
