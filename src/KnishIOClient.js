@@ -77,13 +77,13 @@ import UnauthenticatedException from './exception/UnauthenticatedException';
 import WalletShadowException from './exception/WalletShadowException';
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException';
 import StackableUnitAmountException from './exception/StackableUnitAmountException';
-import ApolloClient from "./httpClient/ApolloClient";
-import CreateMoleculeSubscribe from "./subscribe/CreateMoleculeSubscribe";
-import WalletStatusSubscribe from "./subscribe/WalletStatusSubscribe";
-import ActiveWalletSubscribe from "./subscribe/ActiveWalletSubscribe";
-import ActiveSessionSubscribe from "./subscribe/ActiveSessionSubscribe";
-import MutationActiveSession from "./mutation/MutationActiveSession";
-import QueryActiveSession from "./query/QueryActiveSession";
+import ApolloClient from './httpClient/ApolloClient';
+import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe';
+import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe';
+import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe';
+import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe';
+import MutationActiveSession from './mutation/MutationActiveSession';
+import QueryActiveSession from './query/QueryActiveSession';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -329,7 +329,7 @@ export default class KnishIOClient {
       secretOrBundle: _secret,
       token: _sourceWallet.token,
       batchId: _sourceWallet.batchId,
-      characters: _sourceWallet.characters,
+      characters: _sourceWallet.characters
     } );
 
     return new Molecule( {
@@ -443,7 +443,7 @@ export default class KnishIOClient {
          */
         response = await query.execute( {
           variables: {
-            cellSlug: this.$__cellSlug,
+            cellSlug: this.$__cellSlug
           }
         } );
       } else {
@@ -820,12 +820,18 @@ export default class KnishIOClient {
    * @param {string} metaId
    * @return {Promise<*>}
    */
-  async queryActiveSession ( { metaType, metaId } ) {
+  async queryActiveSession ( {
+    metaType,
+    metaId
+  } ) {
 
     const query = this.createQuery( QueryActiveSession );
 
     return await query.execute( {
-      variables: { metaType, metaId }
+      variables: {
+        metaType,
+        metaId
+      }
     } );
   }
 
@@ -1021,7 +1027,7 @@ export default class KnishIOClient {
       }
     } ).then( ( response ) => {
       return response.getWallets();
-    } )
+    } );
   }
 
   /**
@@ -1268,7 +1274,7 @@ export default class KnishIOClient {
     for ( const shadowWallet of shadowWallets ) {
       responses.push( await this.claimShadowWallet( {
         token,
-        batchId: shadowWallet.batchId,
+        batchId: shadowWallet.batchId
       } ) );
     }
     return responses;

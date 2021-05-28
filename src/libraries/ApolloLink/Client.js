@@ -95,19 +95,19 @@ class Client extends ApolloClient {
       defaultOptions: {
         watchQuery: {
           fetchPolicy: 'no-cache',
-          errorPolicy: 'ignore',
+          errorPolicy: 'ignore'
         },
         query: {
           fetchPolicy: 'no-cache',
-          errorPolicy: 'all',
+          errorPolicy: 'all'
         },
         mutate: {
           fetchPolicy: 'no-cache',
-          errorPolicy: 'all',
+          errorPolicy: 'all'
         },
         subscribe: {
           fetchPolicy: 'no-cache',
-          errorPolicy: 'all',
+          errorPolicy: 'all'
         }
       }
     } );

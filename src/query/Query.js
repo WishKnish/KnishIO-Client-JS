@@ -115,7 +115,7 @@ export default class Query {
    *
    * @param {object} variables
    */
-  async execute ( { variables = null, } ) {
+  async execute ( { variables = null } ) {
 
     this.$__request = this.createQuery( {
       variables
@@ -135,7 +135,7 @@ export default class Query {
    * @returns {{}}
    */
   compiledVariables ( variables = null ) {
-    return variables || {}
+    return variables || {};
   }
 
   /**

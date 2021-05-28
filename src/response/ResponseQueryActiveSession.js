@@ -7,8 +7,14 @@ export default class ResponseQueryActiveSession extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( { query, json} ) {
-    super( { query, json, } );
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
+    } );
     this.dataKey = 'data.ActiveUser';
     this.init();
   }
