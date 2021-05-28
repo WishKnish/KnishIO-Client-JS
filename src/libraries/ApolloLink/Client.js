@@ -91,7 +91,25 @@ class Client extends ApolloClient {
     super( {
       link: ApolloLink.from( links ),
       cache: new InMemoryCache(),
-      connectToDevTools: true
+      connectToDevTools: true,
+      defaultOptions: {
+        watchQuery: {
+          fetchPolicy: 'no-cache',
+          errorPolicy: 'ignore',
+        },
+        query: {
+          fetchPolicy: 'no-cache',
+          errorPolicy: 'all',
+        },
+        mutate: {
+          fetchPolicy: 'no-cache',
+          errorPolicy: 'all',
+        },
+        subscribe: {
+          fetchPolicy: 'no-cache',
+          errorPolicy: 'all',
+        }
+      }
     } );
 
     this.__serverUri = serverUri;
