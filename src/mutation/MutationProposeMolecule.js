@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseProposeMolecule from "../response/ResponseProposeMolecule";
-import Mutation from "./Mutation";
+import ResponseProposeMolecule from '../response/ResponseProposeMolecule';
+import Mutation from './Mutation';
 
 const merge = require( 'lodash.merge' );
 
@@ -65,7 +65,7 @@ export default class MutationProposeMolecule extends Mutation {
     super( knishIO );
     this.$__molecule = molecule;
     this.$__remainderWallet = null;
-    this.$__query = `mutation( $molecule: MoleculeInput! ) { ProposeMolecule( molecule: $molecule ) @fields }`;
+    this.$__query = 'mutation( $molecule: MoleculeInput! ) { ProposeMolecule( molecule: $molecule ) @fields }';
     this.$__fields = {
       'molecularHash': null,
       'height': null,
@@ -76,7 +76,7 @@ export default class MutationProposeMolecule extends Mutation {
       'createdAt': null,
       'receivedAt': null,
       'processedAt': null,
-      'broadcastedAt': null,
+      'broadcastedAt': null
     };
   }
 
@@ -101,7 +101,7 @@ export default class MutationProposeMolecule extends Mutation {
   createResponse ( json ) {
     return new ResponseProposeMolecule( {
       query: this,
-      json,
+      json
     } );
   }
 
@@ -121,7 +121,7 @@ export default class MutationProposeMolecule extends Mutation {
 
     return await super.execute( {
       variables,
-      fields,
+      fields
     } );
   }
 

@@ -62,7 +62,7 @@ export default class Meta {
     modelType,
     modelId,
     meta,
-    snapshotMolecule = null,
+    snapshotMolecule = null
   } ) {
 
     this.modelType = modelType;
@@ -101,7 +101,7 @@ export default class Meta {
    * @return {object}
    */
   static aggregateMeta ( meta ) {
-    const aggregate = {};
+    let aggregate = {};
 
     for ( let metaEntry of meta ) {
       aggregate[ metaEntry.key ] = metaEntry.value;

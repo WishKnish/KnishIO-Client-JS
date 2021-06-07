@@ -63,6 +63,7 @@ import WrongTokenTypeException from './WrongTokenTypeException';
 import UnauthenticatedException from './UnauthenticatedException';
 import NegativeAmountException from './NegativeAmountException';
 import BatchIdException from './BatchIdException';
+import CodeException from './CodeException';
 
 export {
   AtomsMissingException,
@@ -82,5 +83,6 @@ export {
   WrongTokenTypeException,
   UnauthenticatedException,
   NegativeAmountException,
-  BatchIdException
+  BatchIdException,
+  CodeException
 };

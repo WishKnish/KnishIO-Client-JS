@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseProposeMolecule from "./ResponseProposeMolecule";
+import ResponseProposeMolecule from './ResponseProposeMolecule';
 
 /**
  * Response for token transfer queries
@@ -60,7 +60,7 @@ export default class ResponseTransferTokens extends ResponseProposeMolecule {
   payload () {
     const result = {
         reason: null,
-        status: null,
+        status: null
       },
       data = this.data();
 
