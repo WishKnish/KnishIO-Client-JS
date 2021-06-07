@@ -58,12 +58,22 @@ export default class MutationRequestAuthorizationGuest extends Mutation {
    */
   constructor ( apolloClient ) {
     super( apolloClient );
-    this.$__query = gql`mutation( $cellSlug: String ) {
-        AccessToken( cellSlug: $cellSlug ) {
+    this.$__query = gql`mutation( $cellSlug: String, $pubkey: String ) {
+        AccessToken( cellSlug: $cellSlug, pubkey: $pubkey ) {
             token,
-            time
+            time,
+            key
         }
     }`;
+
+    this.wallet = null;
+  }
+
+  /**
+   * @param {Wallet} wallet
+   */
+  setAuthorizationWallet ( wallet ) {
+    this.wallet = wallet;
   }
 
   /**

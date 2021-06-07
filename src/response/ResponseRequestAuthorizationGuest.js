@@ -128,4 +128,21 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   time () {
     return this.payloadKey( 'time' );
   }
+
+  /**
+   * Returns timestamp
+   *
+   * @returns {string}
+   */
+  pubKey () {
+    return this.payloadKey( 'key' );
+  }
+
+  /**
+   * @return {Wallet|null}
+   */
+  wallet () {
+    return this.$__query.wallet;
+  }
+
 }

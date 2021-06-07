@@ -160,6 +160,17 @@ export function operationName ( operation ) {
   return fieldNode.name.value;
 }
 
+/**
+ * @param {Operation} operation
+ * @return {string}
+ */
+export function operationType ( operation ) {
+  const operationDefinition = operation.query
+    .definitions.find( definitionNode => definitionNode.kind === 'OperationDefinition' );
+
+  return operationDefinition.operation;
+}
+
 export function errorHandler ( {
   graphQLErrors,
   networkError,

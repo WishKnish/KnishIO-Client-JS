@@ -55,35 +55,69 @@ export default class ApolloClient {
   /**
    * @param {string} serverUri
    * @param {string|null} socketUri
+   * @param {boolean} encrypt
    */
   constructor ( {
     serverUri,
-    socketUri = null
+    socketUri = null,
+    encrypt = false,
   } ) {
 
     this.$__subscribers = {};
-    this.$__authorization = null;
     this.$__uri = serverUri;
     this.$__socketUri = socketUri;
     this.$__client = null;
 
-    this.restartTransport();
-  }
-
-  restartTransport () {
-    this.$__client = new Client( {
-      serverUri: this.$__uri,
-      socketUri: this.$__socketUri
-    } );
+    this.restartTransport( encrypt );
   }
 
   /**
+   * If you have subscriptions, you unsubscribe
    *
+   * @param {boolean} encrypt
+   */
+  restartTransport ( encrypt = false ) {
+    const client = new Client( {
+      serverUri: this.$__uri,
+      socketUri: this.$__socketUri,
+      encrypt
+    } );
+
+    if ( this.$__client ) {
+
+      this.unsubscribeAll ();
+
+      client.setAuthData ( {
+        token: this.$__client.getAuthToken(),
+        pubkey: this.$__client.getPubKey(),
+        wallet: this.$__client.getWallet()
+      } );
+    }
+
+    this.$__client = client;
+  }
+
+  /**
+   *  If you have subscriptions, you unsubscribe
+   */
+  enableEncryption () {
+    this.restartTransport( true );
+  }
+
+  /**
+   *  If you have subscriptions, you unsubscribe
+   */
+  disableEncryption () {
+    this.restartTransport();
+  }
+
+  /**
    * @param {string} operationName
    */
   unsubscribe ( operationName ) {
     if ( this.$__subscribers[ operationName ] ) {
       this.$__subscribers[ operationName ].unsubscribe();
+      delete this.$__subscribers[ operationName ];
     }
   }
 
@@ -124,11 +158,12 @@ export default class ApolloClient {
   /**
    * Sets the authorization token for this session
    *
-   * @param {string} authToken
+   * @param {string} token
+   * @param {string} pubkey
+   * @param {Wallet|null} wallet
    */
-  setAuthToken ( authToken ) {
-    this.$__authorization = authToken;
-    this.$__client.setAuthToken( authToken );
+  setAuthData ( { token, pubkey, wallet } ) {
+    this.$__client.setAuthData( { token, pubkey, wallet } );
   }
 
   /**
@@ -137,7 +172,7 @@ export default class ApolloClient {
    * @return {string}
    */
   getAuthToken () {
-    return this.$__authorization || '';
+    return this.$__client.getAuthToken();
   }
 
   /**

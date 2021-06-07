@@ -55,6 +55,7 @@ import ErrorLink from './ErrorLink';
 import EchoLink from './EchoLink';
 import AuthLink from './AuthLink';
 import { errorHandler } from './handler';
+import CipherLink from "./CipherLink";
 
 
 class Client extends ApolloClient {
@@ -62,10 +63,12 @@ class Client extends ApolloClient {
   /**
    * @param {string} serverUri
    * @param {string} socketUri
+   * @param {boolean} encrypt
    */
   constructor ( {
     serverUri,
-    socketUri
+    socketUri,
+    encrypt= false
   } ) {
 
     const links = [];
@@ -77,9 +80,15 @@ class Client extends ApolloClient {
     const error = new ErrorLink( errorHandler );
     const auth = new AuthLink();
 
+    let cipher = null;
     let echo = null;
 
     links.push( auth );
+
+    if ( encrypt ) {
+      cipher = new CipherLink();
+      links.push( cipher );
+    }
 
     if ( socketUri ) {
       echo = new EchoLink( { socketUri: socketUri } );
@@ -114,28 +123,54 @@ class Client extends ApolloClient {
 
     this.__serverUri = serverUri;
     this.__socketUri = socketUri;
-    this.__httpLink = http;
-    this.__errorLink = error;
     this.__authLink = auth;
     this.__echoLink = echo;
-    this.auth = '';
+    this.__cipherLink = cipher;
+
+    this.__pubkey = null;
+    this.__wallet = null;
   }
 
   /**
    * @return {string}
    */
   getAuthToken () {
-    return this.auth;
+    return this.__authLink.getAuthToken();
   }
 
   /**
-   * @param {string} auth
+   *
+   * @return {string|null}
    */
-  setAuthToken ( auth ) {
-    this.auth = auth;
-    this.__authLink.setAuthToken( this.getAuthToken() );
+  getPubKey () {
+    return this.__pubkey;
+  }
+
+  /**
+   * @return {Wallet|null}
+   */
+  getWallet () {
+    return this.__wallet;
+  }
+
+  /**
+   * @param {string} token
+   * @param {string|null} pubkey
+   * @param {Wallet|null} wallet
+   */
+  setAuthData ( { token, pubkey = null, wallet = null } ) {
+
+    this.__wallet = wallet;
+    this.__pubkey = pubkey;
+    this.__authLink.setAuthToken( token );
+
     if ( this.__echoLink ) {
-      this.__echoLink.setAuthToken( this.getAuthToken() );
+      this.__echoLink.setAuthToken( token );
+    }
+
+    if ( this.__cipherLink ) {
+      this.__cipherLink.setWallet( this.__wallet );
+      this.__cipherLink.setPubKey( this.__pubkey );
     }
   }
 
