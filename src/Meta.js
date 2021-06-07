@@ -103,14 +103,8 @@ export default class Meta {
   static aggregateMeta ( meta ) {
     let aggregate = {};
 
-    // Ensuring that only array-based meta gets aggregated
-    if( Array.isArray( meta ) ) {
-      for ( let metaEntry of meta ) {
-        aggregate[ metaEntry.key ] = metaEntry.value;
-      }
-    }
-    else {
-      aggregate = meta;
+    for ( let metaEntry of meta ) {
+      aggregate[ metaEntry.key ] = metaEntry.value;
     }
 
     return aggregate;
