@@ -55,7 +55,7 @@ import ErrorLink from './ErrorLink';
 import EchoLink from './EchoLink';
 import AuthLink from './AuthLink';
 import { errorHandler } from './handler';
-import CipherLink from "./CipherLink";
+import CipherLink from './CipherLink';
 
 
 class Client extends ApolloClient {
@@ -104,19 +104,19 @@ class Client extends ApolloClient {
       defaultOptions: {
         watchQuery: {
           fetchPolicy: 'no-cache',
-          errorPolicy: 'ignore',
+          errorPolicy: 'ignore'
         },
         query: {
           fetchPolicy: 'no-cache',
-          errorPolicy: 'all',
+          errorPolicy: 'all'
         },
         mutate: {
           fetchPolicy: 'no-cache',
-          errorPolicy: 'all',
+          errorPolicy: 'all'
         },
         subscribe: {
           fetchPolicy: 'no-cache',
-          errorPolicy: 'all',
+          errorPolicy: 'all'
         }
       }
     } );

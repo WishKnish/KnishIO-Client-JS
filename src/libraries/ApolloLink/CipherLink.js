@@ -4,10 +4,10 @@ import {
   NextLink
 } from 'apollo-link';
 import { print } from 'graphql';
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 import { operationName, operationType } from './handler';
-import CodeException from "../../exception/CodeException";
-import Dot from "../Dot";
+import CodeException from '../../exception/CodeException';
+import Dot from '../Dot';
 
 
 
@@ -97,7 +97,7 @@ class CipherLink extends ApolloLink {
         response = response.data;
       }
 
-      if ( response.CipherHash &&  response.CipherHash.hash ) {
+      if ( response.CipherHash && response.CipherHash.hash ) {
         const encrypted = JSON.parse( response.CipherHash.hash );
         const decryption = wallet.decryptMyMessage( encrypted );
 

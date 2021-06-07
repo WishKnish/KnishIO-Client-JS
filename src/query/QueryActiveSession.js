@@ -1,6 +1,6 @@
 import Query from './Query';
 import ResponseQueryActiveSession from '../response/ResponseQueryActiveSession';
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
 
 export default class QueryActiveSession extends Query {

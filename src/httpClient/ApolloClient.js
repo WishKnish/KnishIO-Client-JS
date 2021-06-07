@@ -60,7 +60,7 @@ export default class ApolloClient {
   constructor ( {
     serverUri,
     socketUri = null,
-    encrypt = false,
+    encrypt = false
   } ) {
 
     this.$__subscribers = {};
