@@ -111,7 +111,7 @@ export default class ResponseProposeMolecule extends Response {
 
     molecule.molecularHash = Dot.get( data, 'molecularHash' );
     molecule.status = Dot.get( data, 'status' );
-    molecule.status = Dot.get( data, 'createdAt' );
+    molecule.createdAt = Dot.get( data, 'createdAt' );
 
     return molecule;
   }

@@ -149,6 +149,20 @@ export default class KnishIOClient {
   }
 
   /**
+   *  If you have subscriptions, you unsubscribe
+   */
+  enableEncryption () {
+    this.$__client.enableEncryption();
+  }
+
+  /**
+   *  If you have subscriptions, you unsubscribe
+   */
+  disableEncryption () {
+    this.$__client.disableEncryption();
+  }
+
+  /**
    * Deinitializes the Knish.IO client session so that a new session can replace it
    */
   deinitialize () {
@@ -428,6 +442,11 @@ export default class KnishIOClient {
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion >= 3 ) {
 
+      const authorizationWallet = new Wallet( {
+        secret: this.getSecret(),
+        token: 'AUTH'
+      } );
+
       let query,
         response;
 
@@ -438,21 +457,21 @@ export default class KnishIOClient {
          */
         query = await this.createQuery( MutationRequestAuthorizationGuest );
 
+        query.setAuthorizationWallet( authorizationWallet );
+
         /**
          * @type {ResponseRequestAuthorization}
          */
         response = await query.execute( {
           variables: {
-            cellSlug: this.$__cellSlug
+            cellSlug: this.$__cellSlug,
+            pubkey: authorizationWallet.pubkey
           }
         } );
       } else {
         const molecule = await this.createMolecule( {
           secret: this.getSecret(),
-          sourceWallet: new Wallet( {
-            secret: this.getSecret(),
-            token: 'AUTH'
-          } )
+          sourceWallet: authorizationWallet
         } );
 
         /**
@@ -473,8 +492,7 @@ export default class KnishIOClient {
 
       if ( response.success() ) {
 
-        const token = response.token();
-        this.client().setAuthToken( token );
+        this.client().setAuthData( { token: response.token(), pubkey: response.pubKey(), wallet: response.wallet() } );
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
