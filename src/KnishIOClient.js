@@ -442,15 +442,15 @@ export default class KnishIOClient {
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion >= 3 ) {
 
-      const authorizationWallet = new Wallet( {
-        secret: this.getSecret(),
-        token: 'AUTH'
-      } );
-
       let query,
         response;
 
       if ( guestMode ) {
+
+        const authorizationWallet = new Wallet( {
+          secret: generateSecret(),
+          token: 'AUTH'
+        } );
 
         /**
          * @type {MutationRequestAuthorizationGuest}
@@ -471,7 +471,10 @@ export default class KnishIOClient {
       } else {
         const molecule = await this.createMolecule( {
           secret: this.getSecret(),
-          sourceWallet: authorizationWallet
+          sourceWallet: new Wallet( {
+            secret: this.getSecret(),
+            token: 'AUTH'
+          } )
         } );
 
         /**
