@@ -492,7 +492,11 @@ export default class KnishIOClient {
 
       if ( response.success() ) {
 
-        this.client().setAuthData( { token: response.token(), pubkey: response.pubKey(), wallet: response.wallet() } );
+        this.client().setAuthData( {
+          token: response.token(),
+          pubkey: response.pubKey(),
+          wallet: response.wallet()
+        } );
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );

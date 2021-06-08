@@ -5,10 +5,12 @@ import {
 } from 'apollo-link';
 import { print } from 'graphql';
 import gql from 'graphql-tag';
-import { operationName, operationType } from './handler';
+import {
+  operationName,
+  operationType
+} from './handler';
 import CodeException from '../../exception/CodeException';
 import Dot from '../Dot';
-
 
 
 class CipherLink extends ApolloLink {

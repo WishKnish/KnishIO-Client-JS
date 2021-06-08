@@ -68,7 +68,7 @@ class Client extends ApolloClient {
   constructor ( {
     serverUri,
     socketUri,
-    encrypt= false
+    encrypt = false
   } ) {
 
     const links = [];
@@ -158,7 +158,11 @@ class Client extends ApolloClient {
    * @param {string|null} pubkey
    * @param {Wallet|null} wallet
    */
-  setAuthData ( { token, pubkey = null, wallet = null } ) {
+  setAuthData ( {
+    token,
+    pubkey = null,
+    wallet = null
+  } ) {
 
     this.__wallet = wallet;
     this.__pubkey = pubkey;
