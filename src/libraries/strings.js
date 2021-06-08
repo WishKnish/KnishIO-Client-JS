@@ -4,6 +4,7 @@ import {
   decode as decodeBase64,
   encode as encodeBase64
 } from '@stablelib/base64';
+import getRandomValues from 'get-random-values';
 
 if ( !String.prototype.trim ) {
 
@@ -42,8 +43,7 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
 
   let array = new Uint8Array( length );
 
-  let cryptoObj = window.crypto || window.msCrypto; // for IE 11
-  cryptoObj.getRandomValues( array );
+  array = getRandomValues( array );
 
   array = array.map( x => alphabet.charCodeAt( x % alphabet.length ) );
 
