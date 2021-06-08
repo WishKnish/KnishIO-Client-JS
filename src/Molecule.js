@@ -61,7 +61,7 @@ import NegativeAmountException from './exception/NegativeAmountException';
 import MoleculeStructure from './MoleculeStructure';
 
 const USE_META_CONTEXT = false;
-const DEFAULT_META_CONTEXT = 'http://www.schema.org';
+const DEFAULT_META_CONTEXT = 'https://www.schema.org';
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -408,7 +408,7 @@ export default class Molecule extends MoleculeStructure {
       bundle: newWallet.bundle,
       position: newWallet.position,
       amount: 0,
-      batch_id: newWallet.batchId,
+      batchId: newWallet.batchId,
       pubkey: newWallet.pubkey,
       characters: newWallet.characters
     };

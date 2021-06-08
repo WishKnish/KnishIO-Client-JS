@@ -495,7 +495,11 @@ export default class KnishIOClient {
 
       if ( response.success() ) {
 
-        this.client().setAuthData( { token: response.token(), pubkey: response.pubKey(), wallet: response.wallet() } );
+        this.client().setAuthData( {
+          token: response.token(),
+          pubkey: response.pubKey(),
+          wallet: response.wallet()
+        } );
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
@@ -1054,7 +1058,7 @@ export default class KnishIOClient {
   /**
    * Retrieves a list of your shadow wallets (balance, but no keys)
    *
-   * @param {string} tokenSlug
+   * @param {string} token
    * @param {string|null} bundle
    * @return {Promise<[]>}
    */
@@ -1413,8 +1417,7 @@ export default class KnishIOClient {
    *
    * @param {string} token
    * @param {number|null} amount
-   * @param {array} units
-   * @param {string|null} batchId
+   * @param {array|null} units
    * @param {Wallet|null} sourceWallet
    * @returns {Promise<unknown>}
    */

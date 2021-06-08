@@ -65,7 +65,7 @@ function subscribeToEcho (
   operationName
 ) {
   const channel = echoClient.private(
-    channelName.replace( /^private\-/, '' )
+    channelName.replace( /^private-/, '' )
   );
 
   channel.listen( '.lighthouse-subscription', result => {

@@ -85,9 +85,9 @@ export default class ApolloClient {
 
     if ( this.$__client ) {
 
-      this.unsubscribeAll ();
+      this.unsubscribeAll();
 
-      client.setAuthData ( {
+      client.setAuthData( {
         token: this.$__client.getAuthToken(),
         pubkey: this.$__client.getPubKey(),
         wallet: this.$__client.getWallet()
@@ -162,8 +162,16 @@ export default class ApolloClient {
    * @param {string} pubkey
    * @param {Wallet|null} wallet
    */
-  setAuthData ( { token, pubkey, wallet } ) {
-    this.$__client.setAuthData( { token, pubkey, wallet } );
+  setAuthData ( {
+    token,
+    pubkey,
+    wallet
+  } ) {
+    this.$__client.setAuthData( {
+      token,
+      pubkey,
+      wallet
+    } );
   }
 
   /**
