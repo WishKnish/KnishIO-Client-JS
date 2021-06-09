@@ -91,13 +91,12 @@ import QueryActiveSession from './query/QueryActiveSession';
  */
 export default class KnishIOClient {
 
-
   /**
    * Class constructor
    *
    * @param {string} uri
-   * @param {string} socketUri
-   * @param {ApolloClient} client
+   * @param {string|null} socketUri
+   * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    * @param {boolean} encrypt
@@ -108,7 +107,7 @@ export default class KnishIOClient {
     socketUri = null,
     serverSdkVersion = 3,
     logging = false,
-    encrypt = false,
+    encrypt = false
   } ) {
     this.initialize( {
       uri,
@@ -125,7 +124,7 @@ export default class KnishIOClient {
    *
    * @param {string} uri
    * @param {string|null} socketUri
-   * @param {ApolloClient} client
+   * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    * @param {boolean} encrypt
@@ -160,28 +159,32 @@ export default class KnishIOClient {
   }
 
   /**
-   *  If you have subscriptions, you unsubscribe
+   *  Enables end-to-end encryption protocol.
+   *  Note: this will cause all active subscriptions to be unsubscribed.
    */
   enableEncryption () {
     if ( this.$__logging ) {
-      console.info( 'KnishIOClient::disableEncryption() - The client went into encryption mode...' );
+      console.info( 'KnishIOClient::enableEncryption() - Enabling end-to-end encryption mode...' );
     }
     this.$__encrypt = true;
     this.$__client.enableEncryption();
   }
 
   /**
-   *  If you have subscriptions, you unsubscribe
+   *  Disables end-to-end encryption protocol.
+   *  Note: this will cause all active subscriptions to be unsubscribed.
    */
   disableEncryption () {
     if ( this.$__logging ) {
-      console.info( 'KnishIOClient::disableEncryption() - Client disabled encryption mode...' );
+      console.info( 'KnishIOClient::disableEncryption() - Disabling end-to-end encryption mode...' );
     }
     this.$__encrypt = false;
     this.$__client.disableEncryption();
   }
 
   /**
+   * Returns whether or not the end-to-end encryption protocol is enabled
+   *
    * @return {boolean}
    */
   hasEncryption () {
@@ -198,6 +201,11 @@ export default class KnishIOClient {
     this.reset();
   }
 
+  /**
+   * Subscribes the client to the node's broadcast socket
+   *
+   * @return {ApolloClient}
+   */
   subscribe () {
     if ( !this.client().getSocketUri() ) {
       throw new CodeException( 'KnishIOClient::subscribe() - socket client not initialized!' );
@@ -273,6 +281,7 @@ export default class KnishIOClient {
 
   /**
    * Set the client's secret
+   *
    * @param secret
    */
   setSecret ( secret ) {
@@ -391,6 +400,8 @@ export default class KnishIOClient {
   }
 
   /**
+   * Builds a new instance of the provided Subscription class
+   *
    * @param subscribeClass
    * @return {*}
    */
@@ -467,6 +478,7 @@ export default class KnishIOClient {
 
     this.$__cellSlug = cellSlug || this.cellSlug();
 
+    // Are we asking for end-to-end encryption?
     if ( encrypt === null ) {
       encrypt = this.hasEncryption();
     }
@@ -541,19 +553,18 @@ export default class KnishIOClient {
         if ( this.hasEncryption() !== response.encrypt() ) {
 
           if ( this.$__logging ) {
-            console.info( `KnishIOClient::requestAuthToken() - The server operating mode does not match the client operating mode...` );
+            console.warn( 'KnishIOClient::requestAuthToken() - Node not respecting requested encryption policy!' );
           }
 
           if ( response.encrypt() ) {
 
             if ( this.$__logging ) {
-              console.info( `KnishIOClient::requestAuthToken() - The server is running in encryption mode...` );
+              console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption on to match node...' );
             }
             this.enableEncryption();
-          }
-          else {
+          } else {
             if ( this.$__logging ) {
-              console.info( `KnishIOClient::requestAuthToken() - The server is running as usual...` );
+              console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption off to match node...' );
             }
             this.disableEncryption();
           }
@@ -573,7 +584,7 @@ export default class KnishIOClient {
     } else {
 
       if ( this.$__logging ) {
-        console.warn( 'KnishIOClient::requestAuthToken() - Server SDK version does not require an auth token...' );
+        console.warn( 'KnishIOClient::requestAuthToken() - Node SDK version does not require an auth token!' );
       }
 
     }
@@ -634,6 +645,8 @@ export default class KnishIOClient {
   }
 
   /**
+   * Creates a subscription for updating Wallet status
+   *
    * @param {string|null} bundle
    * @param {string} token
    * @param {function} closure
@@ -661,6 +674,7 @@ export default class KnishIOClient {
   }
 
   /**
+   *  Creates a subscription for updating active Wallet
    *
    * @param {string|null} bundle
    * @param {function} closure
@@ -681,6 +695,7 @@ export default class KnishIOClient {
   }
 
   /**
+   * Creates a subscription for updating list of active sessions for a given MetaType
    *
    * @param {string} metaType
    * @param {string} metaId
@@ -704,6 +719,7 @@ export default class KnishIOClient {
   }
 
   /**
+   * Unsubscribes from a given subscription name
    *
    * @param {string} operationName
    */
@@ -825,7 +841,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Query batch to get cascade meta instances by batchID
+   * Query batch to get cascading meta instances by batchID
    *
    * @param batchId
    * @returns {Promise<*>}
@@ -835,7 +851,7 @@ export default class KnishIOClient {
   } ) {
 
     if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryBatch() - Querying cascade meta instance data for batchId: ${ batchId }...` );
+      console.info( `KnishIOClient::queryBatch() - Querying cascading meta instances for batchId: ${ batchId }...` );
     }
 
     const query = this.createQuery( QueryBatch );
@@ -846,7 +862,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Query batch history to get cascade meta instances by batchID
+   * Query batch history to get cascading meta instances by batchID
    *
    * @param batchId
    * @returns {Promise<*>}
@@ -856,7 +872,7 @@ export default class KnishIOClient {
   } ) {
 
     if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryBatchHistory() - Querying cascade meta instance data for batchId: ${ batchId }...` );
+      console.info( `KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${ batchId }...` );
     }
 
     const query = this.createQuery( QueryBatchHistory );
@@ -894,6 +910,7 @@ export default class KnishIOClient {
   }
 
   /**
+   * Queries the ledger to retrieve a list of active sessions for the given MetaType
    *
    * @param {string} metaType
    * @param {string} metaId
@@ -915,6 +932,7 @@ export default class KnishIOClient {
   }
 
   /**
+   * Builds and executes a molecule to declare an active session for the given MetaType
    *
    * @param {string} bundle
    * @param {string} metaType
@@ -1468,6 +1486,7 @@ export default class KnishIOClient {
 
 
   /**
+   * Builds and executes a molecule to destroy the specified Token units
    *
    * @param {string} token
    * @param {number|null} amount
