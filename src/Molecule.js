@@ -704,9 +704,11 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Arranges atoms to request an authorization token from the node
    *
+   * @param {object} meta
+   *
    * @returns {Molecule}
    */
-  initAuthorization () {
+  initAuthorization ( { meta } ) {
     this.molecularHash = null;
 
     // Initializing a new Atom to hold our metadata
@@ -717,7 +719,7 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'U',
           token: this.sourceWallet.token,
           batchId: this.sourceWallet.batchId,
-          meta: this.finalMetas(),
+          meta: this.finalMetas( meta ),
           index: this.generateIndex()
         }
       )

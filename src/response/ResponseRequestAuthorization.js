@@ -94,6 +94,14 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
 
   /**
    *
+   * @returns {string}
+   */
+  encrypt () {
+    return this.payloadKey( 'encrypt' );
+  }
+
+  /**
+   *
    * @return {string}
    */
   pubKey () {
