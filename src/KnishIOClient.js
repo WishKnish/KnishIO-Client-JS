@@ -92,7 +92,7 @@ import QueryActiveSession from './query/QueryActiveSession';
 export default class KnishIOClient {
 
 
-  /*
+  /**
    * Class constructor
    *
    * @param {string} uri
@@ -100,20 +100,23 @@ export default class KnishIOClient {
    * @param {ApolloClient} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
+   * @param {boolean} encrypt
    */
   constructor ( {
     uri,
     client = null,
     socketUri = null,
     serverSdkVersion = 3,
-    logging = false
+    logging = false,
+    encrypt = false,
   } ) {
     this.initialize( {
       uri,
       socketUri,
       client,
       serverSdkVersion,
-      logging
+      logging,
+      encrypt
     } );
   }
 
@@ -125,16 +128,19 @@ export default class KnishIOClient {
    * @param {ApolloClient} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
+   * @param {boolean} encrypt
    */
   initialize ( {
     uri,
     socketUri = null,
     client = null,
     serverSdkVersion = 3,
-    logging = false
+    logging = false,
+    encrypt = false
   } ) {
 
     this.$__logging = logging;
+    this.$__encrypt = false;
 
     if ( this.$__logging ) {
       console.info( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
@@ -145,6 +151,11 @@ export default class KnishIOClient {
       socketUri: socketUri,
       serverUri: uri
     } );
+
+    if ( encrypt ) {
+      this.enableEncryption();
+    }
+
     this.$__serverSdkVersion = serverSdkVersion;
   }
 
@@ -152,6 +163,10 @@ export default class KnishIOClient {
    *  If you have subscriptions, you unsubscribe
    */
   enableEncryption () {
+    if ( this.$__logging ) {
+      console.info( 'KnishIOClient::disableEncryption() - The client went into encryption mode...' );
+    }
+    this.$__encrypt = true;
     this.$__client.enableEncryption();
   }
 
@@ -159,7 +174,18 @@ export default class KnishIOClient {
    *  If you have subscriptions, you unsubscribe
    */
   disableEncryption () {
+    if ( this.$__logging ) {
+      console.info( 'KnishIOClient::disableEncryption() - Client disabled encryption mode...' );
+    }
+    this.$__encrypt = false;
     this.$__client.disableEncryption();
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasEncryption () {
+    return this.$__encrypt;
   }
 
   /**
@@ -407,12 +433,14 @@ export default class KnishIOClient {
    * @param {string|null} secret
    * @param {string|null} seed
    * @param {string|null} cellSlug
+   * @param {boolean|null} encrypt
    * @return {Promise<Response>}
    */
   async requestAuthToken ( {
     secret = null,
     seed = null,
-    cellSlug = null
+    cellSlug = null,
+    encrypt = null
   } ) {
 
     if ( this.$__logging ) {
@@ -438,6 +466,10 @@ export default class KnishIOClient {
     }
 
     this.$__cellSlug = cellSlug || this.cellSlug();
+
+    if ( encrypt === null ) {
+      encrypt = this.hasEncryption();
+    }
 
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion >= 3 ) {
@@ -465,7 +497,8 @@ export default class KnishIOClient {
         response = await query.execute( {
           variables: {
             cellSlug: this.$__cellSlug,
-            pubkey: authorizationWallet.pubkey
+            pubkey: authorizationWallet.pubkey,
+            encrypt: encrypt
           }
         } );
       } else {
@@ -485,7 +518,7 @@ export default class KnishIOClient {
           molecule
         } );
 
-        query.fillMolecule();
+        query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
 
         /**
          * @type {ResponseRequestAuthorization}
@@ -503,6 +536,27 @@ export default class KnishIOClient {
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
+        }
+
+        if ( this.hasEncryption() !== response.encrypt() ) {
+
+          if ( this.$__logging ) {
+            console.info( `KnishIOClient::requestAuthToken() - The server operating mode does not match the client operating mode...` );
+          }
+
+          if ( response.encrypt() ) {
+
+            if ( this.$__logging ) {
+              console.info( `KnishIOClient::requestAuthToken() - The server is running in encryption mode...` );
+            }
+            this.enableEncryption();
+          }
+          else {
+            if ( this.$__logging ) {
+              console.info( `KnishIOClient::requestAuthToken() - The server is running as usual...` );
+            }
+            this.disableEncryption();
+          }
         }
 
       } else {

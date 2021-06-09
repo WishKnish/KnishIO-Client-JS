@@ -145,4 +145,12 @@ export default class ResponseRequestAuthorizationGuest extends Response {
     return this.$__query.wallet;
   }
 
+  /**
+   *
+   * @returns {string}
+   */
+  encrypt () {
+    return this.payloadKey( 'encrypt' );
+  }
+
 }
