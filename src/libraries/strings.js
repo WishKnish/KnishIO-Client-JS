@@ -6,9 +6,14 @@ import {
 } from '@stablelib/base64';
 
 if ( !String.prototype.trim ) {
-
   String.prototype.trim = function () {
     return this.replace( /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '' );
+  };
+}
+
+if ( !String.prototype.toCamelCase ) {
+  String.prototype.toCamelCase = function () {
+    return this.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
   };
 }
 
