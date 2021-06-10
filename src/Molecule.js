@@ -203,7 +203,7 @@ export default class Molecule extends MoleculeStructure {
 
     for ( let key of [ 'address', 'position', 'batchId' ] ) {
       if ( typeof metas[ key ] === 'undefined' ) {
-        throw new MetaMissingException( `Missing ${ key } in meta` );
+        throw new MetaMissingException( `Molecule::replenishTokens() - Missing ${ key } in meta!` );
       }
     }
 
@@ -274,7 +274,7 @@ export default class Molecule extends MoleculeStructure {
   } ) {
 
     if ( amount < 0.0 ) {
-      throw new NegativeAmountException( 'Amount to burn must be positive!' );
+      throw new NegativeAmountException( 'Molecule::burnToken() - Amount to burn must be positive!' );
     }
 
     if ( ( this.sourceWallet.balance - amount ) < 0 ) {
@@ -496,7 +496,7 @@ export default class Molecule extends MoleculeStructure {
     for ( let key of [ 'conditions', 'callback', 'rule' ] ) {
 
       if ( typeof meta[ key ] === 'undefined' ) {
-        throw new MetaMissingException( `No or not defined ${ key } in meta` );
+        throw new MetaMissingException( `Molecule::createRule() - Value for required meta key ${ key } in missing!` );
       }
 
       for ( let item of [ '[object Object]', '[object Array]' ] ) {

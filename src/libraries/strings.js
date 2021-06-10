@@ -83,7 +83,7 @@ export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, dest
   // Make sure we are not trying to convert out of the symbol table range
   if ( fromBase > srcSymbolTable.length || toBase > destSymbolTable.length ) {
 
-    console.warn( 'Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length );
+    console.warn( 'Strings::charsetBaseConvert() - Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length );
     return false;
   }
 

@@ -161,7 +161,7 @@ export default class MoleculeStructure {
         if ( typeof target.atoms[ index ][ property ] === 'undefined'
           || null === target.atoms[ index ][ property ]
         ) {
-          throw new AtomsMissingException( 'The required properties of the atom are not filled.' );
+          throw new AtomsMissingException( 'MolecularStructure::jsonToObject() - Required Atom properties are missing!' );
         }
       }
     }

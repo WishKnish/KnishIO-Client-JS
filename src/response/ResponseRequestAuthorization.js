@@ -62,7 +62,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorization: '${ key }' key is not found in the payload.` );
+      throw new InvalidResponseException( `ResponseRequestAuthorization::payloadKey() - '${ key }' key was not found in the payload!` );
     }
     return Dot.get( this.payload(), key );
   }

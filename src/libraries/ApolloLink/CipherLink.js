@@ -80,11 +80,11 @@ class CipherLink extends ApolloLink {
     }
 
     if ( !pubKey ) {
-      throw new CodeException( 'Server public key missing.' );
+      throw new CodeException( 'CipherLink::request() - Node public key missing!' );
     }
 
     if ( !wallet ) {
-      throw new CodeException( 'Authorized wallet missing.' );
+      throw new CodeException( 'CipherLink::request() - Authorized wallet missing!' );
     }
 
     operation.operationName = null;
@@ -104,7 +104,7 @@ class CipherLink extends ApolloLink {
         const decryption = wallet.decryptMyMessage( encrypted );
 
         if ( decryption === null ) {
-          throw new CodeException( 'Response decryption error.' );
+          throw new CodeException( 'CipherLink::request() - Unable to decrypt response!' );
         }
 
         return decryption;

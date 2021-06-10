@@ -97,11 +97,11 @@ export default class Query {
     let uri = this.uri();
 
     if ( !uri ) {
-      throw new CodeException( 'Query::createQuery => Uri does not initialized.' );
+      throw new CodeException( 'Query::createQuery() - Node URI was not initialized for this client instance!' );
     }
 
     if ( this.$__query === null ) {
-      throw new CodeException( 'Query::createQuery => GraphQL subscription does not initialized.' );
+      throw new CodeException( 'Query::createQuery() - GraphQL subscription was not initialized!' );
     }
 
     return {

@@ -208,7 +208,7 @@ export default class KnishIOClient {
    */
   subscribe () {
     if ( !this.client().getSocketUri() ) {
-      throw new CodeException( 'KnishIOClient::subscribe() - socket client not initialized!' );
+      throw new CodeException( 'KnishIOClient::subscribe() - Socket client not initialized!' );
     }
     return this.client();
   }
@@ -430,7 +430,7 @@ export default class KnishIOClient {
     const mutation = new mutationClass( this.client(), _molecule );
 
     if ( !( mutation instanceof MutationProposeMolecule ) ) {
-      throw new CodeException( `${ this.constructor.name }::createMoleculeMutation - required class instance of MutationProposeMolecule.` );
+      throw new CodeException( `${ this.constructor.name }::createMoleculeMutation() - This method only accepts MutationProposeMolecule!` );
     }
 
     this.lastMoleculeQuery = mutation;
@@ -659,7 +659,7 @@ export default class KnishIOClient {
   } ) {
 
     if ( !token ) {
-      throw new CodeException( `${ this.constructor.name }::subscribeWalletStatus - token parameter is required.` );
+      throw new CodeException( `${ this.constructor.name }::subscribeWalletStatus() - Token parameter is required!` );
     }
 
     const subscribe = this.createSubscribe( WalletStatusSubscribe );
