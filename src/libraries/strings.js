@@ -17,6 +17,12 @@ if ( !String.prototype.toCamelCase ) {
   };
 }
 
+if ( !String.prototype.toSnakeCase ) {
+  String.prototype.toSnakeCase = function () {
+    return this.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+  };
+}
+
 /**
  * Chunks a string into array segments of equal size
  *
