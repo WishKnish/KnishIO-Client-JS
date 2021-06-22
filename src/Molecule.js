@@ -61,7 +61,7 @@ import NegativeAmountException from './exception/NegativeAmountException';
 import MoleculeStructure from './MoleculeStructure';
 
 const USE_META_CONTEXT = false;
-const DEFAULT_META_CONTEXT = 'http://www.schema.org';
+const DEFAULT_META_CONTEXT = 'https://www.schema.org';
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -203,7 +203,7 @@ export default class Molecule extends MoleculeStructure {
 
     for ( let key of [ 'address', 'position', 'batchId' ] ) {
       if ( typeof metas[ key ] === 'undefined' ) {
-        throw new MetaMissingException( `Missing ${ key } in meta` );
+        throw new MetaMissingException( `Molecule::replenishTokens() - Missing ${ key } in meta!` );
       }
     }
 
@@ -274,7 +274,7 @@ export default class Molecule extends MoleculeStructure {
   } ) {
 
     if ( amount < 0.0 ) {
-      throw new NegativeAmountException( 'Amount to burn must be positive!' );
+      throw new NegativeAmountException( 'Molecule::burnToken() - Amount to burn must be positive!' );
     }
 
     if ( ( this.sourceWallet.balance - amount ) < 0 ) {
@@ -408,7 +408,7 @@ export default class Molecule extends MoleculeStructure {
       bundle: newWallet.bundle,
       position: newWallet.position,
       amount: 0,
-      batch_id: newWallet.batchId,
+      batchId: newWallet.batchId,
       pubkey: newWallet.pubkey,
       characters: newWallet.characters
     };
@@ -496,7 +496,7 @@ export default class Molecule extends MoleculeStructure {
     for ( let key of [ 'conditions', 'callback', 'rule' ] ) {
 
       if ( typeof meta[ key ] === 'undefined' ) {
-        throw new MetaMissingException( `No or not defined ${ key } in meta` );
+        throw new MetaMissingException( `Molecule::createRule() - Value for required meta key ${ key } in missing!` );
       }
 
       for ( let item of [ '[object Object]', '[object Array]' ] ) {
@@ -704,9 +704,11 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Arranges atoms to request an authorization token from the node
    *
+   * @param {object} meta
+   *
    * @returns {Molecule}
    */
-  initAuthorization () {
+  initAuthorization ( { meta } ) {
     this.molecularHash = null;
 
     // Initializing a new Atom to hold our metadata
@@ -717,7 +719,7 @@ export default class Molecule extends MoleculeStructure {
           isotope: 'U',
           token: this.sourceWallet.token,
           batchId: this.sourceWallet.batchId,
-          meta: this.finalMetas(),
+          meta: this.finalMetas( meta ),
           index: this.generateIndex()
         }
       )

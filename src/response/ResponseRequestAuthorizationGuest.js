@@ -106,7 +106,7 @@ export default class ResponseRequestAuthorizationGuest extends Response {
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest: '${ key }' key is not found in the payload.` );
+      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
     }
     return Dot.get( this.payload(), key );
   }
@@ -128,4 +128,29 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   time () {
     return this.payloadKey( 'time' );
   }
+
+  /**
+   * Returns timestamp
+   *
+   * @returns {string}
+   */
+  pubKey () {
+    return this.payloadKey( 'key' );
+  }
+
+  /**
+   * @return {Wallet|null}
+   */
+  wallet () {
+    return this.$__query.wallet;
+  }
+
+  /**
+   *
+   * @returns {string}
+   */
+  encrypt () {
+    return this.payloadKey( 'encrypt' );
+  }
+
 }

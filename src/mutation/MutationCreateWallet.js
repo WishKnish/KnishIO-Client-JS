@@ -71,4 +71,5 @@ export default class MutationCreateWallet extends MutationProposeMolecule {
       json
     } );
   }
+
 }

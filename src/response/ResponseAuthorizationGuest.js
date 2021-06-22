@@ -54,7 +54,7 @@ export default class ResponseAuthorizationGuest extends Response {
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest: '${ key }' key is not found in the payload.` );
+      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
     }
     return Dot.get( this.payload(), key );
   }

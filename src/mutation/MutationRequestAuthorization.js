@@ -52,9 +52,12 @@ import ResponseRequestAuthorization from '../response/ResponseRequestAuthorizati
  * Query for requesting an authorization token from the node
  */
 export default class MutationRequestAuthorization extends MutationProposeMolecule {
-
-  fillMolecule () {
-    this.$__molecule.initAuthorization();
+  /**
+   *
+   * @param {object} meta
+   */
+  fillMolecule ( { meta } ) {
+    this.$__molecule.initAuthorization( { meta } );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
   }
@@ -71,4 +74,5 @@ export default class MutationRequestAuthorization extends MutationProposeMolecul
       json
     } );
   }
+
 }

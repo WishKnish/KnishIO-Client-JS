@@ -65,7 +65,6 @@ export default class MutationCreateToken extends MutationProposeMolecule {
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
-    console.log( this.$__molecule.toJSON() );
   }
 
   /**
@@ -80,4 +79,5 @@ export default class MutationCreateToken extends MutationProposeMolecule {
       json
     } );
   }
+
 }

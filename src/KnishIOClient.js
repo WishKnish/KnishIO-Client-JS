@@ -52,11 +52,8 @@ import {
   generateBatchId,
   generateSecret
 } from './libraries/crypto';
-import HttpClient from './httpClient/HttpClient';
-import ApolloClient from './httpClient/ApolloClient';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
-
 import QueryContinuId from './query/QueryContinuId';
 import QueryWalletBundle from './query/QueryWalletBundle';
 import QueryWalletList from './query/QueryWalletList';
@@ -64,7 +61,6 @@ import QueryBalance from './query/QueryBalance';
 import QueryMetaType from './query/QueryMetaType';
 import QueryBatch from './query/QueryBatch';
 import QueryBatchHistory from './query/QueryBatchHistory';
-
 import MutationRequestAuthorization from './mutation/MutationRequestAuthorization';
 import MutationCreateToken from './mutation/MutationCreateToken';
 import MutationRequestTokens from './mutation/MutationRequestTokens';
@@ -75,20 +71,19 @@ import MutationClaimShadowWallet from './mutation/MutationClaimShadowWallet';
 import MutationCreateMeta from './mutation/MutationCreateMeta';
 import MutationCreateWallet from './mutation/MutationCreateWallet';
 import MutationRequestAuthorizationGuest from './mutation/MutationRequestAuthorizationGuest';
-
 import TransferBalanceException from './exception/TransferBalanceException';
 import CodeException from './exception/CodeException';
 import UnauthenticatedException from './exception/UnauthenticatedException';
 import WalletShadowException from './exception/WalletShadowException';
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException';
 import StackableUnitAmountException from './exception/StackableUnitAmountException';
-
+import ApolloClient from './httpClient/ApolloClient';
 import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe';
 import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe';
 import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe';
 import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe';
 import MutationActiveSession from './mutation/MutationActiveSession';
-import QueryActiveSession from "./query/QueryActiveSession";
+import QueryActiveSession from './query/QueryActiveSession';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -96,29 +91,31 @@ import QueryActiveSession from "./query/QueryActiveSession";
  */
 export default class KnishIOClient {
 
-
-  /*
+  /**
    * Class constructor
    *
    * @param {string} uri
-   * @param {string} socketUri
-   * @param {HttpClient} client
+   * @param {string|null} socketUri
+   * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
+   * @param {boolean} encrypt
    */
   constructor ( {
     uri,
     client = null,
     socketUri = null,
     serverSdkVersion = 3,
-    logging = false
+    logging = false,
+    encrypt = false
   } ) {
     this.initialize( {
       uri,
       socketUri,
       client,
       serverSdkVersion,
-      logging
+      logging,
+      encrypt
     } );
   }
 
@@ -127,36 +124,71 @@ export default class KnishIOClient {
    *
    * @param {string} uri
    * @param {string|null} socketUri
-   * @param {HttpClient} client
+   * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
+   * @param {boolean} encrypt
    */
   initialize ( {
     uri,
     socketUri = null,
     client = null,
     serverSdkVersion = 3,
-    logging = false
+    logging = false,
+    encrypt = false
   } ) {
 
-    this.$__subscribe = null;
     this.$__logging = logging;
+    this.$__encrypt = false;
 
     if ( this.$__logging ) {
       console.info( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
     }
 
     this.reset();
+    this.$__client = client || new ApolloClient( {
+      socketUri: socketUri,
+      serverUri: uri
+    } );
 
-    if ( socketUri !== null ) {
-      this.$__subscribe = new ApolloClient( {
-        socketUri: socketUri,
-        serverUri: uri
-      } );
+    if ( encrypt ) {
+      this.enableEncryption();
     }
 
-    this.$__client = client || new HttpClient( uri );
     this.$__serverSdkVersion = serverSdkVersion;
+  }
+
+  /**
+   *  Enables end-to-end encryption protocol.
+   *  Note: this will cause all active subscriptions to be unsubscribed.
+   */
+  enableEncryption () {
+    if ( this.$__logging ) {
+      console.info( 'KnishIOClient::enableEncryption() - Enabling end-to-end encryption mode...' );
+    }
+    this.$__encrypt = true;
+    this.$__client.enableEncryption();
+  }
+
+  /**
+   *  Disables end-to-end encryption protocol.
+   *  Note: this will cause all active subscriptions to be unsubscribed.
+   */
+  disableEncryption () {
+    if ( this.$__logging ) {
+      console.info( 'KnishIOClient::disableEncryption() - Disabling end-to-end encryption mode...' );
+    }
+    this.$__encrypt = false;
+    this.$__client.disableEncryption();
+  }
+
+  /**
+   * Returns whether or not the end-to-end encryption protocol is enabled
+   *
+   * @return {boolean}
+   */
+  hasEncryption () {
+    return this.$__encrypt;
   }
 
   /**
@@ -169,11 +201,16 @@ export default class KnishIOClient {
     this.reset();
   }
 
+  /**
+   * Subscribes the client to the node's broadcast socket
+   *
+   * @return {ApolloClient}
+   */
   subscribe () {
-    if ( !this.$__subscribe ) {
-      throw new CodeException( 'KnishIOClient::subscribe() - socket client not initialized!' );
+    if ( !this.client().getSocketUri() ) {
+      throw new CodeException( 'KnishIOClient::subscribe() - Socket client not initialized!' );
     }
-    return this.$__subscribe;
+    return this.client();
   }
 
 
@@ -224,9 +261,9 @@ export default class KnishIOClient {
   }
 
   /**
-   * Returns the HTTP client class session
+   * Returns the Apollo client class session
    *
-   * @returns {HttpClient}
+   * @returns {ApolloClient}
    */
   client () {
     return this.$__client;
@@ -244,6 +281,7 @@ export default class KnishIOClient {
 
   /**
    * Set the client's secret
+   *
    * @param secret
    */
   setSecret ( secret ) {
@@ -362,6 +400,8 @@ export default class KnishIOClient {
   }
 
   /**
+   * Builds a new instance of the provided Subscription class
+   *
    * @param subscribeClass
    * @return {*}
    */
@@ -390,7 +430,7 @@ export default class KnishIOClient {
     const mutation = new mutationClass( this.client(), _molecule );
 
     if ( !( mutation instanceof MutationProposeMolecule ) ) {
-      throw new CodeException( `${ this.constructor.name }::createMoleculeMutation - required class instance of MutationProposeMolecule.` );
+      throw new CodeException( `${ this.constructor.name }::createMoleculeMutation() - This method only accepts MutationProposeMolecule!` );
     }
 
     this.lastMoleculeQuery = mutation;
@@ -404,12 +444,14 @@ export default class KnishIOClient {
    * @param {string|null} secret
    * @param {string|null} seed
    * @param {string|null} cellSlug
+   * @param {boolean|null} encrypt
    * @return {Promise<Response>}
    */
   async requestAuthToken ( {
     secret = null,
     seed = null,
-    cellSlug = null
+    cellSlug = null,
+    encrypt = null
   } ) {
 
     if ( this.$__logging ) {
@@ -436,6 +478,11 @@ export default class KnishIOClient {
 
     this.$__cellSlug = cellSlug || this.cellSlug();
 
+    // Are we asking for end-to-end encryption?
+    if ( encrypt === null ) {
+      encrypt = this.hasEncryption();
+    }
+
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion >= 3 ) {
 
@@ -444,17 +491,26 @@ export default class KnishIOClient {
 
       if ( guestMode ) {
 
+        const authorizationWallet = new Wallet( {
+          secret: generateSecret(),
+          token: 'AUTH'
+        } );
+
         /**
          * @type {MutationRequestAuthorizationGuest}
          */
         query = await this.createQuery( MutationRequestAuthorizationGuest );
+
+        query.setAuthorizationWallet( authorizationWallet );
 
         /**
          * @type {ResponseRequestAuthorization}
          */
         response = await query.execute( {
           variables: {
-            cellSlug: this.$__cellSlug
+            cellSlug: this.$__cellSlug,
+            pubkey: authorizationWallet.pubkey,
+            encrypt: encrypt
           }
         } );
       } else {
@@ -474,9 +530,8 @@ export default class KnishIOClient {
           molecule
         } );
 
-        query.fillMolecule();
-        // console.log(JSON.stringify(query.$__molecule.toJSON()));
-        // throw new Error();
+        query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
+
         /**
          * @type {ResponseRequestAuthorization}
          */
@@ -485,15 +540,34 @@ export default class KnishIOClient {
 
       if ( response.success() ) {
 
-        const token = response.token();
-        this.client().setAuthToken( token );
-
-        if ( this.$__subscribe !== null ) {
-          this.subscribe().setAuthToken( token );
-        }
+        this.client().setAuthData( {
+          token: response.token(),
+          pubkey: response.pubKey(),
+          wallet: response.wallet()
+        } );
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
+        }
+
+        if ( this.hasEncryption() !== response.encrypt() ) {
+
+          if ( this.$__logging ) {
+            console.warn( 'KnishIOClient::requestAuthToken() - Node not respecting requested encryption policy!' );
+          }
+
+          if ( response.encrypt() ) {
+
+            if ( this.$__logging ) {
+              console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption on to match node...' );
+            }
+            this.enableEncryption();
+          } else {
+            if ( this.$__logging ) {
+              console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption off to match node...' );
+            }
+            this.disableEncryption();
+          }
         }
 
       } else {
@@ -510,7 +584,7 @@ export default class KnishIOClient {
     } else {
 
       if ( this.$__logging ) {
-        console.warn( 'KnishIOClient::requestAuthToken() - Server SDK version does not require an auth token...' );
+        console.warn( 'KnishIOClient::requestAuthToken() - Node SDK version does not require an auth token!' );
       }
 
     }
@@ -571,6 +645,8 @@ export default class KnishIOClient {
   }
 
   /**
+   * Creates a subscription for updating Wallet status
+   *
    * @param {string|null} bundle
    * @param {string} token
    * @param {function} closure
@@ -583,7 +659,7 @@ export default class KnishIOClient {
   } ) {
 
     if ( !token ) {
-      throw new CodeException( `${ this.constructor.name }::subscribeWalletStatus - token parameter is required.` );
+      throw new CodeException( `${ this.constructor.name }::subscribeWalletStatus() - Token parameter is required!` );
     }
 
     const subscribe = this.createSubscribe( WalletStatusSubscribe );
@@ -598,6 +674,7 @@ export default class KnishIOClient {
   }
 
   /**
+   *  Creates a subscription for updating active Wallet
    *
    * @param {string|null} bundle
    * @param {function} closure
@@ -618,6 +695,7 @@ export default class KnishIOClient {
   }
 
   /**
+   * Creates a subscription for updating list of active sessions for a given MetaType
    *
    * @param {string} metaType
    * @param {string} metaId
@@ -641,6 +719,7 @@ export default class KnishIOClient {
   }
 
   /**
+   * Unsubscribes from a given subscription name
    *
    * @param {string} operationName
    */
@@ -762,7 +841,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Query batch to get cascade meta instances by batchID
+   * Query batch to get cascading meta instances by batchID
    *
    * @param batchId
    * @returns {Promise<*>}
@@ -772,7 +851,7 @@ export default class KnishIOClient {
   } ) {
 
     if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryBatch() - Querying cascade meta instance data for batchId: ${ batchId }...` );
+      console.info( `KnishIOClient::queryBatch() - Querying cascading meta instances for batchId: ${ batchId }...` );
     }
 
     const query = this.createQuery( QueryBatch );
@@ -783,7 +862,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Query batch history to get cascade meta instances by batchID
+   * Query batch history to get cascading meta instances by batchID
    *
    * @param batchId
    * @returns {Promise<*>}
@@ -793,22 +872,13 @@ export default class KnishIOClient {
   } ) {
 
     if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryBatchHistory() - Querying cascade meta instance data for batchId: ${ batchId }...` );
+      console.info( `KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${ batchId }...` );
     }
 
     const query = this.createQuery( QueryBatchHistory );
 
     return await query.execute( {
       variables: { batchId: batchId }
-    } );
-  }
-
-  async queryActiveSession ( { metaType, metaId } ) {
-
-    const query = this.createQuery( QueryActiveSession );
-
-    return await query.execute( {
-      variables: { metaType, metaId }
     } );
   }
 
@@ -840,6 +910,29 @@ export default class KnishIOClient {
   }
 
   /**
+   * Queries the ledger to retrieve a list of active sessions for the given MetaType
+   *
+   * @param {string} metaType
+   * @param {string} metaId
+   * @return {Promise<*>}
+   */
+  async queryActiveSession ( {
+    metaType,
+    metaId
+  } ) {
+
+    const query = this.createQuery( QueryActiveSession );
+
+    return await query.execute( {
+      variables: {
+        metaType,
+        metaId
+      }
+    } );
+  }
+
+  /**
+   * Builds and executes a molecule to declare an active session for the given MetaType
    *
    * @param {string} bundle
    * @param {string} metaType
@@ -1063,7 +1156,6 @@ export default class KnishIOClient {
       }
     } )
       .then( ( /** ResponseWalletList */ response ) => {
-        console.log( response );
         return response.payload();
       } );
   }
@@ -1394,11 +1486,11 @@ export default class KnishIOClient {
 
 
   /**
+   * Builds and executes a molecule to destroy the specified Token units
    *
    * @param {string} token
    * @param {number|null} amount
-   * @param {array} units
-   * @param {string|null} batchId
+   * @param {array|null} units
    * @param {Wallet|null} sourceWallet
    * @returns {Promise<unknown>}
    */

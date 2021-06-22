@@ -28,11 +28,11 @@ export default class Subscribe {
     let uri = this.uri();
 
     if ( !uri ) {
-      throw new CodeException( 'Subscribe::createSubscribe => Uri does not initialized.' );
+      throw new CodeException( 'Subscribe::createSubscribe() - Node URI was not initialized for this client instance!' );
     }
 
     if ( this.$__subscribe === null ) {
-      throw new CodeException( 'Subscribe::createSubscribe => GraphQL subscription does not initialized.' );
+      throw new CodeException( 'Subscribe::createSubscribe() - GraphQL subscription was not initialized!' );
     }
 
     return {
@@ -54,7 +54,7 @@ export default class Subscribe {
     closure
   } ) {
     if ( !closure ) {
-      throw new CodeException( `${ this.constructor.name }::execute - closure parameter is required.` );
+      throw new CodeException( `${ this.constructor.name }::execute() - closure parameter is required!` );
     }
 
     this.$__request = this.createSubscribe( {

@@ -62,15 +62,22 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorization: '${ key }' key is not found in the payload.` );
+      throw new InvalidResponseException( `ResponseRequestAuthorization::payloadKey() - '${ key }' key was not found in the payload!` );
     }
     return Dot.get( this.payload(), key );
   }
 
   /**
+   * @return {Wallet|null}
+   */
+  wallet () {
+    return this.clientMolecule().sourceWallet;
+  }
+
+  /**
    * Returns the auth token
    *
-   * @returns {*}
+   * @returns {string}
    */
   token () {
     return this.payloadKey( 'token' );
@@ -79,9 +86,25 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
   /**
    * Returns timestamp
    *
-   * @returns {*}
+   * @returns {string}
    */
   time () {
     return this.payloadKey( 'time' );
+  }
+
+  /**
+   *
+   * @returns {string}
+   */
+  encrypt () {
+    return this.payloadKey( 'encrypt' );
+  }
+
+  /**
+   *
+   * @return {string}
+   */
+  pubKey () {
+    return this.payloadKey( 'key' );
   }
 }
