@@ -1,105 +1,123 @@
-import { ApolloClient as RootApolloClient } from 'apollo-client';
-import { createHttpLink } from 'apollo-link-http';
-import { onError } from 'apollo-link-error';
-import fetch from 'isomorphic-fetch';
-import {
-  ApolloLink,
-  Operation
-} from 'apollo-link';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import EchoLink from '../libraries/ApolloLink/EchoLink';
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
+import { Operation } from 'apollo-link';
 import { operationName } from '../libraries/ApolloLink/handler';
+import Client from '../libraries/ApolloLink/Client';
 
 
 export default class ApolloClient {
 
   /**
-   *
-   * @param {string} socketUri
    * @param {string} serverUri
-   * @param {string|null} authorization
+   * @param {string|null} socketUri
+   * @param {boolean} encrypt
    */
   constructor ( {
-    socketUri,
     serverUri,
-    authorization = null
+    socketUri = null,
+    encrypt = false
   } ) {
 
-    const httpLink = createHttpLink( {
-        uri: serverUri,
-        fetch: fetch,
-        transportBatching: true
-      } ),
-      authLink = new ApolloLink( ( operation, forward ) => {
-        // Use the setContext method to set the HTTP headers.
-        operation.setContext( {
-          headers: {
-            'X-Auth-Token': this.getAuthToken()
-          }
-        } );
-        // Call the next link in the middleware chain.
-        return forward( operation );
-      } ),
-      errorLink = onError( ( {
-        graphQLErrors,
-        networkError,
-        operation,
-        forward
-      } ) => {
-
-        if ( graphQLErrors ) {
-          graphQLErrors.map( ( {
-            message,
-            debugMessage,
-            locations,
-            path
-          } ) => console.error(
-            `[GraphQL error]: ${ message }\r\n`,
-            `  Message : ${ debugMessage }\r\n`,
-            `  Path    : ${ path }\r\n`,
-            `  Location: ${ locations }\r\n`
-          ) );
-        }
-
-        if ( networkError ) {
-
-          if ( networkError.name === 'ServerError' && networkError.statusCode === 401 ) {
-
-            operation.setContext( {
-              headers: {
-                ...operation.getContext().headers,
-                'X-Auth-Token': this.getAuthToken()
-              }
-            } );
-            // retry the request, returning the new observable
-            return forward( operation );
-          }
-
-          console.error( `[Network error]: ${ networkError }` );
-          // if you would also like to retry automatically on
-          // network errors, we recommend that you use
-          // apollo-link-retry
-        }
-      } );
-
     this.$__subscribers = {};
-    this.$__authorization = authorization;
-    this.$__uri = socketUri;
-    this.$__echo = new EchoLink( { socketUri } );
-    this.$__client = new RootApolloClient( {
-      link: ApolloLink.from( [ authLink, this.$__echo, errorLink.concat( httpLink ) ] ),
-      cache: new InMemoryCache(),
-      connectToDevTools: true
-    } );
+    this.$__uri = serverUri;
+    this.$__socketUri = socketUri;
+    this.$__client = null;
+
+    this.restartTransport( encrypt );
   }
 
   /**
+   * If you have subscriptions, you unsubscribe
    *
+   * @param {boolean} encrypt
+   */
+  restartTransport ( encrypt = false ) {
+    const client = new Client( {
+      serverUri: this.$__uri,
+      socketUri: this.$__socketUri,
+      encrypt
+    } );
+
+    if ( this.$__client ) {
+
+      this.unsubscribeAll();
+
+      client.setAuthData( {
+        token: this.$__client.getAuthToken(),
+        pubkey: this.$__client.getPubKey(),
+        wallet: this.$__client.getWallet()
+      } );
+    }
+
+    this.$__client = client;
+  }
+
+  /**
+   *  If you have subscriptions, you unsubscribe
+   */
+  enableEncryption () {
+    this.restartTransport( true );
+  }
+
+  /**
+   *  If you have subscriptions, you unsubscribe
+   */
+  disableEncryption () {
+    this.restartTransport();
+  }
+
+  /**
    * @param {string} operationName
    */
   unsubscribe ( operationName ) {
     if ( this.$__subscribers[ operationName ] ) {
       this.$__subscribers[ operationName ].unsubscribe();
+      delete this.$__subscribers[ operationName ];
     }
   }
 
@@ -129,14 +147,31 @@ export default class ApolloClient {
     return operation;
   }
 
+  async query ( request ) {
+    return await this.$__client.query( request );
+  }
+
+  async mutate ( request ) {
+    return await this.$__client.mutate( request );
+  }
+
   /**
    * Sets the authorization token for this session
    *
-   * @param {string} authToken
+   * @param {string} token
+   * @param {string} pubkey
+   * @param {Wallet|null} wallet
    */
-  setAuthToken ( authToken ) {
-    this.$__echo.setAuthToken( authToken );
-    this.$__authorization = authToken;
+  setAuthData ( {
+    token,
+    pubkey,
+    wallet
+  } ) {
+    this.$__client.setAuthData( {
+      token,
+      pubkey,
+      wallet
+    } );
   }
 
   /**
@@ -145,7 +180,7 @@ export default class ApolloClient {
    * @return {string}
    */
   getAuthToken () {
-    return this.$__authorization || '';
+    return this.$__client.getAuthToken();
   }
 
   /**
@@ -164,6 +199,20 @@ export default class ApolloClient {
    */
   setUri ( uri ) {
     this.$__uri = uri;
+  }
+
+  /**
+   * @return {string}
+   */
+  getSocketUri () {
+    return this.$__socketUri;
+  }
+
+  /**
+   * @param {string} socketUri
+   */
+  setSocketUri ( socketUri ) {
+    this.$__socketUri = socketUri;
   }
 
 }

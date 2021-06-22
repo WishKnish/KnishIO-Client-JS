@@ -7,8 +7,14 @@ export default class ResponseQueryActiveSession extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( { query, json} ) {
-    super( { query, json, } );
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
+    } );
     this.dataKey = 'data.ActiveUser';
     this.init();
   }
@@ -20,18 +26,28 @@ export default class ResponseQueryActiveSession extends Response {
       return null;
     }
 
-    const activeUser = [];
+    const activeUsers = [];
 
     for ( let item of list ) {
 
-      if ( item.jsonData ) {
-        item.jsonData = JSON.parse( item.jsonData );
+      const activeSession = { ...item };
+
+      if ( activeSession.jsonData ) {
+        activeSession.jsonData = JSON.parse( activeSession.jsonData );
       }
 
-      activeUser.push( item );
+      if ( activeSession.createdAt ) {
+        activeSession.createdAt = new Date( activeSession.createdAt );
+      }
+
+      if ( activeSession.updatedAt ) {
+        activeSession.updatedAt = new Date( activeSession.updatedAt );
+      }
+
+      activeUsers.push( activeSession );
     }
 
-    return activeUser;
+    return activeUsers;
   }
 
 }

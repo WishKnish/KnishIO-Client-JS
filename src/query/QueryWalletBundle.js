@@ -47,33 +47,28 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from './Query';
 import ResponseWalletBundle from '../response/ResponseWalletBundle';
+import gql from 'graphql-tag';
 
 /**
  * Query for retrieving information about Wallet Bundles
  */
 export default class QueryWalletBundle extends Query {
 
-  /**
-   * Class constructor
-   *
-   * @param httpClient
-   */
-  constructor ( httpClient ) {
-    super( httpClient );
-    this.$__query = 'query( $bundleHash: String, $bundleHashes: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $keys_values: [ MetaInput ], $latest: Boolean, $limit: Int, $order: String ) { WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, order: $order ) @fields }';
-    this.$__fields = {
-      'bundleHash': null,
-      'metas': {
-        'molecularHash': null,
-        'position': null,
-        'key': null,
-        'value': null,
-        'createdAt': null
-      },
-      //	'molecules',
-      //	'wallets',
-      'createdAt': null
-    };
+  constructor ( apolloClient ) {
+    super( apolloClient );
+    this.$__query = gql`query( $bundleHash: String, $bundleHashes: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $keys_values: [ MetaInput ], $latest: Boolean, $limit: Int, $order: String ) {
+        WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, order: $order ) {
+            bundleHash,
+            metas {
+                molecularHash,
+                position,
+                key,
+                value,
+                createdAt
+            },
+            createdAt
+        }
+    }`;
   }
 
   /**
@@ -122,6 +117,6 @@ export default class QueryWalletBundle extends Query {
     }
 
     return variables;
-
   }
+
 }

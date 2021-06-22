@@ -1,25 +1,73 @@
-import Query from '../query/Query';
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
+import Mutation from '../mutation/Mutation';
 import ResponseActiveSession from '../response/ResponseActiveSession';
+import gql from 'graphql-tag';
 
 
-export default class MutationActiveSession extends Query {
-
+export default class MutationActiveSession extends Mutation {
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param apolloClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = 'mutation( $bundleHash: String!, $metaType: String!, $metaId: String!, $json: String ) { ActiveSession( bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId, json: $json ) @fields }';
-    this.$__fields = {
-      'bundleHash': null,
-      'metaType': null,
-      'metaId': null,
-      'jsonData': null,
-      'createdAt': null,
-      'updatedAt': null
-    };
+  constructor ( apolloClient ) {
+    super( apolloClient );
+    this.$__query = gql`mutation( $bundleHash: String!, $metaType: String!, $metaId: String!, $json: String ) {
+        ActiveSession( bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId, json: $json ) {
+            bundleHash,
+            metaType,
+            metaId,
+            jsonData,
+            createdAt,
+            updatedAt
+        }
+    }`;
   }
 
   /**
@@ -34,4 +82,5 @@ export default class MutationActiveSession extends Query {
       json
     } );
   }
+
 }
