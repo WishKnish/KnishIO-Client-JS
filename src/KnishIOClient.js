@@ -84,6 +84,7 @@ import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe';
 import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe';
 import MutationActiveSession from './mutation/MutationActiveSession';
 import QueryActiveSession from './query/QueryActiveSession';
+import QueryUserActivity from './query/QueryUserActivity';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -912,11 +913,13 @@ export default class KnishIOClient {
   /**
    * Queries the ledger to retrieve a list of active sessions for the given MetaType
    *
+   * @param {string} bundleHash
    * @param {string} metaType
    * @param {string} metaId
    * @return {Promise<*>}
    */
   async queryActiveSession ( {
+    bundleHash,
     metaType,
     metaId
   } ) {
@@ -925,8 +928,29 @@ export default class KnishIOClient {
 
     return await query.execute( {
       variables: {
+        bundleHash,
         metaType,
         metaId
+      }
+    } );
+  }
+
+  async queryUserActivity( {
+    bundleHash,
+    metaType,
+    metaId,
+    countBy,
+    interval
+  } ) {
+    const query = this.createQuery( QueryUserActivity );
+
+    return await query.execute( {
+      variables: {
+        bundleHash,
+        metaType,
+        metaId,
+        countBy,
+        interval
       }
     } );
   }
