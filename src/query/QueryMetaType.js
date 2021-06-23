@@ -154,6 +154,11 @@ export default class QueryMetaType extends Query {
     }
 
     if ( queryArgs ) {
+
+      if ( typeof queryArgs.limit === 'undefined' || queryArgs.limit === 0 ) {
+        queryArgs.limit = '*';
+      }
+
       variables[ 'queryArgs' ] = queryArgs;
     }
 
