@@ -935,7 +935,7 @@ export default class KnishIOClient {
     } );
   }
 
-  async queryUserActivity( {
+  async queryUserActivity ( {
     bundleHash,
     metaType,
     metaId,
