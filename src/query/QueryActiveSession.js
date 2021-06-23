@@ -12,8 +12,8 @@ export default class QueryActiveSession extends Query {
   constructor ( httpClient ) {
     super( httpClient );
 
-    this.$__query = gql`query ActiveUserQuery ($metaType: String!, $metaId: String!) {
-        ActiveUser (metaType: $metaType, metaId: $metaId) {
+    this.$__query = gql`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
+        ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {
             bundleHash,
             metaType,
             metaId,
