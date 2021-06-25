@@ -12,7 +12,7 @@ export default class QueryUserActivity extends Query {
   constructor ( httpClient ) {
     super( httpClient );
 
-    this.$__query = gql`query UserActivity ($bundleHash:String, $metaType: String, $metaId: String, $countBy: CountByUserActivity, $interval: span) {
+    this.$__query = gql`query UserActivity ($bundleHash:String, $metaType: String, $metaId: String, $countBy: [CountByUserActivity], $interval: span) {
         UserActivity (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId, countBy: $countBy, interval: $interval ) {
             createdAt,
             bundleHash,
@@ -26,10 +26,7 @@ export default class QueryUserActivity extends Query {
                 createdAt,
                 updatedAt
             },
-            instanceCount {
-                key,
-                value
-            }
+            instanceCount
         }
     }`;
   }

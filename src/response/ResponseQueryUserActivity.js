@@ -29,6 +29,10 @@ export default class ResponseQueryUserActivity extends Response {
       }
     }
 
+    if ( data.instanceCount ) {
+      data.instanceCount = JSON.parse( data.instanceCount );
+    }
+
     return data;
   }
 
