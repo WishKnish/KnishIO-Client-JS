@@ -26,7 +26,27 @@ export default class QueryUserActivity extends Query {
                 createdAt,
                 updatedAt
             },
-            instanceCount
+            instanceCount {
+                ...SubFields,
+                ...Recursive
+            }
+        }
+    }
+    
+    fragment SubFields on InstanceCountType {
+        id,
+        count
+    }
+
+    fragment Recursive on InstanceCountType {
+        instance {
+            ...SubFields
+            instance {
+                ...SubFields,
+                instance {
+                    ...SubFields
+                }
+            }
         }
     }`;
   }
