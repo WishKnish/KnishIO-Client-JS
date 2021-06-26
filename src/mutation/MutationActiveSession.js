@@ -49,7 +49,9 @@ import Mutation from '../mutation/Mutation';
 import ResponseActiveSession from '../response/ResponseActiveSession';
 import gql from 'graphql-tag';
 
-
+/**
+ * Mutation for declaring an active User Session with a given MetaAsset
+ */
 export default class MutationActiveSession extends Mutation {
   /**
    * Class constructor
@@ -71,7 +73,7 @@ export default class MutationActiveSession extends Mutation {
   }
 
   /**
-   * Returns a Response object
+   * Builds a Response object out of a JSON string
    *
    * @param {object} json
    * @return {ResponseActiveSession}
@@ -82,5 +84,4 @@ export default class MutationActiveSession extends Mutation {
       json
     } );
   }
-
 }

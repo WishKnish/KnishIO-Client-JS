@@ -1,8 +1,57 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import Query from './Query';
 import ResponseQueryUserActivity from '../response/ResponseQueryUserActivity';
 import gql from 'graphql-tag';
 
-
+/**
+ * Query for retrieving information about user activity
+ */
 export default class QueryUserActivity extends Query {
   /**
    * Class constructor
@@ -32,7 +81,7 @@ export default class QueryUserActivity extends Query {
             }
         }
     }
-    
+
     fragment SubFields on InstanceCountType {
         id,
         count
@@ -52,6 +101,8 @@ export default class QueryUserActivity extends Query {
   }
 
   /**
+   * Returns a Response object
+   *
    * @param {object} json
    * @return {ResponseQueryUserActivity}
    */
