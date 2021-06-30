@@ -56,8 +56,6 @@ const cloneDeep = require( 'lodash.clonedeep' );
  */
 export default class MoleculeStructure {
 
-  atoms = [];
-
   /**
    * Class constructor
    *
