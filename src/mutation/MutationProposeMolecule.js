@@ -61,18 +61,18 @@ export default class MutationProposeMolecule extends Mutation {
     this.$__molecule = molecule;
     this.$__remainderWallet = null;
     this.$__query = gql`mutation( $molecule: MoleculeInput! ) {
-        ProposeMolecule( molecule: $molecule ) {
-            molecularHash,
-            height,
-            depth,
-            status,
-            reason,
-            payload,
-            createdAt,
-            receivedAt,
-            processedAt,
-            broadcastedAt,
-        }
+      ProposeMolecule( molecule: $molecule ) {
+        molecularHash,
+        height,
+        depth,
+        status,
+        reason,
+        payload,
+        createdAt,
+        receivedAt,
+        processedAt,
+        broadcastedAt,
+      }
     }`;
   }
 

@@ -62,14 +62,14 @@ export default class QueryActiveSession extends Query {
     super( httpClient );
 
     this.$__query = gql`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
-        ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {
-            bundleHash,
-            metaType,
-            metaId,
-            jsonData,
-            createdAt,
-            updatedAt
-        }
+      ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {
+        bundleHash,
+        metaType,
+        metaId,
+        jsonData,
+        createdAt,
+        updatedAt
+      }
     }`;
   }
 

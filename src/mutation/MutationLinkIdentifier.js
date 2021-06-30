@@ -62,13 +62,13 @@ export default class MutationLinkIdentifier extends Mutation {
   constructor ( apolloClient ) {
     super( apolloClient );
     this.$__query = gql`mutation( $bundle: String!, $type: String!, $content: String! ) {
-        LinkIdentifier( bundle: $bundle, type: $type, content: $content ) {
-            type,
-            bundle,
-            content,
-            set,
-            message
-        }
+      LinkIdentifier( bundle: $bundle, type: $type, content: $content ) {
+        type,
+        bundle,
+        content,
+        set,
+        message
+      }
     }`;
   }
 

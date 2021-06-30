@@ -62,78 +62,78 @@ export default class QueryUserActivity extends Query {
     super( httpClient );
 
     this.$__query = gql`query UserActivity (
-        $bundleHash:String,
-        $metaType: String,
-        $metaId: String,
-        $ipAddress: String,
-        $browser: String,
-        $osCpu: String,
-        $resolution: String,
-        $timeZone: String,
-        $countBy: [CountByUserActivity],
-        $interval: span
+      $bundleHash:String,
+      $metaType: String,
+      $metaId: String,
+      $ipAddress: String,
+      $browser: String,
+      $osCpu: String,
+      $resolution: String,
+      $timeZone: String,
+      $countBy: [CountByUserActivity],
+      $interval: span
     ) {
-        UserActivity (
-            bundleHash: $bundleHash,
-            metaType: $metaType,
-            metaId: $metaId,
-            ipAddress: $ipAddress,
-            browser: $browser,
-            osCpu: $osCpu,
-            resolution: $resolution,
-            timeZone: $timeZone,
-            countBy: $countBy,
-            interval: $interval
-        ) {
-            createdAt,
-            bundleHash,
-            metaType,
-            metaId,
-            instances {
-                bundleHash,
-                metaType,
-                metaId,
-                jsonData,
-                createdAt,
-                updatedAt
-            },
-            instanceCount {
-                ...SubFields,
-                ...Recursive
-            }
+      UserActivity (
+        bundleHash: $bundleHash,
+        metaType: $metaType,
+        metaId: $metaId,
+        ipAddress: $ipAddress,
+        browser: $browser,
+        osCpu: $osCpu,
+        resolution: $resolution,
+        timeZone: $timeZone,
+        countBy: $countBy,
+        interval: $interval
+      ) {
+        createdAt,
+        bundleHash,
+        metaType,
+        metaId,
+        instances {
+          bundleHash,
+          metaType,
+          metaId,
+          jsonData,
+          createdAt,
+          updatedAt
+        },
+        instanceCount {
+          ...SubFields,
+          ...Recursive
         }
+      }
     }
 
     fragment SubFields on InstanceCountType {
-        id,
-        count
+      id,
+      count
     }
 
     fragment Recursive on InstanceCountType {
+      instances {
+        ...SubFields
         instances {
+          ...SubFields,
+          instances {
             ...SubFields
             instances {
-                ...SubFields,
+              ...SubFields
+              instances {
+                ...SubFields
                 instances {
+                  ...SubFields
+                  instances {
                     ...SubFields
                     instances {
-                        ...SubFields
-                        instances {
-                            ...SubFields
-                            instances {
-                                ...SubFields
-                                instances {
-                                    ...SubFields
-                                    instances {
-                                        ...SubFields
-                                    }
-                                }
-                            }
-                        }
+                      ...SubFields
                     }
+                  }
                 }
+              }
             }
+          }
         }
+      }
     }`;
   }
 

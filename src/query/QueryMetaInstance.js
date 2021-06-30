@@ -57,28 +57,28 @@ export default class QueryMetaInstance extends Query {
   constructor ( apolloClient ) {
     super( apolloClient );
     this.$__query = gql`query( $metaType: String!, $metaIds: [ String! ], $keys: [ String! ], $values: [ String! ], $filter: [ MetaFilter! ], $countBy: String, $queryArgs: QueryArgs, $latestMetas: Boolean) {
-        MetaInstance( metaType: $metaType, metaIds: $metaIds, keys: $keys, values: $values, filter: $filter, countBy: $countBy, queryArgs: $queryArgs, latestMetas: $latestMetas ) {
-            nodes {
-                metaType,
-                metaId,
-                createdAt,
-                metas(latest:$latest) {
-                    molecularHash,
-                    position,
-                    key,
-                    value,
-                    createdAt
-                }
-            }
-            counts {
-                key,
-                value
-            },
-            paginator {
-                offset,
-                total
-            }
+      MetaInstance( metaType: $metaType, metaIds: $metaIds, keys: $keys, values: $values, filter: $filter, countBy: $countBy, queryArgs: $queryArgs, latestMetas: $latestMetas ) {
+        nodes {
+          metaType,
+          metaId,
+          createdAt,
+          metas(latest:$latest) {
+            molecularHash,
+            position,
+            key,
+            value,
+            createdAt
+          }
         }
+        counts {
+          key,
+          value
+        },
+        paginator {
+          offset,
+          total
+        }
+      }
     }`;
   }
 

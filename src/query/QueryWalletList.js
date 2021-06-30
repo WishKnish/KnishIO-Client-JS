@@ -57,32 +57,32 @@ export default class QueryWalletList extends Query {
   constructor ( apolloClient ) {
     super( apolloClient );
     this.$__query = gql`query( $address: String, $bundleHash: String, $token: String, $position: String, $unspent: Boolean ) {
-        Wallet( address: $address, bundleHash: $bundleHash, token: $token, position: $position, unspent: $unspent ) {
-            address,
-            bundleHash,
-            token {
-                name,
-                amount,
-                fungibility,
-                supply
-            },
-            molecules {
-                molecularHash,
-                createdAt
-            }
-            tokenSlug,
-            batchId,
-            position,
-            amount,
-            characters,
-            pubkey,
-            createdAt,
-            tokenUnits {
-                id,
-                name,
-                metas
-            }
+      Wallet( address: $address, bundleHash: $bundleHash, token: $token, position: $position, unspent: $unspent ) {
+        address,
+        bundleHash,
+        token {
+          name,
+          amount,
+          fungibility,
+          supply
+        },
+        molecules {
+          molecularHash,
+          createdAt
         }
+        tokenSlug,
+        batchId,
+        position,
+        amount,
+        characters,
+        pubkey,
+        createdAt,
+        tokenUnits {
+          id,
+          name,
+          metas
+        }
+      }
     }`;
   }
 

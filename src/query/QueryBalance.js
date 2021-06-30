@@ -62,22 +62,22 @@ export default class QueryBalance extends Query {
     super( apolloClient );
 
     this.$__query = gql`query( $address: String, $bundleHash: String, $token: String, $position: String ) {
-        Balance( address: $address, bundleHash: $bundleHash, token: $token, position: $position ) {
-            address,
-            bundleHash,
-            tokenSlug,
-            batchId,
-            position,
-            amount,
-            characters,
-            pubkey,
-            createdAt,
-            tokenUnits {
-                id,
-                name,
-                metas
-            }
+      Balance( address: $address, bundleHash: $bundleHash, token: $token, position: $position ) {
+        address,
+        bundleHash,
+        tokenSlug,
+        batchId,
+        position,
+        amount,
+        characters,
+        pubkey,
+        createdAt,
+        tokenUnits {
+          id,
+          name,
+          metas
         }
+      }
     }`;
   }
 

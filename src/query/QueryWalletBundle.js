@@ -57,17 +57,17 @@ export default class QueryWalletBundle extends Query {
   constructor ( apolloClient ) {
     super( apolloClient );
     this.$__query = gql`query( $bundleHash: String, $bundleHashes: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $keys_values: [ MetaInput ], $latest: Boolean, $limit: Int, $order: String ) {
-        WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, order: $order ) {
-            bundleHash,
-            metas {
-                molecularHash,
-                position,
-                key,
-                value,
-                createdAt
-            },
-            createdAt
-        }
+      WalletBundle( bundleHash: $bundleHash, bundleHashes: $bundleHashes, key: $key, keys: $keys, value: $value, values: $values, keys_values: $keys_values, latest: $latest, limit: $limit, order: $order ) {
+        bundleHash,
+        metas {
+          molecularHash,
+          position,
+          key,
+          value,
+          createdAt
+        },
+        createdAt
+      }
     }`;
   }
 

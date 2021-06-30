@@ -57,17 +57,17 @@ export default class QueryContinuId extends Query {
   constructor ( apolloClient ) {
     super( apolloClient );
     this.$__query = gql`query ($bundle: String!) {
-        ContinuId(bundle: $bundle) {
-            address,
-            bundleHash,
-            tokenSlug,
-            position,
-            batchId,
-            characters,
-            pubkey,
-            amount,
-            createdAt
-        }
+      ContinuId(bundle: $bundle) {
+        address,
+        bundleHash,
+        tokenSlug,
+        position,
+        batchId,
+        characters,
+        pubkey,
+        amount,
+        createdAt
+      }
     }`;
   }
 

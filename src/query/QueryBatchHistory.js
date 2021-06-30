@@ -58,9 +58,9 @@ export default class QueryBatchHistory extends Query {
   constructor ( apolloClient ) {
     super( apolloClient );
     this.$__query = gql`query( $batchId: String ) {
-        BatchHistory( batchId: $batchId ) {
-            ${ QueryBatch.getFields() }
-        }
+      BatchHistory( batchId: $batchId ) {
+        ${ QueryBatch.getFields() }
+      }
     }`;
   }
 
