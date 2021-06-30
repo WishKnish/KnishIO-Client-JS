@@ -939,6 +939,11 @@ export default class KnishIOClient {
     bundleHash,
     metaType,
     metaId,
+    ipAddress,
+    browser,
+    osCpu,
+    resolution,
+    timeZone,
     countBy,
     interval
   } ) {
@@ -949,6 +954,11 @@ export default class KnishIOClient {
         bundleHash,
         metaType,
         metaId,
+        ipAddress,
+        browser,
+        osCpu,
+        resolution,
+        timeZone,
         countBy,
         interval
       }

@@ -12,8 +12,30 @@ export default class QueryUserActivity extends Query {
   constructor ( httpClient ) {
     super( httpClient );
 
-    this.$__query = gql`query UserActivity ($bundleHash:String, $metaType: String, $metaId: String, $countBy: [CountByUserActivity], $interval: span) {
-        UserActivity (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId, countBy: $countBy, interval: $interval ) {
+    this.$__query = gql`query UserActivity (
+        $bundleHash:String,
+        $metaType: String,
+        $metaId: String,
+        $ipAddress: String,
+        $browser: String,
+        $osCpu: String,
+        $resolution: String,
+        $timeZone: String,
+        $countBy: [CountByUserActivity],
+        $interval: span
+    ) {
+        UserActivity (
+            bundleHash: $bundleHash,
+            metaType: $metaType,
+            metaId: $metaId,
+            ipAddress: $ipAddress,
+            browser: $browser,
+            osCpu: $osCpu,
+            resolution: $resolution,
+            timeZone: $timeZone,
+            countBy: $countBy,
+            interval: $interval
+        ) {
             createdAt,
             bundleHash,
             metaType,
@@ -39,12 +61,27 @@ export default class QueryUserActivity extends Query {
     }
 
     fragment Recursive on InstanceCountType {
-        instance {
+        instances {
             ...SubFields
-            instance {
+            instances {
                 ...SubFields,
-                instance {
+                instances {
                     ...SubFields
+                    instances {
+                        ...SubFields
+                        instances {
+                            ...SubFields
+                            instances {
+                                ...SubFields
+                                instances {
+                                    ...SubFields
+                                    instances {
+                                        ...SubFields
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
