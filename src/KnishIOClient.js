@@ -935,6 +935,21 @@ export default class KnishIOClient {
     } );
   }
 
+
+  /**
+   *
+   * @param {string} bundleHash
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {string} ipAddress
+   * @param {string} browser
+   * @param {string} osCpu
+   * @param {string} resolution
+   * @param {string} timeZone
+   * @param {Array} countBy
+   * @param {string} interval
+   * @return {Promise<*>}
+   */
   async queryUserActivity ( {
     bundleHash,
     metaType,
@@ -971,6 +986,11 @@ export default class KnishIOClient {
    * @param {string} bundle
    * @param {string} metaType
    * @param {string} metaId
+   * @param {string} ipAddress
+   * @param {string} browser
+   * @param {string} osCpu
+   * @param {string} resolution
+   * @param {string} timeZone
    * @param {object|array} json
    * @return {Promise<void>}
    */
@@ -978,6 +998,11 @@ export default class KnishIOClient {
     bundle,
     metaType,
     metaId,
+    ipAddress,
+    browser,
+    osCpu,
+    resolution,
+    timeZone,
     json = {}
   } ) {
     const query = this.createQuery( MutationActiveSession );
@@ -987,6 +1012,11 @@ export default class KnishIOClient {
         bundleHash: bundle,
         metaType,
         metaId,
+        ipAddress,
+        browser,
+        osCpu,
+        resolution,
+        timeZone,
         json: JSON.stringify( json )
       }
     } );
