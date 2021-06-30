@@ -60,8 +60,27 @@ export default class MutationActiveSession extends Mutation {
    */
   constructor ( apolloClient ) {
     super( apolloClient );
-    this.$__query = gql`mutation( $bundleHash: String!, $metaType: String!, $metaId: String!, $json: String ) {
-        ActiveSession( bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId, json: $json ) {
+    this.$__query = gql`mutation(
+        $bundleHash: String!,
+        $metaType: String!,
+        $metaId: String!,
+        $ipAddress: String,
+        $browser: String,
+        $osCpu: String,
+        $resolution: String,
+        $timeZone: String,
+        $json: String ) {
+        ActiveSession(
+            bundleHash: $bundleHash,
+            metaType: $metaType,
+            metaId: $metaId,
+            ipAddress: $ipAddress,
+            browser: $browser,
+            osCpu: $osCpu,
+            resolution: $resolution,
+            timeZone: $timeZone,
+            json: $json
+        ) {
             bundleHash,
             metaType,
             metaId,
