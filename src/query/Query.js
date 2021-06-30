@@ -114,6 +114,7 @@ export default class Query {
    * Sends the Query to a Knish.IO node and returns the Response
    *
    * @param {object} variables
+   * @return {Promise<Response>}
    */
   async execute ( { variables = null } ) {
 

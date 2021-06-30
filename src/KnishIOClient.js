@@ -618,7 +618,7 @@ export default class KnishIOClient {
     const query = this.createQuery( QueryBalance );
 
     // Execute query with either the provided bundle hash or the active client's bundle
-    return await query.execute( {
+    return query.execute( {
       variables: {
         bundleHash: bundle || this.getBundle(),
         token
@@ -1054,7 +1054,7 @@ export default class KnishIOClient {
       if ( units.length > 0 ) {
 
         // Stackable tokens with Unit IDs must not use decimals
-        if ( meta.decimals && meta.decimals > 0 ) {
+        if ( Dot.get( meta || {}, 'decimals' ) > 0 ) {
           throw new StackableUnitDecimalsException();
         }
 
@@ -1164,7 +1164,7 @@ export default class KnishIOClient {
    * @param {string|null} bundle
    * @param {string|null} token
    * @param {boolean|null} unspent
-   * @return {Promise<[]>}
+   * @return {Promise<Response>}
    */
   queryWallets ( {
     bundle = null,

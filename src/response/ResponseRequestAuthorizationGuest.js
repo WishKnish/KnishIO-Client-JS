@@ -56,7 +56,7 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Class constructor
    *
-   * @param query
+   * @param {MutationRequestAuthorizationGuest} query
    * @param json
    */
   constructor ( {
