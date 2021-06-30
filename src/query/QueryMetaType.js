@@ -53,8 +53,14 @@ import gql from 'graphql-tag';
  * Query for retrieving Meta Asset information
  */
 export default class QueryMetaType extends Query {
+  /**
+   * Class constructor
+   *
+   * @param apolloClient
+   */
   constructor ( apolloClient ) {
     super( apolloClient );
+
     this.$__query = gql`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean, $queryArgs: QueryArgs, $countBy: String ) {
         MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas, queryArgs: $queryArgs, countBy: $countBy ) {
             metaType,
@@ -154,6 +160,11 @@ export default class QueryMetaType extends Query {
     }
 
     if ( queryArgs ) {
+
+      if ( typeof queryArgs.limit === 'undefined' || queryArgs.limit === 0 ) {
+        queryArgs.limit = '*';
+      }
+
       variables[ 'queryArgs' ] = queryArgs;
     }
 

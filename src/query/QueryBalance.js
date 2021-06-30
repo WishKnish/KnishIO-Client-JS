@@ -53,8 +53,14 @@ import ResponseBalance from '../response/ResponseBalance';
  * Query for getting the balance of a given wallet or token slug
  */
 export default class QueryBalance extends Query {
+  /**
+   * Class constructor
+   *
+   * @param apolloClient
+   */
   constructor ( apolloClient ) {
     super( apolloClient );
+
     this.$__query = gql`query( $address: String, $bundleHash: String, $token: String, $position: String ) {
         Balance( address: $address, bundleHash: $bundleHash, token: $token, position: $position ) {
             address,
