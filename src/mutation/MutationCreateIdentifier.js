@@ -52,7 +52,6 @@ import ResponseCreateIdentifier from '../response/ResponseCreateIdentifier';
  * Query for creating a new Identifier
  */
 export default class MutationCreateIdentifier extends MutationProposeMolecule {
-
   fillMolecule ( {
     type,
     contact,
@@ -79,4 +78,5 @@ export default class MutationCreateIdentifier extends MutationProposeMolecule {
       json
     } );
   }
+
 }

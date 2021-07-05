@@ -37,7 +37,7 @@ export default class CheckMolecule {
     const firstAtom = molecule.atoms[ 0 ];
 
     if ( firstAtom.token === 'USER' && CheckMolecule.isotopeFilter( 'I', molecule.atoms ).length < 1 ) {
-      throw new AtomsMissingException( 'Missing atom ContinuID' );
+      throw new AtomsMissingException( 'Check::continuId() - Molecule is missing required ContinuID Atom!' );
     }
 
     return true;
@@ -86,11 +86,11 @@ export default class CheckMolecule {
 
     for ( let atom of CheckMolecule.isotopeFilter( 'I', molecule.atoms ) ) {
       if ( atom.token !== 'USER' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Check::isotopeI() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!` );
       }
 
       if ( atom.index === 0 ) {
-        throw new AtomIndexException( `Invalid isotope "${ atom.isotope }" index` );
+        throw new AtomIndexException( `Check::isotopeI() - Isotope "${ atom.isotope }" Atoms must have a non-zero index!` );
       }
     }
 
@@ -109,11 +109,11 @@ export default class CheckMolecule {
 
     for ( let atom of CheckMolecule.isotopeFilter( 'U', molecule.atoms ) ) {
       if ( atom.token !== 'AUTH' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Check::isotopeU() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!` );
       }
 
       if ( atom.index !== 0 ) {
-        throw new AtomIndexException( `Invalid isotope "${ atom.isotope }" index` );
+        throw new AtomIndexException( `Check::isotopeU() - Isotope "${ atom.isotope }" Atoms must have an index equal to 0!` );
       }
     }
 
@@ -137,7 +137,7 @@ export default class CheckMolecule {
       }
 
       if ( atom.token !== 'USER' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Check::isotopeM() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!` );
       }
     }
 
@@ -155,11 +155,11 @@ export default class CheckMolecule {
 
     for ( let atom of CheckMolecule.isotopeFilter( 'C', molecule.atoms ) ) {
       if ( atom.token !== 'USER' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Check::isotopeC() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!` );
       }
 
       if ( atom.index !== 0 ) {
-        throw new AtomIndexException( `Invalid isotope "${ atom.isotope }" index` );
+        throw new AtomIndexException( `Check::isotopeC() - Isotope "${ atom.isotope }" Atoms must have an index equal to 0!` );
       }
     }
 
@@ -183,23 +183,23 @@ export default class CheckMolecule {
       if ( metaType === 'wallet' ) {
         for ( let key of [ 'position', 'bundle' ] ) {
           if ( !meta.hasOwnProperty( key ) || !Boolean( meta[ key ] ) ) {
-            throw new MetaMissingException( `No or not defined "${ key }" in meta` );
+            throw new MetaMissingException( `Check::isotopeT() - Required meta field "${ key }" is missing!` );
           }
         }
       }
 
       for ( let key of [ 'token' ] ) {
         if ( !meta.hasOwnProperty( key ) || !Boolean( meta[ key ] ) ) {
-          throw new MetaMissingException( `No or not defined "${ key }" in meta` );
+          throw new MetaMissingException( `Check::isotopeT() - Required meta field "${ key }" is missing!` );
         }
       }
 
       if ( atom.token !== 'USER' ) {
-        throw new WrongTokenTypeException( `Invalid token name for "${ atom.isotope }" isotope` );
+        throw new WrongTokenTypeException( `Check::isotopeT() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!` );
       }
 
       if ( atom.index !== 0 ) {
-        throw new AtomIndexException( `Invalid isotope "${ atom.isotope }" index` );
+        throw new AtomIndexException( `Check::isotopeT() - Isotope "${ atom.isotope }" Atoms must have an index equal to 0!` );
       }
     }
 
@@ -214,7 +214,7 @@ export default class CheckMolecule {
       for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
 
         if ( !metas.hasOwnProperty( key ) ) {
-          throw new MetaMissingException( `Missing "${ key }" field in meta.` );
+          throw new MetaMissingException( `Check::isotopeR() - Required meta field "${ key }" is missing!` );
         }
       }
 
@@ -230,13 +230,15 @@ export default class CheckMolecule {
               return [ 'managedBy' ].indexOf( n ) !== -1;
             } );
           if ( property.length < 3 && property2.length < 1 ) {
-            throw new MetaMissingException( 'Missing field in conditions.' );
+            throw new MetaMissingException( 'Check::isotopeR() - Required condition field is missing!' );
           }
         }
       } catch ( err ) {
-        throw new MetaMissingException( 'Invalid format for conditions.' );
+        throw new MetaMissingException( 'Check::isotopeR() - Condition is formatted incorrectly!' );
       }
     }
+
+    return true;
   }
 
   /**

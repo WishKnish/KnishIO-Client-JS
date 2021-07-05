@@ -46,14 +46,13 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
+import Query from '../query/Query';
 import Response from './Response';
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
 
 /**
- * Response for Guest Authorization Request
+ * Response for QueryActiveSession
  */
-export default class ResponseAuthorizationGuest extends Response {
+export default class ResponseQueryActiveSession extends Response {
 
   /**
    * Class constructor
@@ -69,65 +68,39 @@ export default class ResponseAuthorizationGuest extends Response {
       query,
       json
     } );
-    this.dataKey = 'data.AccessToken';
+    this.dataKey = 'data.ActiveUser';
     this.init();
   }
 
-  /**
-   * Returns the reason for rejection
-   *
-   * @returns {string}
-   */
-  reason () {
-    return 'Invalid response from server';
-  }
-
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @returns {boolean}
-   */
-  success () {
-    return this.payload() !== null;
-  }
-
-  /**
-   * Returns a wallet with balance
-   *
-   * @returns {null|Wallet}
-   */
   payload () {
-    return this.data();
-  }
+    const list = this.data();
 
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @returns {*}
-   */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
+    if ( !list ) {
+      return null;
     }
-    return Dot.get( this.payload(), key );
+
+    const activeUsers = [];
+
+    for ( let item of list ) {
+
+      const activeSession = { ...item };
+
+      if ( activeSession.jsonData ) {
+        activeSession.jsonData = JSON.parse( activeSession.jsonData );
+      }
+
+      if ( activeSession.createdAt ) {
+        activeSession.createdAt = new Date( activeSession.createdAt );
+      }
+
+      if ( activeSession.updatedAt ) {
+        activeSession.updatedAt = new Date( activeSession.updatedAt );
+      }
+
+      activeUsers.push( activeSession );
+    }
+
+    return activeUsers;
   }
 
-  /**
-   * Returns the auth token
-   *
-   * @returns {*}
-   */
-  token () {
-    return this.payloadKey( 'token' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @returns {*}
-   */
-  time () {
-    return this.payloadKey( 'time' );
-  }
 }

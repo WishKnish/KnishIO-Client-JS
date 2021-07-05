@@ -48,6 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import InvalidResponseException from '../exception/InvalidResponseException';
 import UnauthenticatedException from '../exception/UnauthenticatedException';
 import Dot from '../libraries/Dot';
+import Query from '../query/Query';
 
 /**
  * Base Response class for processing node responses
@@ -130,6 +131,16 @@ export default class Response {
     return this.$__query;
   }
 
+  /**
+   * @return {*}
+   */
+  status () {
+    return null;
+  }
+
+  /**
+   * @return {*}
+   */
   init () {
     return null;
   }

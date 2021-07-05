@@ -77,9 +77,10 @@ export default class ResponseProposeMolecule extends Response {
    * Initialize response object with payload data
    */
   init () {
-    const payload_json = Dot.get( this.data(), 'payload' );
+    const payloadJson = Dot.get( this.data(), 'payload' );
     try {
-      this.$__payload = JSON.parse( payload_json );
+      this.$__payload = Object.prototype.toString.call( payloadJson ) === '[object String]' ?
+        JSON.parse( payloadJson ) : payloadJson;
     } catch ( err ) {
       this.$__payload = null;
     }
@@ -110,7 +111,7 @@ export default class ResponseProposeMolecule extends Response {
 
     molecule.molecularHash = Dot.get( data, 'molecularHash' );
     molecule.status = Dot.get( data, 'status' );
-    molecule.status = Dot.get( data, 'createdAt' );
+    molecule.createdAt = Dot.get( data, 'createdAt' );
 
     return molecule;
   }

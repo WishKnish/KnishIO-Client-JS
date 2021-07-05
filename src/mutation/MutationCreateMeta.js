@@ -52,8 +52,6 @@ import ResponseCreateMeta from '../response/ResponseCreateMeta';
  * Query for creating new Meta attached to some MetaType
  */
 export default class MutationCreateMeta extends MutationProposeMolecule {
-
-
   /**
    * Fills a molecule with an appropriate metadata atom
    *
@@ -87,4 +85,5 @@ export default class MutationCreateMeta extends MutationProposeMolecule {
       json
     } );
   }
+
 }

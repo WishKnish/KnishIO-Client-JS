@@ -1,29 +1,98 @@
-import Query from '../query/Query';
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
+import Mutation from '../mutation/Mutation';
 import ResponseActiveSession from '../response/ResponseActiveSession';
+import gql from 'graphql-tag';
 
-
-export default class MutationActiveSession extends Query {
-
+/**
+ * Mutation for declaring an active User Session with a given MetaAsset
+ */
+export default class MutationActiveSession extends Mutation {
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param apolloClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = 'mutation( $bundleHash: String!, $metaType: String!, $metaId: String!, $json: String ) { ActiveSession( bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId, json: $json ) @fields }';
-    this.$__fields = {
-      'bundle_hash': null,
-      'meta_type': null,
-      'meta_id': null,
-      'json_data': null,
-      'created_at': null,
-      'updated_at': null
-    };
+  constructor ( apolloClient ) {
+    super( apolloClient );
+    this.$__query = gql`mutation(
+      $bundleHash: String!,
+      $metaType: String!,
+      $metaId: String!,
+      $ipAddress: String,
+      $browser: String,
+      $osCpu: String,
+      $resolution: String,
+      $timeZone: String,
+      $json: String ) {
+      ActiveSession(
+        bundleHash: $bundleHash,
+        metaType: $metaType,
+        metaId: $metaId,
+        ipAddress: $ipAddress,
+        browser: $browser,
+        osCpu: $osCpu,
+        resolution: $resolution,
+        timeZone: $timeZone,
+        json: $json
+      ) {
+        bundleHash,
+        metaType,
+        metaId,
+        jsonData,
+        createdAt,
+        updatedAt
+      }
+    }`;
   }
 
   /**
-   * Returns a Response object
+   * Builds a Response object out of a JSON string
    *
    * @param {object} json
    * @return {ResponseActiveSession}

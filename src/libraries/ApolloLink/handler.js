@@ -1,3 +1,50 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import {
   Observable,
   Operation,
@@ -18,7 +65,7 @@ function subscribeToEcho (
   operationName
 ) {
   const channel = echoClient.private(
-    channelName.replace( /^private\-/, '' )
+    channelName.replace( /^private-/, '' )
   );
 
   channel.listen( '.lighthouse-subscription', result => {
@@ -111,6 +158,45 @@ export function operationName ( operation ) {
     .selections.find( definitionNode => definitionNode.kind === 'Field' );
 
   return fieldNode.name.value;
+}
+
+/**
+ * @param {Operation} operation
+ * @return {string}
+ */
+export function operationType ( operation ) {
+  const operationDefinition = operation.query
+    .definitions.find( definitionNode => definitionNode.kind === 'OperationDefinition' );
+
+  return operationDefinition.operation;
+}
+
+export function errorHandler ( {
+  graphQLErrors,
+  networkError,
+  operation,
+  forward
+} ) {
+  if ( graphQLErrors ) {
+    graphQLErrors.map( ( {
+      message,
+      debugMessage,
+      locations,
+      path
+    } ) => console.error(
+      `[GraphQL error]: ${ message }\r\n`,
+      `  Message : ${ debugMessage }\r\n`,
+      `  Path    : ${ path }\r\n`,
+      `  Location: ${ locations }\r\n`
+    ) );
+  }
+
+  if ( networkError ) {
+    console.error( `[Network error]: ${ networkError }` );
+    // if you would also like to retry automatically on
+    // network errors, we recommend that you use
+    // apollo-link-retry
+  }
 }
 
 /**

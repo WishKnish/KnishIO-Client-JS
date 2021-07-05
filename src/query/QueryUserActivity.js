@@ -45,89 +45,109 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-
-import Response from './Response';
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
+import Query from './Query';
+import ResponseQueryUserActivity from '../response/ResponseQueryUserActivity';
+import gql from 'graphql-tag';
 
 /**
- * Response for Guest Authorization Request
+ * Query for retrieving information about user activity
  */
-export default class ResponseAuthorizationGuest extends Response {
-
+export default class QueryUserActivity extends Query {
   /**
    * Class constructor
    *
-   * @param {Query} query
-   * @param {object} json
+   * @param httpClient
    */
-  constructor ( {
-    query,
-    json
-  } ) {
-    super( {
-      query,
+  constructor ( httpClient ) {
+    super( httpClient );
+
+    this.$__query = gql`query UserActivity (
+      $bundleHash:String,
+      $metaType: String,
+      $metaId: String,
+      $ipAddress: String,
+      $browser: String,
+      $osCpu: String,
+      $resolution: String,
+      $timeZone: String,
+      $countBy: [CountByUserActivity],
+      $interval: span
+    ) {
+      UserActivity (
+        bundleHash: $bundleHash,
+        metaType: $metaType,
+        metaId: $metaId,
+        ipAddress: $ipAddress,
+        browser: $browser,
+        osCpu: $osCpu,
+        resolution: $resolution,
+        timeZone: $timeZone,
+        countBy: $countBy,
+        interval: $interval
+      ) {
+        createdAt,
+        bundleHash,
+        metaType,
+        metaId,
+        instances {
+          bundleHash,
+          metaType,
+          metaId,
+          jsonData,
+          createdAt,
+          updatedAt
+        },
+        instanceCount {
+          ...SubFields,
+          ...Recursive
+        }
+      }
+    }
+
+    fragment SubFields on InstanceCountType {
+      id,
+      count
+    }
+
+    fragment Recursive on InstanceCountType {
+      instances {
+        ...SubFields
+        instances {
+          ...SubFields,
+          instances {
+            ...SubFields
+            instances {
+              ...SubFields
+              instances {
+                ...SubFields
+                instances {
+                  ...SubFields
+                  instances {
+                    ...SubFields
+                    instances {
+                      ...SubFields
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`;
+  }
+
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseQueryUserActivity}
+   */
+  createResponse ( json ) {
+    return new ResponseQueryUserActivity( {
+      query: this,
       json
     } );
-    this.dataKey = 'data.AccessToken';
-    this.init();
   }
 
-  /**
-   * Returns the reason for rejection
-   *
-   * @returns {string}
-   */
-  reason () {
-    return 'Invalid response from server';
-  }
-
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @returns {boolean}
-   */
-  success () {
-    return this.payload() !== null;
-  }
-
-  /**
-   * Returns a wallet with balance
-   *
-   * @returns {null|Wallet}
-   */
-  payload () {
-    return this.data();
-  }
-
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @returns {*}
-   */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
-    }
-    return Dot.get( this.payload(), key );
-  }
-
-  /**
-   * Returns the auth token
-   *
-   * @returns {*}
-   */
-  token () {
-    return this.payloadKey( 'token' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @returns {*}
-   */
-  time () {
-    return this.payloadKey( 'time' );
-  }
 }

@@ -48,11 +48,8 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import MutationProposeMolecule from './MutationProposeMolecule';
 import ResponseRequestTokens from '../response/ResponseRequestTokens';
 
-/**
- * Query for requesting tokens from a node
- */
-export default class MutationRequestTokens extends MutationProposeMolecule {
 
+export default class MutationRequestTokens extends MutationProposeMolecule {
   /**
    * Fills a Molecule with the appropriate atoms and prepares for broadcast
    *
@@ -96,4 +93,5 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
       json
     } );
   }
+
 }

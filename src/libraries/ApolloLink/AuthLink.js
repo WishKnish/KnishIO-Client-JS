@@ -45,89 +45,53 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
+import {
+  ApolloLink,
+  Operation,
+  NextLink
+} from 'apollo-link';
 
-import Response from './Response';
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
 
-/**
- * Response for Guest Authorization Request
- */
-export default class ResponseAuthorizationGuest extends Response {
+class AuthLink extends ApolloLink {
 
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor ( {
-    query,
-    json
-  } ) {
-    super( {
-      query,
-      json
-    } );
-    this.dataKey = 'data.AccessToken';
-    this.init();
+  constructor () {
+    super();
+
+    this.auth = '';
   }
 
   /**
-   * Returns the reason for rejection
    *
-   * @returns {string}
+   * @return {string}
    */
-  reason () {
-    return 'Invalid response from server';
+  getAuthToken () {
+    return this.auth;
   }
 
   /**
-   * Returns whether molecule was accepted or not
-   *
-   * @returns {boolean}
+   * @param {string} auth
    */
-  success () {
-    return this.payload() !== null;
+  setAuthToken ( auth ) {
+    this.auth = auth;
   }
 
   /**
-   * Returns a wallet with balance
    *
-   * @returns {null|Wallet}
+   * @param {Operation} operation
+   * @param {NextLink} forward
+   * @return {*}
    */
-  payload () {
-    return this.data();
-  }
+  request ( operation, forward ) {
 
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @returns {*}
-   */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
-    }
-    return Dot.get( this.payload(), key );
-  }
+    operation.setContext( ( { headers = {} } ) => ( {
+      headers: {
+        ...headers,
+        'X-Auth-Token': this.getAuthToken()
+      }
+    } ) );
 
-  /**
-   * Returns the auth token
-   *
-   * @returns {*}
-   */
-  token () {
-    return this.payloadKey( 'token' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @returns {*}
-   */
-  time () {
-    return this.payloadKey( 'time' );
+    return forward( operation );
   }
 }
+
+export default AuthLink;

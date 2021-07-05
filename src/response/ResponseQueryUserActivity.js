@@ -45,98 +45,38 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import {
-  Request,
-  Headers
-} from 'servie';
-import { fetch } from 'popsicle';
+import Query from '../query/Query';
+import Response from './Response';
 
-const merge = require( 'lodash.merge' );
-
-/**
- * HTTP Client for communicating with a node
- */
-export default class HttpClient {
-
+export default class ResponseQueryUserActivity extends Response {
   /**
    * Class constructor
    *
-   * @param {string} uri
-   * @param {object} config
+   * @param {Query} query
+   * @param {object} json
    */
-  constructor ( uri, config = {} ) {
-
-    this.$__headers = new Headers( config.headers || {} );
-    this.$__needHeaders = {
-      'accept': 'application/json',
-      'content-type': 'application/json; charset=UTF-8'
-    };
-    this.$__config = merge( config, {
-      method: 'POST',
-      headers: this.$__headers
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
     } );
-
-    this.setUri( uri );
-  }
-  
-
-  /**
-   * Returns configuration object
-   *
-   * @returns {object}
-   */
-  getConfig () {
-    return this.$__config;
+    this.dataKey = 'data.UserActivity';
+    this.init();
   }
 
-  /**
-   * Sets the endpoint URI
-   *
-   * @param {string} uri
-   */
-  setUri ( uri ) {
-    this.$__uri = uri;
-  }
+  payload () {
+    const data = JSON.parse( JSON.stringify( this.data() ) );
 
-  /**
-   * Gets the endpoint URI
-   *
-   * @returns {string}
-   */
-  getUri () {
-    return this.$__uri;
-  }
-
-  /**
-   * Sets the authorization token for this session
-   *
-   * @param {string} authToken
-   */
-  setAuthToken ( authToken ) {
-    this.$__headers.set( 'X-Auth-Token', authToken || '' );
-  }
-
-  /**
-   * Sends the request
-   *
-   * @param {Request} request
-   * @param {object} options
-   * @returns {Promise<XhrResponse|HttpResponse>}
-   */
-  async send ( request, options = {} ) {
-
-    request.headers.extend( options );
-    this.$__headers.extend( request.headers.asObject() );
-
-    for ( let header in this.$__needHeaders ) {
-      this.$__headers.set( header, this.$__needHeaders[ header ] );
+    if ( data.instances ) {
+      for ( const datum of data.instances ) {
+        datum.jsonData = JSON.parse( datum.jsonData );
+      }
     }
 
-    const req = new Request( request, this.$__config );
-
-    req.headers.delete( 'content-length' );
-
-    return await fetch( req );
+    return data;
   }
 
 }

@@ -38,33 +38,41 @@
            ###########                  #############
           #########                      ##############
         %######
-
         Powered by Knish.IO: Connecting a Decentralized World
-
 Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
-
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from '../query/Query';
+import gql from 'graphql-tag';
+import Mutation from '../mutation/Mutation';
 import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthorizationGuest';
 
-/**
- * Query for requesting a guest authorization token from the node
- */
-export default class MutationRequestAuthorizationGuest extends Query {
+
+export default class MutationRequestAuthorizationGuest extends Mutation {
   /**
    * Class constructor
    *
-   * @param knishIO
+   * @param apolloClient
    */
-  constructor ( knishIO ) {
-    super( knishIO );
-    this.$__query = 'mutation( $cellSlug: String ) { AccessToken( cellSlug: $cellSlug ) @fields }';
-    this.$__fields = {
-      'token': null,
-      'time': null,
-      'expiresAt': null,
-    };
+  constructor ( apolloClient ) {
+    super( apolloClient );
+    this.$__query = gql`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
+      AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {
+        token,
+        time,
+        key,
+        expiresAt,
+        encrypt
+      }
+    }`;
+
+    this.wallet = null;
+  }
+
+  /**
+   * @param {Wallet} wallet
+   */
+  setAuthorizationWallet ( wallet ) {
+    this.wallet = wallet;
   }
 
   /**
@@ -79,4 +87,5 @@ export default class MutationRequestAuthorizationGuest extends Query {
       json
     } );
   }
+
 }

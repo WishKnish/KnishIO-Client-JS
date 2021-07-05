@@ -50,13 +50,18 @@ import Wallet from '../Wallet';
 import ResponseClaimShadowWallet from '../response/ResponseClaimShadowWallet';
 
 /**
- * Query for claiming a Shadow Wallet
+ * Mutation for claiming a Shadow Wallet
  */
 export default class MutationClaimShadowWallet extends MutationProposeMolecule {
-
+  /**
+   * Class constructor
+   *
+   * @param {string} token
+   * @param {string|null} batchId
+   */
   fillMolecule ( {
     token,
-    batchId
+    batchId = null
   } ) {
     let wallet = Wallet.create( {
       secretOrBundle: this.$__molecule.secret,
