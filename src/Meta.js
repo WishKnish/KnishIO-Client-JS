@@ -86,7 +86,7 @@ export default class Meta {
       if ( meta.hasOwnProperty( property ) && meta[ property ] !== null ) {
         target.push( {
           key: property,
-          value: ( meta[ property ] ).toString(),
+          value: ( meta[ property ] ).toString()
         } );
       }
     }

@@ -366,7 +366,7 @@ export default class Test {
       let response = await this.clients[ secret ]
         .requestAuthToken( {
           secret,
-          cellSlug,
+          cellSlug
         } );
 
       this.checkResponse( response, 'requestAuthToken' );
