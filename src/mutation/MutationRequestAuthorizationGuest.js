@@ -38,11 +38,8 @@
            ###########                  #############
           #########                      ##############
         %######
-
         Powered by Knish.IO: Connecting a Decentralized World
-
 Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
-
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import gql from 'graphql-tag';
@@ -63,6 +60,7 @@ export default class MutationRequestAuthorizationGuest extends Mutation {
         token,
         time,
         key,
+        expiresAt,
         encrypt
       }
     }`;

@@ -7,9 +7,20 @@ import {
 import getRandomValues from 'get-random-values';
 
 if ( !String.prototype.trim ) {
-
   String.prototype.trim = function () {
     return this.replace( /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '' );
+  };
+}
+
+if ( !String.prototype.toCamelCase ) {
+  String.prototype.toCamelCase = function () {
+    return this.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
+  };
+}
+
+if ( !String.prototype.toSnakeCase ) {
+  String.prototype.toSnakeCase = function () {
+    return this.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
   };
 }
 
