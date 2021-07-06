@@ -1281,7 +1281,7 @@ export default class KnishIOClient {
      * @type {QueryContinuId}
      */
     const query = this.createQuery( QueryContinuId );
-    return await query.execute( {
+    return query.execute( {
       variables: {
         bundle: bundle
       }
