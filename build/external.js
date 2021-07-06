@@ -11,6 +11,8 @@ export default [
   'big-integer',
   'big-integer/BigInteger',
   'buffer',
+  'get-random-values',
+  'graphql',
   'graphql-tag',
   'isomorphic-fetch',
   'js-sha3',
