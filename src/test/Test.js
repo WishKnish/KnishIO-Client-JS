@@ -359,16 +359,17 @@ export default class Test {
       // Create a client
       this.clients[ secret ] = new KnishIOClient( {
         uri: this.graphqlUrl,
-        logging: true,
+        logging: true
       } );
 
       // Auth the client
       let response = await this.clients[ secret ]
-        .authorize( {
+        .requestAuthToken( {
           secret,
           cellSlug,
         } );
-      this.checkResponse( response, 'authorize' );
+
+      this.checkResponse( response, 'requestAuthToken' );
     }
 
     // Return the client by secret
