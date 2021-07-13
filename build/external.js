@@ -17,8 +17,7 @@ export default [
   'isomorphic-fetch',
   'js-sha3',
   'laravel-echo',
-  'popsicle',
-  'servie',
+  'libraries/array',
   'socket.io-client',
   'tweetnacl',
   'tweetnacl-sealedbox-js'
