@@ -48,7 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import CheckMolecule from './libraries/check';
 import AtomsMissingException from './exception/AtomsMissingException';
 import Atom from './Atom';
-import { clone } from 'libraries/array';
+import { clone } from './libraries/array';
 
 /**
  * MoleculeStructure class to formalize the creation of Molecules
