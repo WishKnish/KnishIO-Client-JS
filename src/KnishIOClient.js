@@ -143,7 +143,7 @@ export default class KnishIOClient {
     this.$__encrypt = false;
     this.$__uris = uri;
     this.$__clients = {};
-    this.$__firstAuth = true;
+    this.$__authProcess = false;
 
     for ( let i in this.$__uris ) {
       let url = this.$__uris [ i ];
@@ -283,8 +283,7 @@ export default class KnishIOClient {
    * @returns {ApolloClient}
    */
   client () {
-
-    if ( !this.$__firstAuth ) {
+    if ( !this.$__authProcess ) {
       let randomUri = this.getRandomUri();
       this.$__client.setUri( randomUri );
       let authDataObj = this.$__clients[ randomUri ];
@@ -487,7 +486,7 @@ export default class KnishIOClient {
     cellSlug = null,
     encrypt = null
   } ) {
-
+    this.$__authProcess = true;
     if ( this.$__logging ) {
       console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
     }
@@ -581,8 +580,8 @@ export default class KnishIOClient {
         };
 
         this.$__client.setAuthData( authObj );
-        this.$__clients[ this.$__client.getUri() ] = authObj;
-        this.$__firstAuth = false;
+        this.$__clients[ this.uri() ] = authObj;
+        this.$__authProcess = false;
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
