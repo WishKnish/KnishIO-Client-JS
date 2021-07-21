@@ -14,7 +14,7 @@ export function chunkArray ( arr, size ) {
   return [ arr.slice( 0, size ) ].concat( chunkArray( arr.slice( size ), size ) );
 }
 
-export function clone (
+export function deepCloning (
   o // The only argument passed by user: object to clone
   , h // Cache (organized as array: [key,value,key,value,...])
 ) {
@@ -40,7 +40,7 @@ export function clone (
     h.push( o, r ); // Add object to cache before (!) making recursive call
     for ( i in o ) // Just copy properties recursively
       if ( h.hasOwnProperty.call( o, i ) ) // As o might have key 'hasOwnProperty', use something
-        r[ i ] = clone( o[ i ], h ); //   we defined right instead
+        r[ i ] = deepCloning( o[ i ], h ); //   we defined right instead
   }
   return r || o; // Return r if it was found in cache or built in if(){}
 }
