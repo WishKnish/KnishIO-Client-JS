@@ -45,105 +45,122 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from './Response';
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
+
 
 /**
- * Response for guest auth mutation
+ *
  */
-export default class ResponseRequestAuthorizationGuest extends Response {
+export default class AuthToken {
+
+
   /**
-   * Class constructor
    *
-   * @param {MutationRequestAuthorizationGuest} query
-   * @param json
+   * @param data
+   * @param wallet
+   * @returns {AuthToken}
+   */
+  static create( data, wallet ) {
+    let authToken = new AuthToken( data );
+    authToken.setWallet( wallet );
+    return authToken;
+  }
+
+
+  /**
+   *
+   * @param snapshot
+   * @returns {AuthToken}
+   */
+  static restore( snapshot ) {
+    let wallet = new Wallet( {
+      secret: snapshot.wallet.secret,
+      token: 'AUTH',
+      position: snapshot.wallet.position,
+      characters: snapshot.wallet.characters,
+    } );
+    let authToken = AuthToken.create( {
+      token: snapshot.token,
+      expiresAt: snapshot.expiresAt,
+      time: snapshot.time,
+      pubkey: snapshot.pubkey,
+      encrypt: snapshot.encrypt,
+    } );
+    authToken.setWallet( wallet );
+    return authToken;
+  }
+
+
+  /**
+   *
+   * @param token
+   * @param expiresAt
+   * @param time
+   * @param pubkey
+   * @param encrypt
+   * @param wallet
    */
   constructor ( {
-    query,
-    json
+    token,
+    expiresAt,
+    time,
+    pubkey,
+    encrypt,
   } ) {
-    super( {
-      query,
-      json
-    } );
-    this.dataKey = 'data.AccessToken';
-    this.init();
+    this.$__token = token;
+    this.$__expiresAt = expiresAt;
+    this.$__time = time;
+    this.$__pubkey = pubkey;
+    this.$__encrypt = encrypt;
   }
 
+
   /**
-   * Returns the reason for rejection
    *
-   * @returns {string}
+   * @param wallet
    */
-  reason () {
-    return 'Invalid response from server';
+  setWallet( wallet ) {
+    this.$__wallet = wallet;
+  }
+
+
+  /**
+   *
+   * @returns {{wallet, token, pubkey}}
+   */
+  getAuthData() {
+    return {
+      token: this.$__token,
+      pubkey: this.$__pubkey,
+      wallet: this.$__wallet,
+    };
+  }
+
+
+  /**
+   *
+   * @returns {{wallet: {characters, secret, position}, encrypt, time, expiresAt, token, pubkey}}
+   */
+  getSnapshot() {
+    return {
+      token: this.$__token,
+      expiresAt: this.$__expiresAt,
+      time: this.$__time,
+      pubkey: this.$__pubkey,
+      encrypt: this.$__encrypt,
+      wallet: {
+        secret: this.$__wallet.secret,
+        position: this.$__wallet.position,
+        characters: this.$__wallet.characters,
+      },
+    };
   }
 
   /**
-   * Returns whether molecule was accepted or not
    *
    * @returns {boolean}
    */
-  success () {
-    return this.payload() !== null;
-  }
-
-  /**
-   * Returns a wallet with balance
-   *
-   * @returns {null|Wallet}
-   */
-  payload () {
-    return this.data();
-  }
-
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @returns {*}
-   */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
-    }
-    return Dot.get( this.payload(), key );
-  }
-
-  /**
-   * Returns the auth token
-   *
-   * @returns {*}
-   */
-  token () {
-    return this.payloadKey( 'token' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @returns {*}
-   */
-  time () {
-    return this.payloadKey( 'time' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @returns {string}
-   */
-  pubKey () {
-    return this.payloadKey( 'key' );
-  }
-
-  /**
-   *
-   * @returns {string}
-   */
-  encrypt () {
-    return this.payloadKey( 'encrypt' );
+  isExpired() {
+    return !this.$__expiresAt || this.$__expiresAt * 1000 <= Date.now();
   }
 
 }

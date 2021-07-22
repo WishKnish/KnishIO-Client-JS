@@ -66,13 +66,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
     }
     return Dot.get( this.payload(), key );
   }
-
-  /**
-   * @return {Wallet|null}
-   */
-  wallet () {
-    return this.clientMolecule().sourceWallet;
-  }
+  
 
   /**
    * Returns the auth token

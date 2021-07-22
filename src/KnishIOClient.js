@@ -54,6 +54,7 @@ import {
 } from './libraries/crypto';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
+import AuthToken from './AuthToken';
 import QueryContinuId from './query/QueryContinuId';
 import QueryWalletBundle from './query/QueryWalletBundle';
 import QueryWalletList from './query/QueryWalletList';
@@ -488,11 +489,12 @@ export default class KnishIOClient {
     if ( this.$__serverSdkVersion >= 3 ) {
 
       let query,
-        response;
+        response,
+        wallet;
 
       if ( guestMode ) {
 
-        const authorizationWallet = new Wallet( {
+        wallet = new Wallet( {
           secret: generateSecret(),
           token: 'AUTH'
         } );
@@ -502,15 +504,13 @@ export default class KnishIOClient {
          */
         query = await this.createQuery( MutationRequestAuthorizationGuest );
 
-        query.setAuthorizationWallet( authorizationWallet );
-
         /**
          * @type {ResponseRequestAuthorization}
          */
         response = await query.execute( {
           variables: {
             cellSlug: this.$__cellSlug,
-            pubkey: authorizationWallet.pubkey,
+            pubkey: wallet.pubkey,
             encrypt: encrypt
           }
         } );
@@ -533,19 +533,19 @@ export default class KnishIOClient {
 
         query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
 
+        wallet = query.molecule.sourceWallet;
+
         /**
          * @type {ResponseRequestAuthorization}
          */
         response = await query.execute( {} );
+
       }
 
       if ( response.success() ) {
 
-        this.client().setAuthData( {
-          token: response.token(),
-          pubkey: response.pubKey(),
-          wallet: response.wallet()
-        } );
+        let authToken = AuthToken.create( response.data(), wallet )
+        this.setAuthToken( authToken );
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
@@ -581,7 +581,7 @@ export default class KnishIOClient {
 
       }
 
-      return response;
+      return authToken;
     } else {
 
       if ( this.$__logging ) {
@@ -589,15 +589,6 @@ export default class KnishIOClient {
       }
 
     }
-  }
-
-  /**
-   * Returns the current authorization token
-   *
-   * @returns {string|null}
-   */
-  getAuthToken () {
-    return this.client().getAuthToken();
   }
 
   /**
@@ -1615,6 +1606,107 @@ export default class KnishIOClient {
     molecule.check();
 
     return ( new MutationProposeMolecule( this.client(), molecule ) ).execute( {} );
+  }
+
+
+  /**
+   * Authorize with auth token
+   *
+   * @param secret
+   * @param cellSlug
+   * @param authToken
+   * @returns {Promise<void>}
+   */
+  async authorize( {
+    secret,
+    cellSlug,
+    encrypt = null,
+  } ) {
+
+    // SDK versions 2 and below do not utilize an authorization token
+    if ( this.$__serverSdkVersion < 3 ) {
+      if ( this.$__logging ) {
+        console.warn( 'KnishIOClient::authorize() - Server SDK version does not require an authorization...' );
+      }
+      return;
+    }
+
+    // Do we have a secret pre-hashed?
+    if ( secret ) {
+      this.setSecret( secret );
+    }
+
+    // Set a cell slug
+    if ( cellSlug ) {
+      this.setCellSlug( cellSlug );
+    }
+
+
+    let response;
+
+    // Authorized user
+    if ( secret ) {
+      response = await this.requestAuthToken( {
+        secret,
+        encrypt,
+      } );
+    }
+
+    // Guest
+    else {
+      response = await this.requestAuthToken( {
+        cellSlug: this.$__cellSlug,
+        encrypt,
+      } );
+    }
+
+    // Have errors with auth token query
+    if ( !response.success() ) {
+      if ( this.$__logging ) {
+        console.warn( 'KnishIOClient::authorize() - Unable to retrieve auth token...' );
+      }
+      throw new UnauthenticatedException( response.reason() );
+    }
+
+
+    // Get an auth token info & set a expireAt key
+    let authToken = response.payload();
+
+    // Set auth token
+    if ( this.$__logging ) {
+      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ authToken.token }...` );
+    }
+
+    // Set an authToken full info
+    this.setAuthToken( authToken );
+
+    // Return full response
+    return authToken;
+  }
+
+
+  /**
+   * Sets the auth token
+   *
+   * @param authToken
+   */
+  setAuthToken( authToken ) {
+
+    // Set auth data to apollo client
+    this.client().setAuthData( authToken.getAuthData() );
+
+    // Save a full auth token object with expireAt key
+    this.$__authToken = authToken;
+  }
+  
+
+  /**
+   * Returns the current authorization token
+   *
+   * @returns {string|null}
+   */
+  getAuthToken () {
+    return this.$__authToken;
   }
 
 }

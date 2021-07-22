@@ -67,16 +67,8 @@ export default class MutationRequestAuthorizationGuest extends Mutation {
         encrypt
       }
     }`;
-
-    this.wallet = null;
   }
 
-  /**
-   * @param {Wallet} wallet
-   */
-  setAuthorizationWallet ( wallet ) {
-    this.wallet = wallet;
-  }
 
   /**
    * Returns a Response object
