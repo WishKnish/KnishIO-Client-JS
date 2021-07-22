@@ -49,7 +49,7 @@ import CheckMolecule from './libraries/check';
 import AtomsMissingException from './exception/AtomsMissingException';
 import Atom from './Atom';
 import { deepCloning } from './libraries/array';
-import Molecule from "./Molecule";
+import Molecule from './Molecule';
 
 /**
  * MoleculeStructure class to formalize the creation of Molecules
@@ -144,8 +144,8 @@ export default class MoleculeStructure {
    * @throws {AtomsMissingException}
    */
   static jsonToObject ( json ) {
-    const target = Object.assign(new Molecule({}), JSON.parse( json )),
-      properties = Object.keys( new Molecule({}) );
+    const target = Object.assign( new Molecule( {} ), JSON.parse( json ) ),
+      properties = Object.keys( new Molecule( {} ) );
 
     if ( !Array.isArray( target.atoms ) ) {
       throw new AtomsMissingException();

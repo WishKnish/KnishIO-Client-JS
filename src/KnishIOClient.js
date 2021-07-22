@@ -157,7 +157,7 @@ export default class KnishIOClient {
     this.reset();
     this.$__client = client || new ApolloClient( {
       socketUri: socketUri,
-      serverUri: this.getRandomUri(),
+      serverUri: this.getRandomUri()
     } );
 
     if ( encrypt ) {
@@ -288,13 +288,12 @@ export default class KnishIOClient {
       this.$__client.setUri( randomUri );
       let authDataObj = this.$__clients[ randomUri ];
       if ( Object.values( authDataObj ).length === 0 ) {
-        this.requestAuthToken({
+        this.requestAuthToken( {
           secret: this.$__secret,
           cellSlug: this.$__cellSlug,
-          encrypt: this.$__encrypt,
-        });
-      }
-      else {
+          encrypt: this.$__encrypt
+        } );
+      } else {
         this.$__client.setAuthData( authDataObj );
       }
     }
