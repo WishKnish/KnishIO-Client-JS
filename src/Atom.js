@@ -100,6 +100,21 @@ export default class Atom {
 
   }
 
+  static get hashSchema () {
+    return new Map([
+      ["position", null],
+      ["walletAddress", null],
+      ["isotope", null],
+      ["token", null],
+      ["value", null],
+      ["batchId", null],
+      ["metaType", null],
+      ["metaId", null],
+      ["meta", null],
+      ["createdAt", null]
+    ]);
+  }
+
   /**
    * Get aggregated meta from stored normalized ones
    */
@@ -133,6 +148,26 @@ export default class Atom {
   }
 
   /**
+   *
+   * @param {Atom} atom
+   *
+   * @return {object}
+   */
+  static molecularHashSchema( atom ) {
+    const schema = Atom.hashSchema;
+
+    for ( const property in atom ) {
+      if ( atom.hasOwnProperty( property ) ) {
+        if ( schema.has(property) ) {
+          schema.set( property, atom[ property ] );
+        }
+      }
+    }
+
+    return schema
+  }
+
+  /**
    * Produces a hash of the atoms inside a molecule.
    * Used to generate the molecularHash field for Molecules.
    *
@@ -151,42 +186,40 @@ export default class Atom {
 
     // Hashing each atom in the molecule to produce a molecular hash
     for ( const atom of atomList ) {
+
+      const molecularHashSchema = Atom.molecularHashSchema( atom );
+
       molecularSponge.update( String( numberOfAtoms ) );
 
-      for ( const property in atom ) {
-        if ( atom.hasOwnProperty( property ) ) {
+      for ( const property of molecularHashSchema.keys() ) {
 
-          // Old atoms support (without batch_id field)
-          if ( [ 'batchId', 'pubkey', 'characters' ].includes( property ) && atom[ property ] === null ) {
-            continue;
-          }
+        const value = molecularHashSchema.get( property )
 
-          // Not hashing OTS fragment or index
-          if ( [ 'otsFragment', 'index' ].includes( property ) ) {
-            continue;
-          }
+        // Old atoms support (without batch_id field)
+        if ( [ 'batchId', 'pubkey', 'characters' ].includes( property ) && value === null ) {
+          continue;
+        }
 
-          // Hashing individual meta keys and values
-          if ( property === 'meta' ) {
-            for ( const meta of atom[ property ] ) {
-              if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
-                molecularSponge.update( String( meta.key ) );
-                molecularSponge.update( String( meta.value ) );
-              }
+        // Hashing individual meta keys and values
+        if ( property === 'meta' ) {
+          for ( const meta of value ) {
+            if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
+              molecularSponge.update( String( meta.key ) );
+              molecularSponge.update( String( meta.value ) );
             }
-            continue;
           }
+          continue;
+        }
 
-          // Hash position, wallet address, or isotope
-          if ( [ 'position', 'walletAddress', 'isotope' ].includes( property ) ) {
-            molecularSponge.update( atom[ property ] === null ? '' : String( atom[ property ] ) );
-            continue;
-          }
+        // Hash position, wallet address, or isotope
+        if ( [ 'position', 'walletAddress', 'isotope' ].includes( property ) ) {
+          molecularSponge.update( value === null ? '' : String( value ) );
+          continue;
+        }
 
-          // Some other property that we haven't anticipated
-          if ( atom[ property ] !== null ) {
-            molecularSponge.update( atom[ property ] === null ? '' : String( atom[ property ] ) );
-          }
+        // Some other property that we haven't anticipated
+        if ( value !== null ) {
+          molecularSponge.update( String( value ) );
         }
       }
     }
