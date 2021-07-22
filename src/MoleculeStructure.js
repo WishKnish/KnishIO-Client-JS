@@ -84,6 +84,8 @@ export default class MoleculeStructure {
   }
 
   /**
+   * Returns JSON-ready clone minus protected properties
+   *
    * @returns {object}
    */
   toJSON () {

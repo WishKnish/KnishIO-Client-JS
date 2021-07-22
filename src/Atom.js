@@ -148,6 +148,8 @@ export default class Atom {
   }
 
   /**
+   * Populates and returns a schema object according to hash priority list
+   * to ensure consistent hashing results across multiple platforms
    *
    * @param {Atom} atom
    *
