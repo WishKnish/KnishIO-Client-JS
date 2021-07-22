@@ -95,7 +95,7 @@ export default class KnishIOClient {
   /**
    * Class constructor
    *
-   * @param {string} uri
+   * @param {[]} uri
    * @param {string|null} socketUri
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
@@ -123,7 +123,7 @@ export default class KnishIOClient {
   /**
    * Initializes a new Knish.IO client session
    *
-   * @param {string} uri
+   * @param {[]} uri
    * @param {string|null} socketUri
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
@@ -141,6 +141,14 @@ export default class KnishIOClient {
 
     this.$__logging = logging;
     this.$__encrypt = false;
+    this.$__uris = uri;
+    this.$__clients = {};
+    this.$__authProcess = false;
+
+    for ( let i in this.$__uris ) {
+      let url = this.$__uris [ i ];
+      this.$__clients[ url ] = {};
+    }
 
     if ( this.$__logging ) {
       console.info( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
@@ -149,7 +157,7 @@ export default class KnishIOClient {
     this.reset();
     this.$__client = client || new ApolloClient( {
       socketUri: socketUri,
-      serverUri: uri
+      serverUri: this.getRandomUri(),
     } );
 
     if ( encrypt ) {
@@ -157,6 +165,14 @@ export default class KnishIOClient {
     }
 
     this.$__serverSdkVersion = serverSdkVersion;
+  }
+
+  /**
+   * Get random uri from specified this.$__uris
+   */
+  getRandomUri () {
+    let rand = Math.floor( Math.random() * ( this.$__uris.length ) );
+    return this.$__uris[ rand ];
   }
 
   /**
@@ -258,7 +274,7 @@ export default class KnishIOClient {
    * @returns {string}
    */
   uri () {
-    return this.client().getUri();
+    return this.$__client.getUri();
   }
 
   /**
@@ -267,6 +283,22 @@ export default class KnishIOClient {
    * @returns {ApolloClient}
    */
   client () {
+    if ( !this.$__authProcess ) {
+      let randomUri = this.getRandomUri();
+      this.$__client.setUri( randomUri );
+      let authDataObj = this.$__clients[ randomUri ];
+      if ( Object.values( authDataObj ).length === 0 ) {
+        this.requestAuthToken({
+          secret: this.$__secret,
+          cellSlug: this.$__cellSlug,
+          encrypt: this.$__encrypt,
+        });
+      }
+      else {
+        this.$__client.setAuthData( authDataObj );
+      }
+    }
+
     return this.$__client;
   }
 
@@ -454,7 +486,7 @@ export default class KnishIOClient {
     cellSlug = null,
     encrypt = null
   } ) {
-
+    this.$__authProcess = true;
     if ( this.$__logging ) {
       console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
     }
@@ -541,11 +573,15 @@ export default class KnishIOClient {
 
       if ( response.success() ) {
 
-        this.client().setAuthData( {
+        let authObj = {
           token: response.token(),
           pubkey: response.pubKey(),
           wallet: response.wallet()
-        } );
+        };
+
+        this.$__client.setAuthData( authObj );
+        this.$__clients[ this.uri() ] = authObj;
+        this.$__authProcess = false;
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
@@ -597,7 +633,7 @@ export default class KnishIOClient {
    * @returns {string|null}
    */
   getAuthToken () {
-    return this.client().getAuthToken();
+    return this.$__client.getAuthToken();
   }
 
   /**
