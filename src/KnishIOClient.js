@@ -123,7 +123,7 @@ export default class KnishIOClient {
   /**
    * Initializes a new Knish.IO client session
    *
-   * @param {[]} uri
+   * @param {string|[]} uri
    * @param {string|null} socketUri
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
@@ -141,7 +141,7 @@ export default class KnishIOClient {
 
     this.$__logging = logging;
     this.$__encrypt = false;
-    this.$__uris = uri;
+    this.$__uris = typeof uri === 'object' ? uri : [ uri ];
     this.$__clients = {};
     this.$__authProcess = false;
 
