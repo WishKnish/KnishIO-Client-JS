@@ -292,7 +292,7 @@ export default class KnishIOClient {
           secret: this.$__secret,
           cellSlug: this.$__cellSlug,
           encrypt: this.$__encrypt
-        } );
+        } ).then( () => {} );
       } else {
         this.$__client.setAuthData( authDataObj );
       }
