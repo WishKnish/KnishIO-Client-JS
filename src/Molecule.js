@@ -781,13 +781,13 @@ export default class Molecule extends MoleculeStructure {
       atoms: this.atoms
     } );
 
-    // Determine first atom
-    const firstAtom = this.atoms[ 0 ],
+    // Determine signing atom
+    const signingAtom = this.atoms[ 0 ],
       // Generate the private signing key for this molecule
       key = Wallet.generatePrivateKey( {
         secret: this.secret,
-        token: firstAtom.token,
-        position: firstAtom.position
+        token: signingAtom.token,
+        position: signingAtom.position
       } ),
       // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
       keyChunks = chunkSubstr( key, 128 ),
