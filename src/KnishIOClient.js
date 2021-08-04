@@ -486,109 +486,109 @@ export default class KnishIOClient {
     }
 
     // SDK versions 2 and below do not utilize an authorization token
-    if ( this.$__serverSdkVersion >= 3 ) {
-
-      let query,
-        response,
-        wallet;
-
-      if ( guestMode ) {
-
-        wallet = new Wallet( {
-          secret: generateSecret(),
-          token: 'AUTH'
-        } );
-
-        /**
-         * @type {MutationRequestAuthorizationGuest}
-         */
-        query = await this.createQuery( MutationRequestAuthorizationGuest );
-
-        /**
-         * @type {ResponseRequestAuthorization}
-         */
-        response = await query.execute( {
-          variables: {
-            cellSlug: this.$__cellSlug,
-            pubkey: wallet.pubkey,
-            encrypt: encrypt
-          }
-        } );
-      } else {
-        const molecule = await this.createMolecule( {
-          secret: this.getSecret(),
-          sourceWallet: new Wallet( {
-            secret: this.getSecret(),
-            token: 'AUTH'
-          } )
-        } );
-
-        /**
-         * @type {MutationRequestAuthorization}
-         */
-        query = await this.createMoleculeMutation( {
-          mutationClass: MutationRequestAuthorization,
-          molecule
-        } );
-
-        query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
-
-        wallet = query.molecule.sourceWallet;
-
-        /**
-         * @type {ResponseRequestAuthorization}
-         */
-        response = await query.execute( {} );
-
-      }
-
-      if ( response.success() ) {
-
-        let authToken = AuthToken.create( response.data(), wallet )
-        this.setAuthToken( authToken );
-
-        if ( this.$__logging ) {
-          console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
-        }
-
-        if ( this.hasEncryption() !== response.encrypt() ) {
-
-          if ( this.$__logging ) {
-            console.warn( 'KnishIOClient::requestAuthToken() - Node not respecting requested encryption policy!' );
-          }
-
-          if ( response.encrypt() ) {
-
-            if ( this.$__logging ) {
-              console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption on to match node...' );
-            }
-            this.enableEncryption();
-          } else {
-            if ( this.$__logging ) {
-              console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption off to match node...' );
-            }
-            this.disableEncryption();
-          }
-        }
-
-      } else {
-
-        if ( this.$__logging ) {
-          console.warn( 'KnishIOClient::requestAuthToken() - Unable to retrieve auth token...' );
-        }
-
-        throw new UnauthenticatedException( response.reason() );
-
-      }
-
-      return authToken;
-    } else {
-
+    if ( this.$__serverSdkVersion < 3 ) {
       if ( this.$__logging ) {
         console.warn( 'KnishIOClient::requestAuthToken() - Node SDK version does not require an auth token!' );
       }
+      return;
+    }
+
+    let query,
+      response,
+      wallet;
+
+    if ( guestMode ) {
+
+      wallet = new Wallet( {
+        secret: generateSecret(),
+        token: 'AUTH'
+      } );
+
+      /**
+       * @type {MutationRequestAuthorizationGuest}
+       */
+      query = await this.createQuery( MutationRequestAuthorizationGuest );
+
+      /**
+       * @type {ResponseRequestAuthorization}
+       */
+      response = await query.execute( {
+        variables: {
+          cellSlug: this.$__cellSlug,
+          pubkey: wallet.pubkey,
+          encrypt: encrypt
+        }
+      } );
+    } else {
+      const molecule = await this.createMolecule( {
+        secret: this.getSecret(),
+        sourceWallet: new Wallet( {
+          secret: this.getSecret(),
+          token: 'AUTH'
+        } )
+      } );
+
+      /**
+       * @type {MutationRequestAuthorization}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationRequestAuthorization,
+        molecule
+      } );
+
+      query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
+
+      wallet = query.molecule.sourceWallet;
+
+      /**
+       * @type {ResponseRequestAuthorization}
+       */
+      response = await query.execute( {} );
 
     }
+
+    if ( response.success() ) {
+
+      let authToken = AuthToken.create( response.data(), wallet )
+      this.setAuthToken( authToken );
+
+      if ( this.$__logging ) {
+        console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
+      }
+
+      if ( this.hasEncryption() !== response.encrypt() ) {
+
+        if ( this.$__logging ) {
+          console.warn( 'KnishIOClient::requestAuthToken() - Node not respecting requested encryption policy!' );
+        }
+
+        if ( response.encrypt() ) {
+
+          if ( this.$__logging ) {
+            console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption on to match node...' );
+          }
+          this.enableEncryption();
+        } else {
+          if ( this.$__logging ) {
+            console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption off to match node...' );
+          }
+          this.disableEncryption();
+        }
+      }
+
+      return authToken;
+
+    } else {
+
+      if ( this.$__logging ) {
+        console.warn( 'KnishIOClient::requestAuthToken() - Unable to retrieve auth token...' );
+      }
+
+      throw new UnauthenticatedException( response.reason() );
+
+    }
+
+
   }
 
   /**
@@ -1642,11 +1642,11 @@ export default class KnishIOClient {
     }
 
 
-    let response;
+    let authToken;
 
     // Authorized user
     if ( secret ) {
-      response = await this.requestAuthToken( {
+      authToken = await this.requestAuthToken( {
         secret,
         encrypt,
       } );
@@ -1654,23 +1654,11 @@ export default class KnishIOClient {
 
     // Guest
     else {
-      response = await this.requestAuthToken( {
+      authToken = await this.requestAuthToken( {
         cellSlug: this.$__cellSlug,
         encrypt,
       } );
     }
-
-    // Have errors with auth token query
-    if ( !response.success() ) {
-      if ( this.$__logging ) {
-        console.warn( 'KnishIOClient::authorize() - Unable to retrieve auth token...' );
-      }
-      throw new UnauthenticatedException( response.reason() );
-    }
-
-
-    // Get an auth token info & set a expireAt key
-    let authToken = response.payload();
 
     // Set auth token
     if ( this.$__logging ) {
@@ -1698,7 +1686,7 @@ export default class KnishIOClient {
     // Save a full auth token object with expireAt key
     this.$__authToken = authToken;
   }
-  
+
 
   /**
    * Returns the current authorization token

@@ -363,13 +363,14 @@ export default class Test {
       } );
 
       // Auth the client
-      let response = await this.clients[ secret ]
+      let authToken = await this.clients[ secret ]
         .requestAuthToken( {
           secret,
           cellSlug
         } );
-
-      this.checkResponse( response, 'requestAuthToken' );
+      if( !authToken ) {
+        console.log( 'Error with requestAuthToken - get an empty response.' );
+      }
     }
 
     // Return the client by secret

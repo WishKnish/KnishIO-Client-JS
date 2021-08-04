@@ -78,15 +78,13 @@ export default class AuthToken {
       position: snapshot.wallet.position,
       characters: snapshot.wallet.characters,
     } );
-    let authToken = AuthToken.create( {
+    return AuthToken.create( {
       token: snapshot.token,
       expiresAt: snapshot.expiresAt,
       time: snapshot.time,
       pubkey: snapshot.pubkey,
       encrypt: snapshot.encrypt,
-    } );
-    authToken.setWallet( wallet );
-    return authToken;
+    }, wallet );
   }
 
 
