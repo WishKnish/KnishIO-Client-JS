@@ -46,6 +46,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
+import Wallet from "@wishknish/knishio-client-js/src/Wallet";
+
 
 /**
  *
@@ -72,6 +74,7 @@ export default class AuthToken {
    * @returns {AuthToken}
    */
   static restore( snapshot ) {
+    console.error( snapshot );
     let wallet = new Wallet( {
       secret: snapshot.wallet.secret,
       token: 'AUTH',
@@ -120,20 +123,6 @@ export default class AuthToken {
     this.$__wallet = wallet;
   }
 
-
-  /**
-   *
-   * @returns {{wallet, token, pubkey}}
-   */
-  getAuthData() {
-    return {
-      token: this.$__token,
-      pubkey: this.$__pubkey,
-      wallet: this.$__wallet,
-    };
-  }
-
-
   /**
    *
    * @returns {{wallet: {characters, secret, position}, encrypt, time, expiresAt, token, pubkey}}
@@ -153,12 +142,29 @@ export default class AuthToken {
     };
   }
 
+
+  /**
+   *
+   * @returns {*}
+   */
+  getToken() {
+    return this.$__token;
+  }
+
+  /**
+   *
+   * @returns {number}
+   */
+  getExpireInterval() {
+    return ( this.$__expiresAt * 1000 ) - Date.now();
+  }
+
   /**
    *
    * @returns {boolean}
    */
   isExpired() {
-    return !this.$__expiresAt || this.$__expiresAt * 1000 <= Date.now();
+    return !this.$__expiresAt || this.getExpireInterval() < 0;
   }
 
 }
