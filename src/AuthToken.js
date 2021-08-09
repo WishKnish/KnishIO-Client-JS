@@ -74,7 +74,6 @@ export default class AuthToken {
    * @returns {AuthToken}
    */
   static restore( snapshot ) {
-    console.error( snapshot );
     let wallet = new Wallet( {
       secret: snapshot.wallet.secret,
       token: 'AUTH',
@@ -124,6 +123,14 @@ export default class AuthToken {
   }
 
   /**
+   * Get a wallet
+   * @returns {*}
+   */
+  getWallet() {
+    return this.$__wallet;
+  }
+
+  /**
    *
    * @returns {{wallet: {characters, secret, position}, encrypt, time, expiresAt, token, pubkey}}
    */
@@ -149,6 +156,15 @@ export default class AuthToken {
    */
   getToken() {
     return this.$__token;
+  }
+
+
+  /**
+   *
+   * @returns {*}
+   */
+  getPubkey() {
+    return this.$__pubkey;
   }
 
   /**

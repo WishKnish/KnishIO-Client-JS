@@ -443,11 +443,11 @@ export default class KnishIOClient {
   /**
    * Requests an authorization token from the node endpoint
    *
-   * @param {string|null} secret
-   * @param {string|null} seed
-   * @param {string|null} cellSlug
-   * @param {boolean|null} encrypt
-   * @return {Promise<Response>}
+   * @param secret
+   * @param seed
+   * @param cellSlug
+   * @param encrypt
+   * @returns {Promise<AuthToken>}
    */
   async requestAuthToken ( {
     secret = null,
@@ -549,7 +549,7 @@ export default class KnishIOClient {
 
     if ( response.success() ) {
 
-      let authToken = AuthToken.create( response.data(), wallet )
+      let authToken = AuthToken.create( response.data(), wallet );
       this.setAuthToken( authToken );
 
       if ( this.$__logging ) {
@@ -1681,7 +1681,11 @@ export default class KnishIOClient {
   setAuthToken( authToken ) {
 
     // Set auth data to apollo client
-    this.client().setAuthData( authToken.getAuthData() );
+    this.client().setAuthData( {
+      token: authToken.getToken(),
+      pubkey: authToken.getPubkey(),
+      wallet: authToken.getWallet(),
+    } );
 
     // Save a full auth token object with expireAt key
     this.$__authToken = authToken;
