@@ -520,12 +520,14 @@ export default class KnishIOClient {
         }
       } );
     } else {
+      wallet = new Wallet( {
+        secret: this.getSecret(),
+        token: 'AUTH'
+      } );
+
       const molecule = await this.createMolecule( {
         secret: this.getSecret(),
-        sourceWallet: new Wallet( {
-          secret: this.getSecret(),
-          token: 'AUTH'
-        } )
+        sourceWallet: wallet
       } );
 
       /**
@@ -538,8 +540,6 @@ export default class KnishIOClient {
 
       query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
 
-      wallet = query.molecule.sourceWallet;
-
       /**
        * @type {ResponseRequestAuthorization}
        */
@@ -548,8 +548,8 @@ export default class KnishIOClient {
     }
 
     if ( response.success() ) {
-
-      let authToken = AuthToken.create( response.data(), wallet );
+      
+      let authToken = AuthToken.create( response.payload(), wallet );
       this.setAuthToken( authToken );
 
       if ( this.$__logging ) {
