@@ -48,8 +48,8 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import CheckMolecule from './libraries/check';
 import AtomsMissingException from './exception/AtomsMissingException';
 import Atom from './Atom';
-
-const cloneDeep = require( 'lodash.clonedeep' );
+import { deepCloning } from './libraries/array';
+import Molecule from './Molecule';
 
 /**
  * MoleculeStructure class to formalize the creation of Molecules
@@ -84,10 +84,12 @@ export default class MoleculeStructure {
   }
 
   /**
+   * Returns JSON-ready clone minus protected properties
+   *
    * @returns {object}
    */
   toJSON () {
-    let clone = cloneDeep( this );
+    let clone = deepCloning( this );
     for ( let key of [ 'remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin' ] ) {
       if ( clone.hasOwnProperty( key ) ) {
         delete clone[ key ];
@@ -144,9 +146,8 @@ export default class MoleculeStructure {
    * @throws {AtomsMissingException}
    */
   static jsonToObject ( json ) {
-
-    const target = { ...( new this() ), ...JSON.parse( json ) },
-      properties = Object.keys( new this() );
+    const target = Object.assign( new Molecule( {} ), JSON.parse( json ) ),
+      properties = Object.keys( new Molecule( {} ) );
 
     if ( !Array.isArray( target.atoms ) ) {
       throw new AtomsMissingException();

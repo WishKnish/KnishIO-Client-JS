@@ -51,13 +51,13 @@ export default class CheckMolecule {
   static batchId ( molecule ) {
 
     if ( molecule.atoms.length > 0 ) {
-      const subscription = molecule.atoms[ 0 ];
+      const signingAtom = molecule.atoms[ 0 ];
 
-      if ( subscription.isotope === 'V' && subscription.batchId !== null ) {
+      if ( signingAtom.isotope === 'V' && signingAtom.batchId !== null ) {
         const atoms = CheckMolecule.isotopeFilter( 'V', molecule.atoms );
-        const remainder = atoms[ atoms.length - 1 ];
+        const remainderAtom = atoms[ atoms.length - 1 ];
 
-        if ( subscription.batchId !== remainder.batchId ) {
+        if ( signingAtom.batchId !== remainderAtom.batchId ) {
           throw new BatchIdException();
         }
 
