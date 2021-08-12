@@ -182,4 +182,17 @@ export default class AuthToken {
     return !this.$__expiresAt || this.getExpireInterval() < 0;
   }
 
+
+  /**
+   * Get auth data for the final client (apollo)
+   * @returns {{wallet: *, token: *, pubkey: *}}
+   */
+  getAuthData() {
+    return {
+      token: this.getToken(),
+      pubkey: this.getPubkey(),
+      wallet: this.getWallet()
+    };
+  }
+
 }

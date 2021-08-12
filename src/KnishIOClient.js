@@ -54,6 +54,7 @@ import {
 } from './libraries/crypto';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
+import AuthToken from './AuthToken';
 import QueryContinuId from './query/QueryContinuId';
 import QueryWalletBundle from './query/QueryWalletBundle';
 import QueryWalletList from './query/QueryWalletList';
@@ -95,7 +96,7 @@ export default class KnishIOClient {
   /**
    * Class constructor
    *
-   * @param {[]} uri
+   * @param {string} uri
    * @param {string|null} socketUri
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
@@ -144,7 +145,6 @@ export default class KnishIOClient {
     this.$__uris = typeof uri === 'object' ? uri : [ uri ];
     this.$__clients = {};
     this.$__authProcess = false;
-
     for ( let i in this.$__uris ) {
       let url = this.$__uris [ i ];
       this.$__clients[ url ] = {};
@@ -167,8 +167,11 @@ export default class KnishIOClient {
     this.$__serverSdkVersion = serverSdkVersion;
   }
 
+
   /**
    * Get random uri from specified this.$__uris
+   *
+   * @returns {string}
    */
   getRandomUri () {
     let rand = Math.floor( Math.random() * ( this.$__uris.length ) );
@@ -297,7 +300,6 @@ export default class KnishIOClient {
         this.$__client.setAuthData( authDataObj );
       }
     }
-
     return this.$__client;
   }
 
@@ -473,11 +475,11 @@ export default class KnishIOClient {
   /**
    * Requests an authorization token from the node endpoint
    *
-   * @param {string|null} secret
-   * @param {string|null} seed
-   * @param {string|null} cellSlug
-   * @param {boolean|null} encrypt
-   * @return {Promise<Response>}
+   * @param secret
+   * @param seed
+   * @param cellSlug
+   * @param encrypt
+   * @returns {Promise<*>}
    */
   async requestAuthToken ( {
     secret = null,
@@ -519,11 +521,12 @@ export default class KnishIOClient {
     if ( this.$__serverSdkVersion >= 3 ) {
 
       let query,
-        response;
+        response,
+        wallet;
 
       if ( guestMode ) {
 
-        const authorizationWallet = new Wallet( {
+        wallet = new Wallet( {
           secret: generateSecret(),
           token: 'AUTH'
         } );
@@ -533,25 +536,26 @@ export default class KnishIOClient {
          */
         query = await this.createQuery( MutationRequestAuthorizationGuest );
 
-        query.setAuthorizationWallet( authorizationWallet );
-
         /**
          * @type {ResponseRequestAuthorization}
          */
         response = await query.execute( {
           variables: {
             cellSlug: this.$__cellSlug,
-            pubkey: authorizationWallet.pubkey,
+            pubkey: wallet.pubkey,
             encrypt: encrypt
           }
         } );
       } else {
+
+        wallet = new Wallet( {
+          secret: this.getSecret(),
+          token: 'AUTH'
+        } );
+
         const molecule = await this.createMolecule( {
           secret: this.getSecret(),
-          sourceWallet: new Wallet( {
-            secret: this.getSecret(),
-            token: 'AUTH'
-          } )
+          sourceWallet: wallet
         } );
 
         /**
@@ -572,14 +576,10 @@ export default class KnishIOClient {
 
       if ( response.success() ) {
 
-        let authObj = {
-          token: response.token(),
-          pubkey: response.pubKey(),
-          wallet: response.wallet()
-        };
+        let authToken = AuthToken.create( response.payload(), wallet );
 
-        this.$__client.setAuthData( authObj );
-        this.$__clients[ this.uri() ] = authObj;
+        this.$__client.setAuthData( authToken.getAuthData() );
+        this.$__clients[ this.uri() ] = authToken.getAuthData();
         this.$__authProcess = false;
 
         if ( this.$__logging ) {
@@ -606,6 +606,8 @@ export default class KnishIOClient {
           }
         }
 
+        return authToken;
+
       } else {
 
         if ( this.$__logging ) {
@@ -616,7 +618,6 @@ export default class KnishIOClient {
 
       }
 
-      return response;
     } else {
 
       if ( this.$__logging ) {
@@ -624,15 +625,6 @@ export default class KnishIOClient {
       }
 
     }
-  }
-
-  /**
-   * Returns the current authorization token
-   *
-   * @returns {string|null}
-   */
-  getAuthToken () {
-    return this.$__client.getAuthToken();
   }
 
   /**
@@ -1650,6 +1642,107 @@ export default class KnishIOClient {
     molecule.check();
 
     return ( new MutationProposeMolecule( this.client(), molecule ) ).execute( {} );
+  }
+
+
+  /**
+   * Authorize with auth token
+   *
+   * @param secret
+   * @param cellSlug
+   * @param authToken
+   * @returns {Promise<void>}
+   */
+  async authorize( {
+    secret,
+    cellSlug,
+    encrypt = null,
+  } ) {
+
+    // SDK versions 2 and below do not utilize an authorization token
+    if ( this.$__serverSdkVersion < 3 ) {
+      if ( this.$__logging ) {
+        console.warn( 'KnishIOClient::authorize() - Server SDK version does not require an authorization...' );
+      }
+      return;
+    }
+
+    // Do we have a secret pre-hashed?
+    if ( secret ) {
+      this.setSecret( secret );
+    }
+
+    // Set a cell slug
+    if ( cellSlug ) {
+      this.setCellSlug( cellSlug );
+    }
+
+
+    let authToken;
+
+    // Authorized user
+    if ( secret ) {
+      authToken = await this.requestAuthToken( {
+        secret,
+        encrypt,
+      } );
+    }
+
+    // Guest
+    else {
+      authToken = await this.requestAuthToken( {
+        cellSlug: this.$__cellSlug,
+        encrypt,
+      } );
+    }
+
+    // Set auth token
+    if ( this.$__logging ) {
+      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ authToken.token }...` );
+    }
+
+    // Set an authToken full info
+    this.setAuthToken( authToken );
+
+    // Return full response
+    return authToken;
+  }
+
+
+  /**
+   * Sets the auth token
+   *
+   * @param authToken
+   */
+  setAuthToken( authToken ) {
+
+    // An empty auth token
+    if( !authToken ) {
+      if( this.$__logging ) {
+        console.info( `KnishIOClient::setAuthToken() - authToken object is empty.` );
+      }
+      return;
+    }
+
+    // Set auth data to apollo client
+    this.client().setAuthData( {
+      token: authToken.getToken(),
+      pubkey: authToken.getPubkey(),
+      wallet: authToken.getWallet(),
+    } );
+
+    // Save a full auth token object with expireAt key
+    this.$__authToken = authToken;
+  }
+
+
+  /**
+   * Returns the current authorization token
+   *
+   * @returns {string|null}
+   */
+  getAuthToken () {
+    return this.$__authToken;
   }
 
 }

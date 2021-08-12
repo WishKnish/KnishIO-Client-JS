@@ -87,10 +87,12 @@ export default class ApolloClient {
 
       this.unsubscribeAll();
 
+      let authToken = this.$__client.getAuthToken();
+
       client.setAuthData( {
-        token: this.$__client.getAuthToken(),
-        pubkey: this.$__client.getPubKey(),
-        wallet: this.$__client.getWallet()
+        token: authToken.getToken(),
+        pubkey: authToken.getPubKey(),
+        wallet: authToken.getWallet()
       } );
     }
 
@@ -180,7 +182,11 @@ export default class ApolloClient {
    * @return {string}
    */
   getAuthToken () {
-    return this.$__client.getAuthToken();
+    let authTokenObject = this.$__client.getAuthToken();
+    if( !authTokenObject ) {
+      return null;
+    }
+    return authTokenObject.getToken();
   }
 
   /**
