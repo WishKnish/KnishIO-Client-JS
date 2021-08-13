@@ -143,11 +143,11 @@ export default class KnishIOClient {
     this.$__logging = logging;
     this.$__encrypt = false;
     this.$__uris = typeof uri === 'object' ? uri : [ uri ];
-    this.$__clients = {};
-    this.$__authProcess = false;
+    this.$__authTokenObjects = {};
+    this.$__authInProcess = false;
     for ( let i in this.$__uris ) {
       let url = this.$__uris [ i ];
-      this.$__clients[ url ] = {};
+      this.$__authTokenObjects[ url ] = null;
     }
 
     if ( this.$__logging ) {
@@ -286,18 +286,24 @@ export default class KnishIOClient {
    * @returns {ApolloClient}
    */
   client () {
-    if ( !this.$__authProcess ) {
+    if ( !this.$__authInProcess ) {
       let randomUri = this.getRandomUri();
       this.$__client.setUri( randomUri );
-      let authDataObj = this.$__clients[ randomUri ];
-      if ( Object.values( authDataObj ).length === 0 ) {
-        this.requestAuthToken( {
+
+      // Try to get stored auth token object
+      let authTokenObject = this.$__authTokenObjects[ randomUri ];
+
+      // Not authorized - try to do it
+      if ( !authTokenObject ) {
+        this.authorize( {
           secret: this.$__secret,
           cellSlug: this.$__cellSlug,
           encrypt: this.$__encrypt
         } ).then( () => {} );
-      } else {
-        this.$__client.setAuthData( authDataObj );
+      }
+      // Use stored authorization data
+      else {
+        this.$__client.setAuthData( authTokenObject.getAuthData() );
       }
     }
     return this.$__client;
@@ -487,7 +493,6 @@ export default class KnishIOClient {
     cellSlug = null,
     encrypt = null
   } ) {
-    this.$__authProcess = true;
     if ( this.$__logging ) {
       console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
     }
@@ -577,10 +582,6 @@ export default class KnishIOClient {
       if ( response.success() ) {
 
         let authToken = AuthToken.create( response.payload(), wallet );
-
-        this.$__client.setAuthData( authToken.getAuthData() );
-        this.$__clients[ this.uri() ] = authToken.getAuthData();
-        this.$__authProcess = false;
 
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
@@ -1677,6 +1678,8 @@ export default class KnishIOClient {
       this.setCellSlug( cellSlug );
     }
 
+    // Auth in process...
+    this.$__authInProcess = true;
 
     let authToken;
 
@@ -1704,6 +1707,9 @@ export default class KnishIOClient {
     // Set an authToken full info
     this.setAuthToken( authToken );
 
+    // Auth process is stopped
+    this.$__authInProcess = false;
+
     // Return full response
     return authToken;
   }
@@ -1724,12 +1730,11 @@ export default class KnishIOClient {
       return;
     }
 
+    // Save auth token object to global list
+    this.$__authTokenObjects[ this.uri() ] = authToken;
+
     // Set auth data to apollo client
-    this.client().setAuthData( {
-      token: authToken.getToken(),
-      pubkey: authToken.getPubkey(),
-      wallet: authToken.getWallet(),
-    } );
+    this.client().setAuthData( authToken.getAuthData() );
 
     // Save a full auth token object with expireAt key
     this.$__authToken = authToken;
