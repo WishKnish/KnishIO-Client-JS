@@ -368,7 +368,7 @@ export default class Test {
           secret,
           cellSlug
         } );
-      if( !authToken ) {
+      if ( !authToken ) {
         console.log( 'Error with requestAuthToken - get an empty response.' );
       }
     }

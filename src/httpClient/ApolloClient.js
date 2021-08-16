@@ -183,7 +183,7 @@ export default class ApolloClient {
    */
   getAuthToken () {
     let authTokenObject = this.$__client.getAuthToken();
-    if( !authTokenObject ) {
+    if ( !authTokenObject ) {
       return null;
     }
     return authTokenObject.getToken();

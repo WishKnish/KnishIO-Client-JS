@@ -1654,10 +1654,10 @@ export default class KnishIOClient {
    * @param authToken
    * @returns {Promise<void>}
    */
-  async authorize( {
+  async authorize ( {
     secret,
     cellSlug,
-    encrypt = null,
+    encrypt = null
   } ) {
 
     // SDK versions 2 and below do not utilize an authorization token
@@ -1687,7 +1687,7 @@ export default class KnishIOClient {
     if ( secret ) {
       authToken = await this.requestAuthToken( {
         secret,
-        encrypt,
+        encrypt
       } );
     }
 
@@ -1695,7 +1695,7 @@ export default class KnishIOClient {
     else {
       authToken = await this.requestAuthToken( {
         cellSlug: this.$__cellSlug,
-        encrypt,
+        encrypt
       } );
     }
 
@@ -1720,12 +1720,12 @@ export default class KnishIOClient {
    *
    * @param authToken
    */
-  setAuthToken( authToken ) {
+  setAuthToken ( authToken ) {
 
     // An empty auth token
-    if( !authToken ) {
-      if( this.$__logging ) {
-        console.info( `KnishIOClient::setAuthToken() - authToken object is empty.` );
+    if ( !authToken ) {
+      if ( this.$__logging ) {
+        console.info( 'KnishIOClient::setAuthToken() - authToken object is empty.' );
       }
       return;
     }

@@ -66,7 +66,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
     }
     return Dot.get( this.payload(), key );
   }
-  
+
 
   /**
    * Returns the auth token

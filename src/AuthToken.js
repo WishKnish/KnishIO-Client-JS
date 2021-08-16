@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Wallet from "@wishknish/knishio-client-js/src/Wallet";
+import Wallet from '@wishknish/knishio-client-js/src/Wallet';
 
 
 /**
@@ -61,7 +61,7 @@ export default class AuthToken {
    * @param wallet
    * @returns {AuthToken}
    */
-  static create( data, wallet ) {
+  static create ( data, wallet ) {
     let authToken = new AuthToken( data );
     authToken.setWallet( wallet );
     return authToken;
@@ -74,19 +74,19 @@ export default class AuthToken {
    * @param secret
    * @returns {AuthToken}
    */
-  static restore( snapshot, secret ) {
+  static restore ( snapshot, secret ) {
     let wallet = new Wallet( {
       secret,
       token: 'AUTH',
       position: snapshot.wallet.position,
-      characters: snapshot.wallet.characters,
+      characters: snapshot.wallet.characters
     } );
     return AuthToken.create( {
       token: snapshot.token,
       expiresAt: snapshot.expiresAt,
       time: snapshot.time,
       pubkey: snapshot.pubkey,
-      encrypt: snapshot.encrypt,
+      encrypt: snapshot.encrypt
     }, wallet );
   }
 
@@ -104,7 +104,7 @@ export default class AuthToken {
     expiresAt,
     time,
     encrypt,
-    key,
+    key
   } ) {
     this.$__token = token;
     this.$__expiresAt = expiresAt;
@@ -118,7 +118,7 @@ export default class AuthToken {
    *
    * @param wallet
    */
-  setWallet( wallet ) {
+  setWallet ( wallet ) {
     this.$__wallet = wallet;
   }
 
@@ -126,7 +126,7 @@ export default class AuthToken {
    * Get a wallet
    * @returns {*}
    */
-  getWallet() {
+  getWallet () {
     return this.$__wallet;
   }
 
@@ -134,7 +134,7 @@ export default class AuthToken {
    *
    * @returns {{wallet: {characters, position}, encrypt, time, expiresAt, token, pubkey}}
    */
-  getSnapshot() {
+  getSnapshot () {
     return {
       token: this.$__token,
       expiresAt: this.$__expiresAt,
@@ -143,8 +143,8 @@ export default class AuthToken {
       encrypt: this.$__encrypt,
       wallet: {
         position: this.$__wallet.position,
-        characters: this.$__wallet.characters,
-      },
+        characters: this.$__wallet.characters
+      }
     };
   }
 
@@ -153,7 +153,7 @@ export default class AuthToken {
    *
    * @returns {*}
    */
-  getToken() {
+  getToken () {
     return this.$__token;
   }
 
@@ -162,7 +162,7 @@ export default class AuthToken {
    *
    * @returns {*}
    */
-  getPubkey() {
+  getPubkey () {
     return this.$__pubkey;
   }
 
@@ -170,7 +170,7 @@ export default class AuthToken {
    *
    * @returns {number}
    */
-  getExpireInterval() {
+  getExpireInterval () {
     return ( this.$__expiresAt * 1000 ) - Date.now();
   }
 
@@ -178,7 +178,7 @@ export default class AuthToken {
    *
    * @returns {boolean}
    */
-  isExpired() {
+  isExpired () {
     return !this.$__expiresAt || this.getExpireInterval() < 0;
   }
 
@@ -187,7 +187,7 @@ export default class AuthToken {
    * Get auth data for the final client (apollo)
    * @returns {{wallet: *, token: *, pubkey: *}}
    */
-  getAuthData() {
+  getAuthData () {
     return {
       token: this.getToken(),
       pubkey: this.getPubkey(),
