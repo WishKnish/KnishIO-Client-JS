@@ -45,105 +45,154 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from './Response';
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
+
+import Wallet from "@wishknish/knishio-client-js/src/Wallet";
+
 
 /**
- * Response for guest auth mutation
+ *
  */
-export default class ResponseRequestAuthorizationGuest extends Response {
+export default class AuthToken {
+
+
   /**
-   * Class constructor
    *
-   * @param {MutationRequestAuthorizationGuest} query
-   * @param json
+   * @param data
+   * @param wallet
+   * @returns {AuthToken}
+   */
+  static create( data, wallet ) {
+    let authToken = new AuthToken( data );
+    authToken.setWallet( wallet );
+    return authToken;
+  }
+
+
+  /**
+   *
+   * @param snapshot
+   * @param secret
+   * @returns {AuthToken}
+   */
+  static restore( snapshot, secret ) {
+    let wallet = new Wallet( {
+      secret,
+      token: 'AUTH',
+      position: snapshot.wallet.position,
+      characters: snapshot.wallet.characters,
+    } );
+    return AuthToken.create( {
+      token: snapshot.token,
+      expiresAt: snapshot.expiresAt,
+      time: snapshot.time,
+      pubkey: snapshot.pubkey,
+      encrypt: snapshot.encrypt,
+    }, wallet );
+  }
+
+
+  /**
+   *
+   * @param token
+   * @param expiresAt
+   * @param time
+   * @param encrypt
+   * @param key
    */
   constructor ( {
-    query,
-    json
+    token,
+    expiresAt,
+    time,
+    encrypt,
+    key,
   } ) {
-    super( {
-      query,
-      json
-    } );
-    this.dataKey = 'data.AccessToken';
-    this.init();
+    this.$__token = token;
+    this.$__expiresAt = expiresAt;
+    this.$__time = time;
+    this.$__pubkey = key;
+    this.$__encrypt = encrypt;
   }
 
+
   /**
-   * Returns the reason for rejection
    *
-   * @returns {string}
+   * @param wallet
    */
-  reason () {
-    return 'Invalid response from server';
+  setWallet( wallet ) {
+    this.$__wallet = wallet;
   }
 
   /**
-   * Returns whether molecule was accepted or not
+   * Get a wallet
+   * @returns {*}
+   */
+  getWallet() {
+    return this.$__wallet;
+  }
+
+  /**
+   *
+   * @returns {{wallet: {characters, position}, encrypt, time, expiresAt, token, pubkey}}
+   */
+  getSnapshot() {
+    return {
+      token: this.$__token,
+      expiresAt: this.$__expiresAt,
+      time: this.$__time,
+      pubkey: this.$__pubkey,
+      encrypt: this.$__encrypt,
+      wallet: {
+        position: this.$__wallet.position,
+        characters: this.$__wallet.characters,
+      },
+    };
+  }
+
+
+  /**
+   *
+   * @returns {*}
+   */
+  getToken() {
+    return this.$__token;
+  }
+
+
+  /**
+   *
+   * @returns {*}
+   */
+  getPubkey() {
+    return this.$__pubkey;
+  }
+
+  /**
+   *
+   * @returns {number}
+   */
+  getExpireInterval() {
+    return ( this.$__expiresAt * 1000 ) - Date.now();
+  }
+
+  /**
    *
    * @returns {boolean}
    */
-  success () {
-    return this.payload() !== null;
+  isExpired() {
+    return !this.$__expiresAt || this.getExpireInterval() < 0;
   }
 
-  /**
-   * Returns a wallet with balance
-   *
-   * @returns {null|Wallet}
-   */
-  payload () {
-    return this.data();
-  }
 
   /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @returns {*}
+   * Get auth data for the final client (apollo)
+   * @returns {{wallet: *, token: *, pubkey: *}}
    */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
-    }
-    return Dot.get( this.payload(), key );
-  }
-
-  /**
-   * Returns the auth token
-   *
-   * @returns {*}
-   */
-  token () {
-    return this.payloadKey( 'token' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @returns {*}
-   */
-  time () {
-    return this.payloadKey( 'time' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @returns {string}
-   */
-  pubKey () {
-    return this.payloadKey( 'key' );
-  }
-
-  /**
-   *
-   * @returns {string}
-   */
-  encrypt () {
-    return this.payloadKey( 'encrypt' );
+  getAuthData() {
+    return {
+      token: this.getToken(),
+      pubkey: this.getPubkey(),
+      wallet: this.getWallet()
+    };
   }
 
 }
