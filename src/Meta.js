@@ -53,22 +53,13 @@ export default class Meta {
   /**
    * Class constructor
    *
-   * @param {string} modelType
-   * @param {string} modelId
    * @param {array} meta
-   * @param {null|} snapshotMolecule
    */
   constructor ( {
-    modelType,
-    modelId,
-    meta,
-    snapshotMolecule = null
+    meta
   } ) {
 
-    this.modelType = modelType;
-    this.modelId = modelId;
     this.meta = meta;
-    this.snapshotMolecule = snapshotMolecule;
     this.createdAt = +new Date;
 
   }
