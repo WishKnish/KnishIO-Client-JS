@@ -491,7 +491,8 @@ export default class KnishIOClient {
     secret = null,
     seed = null,
     cellSlug = null,
-    encrypt = null
+    encrypt = null,
+    oldVersion = true
   } ) {
     if ( this.$__logging ) {
       console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
@@ -605,6 +606,11 @@ export default class KnishIOClient {
             }
             this.disableEncryption();
           }
+        }
+
+        // @todo temporarily code for old version support!
+        if ( oldVersion ) {
+          return response;
         }
 
         return authToken;
@@ -1687,7 +1693,8 @@ export default class KnishIOClient {
     if ( secret ) {
       authToken = await this.requestAuthToken( {
         secret,
-        encrypt
+        encrypt,
+        oldVersion: false
       } );
     }
 
@@ -1695,7 +1702,8 @@ export default class KnishIOClient {
     else {
       authToken = await this.requestAuthToken( {
         cellSlug: this.$__cellSlug,
-        encrypt
+        encrypt,
+        oldVersion: false
       } );
     }
 
