@@ -582,8 +582,6 @@ export default class KnishIOClient {
 
       if ( response.success() ) {
 
-        let authToken = AuthToken.create( response.payload(), wallet );
-
         if ( this.$__logging ) {
           console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
         }
@@ -608,12 +606,12 @@ export default class KnishIOClient {
           }
         }
 
-        // @todo temporarily code for old version support!
+        // @todo temporarily code for old version support!y
         if ( oldVersion ) {
           return response;
         }
 
-        return authToken;
+        return AuthToken.create( response.payload(), wallet );
 
       } else {
 
