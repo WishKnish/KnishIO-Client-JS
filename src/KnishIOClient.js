@@ -606,13 +606,16 @@ export default class KnishIOClient {
           }
         }
 
+        // Create an auth token & set auth data to final client (http / apollo)
+        let authToken = AuthToken.create( response.payload(), wallet );
+        this.client().setAuthData( authToken.getAuthData() );
+
         // @todo temporarily code for old version support!y
         if ( oldVersion ) {
           return response;
         }
 
-        return AuthToken.create( response.payload(), wallet );
-
+        return authToken;
       } else {
 
         if ( this.$__logging ) {
