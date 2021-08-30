@@ -61,10 +61,8 @@ export default class MutationRequestAuthorizationGuest extends Mutation {
     this.$__query = gql`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
       AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {
         token,
-        time,
-        key,
-        expiresAt,
-        encrypt
+        pubkey,
+        expiresAt
       }
     }`;
   }

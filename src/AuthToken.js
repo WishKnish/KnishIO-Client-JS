@@ -59,9 +59,11 @@ export default class AuthToken {
    *
    * @param data
    * @param wallet
+   * @param encrypt
    * @returns {AuthToken}
    */
-  static create ( data, wallet ) {
+  static create ( data, wallet, encrypt ) {
+    data.encrypt = encrypt;
     let authToken = new AuthToken( data );
     authToken.setWallet( wallet );
     return authToken;
