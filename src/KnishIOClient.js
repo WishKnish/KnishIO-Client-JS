@@ -1531,80 +1531,80 @@ export default class KnishIOClient {
   }
 
 
-  /**
-   *
-   * @param cellSlug
-   * @param encrypt
-   * @returns {Promise<AuthToken>}
-   */
-  async getGuestAuthToken( {
-    cellSlug,
-    encrypt,
-  } ) {
-    this.setCellSlug( cellSlug );
+    /**
+     *
+     * @param cellSlug
+     * @param encrypt
+     * @returns {Promise<AuthToken>}
+     */
+    async getGuestAuthToken( {
+      cellSlug,
+      encrypt,
+    } ) {
+      this.setCellSlug( cellSlug );
 
-    let wallet = new Wallet( {
-      secret: generateSecret(),
-      token: 'AUTH'
-    } );
+      let wallet = new Wallet( {
+        secret: generateSecret(),
+        token: 'AUTH'
+      } );
+
+      /**
+       * @type {MutationRequestAuthorizationGuest}
+       */
+      let query = await this.createQuery( MutationRequestAuthorizationGuest );
+
+      /**
+       * @type {ResponseRequestAuthorization}
+       */
+      let response = await query.execute( {
+        variables: {
+          cellSlug,
+          pubkey: wallet.pubkey,
+          encrypt
+        }
+      } );
+      return AuthToken.create( response.payload(), wallet, encrypt );
+    }
+
 
     /**
-     * @type {MutationRequestAuthorizationGuest}
+     *
+     * @param secret
+     * @param encrypt
+     * @returns {Promise<AuthToken>}
      */
-    let query = await this.createQuery( MutationRequestAuthorizationGuest );
-
-    /**
-     * @type {ResponseRequestAuthorization}
-     */
-    let response = await query.execute( {
-      variables: {
-        cellSlug: cellSlug,
-        pubkey: wallet.pubkey,
-        encrypt: encrypt
-      }
-    } );
-    return AuthToken.create( response.payload(), wallet, encrypt );
-  }
-
-
-  /**
-   *
-   * @param secret
-   * @param encrypt
-   * @returns {Promise<AuthToken>}
-   */
-  async getProfileAuthToken( {
-    secret,
-    encrypt,
-  } ) {
-    this.setSecret( secret );
-
-    let wallet = new Wallet( {
-      secret: secret,
-      token: 'AUTH'
-    } );
-
-    const molecule = await this.createMolecule( {
+    async getProfileAuthToken( {
       secret,
-      sourceWallet: wallet
-    } );
+      encrypt,
+    } ) {
+      this.setSecret( secret );
 
-    /**
-     * @type {MutationRequestAuthorization}
-     */
-    let query = await this.createMoleculeMutation( {
-      mutationClass: MutationRequestAuthorization,
-      molecule
-    } );
+      let wallet = new Wallet( {
+        secret,
+        token: 'AUTH'
+      } );
 
-    query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
+      const molecule = await this.createMolecule( {
+        secret,
+        sourceWallet: wallet
+      } );
 
-    /**
-     * @type {ResponseRequestAuthorization}
-     */
-    let response = await query.execute( {} );
-    return AuthToken.create( response.payload(), wallet, encrypt );
-  }
+      /**
+       * @type {MutationRequestAuthorization}
+       */
+      let query = await this.createMoleculeMutation( {
+        mutationClass: MutationRequestAuthorization,
+        molecule
+      } );
+
+      query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
+
+      /**
+       * @type {ResponseRequestAuthorization}
+       */
+      let response = await query.execute( {} );
+      return AuthToken.create( response.payload(), wallet, encrypt );
+    }
 
   /**
    * @todo Deprecated function, used for old version!
@@ -1652,7 +1652,7 @@ export default class KnishIOClient {
    */
   async authorize ( {
     secret,
-    cellSlug,
+    cellSlug = null,
     encrypt = false
   } ) {
 
