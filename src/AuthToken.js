@@ -59,9 +59,11 @@ export default class AuthToken {
    *
    * @param data
    * @param wallet
+   * @param encrypt
    * @returns {AuthToken}
    */
-  static create ( data, wallet ) {
+  static create ( data, wallet, encrypt ) {
+    data.encrypt = encrypt;
     let authToken = new AuthToken( data );
     authToken.setWallet( wallet );
     return authToken;
@@ -84,7 +86,6 @@ export default class AuthToken {
     return AuthToken.create( {
       token: snapshot.token,
       expiresAt: snapshot.expiresAt,
-      time: snapshot.time,
       pubkey: snapshot.pubkey,
       encrypt: snapshot.encrypt
     }, wallet );
@@ -95,21 +96,18 @@ export default class AuthToken {
    *
    * @param token
    * @param expiresAt
-   * @param time
    * @param encrypt
-   * @param key
+   * @param pubkey
    */
   constructor ( {
     token,
     expiresAt,
-    time,
     encrypt,
-    key
+    pubkey
   } ) {
     this.$__token = token;
     this.$__expiresAt = expiresAt;
-    this.$__time = time;
-    this.$__pubkey = key;
+    this.$__pubkey = pubkey;
     this.$__encrypt = encrypt;
   }
 
@@ -132,13 +130,12 @@ export default class AuthToken {
 
   /**
    *
-   * @returns {{wallet: {characters, position}, encrypt, time, expiresAt, token, pubkey}}
+   * @returns {{wallet: {characters, position}, encrypt, expiresAt, token, pubkey}}
    */
   getSnapshot () {
     return {
       token: this.$__token,
       expiresAt: this.$__expiresAt,
-      time: this.$__time,
       pubkey: this.$__pubkey,
       encrypt: this.$__encrypt,
       wallet: {

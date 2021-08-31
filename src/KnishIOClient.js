@@ -178,6 +178,40 @@ export default class KnishIOClient {
     return this.$__uris[ rand ];
   }
 
+
+  /**
+   *
+   * @param encrypt
+   * @returns {boolean}
+   */
+  switchEncryption( encrypt ) {
+    if ( this.hasEncryption() === encrypt ) {
+      return false;
+    }
+
+    if ( this.$__logging ) {
+      console.warn( 'KnishIOClient::switchEncryption() - Node not respecting requested encryption policy!' );
+    }
+
+    if ( encrypt ) {
+
+      if ( this.$__logging ) {
+        console.info( 'KnishIOClient::switchEncryption() - Forcing encryption on to match node...' );
+      }
+      this.enableEncryption();
+
+    } else {
+
+      if ( this.$__logging ) {
+        console.info( 'KnishIOClient::switchEncryption() - Forcing encryption off to match node...' );
+      }
+      this.disableEncryption();
+
+    }
+    return true;
+  }
+
+
   /**
    *  Enables end-to-end encryption protocol.
    *  Note: this will cause all active subscriptions to be unsubscribed.
@@ -478,161 +512,6 @@ export default class KnishIOClient {
     return mutation;
   }
 
-  /**
-   * Requests an authorization token from the node endpoint
-   *
-   * @param secret
-   * @param seed
-   * @param cellSlug
-   * @param encrypt
-   * @returns {Promise<*>}
-   */
-  async requestAuthToken ( {
-    secret = null,
-    seed = null,
-    cellSlug = null,
-    encrypt = null,
-    oldVersion = true
-  } ) {
-    if ( this.$__logging ) {
-      console.info( 'KnishIOClient::requestAuthToken() - Requesting authorization token...' );
-    }
-
-    let guestMode = false;
-
-    // Do we have a seed we need to hash?
-    if ( seed ) {
-      this.setSecret( generateSecret( seed ) );
-    }
-    // Do we have a secret pre-hashed?
-    else if ( secret ) {
-      this.setSecret( secret );
-    }
-    // Neither seed nor secret
-    else {
-      if ( this.$__logging ) {
-        console.info( 'KnishIOClient::requestAuthToken() - Guest mode enabled...' );
-      }
-      guestMode = true;
-    }
-
-    this.$__cellSlug = cellSlug || this.cellSlug();
-
-    // Are we asking for end-to-end encryption?
-    if ( encrypt === null ) {
-      encrypt = this.hasEncryption();
-    }
-
-    // SDK versions 2 and below do not utilize an authorization token
-    if ( this.$__serverSdkVersion >= 3 ) {
-
-      let query,
-        response,
-        wallet;
-
-      if ( guestMode ) {
-
-        wallet = new Wallet( {
-          secret: generateSecret(),
-          token: 'AUTH'
-        } );
-
-        /**
-         * @type {MutationRequestAuthorizationGuest}
-         */
-        query = await this.createQuery( MutationRequestAuthorizationGuest );
-
-        /**
-         * @type {ResponseRequestAuthorization}
-         */
-        response = await query.execute( {
-          variables: {
-            cellSlug: this.$__cellSlug,
-            pubkey: wallet.pubkey,
-            encrypt: encrypt
-          }
-        } );
-      } else {
-
-        wallet = new Wallet( {
-          secret: this.getSecret(),
-          token: 'AUTH'
-        } );
-
-        const molecule = await this.createMolecule( {
-          secret: this.getSecret(),
-          sourceWallet: wallet
-        } );
-
-        /**
-         * @type {MutationRequestAuthorization}
-         */
-        query = await this.createMoleculeMutation( {
-          mutationClass: MutationRequestAuthorization,
-          molecule
-        } );
-
-        query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
-
-        /**
-         * @type {ResponseRequestAuthorization}
-         */
-        response = await query.execute( {} );
-      }
-
-      if ( response.success() ) {
-
-        let authToken = AuthToken.create( response.payload(), wallet );
-
-        if ( this.$__logging ) {
-          console.info( `KnishIOClient::requestAuthToken() - Successfully retrieved auth token ${ response.token() }...` );
-        }
-
-        if ( this.hasEncryption() !== response.encrypt() ) {
-
-          if ( this.$__logging ) {
-            console.warn( 'KnishIOClient::requestAuthToken() - Node not respecting requested encryption policy!' );
-          }
-
-          if ( response.encrypt() ) {
-
-            if ( this.$__logging ) {
-              console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption on to match node...' );
-            }
-            this.enableEncryption();
-          } else {
-            if ( this.$__logging ) {
-              console.info( 'KnishIOClient::requestAuthToken() - Forcing encryption off to match node...' );
-            }
-            this.disableEncryption();
-          }
-        }
-
-        // @todo temporarily code for old version support!
-        if ( oldVersion ) {
-          return response;
-        }
-
-        return authToken;
-
-      } else {
-
-        if ( this.$__logging ) {
-          console.warn( 'KnishIOClient::requestAuthToken() - Unable to retrieve auth token...' );
-        }
-
-        throw new UnauthenticatedException( response.reason() );
-
-      }
-
-    } else {
-
-      if ( this.$__logging ) {
-        console.warn( 'KnishIOClient::requestAuthToken() - Node SDK version does not require an auth token!' );
-      }
-
-    }
-  }
 
   /**
    * Retrieves the balance wallet for a specified Knish.IO identity and token slug
@@ -1652,6 +1531,117 @@ export default class KnishIOClient {
   }
 
 
+    /**
+     *
+     * @param cellSlug
+     * @param encrypt
+     * @returns {Promise<AuthToken>}
+     */
+    async getGuestAuthToken( {
+      cellSlug,
+      encrypt,
+    } ) {
+      this.setCellSlug( cellSlug );
+
+      let wallet = new Wallet( {
+        secret: generateSecret(),
+        token: 'AUTH'
+      } );
+
+      /**
+       * @type {MutationRequestAuthorizationGuest}
+       */
+      let query = await this.createQuery( MutationRequestAuthorizationGuest );
+
+      /**
+       * @type {ResponseRequestAuthorization}
+       */
+      let response = await query.execute( {
+        variables: {
+          cellSlug,
+          pubkey: wallet.pubkey,
+          encrypt
+        }
+      } );
+      return AuthToken.create( response.payload(), wallet, encrypt );
+    }
+
+
+    /**
+     *
+     * @param secret
+     * @param encrypt
+     * @returns {Promise<AuthToken>}
+     */
+    async getProfileAuthToken( {
+      secret,
+      encrypt,
+    } ) {
+      this.setSecret( secret );
+
+      let wallet = new Wallet( {
+        secret,
+        token: 'AUTH'
+      } );
+
+      const molecule = await this.createMolecule( {
+        secret,
+        sourceWallet: wallet
+      } );
+
+      /**
+       * @type {MutationRequestAuthorization}
+       */
+      let query = await this.createMoleculeMutation( {
+        mutationClass: MutationRequestAuthorization,
+        molecule
+      } );
+
+      query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
+
+      /**
+       * @type {ResponseRequestAuthorization}
+       */
+      let response = await query.execute( {} );
+      return AuthToken.create( response.payload(), wallet, encrypt );
+    }
+
+  /**
+   * @todo Deprecated function, used for old version!
+   *
+   * @param secret
+   * @param cellSlug
+   * @param encrypt
+   * @returns {Promise<void>}
+   */
+  async requestAuthToken ( {
+    secret = null,
+    cellSlug = null,
+    encrypt = null,
+  } ) {
+
+    // Set default cell slug (when requestAuthToken calls from boot without args)
+    cellSlug = cellSlug ? cellSlug : this.$__cellSlug;
+
+    // Get an auth token
+    let authToken = await this.authorize( {
+      secret,
+      cellSlug,
+      encrypt,
+    } );
+
+    // Create a base object with paylaod function (instead of Response object)
+    return {
+      payload: function() {
+        return {
+          token: authToken.getToken(),
+          time: authToken.getExpireInterval(),
+        };
+      }
+    }
+  }
+
+
   /**
    * Authorize with auth token
    *
@@ -1662,8 +1652,8 @@ export default class KnishIOClient {
    */
   async authorize ( {
     secret,
-    cellSlug,
-    encrypt = null
+    cellSlug = null,
+    encrypt = false
   } ) {
 
     // SDK versions 2 and below do not utilize an authorization token
@@ -1674,16 +1664,6 @@ export default class KnishIOClient {
       return;
     }
 
-    // Do we have a secret pre-hashed?
-    if ( secret ) {
-      this.setSecret( secret );
-    }
-
-    // Set a cell slug
-    if ( cellSlug ) {
-      this.setCellSlug( cellSlug );
-    }
-
     // Auth in process...
     this.$__authInProcess = true;
 
@@ -1691,19 +1671,17 @@ export default class KnishIOClient {
 
     // Authorized user
     if ( secret ) {
-      authToken = await this.requestAuthToken( {
+      authToken = await this.getProfileAuthToken( {
         secret,
         encrypt,
-        oldVersion: false
       } );
     }
 
     // Guest
     else {
-      authToken = await this.requestAuthToken( {
-        cellSlug: this.$__cellSlug,
+      authToken = await this.getGuestAuthToken( {
+        cellSlug,
         encrypt,
-        oldVersion: false
       } );
     }
 
@@ -1714,6 +1692,9 @@ export default class KnishIOClient {
 
     // Set an authToken full info
     this.setAuthToken( authToken );
+
+    // Switch enryption if it has been changed
+    this.switchEncryption( encrypt );
 
     // Auth process is stopped
     this.$__authInProcess = false;
