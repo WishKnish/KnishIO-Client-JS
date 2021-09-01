@@ -60,6 +60,16 @@ export default class Query {
     this.$__query = null;
   }
 
+
+  /**
+   * Return a response object
+   * Used at KnishIOClient::createMolecule => sets the source wallet from the remainder one stored in response object
+   * @returns {Response}
+   */
+  response() {
+    return this.$__response;
+  }
+
   /**
    * Builds a Response based on JSON input
    *
