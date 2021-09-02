@@ -63,7 +63,7 @@ export default class AuthToken {
    * @returns {AuthToken}
    */
   static create ( data, wallet, encrypt ) {
-    data.encrypt = encrypt;
+    // data.encrypt = encrypt; // @todo enrypt true/ false from server
     let authToken = new AuthToken( data );
     authToken.setWallet( wallet );
     return authToken;

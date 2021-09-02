@@ -1597,7 +1597,7 @@ export default class KnishIOClient {
         molecule
       } );
 
-      query.fillMolecule( { meta: { encrypt: String( encrypt ) } } );
+      query.fillMolecule( { meta: { encrypt: ( encrypt ? 'true' : 'false' ) } } );
 
       /**
        * @type {ResponseRequestAuthorization}
@@ -1617,7 +1617,7 @@ export default class KnishIOClient {
   async requestAuthToken ( {
     secret = null,
     cellSlug = null,
-    encrypt = null,
+    encrypt = false,
   } ) {
 
     // Set default cell slug (when requestAuthToken calls from boot without args)
@@ -1673,7 +1673,7 @@ export default class KnishIOClient {
     if ( secret ) {
       authToken = await this.getProfileAuthToken( {
         secret,
-        encrypt,
+        encrypt
       } );
     }
 
@@ -1681,7 +1681,7 @@ export default class KnishIOClient {
     else {
       authToken = await this.getGuestAuthToken( {
         cellSlug,
-        encrypt,
+        encrypt
       } );
     }
 
