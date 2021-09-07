@@ -55,12 +55,6 @@ import { deepCloning } from './libraries/array';
  */
 export default class MoleculeStructure {
 
-  atoms = [];
-  sourceWallet = null;
-  remainderWallet = null;
-  cellSlug = null;
-  cellSlugOrigin = null;
-
   /**
    * Class constructor
    *
