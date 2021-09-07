@@ -97,7 +97,7 @@ export default class ResponseProposeMolecule extends Response {
   /**
    * Returns the resulting molecule
    *
-   * @returns {MoleculeStructure|null}
+   * @return {MoleculeStructure|null}
    */
   molecule () {
 
@@ -119,7 +119,7 @@ export default class ResponseProposeMolecule extends Response {
   /**
    * Returns whether molecule was accepted or not
    *
-   * @returns {boolean}
+   * @return {boolean}
    */
   success () {
     return this.status() === 'accepted';
@@ -128,7 +128,7 @@ export default class ResponseProposeMolecule extends Response {
   /**
    * Returns the status of the proposal
    *
-   * @returns {string}
+   * @return {string}
    */
   status () {
     return Dot.get( this.data(), 'status', 'rejected' );
@@ -137,7 +137,7 @@ export default class ResponseProposeMolecule extends Response {
   /**
    * Returns the reason for rejection
    *
-   * @returns {string}
+   * @return {string}
    */
   reason () {
     return Dot.get( this.data(), 'reason', 'Invalid response from server' );
@@ -146,7 +146,7 @@ export default class ResponseProposeMolecule extends Response {
   /**
    * Returns payload object
    *
-   * @returns {null}
+   * @return {null}
    */
   payload () {
     return this.$__payload;

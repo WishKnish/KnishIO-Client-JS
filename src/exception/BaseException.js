@@ -66,7 +66,7 @@ export default class BaseException extends TypeError {
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    */
   toString () {
     return `${ this.name }: ${ this.message }.\nStack:\n${ this.stack }`;

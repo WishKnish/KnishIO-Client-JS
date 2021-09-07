@@ -64,7 +64,7 @@ export default class Query {
   /**
    * Return a response object
    * Used at KnishIOClient::createMolecule => sets the source wallet from the remainder one stored in response object
-   * @returns {Response}
+   * @return {Response}
    */
   response () {
     return this.$__response;
@@ -74,7 +74,7 @@ export default class Query {
    * Builds a Response based on JSON input
    *
    * @param response
-   * @returns {Promise<Response>}
+   * @return {Promise<Response>}
    */
   async createResponseRaw ( response ) {
     return this.createResponse( response );
@@ -97,8 +97,7 @@ export default class Query {
    * Creates a new Request for the given parameters
    *
    * @param {object} variables
-   * @param {array|object|null} fields
-   * @returns {Operation}
+   * @return {Operation}
    */
   createQuery ( { variables = null } ) {
     this.$__variables = this.compiledVariables( variables );
@@ -142,8 +141,8 @@ export default class Query {
   /**
    * Returns a variables object for the Query
    *
-   * @param variables
-   * @returns {{}}
+   * @param {object} variables
+   * @return {object}
    */
   compiledVariables ( variables = null ) {
     return variables || {};

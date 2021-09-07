@@ -190,7 +190,7 @@ export default class ApolloClient {
   /**
    * Gets the endpoint URI
    *
-   * @returns {string}
+   * @return {string}
    */
   getUri () {
     return this.$__uri;

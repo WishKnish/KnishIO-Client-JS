@@ -75,7 +75,7 @@ export default class ResponseMetaType extends Response {
   /**
    * Returns meta type instance results
    *
-   * @returns {null|*}
+   * @return {null|*}
    */
   payload () {
     const metaTypeData = this.data();

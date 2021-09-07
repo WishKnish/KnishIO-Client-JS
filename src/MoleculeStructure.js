@@ -56,6 +56,12 @@ import Molecule from './Molecule';
  */
 export default class MoleculeStructure {
 
+  atoms = [];
+  sourceWallet = null;
+  remainderWallet = null;
+  cellSlug = null;
+  cellSlugOrigin = null;
+
   /**
    * Class constructor
    *
@@ -68,7 +74,7 @@ export default class MoleculeStructure {
   /**
    * Returns the cell slug delimiter
    *
-   * @returns {string}
+   * @return {string}
    */
   get cellSlugDelimiter () {
     return '.';
@@ -77,7 +83,7 @@ export default class MoleculeStructure {
   /**
    * Returns the base cell slug portion
    *
-   * @returns {string}
+   * @return {string}
    */
   cellSlugBase () {
     return ( this.cellSlug || '' ).split( this.cellSlugDelimiter )[ 0 ];
@@ -86,7 +92,7 @@ export default class MoleculeStructure {
   /**
    * Returns JSON-ready clone minus protected properties
    *
-   * @returns {object}
+   * @return {object}
    */
   toJSON () {
     let clone = deepCloning( this );
@@ -102,7 +108,7 @@ export default class MoleculeStructure {
    * Validates the current molecular structure
    *
    * @param {Wallet|null} sourceWallet
-   * @returns {boolean}
+   * @return {boolean}
    */
   check ( sourceWallet = null ) {
     return MoleculeStructure.verify( {

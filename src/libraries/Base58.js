@@ -14,7 +14,7 @@ export default class Base58 {
 
   /**
    * @param {Buffer} data
-   * @returns {string}
+   * @return {string}
    */
   encode ( data ) {
 
@@ -24,7 +24,7 @@ export default class Base58 {
 
   /**
    * @param {string} data
-   * @returns {Buffer}
+   * @return {Buffer}
    */
   decode ( data ) {
 
@@ -33,7 +33,7 @@ export default class Base58 {
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    * @constructor
    */
   get GMP () {
@@ -41,7 +41,7 @@ export default class Base58 {
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    * @constructor
    */
   get BITCOIN () {
@@ -49,7 +49,7 @@ export default class Base58 {
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    * @constructor
    */
   get FLICKR () {
@@ -57,7 +57,7 @@ export default class Base58 {
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    * @constructor
    */
   get RIPPLE () {
@@ -65,7 +65,7 @@ export default class Base58 {
   }
 
   /**
-   * @returns {string}
+   * @return {string}
    * @constructor
    */
   get IPFS () {

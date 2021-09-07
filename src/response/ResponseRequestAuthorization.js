@@ -55,10 +55,10 @@ import ResponseProposeMolecule from './ResponseProposeMolecule';
 export default class ResponseRequestAuthorization extends ResponseProposeMolecule {
 
   /**
-   * Returns the authorization key
+   * return the authorization key
    *
    * @param key
-   * @returns {*}
+   * @return {*}
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
@@ -71,7 +71,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
   /**
    * Returns the auth token
    *
-   * @returns {string}
+   * @return {string}
    */
   token () {
     return this.payloadKey( 'token' );
@@ -80,7 +80,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
   /**
    * Returns timestamp
    *
-   * @returns {string}
+   * @return {string}
    */
   time () {
     return this.payloadKey( 'time' );
@@ -88,7 +88,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
 
   /**
    *
-   * @returns {string}
+   * @return {string}
    */
   encrypt () {
     return this.payloadKey( 'encrypt' );

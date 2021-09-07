@@ -77,7 +77,7 @@ export default class ResponseWalletList extends Response {
    *
    * @param {object} data
    * @param {string|null} secret
-   * @returns {Wallet}
+   * @return {Wallet}
    */
   static toClientWallet ( {
     data,
@@ -124,7 +124,7 @@ export default class ResponseWalletList extends Response {
    * Returns a list of Wallet class instances
    *
    * @param secret
-   * @returns {null|[]}
+   * @return {null|[]}
    */
   getWallets ( secret = null ) {
 
@@ -149,7 +149,7 @@ export default class ResponseWalletList extends Response {
   /**
    * Returns response payload
    *
-   * @returns {null|[]}
+   * @return {null|[]}
    */
   payload () {
     const list = this.data();

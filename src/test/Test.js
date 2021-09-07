@@ -245,7 +245,7 @@ export default class Test {
 
   /**
    *
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    */
   async testTransferToken () {
 

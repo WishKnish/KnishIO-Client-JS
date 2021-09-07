@@ -17,14 +17,14 @@ export default class Hex {
    *
    * @param {array|ArrayBuffer|Uint8Array} arr
    * @param {object} options
-   * @returns {string}
+   * @return {string}
    */
   static toHex ( arr, options ) {
 
     /**
      * @param {number} val
      * @param {boolean} uppercase
-     * @returns {*}
+     * @return {*}
      */
     const numberToHex = ( val, uppercase ) => {
 
@@ -82,7 +82,7 @@ export default class Hex {
    * return a Uint8Array array.
    *
    * @param {string} str
-   * @returns {Uint8Array}
+   * @return {Uint8Array}
    */
   static toUint8Array ( str ) {
 

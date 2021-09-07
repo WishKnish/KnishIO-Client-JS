@@ -175,7 +175,7 @@ export default class Atom {
    *
    * @param {array} atoms
    * @param {string} output
-   * @returns {number[]|*}
+   * @return {number[]|*}
    */
   static hashAtoms ( {
     atoms,
