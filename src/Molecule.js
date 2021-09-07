@@ -77,7 +77,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {string|null} cellSlug
    */
   constructor ( {
-    secret= null,
+    secret = null,
     sourceWallet = null,
     remainderWallet = null,
     cellSlug = null
