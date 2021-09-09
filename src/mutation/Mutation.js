@@ -65,7 +65,7 @@ export default class Mutation extends Query {
    *
    * @param {object} variables
    * @param {array|object|null} fields
-   * @returns {Operation}
+   * @return {Operation}
    */
   createQuery ( { variables = null } ) {
 

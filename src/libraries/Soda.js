@@ -24,7 +24,7 @@ export default class Soda {
   /**
    * @param {array|object} message
    * @param {string} key
-   * @returns {string}
+   * @return {string}
    */
   encrypt ( message, key ) {
     return this.encode( seal( encodeUTF8( JSON.stringify( message ) ), this.decode( key ) ) );
@@ -34,7 +34,7 @@ export default class Soda {
    * @param {string} decrypted
    * @param {string} privateKey
    * @param {string} publicKey
-   * @returns {null|array|object}
+   * @return {null|array|object}
    */
   decrypt ( decrypted, privateKey, publicKey ) {
     try {
@@ -47,7 +47,7 @@ export default class Soda {
   /**
    *
    * @param {string} key
-   * @returns {string}
+   * @return {string}
    */
   generatePrivateKey ( key ) {
     const sponge = shake256.create( box.secretKeyLength * 8 );
@@ -57,7 +57,7 @@ export default class Soda {
 
   /**
    * @param {string} key
-   * @returns {string}
+   * @return {string}
    */
   generatePublicKey ( key ) {
     const boxKey = box.keyPair.fromSecretKey( this.decode( key ) );
@@ -66,7 +66,7 @@ export default class Soda {
 
   /**
    * @param {string} key
-   * @returns {string}
+   * @return {string}
    */
   shortHash ( key ) {
     const sponge = shake256.create( 64 );
@@ -76,7 +76,7 @@ export default class Soda {
 
   /**
    * @param {string} data
-   * @returns {string|Buffer}
+   * @return {string|Buffer}
    */
   decode ( data ) {
     return this.base.decode( data );
@@ -84,7 +84,7 @@ export default class Soda {
 
   /**
    * @param {string|Buffer|Uint8Array} data
-   * @returns {string}
+   * @return {string}
    */
   encode ( data ) {
     return this.base.encode( data );

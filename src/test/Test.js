@@ -53,7 +53,7 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
-    /// -------------------------------- BEGIN: TEST CODE!!! ENCRYPTION DEBUG --------------------------------
+    // -------------------------------- BEGIN: TEST CODE!!! ENCRYPTION DEBUG --------------------------------
 
     // Create a client
     let client = new KnishIOClient( {
@@ -64,7 +64,7 @@ export default class Test {
     let authToken = await client.authorize( {
       secret: this.secrets[ 0 ],
       cellSlug: 'unit_test',
-      encrypt: true,
+      encrypt: true
     } );
     if ( !authToken ) {
       console.log( 'Error with authorize - get an empty response.' );
@@ -85,7 +85,7 @@ export default class Test {
     } );
     console.error( response );
     return;
-    /// -------------------------------- END: TEST CODE!!! ENCRYPTION DEBUG --------------------------------
+    // -------------------------------- END: TEST CODE!!! ENCRYPTION DEBUG --------------------------------
 
 
     await this.client( this.secrets[ 0 ] );
@@ -245,7 +245,7 @@ export default class Test {
 
   /**
    *
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    */
   async testTransferToken () {
 
@@ -401,7 +401,7 @@ export default class Test {
       let authToken = await this.clients[ secret ]
         .authorize( {
           secret,
-          cellSlug,
+          cellSlug
         } );
       if ( !authToken ) {
         console.log( 'Error with authorize - get an empty response.' );

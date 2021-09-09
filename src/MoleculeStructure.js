@@ -49,7 +49,6 @@ import CheckMolecule from './libraries/check';
 import AtomsMissingException from './exception/AtomsMissingException';
 import Atom from './Atom';
 import { deepCloning } from './libraries/array';
-import Molecule from './Molecule';
 
 /**
  * MoleculeStructure class to formalize the creation of Molecules
@@ -68,7 +67,7 @@ export default class MoleculeStructure {
   /**
    * Returns the cell slug delimiter
    *
-   * @returns {string}
+   * @return {string}
    */
   get cellSlugDelimiter () {
     return '.';
@@ -77,7 +76,7 @@ export default class MoleculeStructure {
   /**
    * Returns the base cell slug portion
    *
-   * @returns {string}
+   * @return {string}
    */
   cellSlugBase () {
     return ( this.cellSlug || '' ).split( this.cellSlugDelimiter )[ 0 ];
@@ -86,7 +85,7 @@ export default class MoleculeStructure {
   /**
    * Returns JSON-ready clone minus protected properties
    *
-   * @returns {object}
+   * @return {object}
    */
   toJSON () {
     let clone = deepCloning( this );
@@ -102,7 +101,7 @@ export default class MoleculeStructure {
    * Validates the current molecular structure
    *
    * @param {Wallet|null} sourceWallet
-   * @returns {boolean}
+   * @return {boolean}
    */
   check ( sourceWallet = null ) {
     return MoleculeStructure.verify( {
@@ -115,7 +114,7 @@ export default class MoleculeStructure {
    *
    * Verifies a specified molecule
    *
-   * @param {Molecule|MoleculeStructure} molecule
+   * @param {MoleculeStructure} molecule
    * @param {Wallet|null} sourceWallet
    * @return {boolean}
    */
@@ -146,8 +145,8 @@ export default class MoleculeStructure {
    * @throws {AtomsMissingException}
    */
   static jsonToObject ( json ) {
-    const target = Object.assign( new Molecule( {} ), JSON.parse( json ) ),
-      properties = Object.keys( new Molecule( {} ) );
+    const target = Object.assign( new MoleculeStructure( {} ), JSON.parse( json ) ),
+      properties = Object.keys( new MoleculeStructure( {} ) );
 
     if ( !Array.isArray( target.atoms ) ) {
       throw new AtomsMissingException();

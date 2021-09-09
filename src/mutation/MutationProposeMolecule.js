@@ -79,8 +79,8 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Returns an object of query variables
    *
-   * @param variables
-   * @returns {*}
+   * @param {object} variables
+   * @return {object}
    */
   compiledVariables ( variables ) {
     const _variables = super.compiledVariables( variables );
@@ -119,7 +119,7 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Returns the remainder wallet
    *
-   * @returns {null}
+   * @return {null}
    */
   remainderWallet () {
     return this.$__remainderWallet;
@@ -128,7 +128,7 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Returns the molecule we are proposing
    *
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   molecule () {
     return this.$__molecule;

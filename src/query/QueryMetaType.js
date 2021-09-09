@@ -114,7 +114,7 @@ export default class QueryMetaType extends Query {
    * @param {object|null} queryArgs
    * @param {string|null} count
    * @param {string|null} countBy
-   * @returns {{}}
+   * @return {{}}
    */
   static createVariables ( {
     metaType = null,

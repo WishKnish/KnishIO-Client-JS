@@ -77,7 +77,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {string|null} cellSlug
    */
   constructor ( {
-    secret= null,
+    secret = null,
     sourceWallet = null,
     remainderWallet = null,
     cellSlug = null
@@ -105,7 +105,7 @@ export default class Molecule extends MoleculeStructure {
    * Generates the next atomic index
    *
    * @param {array} atoms
-   * @returns {number}
+   * @return {number}
    */
   static generateNextAtomIndex ( atoms ) {
 
@@ -117,7 +117,7 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Returns the Meta Type for ContinuID
    *
-   * @returns {string}
+   * @return {string}
    */
   continuIdMetaType () {
     return 'walletBundle';
@@ -138,7 +138,7 @@ export default class Molecule extends MoleculeStructure {
    * Adds an atom to an existing Molecule
    *
    * @param {Atom} atom
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   addAtom ( atom ) {
     this.molecularHash = null;
@@ -151,7 +151,7 @@ export default class Molecule extends MoleculeStructure {
    * Final meta array
    * @param meta
    * @param wallet
-   * @returns {{}}
+   * @return {{}}
    */
   finalMetas ( meta = null, wallet = null ) {
     meta = meta || {};
@@ -192,7 +192,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {number} amount
    * @param {string} token
    * @param {array|object} metas
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   replenishTokens ( {
     amount,
@@ -235,7 +235,7 @@ export default class Molecule extends MoleculeStructure {
    * Add user remainder atom for ContinuID
    *
    * @param {Wallet} userRemainderWallet
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   addUserRemainderAtom ( userRemainderWallet ) {
 
@@ -266,7 +266,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @param {number} amount
    * @param {string|null} walletBundle
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   burnToken ( {
     amount,
@@ -325,8 +325,8 @@ export default class Molecule extends MoleculeStructure {
    * regenerated wallet receiving the remainder
    *
    * @param {Wallet} recipientWallet
-   * @param {*} amount
-   * @returns {Molecule}
+   * @param {number} amount
+   * @return {Molecule}
    */
   initValue ( {
     recipientWallet,
@@ -396,7 +396,7 @@ export default class Molecule extends MoleculeStructure {
    * Builds Atoms to define a new wallet on the ledger
    *
    * @param {Wallet} newWallet
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   initWalletCreation ( newWallet ) {
 
@@ -440,7 +440,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {Wallet} recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
    * @param {number} amount - how many of the token we are initially issuing (for fungible tokens only)
    * @param {array|object} meta - additional fields to configure the token
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   initTokenCreation ( {
     recipientWallet,
@@ -486,7 +486,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {string} metaType
    * @param {string} metaId
    * @param {object|array} meta
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   createRule ( {
     metaType,
@@ -578,7 +578,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {string} contact - phone number or email string
    * @param {string} code -
    *
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   initIdentifierCreation ( {
     type,
@@ -619,7 +619,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {array|object} meta
    * @param {string} metaType
    * @param {string} metaId
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   initMeta ( {
     meta,
@@ -663,7 +663,7 @@ export default class Molecule extends MoleculeStructure {
    * @param {array|object} meta
    * @param {string|null} batchId
    *
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   initTokenRequest ( {
     token,
@@ -706,7 +706,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @param {object} meta
    *
-   * @returns {Molecule}
+   * @return {Molecule}
    */
   initAuthorization ( { meta } ) {
     this.molecularHash = null;
@@ -754,7 +754,7 @@ export default class Molecule extends MoleculeStructure {
    *
    * @param {boolean} anonymous
    * @param {boolean} compressed
-   * @returns {*}
+   * @return {string|null}
    * @throws {AtomsMissingException}
    */
   sign ( {
@@ -828,7 +828,7 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Generates the next atomic index
    *
-   * @returns {number}
+   * @return {number}
    */
   generateIndex () {
     return Molecule.generateNextAtomIndex( this.atoms );

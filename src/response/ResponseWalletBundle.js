@@ -75,7 +75,7 @@ export default class ResponseWalletBundle extends Response {
   /**
    * Returns a wallet bundle with normalized metadata
    *
-   * @returns {{}|null}
+   * @return {{}|null}
    */
   payload () {
     const bundleData = this.data();

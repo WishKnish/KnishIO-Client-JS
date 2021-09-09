@@ -171,7 +171,7 @@ export default class KnishIOClient {
   /**
    * Get random uri from specified this.$__uris
    *
-   * @returns {string}
+   * @return {string}
    */
   getRandomUri () {
     let rand = Math.floor( Math.random() * ( this.$__uris.length ) );
@@ -182,9 +182,9 @@ export default class KnishIOClient {
   /**
    *
    * @param encrypt
-   * @returns {boolean}
+   * @return {boolean}
    */
-  switchEncryption( encrypt ) {
+  switchEncryption ( encrypt ) {
     if ( this.hasEncryption() === encrypt ) {
       return false;
     }
@@ -290,7 +290,7 @@ export default class KnishIOClient {
   /**
    * Returns the currently defined Cell identifier for this session
    *
-   * @returns {string|null}
+   * @return {string|null}
    */
   cellSlug () {
     return this.$__cellSlug || null;
@@ -308,7 +308,7 @@ export default class KnishIOClient {
   /**
    * Retrieves the endpoint URI for this session
    *
-   * @returns {string}
+   * @return {string}
    */
   uri () {
     return this.$__client.getUri();
@@ -317,7 +317,7 @@ export default class KnishIOClient {
   /**
    * Returns the Apollo client class session
    *
-   * @returns {ApolloClient}
+   * @return {ApolloClient}
    */
   client () {
     if ( !this.$__authInProcess ) {
@@ -333,7 +333,9 @@ export default class KnishIOClient {
           secret: this.$__secret,
           cellSlug: this.$__cellSlug,
           encrypt: this.$__encrypt
-        } ).then( () => {} );
+        } ).then( () => {
+          // Success
+        } );
       }
       // Use stored authorization data
       else {
@@ -346,7 +348,7 @@ export default class KnishIOClient {
   /**
    * Returns whether or not a secret is being stored for this session
    *
-   * @returns {boolean}
+   * @return {boolean}
    */
   hasSecret () {
     return !!this.$__secret;
@@ -367,7 +369,7 @@ export default class KnishIOClient {
   /**
    * Retrieves the stored secret for this session
    *
-   * @returns {string}
+   * @return {string}
    */
   getSecret () {
     if ( !this.$__secret ) {
@@ -379,7 +381,7 @@ export default class KnishIOClient {
   /**
    * Returns the bundle hash for this session
    *
-   * @returns {string}
+   * @return {string}
    */
   getBundle () {
     if ( !this.$__bundle ) {
@@ -391,7 +393,7 @@ export default class KnishIOClient {
   /**
    * Retrieves this session's wallet used for signing the next Molecule
    *
-   * @returns {Promise<*|Wallet|null>}
+   * @return {Promise<*|Wallet|null>}
    */
   async getSourceWallet () {
     let sourceWallet = ( await this.queryContinuId( {
@@ -410,7 +412,7 @@ export default class KnishIOClient {
   /**
    * Retrieves this session's remainder wallet
    *
-   * @returns {null}
+   * @return {null}
    */
   getRemainderWallet () {
     return this.remainderWallet;
@@ -422,7 +424,7 @@ export default class KnishIOClient {
    * @param secret
    * @param sourceWallet
    * @param remainderWallet
-   * @returns {Promise<Molecule>}
+   * @return {Promise<Molecule>}
    */
   async createMolecule ( {
     secret = null,
@@ -659,7 +661,7 @@ export default class KnishIOClient {
    * @param {object|null} queryArgs
    * @param {string|null} count
    * @param {string|null} countBy
-   * @returns {Promise<ResponseMetaType>}
+   * @return {Promise<ResponseMetaType>}
    */
   queryMeta ( {
     metaType,
@@ -716,7 +718,7 @@ export default class KnishIOClient {
    * @param {boolean|null} latest
    * @param {object|null} fields
    * @param {object|null} filter
-   * @returns {Promise<ResponseMetaType>}
+   * @return {Promise<ResponseMetaType>}
    */
   queryMetaInstance ( {
     metaType,
@@ -758,7 +760,7 @@ export default class KnishIOClient {
    * Query batch to get cascading meta instances by batchID
    *
    * @param batchId
-   * @returns {Promise<*>}
+   * @return {Promise<*>}
    */
   async queryBatch ( {
     batchId
@@ -779,7 +781,7 @@ export default class KnishIOClient {
    * Query batch history to get cascading meta instances by batchID
    *
    * @param batchId
-   * @returns {Promise<*>}
+   * @return {Promise<*>}
    */
   async queryBatchHistory ( {
     batchId
@@ -1006,7 +1008,7 @@ export default class KnishIOClient {
     return await query.execute( {} );
   }
 
-  /*
+  /**
    * Builds and executes a molecule to convey new metadata to the ledger
    *
    * @param {string} metaType
@@ -1146,7 +1148,7 @@ export default class KnishIOClient {
    * @param {boolean} latest
    * @param {object|null} fields
    * @param {boolean} raw
-   * @returns {Promise<ResponseWalletBundle|{}>}
+   * @return {Promise<ResponseWalletBundle|{}>}
    */
   queryBundle ( {
     bundle = null,
@@ -1185,7 +1187,7 @@ export default class KnishIOClient {
    * Queries the ledger for the next ContinuId wallet
    *
    * @param bundle
-   * @returns {Promise<ResponseContinuId>}
+   * @return {Promise<ResponseContinuId>}
    */
   async queryContinuId ( {
     bundle
@@ -1296,7 +1298,7 @@ export default class KnishIOClient {
    * @param {string} token
    * @param {string|null} batchId
    * @param {Molecule|null} molecule
-   * @returns {Promise<ResponseClaimShadowWallet>}
+   * @return {Promise<ResponseClaimShadowWallet>}
    */
   async claimShadowWallet ( {
     token,
@@ -1325,7 +1327,7 @@ export default class KnishIOClient {
    * Claim shadow wallets
    *
    * @param {string} token
-   * @returns {[]}
+   * @return {[]}
    */
   async claimShadowWallets ( {
     token
@@ -1469,7 +1471,7 @@ export default class KnishIOClient {
    * @param {number|null} amount
    * @param {array|null} units
    * @param {Wallet|null} sourceWallet
-   * @returns {Promise<unknown>}
+   * @return {Promise<unknown>}
    */
   async burnTokens ( {
     token,
@@ -1531,80 +1533,80 @@ export default class KnishIOClient {
   }
 
 
-    /**
-     *
-     * @param cellSlug
-     * @param encrypt
-     * @returns {Promise<AuthToken>}
-     */
-    async getGuestAuthToken( {
-      cellSlug,
-      encrypt,
-    } ) {
-      this.setCellSlug( cellSlug );
+  /**
+   *
+   * @param cellSlug
+   * @param encrypt
+   * @return {Promise<AuthToken>}
+   */
+  async getGuestAuthToken ( {
+    cellSlug,
+    encrypt
+  } ) {
+    this.setCellSlug( cellSlug );
 
-      let wallet = new Wallet( {
-        secret: generateSecret(),
-        token: 'AUTH'
-      } );
-
-      /**
-       * @type {MutationRequestAuthorizationGuest}
-       */
-      let query = await this.createQuery( MutationRequestAuthorizationGuest );
-
-      /**
-       * @type {ResponseRequestAuthorization}
-       */
-      let response = await query.execute( {
-        variables: {
-          cellSlug,
-          pubkey: wallet.pubkey,
-          encrypt
-        }
-      } );
-      return AuthToken.create( response.payload(), wallet, encrypt );
-    }
-
+    let wallet = new Wallet( {
+      secret: generateSecret(),
+      token: 'AUTH'
+    } );
 
     /**
-     *
-     * @param secret
-     * @param encrypt
-     * @returns {Promise<AuthToken>}
+     * @type {MutationRequestAuthorizationGuest}
      */
-    async getProfileAuthToken( {
+    let query = await this.createQuery( MutationRequestAuthorizationGuest );
+
+    /**
+     * @type {ResponseRequestAuthorization}
+     */
+    let response = await query.execute( {
+      variables: {
+        cellSlug,
+        pubkey: wallet.pubkey,
+        encrypt
+      }
+    } );
+    return AuthToken.create( response.payload(), wallet, encrypt );
+  }
+
+
+  /**
+   *
+   * @param secret
+   * @param encrypt
+   * @return {Promise<AuthToken>}
+   */
+  async getProfileAuthToken ( {
+    secret,
+    encrypt
+  } ) {
+    this.setSecret( secret );
+
+    let wallet = new Wallet( {
       secret,
-      encrypt,
-    } ) {
-      this.setSecret( secret );
+      token: 'AUTH'
+    } );
 
-      let wallet = new Wallet( {
-        secret,
-        token: 'AUTH'
-      } );
+    const molecule = await this.createMolecule( {
+      secret,
+      sourceWallet: wallet
+    } );
 
-      const molecule = await this.createMolecule( {
-        secret,
-        sourceWallet: wallet
-      } );
+    /**
+     * @type {MutationRequestAuthorization}
+     */
+    let query = await this.createMoleculeMutation( {
+      mutationClass: MutationRequestAuthorization,
+      molecule
+    } );
 
-      /**
-       * @type {MutationRequestAuthorization}
-       */
-      let query = await this.createMoleculeMutation( {
-        mutationClass: MutationRequestAuthorization,
-        molecule
-      } );
+    query.fillMolecule( { meta: { encrypt: ( encrypt ? 'true' : 'false' ) } } );
 
-      query.fillMolecule( { meta: { encrypt: ( encrypt ? 'true' : 'false' ) } } );
-
-      /**
-       * @type {ResponseRequestAuthorization}
-       */
-      let response = await query.execute( {} );
-      return AuthToken.create( response.payload(), wallet, encrypt );
-    }
+    /**
+     * @type {ResponseRequestAuthorization}
+     */
+    let response = await query.execute( {} );
+    return AuthToken.create( response.payload(), wallet, encrypt );
+  }
 
   /**
    * @todo Deprecated function, used for old version!
@@ -1613,13 +1615,13 @@ export default class KnishIOClient {
    * @param {string|null} seed
    * @param {string|null} cellSlug
    * @param {boolean}encrypt
-   * @returns {Promise<void>}
+   * @return {Promise<{payload: (function(): {time: *, token: *})}>}
    */
   async requestAuthToken ( {
     secret = null,
     seed = null,
     cellSlug = null,
-    encrypt = false,
+    encrypt = false
   } ) {
     let _secret = secret;
 
@@ -1634,12 +1636,12 @@ export default class KnishIOClient {
     let authToken = await this.authorize( {
       secret: _secret,
       cellSlug,
-      encrypt,
+      encrypt
     } );
 
-    // Create a base object with paylaod function (instead of Response object)
+    // Create a base object with payload function (instead of Response object)
     return {
-      payload: function() {
+      payload: function () {
         return {
           token: authToken.getToken(),
           time: authToken.getExpireInterval(),
@@ -1647,17 +1649,17 @@ export default class KnishIOClient {
           encrypt: authToken.getSnapshot().encrypt
         };
       }
-    }
+    };
   }
 
 
   /**
    * Authorize with auth token
    *
-   * @param secret
-   * @param cellSlug
-   * @param authToken
-   * @returns {Promise<void>}
+   * @param {string} secret
+   * @param {string|null} cellSlug
+   * @param {boolean} encrypt
+   * @return {Promise<AuthToken>|null}
    */
   async authorize ( {
     secret,
@@ -1702,7 +1704,7 @@ export default class KnishIOClient {
     // Set an authToken full info
     this.setAuthToken( authToken );
 
-    // Switch enryption if it has been changed
+    // Switch encryption mode if it has been changed
     this.switchEncryption( encrypt );
 
     // Auth process is stopped
@@ -1716,7 +1718,7 @@ export default class KnishIOClient {
   /**
    * Sets the auth token
    *
-   * @param authToken
+   * @param {AuthToken} authToken
    */
   setAuthToken ( authToken ) {
 
@@ -1742,7 +1744,7 @@ export default class KnishIOClient {
   /**
    * Returns the current authorization token
    *
-   * @returns {string|null}
+   * @return {AuthToken}
    */
   getAuthToken () {
     return this.$__authToken;

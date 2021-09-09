@@ -29,7 +29,7 @@ if ( !String.prototype.toSnakeCase ) {
  *
  * @param str
  * @param size
- * @returns {any[]}
+ * @return {any[]}
  */
 export function chunkSubstr ( str, size ) {
 
@@ -48,7 +48,7 @@ export function chunkSubstr ( str, size ) {
  *
  * @param length
  * @param alphabet
- * @returns {string}
+ * @return {string}
  */
 export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
 
@@ -69,7 +69,7 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
  * @param toBase
  * @param srcSymbolTable
  * @param destSymbolTable
- * @returns {boolean|string|number}
+ * @return {boolean|string|number}
  */
 export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, destSymbolTable ) {
 
@@ -128,7 +128,7 @@ export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, dest
  * Converts a buffer into a hexadecimal string
  *
  * @param byteArray
- * @returns {string}
+ * @return {string}
  */
 export function bufferToHexString ( byteArray ) {
   return Hex.toHex( byteArray, {} );
@@ -138,7 +138,7 @@ export function bufferToHexString ( byteArray ) {
  * Converts a hexadecimal string into a buffer
  *
  * @param hexString
- * @returns {Uint8Array}
+ * @return {Uint8Array}
  */
 export function hexStringToBuffer ( hexString ) {
   return Hex.toUint8Array( hexString );
@@ -148,7 +148,7 @@ export function hexStringToBuffer ( hexString ) {
  * Compresses a given string for web sharing
  *
  * @param string
- * @returns {string}
+ * @return {string}
  */
 export function hexToBase64 ( string ) {
   return encodeBase64( Hex.toUint8Array( string ) );
@@ -158,7 +158,7 @@ export function hexToBase64 ( string ) {
  * Decompresses a compressed string
  *
  * @param {string} string
- * @returns {string}
+ * @return {string}
  */
 export function base64ToHex ( string ) {
   return Hex.toHex( decodeBase64( string ), {} );

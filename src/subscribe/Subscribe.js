@@ -16,8 +16,7 @@ export default class Subscribe {
    * Creates a new Request for the given parameters
    *
    * @param {object} variables
-   * @param {array|object|null} fields
-   * @returns {Operation}
+   * @return {Operation}
    */
   createSubscribe ( {
     variables = null
@@ -68,7 +67,7 @@ export default class Subscribe {
    * Returns a variables object for the Query
    *
    * @param variables
-   * @returns {{}}
+   * @return {object}
    */
   compiledVariables ( variables = null ) {
     return variables || {};

@@ -3,7 +3,7 @@
  *
  * @param {array} arr
  * @param {number} size
- * @returns {array}
+ * @return {array}
  */
 export function chunkArray ( arr, size ) {
 

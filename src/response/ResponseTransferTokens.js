@@ -55,7 +55,7 @@ export default class ResponseTransferTokens extends ResponseProposeMolecule {
   /**
    * Returns result of the transfer
    *
-   * @returns {{reason: null, status: null}}
+   * @return {{reason: null, status: null}}
    */
   payload () {
     const result = {
