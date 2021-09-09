@@ -1612,22 +1612,29 @@ export default class KnishIOClient {
    * @todo Deprecated function, used for old version!
    *
    * @param {string|null} secret
+   * @param {string|null} seed
    * @param {string|null} cellSlug
-   * @param {boolean} encrypt
+   * @param {boolean}encrypt
    * @return {Promise<{payload: (function(): {time: *, token: *})}>}
    */
   async requestAuthToken ( {
     secret = null,
+    seed = null,
     cellSlug = null,
     encrypt = false
   } ) {
+    let _secret = secret;
+
+    if ( _secret === null && seed ) {
+      _secret = generateSecret(seed);
+    }
 
     // Set default cell slug (when requestAuthToken calls from boot without args)
     cellSlug = cellSlug ? cellSlug : this.$__cellSlug;
 
     // Get an auth token
     let authToken = await this.authorize( {
-      secret,
+      secret: _secret,
       cellSlug,
       encrypt
     } );
@@ -1637,7 +1644,9 @@ export default class KnishIOClient {
       payload: function () {
         return {
           token: authToken.getToken(),
-          time: authToken.getExpireInterval()
+          time: authToken.getExpireInterval(),
+          key: authToken.getPubkey(),
+          encrypt: authToken.getSnapshot().encrypt
         };
       }
     };
