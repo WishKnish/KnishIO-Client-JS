@@ -46,8 +46,6 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import CheckMolecule from './libraries/check';
-import AtomsMissingException from './exception/AtomsMissingException';
-import Atom from './Atom';
 import { deepCloning } from './libraries/array';
 
 /**
@@ -135,48 +133,5 @@ export default class MoleculeStructure {
       && CheckMolecule.isotopeI( molecule )
       && CheckMolecule.isotopeR( molecule )
       && CheckMolecule.isotopeV( molecule, sourceWallet );
-  }
-
-  /**
-   * Converts a JSON object into a Molecule Structure instance
-   *
-   * @param {string} json
-   * @return {object}
-   * @throws {AtomsMissingException}
-   */
-  static jsonToObject ( json ) {
-    const target = Object.assign( new MoleculeStructure( {} ), JSON.parse( json ) ),
-      properties = Object.keys( new MoleculeStructure( {} ) );
-
-    if ( !Array.isArray( target.atoms ) ) {
-      throw new AtomsMissingException();
-    }
-
-    for ( const index in Object.keys( target.atoms ) ) {
-
-      target.atoms[ index ] = Atom.jsonToObject( JSON.stringify( target.atoms[ index ] ) );
-
-      for ( const property of [ 'position', 'walletAddress', 'isotope' ] ) {
-
-        if ( typeof target.atoms[ index ][ property ] === 'undefined'
-          || null === target.atoms[ index ][ property ]
-        ) {
-          throw new AtomsMissingException( 'MolecularStructure::jsonToObject() - Required Atom properties are missing!' );
-        }
-      }
-    }
-
-    for ( const property in target ) {
-
-      if ( target.hasOwnProperty( property )
-        && !properties.includes( property )
-      ) {
-        delete target[ property ];
-      }
-    }
-
-    target.atoms = Atom.sortAtoms( target.atoms );
-
-    return target;
   }
 }
