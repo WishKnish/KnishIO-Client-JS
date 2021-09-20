@@ -101,23 +101,20 @@ export default class KnishIOClient {
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
-   * @param {boolean} encrypt
    */
   constructor ( {
     uri,
     client = null,
     socketUri = null,
     serverSdkVersion = 3,
-    logging = false,
-    encrypt = false
+    logging = false
   } ) {
     this.initialize( {
       uri,
       socketUri,
       client,
       serverSdkVersion,
-      logging,
-      encrypt
+      logging
     } );
   }
 
@@ -129,19 +126,16 @@ export default class KnishIOClient {
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
-   * @param {boolean} encrypt
    */
   initialize ( {
     uri,
     socketUri = null,
     client = null,
     serverSdkVersion = 3,
-    logging = false,
-    encrypt = false
+    logging = false
   } ) {
 
     this.$__logging = logging;
-    this.$__encrypt = false;
     this.$__uris = typeof uri === 'object' ? uri : [ uri ];
     this.$__authTokenObjects = {};
     this.$__authInProcess = false;
@@ -159,10 +153,6 @@ export default class KnishIOClient {
       socketUri: socketUri,
       serverUri: this.getRandomUri()
     } );
-
-    if ( encrypt ) {
-      this.enableEncryption();
-    }
 
     this.$__serverSdkVersion = serverSdkVersion;
   }
