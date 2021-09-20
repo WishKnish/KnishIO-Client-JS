@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Response from './Response';
 import Dot from '../libraries/Dot';
-import MoleculeStructure from '../MoleculeStructure';
+import Molecule from "../Molecule";
 
 /**
  * Response for proposing new Molecules
@@ -97,7 +97,7 @@ export default class ResponseProposeMolecule extends Response {
   /**
    * Returns the resulting molecule
    *
-   * @return {MoleculeStructure|null}
+   * @return {Molecule|null}
    */
   molecule () {
 
@@ -107,7 +107,7 @@ export default class ResponseProposeMolecule extends Response {
       return null;
     }
 
-    const molecule = new MoleculeStructure();
+    const molecule = new Molecule({});
 
     molecule.molecularHash = Dot.get( data, 'molecularHash' );
     molecule.status = Dot.get( data, 'status' );

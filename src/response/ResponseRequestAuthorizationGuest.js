@@ -48,11 +48,18 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Response from './Response';
 import Dot from '../libraries/Dot';
 import InvalidResponseException from '../exception/InvalidResponseException';
+import AuthToken from "../AuthToken";
 
 /**
  * Response for guest auth mutation
  */
 export default class ResponseRequestAuthorizationGuest extends Response {
+
+  /**
+   * @type {AuthToken}
+   */
+  $__authToken = null
+
   /**
    * Class constructor
    *
@@ -144,6 +151,25 @@ export default class ResponseRequestAuthorizationGuest extends Response {
    */
   encrypt () {
     return this.payloadKey( 'encrypt' );
+  }
+
+  /**
+   *
+   * @param {Wallet} wallet
+   * @param {boolean} encrypt
+   */
+  setAuthToken ( { wallet, encrypt} ) {
+    if ( this.payload() !== null ) {
+      this.$__authToken = AuthToken.create( this.payload(), wallet, encrypt );
+    }
+  }
+
+  /**
+   *
+   * @return {AuthToken|null}
+   */
+  getAuthToken() {
+    return this.$__authToken;
   }
 
 }

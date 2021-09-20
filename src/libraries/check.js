@@ -27,7 +27,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {AtomsMissingException}
    */
@@ -44,7 +44,7 @@ export default class CheckMolecule {
   }
 
   /**
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    *
    * @return {boolean}
    */
@@ -76,7 +76,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -99,7 +99,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -122,7 +122,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException}
    */
@@ -145,7 +145,7 @@ export default class CheckMolecule {
   }
 
   /**
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -168,7 +168,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException|AtomIndexException}
    */
@@ -242,7 +242,7 @@ export default class CheckMolecule {
   }
 
   /**
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @param {Wallet} sourceWallet
    * @return {boolean}
    * @throws {TransferRemainderException|TransferRemainderException|TypeError|TransferMismatchedException|TransferMalformedException|TransferToSelfException|TransferUnbalancedException|TransferBalanceException}
@@ -359,7 +359,7 @@ export default class CheckMolecule {
   /**
    * Verifies if the hash of all the atoms matches the molecular hash to ensure content has not been messed with
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {MolecularHashMismatchException}
    */
@@ -382,7 +382,7 @@ export default class CheckMolecule {
    * fragments from its atoms and its molecular hash into a single-use wallet address to be matched
    * against the sender’s address. If it matches, the molecule was correctly signed.
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {SignatureMalformedException|SignatureMismatchException}
    */
@@ -446,7 +446,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {MolecularHashMissingException|AtomsMissingException|AtomIndexException}
    */
@@ -578,7 +578,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @throws {MolecularHashMissingException|AtomsMissingException}
    */
   static missing ( molecule ) {

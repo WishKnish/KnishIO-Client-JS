@@ -58,7 +58,7 @@ import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
 import MetaMissingException from './exception/MetaMissingException';
 import NegativeAmountException from './exception/NegativeAmountException';
-import MoleculeStructure from './MoleculeStructure';
+import { deepCloning } from "./libraries/array";
 
 const USE_META_CONTEXT = false;
 const DEFAULT_META_CONTEXT = 'https://www.schema.org';
@@ -66,7 +66,7 @@ const DEFAULT_META_CONTEXT = 'https://www.schema.org';
 /**
  * Molecule class used for committing changes to the ledger
  */
-export default class Molecule extends MoleculeStructure {
+export default class Molecule {
 
   /**
    * Class constructor
@@ -83,7 +83,7 @@ export default class Molecule extends MoleculeStructure {
     cellSlug = null
   } ) {
 
-    super( cellSlug );
+    this.cellSlugOrigin = this.cellSlug = cellSlug;
     this.secret = secret;
     this.sourceWallet = sourceWallet;
     this.atoms = [];
@@ -126,11 +126,11 @@ export default class Molecule extends MoleculeStructure {
   /**
    * Fills a Molecule's properties with the provided object
    *
-   * @param {MoleculeStructure} moleculeStructure
+   * @param {Molecule} molecule
    */
-  fill ( moleculeStructure ) {
-    for ( let key in Object.keys( moleculeStructure ) ) {
-      this[ key ] = moleculeStructure[ key ];
+  fill ( molecule ) {
+    for ( let key in Object.keys( molecule ) ) {
+      this[ key ] = molecule[ key ];
     }
   }
 
@@ -875,5 +875,78 @@ export default class Molecule extends MoleculeStructure {
     target.atoms = Atom.sortAtoms( target.atoms );
 
     return target;
+  }
+
+  /**
+   * Returns the cell slug delimiter
+   *
+   * @return {string}
+   */
+  get cellSlugDelimiter () {
+    return '.';
+  }
+
+  /**
+   * Returns the base cell slug portion
+   *
+   * @return {string}
+   */
+  cellSlugBase () {
+    return ( this.cellSlug || '' ).split( this.cellSlugDelimiter )[ 0 ];
+  }
+
+  /**
+   * Returns JSON-ready clone minus protected properties
+   *
+   * @return {object}
+   */
+  toJSON () {
+    let clone = deepCloning( this );
+    for ( let key of [ 'remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin' ] ) {
+      if ( clone.hasOwnProperty( key ) ) {
+        delete clone[ key ];
+      }
+    }
+    return clone;
+  }
+
+  /**
+   * Validates the current molecular structure
+   *
+   * @param {Wallet|null} sourceWallet
+   * @return {boolean}
+   */
+  check ( sourceWallet = null ) {
+    return Molecule.verify( {
+      molecule: this,
+      sourceWallet
+    } );
+  }
+
+  /**
+   *
+   * Verifies a specified molecule
+   *
+   * @param {Molecule} molecule
+   * @param {Wallet|null} sourceWallet
+   * @return {boolean}
+   */
+  static verify ( {
+    molecule,
+    sourceWallet = null
+  } ) {
+
+    return CheckMolecule.molecularHash( molecule )
+      && CheckMolecule.ots( molecule )
+      && CheckMolecule.index( molecule )
+      && CheckMolecule.batchId( molecule )
+      && CheckMolecule.continuId( molecule )
+      && CheckMolecule.isotopeM( molecule )
+      && CheckMolecule.isotopeT( molecule )
+      && CheckMolecule.isotopeC( molecule )
+      && CheckMolecule.isotopeU( molecule )
+      && CheckMolecule.isotopeI( molecule )
+      && CheckMolecule.isotopeR( molecule )
+      && CheckMolecule.isotopeV( molecule, sourceWallet );
   }
 }
