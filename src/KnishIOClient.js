@@ -54,7 +54,6 @@ import {
 } from './libraries/crypto';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
-import AuthToken from './AuthToken';
 import QueryContinuId from './query/QueryContinuId';
 import QueryWalletBundle from './query/QueryWalletBundle';
 import QueryWalletList from './query/QueryWalletList';
@@ -1128,6 +1127,7 @@ export default class KnishIOClient {
      * @type {QueryWalletList}
      */
     const shadowWalletQuery = this.createQuery( QueryWalletList );
+
     return shadowWalletQuery.execute( {
       variables: {
         bundleHash: bundle,
@@ -1537,7 +1537,7 @@ export default class KnishIOClient {
    *
    * @param cellSlug
    * @param encrypt
-   * @return {Promise<AuthToken>}
+   * @return {Promise<ResponseRequestAuthorizationGuest>}
    */
   async getGuestAuthToken ( {
     cellSlug,
@@ -1545,7 +1545,7 @@ export default class KnishIOClient {
   } ) {
     this.setCellSlug( cellSlug );
 
-    let wallet = new Wallet( {
+    const wallet = new Wallet( {
       secret: generateSecret(),
       token: 'AUTH'
     } );
@@ -1553,19 +1553,22 @@ export default class KnishIOClient {
     /**
      * @type {MutationRequestAuthorizationGuest}
      */
-    let query = await this.createQuery( MutationRequestAuthorizationGuest );
+    const query = await this.createQuery( MutationRequestAuthorizationGuest );
 
     /**
-     * @type {ResponseRequestAuthorization}
+     * @type {ResponseRequestAuthorizationGuest}
      */
-    let response = await query.execute( {
+    const response = await query.execute( {
       variables: {
         cellSlug,
         pubkey: wallet.pubkey,
         encrypt
       }
     } );
-    return AuthToken.create( response.payload(), wallet, encrypt );
+
+    response.setAuthToken( {wallet, encrypt} );
+
+    return response;
   }
 
 
@@ -1573,7 +1576,7 @@ export default class KnishIOClient {
    *
    * @param secret
    * @param encrypt
-   * @return {Promise<AuthToken>}
+   * @return {Promise<ResponseRequestAuthorization>}
    */
   async getProfileAuthToken ( {
     secret,
@@ -1581,7 +1584,7 @@ export default class KnishIOClient {
   } ) {
     this.setSecret( secret );
 
-    let wallet = new Wallet( {
+    const wallet = new Wallet( {
       secret,
       token: 'AUTH'
     } );
@@ -1594,7 +1597,7 @@ export default class KnishIOClient {
     /**
      * @type {MutationRequestAuthorization}
      */
-    let query = await this.createMoleculeMutation( {
+    const query = await this.createMoleculeMutation( {
       mutationClass: MutationRequestAuthorization,
       molecule
     } );
@@ -1604,8 +1607,11 @@ export default class KnishIOClient {
     /**
      * @type {ResponseRequestAuthorization}
      */
-    let response = await query.execute( {} );
-    return AuthToken.create( response.payload(), wallet, encrypt );
+    const response = await query.execute( {} );
+
+    response.setAuthToken( { wallet, encrypt } );
+
+    return response;
   }
 
   /**
@@ -1615,7 +1621,7 @@ export default class KnishIOClient {
    * @param {string|null} seed
    * @param {string|null} cellSlug
    * @param {boolean}encrypt
-   * @return {Promise<{payload: (function(): {time: *, token: *})}>}
+   * @return {Promise<{payload: (function(): {time: *, token: *})}>|Promise<null>|Promise<ResponseRequestAuthorization>|Promise<ResponseRequestAuthorizationGuest>}
    */
   async requestAuthToken ( {
     secret = null,
@@ -1633,23 +1639,36 @@ export default class KnishIOClient {
     cellSlug = cellSlug ? cellSlug : this.$__cellSlug;
 
     // Get an auth token
-    let authToken = await this.authorize( {
+    const response = await this.authorize( {
       secret: _secret,
       cellSlug,
       encrypt
     } );
+    const less4version = this.$__serverSdkVersion < 4;
 
-    // Create a base object with payload function (instead of Response object)
-    return {
-      payload: function () {
-        return {
-          token: authToken.getToken(),
-          time: authToken.getExpireInterval(),
-          key: authToken.getPubkey(),
-          encrypt: authToken.getSnapshot().encrypt
+    if (response) {
+      const authToken = less4version ? response : response.getAuthToken();
+
+      // Create a base object with payload function (instead of Response object)
+      let emulation = null;
+
+      if (authToken) {
+        emulation = {
+          payload: function () {
+            return {
+              token: authToken.getToken(),
+              time: authToken.getExpireInterval(),
+              key: authToken.getPubkey(),
+              encrypt: authToken.getSnapshot().encrypt
+            };
+          }
         };
       }
-    };
+
+      return less4version ? emulation : response;
+    }
+
+    return null;
   }
 
 
@@ -1659,7 +1678,7 @@ export default class KnishIOClient {
    * @param {string} secret
    * @param {string|null} cellSlug
    * @param {boolean} encrypt
-   * @return {Promise<AuthToken>|null}
+   * @return {Promise<null>|Promise<AuthToken>|Promise<ResponseRequestAuthorization>|Promise<ResponseRequestAuthorizationGuest>}
    */
   async authorize ( {
     secret,
@@ -1672,17 +1691,17 @@ export default class KnishIOClient {
       if ( this.$__logging ) {
         console.warn( 'KnishIOClient::authorize() - Server SDK version does not require an authorization...' );
       }
-      return;
+      return null;
     }
 
     // Auth in process...
     this.$__authInProcess = true;
 
-    let authToken;
+    let response;
 
     // Authorized user
     if ( secret ) {
-      authToken = await this.getProfileAuthToken( {
+      response = await this.getProfileAuthToken( {
         secret,
         encrypt
       } );
@@ -1690,11 +1709,13 @@ export default class KnishIOClient {
 
     // Guest
     else {
-      authToken = await this.getGuestAuthToken( {
+      response = await this.getGuestAuthToken( {
         cellSlug,
         encrypt
       } );
     }
+
+    const authToken = response.getAuthToken();
 
     // Set auth token
     if ( this.$__logging ) {
@@ -1711,7 +1732,7 @@ export default class KnishIOClient {
     this.$__authInProcess = false;
 
     // Return full response
-    return authToken;
+    return this.$__serverSdkVersion < 4 ? authToken : response;
   }
 
 
