@@ -54,6 +54,7 @@ import {
 } from './libraries/crypto';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
+import AuthToken from './AuthToken';
 import QueryContinuId from './query/QueryContinuId';
 import QueryWalletBundle from './query/QueryWalletBundle';
 import QueryWalletList from './query/QueryWalletList';
@@ -1555,10 +1556,7 @@ export default class KnishIOClient {
         encrypt
       }
     } );
-
-    response.setAuthToken( {wallet, encrypt} );
-
-    return response;
+    return AuthToken.create( response.payload(), wallet, encrypt );
   }
 
 
@@ -1598,20 +1596,25 @@ export default class KnishIOClient {
      * @type {ResponseRequestAuthorization}
      */
     const response = await query.execute( {} );
-
-    response.setAuthToken( { wallet, encrypt } );
-
-    return response;
+    return AuthToken.create( response.payload(), wallet, encrypt );
   }
 
+
   /**
-   * @todo Deprecated function, used for old version!
+   * @todo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   * @todo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   * @todo DEPRECATED FUNCTION!, USED ONLY FOR THE OLD VERSIONS: SDK < 4!
+   * @todo RETURN VALUE FOR THE "requestAuthToken" IS ONLY response object (EMULATED FOR NOW)
+   * @todo FOR THE SDK >= 4 ACTIVE FUNCTION IS "authorize"!
+   * @todo RETURN VALUE FOR THE "authorize" IS ONLY AuthToken object
+   * @todo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   * @todo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    *
-   * @param {string|null} secret
-   * @param {string|null} seed
-   * @param {string|null} cellSlug
-   * @param {boolean}encrypt
-   * @return {Promise<{payload: (function(): {time: *, token: *})}>|Promise<null>|Promise<ResponseRequestAuthorization>|Promise<ResponseRequestAuthorizationGuest>}
+   * @param secret
+   * @param seed
+   * @param cellSlug
+   * @param encrypt
+   * @returns {Promise<{payload: (function(): {encrypt: *, time: *, key: *, token: *})}>}
    */
   async requestAuthToken ( {
     secret = null,
@@ -1629,36 +1632,23 @@ export default class KnishIOClient {
     cellSlug = cellSlug ? cellSlug : this.$__cellSlug;
 
     // Get an auth token
-    const response = await this.authorize( {
+    const authToken = await this.authorize( {
       secret: _secret,
       cellSlug,
       encrypt
     } );
-    const less4version = this.$__serverSdkVersion < 4;
 
-    if (response) {
-      const authToken = less4version ? response : response.getAuthToken();
-
-      // Create a base object with payload function (instead of Response object)
-      let emulation = null;
-
-      if (authToken) {
-        emulation = {
-          payload: function () {
-            return {
-              token: authToken.getToken(),
-              time: authToken.getExpireInterval(),
-              key: authToken.getPubkey(),
-              encrypt: authToken.getSnapshot().encrypt
-            };
-          }
+    // Create a base object with payload function (instead of Response object)
+    return {
+      payload: function () {
+        return {
+          token: authToken.getToken(),
+          time: authToken.getExpireInterval(),
+          key: authToken.getPubkey(),
+          encrypt: authToken.getSnapshot().encrypt
         };
       }
-
-      return less4version ? emulation : response;
-    }
-
-    return null;
+    };
   }
 
 
@@ -1687,11 +1677,11 @@ export default class KnishIOClient {
     // Auth in process...
     this.$__authInProcess = true;
 
-    let response;
+    let authToken;
 
     // Authorized user
     if ( secret ) {
-      response = await this.getProfileAuthToken( {
+      authToken = await this.getProfileAuthToken( {
         secret,
         encrypt
       } );
@@ -1699,13 +1689,11 @@ export default class KnishIOClient {
 
     // Guest
     else {
-      response = await this.getGuestAuthToken( {
+      authToken = await this.getGuestAuthToken( {
         cellSlug,
         encrypt
       } );
     }
-
-    const authToken = response.getAuthToken();
 
     // Set auth token
     if ( this.$__logging ) {
@@ -1722,7 +1710,7 @@ export default class KnishIOClient {
     this.$__authInProcess = false;
 
     // Return full response
-    return this.$__serverSdkVersion < 4 ? authToken : response;
+    return authToken;
   }
 
 

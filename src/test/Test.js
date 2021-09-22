@@ -54,7 +54,7 @@ export default class Test {
    */
   async testAll () {
     // -------------------------------- BEGIN: TEST CODE!!! ENCRYPTION DEBUG --------------------------------
-
+    /*
     // Create a client
     let client = new KnishIOClient( {
       uri: this.graphqlUrl,
@@ -85,6 +85,7 @@ export default class Test {
     } );
     console.error( response );
     return;
+    */
     // -------------------------------- END: TEST CODE!!! ENCRYPTION DEBUG --------------------------------
 
 

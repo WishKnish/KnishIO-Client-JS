@@ -48,17 +48,12 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Dot from '../libraries/Dot';
 import InvalidResponseException from '../exception/InvalidResponseException';
 import ResponseProposeMolecule from './ResponseProposeMolecule';
-import AuthToken from "../AuthToken";
 
 /**
  * Response for auth token mutation
  */
 export default class ResponseRequestAuthorization extends ResponseProposeMolecule {
 
-  /**
-   * @type {AuthToken}
-   */
-  $__authToken = null
 
   /**
    * return the authorization key
@@ -108,21 +103,5 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
     return this.payloadKey( 'key' );
   }
 
-  /**
-   * @param {Wallet} wallet
-   * @param {boolean} encrypt
-   */
-  setAuthToken ( { wallet, encrypt} ) {
-    if ( this.payload() !== null ) {
-      this.$__authToken = AuthToken.create( this.payload(), wallet, encrypt );
-    }
-  }
-
-  /**
-   * @return {AuthToken}
-   */
-  getAuthToken() {
-    return this.$__authToken
-  }
 
 }
