@@ -404,6 +404,13 @@ export default class KnishIOClient {
         secret: this.getSecret()
       } );
     }
+    else {
+      sourceWallet.key = Wallet.generatePrivateKey( {
+        secret: this.getSecret(),
+        token: sourceWallet.token,
+        position: sourceWallet.position,
+      } );
+    }
 
     return sourceWallet;
   }
