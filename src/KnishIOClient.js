@@ -394,12 +394,11 @@ export default class KnishIOClient {
       sourceWallet = new Wallet( {
         secret: this.getSecret()
       } );
-    }
-    else {
+    } else {
       sourceWallet.key = Wallet.generatePrivateKey( {
         secret: this.getSecret(),
         token: sourceWallet.token,
-        position: sourceWallet.position,
+        position: sourceWallet.position
       } );
     }
 
