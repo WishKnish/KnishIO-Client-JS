@@ -66,10 +66,10 @@ class CipherLink extends ApolloLink {
         ( requestType === 'mutation' && requestName === 'AccessToken' ),
         ( isMoleculeMutation && Dot.get( operation, 'variables.molecule.atoms.0.isotope' ) === 'U' )
       ],
-      cipher = JSON.stringify( {
+      cipher = {
         query: print( operation.query ),
         variables: JSON.stringify( operation.variables )
-      } ),
+      },
       wallet = this.getWallet(),
       pubKey = this.getPubKey();
 

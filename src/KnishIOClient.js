@@ -54,6 +54,7 @@ import {
 } from './libraries/crypto';
 import Molecule from './Molecule';
 import Wallet from './Wallet';
+import AuthToken from './AuthToken';
 import QueryContinuId from './query/QueryContinuId';
 import QueryWalletBundle from './query/QueryWalletBundle';
 import QueryWalletList from './query/QueryWalletList';
@@ -100,23 +101,20 @@ export default class KnishIOClient {
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
-   * @param {boolean} encrypt
    */
   constructor ( {
     uri,
     client = null,
     socketUri = null,
     serverSdkVersion = 3,
-    logging = false,
-    encrypt = false
+    logging = false
   } ) {
     this.initialize( {
       uri,
       socketUri,
       client,
       serverSdkVersion,
-      logging,
-      encrypt
+      logging
     } );
   }
 
@@ -128,19 +126,16 @@ export default class KnishIOClient {
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
-   * @param {boolean} encrypt
    */
   initialize ( {
     uri,
     socketUri = null,
     client = null,
     serverSdkVersion = 3,
-    logging = false,
-    encrypt = false
+    logging = false
   } ) {
 
     this.$__logging = logging;
-    this.$__encrypt = false;
     this.$__uris = typeof uri === 'object' ? uri : [ uri ];
     this.$__authTokenObjects = {};
     this.$__authInProcess = false;
@@ -158,10 +153,6 @@ export default class KnishIOClient {
       socketUri: socketUri,
       serverUri: this.getRandomUri()
     } );
-
-    if ( encrypt ) {
-      this.enableEncryption();
-    }
 
     this.$__serverSdkVersion = serverSdkVersion;
   }
@@ -328,7 +319,7 @@ export default class KnishIOClient {
 
       // Not authorized - try to do it
       if ( !authTokenObject ) {
-        this.authorize( {
+        this.requestAuthToken( {
           secret: this.$__secret,
           cellSlug: this.$__cellSlug,
           encrypt: this.$__encrypt
@@ -1534,17 +1525,19 @@ export default class KnishIOClient {
 
 
   /**
+   * Request a guest auth token
    *
    * @param cellSlug
    * @param encrypt
-   * @return {Promise<ResponseRequestAuthorizationGuest>}
+   * @returns {Promise<ResponseRequestAuthorizationGuest>}
    */
-  async getGuestAuthToken ( {
+  async requestGuestAuthToken ( {
     cellSlug,
     encrypt
   } ) {
     this.setCellSlug( cellSlug );
 
+    // Create a wallet for enryption
     const wallet = new Wallet( {
       secret: generateSecret(),
       token: 'AUTH'
@@ -1566,29 +1559,34 @@ export default class KnishIOClient {
       }
     } );
 
-    response.setAuthToken( {wallet, encrypt} );
+    // Create & set an auth token from the response data
+    const authToken = AuthToken.create( response.payload(), wallet );
+    this.setAuthToken( authToken );
 
     return response;
   }
 
 
   /**
+   * Request a profile auth token
    *
    * @param secret
    * @param encrypt
-   * @return {Promise<ResponseRequestAuthorization>}
+   * @returns {Promise<AuthToken>}
    */
-  async getProfileAuthToken ( {
+  async requestProfileAuthToken ( {
     secret,
     encrypt
   } ) {
     this.setSecret( secret );
 
+    // Generate a siging wallet
     const wallet = new Wallet( {
       secret,
       token: 'AUTH'
     } );
 
+    // Create a wallet with a signing wallet
     const molecule = await this.createMolecule( {
       secret,
       sourceWallet: wallet
@@ -1609,79 +1607,26 @@ export default class KnishIOClient {
      */
     const response = await query.execute( {} );
 
-    response.setAuthToken( { wallet, encrypt } );
+    // Create & set an auth token from the response data
+    const authToken = AuthToken.create( response.payload(), wallet );
+    this.setAuthToken( authToken );
 
     return response;
   }
 
+
   /**
-   * @todo Deprecated function, used for old version!
+   * Request an auth token (guest or profile)
    *
-   * @param {string|null} secret
-   * @param {string|null} seed
-   * @param {string|null} cellSlug
-   * @param {boolean}encrypt
-   * @return {Promise<{payload: (function(): {time: *, token: *})}>|Promise<null>|Promise<ResponseRequestAuthorization>|Promise<ResponseRequestAuthorizationGuest>}
+   * @param secret
+   * @param seed
+   * @param cellSlug
+   * @param encrypt
+   * @returns {Promise<ResponseRequestAuthorizationGuest|ResponseRequestAuthorization|null>}
    */
   async requestAuthToken ( {
-    secret = null,
-    seed = null,
-    cellSlug = null,
-    encrypt = false
-  } ) {
-    let _secret = secret;
-
-    if ( _secret === null && seed ) {
-      _secret = generateSecret(seed);
-    }
-
-    // Set default cell slug (when requestAuthToken calls from boot without args)
-    cellSlug = cellSlug ? cellSlug : this.$__cellSlug;
-
-    // Get an auth token
-    const response = await this.authorize( {
-      secret: _secret,
-      cellSlug,
-      encrypt
-    } );
-    const less4version = this.$__serverSdkVersion < 4;
-
-    if (response) {
-      const authToken = less4version ? response : response.getAuthToken();
-
-      // Create a base object with payload function (instead of Response object)
-      let emulation = null;
-
-      if (authToken) {
-        emulation = {
-          payload: function () {
-            return {
-              token: authToken.getToken(),
-              time: authToken.getExpireInterval(),
-              key: authToken.getPubkey(),
-              encrypt: authToken.getSnapshot().encrypt
-            };
-          }
-        };
-      }
-
-      return less4version ? emulation : response;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Authorize with auth token
-   *
-   * @param {string} secret
-   * @param {string|null} cellSlug
-   * @param {boolean} encrypt
-   * @return {Promise<null>|Promise<AuthToken>|Promise<ResponseRequestAuthorization>|Promise<ResponseRequestAuthorizationGuest>}
-   */
-  async authorize ( {
     secret,
+    seed = null,
     cellSlug = null,
     encrypt = false
   } ) {
@@ -1694,14 +1639,21 @@ export default class KnishIOClient {
       return null;
     }
 
+    // Generate a secret from the seed if it has been passed
+    if ( secret === null && seed ) {
+      secret = generateSecret( seed );
+    }
+
     // Auth in process...
     this.$__authInProcess = true;
 
-    let response;
+
+    // Auth token response
+    let response = null;
 
     // Authorized user
     if ( secret ) {
-      response = await this.getProfileAuthToken( {
+      response = await this.requestProfileAuthToken( {
         secret,
         encrypt
       } );
@@ -1709,21 +1661,16 @@ export default class KnishIOClient {
 
     // Guest
     else {
-      response = await this.getGuestAuthToken( {
+      response = await this.requestGuestAuthToken( {
         cellSlug,
         encrypt
       } );
     }
 
-    const authToken = response.getAuthToken();
-
     // Set auth token
     if ( this.$__logging ) {
-      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ authToken.token }...` );
+      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.token }...` );
     }
-
-    // Set an authToken full info
-    this.setAuthToken( authToken );
 
     // Switch encryption mode if it has been changed
     this.switchEncryption( encrypt );
@@ -1732,7 +1679,7 @@ export default class KnishIOClient {
     this.$__authInProcess = false;
 
     // Return full response
-    return this.$__serverSdkVersion < 4 ? authToken : response;
+    return response;
   }
 
 
