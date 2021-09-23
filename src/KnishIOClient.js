@@ -1098,7 +1098,7 @@ export default class KnishIOClient {
         unspent: unspent
       }
     } ).then( ( response ) => {
-      return response.getWallets();
+      return response.payload();
     } );
   }
 
@@ -1543,7 +1543,7 @@ export default class KnishIOClient {
   } ) {
     this.setCellSlug( cellSlug );
 
-    // Create a wallet for enryption
+    // Create a wallet for encryption
     const wallet = new Wallet( {
       secret: generateSecret(),
       token: 'AUTH'
@@ -1578,7 +1578,7 @@ export default class KnishIOClient {
    *
    * @param secret
    * @param encrypt
-   * @returns {Promise<AuthToken>}
+   * @returns {Promise<ResponseRequestAuthorization>}
    */
   async requestProfileAuthToken ( {
     secret,
@@ -1586,7 +1586,7 @@ export default class KnishIOClient {
   } ) {
     this.setSecret( secret );
 
-    // Generate a siging wallet
+    // Generate a signing wallet
     const wallet = new Wallet( {
       secret,
       token: 'AUTH'
@@ -1655,7 +1655,7 @@ export default class KnishIOClient {
 
 
     // Auth token response
-    let response = null;
+    let response;
 
     // Authorized user
     if ( secret ) {
