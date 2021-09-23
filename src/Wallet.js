@@ -119,7 +119,7 @@ export default class Wallet {
    * @param {string} token
    * @param {string|null} batchId
    * @param {string|null} characters
-   * @returns {Wallet}
+   * @return {Wallet}
    */
   static create ( {
     secretOrBundle,
@@ -148,7 +148,7 @@ export default class Wallet {
    * Determines if the provided string is a bundle hash
    *
    * @param {string} maybeBundleHash
-   * @returns {boolean}
+   * @return {boolean}
    */
   static isBundleHash ( maybeBundleHash ) {
 
@@ -163,7 +163,7 @@ export default class Wallet {
    * Get formatted token units from the raw data
    *
    * @param unitsData
-   * @returns {[]}
+   * @return {[]}
    */
   static getTokenUnits ( unitsData ) {
     let result = [];
@@ -179,7 +179,7 @@ export default class Wallet {
 
   /**
    * Has token units?
-   * @returns {boolean}
+   * @return {boolean}
    */
   hasTokenUnits () {
     return !!this.tokenUnits && this.tokenUnits.length > 0;
@@ -289,7 +289,7 @@ export default class Wallet {
   /**
    * Derives a private key for encrypting data with this wallet's key
    *
-   * @returns {string}
+   * @return {string}
    */
   getMyEncPrivateKey () {
 
@@ -303,7 +303,7 @@ export default class Wallet {
   /**
    * Derives a public key for encrypting data for this wallet's consumption
    *
-   * @returns {string}
+   * @return {string}
    */
   getMyEncPublicKey () {
 
@@ -320,7 +320,7 @@ export default class Wallet {
    * Encrypts a message for this wallet instance
    *
    * @param {object|array} message
-   * @returns {object}
+   * @return {object}
    */
   encryptMyMessage ( message ) {
 
@@ -337,7 +337,7 @@ export default class Wallet {
    * Uses the current wallet's private key to decrypt the given message
    *
    * @param {string|object} message
-   * @returns {array|object|null}
+   * @return {array|object|null}
    */
   decryptMyMessage ( message ) {
 
@@ -359,7 +359,7 @@ export default class Wallet {
    *
    * @param {string} data
    * @param {string|array} publicKeys
-   * @returns {string}
+   * @return {string}
    */
   encryptString ( {
     data,
@@ -388,7 +388,7 @@ export default class Wallet {
    *
    * @param {string} data
    * @param {string|null} fallbackValue
-   * @returns {array|object}
+   * @return {array|object}
    */
   decryptString ( {
     data,

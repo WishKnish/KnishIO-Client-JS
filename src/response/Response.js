@@ -110,7 +110,7 @@ export default class Response {
   }
 
   /**
-   * @return {*}
+   * @return {object}
    */
   response () {
     return this.$__response;
@@ -124,7 +124,7 @@ export default class Response {
   }
 
   /**
-   * @return {*}
+   * @return {Query}
    */
   query () {
     return this.$__query;

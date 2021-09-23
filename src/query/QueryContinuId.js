@@ -75,7 +75,7 @@ export default class QueryContinuId extends Query {
    * Returns a Response object
    *
    * @param {object} json
-   * @returns {ResponseContinuId}
+   * @return {ResponseContinuId}
    */
   createResponse ( json ) {
     return new ResponseContinuId( {

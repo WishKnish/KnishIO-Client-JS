@@ -45,111 +45,150 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from './Response';
-import Dot from '../libraries/Dot';
-import Molecule from "../Molecule";
+
+import Wallet from './Wallet';
 
 /**
- * Response for proposing new Molecules
+ *
  */
-export default class ResponseProposeMolecule extends Response {
+export default class AuthToken {
+
 
   /**
-   * Class constructor
    *
-   * @param {MutationProposeMolecule} query
-   * @param {object} json
+   * @param {object} data
+   * @param {Wallet} wallet
+   * @param {boolean} encrypt
+   * @return {AuthToken}
+   */
+  static create ( data, wallet, encrypt = false ) {
+    // data.encrypt = encrypt; // @todo enrypt true/ false from server
+    let authToken = new AuthToken( data );
+    authToken.setWallet( wallet );
+    return authToken;
+  }
+
+
+  /**
+   *
+   * @param {object} snapshot
+   * @param {string} secret
+   * @return {AuthToken}
+   */
+  static restore ( snapshot, secret ) {
+    let wallet = new Wallet( {
+      secret,
+      token: 'AUTH',
+      position: snapshot.wallet.position,
+      characters: snapshot.wallet.characters
+    } );
+    return AuthToken.create( {
+      token: snapshot.token,
+      expiresAt: snapshot.expiresAt,
+      pubkey: snapshot.pubkey,
+      encrypt: snapshot.encrypt
+    }, wallet );
+  }
+
+
+  /**
+   *
+   * @param {string} token
+   * @param {number} expiresAt
+   * @param {boolean} encrypt
+   * @param {string} pubkey
    */
   constructor ( {
-    query,
-    json
+    token,
+    expiresAt,
+    encrypt,
+    pubkey
   } ) {
-    super( {
-      query,
-      json
-    } );
-    this.dataKey = 'data.ProposeMolecule';
-    this.$__clientMolecule = query.molecule();
-    this.init();
-  }
-
-  /**
-   * Initialize response object with payload data
-   */
-  init () {
-    const payloadJson = Dot.get( this.data(), 'payload' );
-    try {
-      this.$__payload = Object.prototype.toString.call( payloadJson ) === '[object String]' ?
-        JSON.parse( payloadJson ) : payloadJson;
-    } catch ( err ) {
-      this.$__payload = null;
-    }
+    this.$__token = token;
+    this.$__expiresAt = expiresAt;
+    this.$__pubkey = pubkey;
+    this.$__encrypt = encrypt;
   }
 
 
   /**
-   * Returns the client molecule
-   */
-  clientMolecule () {
-    return this.$__clientMolecule;
-  }
-
-  /**
-   * Returns the resulting molecule
    *
-   * @return {Molecule|null}
+   * @param {Wallet} wallet
    */
-  molecule () {
-
-    const data = this.data();
-
-    if ( !data ) {
-      return null;
-    }
-
-    const molecule = new Molecule({});
-
-    molecule.molecularHash = Dot.get( data, 'molecularHash' );
-    molecule.status = Dot.get( data, 'status' );
-    molecule.createdAt = Dot.get( data, 'createdAt' );
-
-    return molecule;
+  setWallet ( wallet ) {
+    this.$__wallet = wallet;
   }
 
   /**
-   * Returns whether molecule was accepted or not
+   * Get a wallet
+   * @return {Wallet}
+   */
+  getWallet () {
+    return this.$__wallet;
+  }
+
+  /**
+   *
+   * @return {{wallet: {characters, position}, encrypt, expiresAt, token, pubkey}}
+   */
+  getSnapshot () {
+    return {
+      token: this.$__token,
+      expiresAt: this.$__expiresAt,
+      pubkey: this.$__pubkey,
+      encrypt: this.$__encrypt,
+      wallet: {
+        position: this.$__wallet.position,
+        characters: this.$__wallet.characters
+      }
+    };
+  }
+
+
+  /**
+   *
+   * @return {string}
+   */
+  getToken () {
+    return this.$__token;
+  }
+
+
+  /**
+   *
+   * @return {string}
+   */
+  getPubkey () {
+    return this.$__pubkey;
+  }
+
+  /**
+   *
+   * @return {number}
+   */
+  getExpireInterval () {
+    return ( this.$__expiresAt * 1000 ) - Date.now();
+  }
+
+  /**
    *
    * @return {boolean}
    */
-  success () {
-    return this.status() === 'accepted';
+  isExpired () {
+    return !this.$__expiresAt || this.getExpireInterval() < 0;
   }
 
-  /**
-   * Returns the status of the proposal
-   *
-   * @return {string}
-   */
-  status () {
-    return Dot.get( this.data(), 'status', 'rejected' );
-  }
 
   /**
-   * Returns the reason for rejection
-   *
-   * @return {string}
+   * Get auth data for the final client (apollo)
+   * @return {{wallet: Wallet, token: string, pubkey: string}}
    */
-  reason () {
-    return Dot.get( this.data(), 'reason', 'Invalid response from server' );
-  }
-
-  /**
-   * Returns payload object
-   *
-   * @return {null}
-   */
-  payload () {
-    return this.$__payload;
+  getAuthData () {
+    return {
+      token: this.getToken(),
+      pubkey: this.getPubkey(),
+      wallet: this.getWallet()
+    };
   }
 
 }

@@ -48,11 +48,18 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Response from './Response';
 import Dot from '../libraries/Dot';
 import InvalidResponseException from '../exception/InvalidResponseException';
+import AuthToken from "../AuthToken";
 
 /**
  * Response for guest auth mutation
  */
 export default class ResponseRequestAuthorizationGuest extends Response {
+
+  /**
+   * @type {AuthToken}
+   */
+  $__authToken = null
+
   /**
    * Class constructor
    *
@@ -74,7 +81,7 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Returns the reason for rejection
    *
-   * @returns {string}
+   * @return {string}
    */
   reason () {
     return 'Invalid response from server';
@@ -83,7 +90,7 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Returns whether molecule was accepted or not
    *
-   * @returns {boolean}
+   * @return {boolean}
    */
   success () {
     return this.payload() !== null;
@@ -92,7 +99,7 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Returns a wallet with balance
    *
-   * @returns {null|Wallet}
+   * @return {null|Wallet}
    */
   payload () {
     return this.data();
@@ -102,7 +109,7 @@ export default class ResponseRequestAuthorizationGuest extends Response {
    * Returns the authorization key
    *
    * @param key
-   * @returns {*}
+   * @return {*}
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
@@ -114,7 +121,7 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Returns the auth token
    *
-   * @returns {*}
+   * @return {*}
    */
   token () {
     return this.payloadKey( 'token' );
@@ -123,7 +130,7 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Returns timestamp
    *
-   * @returns {*}
+   * @return {*}
    */
   time () {
     return this.payloadKey( 'time' );
@@ -132,25 +139,37 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   /**
    * Returns timestamp
    *
-   * @returns {string}
+   * @return {string}
    */
   pubKey () {
     return this.payloadKey( 'key' );
   }
 
   /**
-   * @return {Wallet|null}
+   *
+   * @return {string}
    */
-  wallet () {
-    return this.$__query.wallet;
+  encrypt () {
+    return this.payloadKey( 'encrypt' );
   }
 
   /**
    *
-   * @returns {string}
+   * @param {Wallet} wallet
+   * @param {boolean} encrypt
    */
-  encrypt () {
-    return this.payloadKey( 'encrypt' );
+  setAuthToken ( { wallet, encrypt} ) {
+    if ( this.payload() !== null ) {
+      this.$__authToken = AuthToken.create( this.payload(), wallet, encrypt );
+    }
+  }
+
+  /**
+   *
+   * @return {AuthToken|null}
+   */
+  getAuthToken() {
+    return this.$__authToken;
   }
 
 }

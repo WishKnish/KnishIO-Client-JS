@@ -101,18 +101,18 @@ export default class Atom {
   }
 
   static get hashSchema () {
-    return new Map([
-      ["position", null],
-      ["walletAddress", null],
-      ["isotope", null],
-      ["token", null],
-      ["value", null],
-      ["batchId", null],
-      ["metaType", null],
-      ["metaId", null],
-      ["meta", null],
-      ["createdAt", null]
-    ]);
+    return new Map( [
+      [ 'position', null ],
+      [ 'walletAddress', null ],
+      [ 'isotope', null ],
+      [ 'token', null ],
+      [ 'value', null ],
+      [ 'batchId', null ],
+      [ 'metaType', null ],
+      [ 'metaId', null ],
+      [ 'meta', null ],
+      [ 'createdAt', null ]
+    ] );
   }
 
   /**
@@ -148,23 +148,25 @@ export default class Atom {
   }
 
   /**
+   * Populates and returns a schema object according to hash priority list
+   * to ensure consistent hashing results across multiple platforms
    *
    * @param {Atom} atom
    *
    * @return {object}
    */
-  static molecularHashSchema( atom ) {
+  static molecularHashSchema ( atom ) {
     const schema = Atom.hashSchema;
 
     for ( const property in atom ) {
       if ( atom.hasOwnProperty( property ) ) {
-        if ( schema.has(property) ) {
+        if ( schema.has( property ) ) {
           schema.set( property, atom[ property ] );
         }
       }
     }
 
-    return schema
+    return schema;
   }
 
   /**
@@ -173,7 +175,7 @@ export default class Atom {
    *
    * @param {array} atoms
    * @param {string} output
-   * @returns {number[]|*}
+   * @return {number[]|*}
    */
   static hashAtoms ( {
     atoms,
@@ -193,7 +195,7 @@ export default class Atom {
 
       for ( const property of molecularHashSchema.keys() ) {
 
-        const value = molecularHashSchema.get( property )
+        const value = molecularHashSchema.get( property );
 
         // Old atoms support (without batch_id field)
         if ( [ 'batchId', 'pubkey', 'characters' ].includes( property ) && value === null ) {

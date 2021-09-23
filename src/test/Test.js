@@ -53,6 +53,41 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
+    // -------------------------------- BEGIN: TEST CODE!!! ENCRYPTION DEBUG --------------------------------
+
+    // Create a client
+    let client = new KnishIOClient( {
+      uri: this.graphqlUrl,
+      logging: true
+    } );
+    // Auth the client
+    let authToken = await client.authorize( {
+      secret: this.secrets[ 0 ],
+      cellSlug: 'unit_test',
+      encrypt: true
+    } );
+    if ( !authToken ) {
+      console.log( 'Error with authorize - get an empty response.' );
+    }
+
+    // Regular stackable token
+    let response = await client.createToken( {
+      token: this.tokenSlugs[ 0 ],
+      amount: 1000.000000000000,
+      meta: {
+        name: this.tokenSlugs[ 0 ],
+        fungibility: 'stackable',
+        supply: 'limited',
+        decimals: 0,
+        icon: 'icon'
+      },
+      batchId: 'batch_0'
+    } );
+    console.error( response );
+    return;
+    // -------------------------------- END: TEST CODE!!! ENCRYPTION DEBUG --------------------------------
+
+
     await this.client( this.secrets[ 0 ] );
     await this.client( this.secrets[ 1 ] );
 
@@ -210,7 +245,7 @@ export default class Test {
 
   /**
    *
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    */
   async testTransferToken () {
 
@@ -363,13 +398,14 @@ export default class Test {
       } );
 
       // Auth the client
-      let response = await this.clients[ secret ]
-        .requestAuthToken( {
+      let authToken = await this.clients[ secret ]
+        .authorize( {
           secret,
           cellSlug
         } );
-
-      this.checkResponse( response, 'requestAuthToken' );
+      if ( !authToken ) {
+        console.log( 'Error with authorize - get an empty response.' );
+      }
     }
 
     // Return the client by secret

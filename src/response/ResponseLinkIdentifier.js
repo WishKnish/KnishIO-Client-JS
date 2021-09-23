@@ -75,7 +75,7 @@ export default class ResponseLinkIdentifier extends Response {
   /**
    * Returns success status
    *
-   * @returns {*}
+   * @return {*}
    */
   success () {
     return Dot.get( this.data(), 'set' );
@@ -84,7 +84,7 @@ export default class ResponseLinkIdentifier extends Response {
   /**
    * Returns message
    *
-   * @returns {*}
+   * @return {*}
    */
   message () {
     return Dot.get( this.data(), 'message' );

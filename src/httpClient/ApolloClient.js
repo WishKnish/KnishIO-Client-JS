@@ -177,16 +177,20 @@ export default class ApolloClient {
   /**
    * Gets the current auth token
    *
-   * @return {string}
+   * @return {string|null}
    */
   getAuthToken () {
-    return this.$__client.getAuthToken();
+    let authTokenObject = this.$__client.getAuthToken();
+    if ( !authTokenObject ) {
+      return null;
+    }
+    return authTokenObject.getToken();
   }
 
   /**
    * Gets the endpoint URI
    *
-   * @returns {string}
+   * @return {string}
    */
   getUri () {
     return this.$__uri;

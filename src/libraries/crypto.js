@@ -54,7 +54,7 @@ import Soda from './../libraries/Soda';
  *
  * @param seed
  * @param length
- * @returns {string|*}
+ * @return {string|*}
  */
 export function generateSecret ( seed = null, length = 2048 ) {
 
@@ -79,7 +79,7 @@ export function generateSecret ( seed = null, length = 2048 ) {
  * Hashes the user secret to produce a bundle hash
  *
  * @param {string} secret
- * @returns {string}
+ * @return {string}
  */
 export function generateBundleHash ( secret ) {
 
@@ -97,7 +97,7 @@ export function generateBundleHash ( secret ) {
  * @param {string|null} molecularHash
  * @param {number|null} index
  *
- * @returns {string}
+ * @return {string}
  */
 export function generateBatchId ( {
   molecularHash = null,
@@ -115,7 +115,7 @@ export function generateBatchId ( {
 /**
  * Generate wallet position
  *
- * @returns {string}
+ * @return {string}
  */
 export function generateWalletPosition ( saltLength = 64 ) {
   return randomString( saltLength, 'abcdef0123456789' );
@@ -127,7 +127,7 @@ export function generateWalletPosition ( saltLength = 64 ) {
  * @param message
  * @param {string} recipientPublicKey
  * @param {string|null} characters
- * @returns {string}
+ * @return {string}
  */
 export function encryptMessage ( message, recipientPublicKey, characters = null ) {
   return ( new Soda( characters ) ).encrypt( message, recipientPublicKey );
@@ -140,7 +140,7 @@ export function encryptMessage ( message, recipientPublicKey, characters = null 
  * @param {string} privateKey
  * @param {string} publicKey
  * @param {string|null} characters
- * @returns {array|object|null}
+ * @return {array|object|null}
  */
 export function decryptMessage ( message, privateKey, publicKey, characters = null ) {
   return ( new Soda( characters ) ).decrypt( message, privateKey, publicKey );
@@ -151,7 +151,7 @@ export function decryptMessage ( message, privateKey, publicKey, characters = nu
  *
  * @param {string} key
  * @param {string|null} characters
- * @returns {string}
+ * @return {string}
  */
 export function generateEncPrivateKey ( key, characters = null ) {
   return ( new Soda( characters ) ).generatePrivateKey( key );
@@ -162,7 +162,7 @@ export function generateEncPrivateKey ( key, characters = null ) {
  *
  * @param {string} privateKey
  * @param {string|null} characters
- * @returns {string}
+ * @return {string}
  */
 export function generateEncPublicKey ( privateKey, characters = null ) {
   return ( new Soda( characters ) ).generatePublicKey( privateKey );
@@ -172,7 +172,7 @@ export function generateEncPublicKey ( privateKey, characters = null ) {
  *
  * @param {string} key
  * @param {string|null} characters
- * @returns {string}
+ * @return {string}
  */
 export function hashShare ( key, characters = null ) {
   return ( new Soda( characters ) ).shortHash( key );

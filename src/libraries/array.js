@@ -3,7 +3,7 @@
  *
  * @param {array} arr
  * @param {number} size
- * @returns {array}
+ * @return {array}
  */
 export function chunkArray ( arr, size ) {
 
@@ -34,8 +34,8 @@ export function deepCloning (
     for ( i = 0; i < t.length; i++ ) // To handle multiframe environment, search for type by
       if ( s.call( o ) === s.call( //   comparing Object.prototype.toString's of our object
         x = new t[ i ]( o ) ) ) //   and new object x created with the constructor t[i]
-                                             // Notice that it will create new Date(o), new String(o)
-                                             //   which is good and new Array(o) which is bad
+        // Notice that it will create new Date(o), new String(o)
+        //   which is good and new Array(o) which is bad
         r = i ? x : []; // If i==0, t==Array. We need to recreate it. Else use x
     h.push( o, r ); // Add object to cache before (!) making recursive call
     for ( i in o ) // Just copy properties recursively

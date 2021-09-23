@@ -75,7 +75,7 @@ export default class ResponseBalance extends Response {
   /**
    * Returns a wallet with balance
    *
-   * @returns {null|Wallet}
+   * @return {null|Wallet}
    */
   payload () {
     const walletData = this.data();

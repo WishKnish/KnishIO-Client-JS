@@ -48,6 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Dot from '../libraries/Dot';
 import InvalidResponseException from '../exception/InvalidResponseException';
 import ResponseProposeMolecule from './ResponseProposeMolecule';
+import AuthToken from "../AuthToken";
 
 /**
  * Response for auth token mutation
@@ -55,10 +56,15 @@ import ResponseProposeMolecule from './ResponseProposeMolecule';
 export default class ResponseRequestAuthorization extends ResponseProposeMolecule {
 
   /**
-   * Returns the authorization key
+   * @type {AuthToken}
+   */
+  $__authToken = null
+
+  /**
+   * return the authorization key
    *
    * @param key
-   * @returns {*}
+   * @return {*}
    */
   payloadKey ( key ) {
     if ( !Dot.has( this.payload(), key ) ) {
@@ -67,17 +73,11 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
     return Dot.get( this.payload(), key );
   }
 
-  /**
-   * @return {Wallet|null}
-   */
-  wallet () {
-    return this.clientMolecule().sourceWallet;
-  }
 
   /**
    * Returns the auth token
    *
-   * @returns {string}
+   * @return {string}
    */
   token () {
     return this.payloadKey( 'token' );
@@ -86,7 +86,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
   /**
    * Returns timestamp
    *
-   * @returns {string}
+   * @return {string}
    */
   time () {
     return this.payloadKey( 'time' );
@@ -94,7 +94,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
 
   /**
    *
-   * @returns {string}
+   * @return {string}
    */
   encrypt () {
     return this.payloadKey( 'encrypt' );
@@ -107,4 +107,22 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
   pubKey () {
     return this.payloadKey( 'key' );
   }
+
+  /**
+   * @param {Wallet} wallet
+   * @param {boolean} encrypt
+   */
+  setAuthToken ( { wallet, encrypt} ) {
+    if ( this.payload() !== null ) {
+      this.$__authToken = AuthToken.create( this.payload(), wallet, encrypt );
+    }
+  }
+
+  /**
+   * @return {AuthToken}
+   */
+  getAuthToken() {
+    return this.$__authToken
+  }
+
 }

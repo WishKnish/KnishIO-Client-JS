@@ -27,8 +27,8 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
-   * @returns {boolean}
+   * @param {Molecule} molecule
+   * @return {boolean}
    * @throws {AtomsMissingException}
    */
   static continuId ( molecule ) {
@@ -44,20 +44,20 @@ export default class CheckMolecule {
   }
 
   /**
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    *
    * @return {boolean}
    */
   static batchId ( molecule ) {
 
     if ( molecule.atoms.length > 0 ) {
-      const subscription = molecule.atoms[ 0 ];
+      const signingAtom = molecule.atoms[ 0 ];
 
-      if ( subscription.isotope === 'V' && subscription.batchId !== null ) {
+      if ( signingAtom.isotope === 'V' && signingAtom.batchId !== null ) {
         const atoms = CheckMolecule.isotopeFilter( 'V', molecule.atoms );
-        const remainder = atoms[ atoms.length - 1 ];
+        const remainderAtom = atoms[ atoms.length - 1 ];
 
-        if ( subscription.batchId !== remainder.batchId ) {
+        if ( signingAtom.batchId !== remainderAtom.batchId ) {
           throw new BatchIdException();
         }
 
@@ -76,8 +76,8 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
-   * @returns {boolean}
+   * @param {Molecule} molecule
+   * @return {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
   static isotopeI ( molecule ) {
@@ -99,8 +99,8 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
-   * @returns {boolean}
+   * @param {Molecule} molecule
+   * @return {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
   static isotopeU ( molecule ) {
@@ -122,8 +122,8 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
-   * @returns {boolean}
+   * @param {Molecule} molecule
+   * @return {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException}
    */
   static isotopeM ( molecule ) {
@@ -145,7 +145,7 @@ export default class CheckMolecule {
   }
 
   /**
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {WrongTokenTypeException|AtomIndexException}
    */
@@ -168,7 +168,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {MetaMissingException|WrongTokenTypeException|AtomIndexException}
    */
@@ -242,7 +242,7 @@ export default class CheckMolecule {
   }
 
   /**
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @param {Wallet} sourceWallet
    * @return {boolean}
    * @throws {TransferRemainderException|TransferRemainderException|TypeError|TransferMismatchedException|TransferMalformedException|TransferToSelfException|TransferUnbalancedException|TransferBalanceException}
@@ -359,7 +359,7 @@ export default class CheckMolecule {
   /**
    * Verifies if the hash of all the atoms matches the molecular hash to ensure content has not been messed with
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {MolecularHashMismatchException}
    */
@@ -382,8 +382,8 @@ export default class CheckMolecule {
    * fragments from its atoms and its molecular hash into a single-use wallet address to be matched
    * against the sender’s address. If it matches, the molecule was correctly signed.
    *
-   * @param {MoleculeStructure} molecule
-   * @returns {boolean}
+   * @param {Molecule} molecule
+   * @return {boolean}
    * @throws {SignatureMalformedException|SignatureMismatchException}
    */
   static ots ( molecule ) {
@@ -446,7 +446,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @return {boolean}
    * @throws {MolecularHashMissingException|AtomsMissingException|AtomIndexException}
    */
@@ -468,7 +468,7 @@ export default class CheckMolecule {
    *
    * @param {string} isotope
    * @param {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array} atoms
-   * @returns {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array}
+   * @return {Int32Array|Uint32Array|Array|Int8Array|Float64Array|BigUint64Array|Uint8Array|Int16Array|BigInt64Array|Float32Array|Uint8ClampedArray|Uint16Array}
    */
   static isotopeFilter ( isotope, atoms ) {
 
@@ -481,7 +481,7 @@ export default class CheckMolecule {
    * Convert Hm to numeric notation via EnumerateMolecule(Hm)
    *
    * @param {string} hash
-   * @returns {array}
+   * @return {array}
    */
   static normalizedHash ( hash ) {
 
@@ -499,7 +499,7 @@ export default class CheckMolecule {
    * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
    *
    * @param {string} hash
-   * @returns {array}
+   * @return {array}
    */
   static enumerate ( hash ) {
 
@@ -548,7 +548,7 @@ export default class CheckMolecule {
    *    If m=0, stop the iteration
    *
    * @param {array} mappedHashArray
-   * @returns {*}
+   * @return {array}
    */
   static normalize ( mappedHashArray ) {
 
@@ -578,7 +578,7 @@ export default class CheckMolecule {
 
   /**
    *
-   * @param {MoleculeStructure} molecule
+   * @param {Molecule} molecule
    * @throws {MolecularHashMissingException|AtomsMissingException}
    */
   static missing ( molecule ) {

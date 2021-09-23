@@ -75,7 +75,7 @@ export default class QueryWalletBundle extends Query {
    * Builds a Response object out of a JSON string
    *
    * @param {object} json
-   * @returns {ResponseWalletBundle}
+   * @return {ResponseWalletBundle}
    */
   createResponse ( json ) {
     return new ResponseWalletBundle( {
