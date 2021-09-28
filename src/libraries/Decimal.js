@@ -5,7 +5,7 @@ export default class Decimal {
 
   /**
    * @param {number} value
-   * @returns {number}
+   * @return {number}
    */
   static val ( value ) {
     if ( Math.abs( value * multiplier ) < 1 ) {
@@ -19,7 +19,7 @@ export default class Decimal {
    * @param {number} value1
    * @param {number} value2
    * @param {boolean} debug
-   * @returns {number}
+   * @return {number}
    */
   static cmp ( value1, value2, debug = false ) {
 
@@ -39,7 +39,7 @@ export default class Decimal {
   /**
    * @param {number} value1
    * @param {number} value2
-   * @returns {boolean}
+   * @return {boolean}
    */
   static equal ( value1, value2 ) {
     return ( Decimal.cmp( value1, value2 ) === 0 );

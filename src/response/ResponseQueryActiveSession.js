@@ -45,105 +45,62 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { Request, Headers } from 'servie';
-import { fetch, } from 'popsicle';
 
-const merge = require( 'lodash.merge' );
+import Query from '../query/Query';
+import Response from './Response';
 
 /**
- * HTTP Client for communicating with a node
+ * Response for QueryActiveSession
  */
-export default class HttpClient {
+export default class ResponseQueryActiveSession extends Response {
 
   /**
    * Class constructor
    *
-   * @param {string} url
-   * @param {Object} config
+   * @param {Query} query
+   * @param {object} json
    */
-  constructor ( url, config = {} ) {
-
-    this.$__headers = new Headers( config.headers || {} );
-    this.$__needHeaders = {
-      'accept': 'application/json',
-      'content-type': 'application/json; charset=UTF-8'
-    };
-    this.$__config = merge( config, {
-      method: 'POST',
-      headers: this.$__headers,
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
     } );
-
-    this.setUrl( url );
+    this.dataKey = 'data.ActiveUser';
+    this.init();
   }
 
-  /**
-   * Returns configuration object
-   *
-   * @returns {Object}
-   */
-  getConfig () {
-    return this.$__config;
-  }
+  payload () {
+    const list = this.data();
 
-  /**
-   * Sets the endpoint URL
-   *
-   * @param {string} url
-   */
-  setUrl ( url ) {
-    this.$__url = url;
-  }
-
-  /**
-   * Gets the endpoint URL
-   *
-   * @returns {string}
-   */
-  getUrl () {
-    return this.$__url;
-  }
-
-  /**
-   * Sets the authorization token for this session
-   *
-   * @param {string} authToken
-   */
-  setAuthToken ( authToken ) {
-    this.$__headers.set( 'X-Auth-Token', authToken || '' );
-  }
-
-  /**
-   * Gets the current auth token
-   *
-   * @return {string|null}
-   */
-  getAuthToken () {
-    return this.$__headers.get( 'X-Auth-Token' ) || '';
-  }
-
-  /**
-   * Sends the request
-   *
-   * @param {Request} request
-   * @param {Object} options
-   * @returns {Promise<XhrResponse|HttpResponse>}
-   */
-  async send ( request, options = {} ) {
-
-    request.headers.extend( options );
-    this.$__headers.extend( request.headers.asObject() );
-
-    for ( let header in this.$__needHeaders ) {
-      this.$__headers.set( header, this.$__needHeaders[ header ] );
+    if ( !list ) {
+      return null;
     }
 
-    this.setAuthToken( this.getAuthToken() );
+    const activeUsers = [];
 
-    const req = new Request( request, this.$__config );
+    for ( let item of list ) {
 
-    req.headers.delete( 'content-length' );
+      const activeSession = { ...item };
 
-    return await fetch( req );
+      if ( activeSession.jsonData ) {
+        activeSession.jsonData = JSON.parse( activeSession.jsonData );
+      }
+
+      if ( activeSession.createdAt ) {
+        activeSession.createdAt = new Date( activeSession.createdAt );
+      }
+
+      if ( activeSession.updatedAt ) {
+        activeSession.updatedAt = new Date( activeSession.updatedAt );
+      }
+
+      activeUsers.push( activeSession );
+    }
+
+    return activeUsers;
   }
 
 }

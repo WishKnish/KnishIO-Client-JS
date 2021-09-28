@@ -45,23 +45,29 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Dot from "../libraries/Dot";
-import MoleculeStructure from "../MoleculeStructure";
+import Response from './Response';
+import Dot from '../libraries/Dot';
+import Molecule from '../Molecule';
 
 /**
  * Response for proposing new Molecules
  */
-export default class ResponseMolecule extends Response {
+export default class ResponseProposeMolecule extends Response {
 
   /**
    * Class constructor
    *
-   * @param query
-   * @param json
+   * @param {MutationProposeMolecule} query
+   * @param {object} json
    */
-  constructor ( query, json ) {
-    super( query, json );
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
+    } );
     this.dataKey = 'data.ProposeMolecule';
     this.$__clientMolecule = query.molecule();
     this.init();
@@ -71,9 +77,10 @@ export default class ResponseMolecule extends Response {
    * Initialize response object with payload data
    */
   init () {
-    const payload_json = Dot.get( this.data(), 'payload' );
+    const payloadJson = Dot.get( this.data(), 'payload' );
     try {
-      this.$__payload = JSON.parse( payload_json );
+      this.$__payload = Object.prototype.toString.call( payloadJson ) === '[object String]' ?
+        JSON.parse( payloadJson ) : payloadJson;
     } catch ( err ) {
       this.$__payload = null;
     }
@@ -90,7 +97,7 @@ export default class ResponseMolecule extends Response {
   /**
    * Returns the resulting molecule
    *
-   * @returns {MoleculeStructure|null}
+   * @return {Molecule|null}
    */
   molecule () {
 
@@ -100,11 +107,11 @@ export default class ResponseMolecule extends Response {
       return null;
     }
 
-    const molecule = new MoleculeStructure();
+    const molecule = new Molecule( {} );
 
     molecule.molecularHash = Dot.get( data, 'molecularHash' );
     molecule.status = Dot.get( data, 'status' );
-    molecule.status = Dot.get( data, 'createdAt' );
+    molecule.createdAt = Dot.get( data, 'createdAt' );
 
     return molecule;
   }
@@ -112,7 +119,7 @@ export default class ResponseMolecule extends Response {
   /**
    * Returns whether molecule was accepted or not
    *
-   * @returns {boolean}
+   * @return {boolean}
    */
   success () {
     return this.status() === 'accepted';
@@ -121,7 +128,7 @@ export default class ResponseMolecule extends Response {
   /**
    * Returns the status of the proposal
    *
-   * @returns {string}
+   * @return {string}
    */
   status () {
     return Dot.get( this.data(), 'status', 'rejected' );
@@ -130,7 +137,7 @@ export default class ResponseMolecule extends Response {
   /**
    * Returns the reason for rejection
    *
-   * @returns {string}
+   * @return {string}
    */
   reason () {
     return Dot.get( this.data(), 'reason', 'Invalid response from server' );
@@ -139,7 +146,7 @@ export default class ResponseMolecule extends Response {
   /**
    * Returns payload object
    *
-   * @returns {null}
+   * @return {null}
    */
   payload () {
     return this.$__payload;

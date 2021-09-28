@@ -45,78 +45,81 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "../response/ResponseMolecule";
-import Mutation from "./Mutation";
+import ResponseProposeMolecule from '../response/ResponseProposeMolecule';
+import Mutation from './Mutation';
+import gql from 'graphql-tag';
 
-const merge = require( 'lodash.merge' );
 
-/**
- * Query for proposing a new Molecule
- */
 export default class MutationProposeMolecule extends Mutation {
-
   /**
-   * Class constructor
    *
-   * @param knishIO
-   * @param {Molecule|null} molecule
+   * @param {ApolloClient} apolloClient
+   * @param molecule
    */
-  constructor ( knishIO, molecule = null ) {
-    super( knishIO );
+  constructor ( apolloClient, molecule = null ) {
+    super( apolloClient );
     this.$__molecule = molecule;
     this.$__remainderWallet = null;
-    this.$__query = `mutation( $molecule: MoleculeInput! ) { ProposeMolecule( molecule: $molecule ) @fields }`;
-    this.$__fields = {
-      'molecularHash': null,
-      'height': null,
-      'depth': null,
-      'status': null,
-      'reason': null,
-      'payload': null,
-      'createdAt': null,
-      'receivedAt': null,
-      'processedAt': null,
-      'broadcastedAt': null,
-    };
+    this.$__query = gql`mutation( $molecule: MoleculeInput! ) {
+      ProposeMolecule( molecule: $molecule ) {
+        molecularHash,
+        height,
+        depth,
+        status,
+        reason,
+        payload,
+        createdAt,
+        receivedAt,
+        processedAt,
+        broadcastedAt,
+      }
+    }`;
   }
 
   /**
    * Returns an object of query variables
    *
-   * @param variables
-   * @returns {*}
+   * @param {object} variables
+   * @return {object}
    */
   compiledVariables ( variables ) {
     const _variables = super.compiledVariables( variables );
 
-    return merge( _variables, { molecule: this.molecule() } );
+    return { ..._variables, ...{ molecule: this.molecule() } };
   }
 
   /**
    * Creates a new response from a JSON string
    *
-   * @param {string} response
-   * @return {ResponseMolecule}
+   * @param {object} json
+   * @return {ResponseProposeMolecule}
    */
-  createResponse ( response ) {
-    return new ResponseMolecule( this, response );
+  createResponse ( json ) {
+    return new ResponseProposeMolecule( {
+      query: this,
+      json
+    } );
   }
 
   /**
    * Executes the query
    *
-   * @param {Object} variables
-   * @param {Object|null} fields
-   * @return {Promise<Response>}
+   * @param {object} variables
+   * @return {Promise}
    */
-  async execute ( variables = null, fields = null ) {
-    return await super.execute( merge( variables || {}, { 'molecule': this.molecule() } ), fields );
+  async execute ( { variables = null } ) {
+    variables = variables || {};
+    variables.molecule = this.molecule();
+
+    return super.execute( {
+      variables
+    } );
   }
 
   /**
    * Returns the remainder wallet
    *
-   * @returns {null}
+   * @return {null}
    */
   remainderWallet () {
     return this.$__remainderWallet;
@@ -125,7 +128,7 @@ export default class MutationProposeMolecule extends Mutation {
   /**
    * Returns the molecule we are proposing
    *
-   * @returns {null}
+   * @return {Molecule}
    */
   molecule () {
     return this.$__molecule;

@@ -45,8 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from "./Response";
-import Wallet from "../Wallet";
+import Query from '../query/Query';
+import Response from './Response';
+import Wallet from '../Wallet';
 
 /**
  * Response for ContinuID query
@@ -56,11 +57,17 @@ export default class ResponseContinuId extends Response {
   /**
    * Class constructor
    *
-   * @param query
-   * @param json
+   * @param {Query} query
+   * @param {object} json
    */
-  constructor ( query, json ) {
-    super( query, json );
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
+    } );
     this.dataKey = 'data.ContinuId';
     this.init();
   }
@@ -76,7 +83,10 @@ export default class ResponseContinuId extends Response {
     const continuId = this.data();
 
     if ( continuId ) {
-      wallet = new Wallet( null, continuId[ 'tokenSlug' ] );
+      wallet = new Wallet( {
+        secret: null,
+        token: continuId[ 'tokenSlug' ]
+      } );
       wallet.address = continuId[ 'address' ];
       wallet.position = continuId[ 'position' ];
       wallet.bundle = continuId[ 'bundleHash' ];

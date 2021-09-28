@@ -45,28 +45,27 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "./ResponseMolecule";
+import {
+  Operation,
+  NextLink
+} from 'apollo-link';
+import { HttpLink as RootHttpLink } from 'apollo-link-http';
 
-/**
- * Response for token transfer queries
- */
-export default class ResponseTokenTransfer extends ResponseMolecule {
+class HttpLink extends RootHttpLink {
+
+  constructor ( options ) {
+    super( options );
+  }
 
   /**
-   * Returns result of the transfer
    *
-   * @returns {{reason: null, status: null}}
+   * @param {Operation} operation
+   * @param {NextLink} forward
+   * @return {*}
    */
-  payload () {
-    const result = {
-        'reason': null,
-        'status': null,
-      },
-      data = this.data();
-
-    result.reason = typeof data.reason === 'undefined' ? 'Invalid response from server' : data.reason;
-    result.status = typeof data.status === 'undefined' ? 'rejected' : data.status;
-
-    return result;
+  request ( operation, forward ) {
+    return forward( operation );
   }
 }
+
+export default HttpLink;

@@ -45,11 +45,40 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "./ResponseMolecule";
+import gql from 'graphql-tag';
+import Mutation from '../mutation/Mutation';
+import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthorizationGuest';
 
-/**
- * Response for Wallet creation
- */
-export default class ResponseWalletCreate extends ResponseMolecule {
+
+export default class MutationRequestAuthorizationGuest extends Mutation {
+  /**
+   * Class constructor
+   *
+   * @param apolloClient
+   */
+  constructor ( apolloClient ) {
+    super( apolloClient );
+    this.$__query = gql`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
+      AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {
+        token,
+        pubkey,
+        expiresAt
+      }
+    }`;
+  }
+
+
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseRequestAuthorizationGuest}
+   */
+  createResponse ( json ) {
+    return new ResponseRequestAuthorizationGuest( {
+      query: this,
+      json
+    } );
+  }
 
 }

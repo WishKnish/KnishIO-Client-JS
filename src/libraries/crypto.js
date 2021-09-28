@@ -47,14 +47,14 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
 import { shake256 } from 'js-sha3';
 import { randomString } from './strings';
-import Soda from "./../libraries/Soda";
+import Soda from './../libraries/Soda';
 
 /**
  * Generates a secret based on an optional seed
  *
  * @param seed
  * @param length
- * @returns {string|*}
+ * @return {string|*}
  */
 export function generateSecret ( seed = null, length = 2048 ) {
 
@@ -79,11 +79,11 @@ export function generateSecret ( seed = null, length = 2048 ) {
  * Hashes the user secret to produce a bundle hash
  *
  * @param {string} secret
- * @returns {string}
+ * @return {string}
  */
 export function generateBundleHash ( secret ) {
 
-  console.info( 'Crypto::bundle() - Computing wallet bundle from secret...' );
+  console.info( 'Crypto::generateBundleHash() - Computing wallet bundle from secret...' );
 
   const sponge = shake256.create( 256 );
   sponge.update( secret );
@@ -94,9 +94,20 @@ export function generateBundleHash ( secret ) {
 /**
  * Returns a new batch ID for stackable tokens
  *
- * @returns {string}
+ * @param {string|null} molecularHash
+ * @param {number|null} index
+ *
+ * @return {string}
  */
-export function generateBatchId () {
+export function generateBatchId ( {
+  molecularHash = null,
+  index = null
+} ) {
+
+  if ( molecularHash !== null && index !== null ) {
+    return generateBundleHash( String( molecularHash ) + String( index ) );
+  }
+
   return randomString( 64 );
 }
 
@@ -104,7 +115,7 @@ export function generateBatchId () {
 /**
  * Generate wallet position
  *
- * @returns {string}
+ * @return {string}
  */
 export function generateWalletPosition ( saltLength = 64 ) {
   return randomString( saltLength, 'abcdef0123456789' );
@@ -116,7 +127,7 @@ export function generateWalletPosition ( saltLength = 64 ) {
  * @param message
  * @param {string} recipientPublicKey
  * @param {string|null} characters
- * @returns {string}
+ * @return {string}
  */
 export function encryptMessage ( message, recipientPublicKey, characters = null ) {
   return ( new Soda( characters ) ).encrypt( message, recipientPublicKey );
@@ -129,7 +140,7 @@ export function encryptMessage ( message, recipientPublicKey, characters = null 
  * @param {string} privateKey
  * @param {string} publicKey
  * @param {string|null} characters
- * @returns {Array | Object | null}
+ * @return {array|object|null}
  */
 export function decryptMessage ( message, privateKey, publicKey, characters = null ) {
   return ( new Soda( characters ) ).decrypt( message, privateKey, publicKey );
@@ -140,7 +151,7 @@ export function decryptMessage ( message, privateKey, publicKey, characters = nu
  *
  * @param {string} key
  * @param {string|null} characters
- * @returns {string}
+ * @return {string}
  */
 export function generateEncPrivateKey ( key, characters = null ) {
   return ( new Soda( characters ) ).generatePrivateKey( key );
@@ -151,7 +162,7 @@ export function generateEncPrivateKey ( key, characters = null ) {
  *
  * @param {string} privateKey
  * @param {string|null} characters
- * @returns {string}
+ * @return {string}
  */
 export function generateEncPublicKey ( privateKey, characters = null ) {
   return ( new Soda( characters ) ).generatePublicKey( privateKey );
@@ -161,7 +172,7 @@ export function generateEncPublicKey ( privateKey, characters = null ) {
  *
  * @param {string} key
  * @param {string|null} characters
- * @returns {string}
+ * @return {string}
  */
 export function hashShare ( key, characters = null ) {
   return ( new Soda( characters ) ).shortHash( key );

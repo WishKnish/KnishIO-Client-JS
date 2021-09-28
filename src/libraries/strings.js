@@ -2,13 +2,25 @@ import bigInt from 'big-integer';
 import Hex from './Hex';
 import {
   decode as decodeBase64,
-  encode as encodeBase64,
+  encode as encodeBase64
 } from '@stablelib/base64';
+import getRandomValues from 'get-random-values';
 
 if ( !String.prototype.trim ) {
-
   String.prototype.trim = function () {
     return this.replace( /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '' );
+  };
+}
+
+if ( !String.prototype.toCamelCase ) {
+  String.prototype.toCamelCase = function () {
+    return this.toLowerCase().replace( /[^a-zA-Z0-9]+(.)/g, ( m, chr ) => chr.toUpperCase() );
+  };
+}
+
+if ( !String.prototype.toSnakeCase ) {
+  String.prototype.toSnakeCase = function () {
+    return this.replace( /[A-Z]/g, letter => `_${ letter.toLowerCase() }` );
   };
 }
 
@@ -17,12 +29,12 @@ if ( !String.prototype.trim ) {
  *
  * @param str
  * @param size
- * @returns {any[]}
+ * @return {any[]}
  */
 export function chunkSubstr ( str, size ) {
 
   const numChunks = Math.ceil( str.length / size ),
-    chunks = new Array( numChunks );
+    chunks = [];
 
   for ( let i = 0, o = 0; i < numChunks; ++i, o += size ) {
     chunks[ i ] = str.substr( o, size );
@@ -36,14 +48,13 @@ export function chunkSubstr ( str, size ) {
  *
  * @param length
  * @param alphabet
- * @returns {string}
+ * @return {string}
  */
 export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
 
   let array = new Uint8Array( length );
 
-  let cryptoObj = window.crypto || window.msCrypto; // for IE 11
-  cryptoObj.getRandomValues( array );
+  array = getRandomValues( array );
 
   array = array.map( x => alphabet.charCodeAt( x % alphabet.length ) );
 
@@ -54,13 +65,13 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
  * Convert charset between bases and alphabets
  *
  * @param src
- * @param from_base
- * @param to_base
- * @param src_symbol_table
- * @param dest_symbol_table
- * @returns {boolean|string|number}
+ * @param fromBase
+ * @param toBase
+ * @param srcSymbolTable
+ * @param destSymbolTable
+ * @return {boolean|string|number}
  */
-export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, dest_symbol_table ) {
+export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, destSymbolTable ) {
 
   // From: convert.js: http://rot47.net/_js/convert.js
   //	http://rot47.net
@@ -73,17 +84,17 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
 
   // The reasoning behind capital first is because it comes first in a ASCII/Unicode character map
   // 96 symbols support up to base 96
-  const base_symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡';
+  const baseSymbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡';
 
   // Default the symbol table to a nice default table that supports up to base 96
-  src_symbol_table = src_symbol_table ? src_symbol_table : base_symbols;
+  srcSymbolTable = srcSymbolTable ? srcSymbolTable : baseSymbols;
   // Default the desttable equal to the srctable if it isn't defined
-  dest_symbol_table = dest_symbol_table ? dest_symbol_table : src_symbol_table;
+  destSymbolTable = destSymbolTable ? destSymbolTable : srcSymbolTable;
 
   // Make sure we are not trying to convert out of the symbol table range
-  if ( from_base > src_symbol_table.length || to_base > dest_symbol_table.length ) {
+  if ( fromBase > srcSymbolTable.length || toBase > destSymbolTable.length ) {
 
-    console.warn( 'Can\'t convert', src, 'to base', to_base, 'greater than symbol table length. src-table:', src_symbol_table.length, 'dest-table:', dest_symbol_table.length );
+    console.warn( 'Strings::charsetBaseConvert() - Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length );
     return false;
   }
 
@@ -91,7 +102,7 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
   let val = bigInt( 0 );
 
   for ( let i = 0; i < src.length; i++ ) {
-    val = val.multiply( from_base ).add( src_symbol_table.indexOf( src.charAt( i ) ) );
+    val = val.multiply( fromBase ).add( srcSymbolTable.indexOf( src.charAt( i ) ) );
   }
 
   if ( val.lesser( 0 ) ) {
@@ -99,15 +110,15 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
   }
 
   // Then covert to any base
-  let r = val.mod( to_base ),
-    res = dest_symbol_table.charAt( r ),
-    q = val.divide( to_base );
+  let r = val.mod( toBase ),
+    res = destSymbolTable.charAt( r ),
+    q = val.divide( toBase );
 
   while ( !q.equals( 0 ) ) {
 
-    r = q.mod( to_base );
-    q = q.divide( to_base );
-    res = dest_symbol_table.charAt( r ) + res;
+    r = q.mod( toBase );
+    q = q.divide( toBase );
+    res = destSymbolTable.charAt( r ) + res;
   }
 
   return res;
@@ -117,7 +128,7 @@ export function charsetBaseConvert ( src, from_base, to_base, src_symbol_table, 
  * Converts a buffer into a hexadecimal string
  *
  * @param byteArray
- * @returns {string}
+ * @return {string}
  */
 export function bufferToHexString ( byteArray ) {
   return Hex.toHex( byteArray, {} );
@@ -127,7 +138,7 @@ export function bufferToHexString ( byteArray ) {
  * Converts a hexadecimal string into a buffer
  *
  * @param hexString
- * @returns {Uint8Array}
+ * @return {Uint8Array}
  */
 export function hexStringToBuffer ( hexString ) {
   return Hex.toUint8Array( hexString );
@@ -137,7 +148,7 @@ export function hexStringToBuffer ( hexString ) {
  * Compresses a given string for web sharing
  *
  * @param string
- * @returns {string}
+ * @return {string}
  */
 export function hexToBase64 ( string ) {
   return encodeBase64( Hex.toUint8Array( string ) );
@@ -147,7 +158,7 @@ export function hexToBase64 ( string ) {
  * Decompresses a compressed string
  *
  * @param {string} string
- * @returns {string}
+ * @return {string}
  */
 export function base64ToHex ( string ) {
   return Hex.toHex( decodeBase64( string ), {} );

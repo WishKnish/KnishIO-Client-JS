@@ -9,5 +9,5 @@ export default {
   'big-integer/BigInteger': 'bigIntB',
   'tweetnacl-sealedbox-js': 'tweetnaclSealedboxJs',
   '@stablelib/utf8': 'utf8',
-  '@stablelib/base64': 'base64',
-}
+  '@stablelib/base64': 'base64'
+};

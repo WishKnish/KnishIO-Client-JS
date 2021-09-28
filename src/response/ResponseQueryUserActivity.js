@@ -45,11 +45,38 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseMolecule from "./ResponseMolecule";
+import Query from '../query/Query';
+import Response from './Response';
 
-/**
- * Response for token creation
- */
-export default class ResponseTokenCreate extends ResponseMolecule {
+export default class ResponseQueryUserActivity extends Response {
+  /**
+   * Class constructor
+   *
+   * @param {Query} query
+   * @param {object} json
+   */
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json
+    } );
+    this.dataKey = 'data.UserActivity';
+    this.init();
+  }
+
+  payload () {
+    const data = JSON.parse( JSON.stringify( this.data() ) );
+
+    if ( data.instances ) {
+      for ( const datum of data.instances ) {
+        datum.jsonData = JSON.parse( datum.jsonData );
+      }
+    }
+
+    return data;
+  }
 
 }

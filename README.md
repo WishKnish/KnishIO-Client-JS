@@ -4,9 +4,12 @@
 <div style="text-align:center">info@wishknish.com | https://wishknish.com</div>
 
 # Knish.IO Javascript Client SDK
-This is an experimental Javascript / NodeJS implementation of the Knish.IO client SDK. Its purpose is to expose class libraries for building and signing Knish.IO Molecules, composing Atoms, generating Wallets, and so much more.
+
+This is an experimental Javascript / NodeJS implementation of the Knish.IO client SDK. Its purpose is to expose class
+libraries for building and signing Knish.IO Molecules, composing Atoms, generating Wallets, and so much more.
 
 ## Installation
+
 The SDK can be installed via either of the following:
 
 1. `yarn add @wishknish/knishio-client-js`
@@ -14,6 +17,7 @@ The SDK can be installed via either of the following:
 2. `npm install @wishknish/knishio-client-js --save`
 
 ## Basic Usage
+
 The purpose of the Knish.IO SDK is to expose various ledger functions to new or existing applications.
 
 There are two ways to take advantage of these functions:
@@ -27,153 +31,154 @@ This document will explain both ways.
 ## The Easy Way: KnishIOClient Wrapper
 
 1. Include the wrapper class in your application code:
-    ```javascript
-    import { KnishIOClient } from '@wishknish/knishio-client-js'
-    ```
-   
-2. Instantiate the class with your node URI:
-    ```javascript
-    const client = new KnishIOClient( myNodeURI );
-    ```
-   
-3. Set the Cell to match your app:
-    ```javascript
-    client.setCellSlug( myCellSlug );
-    ```
-    (**Note:** the `knishio_cells` table on the node must contain an entry for this Cell)
-    
-4. Generate a 2048-symbol hexadecimal secret, either randomly, or via hashing login + password + salt, OAuth secret ID, biometric ID, or any other static value
+   ```javascript
+   import { KnishIOClient } from '@wishknish/knishio-client-js'
+   ```
 
-5. Request authorization token from the node:
-    ```javascript
-    client.requestAuthToken ( mySecret )
-    ```
-   
-6. Begin using `client` to trigger commands described below...
+2. Instantiate the class with your node URI:
+   ```javascript
+   const client = new KnishIOClient( {
+     uri: myNodeURI
+   } );
+   ```
+
+3. Set the Cell to match your app:
+   ```javascript
+   client.setCellSlug( myCellSlug );
+   ```
+   (**Note:** the `knishio_cells` table on the node must contain an entry for this Cell)
+
+
+4. Request authorization token from the node:
+   ```javascript
+   client.requestAuthToken ( {
+      seed: 'myTopSecretCode'
+   } )
+   ```
+
+   (**Note:** the `seed` parameter can be a salted combination of username + password, a biometric hash, an existing
+   user identifier from an external authentication process, for example)
+
+
+5. Begin using `client` to trigger commands described below...
 
 ### KnishIOClient Methods
 
-- Query metadata for a **Wallet Bundle**. Leave the `bundleHash` parameter `null` to query your own Wallet Bundle:
+- Query metadata for a **Wallet Bundle**. Omit the `bundleHash` parameter to query your own Wallet Bundle:
+  ```javascript
+  const result = await client.queryBundle ( {
+    bundleHash: 'c47e20f99df190e418f0cc5ddfa2791e9ccc4eb297cfa21bd317dc0f98313b1d',
+  } );
 
-```javascript
-const result = await client.queryBundle (
-  // Bundle hash we are querying for
-  'c47e20f99df190e418f0cc5ddfa2791e9ccc4eb297cfa21bd317dc0f98313b1d'
-);
+  // Raw Metadata
+  console.log( result );
+  ```
 
-// Raw Metadata
-console.log( result );
-```
+- Query metadata for a **Meta Asset**. Omit any parameters to widen the search:
 
-- Query metadata for a **Meta Asset**. Leave any parameters `null` to widen the search:
+  ```javascript
+  const result = await client.queryMeta ( {
+    metaType: 'Vehicle',
+    metaId: null, // Meta ID
+    key: 'LicensePlate',
+    value: '1H17P',
+    latest: true // Limit meta values to latest per key
+  } );
 
-```javascript
-const result = await client.queryMeta (
-  'Vehicle', // MetaType
-  null, // Meta ID
-  'LicensePlate', // Key
-  '1H17P', // Value
-  true // Limit meta values to latest per key
-);
-
-// Raw Metadata
-console.log( result );
-```
+  // Raw Metadata
+  console.log( result );
+  ```
 
 - Writing new metadata for a **Meta Asset**.
 
-```javascript
-const result = await client.createMeta (
-  'Pokemon', // MetaType
-  'Charizard', // Meta ID
-  {
-    type: 'fire',
-    weaknesses: [
-      'rock',
-      'water',
-      'electric'
-    ],
-    immunities: [
-      'ground',
-    ],
-    hp: 78,
-    attack: 84,
-  } // Metadata JSON
-);
+  ```javascript
+  const result = await client.createMeta ( {
+    metaType: 'Pokemon',
+    metaId: 'Charizard',
+    meta: {
+      type: 'fire',
+      weaknesses: [
+        'rock',
+        'water',
+        'electric'
+      ],
+      immunities: [
+        'ground',
+      ],
+      hp: 78,
+      attack: 84,
+    }
+  } );
 
-if( result.success() ) {
-  // Do things!
-}
+  if( result.success() ) {
+    // Do things!
+  }
 
-console.log( result.data() ); // Raw response
-
-```
+  console.log( result.data() ); // Raw response
+  ```
 
 - Query Wallets associated with a Wallet Bundle:
 
-```javascript
-const result = await client.queryWallets (
-  // owner's bundle hash
-  'c47e20f99df190e418f0cc5ddfa2791e9ccc4eb297cfa21bd317dc0f98313b1d',
-  true // limit results to unspent wallets?
-);
+  ```javascript
+  const result = await client.queryWallets ( {
+    bundleHash: 'c47e20f99df190e418f0cc5ddfa2791e9ccc4eb297cfa21bd317dc0f98313b1d',
+    unspent: true // limit results to unspent wallets?
+  } );
 
-console.log( results ); // Raw response
-```
+  console.log( results ); // Raw response
+  ```
 
-- Declaring new **Wallets**. If Tokens are sent to undeclared Wallets, **Shadow Wallets** will be used (placeholder Wallets that can receive, but cannot send) to store tokens until they are claimed.
+- Declaring new **Wallets**. If Tokens are sent to undeclared Wallets, **Shadow Wallets** will be used (placeholder
+  Wallets that can receive, but cannot send) to store tokens until they are claimed.
 
-```javascript
-const result = await client.createWallet (
-  'FOO' // Token Slug for the wallet we are declaring
-);
+  ```javascript
+  const result = await client.createWallet ( {
+    token: 'FOO' // Token Slug for the wallet we are declaring
+  } );
 
-if( result.success() ) {
-  // Do things!
-}
+  if( result.success() ) {
+    // Do things!
+  }
 
-console.log( result.data() ); // Raw response
-```
+  console.log( result.data() ); // Raw response
+  ```
 
 - Issuing new **Tokens**:
 
-```javascript
-const tokenMeta = {
-  name: 'CrazyCoin', // Public name for the token
-  fungibility: 'fungible', // Fungibility style (fungible / nonfungible / stackable)
-  supply: 'limited', // Supply style (limited / replenishable)
-  decimals: '2', // Decimal places
-};
+  ```javascript
+  const result = await client.createToken ( {
+    token: 'CRZY', // Token slug (ticker symbol)
+    amount: '100000000', // Initial amount to issue
+    meta: {
+      name: 'CrazyCoin', // Public name for the token
+      fungibility: 'fungible', // Fungibility style (fungible / nonfungible / stackable)
+      supply: 'limited', // Supply style (limited / replenishable)
+      decimals: '2' // Decimal places
+    }
+  } );
 
-const result = await client.createToken (
-  'CRZY', // Token slug (ticker symbol)
-  '100000000', // Initial amount to issue
-  tokenMeta // Metadata JSON
-);
+  if( result.success() ) {
+    // Do things!
+  }
 
-if( result.success() ) {
-  // Do things!
-}
-
-console.log( result.data() ); // Raw response
-```
+  console.log( result.data() ); // Raw response
+  ```
 
 - Transferring **Tokens** to other users:
 
-```javascript
-const result = await client.transferToken (
-  // Recipient's bundle hash
-  '7bf38257401eb3b0f20cabf5e6cf3f14c76760386473b220d95fa1c38642b61d',
-  'CRZY', // Token slug
-  '100' // Transfer amount
-);
+  ```javascript
+  const result = await client.transferToken ( {
+    recipient: '7bf38257401eb3b0f20cabf5e6cf3f14c76760386473b220d95fa1c38642b61d', // Recipient's bundle hash,
+    token: 'CRZY', // Token slug
+    amount: '100'
+  } );
 
-if( result.success() ) {
-  // Do things!
-}
+  if( result.success() ) {
+    // Do things!
+  }
 
-console.log( result.data() ); // Raw response
-```
+  console.log( result.data() ); // Raw response
+  ```
 
 ## The Hard Way: working directly with Molecules
 
@@ -181,41 +186,67 @@ console.log( result.data() ); // Raw response
     ```javascript
     client.createMolecule ()
     ```
-  
-- Return a customized Query instance (via Promise) that can be used to generate arbitrary transactions to the ledger for the supplied Query class (more on these below):
+
+- Return a customized Query instance (via Promise) that can be used to generate arbitrary transactions to the ledger for
+  the supplied Query class:
     ```javascript
-    client.createMoleculeMutation ( myQueryClass )
+    client.createMoleculeMutation ( {
+      mutationClass: myQueryClass // More info on these below
+    } )
     ```
-  
+
 - Retrieves the active balance (in the form of a Wallet object:
     ```javascript
-    client.getBalance ( bundleOrSecret, tokenSlug )
+    client.queryBalance ( {
+      token: myTokenSlug,
+      bundle: myBundleHash // Omit to get your own balance
+    } )
     ```
-  
-- Create a new Token on the ledger and places initial balance into a new wallet created for you; `tokenMetadata` object must contain properties for `name` and `fungibility` (which can presently be `'fungible'`, `'nonfungible'`, or `'stackable'`):
+
+- Create a new Token on the ledger and places initial balance into a new wallet created for you; `tokenMetadata` object
+  must contain properties for `name` and `fungibility` (which can presently be `'fungible'`, `'nonfungible'`,
+  or `'stackable'`):
     ```javascript
-    client.createToken ( tokenSlug, initialAmount, tokenMetadata )
+    client.createToken ( {
+      token: tokenSlug, 
+      amount: initialAmount,
+      meta: tokenMetadata
+    } )
     ```
-  
-- Retrieve a list of Shadow Wallets (wallets that have a balance in a particular token, but no keys - as can happen when you are sent tokens for which you lack a prior wallet):
+
+- Retrieve a list of Shadow Wallets (wallets that have a balance in a particular token, but no keys - as can happen when
+  you are sent tokens for which you lack a prior wallet):
     ```javascript
-    client.getShadowWallets ( tokenSlug )
+    client.queryShadowWallets ( {
+      token: tokenSlug,
+      bundle: myBundleHash // Omit to get your own balance
+    } )
     ```
-  
+
 - Attempt to claim a Shadow Wallet by generating keys for it, which turns it into a usable Wallet:
     ```javascript
-    client.claimShadowWallet ( tokenSlug )
+    client.claimShadowWallet ( {
+      token: tokenSlug
+    } )
     ```
-  
+
 - Transfer tokens to a recipient Wallet or Bundle:
     ```javascript
-    client.transferToken ( walletObjectOrBundleHash, tokenSlug, amount )
+    client.transferToken ( {
+      recipient: walletObjectOrBundleHash,
+      token: tokenSlug,
+      amount: transferAmount
+    } )
     ```
 
 ### Knish.IO Query Classes
-The `KnishIOClient` can utilize a wide variety of built-in query classes via `client.createMoleculeQuery ( myQueryClass )`, in case you need something more flexible than the built-in methods.
 
-After calling `client.createMoleculeQuery ( myQueryClass )`, you will receive a `Query` class instance, which will let you add any necessary metadata to fulfill the GraphQL query or mutation. The metadata required will be different based on the type of `Query` class you choose, via an overloaded `fill()` method.
+The `KnishIOClient` can utilize a wide variety of built-in query classes
+via `client.createMoleculeQuery ( myQueryClass )`, in case you need something more flexible than the built-in methods.
+
+After calling `client.createMoleculeQuery ( myQueryClass )`, you will receive a `Query` class instance, which will let
+you add any necessary metadata to fulfill the GraphQL query or mutation. The metadata required will be different based
+on the type of `Query` class you choose, via an overloaded `fill()` method.
 
 Here are the most commonly used ones:
 
@@ -223,7 +254,7 @@ Here are the most commonly used ones:
 
 ```javascript
 // Build the query
-const query = await client.createQuery(QueryMetaType);
+const query = await client.createQuery( QueryMetaType );
 
 // Define variable parameters
 // (eg: which MetaType we are querying)
@@ -241,15 +272,19 @@ const fields = {
 }
 
 // Execute the query
-const result = await query.execute(variables, fields);
-console.log(result.data());
+const result = await query.execute( {
+  variables,
+  fields
+} );
+
+console.log( result.data() );
 ```
 
 #### `QueryWalletBundle` (for retrieving information about Wallet Bundles)
 
 ```javascript
 // Build the query
-const query = await client.createQuery(QueryWalletBundle);
+const query = await client.createQuery( QueryWalletBundle );
 
 // Define variable parameters
 // (eg: how we want to filter Wallet Bundles)
@@ -268,8 +303,12 @@ const fields = {
 }
 
 // Execute the query
-const result = await query.execute(variables, fields);
-console.log(result.data());
+const result = await query.execute( {
+  variables,
+  fields
+} );
+
+console.log( result.data() );
 ```
 
 #### `QueryWalletList` (for getting a list of Wallets)
@@ -291,47 +330,60 @@ const fields = {
 };
 
 // Execute the query
-const result = await query.execute( variables, fields );
+const result = await query.execute( {
+  variables,
+  fields
+} );
+
 console.log( result.data() );
 ```
 
 ## The Extreme Way: DIY Everything
-This method involves individually building Atoms and Molecules, triggering the signature and validation processes, and communicating the resulting signed Molecule mutation or Query to a Knish.IO node via your favorite GraphQL client.
+
+This method involves individually building Atoms and Molecules, triggering the signature and validation processes, and
+communicating the resulting signed Molecule mutation or Query to a Knish.IO node via your favorite GraphQL client.
 
 1. Include the relevant classes in your application code:
     ```javascript
-    import { Molecule, Wallet } from '@wishknish/knishio-client-js'
+   import { Molecule, Wallet } from '@wishknish/knishio-client-js'
     ```
-   
-2. Generate a 2048-symbol hexadecimal secret, either randomly, or via hashing login + password + salt, OAuth secret ID, biometric ID, or any other static value
+
+2. Generate a 2048-symbol hexadecimal secret, either randomly, or via hashing login + password + salt, OAuth secret ID,
+   biometric ID, or any other static value
+
 
 3. (optional) Initialize a signing wallet with:
-    ```javascript
-    const wallet = new Wallet( secret, token )
-    ```
+   ```javascript
+   const wallet = new Wallet( {
+     secret: mySecret,
+     token: tokenSlug,
+     position: myCustomPosition // (optional) instantiate specific wallet instance vs. random
    
-    An optional third argument, `position`, allows you to instantiate a specific wallet instance:
-    ```javascript
-    const wallet = new Wallet( secret, token, myCustomPosition )
-    ```
-    
-    An optional fourth argument, `saltLength`, helps tweak the length of the automatically-generated `position`, when not otherwise specified. It defaults to 64 symbols.
-    
-    An optional fifth argument, `characters`, helps you override the character set used by the wallet, for inter-ledger compatibility. Currently supported options are: `GMP`, `BITCOIN`, `FLICKR`, `RIPPLE`, and `IPFS`.
-    
-    **WARNING 1:** If ContinuID is enabled on the node, you will need to use a specific wallet, and therefore will first need to query the node to retrieve the `position` for that wallet.
-    
-    **WARNING 2:** The Knish.IO protocol mandates that all C and M transactions be signed with a `USER` token wallet.
-    
-4. Build your molecule with:
-    ```javascript
-    const molecule = new Molecule( secret, sourceWallet, remainderWallet, cellSlug );
-    ```
-    Only the `secret` parameter is required. You can specify an optional `sourceWallet` (for signing), and a `remainderWallet` (for token transfer remainders and ContinuID purposes), as well as a `cellSlug` for your app.
-    
-5. Either use one of the shortcut methods provided by the `Molecule` class (which will build `Atom` instances for you, or create `Atom` instances yourself.
+     // (optional) helps you override the character set used by the wallet, for inter-ledger compatibility. Currently supported options are: `GMP`, `BITCOIN`, `FLICKR`, `RIPPLE`, and `IPFS`.
+     // characters: myCharacterSet
+   } )
+   ```
 
-    DIY example:
+   **WARNING 1:** If ContinuID is enabled on the node, you will need to use a specific wallet, and therefore will first
+   need to query the node to retrieve the `position` for that wallet.
+
+   **WARNING 2:** The Knish.IO protocol mandates that all C and M transactions be signed with a `USER` token wallet.
+
+
+4. Build your molecule with:
+   ```javascript
+   const molecule = new Molecule( {
+     secret: mySecret,
+     sourceWallet: mySourceWallet, // (optional) wallet for signing
+     remainderWaller: myRemainderWallet, // (optional) wallet to receive remainder tokens
+     cellSlug: myCellSlug // (optional) used to point a transaction to a specific branch of the ledger
+   } );
+   ```
+
+5. Either use one of the shortcut methods provided by the `Molecule` class (which will build `Atom` instances for you),
+   or create `Atom` instances yourself.
+
+   DIY example:
     ```javascript
     // This example records a new Wallet on the ledger
 
@@ -345,19 +397,16 @@ This method involves individually building Atoms and Molecules, triggering the s
     }
    
     // Build the C isotope atom
-    const walletCreationAtom = new Atom(
-      sourceWallet.position,   // {string} position
-      sourceWallet.address,    // {string} walletAddress
-      'C',                     // {string} isotope
-      sourceWallet.token,      // {string|null} token
-      null,                    // {string|number|null} value
-      sourceWallet.batchId,    // {string} batchId
-      'wallet',                // {string|null} metaType
-      newWallet.address,       // {string|null} metaId
-      newWalletMeta,           // {Array|Object|null} meta
-      null,                    // {string|null} otsFragment
-      molecule.generateIndex() // {number|null} index
-    )
+    const walletCreationAtom = new Atom( {
+      position: sourceWallet.position,
+      walletAddress: sourceWallet.address,
+      isotope: 'C',
+      token: sourceWallet.token,
+      metaType: 'wallet',
+      metaId: newWallet.address,
+      meta: newWalletMeta,
+      index: molecule.generateIndex()
+    } )
    
     // Add the atom to our molecule
     molecule.addAtom( walletCreationAtom )
@@ -365,8 +414,8 @@ This method involves individually building Atoms and Molecules, triggering the s
     // Adding a ContinuID / remainder atom
     molecule.addUserRemainderAtom( new Wallet( secret ) );
     ```
-   
-    Molecule shortcut method example:
+
+   Molecule shortcut method example:
     ```javascript
     // This example commits metadata to some Meta Asset
 
@@ -376,7 +425,11 @@ This method involves individually building Atoms and Molecules, triggering the s
       bar: 'Bar'
     }
     
-    molecule.initMeta( metadata, 'MyMetaType', 'MetaId123' )
+    molecule.initMeta( {
+      meta: metadata,
+      metaType: 'MyMetaType',
+      metaId: 'MetaId123'
+   } );
     ```
 
 6. Sign the molecule with the stored user secret:
@@ -411,22 +464,27 @@ This method involves individually building Atoms and Molecules, triggering the s
     // For basic queries, we look at the data property:
     console.log( response.data() )
     ```
-    If you are sending a mutation, you can also check if the molecule was accepted by the ledger:
+   If you are sending a mutation, you can also check if the molecule was accepted by the ledger:
     ```javascript
     // For mutations only 
-    console.log( response.accepted() )
+    console.log( response.success() )
    
     // We can also check the reason for rejection
     console.log( response.reason() )
     ```
-    Some queries may also produce a payload, with additional data:
+   Some queries may also produce a payload, with additional data:
     ```javascript 
     console.log( response.payload() )
     ```
-    Payloads are provided by responses to the following queries:
+   Payloads are provided by responses to the following queries:
     1. `QueryBalance` and `QueryContinuId` -> returns a `Wallet` instance
     2. `QueryWalletList` -> returns a list of `Wallet` instances
-    3. `MutationProposeMolecule`, `MutationRequestAuthorization`, `MutationCreateIdentifier`, `MutationLinkIdentifier`, `MutationClaimShadowWallet`, `MutationCreateToken`, `MutationRequestTokens`, and `MutationTransferTokens` -> returns molecule metadata
+    3. `MutationProposeMolecule`, `MutationRequestAuthorization`, `MutationCreateIdentifier`, `MutationLinkIdentifier`
+       , `MutationClaimShadowWallet`, `MutationCreateToken`, `MutationRequestTokens`, and `MutationTransferTokens` ->
+       returns molecule metadata
 
 ## Getting Help
-Knish.IO is active development, and our team is ready to assist with integration questions. The best way to seek help is to stop by our [Telegram Support Channel](https://t.me/wishknish). You can also [send us a contact request](https://knish.io/contact) via our website.
+
+Knish.IO is active development, and our team is ready to assist with integration questions. The best way to seek help is
+to stop by our [Telegram Support Channel](https://t.me/wishknish). You can
+also [send us a contact request](https://knish.io/contact) via our website.
