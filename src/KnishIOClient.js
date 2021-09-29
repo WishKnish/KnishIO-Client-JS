@@ -1013,12 +1013,14 @@ export default class KnishIOClient {
    * @param {string} metaType
    * @param {string} metaId
    * @param {array|object} metadata
+   * @param {object|null} policy
    * @return {Promise<ResponseCreateMeta>}
    */
   async createMeta ( {
     metaType,
     metaId,
-    meta = null
+    meta = null,
+    policy = null
   } ) {
 
     /**
@@ -1033,10 +1035,20 @@ export default class KnishIOClient {
       }
     );
 
+    const metas = meta || {};
+
+    if ( policy ) {
+      for ( const [ policyKey, value ] of Object.entries( policy ) ) {
+        if ( value !== null && ['read', 'write'].includes( policyKey ) ) {
+          metas[ `${ policyKey }Policy` ] = JSON.stringify( value );
+        }
+      }
+    }
+
     query.fillMolecule( {
       metaType,
       metaId,
-      meta
+      meta: metas
     } );
 
     return await query.execute( {} );
