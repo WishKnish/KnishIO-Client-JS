@@ -121,6 +121,9 @@ export default class ApolloClient {
     }
   }
 
+  /**
+   *
+   */
   unsubscribeAll () {
     for ( let subscribe in this.$__subscribers ) {
       if ( this.$__subscribers.hasOwnProperty( subscribe ) ) {
@@ -147,10 +150,20 @@ export default class ApolloClient {
     return operation;
   }
 
+  /**
+   *
+   * @param request
+   * @returns {Promise<*>}
+   */
   async query ( request ) {
     return await this.$__client.query( request );
   }
 
+  /**
+   *
+   * @param request
+   * @returns {Promise<*>}
+   */
   async mutate ( request ) {
     return await this.$__client.mutate( request );
   }
