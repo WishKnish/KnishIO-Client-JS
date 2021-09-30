@@ -256,15 +256,15 @@ export default class Wallet {
    * Sets up a batch ID - either using the sender's, or a new one
    *
    * @param {Wallet} sourceWallet
-   * @param {boolean} remainder
+   * @param {boolean} isRemainder
    */
   initBatchId ( {
     sourceWallet,
-    remainder = false
+    isRemainder = false
   } ) {
 
     if ( sourceWallet.batchId ) {
-      this.batchId = remainder ? sourceWallet.batchId : generateBatchId( {} );
+      this.batchId = isRemainder ? sourceWallet.batchId : generateBatchId( {} );
     }
   }
 
