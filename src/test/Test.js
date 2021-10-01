@@ -54,6 +54,7 @@ export default class Test {
    */
   async testAll () {
     const encrypt = false;
+
     await this.client( this.secrets[ 0 ], encrypt );
     await this.client( this.secrets[ 1 ], encrypt );
 
@@ -77,12 +78,10 @@ export default class Test {
    */
   async testCreateToken () {
 
-    let client = await this.client( this.secrets[ 0 ] );
-    let serverClient = await this.client( process.env.SECRET_TOKEN_KNISH );
-
     let responses = {};
 
     // Regular stackable token
+    let client = await this.client( this.secrets[ 0 ] );
     responses[ 0 ] = await client.createToken( {
       token: this.tokenSlugs[ 0 ],
       amount: 1000.000000000000,
@@ -98,6 +97,7 @@ export default class Test {
     this.checkResponse( responses[ 0 ], 'testCreateToken.0' );
 
     // Server stackable token
+    let serverClient = await this.client( process.env.SECRET_TOKEN_KNISH );
     responses[ 1 ] = await serverClient.createToken( {
       token: this.tokenSlugs[ 1 ],
       amount: 1000.000000000000,
@@ -355,7 +355,7 @@ export default class Test {
    * @param cellSlug
    * @returns {Promise<*>}
    */
-  async client ( secret, encrypt = false, cellSlug = 'unit_test' ) {
+  async client ( secret, encrypt = true, cellSlug = 'unit_test' ) {
 
     // Create new client
     if ( !this.clients[ secret ] ) {

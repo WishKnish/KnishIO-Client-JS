@@ -444,7 +444,7 @@ export default class KnishIOClient {
     // Set the remainder wallet for the next transaction
     this.remainderWallet = remainderWallet || Wallet.create( {
       secretOrBundle: _secret,
-      token: _sourceWallet.token,
+      token: 'USER',
       batchId: _sourceWallet.batchId,
       characters: _sourceWallet.characters
     } );
@@ -954,7 +954,6 @@ export default class KnishIOClient {
       if ( !batchId ) {
         batchId = generateBatchId( {} );
       }
-
       meta.batchId = batchId;
 
       // Adding unit IDs to the token
@@ -1225,12 +1224,11 @@ export default class KnishIOClient {
     // Get a token & init is Stackable flag for batch ID initialization
     const tokenResponse = await this.createQuery( QueryToken )
       .execute( { slug: token } );
-    console.error( tokenResponse );
     const isStackable = Dot.get( tokenResponse.data(), '0.fungibility' ) === 'stackable';
 
     // NON-stackable tokens & batch ID is NOT NULL - error
     if ( !isStackable && batchId !== null ) {
-      throw new BatchIdException( 'Expected Batch ID is null for non-stackable tokens.' );
+      throw new BatchIdException( 'Expected Batch ID = null for non-stackable tokens.' );
     }
     // Stackable tokens & batch ID is NULL - generate new one
     if ( isStackable && batchId === null ) {
