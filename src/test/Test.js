@@ -10,10 +10,12 @@ import ResponseMolecule from '../response/ResponseProposeMolecule';
 export default class Test {
 
   /**
-   * Constructor
+   *
    * @param graphqlUrl
+   * @param encrypt
    */
-  constructor ( graphqlUrl ) {
+  constructor ( graphqlUrl, encrypt = false ) {
+    this.encrypt = encrypt;
     this.secrets = [ generateSecret(), generateSecret() ];
     this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT' ];
     this.graphqlUrl = graphqlUrl;
@@ -53,10 +55,8 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
-    const encrypt = false;
-
-    await this.client( this.secrets[ 0 ], encrypt );
-    await this.client( this.secrets[ 1 ], encrypt );
+    await this.client( this.secrets[ 0 ] );
+    await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
     await this.testCreateWallet();
@@ -355,7 +355,7 @@ export default class Test {
    * @param cellSlug
    * @returns {Promise<*>}
    */
-  async client ( secret, encrypt = true, cellSlug = 'unit_test' ) {
+  async client ( secret, cellSlug = 'unit_test' ) {
 
     // Create new client
     if ( !this.clients[ secret ] ) {
@@ -370,7 +370,7 @@ export default class Test {
       await this.clients[ secret ]
         .requestAuthToken( {
           secret,
-          encrypt,
+          encrypt: this.encrypt,
           cellSlug
         } );
       if ( !this.clients[ secret ].getAuthToken() ) {
