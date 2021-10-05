@@ -58,7 +58,7 @@ import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
 import MetaMissingException from './exception/MetaMissingException';
 import NegativeAmountException from './exception/NegativeAmountException';
-import { deepCloning } from "./libraries/array";
+import { deepCloning } from './libraries/array';
 
 const USE_META_CONTEXT = false;
 const DEFAULT_META_CONTEXT = 'https://www.schema.org';

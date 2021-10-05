@@ -396,6 +396,12 @@ export default class KnishIOClient {
       sourceWallet = new Wallet( {
         secret: this.getSecret()
       } );
+    } else {
+      sourceWallet.key = Wallet.generatePrivateKey( {
+        secret: this.getSecret(),
+        token: sourceWallet.token,
+        position: sourceWallet.position
+      } );
     }
 
     return sourceWallet;
@@ -1005,12 +1011,14 @@ export default class KnishIOClient {
    * @param {string} metaType
    * @param {string} metaId
    * @param {array|object} metadata
+   * @param {object|null} policy
    * @return {Promise<ResponseCreateMeta>}
    */
   async createMeta ( {
     metaType,
     metaId,
-    meta = null
+    meta = null,
+    policy = null
   } ) {
 
     /**
@@ -1025,10 +1033,20 @@ export default class KnishIOClient {
       }
     );
 
+    const metas = meta || {};
+
+    if ( policy ) {
+      for ( const [ policyKey, value ] of Object.entries( policy ) ) {
+        if ( value !== null && ['read', 'write'].includes( policyKey ) ) {
+          metas[ `${ policyKey }Policy` ] = JSON.stringify( value );
+        }
+      }
+    }
+
     query.fillMolecule( {
       metaType,
       metaId,
-      meta
+      meta: metas
     } );
 
     return await query.execute( {} );
@@ -1093,7 +1111,7 @@ export default class KnishIOClient {
         unspent: unspent
       }
     } ).then( ( response ) => {
-      return response.getWallets();
+      return response.payload();
     } );
   }
 
@@ -1554,7 +1572,7 @@ export default class KnishIOClient {
   } ) {
     this.setCellSlug( cellSlug );
 
-    // Create a wallet for enryption
+    // Create a wallet for encryption
     const wallet = new Wallet( {
       secret: generateSecret(),
       token: 'AUTH'
@@ -1589,7 +1607,7 @@ export default class KnishIOClient {
    *
    * @param secret
    * @param encrypt
-   * @returns {Promise<AuthToken>}
+   * @returns {Promise<ResponseRequestAuthorization>}
    */
   async requestProfileAuthToken ( {
     secret,
@@ -1597,7 +1615,7 @@ export default class KnishIOClient {
   } ) {
     this.setSecret( secret );
 
-    // Generate a siging wallet
+    // Generate a signing wallet
     const wallet = new Wallet( {
       secret,
       token: 'AUTH'
@@ -1666,7 +1684,7 @@ export default class KnishIOClient {
 
 
     // Auth token response
-    let response = null;
+    let response;
 
     // Authorized user
     if ( secret ) {

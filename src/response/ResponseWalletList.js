@@ -124,7 +124,7 @@ export default class ResponseWalletList extends Response {
    * Returns a list of Wallet class instances
    *
    * @param secret
-   * @return {null|[]}
+   * @return {null|[Wallet]}
    */
   getWallets ( secret = null ) {
 
@@ -149,23 +149,9 @@ export default class ResponseWalletList extends Response {
   /**
    * Returns response payload
    *
-   * @return {null|[]}
+   * @return {null|[Wallet]}
    */
   payload () {
-    const list = this.data();
-
-    if ( !list ) {
-      return null;
-    }
-
-    const wallets = [];
-
-    for ( let item of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( {
-        data: item
-      } ) );
-    }
-
-    return wallets;
+    this.getWallets();
   }
 }
