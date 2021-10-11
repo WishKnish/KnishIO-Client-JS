@@ -725,6 +725,8 @@ export default class Molecule {
       )
     );
 
+    // User remainder atom
+    this.addUserRemainderAtom( this.remainderWallet );
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
