@@ -87,7 +87,7 @@ import MutationActiveSession from './mutation/MutationActiveSession';
 import QueryActiveSession from './query/QueryActiveSession';
 import QueryUserActivity from './query/QueryUserActivity';
 import QueryToken from './query/QueryToken';
-import { BatchIdException } from 'exception';
+import BatchIdException from './exception/BatchIdException';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
