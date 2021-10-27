@@ -51,11 +51,11 @@ import { ApolloLink } from 'apollo-link';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 
 import HttpLink from './HttpLink';
-import ErrorLink from './ErrorLink';
 import EchoLink from './EchoLink';
 import AuthLink from './AuthLink';
 import { errorHandler } from './handler';
 import CipherLink from './CipherLink';
+import { onError } from 'apollo-link-error';
 
 
 class Client extends ApolloClient {
@@ -77,7 +77,7 @@ class Client extends ApolloClient {
       fetch: fetch,
       transportBatching: true
     } );
-    const error = new ErrorLink( errorHandler );
+    const error = onError( errorHandler );
     const auth = new AuthLink();
 
     let cipher = null;

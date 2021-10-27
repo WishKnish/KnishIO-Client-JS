@@ -175,8 +175,10 @@ export function errorHandler ( {
   graphQLErrors,
   networkError,
   operation,
-  forward
+  forward,
+  response,
 } ) {
+
   if ( graphQLErrors ) {
     graphQLErrors.map( ( {
       message,
