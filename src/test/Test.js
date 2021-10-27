@@ -351,7 +351,6 @@ export default class Test {
    * Get a client for each secret
    *
    * @param secret
-   * @param encrypt
    * @param cellSlug
    * @returns {Promise<*>}
    */

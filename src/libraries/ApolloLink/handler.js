@@ -176,7 +176,7 @@ export function errorHandler ( {
   networkError,
   operation,
   forward,
-  response,
+  response
 } ) {
 
   if ( graphQLErrors ) {

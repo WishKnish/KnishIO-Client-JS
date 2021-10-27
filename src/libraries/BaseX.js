@@ -18,11 +18,9 @@ export default class BaseX {
 
     if ( base64.includes( this.$options.characters ) ) {
       this.$encoder = new Base64();
-    }
-    else if ( basex.includes( this.$options.characters ) ) {
+    } else if ( basex.includes( this.$options.characters ) ) {
       this.$encoder = base( this[ this.$options.characters ] );
-    }
-    else if ( characters.includes( this.$options.characters ) ) {
+    } else if ( characters.includes( this.$options.characters ) ) {
       this.$encoder = new Base58( this.$options );
     }
   }

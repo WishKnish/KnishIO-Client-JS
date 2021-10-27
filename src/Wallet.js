@@ -364,7 +364,7 @@ export default class Wallet {
    * @param {Buffer|ArrayBuffer|Uint8Array} message
    * @returns {{string}}
    */
-  encryptBinary( message ) {
+  encryptBinary ( message ) {
     const arg = Array.from( arguments ).slice( 1 );
 
     const messageBase64 = ( new BaseX( { characters: 'BASE64' } ) ).encode( message );

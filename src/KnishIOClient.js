@@ -86,8 +86,8 @@ import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe';
 import MutationActiveSession from './mutation/MutationActiveSession';
 import QueryActiveSession from './query/QueryActiveSession';
 import QueryUserActivity from './query/QueryUserActivity';
-import QueryToken from "@wishknish/knishio-client-js/src/query/QueryToken";
-import { BatchIdException } from "@wishknish/knishio-client-js/src/exception";
+import QueryToken from './query/QueryToken';
+import { BatchIdException } from 'exception';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -1037,7 +1037,7 @@ export default class KnishIOClient {
 
     if ( policy ) {
       for ( const [ policyKey, value ] of Object.entries( policy ) ) {
-        if ( value !== null && ['read', 'write'].includes( policyKey ) ) {
+        if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
           metas[ `${ policyKey }Policy` ] = JSON.stringify( value );
         }
       }
@@ -1250,9 +1250,8 @@ export default class KnishIOClient {
     }
     // Stackable tokens & batch ID is NULL - generate new one
     if ( isStackable && batchId === null ) {
-      batchId = generateBatchId();
+      batchId = generateBatchId( {} );
     }
-
 
     // Calculate amount & set meta key
     if ( units.length > 0 ) {

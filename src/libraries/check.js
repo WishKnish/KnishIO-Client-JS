@@ -15,7 +15,7 @@ import WrongTokenTypeException from './../exception/WrongTokenTypeException';
 import BatchIdException from './../exception/BatchIdException';
 import Atom from './../Atom';
 import Meta from './../Meta';
-import Wallet from "./../Wallet";
+import Wallet from './../Wallet';
 import {
   base64ToHex,
   chunkSubstr
@@ -163,7 +163,7 @@ export default class CheckMolecule {
 
               for ( const value of policyValue ) {
 
-                if ( !Wallet.isBundleHash(value) && ![ 'all', 'self' ].includes( value ) ) {
+                if ( !Wallet.isBundleHash( value ) && ![ 'all', 'self' ].includes( value ) ) {
                   throw new KnishIOInvalidPolicyException( `${ value } does not correspond to the format of the policy.` );
                 }
               }
