@@ -152,6 +152,6 @@ export default class ResponseWalletList extends Response {
    * @return {null|[Wallet]}
    */
   payload () {
-    this.getWallets();
+    return this.getWallets();
   }
 }
