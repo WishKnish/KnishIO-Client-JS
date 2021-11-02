@@ -1,5 +1,5 @@
 import Subscribe from './Subscribe';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 
 export default class CreateMoleculeSubscribe extends Subscribe {
   constructor ( apolloClient ) {

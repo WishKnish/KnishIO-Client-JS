@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import ResponseProposeMolecule from '../response/ResponseProposeMolecule';
 import Mutation from './Mutation';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 
 
 export default class MutationProposeMolecule extends Mutation {

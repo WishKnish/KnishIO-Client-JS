@@ -48,9 +48,9 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import {
   Observable,
   Operation,
-  FetchResult
-} from 'apollo-link';
-import { Observer } from 'apollo-client/util/Observable';
+  FetchResult,
+  Observer
+} from '@apollo/client/core';
 
 /**
  * @param {Echo} echoClient
@@ -194,7 +194,8 @@ export function errorHandler ( {
   }
 
   if ( networkError ) {
-    console.error( `[Network error]: ${ networkError }` );
+    const { name, statusCode, result = {} } = networkError;
+    console.error( `[Network error]: ${ name }, status code: ${ statusCode }` );
     // if you would also like to retry automatically on
     // network errors, we recommend that you use
     // apollo-link-retry

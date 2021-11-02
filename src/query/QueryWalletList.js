@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from './Query';
 import ResponseWalletList from '../response/ResponseWalletList';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 
 /**
  * Query for getting a list of Wallets

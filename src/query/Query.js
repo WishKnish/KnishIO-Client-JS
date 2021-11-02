@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import CodeException from '../exception/CodeException';
-import { Operation } from 'apollo-link';
+import { Operation } from '@apollo/client/core';
 import Response from '../response/Response';
 
 export default class Query {
