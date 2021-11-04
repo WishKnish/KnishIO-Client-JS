@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Mutation from '../mutation/Mutation';
 import ResponseActiveSession from '../response/ResponseActiveSession';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 
 /**
  * Mutation for declaring an active User Session with a given MetaAsset
