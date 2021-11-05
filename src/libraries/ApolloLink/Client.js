@@ -45,7 +45,11 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { ApolloClient, from, concat } from '@apollo/client/core';
+import {
+  ApolloClient,
+  from,
+  concat
+} from '@apollo/client/core';
 import fetch from 'isomorphic-fetch';
 import { InMemoryCache } from '@apollo/client/cache';
 import { onError } from '@apollo/client/link/error';

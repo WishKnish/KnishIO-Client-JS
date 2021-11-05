@@ -194,7 +194,11 @@ export function errorHandler ( {
   }
 
   if ( networkError ) {
-    const { name, statusCode, result = {} } = networkError;
+    const {
+      name,
+      statusCode,
+      result = {}
+    } = networkError;
     console.error( `[Network error]: ${ name }, status code: ${ statusCode }` );
     // if you would also like to retry automatically on
     // network errors, we recommend that you use
