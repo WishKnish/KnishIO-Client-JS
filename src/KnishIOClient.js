@@ -365,11 +365,21 @@ export default class KnishIOClient {
    * @return {string}
    */
   getSecret () {
-    if ( !this.$__secret ) {
-      throw new UnauthenticatedException( 'KnishIOClient::getSecret() - Unable to find a stored getSecret!' );
+    if ( !this.hasSecret() ) {
+      throw new UnauthenticatedException( 'KnishIOClient::getSecret() - Unable to find a stored secret! Have you set a secret?' );
     }
     return this.$__secret;
   }
+
+  /**
+   * Returns whether or not a bundle hash is being stored for this session
+   *
+   * @return {boolean}
+   */
+  hasBundle () {
+    return !!this.$__bundle;
+  }
+
 
   /**
    * Returns the bundle hash for this session
@@ -377,8 +387,8 @@ export default class KnishIOClient {
    * @return {string}
    */
   getBundle () {
-    if ( !this.$__bundle ) {
-      throw new UnauthenticatedException( 'KnishIOClient::getBundle() - Unable to find a stored getBundle!' );
+    if ( !this.hasBundle() ) {
+      throw new UnauthenticatedException( 'KnishIOClient::getBundle() - Unable to find a stored bundle! Have you set a secret?' );
     }
     return this.$__bundle;
   }
@@ -1688,7 +1698,7 @@ export default class KnishIOClient {
    * @returns {Promise<ResponseRequestAuthorizationGuest|ResponseRequestAuthorization|null>}
    */
   async requestAuthToken ( {
-    secret,
+    secret = null,
     seed = null,
     cellSlug = null,
     encrypt = false
@@ -1709,7 +1719,6 @@ export default class KnishIOClient {
 
     // Auth in process...
     this.$__authInProcess = true;
-
 
     // Auth token response
     let response;
