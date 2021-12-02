@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Mutation from '../mutation/Mutation';
 import ResponseLinkIdentifier from '../response/ResponseLinkIdentifier';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 
 /**
  * Query for linking an Identifier to a Wallet Bundle

@@ -86,8 +86,8 @@ import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe';
 import MutationActiveSession from './mutation/MutationActiveSession';
 import QueryActiveSession from './query/QueryActiveSession';
 import QueryUserActivity from './query/QueryUserActivity';
-import QueryToken from "@wishknish/knishio-client-js/src/query/QueryToken";
-import { BatchIdException } from "@wishknish/knishio-client-js/src/exception";
+import QueryToken from './query/QueryToken';
+import BatchIdException from './exception/BatchIdException';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -364,11 +364,21 @@ export default class KnishIOClient {
    * @return {string}
    */
   getSecret () {
-    if ( !this.$__secret ) {
-      throw new UnauthenticatedException( 'KnishIOClient::getSecret() - Unable to find a stored getSecret!' );
+    if ( !this.hasSecret() ) {
+      throw new UnauthenticatedException( 'KnishIOClient::getSecret() - Unable to find a stored secret! Have you set a secret?' );
     }
     return this.$__secret;
   }
+
+  /**
+   * Returns whether or not a bundle hash is being stored for this session
+   *
+   * @return {boolean}
+   */
+  hasBundle () {
+    return !!this.$__bundle;
+  }
+
 
   /**
    * Returns the bundle hash for this session
@@ -376,8 +386,8 @@ export default class KnishIOClient {
    * @return {string}
    */
   getBundle () {
-    if ( !this.$__bundle ) {
-      throw new UnauthenticatedException( 'KnishIOClient::getBundle() - Unable to find a stored getBundle!' );
+    if ( !this.hasBundle() ) {
+      throw new UnauthenticatedException( 'KnishIOClient::getBundle() - Unable to find a stored bundle! Have you set a secret?' );
     }
     return this.$__bundle;
   }
@@ -1037,7 +1047,7 @@ export default class KnishIOClient {
 
     if ( policy ) {
       for ( const [ policyKey, value ] of Object.entries( policy ) ) {
-        if ( value !== null && ['read', 'write'].includes( policyKey ) ) {
+        if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
           metas[ `${ policyKey }Policy` ] = JSON.stringify( value );
         }
       }
@@ -1250,9 +1260,8 @@ export default class KnishIOClient {
     }
     // Stackable tokens & batch ID is NULL - generate new one
     if ( isStackable && batchId === null ) {
-      batchId = generateBatchId();
+      batchId = generateBatchId( {} );
     }
-
 
     // Calculate amount & set meta key
     if ( units.length > 0 ) {
@@ -1660,7 +1669,7 @@ export default class KnishIOClient {
    * @returns {Promise<ResponseRequestAuthorizationGuest|ResponseRequestAuthorization|null>}
    */
   async requestAuthToken ( {
-    secret,
+    secret = null,
     seed = null,
     cellSlug = null,
     encrypt = false
@@ -1681,7 +1690,6 @@ export default class KnishIOClient {
 
     // Auth in process...
     this.$__authInProcess = true;
-
 
     // Auth token response
     let response;

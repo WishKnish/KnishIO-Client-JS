@@ -49,7 +49,7 @@ import {
   ApolloLink,
   Operation,
   NextLink
-} from 'apollo-link';
+} from '@apollo/client/core';
 
 
 class AuthLink extends ApolloLink {
