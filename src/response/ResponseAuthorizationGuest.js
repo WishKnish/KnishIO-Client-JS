@@ -63,7 +63,7 @@ export default class ResponseAuthorizationGuest extends Response {
    */
   constructor ( {
     query,
-    json,
+    json
   } ) {
     super( {
       query,
