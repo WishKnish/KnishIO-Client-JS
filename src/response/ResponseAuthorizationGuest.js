@@ -63,14 +63,13 @@ export default class ResponseAuthorizationGuest extends Response {
    */
   constructor ( {
     query,
-    json
+    json,
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.AccessToken'
     } );
-    this.dataKey = 'data.AccessToken';
-    this.init();
   }
 
   /**
