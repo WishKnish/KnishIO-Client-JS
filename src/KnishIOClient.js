@@ -88,6 +88,7 @@ import QueryActiveSession from './query/QueryActiveSession';
 import QueryUserActivity from './query/QueryUserActivity';
 import QueryToken from './query/QueryToken';
 import BatchIdException from './exception/BatchIdException';
+import QueryAtom from './query/QueryAtom';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -793,6 +794,34 @@ export default class KnishIOClient {
 
     return await query.execute( {
       variables: { batchId: batchId }
+    } );
+  }
+
+  /**
+   * Query atom
+   *
+   * @param batchId
+   * @return {Promise<*>}
+   */
+  async queryAtom ( {
+    tokenSlugs,
+    bundleHashs,
+  } ) {
+
+    if ( this.$__logging ) {
+      console.info( 'KnishIOClient::queryAtom() - Querying atom instances' );
+    }
+
+    const query = this.createQuery( QueryAtom );
+
+    let variables = {
+      tokenSlugs: tokenSlugs,
+    };
+    if ( bundleHashs ) {
+      variables.bundleHashs = bundleHashs;
+    }
+    return await query.execute( {
+      variables: variables,
     } );
   }
 
