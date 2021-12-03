@@ -222,7 +222,7 @@ import{shake256 as e}from"js-sha3";import t from"big-integer";import{decode as s
           createdAt,
           updatedAt
         }
-      }`}}class St extends Ae{constructor({query:e,json:t}){super({query:e,json:t}),this.dataKey="data.ActiveSession",this.init()}}class It extends Ke{constructor(e){super(e),this.$__query=p`mutation(
+      }`}}class St extends Ae{constructor({query:e,json:t}){super({query:e,json:t,dataKey:"data.ActiveSession"})}}class It extends Ke{constructor(e){super(e),this.$__query=p`mutation(
       $bundleHash: String!,
       $metaType: String!,
       $metaId: String!,
@@ -250,7 +250,7 @@ import{shake256 as e}from"js-sha3";import t from"big-integer";import{decode as s
         createdAt,
         updatedAt
       }
-    }`}createResponse(e){return new St({query:this,json:e})}}class At extends Ae{constructor({query:e,json:t}){super({query:e,json:t}),this.dataKey="data.ActiveUser",this.init()}payload(){const e=this.data();if(!e)return null;const t=[];for(let s of e){const e={...s};e.jsonData&&(e.jsonData=JSON.parse(e.jsonData)),e.createdAt&&(e.createdAt=new Date(e.createdAt)),e.updatedAt&&(e.updatedAt=new Date(e.updatedAt)),t.push(e)}return t}}class xt extends xe{constructor(e){super(e),this.$__query=p`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
+    }`}createResponse(e){return new St({query:this,json:e})}}class At extends Ae{constructor({query:e,json:t}){super({query:e,json:t,dataKey:"data.ActiveUser"})}payload(){const e=this.data();if(!e)return null;const t=[];for(let s of e){const e={...s};e.jsonData&&(e.jsonData=JSON.parse(e.jsonData)),e.createdAt&&(e.createdAt=new Date(e.createdAt)),e.updatedAt&&(e.updatedAt=new Date(e.updatedAt)),t.push(e)}return t}}class xt extends xe{constructor(e){super(e),this.$__query=p`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
       ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {
         bundleHash,
         metaType,
@@ -259,7 +259,7 @@ import{shake256 as e}from"js-sha3";import t from"big-integer";import{decode as s
         createdAt,
         updatedAt
       }
-    }`}createResponse(e){return new At({query:this,json:e})}}class Tt extends Ae{constructor({query:e,json:t}){super({query:e,json:t}),this.dataKey="data.UserActivity",this.init()}payload(){const e=JSON.parse(JSON.stringify(this.data()));if(e.instances)for(const t of e.instances)t.jsonData=JSON.parse(t.jsonData);return e}}class vt extends xe{constructor(e){super(e),this.$__query=p`query UserActivity (
+    }`}createResponse(e){return new At({query:this,json:e})}}class Tt extends Ae{constructor({query:e,json:t}){super({query:e,json:t,dataKey:"data.UserActivity"})}payload(){const e=JSON.parse(JSON.stringify(this.data()));if(e.instances)for(const t of e.instances)t.jsonData=JSON.parse(t.jsonData);return e}}class vt extends xe{constructor(e){super(e),this.$__query=p`query UserActivity (
       $bundleHash:String,
       $metaType: String,
       $metaId: String,

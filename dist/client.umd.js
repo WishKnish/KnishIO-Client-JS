@@ -22,7 +22,7 @@
         },
         createdAt
       }
-    }`}createResponse(e){return new ve({query:this,json:e})}static createVariables({bundleHash:e=null,key:t=null,value:s=null,latest:n=!0}){const i={latest:n};return e&&(i["string"==typeof e?"bundleHash":"bundleHashes"]=e),t&&(i["string"==typeof t?"key":"keys"]=t),s&&(i["string"==typeof s?"value":"values"]=s),i}}class Me extends Ie{constructor({query:e,json:t}){super({query:e,json:t}),this.dataKey="data.Wallet",this.init()}static toClientWallet({data:e,secret:t=null}){let s;return null===e.position||void 0===e.position?s=z.create({secretOrBundle:e.bundleHash,token:e.tokenSlug,batchId:e.batchId,characters:e.characters}):(s=new z({secret:t,token:e.tokenSlug,position:e.position,batchId:e.batchId,characters:e.characters}),s.address=e.address,s.bundle=e.bundleHash),e.token&&(s.tokenName=e.token.name,s.tokenAmount=e.token.amount,s.tokenSupply=e.token.supply,s.tokenFungibility=e.token.fungibility),s.tokenUnits=e.tokenUnits,s.molecules=e.molecules,s.balance=Number(e.amount),s.pubkey=e.pubkey,s.createdAt=e.createdAt,s}getWallets(e=null){const t=this.data();if(!t)return null;const s=[];for(let n of t)s.push(Me.toClientWallet({data:n,secret:e}));return s}payload(){return this.getWallets()}}class We extends Ae{constructor(e){super(e),this.$__query=h.gql`query( $address: String, $bundleHash: String, $token: String, $position: String, $unspent: Boolean ) {
+    }`}createResponse(e){return new ve({query:this,json:e})}static createVariables({bundleHash:e=null,key:t=null,value:s=null,latest:n=!0}){const i={latest:n};return e&&(i["string"==typeof e?"bundleHash":"bundleHashes"]=e),t&&(i["string"==typeof t?"key":"keys"]=t),s&&(i["string"==typeof s?"value":"values"]=s),i}}class Me extends Ie{constructor({query:e,json:t}){super({query:e,json:t,dataKey:"data.Wallet"})}static toClientWallet({data:e,secret:t=null}){let s;return null===e.position||void 0===e.position?s=z.create({secretOrBundle:e.bundleHash,token:e.tokenSlug,batchId:e.batchId,characters:e.characters}):(s=new z({secret:t,token:e.tokenSlug,position:e.position,batchId:e.batchId,characters:e.characters}),s.address=e.address,s.bundle=e.bundleHash),e.token&&(s.tokenName=e.token.name,s.tokenAmount=e.token.amount,s.tokenSupply=e.token.supply,s.tokenFungibility=e.token.fungibility),s.tokenUnits=e.tokenUnits,s.molecules=e.molecules,s.balance=Number(e.amount),s.pubkey=e.pubkey,s.createdAt=e.createdAt,s}getWallets(e=null){const t=this.data();if(!t)return null;const s=[];for(let n of t)s.push(Me.toClientWallet({data:n,secret:e}));return s}payload(){return this.getWallets()}}class We extends Ae{constructor(e){super(e),this.$__query=h.gql`query( $address: String, $bundleHash: String, $token: String, $position: String, $unspent: Boolean ) {
       Wallet( address: $address, bundleHash: $bundleHash, token: $token, position: $position, unspent: $unspent ) {
         address,
         bundleHash,
@@ -250,7 +250,7 @@
         createdAt,
         updatedAt
       }
-    }`}createResponse(e){return new $t({query:this,json:e})}}class It extends Ie{constructor({query:e,json:t}){super({query:e,json:t}),this.dataKey="data.ActiveUser",this.init()}payload(){const e=this.data();if(!e)return null;const t=[];for(let s of e){const e={...s};e.jsonData&&(e.jsonData=JSON.parse(e.jsonData)),e.createdAt&&(e.createdAt=new Date(e.createdAt)),e.updatedAt&&(e.updatedAt=new Date(e.updatedAt)),t.push(e)}return t}}class At extends Ae{constructor(e){super(e),this.$__query=h.gql`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
+    }`}createResponse(e){return new $t({query:this,json:e})}}class It extends Ie{constructor({query:e,json:t}){super({query:e,json:t,dataKey:"data.ActiveUser"})}payload(){const e=this.data();if(!e)return null;const t=[];for(let s of e){const e={...s};e.jsonData&&(e.jsonData=JSON.parse(e.jsonData)),e.createdAt&&(e.createdAt=new Date(e.createdAt)),e.updatedAt&&(e.updatedAt=new Date(e.updatedAt)),t.push(e)}return t}}class At extends Ae{constructor(e){super(e),this.$__query=h.gql`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
       ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {
         bundleHash,
         metaType,
@@ -259,7 +259,7 @@
         createdAt,
         updatedAt
       }
-    }`}createResponse(e){return new It({query:this,json:e})}}class xt extends Ie{constructor({query:e,json:t}){super({query:e,json:t}),this.dataKey="data.UserActivity",this.init()}payload(){const e=JSON.parse(JSON.stringify(this.data()));if(e.instances)for(const t of e.instances)t.jsonData=JSON.parse(t.jsonData);return e}}class Tt extends Ae{constructor(e){super(e),this.$__query=h.gql`query UserActivity (
+    }`}createResponse(e){return new It({query:this,json:e})}}class xt extends Ie{constructor({query:e,json:t}){super({query:e,json:t,dataKey:"data.UserActivity"})}payload(){const e=JSON.parse(JSON.stringify(this.data()));if(e.instances)for(const t of e.instances)t.jsonData=JSON.parse(t.jsonData);return e}}class Tt extends Ae{constructor(e){super(e),this.$__query=h.gql`query UserActivity (
       $bundleHash:String,
       $metaType: String,
       $metaId: String,

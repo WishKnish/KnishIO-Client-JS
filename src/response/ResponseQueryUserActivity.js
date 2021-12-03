@@ -61,10 +61,9 @@ export default class ResponseQueryUserActivity extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.UserActivity'
     } );
-    this.dataKey = 'data.UserActivity';
-    this.init();
   }
 
   payload () {
