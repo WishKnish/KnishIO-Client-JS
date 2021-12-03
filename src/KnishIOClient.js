@@ -814,8 +814,20 @@ export default class KnishIOClient {
    * @return {Promise<*>}
    */
   async queryAtom ( {
-    tokenSlugs,
+    molecularHashes,
     bundleHashs,
+    positions,
+    walletAddress,
+    isotopes,
+    tokenSlugs,
+    cellSlugs,
+    batchIds,
+    values,
+    metaTypes,
+    metaIds,
+    indexes,
+    limit,
+    order,
   } ) {
 
     if ( this.$__logging ) {
@@ -825,11 +837,22 @@ export default class KnishIOClient {
     const query = this.createQuery( QueryAtom );
 
     let variables = {
+      molecularHashes: molecularHashes,
+      bundleHashs: bundleHashs,
+      positions: positions,
+      walletAddress: walletAddress,
+      isotopes: isotopes,
       tokenSlugs: tokenSlugs,
+      cellSlugs: cellSlugs,
+      batchIds: batchIds,
+      values: values,
+      metaTypes: metaTypes,
+      metaIds: metaIds,
+      indexes: indexes,
+      limit: limit,
+      order: order,
     };
-    if ( bundleHashs ) {
-      variables.bundleHashs = bundleHashs;
-    }
+
     return await query.execute( {
       variables: variables,
     } );
