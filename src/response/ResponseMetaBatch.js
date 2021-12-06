@@ -65,10 +65,9 @@ export default class ResponseMetaBatch extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.MetaBatch'
     } );
-    this.dataKey = 'data.MetaBatch';
-    this.init();
   }
 
 }

@@ -66,10 +66,9 @@ export default class ResponseBalance extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.Balance'
     } );
-    this.dataKey = 'data.Balance';
-    this.init();
   }
 
   /**

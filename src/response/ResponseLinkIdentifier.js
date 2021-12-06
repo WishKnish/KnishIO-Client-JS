@@ -66,10 +66,9 @@ export default class ResponseLinkIdentifier extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.LinkIdentifier'
     } );
-    this.dataKey = 'data.LinkIdentifier';
-    this.init();
   }
 
   /**

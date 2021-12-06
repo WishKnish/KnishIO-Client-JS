@@ -66,11 +66,10 @@ export default class ResponseProposeMolecule extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.ProposeMolecule'
     } );
-    this.dataKey = 'data.ProposeMolecule';
     this.$__clientMolecule = query.molecule();
-    this.init();
   }
 
   /**

@@ -66,10 +66,9 @@ export default class ResponseContinuId extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.ContinuId'
     } );
-    this.dataKey = 'data.ContinuId';
-    this.init();
   }
 
   /**
