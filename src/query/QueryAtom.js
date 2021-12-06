@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from './Query';
 import { gql } from '@apollo/client/core';
-import ResponseAtom from '../response/ResponseAtom';
+import Response from "../response/Response";
 
 /**
  * Query for getting the balance of a given wallet or token slug
@@ -113,12 +113,13 @@ export default class QueryAtom extends Query {
 
   /**
    * @param {object} json
-   * @return {ResponseBalance}
+   * @return {ResponseAtom}
    */
   createResponse ( json ) {
-    return new ResponseAtom( {
+    return new Response( {
       query: this,
-      json
-    } );
+      json,
+      dataKey: 'data.Atom'
+    } ).data();
   }
 }
