@@ -45,86 +45,64 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import { gql } from '@apollo/client/core';
-import ResponseAtom from '../response/ResponseAtom';
+
+import Query from '../query/Query';
+import Response from './Response';
 
 /**
- * Query for getting the balance of a given wallet or token slug
+ * Response for MetaType Query
  */
-export default class QueryAtom extends Query {
+export default class ResponseAtom extends Response {
+
   /**
    * Class constructor
    *
-   * @param apolloClient
+   * @param {Query} query
+   * @param {object} json
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
-
-    this.$__query = gql`query(
-        $molecularHashes: [String!],
-        $bundleHashs: [String!],
-        $positions:[String!],
-        $walletAddress: [String!],
-        $isotopes: [String!],
-        $tokenSlugs: [String!],
-        $cellSlugs: [String!],
-        $batchIds: [String!],
-        $values: [String!],
-        $metaTypes: [String!],
-        $metaIds: [String!],
-        $indexes: [String!],
-        $queryArgs: QueryArgs,
-     ) {
-      Atom(
-        molecularHashes: $molecularHashes,
-        bundleHashs: $bundleHashs,
-        positions: $positions,
-        walletAddress: $walletAddress,
-        isotopes: $isotopes,
-        tokenSlugs: $tokenSlugs,
-        cellSlugs: $cellSlugs,
-        batchIds: $batchIds,
-        values: $values,
-        metaTypes: $metaTypes,
-        metaIds: $metaIds,
-        indexes: $indexes,
-        queryArgs: $queryArgs,
-      ) {
-        instances {
-          position,
-          walletAddress,
-          tokenSlug,
-          isotope,
-          index,
-          molecularHash,
-          metaId,
-          metaType,
-          batchId,
-          value,
-          bundleHashs,
-          cellSlugs,
-          createdAt,
-          otsFragment
-        },
-        paginatorInfo {
-          currentPage,
-          total
-        }
-      }
-    }`;
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json,
+      dataKey: 'data.Atom'
+    } );
   }
 
   /**
-   * Returns a Response object
+   * Returns meta type instance results
    *
-   * @param {object} json
-   * @return {ResponseMetaType}
+   * @return {null|*}
    */
-  createResponse ( json ) {
-    return new ResponseAtom( {
-      query: this,
-      json
-    } );
+  payload () {
+    const metaTypeData = this.data();
+
+    if ( !metaTypeData || metaTypeData.length === 0 ) {
+      return null;
+    }
+
+    let response = {
+      instances: {},
+      instanceCount: {},
+      paginatorInfo: {}
+    };
+
+    let metaData = metaTypeData.pop();
+
+    if ( metaData.instances ) {
+      response.instances = metaData.instances;
+    }
+
+    if ( metaData.instanceCount ) {
+      response.instanceCount = metaData.instanceCount;
+    }
+
+    if ( metaData.paginatorInfo ) {
+      response.paginatorInfo = metaData.paginatorInfo;
+    }
+
+    return response;
   }
 }
