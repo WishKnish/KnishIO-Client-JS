@@ -88,6 +88,7 @@ import QueryActiveSession from './query/QueryActiveSession';
 import QueryUserActivity from './query/QueryUserActivity';
 import QueryToken from './query/QueryToken';
 import BatchIdException from './exception/BatchIdException';
+import AuthorizationRejectedException from './exception/AuthorizationRejectedException';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -1603,9 +1604,18 @@ export default class KnishIOClient {
       }
     } );
 
-    // Create & set an auth token from the response data
-    const authToken = AuthToken.create( response.payload(), wallet );
-    this.setAuthToken( authToken );
+    // Did the authorization molecule get accepted?
+    if ( response.status() === 'accepted' ) {
+
+      // Create & set an auth token from the response data
+      const authToken = AuthToken.create( response.payload(), wallet );
+      this.setAuthToken( authToken );
+
+    } else {
+
+      throw new AuthorizationRejectedException( `KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }` );
+
+    }
 
     return response;
   }
@@ -1651,9 +1661,18 @@ export default class KnishIOClient {
      */
     const response = await query.execute( {} );
 
-    // Create & set an auth token from the response data
-    const authToken = AuthToken.create( response.payload(), wallet );
-    this.setAuthToken( authToken );
+    // Did the authorization molecule get accepted?
+    if ( response.status() === 'accepted' ) {
+
+      // Create & set an auth token from the response data
+      const authToken = AuthToken.create( response.payload(), wallet );
+      this.setAuthToken( authToken );
+
+    } else {
+
+      throw new AuthorizationRejectedException( `KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }` );
+
+    }
 
     return response;
   }
