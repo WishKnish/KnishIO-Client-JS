@@ -809,14 +809,27 @@ export default class KnishIOClient {
   }
 
   /**
-   * Query atom
+   * Queries Knish.IO Atoms
    *
-   * @param batchId
-   * @return {Promise<*>}
+   * @param molecularHashes
+   * @param bundleHashes
+   * @param positions
+   * @param walletAddress
+   * @param isotopes
+   * @param tokenSlugs
+   * @param cellSlugs
+   * @param batchIds
+   * @param values
+   * @param metaTypes
+   * @param metaIds
+   * @param indexes
+   * @param limit
+   * @param order
+   * @return {Promise<Response>}
    */
   async queryAtom ( {
     molecularHashes,
-    bundleHashs,
+    bundleHashes,
     positions,
     walletAddress,
     isotopes,
@@ -828,18 +841,19 @@ export default class KnishIOClient {
     metaIds,
     indexes,
     limit,
-    order,
+    order
   } ) {
 
     if ( this.$__logging ) {
       console.info( 'KnishIOClient::queryAtom() - Querying atom instances' );
     }
 
+    /** @type QueryAtom */
     const query = this.createQuery( QueryAtom );
 
     let variables = {
       molecularHashes: molecularHashes,
-      bundleHashs: bundleHashs,
+      bundleHashs: bundleHashes,
       positions: positions,
       walletAddress: walletAddress,
       isotopes: isotopes,
@@ -851,11 +865,11 @@ export default class KnishIOClient {
       metaIds: metaIds,
       indexes: indexes,
       limit: limit,
-      order: order,
+      order: order
     };
 
     return await query.execute( {
-      variables: variables,
+      variables: variables
     } );
   }
 
