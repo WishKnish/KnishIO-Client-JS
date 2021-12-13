@@ -1670,18 +1670,9 @@ export default class KnishIOClient {
       }
     } );
 
-    // Did the authorization molecule get accepted?
-    if ( response.status() === 'accepted' ) {
-
-      // Create & set an auth token from the response data
-      const authToken = AuthToken.create( response.payload(), wallet );
-      this.setAuthToken( authToken );
-
-    } else {
-
-      throw new AuthorizationRejectedException( `KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }` );
-
-    }
+    // Create & set an auth token from the response data
+    const authToken = AuthToken.create( response.payload(), wallet );
+    this.setAuthToken( authToken );
 
     return response;
   }
