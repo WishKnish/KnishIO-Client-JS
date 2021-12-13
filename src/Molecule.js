@@ -59,6 +59,7 @@ import BalanceInsufficientException from './exception/BalanceInsufficientExcepti
 import MetaMissingException from './exception/MetaMissingException';
 import NegativeAmountException from './exception/NegativeAmountException';
 import { deepCloning } from './libraries/array';
+import Meta from './Meta';
 
 const USE_META_CONTEXT = false;
 const DEFAULT_META_CONTEXT = 'https://www.schema.org';
@@ -248,6 +249,34 @@ export default class Molecule {
         metaType: 'walletBundle',
         metaId: userRemainderWallet.bundle,
         meta: this.finalMetas( {}, userRemainderWallet ),
+        index: this.generateIndex()
+      } )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+  }
+
+  /**
+   *
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {object} meta
+   * @param {object} policy
+   *
+   * @return {Molecule}
+   */
+  addPolicyAtom( { metaType, metaId, meta = {}, policy = {} } ) {
+
+    this.molecularHash = null;
+
+    this.addAtom(
+      Atom.create.R( {
+        token: 'USER',
+        metaType,
+        metaId,
+        meta: Meta.policy( this.finalMetas( meta ), policy ),
         index: this.generateIndex()
       } )
     );
@@ -595,12 +624,14 @@ export default class Molecule {
    * @param {array|object} meta
    * @param {string} metaType
    * @param {string} metaId
+   * @param {object} policy
    * @return {Molecule}
    */
   initMeta ( {
     meta,
     metaType,
-    metaId
+    metaId,
+    policy
   } ) {
 
     this.molecularHash = null;
@@ -619,6 +650,13 @@ export default class Molecule {
         index: this.generateIndex()
       } )
     );
+
+    this.addPolicyAtom( {
+      metaType,
+      metaId,
+      meta,
+      policy
+    } );
 
     // User remainder atom
     this.addUserRemainderAtom( this.remainderWallet );

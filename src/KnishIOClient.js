@@ -88,6 +88,8 @@ import QueryActiveSession from './query/QueryActiveSession';
 import QueryUserActivity from './query/QueryUserActivity';
 import QueryToken from './query/QueryToken';
 import BatchIdException from './exception/BatchIdException';
+import QueryPolicy from './query/QueryPolicy';
+import MutationCreatePolicy from './mutation/MutationCreatePolicy';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -1016,7 +1018,8 @@ export default class KnishIOClient {
   async createMeta ( {
     metaType,
     metaId,
-    meta = null
+    meta = null,
+    policy = {}
   } ) {
 
     /**
@@ -1036,7 +1039,8 @@ export default class KnishIOClient {
     query.fillMolecule( {
       metaType,
       metaId,
-      meta: metas
+      meta: metas,
+      policy
     } );
 
     return await query.execute( {} );
@@ -1070,6 +1074,46 @@ export default class KnishIOClient {
     } );
 
     return await query.execute( {} );
+  }
+
+  async createPolicy( {
+    metaType,
+    metaId,
+    policy = {}
+  } ) {
+    /**
+     * @type {MutationCreatePolicy}
+     */
+    const query = await this.createMoleculeMutation( {
+      mutationClass: MutationCreatePolicy
+    } );
+
+    query.fillMolecule( {
+      metaType,
+      metaId,
+      policy
+    } );
+
+    return await query.execute( {} );
+  }
+
+  /**
+   *
+   * @param {string} metaType
+   * @param {string} metaId
+   * @returns {ResponsePolicy}
+   */
+  async queryPolicy( {
+    metaType,
+    metaId
+  } ) {
+    const query = this.createQuery( QueryPolicy );
+    return query.execute( {
+      variables: {
+        metaType,
+        metaId
+      }
+    } );
   }
 
   /**
