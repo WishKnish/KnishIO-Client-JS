@@ -74,8 +74,7 @@ export default class QueryAtom extends Query {
         $metaTypes: [String!],
         $metaIds: [String!],
         $indexes: [String!],
-        $limit: Int,
-        $order: String
+        $queryArgs: QueryArgs,
      ) {
       Atom(
         molecularHashes: $molecularHashes,
@@ -90,30 +89,37 @@ export default class QueryAtom extends Query {
         metaTypes: $metaTypes,
         metaIds: $metaIds,
         indexes: $indexes,
-        limit: $limit,
-        order: $order
+        queryArgs: $queryArgs,
       ) {
-        position,
-        walletAddress,
-        tokenSlug,
-        isotope,
-        index,
-        molecularHash,
-        metaId,
-        metaType,
-        batchId,
-        value,
-        bundleHashs,
-        cellSlugs,
-        createdAt,
-        otsFragment
+        instances {
+          position,
+          walletAddress,
+          tokenSlug,
+          isotope,
+          index,
+          molecularHash,
+          metaId,
+          metaType,
+          batchId,
+          value,
+          bundleHashs,
+          cellSlugs,
+          createdAt,
+          otsFragment
+        },
+        paginatorInfo {
+          currentPage,
+          total
+        }
       }
     }`;
   }
 
   /**
+   * Returns a Response object
+   *
    * @param {object} json
-   * @return {ResponseBalance}
+   * @return {ResponseMetaType}
    */
   createResponse ( json ) {
     return new ResponseAtom( {

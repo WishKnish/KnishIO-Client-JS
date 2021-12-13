@@ -45,12 +45,12 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
+
 import Query from '../query/Query';
 import Response from './Response';
-import Meta from '../Meta';
 
 /**
- * Response for Atom query
+ * Response for MetaType Query
  */
 export default class ResponseAtom extends Response {
 
@@ -66,24 +66,43 @@ export default class ResponseAtom extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.Atom'
     } );
-    this.dataKey = 'data.Atom';
-    this.init();
   }
 
   /**
-   * Returns a atom with normalized metadata
+   * Returns meta type instance results
    *
-   * @return {{}|null}
+   * @return {null|*}
    */
   payload () {
-    const atomData = this.data();
+    const metaTypeData = this.data();
 
-    if ( !atomData || atomData.length === 0 ) {
+    if ( !metaTypeData || metaTypeData.length === 0 ) {
       return null;
     }
 
-    return atomData;
+    let response = {
+      instances: {},
+      instanceCount: {},
+      paginatorInfo: {}
+    };
+
+    let metaData = metaTypeData.pop();
+
+    if ( metaData.instances ) {
+      response.instances = metaData.instances;
+    }
+
+    if ( metaData.instanceCount ) {
+      response.instanceCount = metaData.instanceCount;
+    }
+
+    if ( metaData.paginatorInfo ) {
+      response.paginatorInfo = metaData.paginatorInfo;
+    }
+
+    return response;
   }
 }
