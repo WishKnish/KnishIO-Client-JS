@@ -7,6 +7,16 @@ import {
 import ResponseMolecule from '../response/ResponseProposeMolecule';
 
 
+/*
+
+import Test from '@wishknish/knishio-client-js/src/test/Test';
+
+let uri = 'https://lumen.knishio/graphql';
+let test = new Test( uri );
+test.testAll();
+
+*/
+
 export default class Test {
 
   /**
