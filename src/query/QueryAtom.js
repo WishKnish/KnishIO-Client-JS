@@ -45,110 +45,80 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from './Response';
-import Dot from '../libraries/Dot';
-import Molecule from '../Molecule';
+import Query from './Query';
+import { gql } from '@apollo/client/core';
+import ResponseAtom from '../response/ResponseAtom';
 
 /**
- * Response for proposing new Molecules
+ * Query for getting the balance of a given wallet or token slug
  */
-export default class ResponseProposeMolecule extends Response {
-
+export default class QueryAtom extends Query {
   /**
    * Class constructor
    *
-   * @param {MutationProposeMolecule} query
+   * @param apolloClient
+   */
+  constructor ( apolloClient ) {
+    super( apolloClient );
+
+    this.$__query = gql`query(
+        $molecularHashes: [String!],
+        $bundleHashs: [String!],
+        $positions:[String!],
+        $walletAddress: [String!],
+        $isotopes: [String!],
+        $tokenSlugs: [String!],
+        $cellSlugs: [String!],
+        $batchIds: [String!],
+        $values: [String!],
+        $metaTypes: [String!],
+        $metaIds: [String!],
+        $indexes: [String!],
+        $limit: Int,
+        $order: String
+     ) {
+      Atom(
+        molecularHashes: $molecularHashes,
+        bundleHashs: $bundleHashs,
+        positions: $positions,
+        walletAddress: $walletAddress,
+        isotopes: $isotopes,
+        tokenSlugs: $tokenSlugs,
+        cellSlugs: $cellSlugs,
+        batchIds: $batchIds,
+        values: $values,
+        metaTypes: $metaTypes,
+        metaIds: $metaIds,
+        indexes: $indexes,
+        limit: $limit,
+        order: $order
+      ) {
+        position,
+        walletAddress,
+        tokenSlug,
+        isotope,
+        index,
+        molecularHash,
+        metaId,
+        metaType,
+        batchId,
+        value,
+        bundleHashs,
+        cellSlugs,
+        createdAt,
+        otsFragment
+      }
+    }`;
+  }
+
+  /**
    * @param {object} json
+   * @return {ResponseBalance}
    */
-  constructor ( {
-    query,
-    json
-  } ) {
-    super( {
-      query,
-      json,
-      dataKey: 'data.ProposeMolecule'
+  createResponse ( json ) {
+    return new ResponseAtom( {
+      query: this,
+      json
     } );
-    this.$__clientMolecule = query.molecule();
   }
-
-  /**
-   * Initialize response object with payload data
-   */
-  init () {
-    const payloadJson = Dot.get( this.data(), 'payload' );
-    try {
-      this.$__payload = Object.prototype.toString.call( payloadJson ) === '[object String]' ?
-        JSON.parse( payloadJson ) : payloadJson;
-    } catch ( err ) {
-      this.$__payload = null;
-    }
-  }
-
-
-  /**
-   * Returns the client molecule
-   */
-  clientMolecule () {
-    return this.$__clientMolecule;
-  }
-
-  /**
-   * Returns the resulting molecule
-   *
-   * @return {Molecule|null}
-   */
-  molecule () {
-
-    const data = this.data();
-
-    if ( !data ) {
-      return null;
-    }
-
-    const molecule = new Molecule( {} );
-
-    molecule.molecularHash = Dot.get( data, 'molecularHash' );
-    molecule.status = Dot.get( data, 'status' );
-    molecule.createdAt = Dot.get( data, 'createdAt' );
-
-    return molecule;
-  }
-
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @return {boolean}
-   */
-  success () {
-    return this.status() === 'accepted';
-  }
-
-  /**
-   * Returns the status of the proposal
-   *
-   * @return {string}
-   */
-  status () {
-    return Dot.get( this.data(), 'status', 'rejected' );
-  }
-
-  /**
-   * Returns the reason for rejection
-   *
-   * @return {string}
-   */
-  reason () {
-    return Dot.get( this.data(), 'reason', 'Invalid response from server' );
-  }
-
-  /**
-   * Returns payload object
-   *
-   * @return {null}
-   */
-  payload () {
-    return this.$__payload;
-  }
-
 }

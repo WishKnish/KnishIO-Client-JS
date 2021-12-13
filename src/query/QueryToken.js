@@ -81,11 +81,10 @@ export default class QueryToken extends Query {
    * @returns {Response}
    */
   createResponse ( json ) {
-    let responseObject = new Response( {
+    return new Response( {
       query: this,
-      json
+      json,
+      dataKey: 'data.Token'
     } );
-    responseObject.dataKey = 'data.Token';
-    return responseObject;
   }
 }

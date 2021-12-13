@@ -88,8 +88,11 @@ import QueryActiveSession from './query/QueryActiveSession';
 import QueryUserActivity from './query/QueryUserActivity';
 import QueryToken from './query/QueryToken';
 import BatchIdException from './exception/BatchIdException';
+import AuthorizationRejectedException from './exception/AuthorizationRejectedException';
+import QueryAtom from './query/QueryAtom';
 import QueryPolicy from './query/QueryPolicy';
 import MutationCreatePolicy from './mutation/MutationCreatePolicy';
+
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -366,11 +369,21 @@ export default class KnishIOClient {
    * @return {string}
    */
   getSecret () {
-    if ( !this.$__secret ) {
-      throw new UnauthenticatedException( 'KnishIOClient::getSecret() - Unable to find a stored getSecret!' );
+    if ( !this.hasSecret() ) {
+      throw new UnauthenticatedException( 'KnishIOClient::getSecret() - Unable to find a stored secret! Have you set a secret?' );
     }
     return this.$__secret;
   }
+
+  /**
+   * Returns whether or not a bundle hash is being stored for this session
+   *
+   * @return {boolean}
+   */
+  hasBundle () {
+    return !!this.$__bundle;
+  }
+
 
   /**
    * Returns the bundle hash for this session
@@ -378,8 +391,8 @@ export default class KnishIOClient {
    * @return {string}
    */
   getBundle () {
-    if ( !this.$__bundle ) {
-      throw new UnauthenticatedException( 'KnishIOClient::getBundle() - Unable to find a stored getBundle!' );
+    if ( !this.hasBundle() ) {
+      throw new UnauthenticatedException( 'KnishIOClient::getBundle() - Unable to find a stored bundle! Have you set a secret?' );
     }
     return this.$__bundle;
   }
@@ -795,6 +808,71 @@ export default class KnishIOClient {
 
     return await query.execute( {
       variables: { batchId: batchId }
+    } );
+  }
+
+  /**
+   * Queries Knish.IO Atoms
+   *
+   * @param molecularHashes
+   * @param bundleHashes
+   * @param positions
+   * @param walletAddress
+   * @param isotopes
+   * @param tokenSlugs
+   * @param cellSlugs
+   * @param batchIds
+   * @param values
+   * @param metaTypes
+   * @param metaIds
+   * @param indexes
+   * @param limit
+   * @param order
+   * @return {Promise<Response>}
+   */
+  async queryAtom ( {
+    molecularHashes,
+    bundleHashes,
+    positions,
+    walletAddress,
+    isotopes,
+    tokenSlugs,
+    cellSlugs,
+    batchIds,
+    values,
+    metaTypes,
+    metaIds,
+    indexes,
+    limit,
+    order
+  } ) {
+
+    if ( this.$__logging ) {
+      console.info( 'KnishIOClient::queryAtom() - Querying atom instances' );
+    }
+
+    /** @type QueryAtom */
+    const query = this.createQuery( QueryAtom );
+
+    let variables = {
+      molecularHashes: molecularHashes,
+      bundleHashs: bundleHashes,
+      positions: positions,
+      walletAddress: walletAddress,
+      isotopes: isotopes,
+      tokenSlugs: tokenSlugs,
+      cellSlugs: cellSlugs,
+      batchIds: batchIds,
+      values: values,
+      metaTypes: metaTypes,
+      metaIds: metaIds,
+      indexes: indexes,
+      limit: limit,
+      order: order
+    };
+
+    return await query.execute( {
+      variables: variables
     } );
   }
 
@@ -1627,9 +1705,18 @@ export default class KnishIOClient {
       }
     } );
 
-    // Create & set an auth token from the response data
-    const authToken = AuthToken.create( response.payload(), wallet );
-    this.setAuthToken( authToken );
+    // Did the authorization molecule get accepted?
+    if ( response.status() === 'accepted' ) {
+
+      // Create & set an auth token from the response data
+      const authToken = AuthToken.create( response.payload(), wallet );
+      this.setAuthToken( authToken );
+
+    } else {
+
+      throw new AuthorizationRejectedException( `KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }` );
+
+    }
 
     return response;
   }
@@ -1675,9 +1762,18 @@ export default class KnishIOClient {
      */
     const response = await query.execute( {} );
 
-    // Create & set an auth token from the response data
-    const authToken = AuthToken.create( response.payload(), wallet );
-    this.setAuthToken( authToken );
+    // Did the authorization molecule get accepted?
+    if ( response.status() === 'accepted' ) {
+
+      // Create & set an auth token from the response data
+      const authToken = AuthToken.create( response.payload(), wallet );
+      this.setAuthToken( authToken );
+
+    } else {
+
+      throw new AuthorizationRejectedException( `KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }` );
+
+    }
 
     return response;
   }
@@ -1693,7 +1789,7 @@ export default class KnishIOClient {
    * @returns {Promise<ResponseRequestAuthorizationGuest|ResponseRequestAuthorization|null>}
    */
   async requestAuthToken ( {
-    secret,
+    secret = null,
     seed = null,
     cellSlug = null,
     encrypt = false
@@ -1714,7 +1810,6 @@ export default class KnishIOClient {
 
     // Auth in process...
     this.$__authInProcess = true;
-
 
     // Auth token response
     let response;
