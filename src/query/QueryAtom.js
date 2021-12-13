@@ -63,9 +63,9 @@ export default class QueryAtom extends Query {
 
     this.$__query = gql`query(
         $molecularHashes: [String!],
-        $bundleHashs: [String!],
+        $bundleHashes: [String!],
         $positions:[String!],
-        $walletAddress: [String!],
+        $walletAddresses: [String!],
         $isotopes: [String!],
         $tokenSlugs: [String!],
         $cellSlugs: [String!],
@@ -78,9 +78,9 @@ export default class QueryAtom extends Query {
      ) {
       Atom(
         molecularHashes: $molecularHashes,
-        bundleHashs: $bundleHashs,
+        bundleHashes: $bundleHashes,
         positions: $positions,
-        walletAddress: $walletAddress,
+        walletAddresses: $walletAddresses,
         isotopes: $isotopes,
         tokenSlugs: $tokenSlugs,
         cellSlugs: $cellSlugs,
@@ -119,12 +119,146 @@ export default class QueryAtom extends Query {
    * Returns a Response object
    *
    * @param {object} json
-   * @return {ResponseMetaType}
+   * @return {ResponseAtom}
    */
   createResponse ( json ) {
     return new ResponseAtom( {
       query: this,
       json
     } );
+  }
+
+  /**
+   * Queries Knish.IO Atoms
+   *
+   * @param {string[]} molecularHashes
+   * @param {string} molecularHash
+   * @param {string[]} bundleHashes
+   * @param {string} bundleHash
+   * @param {string[]} positions
+   * @param {string} position
+   * @param {string[]} walletAddresses
+   * @param {string} walletAddress
+   * @param {string[]} isotopes
+   * @param {string} isotope
+   * @param {string[]} tokenSlugs
+   * @param {string} tokenSlug
+   * @param {string[]} cellSlugs
+   * @param {string} cellSlug
+   * @param {string[]} batchIds
+   * @param {string} batchId
+   * @param {string[]} values
+   * @param {string|number} value
+   * @param {string[]} metaTypes
+   * @param {string} metaType
+   * @param {string[]} metaIds
+   * @param {string} metaId
+   * @param {string[]} indexes
+   * @param {number} index
+   * @param {object} QueryArgs
+   * @return {object}
+   */
+  static createVariables( {
+    molecularHashes,
+    molecularHash,
+    bundleHashes,
+    bundleHash,
+    positions,
+    position,
+    walletAddresses,
+    walletAddress,
+    isotopes,
+    isotope,
+    tokenSlugs,
+    tokenSlug,
+    cellSlugs,
+    cellSlug,
+    batchIds,
+    batchId,
+    values,
+    value,
+    metaTypes,
+    metaType,
+    metaIds,
+    metaId,
+    indexes,
+    index,
+    QueryArgs
+  } ) {
+    if ( molecularHash ) {
+      molecularHashes = molecularHashes || [];
+      molecularHashes.push( molecularHash );
+    }
+
+    if ( bundleHash ) {
+      bundleHashes = bundleHashes || [];
+      bundleHashes.push( bundleHash );
+    }
+
+    if ( position ) {
+      positions = positions || [];
+      positions.push( position );
+    }
+
+    if ( walletAddress ) {
+      walletAddresses = walletAddresses || [];
+      walletAddresses.push( walletAddress );
+    }
+
+    if ( isotope ) {
+      isotopes = isotopes || [];
+      isotopes.push( isotope );
+    }
+
+    if ( tokenSlug ) {
+      tokenSlugs = tokenSlugs || [];
+      tokenSlugs.push( tokenSlug );
+    }
+
+    if ( cellSlug ) {
+      cellSlugs = cellSlugs || [];
+      cellSlugs.push( cellSlug );
+    }
+
+    if ( batchId ) {
+      batchIds = batchIds || [];
+      batchIds.push( batchId );
+    }
+
+    if ( value ) {
+      values = values || [];
+      values.push( value );
+    }
+
+    if ( metaType ) {
+      metaIds = metaIds || [];
+      metaIds.push( metaType );
+    }
+
+    if ( metaId ) {
+      metaIds = metaIds || [];
+      metaIds.push( metaId );
+    }
+
+    if ( index ) {
+      indexes = indexes || [];
+      indexes.push( index );
+    }
+
+    return {
+      molecularHashes: molecularHashes,
+      bundleHashes: bundleHashes,
+      positions: positions,
+      walletAddresses: walletAddresses,
+      isotopes: isotopes,
+      tokenSlugs: tokenSlugs,
+      cellSlugs: cellSlugs,
+      batchIds: batchIds,
+      values: values,
+      metaTypes: metaTypes,
+      metaIds: metaIds,
+      indexes: indexes,
+      QueryArgs: QueryArgs
+    };
   }
 }
