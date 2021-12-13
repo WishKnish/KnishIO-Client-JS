@@ -45,88 +45,80 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-
-import Response from './Response';
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
+import Query from './Query';
+import { gql } from '@apollo/client/core';
+import ResponseAtom from '../response/ResponseAtom';
 
 /**
- * Response for Guest Authorization Request
+ * Query for getting the balance of a given wallet or token slug
  */
-export default class ResponseAuthorizationGuest extends Response {
-
+export default class QueryAtom extends Query {
   /**
    * Class constructor
    *
-   * @param {Query} query
+   * @param apolloClient
+   */
+  constructor ( apolloClient ) {
+    super( apolloClient );
+
+    this.$__query = gql`query(
+        $molecularHashes: [String!],
+        $bundleHashs: [String!],
+        $positions:[String!],
+        $walletAddress: [String!],
+        $isotopes: [String!],
+        $tokenSlugs: [String!],
+        $cellSlugs: [String!],
+        $batchIds: [String!],
+        $values: [String!],
+        $metaTypes: [String!],
+        $metaIds: [String!],
+        $indexes: [String!],
+        $limit: Int,
+        $order: String
+     ) {
+      Atom(
+        molecularHashes: $molecularHashes,
+        bundleHashs: $bundleHashs,
+        positions: $positions,
+        walletAddress: $walletAddress,
+        isotopes: $isotopes,
+        tokenSlugs: $tokenSlugs,
+        cellSlugs: $cellSlugs,
+        batchIds: $batchIds,
+        values: $values,
+        metaTypes: $metaTypes,
+        metaIds: $metaIds,
+        indexes: $indexes,
+        limit: $limit,
+        order: $order
+      ) {
+        position,
+        walletAddress,
+        tokenSlug,
+        isotope,
+        index,
+        molecularHash,
+        metaId,
+        metaType,
+        batchId,
+        value,
+        bundleHashs,
+        cellSlugs,
+        createdAt,
+        otsFragment
+      }
+    }`;
+  }
+
+  /**
    * @param {object} json
+   * @return {ResponseBalance}
    */
-  constructor ( {
-    query,
-    json
-  } ) {
-    super( {
-      query,
-      json,
-      dataKey: 'data.AccessToken'
+  createResponse ( json ) {
+    return new ResponseAtom( {
+      query: this,
+      json
     } );
-  }
-
-  /**
-   * Returns the reason for rejection
-   *
-   * @return {string}
-   */
-  reason () {
-    return 'Invalid response from server';
-  }
-
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @return {boolean}
-   */
-  success () {
-    return this.payload() !== null;
-  }
-
-  /**
-   * Returns a wallet with balance
-   *
-   * @return {null|Wallet}
-   */
-  payload () {
-    return this.data();
-  }
-
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @return {*}
-   */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
-    }
-    return Dot.get( this.payload(), key );
-  }
-
-  /**
-   * Returns the auth token
-   *
-   * @return {*}
-   */
-  token () {
-    return this.payloadKey( 'token' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @return {*}
-   */
-  time () {
-    return this.payloadKey( 'time' );
   }
 }

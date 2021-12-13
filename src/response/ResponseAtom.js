@@ -45,15 +45,14 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-
+import Query from '../query/Query';
 import Response from './Response';
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
+import Meta from '../Meta';
 
 /**
- * Response for Guest Authorization Request
+ * Response for Atom query
  */
-export default class ResponseAuthorizationGuest extends Response {
+export default class ResponseAtom extends Response {
 
   /**
    * Class constructor
@@ -67,66 +66,24 @@ export default class ResponseAuthorizationGuest extends Response {
   } ) {
     super( {
       query,
-      json,
-      dataKey: 'data.AccessToken'
+      json
     } );
+    this.dataKey = 'data.Atom';
+    this.init();
   }
 
   /**
-   * Returns the reason for rejection
+   * Returns a atom with normalized metadata
    *
-   * @return {string}
-   */
-  reason () {
-    return 'Invalid response from server';
-  }
-
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @return {boolean}
-   */
-  success () {
-    return this.payload() !== null;
-  }
-
-  /**
-   * Returns a wallet with balance
-   *
-   * @return {null|Wallet}
+   * @return {{}|null}
    */
   payload () {
-    return this.data();
-  }
+    const atomData = this.data();
 
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @return {*}
-   */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
+    if ( !atomData || atomData.length === 0 ) {
+      return null;
     }
-    return Dot.get( this.payload(), key );
-  }
 
-  /**
-   * Returns the auth token
-   *
-   * @return {*}
-   */
-  token () {
-    return this.payloadKey( 'token' );
-  }
-
-  /**
-   * Returns timestamp
-   *
-   * @return {*}
-   */
-  time () {
-    return this.payloadKey( 'time' );
+    return atomData;
   }
 }
