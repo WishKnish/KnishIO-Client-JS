@@ -66,6 +66,7 @@ export default class Test {
    */
   async testAll () {
     await this.client( this.secrets[ 0 ] );
+    return;
     await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
