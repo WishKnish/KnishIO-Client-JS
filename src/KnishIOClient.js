@@ -665,7 +665,7 @@ export default class KnishIOClient {
    * @param {object[]|null} metas
    * @returns {Promise<ResponseAtom>}
    */
-  async queryMetaViaAtom( {
+  async queryMetaViaAtom ( {
     metaType,
     metaId,
     key = null,
@@ -902,7 +902,7 @@ export default class KnishIOClient {
     index,
     metas,
     latest,
-    QueryArgs= {
+    QueryArgs = {
       limit: 15,
       offset: 1
     }
@@ -916,7 +916,7 @@ export default class KnishIOClient {
     const query = this.createQuery( QueryAtom );
 
     return await query.execute( {
-      variables: QueryAtom.createVariables({
+      variables: QueryAtom.createVariables( {
         molecularHashes,
         molecularHash,
         bundleHashes,

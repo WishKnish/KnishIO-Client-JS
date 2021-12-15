@@ -62,22 +62,22 @@ export default class QueryAtom extends Query {
     super( apolloClient );
 
     this.$__query = gql`query(
-        $molecularHashes: [String!],
-        $bundleHashes: [String!],
-        $positions:[String!],
-        $walletAddresses: [String!],
-        $isotopes: [String!],
-        $tokenSlugs: [String!],
-        $cellSlugs: [String!],
-        $batchIds: [String!],
-        $values: [String!],
-        $metaTypes: [String!],
-        $metaIds: [String!],
-        $indexes: [String!],
-        $metas: [ MetaInput! ],
-        $latest: Boolean,
-        $queryArgs: QueryArgs,
-     ) {
+      $molecularHashes: [String!],
+      $bundleHashes: [String!],
+      $positions:[String!],
+      $walletAddresses: [String!],
+      $isotopes: [String!],
+      $tokenSlugs: [String!],
+      $cellSlugs: [String!],
+      $batchIds: [String!],
+      $values: [String!],
+      $metaTypes: [String!],
+      $metaIds: [String!],
+      $indexes: [String!],
+      $metas: [ MetaInput! ],
+      $latest: Boolean,
+      $queryArgs: QueryArgs,
+    ) {
       Atom(
         molecularHashes: $molecularHashes,
         bundleHashes: $bundleHashes,
@@ -165,7 +165,7 @@ export default class QueryAtom extends Query {
    * @param {object} QueryArgs
    * @return {object}
    */
-  static createVariables( {
+  static createVariables ( {
     molecularHashes,
     molecularHash,
     bundleHashes,
