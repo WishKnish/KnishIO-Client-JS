@@ -333,7 +333,7 @@ export default class Wallet {
    * Uses the current wallet's private key to decrypt the given message
    *
    * @param {string|object} message
-   * @return {array|object|null}
+   * @return {null|any}
    */
   decryptMyMessage ( message ) {
 
