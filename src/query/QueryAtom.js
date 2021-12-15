@@ -74,6 +74,8 @@ export default class QueryAtom extends Query {
         $metaTypes: [String!],
         $metaIds: [String!],
         $indexes: [String!],
+        $metas: [ MetaInput! ],
+        $latest: Boolean,
         $queryArgs: QueryArgs,
      ) {
       Atom(
@@ -89,6 +91,8 @@ export default class QueryAtom extends Query {
         metaTypes: $metaTypes,
         metaIds: $metaIds,
         indexes: $indexes,
+        metas: $metas,
+        latest: $latest,
         queryArgs: $queryArgs,
       ) {
         instances {
@@ -100,6 +104,7 @@ export default class QueryAtom extends Query {
           molecularHash,
           metaId,
           metaType,
+          metasJson,
           batchId,
           value,
           bundleHashs,
@@ -153,8 +158,10 @@ export default class QueryAtom extends Query {
    * @param {string} metaType
    * @param {string[]} metaIds
    * @param {string} metaId
-   * @param {string[]} indexes
+   * @param {number[]} indexes
    * @param {number} index
+   * @param {object} metas,
+   * @param {boolean} latest
    * @param {object} QueryArgs
    * @return {object}
    */
@@ -183,6 +190,8 @@ export default class QueryAtom extends Query {
     metaId,
     indexes,
     index,
+    metas,
+    latest,
     QueryArgs
   } ) {
     if ( molecularHash ) {
@@ -258,6 +267,8 @@ export default class QueryAtom extends Query {
       metaTypes: metaTypes,
       metaIds: metaIds,
       indexes: indexes,
+      metas: metas,
+      latest: latest,
       QueryArgs: QueryArgs
     };
   }

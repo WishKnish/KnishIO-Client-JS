@@ -658,6 +658,41 @@ export default class KnishIOClient {
   }
 
   /**
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {string|null} key
+   * @param {string|null} value
+   * @param {object[]|null} metas
+   * @returns {Promise<ResponseAtom>}
+   */
+  async queryMetaViaAtom( {
+    metaType,
+    metaId,
+    key = null,
+    value = null,
+    metas = null
+  } ) {
+    if ( key ) {
+      const item = { key };
+      metas = metas || [];
+
+      if ( value ) {
+        item[ 'value' ] = value;
+      }
+
+      metas.push( metas );
+    }
+
+    return await this.queryAtom( {
+      metaType,
+      metaId,
+      metas,
+      isotopes: [ 'C', 'M' ],
+      latest: true
+    } );
+  }
+
+  /**
    * Retrieves metadata for the given metaType and provided parameters
    *
    * @param {string|array|null} metaType
@@ -835,8 +870,10 @@ export default class KnishIOClient {
    * @param {string} metaId
    * @param {string[]} indexes
    * @param {number} index
+   * @param {object} metas,
+   * @param {boolean} latest
    * @param {object} QueryArgs
-   * @return {Promise<Response>}
+   * @return {Promise<ResponseAtom>}
    */
   async queryAtom ( {
     molecularHashes,
@@ -863,6 +900,8 @@ export default class KnishIOClient {
     metaId,
     indexes,
     index,
+    metas,
+    latest,
     QueryArgs= {
       limit: 15,
       offset: 1
@@ -902,6 +941,8 @@ export default class KnishIOClient {
         metaId,
         indexes,
         index,
+        metas,
+        latest,
         QueryArgs
       } )
     } );
