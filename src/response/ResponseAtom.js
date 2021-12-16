@@ -45,12 +45,11 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from '../query/Query';
+
 import Response from './Response';
-import Meta from '../Meta';
 
 /**
- * Response for Atom query
+ * Response for MetaType Query
  */
 export default class ResponseAtom extends Response {
 
@@ -66,24 +65,56 @@ export default class ResponseAtom extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.Atom'
     } );
-    this.dataKey = 'data.Atom';
-    this.init();
   }
 
   /**
-   * Returns a atom with normalized metadata
+   * Returns meta type instance results
    *
-   * @return {{}|null}
+   * @return {null|*}
    */
   payload () {
-    const atomData = this.data();
+    const metaTypeData = this.data();
 
-    if ( !atomData || atomData.length === 0 ) {
+    if ( !metaTypeData ) {
       return null;
     }
 
-    return atomData;
+    let response = {
+      instances: [],
+      instanceCount: {},
+      paginatorInfo: {}
+    };
+
+    if ( metaTypeData.instances ) {
+      response.instances = metaTypeData.instances;
+    }
+
+    if ( metaTypeData.instanceCount ) {
+      response.instanceCount = metaTypeData.instanceCount;
+    }
+
+    if ( metaTypeData.paginatorInfo ) {
+      response.paginatorInfo = metaTypeData.paginatorInfo;
+    }
+
+    return response;
+  }
+
+  metas () {
+    const response = this.payload();
+    const metas = [];
+
+    if ( response && response.instances ) {
+      for ( const instance of response.instances ) {
+        if ( instance.metasJson ) {
+          metas.push( JSON.parse( instance.metasJson ) );
+        }
+      }
+    }
+
+    return metas;
   }
 }

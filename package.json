@@ -1,6 +1,6 @@
 {
   "name": "@wishknish/knishio-client-js",
-  "version": "0.4.30",
+  "version": "0.4.34",
   "productName": "Knish.IO Javascript SDK Client",
   "description": "JavaScript implementation of the Knish.IO SDK to consume Knish.IO GraphQL APIs.",
   "license": "GPL-3.0-or-later",
@@ -39,9 +39,9 @@
     "graphql"
   ],
   "dependencies": {
+    "@apollo/client": "^3.4.16",
     "@stablelib/base64": "^1.0.0",
     "@stablelib/utf8": "^1.0.0",
-    "@apollo/client": "^3.4.16",
     "base-x": "^3.0.8",
     "big-integer": "^1.6.48",
     "buffer": "^6.0.3",

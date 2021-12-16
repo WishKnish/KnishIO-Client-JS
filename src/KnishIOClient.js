@@ -661,6 +661,41 @@ export default class KnishIOClient {
   }
 
   /**
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {string|null} key
+   * @param {string|null} value
+   * @param {object[]|null} metas
+   * @returns {Promise<ResponseAtom>}
+   */
+  async queryMetaViaAtom ( {
+    metaType,
+    metaId,
+    key = null,
+    value = null,
+    metas = null
+  } ) {
+    if ( key ) {
+      const item = { key };
+      metas = metas || [];
+
+      if ( value ) {
+        item[ 'value' ] = value;
+      }
+
+      metas.push( metas );
+    }
+
+    return await this.queryAtom( {
+      metaType,
+      metaId,
+      metas,
+      isotopes: [ 'C', 'M' ],
+      latest: true
+    } );
+  }
+
+  /**
    * Retrieves metadata for the given metaType and provided parameters
    *
    * @param {string|array|null} metaType
@@ -814,37 +849,66 @@ export default class KnishIOClient {
   /**
    * Queries Knish.IO Atoms
    *
-   * @param molecularHashes
-   * @param bundleHashes
-   * @param positions
-   * @param walletAddress
-   * @param isotopes
-   * @param tokenSlugs
-   * @param cellSlugs
-   * @param batchIds
-   * @param values
-   * @param metaTypes
-   * @param metaIds
-   * @param indexes
-   * @param limit
-   * @param order
-   * @return {Promise<Response>}
+   * @param {string[]} molecularHashes
+   * @param {string} molecularHash
+   * @param {string[]} bundleHashes
+   * @param {string} bundleHash
+   * @param {string[]} positions
+   * @param {string} position
+   * @param {string[]} walletAddresses
+   * @param {string} walletAddress
+   * @param {string[]} isotopes
+   * @param {string} isotope
+   * @param {string[]} tokenSlugs
+   * @param {string} tokenSlug
+   * @param {string[]} cellSlugs
+   * @param {string} cellSlug
+   * @param {string[]} batchIds
+   * @param {string} batchId
+   * @param {string[]} values
+   * @param {string|number} value
+   * @param {string[]} metaTypes
+   * @param {string} metaType
+   * @param {string[]} metaIds
+   * @param {string} metaId
+   * @param {string[]} indexes
+   * @param {number} index
+   * @param {object} metas,
+   * @param {boolean} latest
+   * @param {object} QueryArgs
+   * @return {Promise<ResponseAtom>}
    */
   async queryAtom ( {
     molecularHashes,
+    molecularHash,
     bundleHashes,
+    bundleHash,
     positions,
+    position,
+    walletAddresses,
     walletAddress,
     isotopes,
+    isotope,
     tokenSlugs,
+    tokenSlug,
     cellSlugs,
+    cellSlug,
     batchIds,
+    batchId,
     values,
+    value,
     metaTypes,
+    metaType,
     metaIds,
+    metaId,
     indexes,
-    limit,
-    order
+    index,
+    metas,
+    latest,
+    QueryArgs = {
+      limit: 15,
+      offset: 1
+    }
   } ) {
 
     if ( this.$__logging ) {
@@ -854,25 +918,36 @@ export default class KnishIOClient {
     /** @type QueryAtom */
     const query = this.createQuery( QueryAtom );
 
-    let variables = {
-      molecularHashes: molecularHashes,
-      bundleHashs: bundleHashes,
-      positions: positions,
-      walletAddress: walletAddress,
-      isotopes: isotopes,
-      tokenSlugs: tokenSlugs,
-      cellSlugs: cellSlugs,
-      batchIds: batchIds,
-      values: values,
-      metaTypes: metaTypes,
-      metaIds: metaIds,
-      indexes: indexes,
-      limit: limit,
-      order: order
-    };
-
     return await query.execute( {
-      variables: variables
+      variables: QueryAtom.createVariables( {
+        molecularHashes,
+        molecularHash,
+        bundleHashes,
+        bundleHash,
+        positions,
+        position,
+        walletAddresses,
+        walletAddress,
+        isotopes,
+        isotope,
+        tokenSlugs,
+        tokenSlug,
+        cellSlugs,
+        cellSlug,
+        batchIds,
+        batchId,
+        values,
+        value,
+        metaTypes,
+        metaType,
+        metaIds,
+        metaId,
+        indexes,
+        index,
+        metas,
+        latest,
+        QueryArgs
+      } )
     } );
   }
 
