@@ -1746,7 +1746,7 @@ export default class KnishIOClient {
     } );
 
     // Did the authorization molecule get accepted?
-    if ( response.status() === 'accepted' ) {
+    if ( response.success() ) {
 
       // Create & set an auth token from the response data
       const authToken = AuthToken.create( response.payload(), wallet );
@@ -1803,7 +1803,7 @@ export default class KnishIOClient {
     const response = await query.execute( {} );
 
     // Did the authorization molecule get accepted?
-    if ( response.status() === 'accepted' ) {
+    if ( response.success() ) {
 
       // Create & set an auth token from the response data
       const authToken = AuthToken.create( response.payload(), wallet );
