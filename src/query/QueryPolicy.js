@@ -45,48 +45,44 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule';
-import ResponseCreateMeta from '../response/ResponseCreateMeta';
 
-/**
- * Query for creating new Meta attached to some MetaType
- */
-export default class MutationCreateMeta extends MutationProposeMolecule {
+import Query from './Query';
+import { gql } from '@apollo/client/core';
+import ResponsePolicy from '../response/ResponsePolicy';
+
+export default class QueryPolicy extends Query {
   /**
-   * Fills a molecule with an appropriate metadata atom
+   * Class constructor
    *
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {array|object} meta
-   * @param {object} policy
+   * @param apolloClient
    */
-  fillMolecule ( {
-    metaType,
-    metaId,
-    meta,
-    policy
-  } ) {
-    this.$__molecule.initMeta( {
-      meta,
-      metaType,
-      metaId,
-      policy
-    } );
-    this.$__molecule.sign( {} );
-    this.$__molecule.check();
+  constructor ( apolloClient ) {
+    super( apolloClient );
+
+    this.$__query = gql`query( $metaType: String, $metaId: String, ) {
+      Policy( metaType: $metaType, metaId: $metaId ) {
+        molecularHash,
+        position,
+        metaType,
+        metaId,
+        conditions,
+        callback,
+        rule,
+        createdAt
+      }
+    }`;
   }
 
   /**
-   * Builds a new Response object from a JSON string
+   * Returns a Response object
    *
    * @param {object} json
-   * @return {ResponseCreateMeta}
+   * @return {ResponsePolicy}
    */
   createResponse ( json ) {
-    return new ResponseCreateMeta( {
+    return new ResponsePolicy( {
       query: this,
       json
     } );
   }
-
 }

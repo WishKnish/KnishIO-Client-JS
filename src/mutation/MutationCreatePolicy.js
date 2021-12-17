@@ -46,32 +46,21 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import MutationProposeMolecule from './MutationProposeMolecule';
-import ResponseCreateMeta from '../response/ResponseCreateMeta';
+import ResponseCreatePolicy from '../response/ResponseCreatePolicy';
 
-/**
- * Query for creating new Meta attached to some MetaType
- */
-export default class MutationCreateMeta extends MutationProposeMolecule {
-  /**
-   * Fills a molecule with an appropriate metadata atom
-   *
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {array|object} meta
-   * @param {object} policy
-   */
+export default class MutationCreatePolicy extends MutationProposeMolecule {
   fillMolecule ( {
     metaType,
     metaId,
-    meta,
-    policy
+    policy = {}
   } ) {
-    this.$__molecule.initMeta( {
-      meta,
+    this.$__molecule.addPolicyAtom( {
       metaType,
       metaId,
+      meta: {},
       policy
     } );
+    this.$__molecule.addUserRemainderAtom( this.$__molecule.remainderWallet );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
   }
@@ -80,13 +69,12 @@ export default class MutationCreateMeta extends MutationProposeMolecule {
    * Builds a new Response object from a JSON string
    *
    * @param {object} json
-   * @return {ResponseCreateMeta}
+   * @return {ResponseCreatePolicy}
    */
   createResponse ( json ) {
-    return new ResponseCreateMeta( {
+    return new ResponseCreatePolicy( {
       query: this,
       json
     } );
   }
-
 }

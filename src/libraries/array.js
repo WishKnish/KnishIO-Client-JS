@@ -44,3 +44,21 @@ export function deepCloning (
   }
   return r || o; // Return r if it was found in cache or built in if(){}
 }
+
+/**
+ * @param arrays
+ * @returns {*[]}
+ */
+export function diff( ...arrays ) {
+
+  return [].concat( ...arrays.map( ( arr, i) => {
+
+    const others = arrays.slice( 0 );
+
+    others.splice( i, 1 );
+
+    const unique = [ ...new Set( [].concat( ...others ) ) ];
+
+    return arr.filter( item => !unique.includes( item ) );
+  } ) );
+}
