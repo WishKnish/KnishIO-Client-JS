@@ -140,7 +140,7 @@ export function encryptMessage ( message, recipientPublicKey, characters = null 
  * @param {string} privateKey
  * @param {string} publicKey
  * @param {string|null} characters
- * @return {array|object|null}
+ * @return {null|any}
  */
 export function decryptMessage ( message, privateKey, publicKey, characters = null ) {
   return ( new Soda( characters ) ).decrypt( message, privateKey, publicKey );

@@ -34,7 +34,7 @@ export default class Soda {
    * @param {string} decrypted
    * @param {string} privateKey
    * @param {string} publicKey
-   * @return {null|array|object}
+   * @return {null|any}
    */
   decrypt ( decrypted, privateKey, publicKey ) {
     try {

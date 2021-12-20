@@ -408,7 +408,7 @@ export default class Test {
       if ( !response.success() ) {
         this.debug( response );
       }
-      console.assert( response.status() === 'accepted', response );
+      console.assert( response.success(), response );
     }
 
     // Default response
