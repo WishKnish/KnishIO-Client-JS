@@ -45,50 +45,76 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import { gql } from '@apollo/client/core';
-import ResponseBalance from '../response/ResponseBalance';
+
+import Response from './Response';
 
 /**
- * Query for getting the balance of a given wallet or token slug
+ * Response for MetaType Query
  */
-export default class QueryBalance extends Query {
+export default class ResponseAtom extends Response {
+
   /**
    * Class constructor
    *
-   * @param apolloClient
+   * @param {Query} query
+   * @param {object} json
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
-
-    this.$__query = gql`query( $address: String, $bundleHash: String, $token: String, $position: String ) {
-      Balance( address: $address, bundleHash: $bundleHash, token: $token, position: $position ) {
-        address,
-        bundleHash,
-        tokenSlug,
-        batchId,
-        position,
-        amount,
-        characters,
-        pubkey,
-        createdAt,
-        tokenUnits {
-          id,
-          name,
-          metas
-        }
-      }
-    }`;
+  constructor ( {
+    query,
+    json
+  } ) {
+    super( {
+      query,
+      json,
+      dataKey: 'data.Atom'
+    } );
   }
 
   /**
-   * @param {object} json
-   * @return {ResponseBalance}
+   * Returns meta type instance results
+   *
+   * @return {null|*}
    */
-  createResponse ( json ) {
-    return new ResponseBalance( {
-      query: this,
-      json
-    } );
+  payload () {
+    const metaTypeData = this.data();
+
+    if ( !metaTypeData ) {
+      return null;
+    }
+
+    let response = {
+      instances: [],
+      instanceCount: {},
+      paginatorInfo: {}
+    };
+
+    if ( metaTypeData.instances ) {
+      response.instances = metaTypeData.instances;
+    }
+
+    if ( metaTypeData.instanceCount ) {
+      response.instanceCount = metaTypeData.instanceCount;
+    }
+
+    if ( metaTypeData.paginatorInfo ) {
+      response.paginatorInfo = metaTypeData.paginatorInfo;
+    }
+
+    return response;
+  }
+
+  metas () {
+    const response = this.payload();
+    const metas = [];
+
+    if ( response && response.instances ) {
+      for ( const instance of response.instances ) {
+        if ( instance.metasJson ) {
+          metas.push( JSON.parse( instance.metasJson ) );
+        }
+      }
+    }
+
+    return metas;
   }
 }

@@ -1,4 +1,4 @@
-import Base58 from './Base58';
+import BaseX from './BaseX';
 import { shake256 } from 'js-sha3';
 import { box } from 'tweetnacl';
 import { Buffer } from 'buffer';
@@ -18,7 +18,7 @@ export default class Soda {
    * @param {string|null} characters
    */
   constructor ( characters = null ) {
-    this.base = new Base58( characters );
+    this.base = new BaseX( { characters: characters || 'BASE64' } );
   }
 
   /**
@@ -34,7 +34,7 @@ export default class Soda {
    * @param {string} decrypted
    * @param {string} privateKey
    * @param {string} publicKey
-   * @return {null|array|object}
+   * @return {null|any}
    */
   decrypt ( decrypted, privateKey, publicKey ) {
     try {

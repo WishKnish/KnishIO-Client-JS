@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from './Query';
 import Response from '../response/Response';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 
 /**
  * Query for retrieving Meta Asset information

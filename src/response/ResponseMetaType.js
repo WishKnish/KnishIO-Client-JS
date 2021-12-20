@@ -66,10 +66,9 @@ export default class ResponseMetaType extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.MetaType'
     } );
-    this.dataKey = 'data.MetaType';
-    this.init();
   }
 
   /**

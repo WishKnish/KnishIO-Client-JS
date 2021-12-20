@@ -47,7 +47,6 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import { shake256 } from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
-import Base58 from './libraries/Base58';
 import {
   chunkSubstr,
   isHex
@@ -62,6 +61,7 @@ import {
   generateBatchId,
   hashShare
 } from './libraries/crypto';
+import BaseX from './libraries/BaseX';
 
 /**
  * Wallet class represents the set of public and private
@@ -100,16 +100,12 @@ export default class Wallet {
     this.bundle = secret ? generateBundleHash( secret ) : null;
     this.batchId = batchId;
     this.position = position;
-    this.characters = ( new Base58() )[ characters ] !== 'undefined' ? characters : null;
+    this.characters = characters || 'BASE64';
 
     if ( secret ) {
-
       this.position = this.position || generateWalletPosition();
-
       this.prepareKeys( secret );
-
     }
-
   }
 
   /**
@@ -256,15 +252,15 @@ export default class Wallet {
    * Sets up a batch ID - either using the sender's, or a new one
    *
    * @param {Wallet} sourceWallet
-   * @param {boolean} remainder
+   * @param {boolean} isRemainder
    */
   initBatchId ( {
     sourceWallet,
-    remainder = false
+    isRemainder = false
   } ) {
 
     if ( sourceWallet.batchId ) {
-      this.batchId = remainder ? sourceWallet.batchId : generateBatchId( {} );
+      this.batchId = isRemainder ? sourceWallet.batchId : generateBatchId( {} );
     }
   }
 
@@ -337,7 +333,7 @@ export default class Wallet {
    * Uses the current wallet's private key to decrypt the given message
    *
    * @param {string|object} message
-   * @return {array|object|null}
+   * @return {null|any}
    */
   decryptMyMessage ( message ) {
 
@@ -352,6 +348,28 @@ export default class Wallet {
     }
 
     return decryptMessage( encrypt, this.getMyEncPrivateKey(), pubKey, this.characters );
+  }
+
+  /**
+   * @param {string|object} message
+   *
+   * @returns {Buffer|ArrayBuffer|Uint8Array}
+   */
+  decryptBinary ( message ) {
+    const decrypt = this.decryptMyMessage( message );
+    return ( new BaseX( { characters: 'BASE64' } ) ).decode( decrypt );
+  }
+
+  /**
+   * @param {Buffer|ArrayBuffer|Uint8Array} message
+   * @returns {{string}}
+   */
+  encryptBinary ( message ) {
+    const arg = Array.from( arguments ).slice( 1 );
+
+    const messageBase64 = ( new BaseX( { characters: 'BASE64' } ) ).encode( message );
+
+    return this.encryptMyMessage( messageBase64, ...arg );
   }
 
   /**

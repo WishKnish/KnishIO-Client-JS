@@ -45,50 +45,22 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import { gql } from '@apollo/client/core';
-import ResponseBalance from '../response/ResponseBalance';
+import BaseException from './BaseException';
 
 /**
- * Query for getting the balance of a given wallet or token slug
+ * Thrown when attempt to authorize is rejected by the node
  */
-export default class QueryBalance extends Query {
+export default class AuthorizationRejectedException extends BaseException {
+
   /**
    * Class constructor
    *
-   * @param apolloClient
+   * @param {string} message
+   * @param {string|null} fileName
+   * @param {number|null} lineNumber
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
-
-    this.$__query = gql`query( $address: String, $bundleHash: String, $token: String, $position: String ) {
-      Balance( address: $address, bundleHash: $bundleHash, token: $token, position: $position ) {
-        address,
-        bundleHash,
-        tokenSlug,
-        batchId,
-        position,
-        amount,
-        characters,
-        pubkey,
-        createdAt,
-        tokenUnits {
-          id,
-          name,
-          metas
-        }
-      }
-    }`;
-  }
-
-  /**
-   * @param {object} json
-   * @return {ResponseBalance}
-   */
-  createResponse ( json ) {
-    return new ResponseBalance( {
-      query: this,
-      json
-    } );
+  constructor ( message = 'Authorization attempt rejected by ledger.', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber );
+    this.name = 'AuthorizationRejectedException';
   }
 }

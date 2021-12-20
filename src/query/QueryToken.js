@@ -47,12 +47,13 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from './Query';
 import { gql } from '@apollo/client/core';
-import ResponseBalance from '../response/ResponseBalance';
+import Response from '../response/Response';
+
 
 /**
- * Query for getting the balance of a given wallet or token slug
+ * Query for getting the token info
  */
-export default class QueryBalance extends Query {
+export default class QueryToken extends Query {
   /**
    * Class constructor
    *
@@ -61,34 +62,29 @@ export default class QueryBalance extends Query {
   constructor ( apolloClient ) {
     super( apolloClient );
 
-    this.$__query = gql`query( $address: String, $bundleHash: String, $token: String, $position: String ) {
-      Balance( address: $address, bundleHash: $bundleHash, token: $token, position: $position ) {
-        address,
-        bundleHash,
-        tokenSlug,
-        batchId,
-        position,
+    this.$__query = gql`query( $slug: String, $slugs: [ String! ], $limit: Int, $order: String ) {
+      Token( slug: $slug, slugs: $slugs, limit: $limit, order: $order ) {
+        slug,
+        name,
+        fungibility,
+        supply,
+        decimals,
         amount,
-        characters,
-        pubkey,
-        createdAt,
-        tokenUnits {
-          id,
-          name,
-          metas
-        }
+        icon,
       }
     }`;
   }
 
   /**
-   * @param {object} json
-   * @return {ResponseBalance}
+   *
+   * @param json
+   * @returns {Response}
    */
   createResponse ( json ) {
-    return new ResponseBalance( {
+    return new Response( {
       query: this,
-      json
+      json,
+      dataKey: 'data.Token'
     } );
   }
 }

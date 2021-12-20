@@ -66,10 +66,9 @@ export default class ResponseWalletList extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.Wallet'
     } );
-    this.dataKey = 'data.Wallet';
-    this.init();
   }
 
   /**
@@ -152,6 +151,6 @@ export default class ResponseWalletList extends Response {
    * @return {null|[Wallet]}
    */
   payload () {
-    this.getWallets();
+    return this.getWallets();
   }
 }

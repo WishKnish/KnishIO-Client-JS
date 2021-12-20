@@ -66,10 +66,9 @@ export default class ResponseQueryActiveSession extends Response {
   } ) {
     super( {
       query,
-      json
+      json,
+      dataKey: 'data.ActiveUser'
     } );
-    this.dataKey = 'data.ActiveUser';
-    this.init();
   }
 
   payload () {

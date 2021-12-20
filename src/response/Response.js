@@ -93,6 +93,11 @@ export default class Response {
   }
 
   /**
+   *
+   */
+  init () {}
+
+  /**
    * @return {*}
    */
   data () {
@@ -137,10 +142,4 @@ export default class Response {
     return null;
   }
 
-  /**
-   * @return {*}
-   */
-  init () {
-    return null;
-  }
 }

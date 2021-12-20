@@ -2,9 +2,9 @@ import {
   ApolloLink,
   Operation,
   NextLink
-} from 'apollo-link';
+} from '@apollo/client/core';
 import { print } from 'graphql';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 import {
   operationName,
   operationType

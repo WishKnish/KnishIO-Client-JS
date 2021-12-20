@@ -14,11 +14,14 @@ import MetaMissingException from './../exception/MetaMissingException';
 import WrongTokenTypeException from './../exception/WrongTokenTypeException';
 import BatchIdException from './../exception/BatchIdException';
 import Atom from './../Atom';
+import Meta from './../Meta';
+import Wallet from './../Wallet';
 import {
   base64ToHex,
   chunkSubstr
 } from './strings';
 import { shake256 } from 'js-sha3';
+import KnishIOInvalidPolicyException from './../exception/KnishIOInvalidPolicyException';
 
 /**
  *
@@ -130,7 +133,9 @@ export default class CheckMolecule {
 
     CheckMolecule.missing( molecule );
 
-    for ( let atom of CheckMolecule.isotopeFilter( 'M', molecule.atoms ) ) {
+    const policyArray = [ 'readPolicy', 'writePolicy' ];
+
+    for ( /** @type {Atom} */ let atom of CheckMolecule.isotopeFilter( 'M', molecule.atoms ) ) {
 
       if ( atom.meta.length < 1 ) {
         throw new MetaMissingException();
@@ -138,6 +143,33 @@ export default class CheckMolecule {
 
       if ( atom.token !== 'USER' ) {
         throw new WrongTokenTypeException( `Check::isotopeM() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!` );
+      }
+
+      const metas = Meta.aggregateMeta( atom.meta );
+
+      for ( const key of policyArray ) {
+        let policy = metas[ key ];
+
+        if ( policy ) {
+          policy = JSON.parse( policy );
+
+          for ( const [ policyName, policyValue ] of Object.entries( policy ) ) {
+
+            if ( !policyArray.includes( policyName ) ) {
+
+              if ( !Object.keys( metas ).includes( policyName ) ) {
+                throw new KnishIOInvalidPolicyException( `${ policyName } is missing from the meta.` );
+              }
+
+              for ( const value of policyValue ) {
+
+                if ( !Wallet.isBundleHash( value ) && ![ 'all', 'self' ].includes( value ) ) {
+                  throw new KnishIOInvalidPolicyException( `${ value } does not correspond to the format of the policy.` );
+                }
+              }
+            }
+          }
+        }
       }
     }
 

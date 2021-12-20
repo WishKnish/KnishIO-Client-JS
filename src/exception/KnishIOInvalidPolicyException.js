@@ -45,28 +45,21 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import {
-  Operation,
-  NextLink
-} from 'apollo-link';
-import { ErrorLink as RootErrorLink } from 'apollo-link-error';
+import BaseException from './BaseException';
 
-
-class ErrorLink extends RootErrorLink {
-
-  constructor ( errorHandler ) {
-    super( errorHandler );
-  }
-
+/**
+ * Exception for bad GraphQL responses
+ */
+export default class KnishIOInvalidPolicyException extends BaseException {
   /**
+   * Class constructor
    *
-   * @param {Operation} operation
-   * @param {NextLink} forward
-   * @return {*}
+   * @param {string} message
+   * @param {string|null} fileName
+   * @param {number|null} lineNumber
    */
-  request ( operation, forward ) {
-    return forward( operation );
+  constructor ( message = '', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber );
+    this.name = 'KnishIOInvalidPolicyException';
   }
 }
-
-export default ErrorLink;

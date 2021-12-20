@@ -45,18 +45,20 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { ApolloClient } from 'apollo-client';
+import {
+  ApolloClient,
+  from,
+  concat
+} from '@apollo/client/core';
 import fetch from 'isomorphic-fetch';
-import { ApolloLink } from 'apollo-link';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache } from '@apollo/client/cache';
+import { onError } from '@apollo/client/link/error';
 
 import HttpLink from './HttpLink';
-import ErrorLink from './ErrorLink';
 import EchoLink from './EchoLink';
 import AuthLink from './AuthLink';
 import { errorHandler } from './handler';
 import CipherLink from './CipherLink';
-
 
 class Client extends ApolloClient {
 
@@ -77,7 +79,6 @@ class Client extends ApolloClient {
       fetch: fetch,
       transportBatching: true
     } );
-    const error = new ErrorLink( errorHandler );
     const auth = new AuthLink();
 
     let cipher = null;
@@ -95,10 +96,10 @@ class Client extends ApolloClient {
       links.push( echo );
     }
 
-    links.push( error.concat( http ) );
+    links.push( concat( onError( errorHandler ), http ) );
 
     super( {
-      link: ApolloLink.from( links ),
+      link: from( links ),
       cache: new InMemoryCache(),
       connectToDevTools: true,
       defaultOptions: {

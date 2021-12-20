@@ -17,9 +17,7 @@ export default class Base58 {
    * @return {string}
    */
   encode ( data ) {
-
     return this.$encoder.encode( Buffer.from( data ) );
-
   }
 
   /**
@@ -27,9 +25,7 @@ export default class Base58 {
    * @return {Buffer}
    */
   decode ( data ) {
-
     return this.$encoder.decode( data );
-
   }
 
   /**

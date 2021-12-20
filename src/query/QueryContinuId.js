@@ -47,7 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from './Query';
 import ResponseContinuId from '../response/ResponseContinuId';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 
 /**
  * Queries the node for the next wallet to sign with for ContinuID

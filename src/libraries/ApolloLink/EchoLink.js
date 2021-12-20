@@ -49,7 +49,7 @@ import {
   ApolloLink,
   Operation,
   NextLink
-} from 'apollo-link';
+} from '@apollo/client/core';
 import Echo from 'laravel-echo';
 import createRequestHandler from './handler';
 import io from 'socket.io-client';

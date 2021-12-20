@@ -10,10 +10,12 @@ import ResponseMolecule from '../response/ResponseProposeMolecule';
 export default class Test {
 
   /**
-   * Constructor
+   *
    * @param graphqlUrl
+   * @param encrypt
    */
-  constructor ( graphqlUrl ) {
+  constructor ( graphqlUrl, encrypt = false ) {
+    this.encrypt = encrypt;
     this.secrets = [ generateSecret(), generateSecret() ];
     this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT' ];
     this.graphqlUrl = graphqlUrl;
@@ -53,9 +55,8 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
-    const encrypt = false;
-    await this.client( this.secrets[ 0 ], encrypt );
-    await this.client( this.secrets[ 1 ], encrypt );
+    await this.client( this.secrets[ 0 ] );
+    await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
     await this.testCreateWallet();
@@ -77,12 +78,10 @@ export default class Test {
    */
   async testCreateToken () {
 
-    let client = await this.client( this.secrets[ 0 ] );
-    let serverClient = await this.client( process.env.SECRET_TOKEN_KNISH );
-
     let responses = {};
 
     // Regular stackable token
+    let client = await this.client( this.secrets[ 0 ] );
     responses[ 0 ] = await client.createToken( {
       token: this.tokenSlugs[ 0 ],
       amount: 1000.000000000000,
@@ -98,6 +97,7 @@ export default class Test {
     this.checkResponse( responses[ 0 ], 'testCreateToken.0' );
 
     // Server stackable token
+    let serverClient = await this.client( process.env.SECRET_TOKEN_KNISH );
     responses[ 1 ] = await serverClient.createToken( {
       token: this.tokenSlugs[ 1 ],
       amount: 1000.000000000000,
@@ -351,11 +351,10 @@ export default class Test {
    * Get a client for each secret
    *
    * @param secret
-   * @param encrypt
    * @param cellSlug
    * @returns {Promise<*>}
    */
-  async client ( secret, encrypt = false, cellSlug = 'unit_test' ) {
+  async client ( secret, cellSlug = 'unit_test' ) {
 
     // Create new client
     if ( !this.clients[ secret ] ) {
@@ -370,7 +369,7 @@ export default class Test {
       await this.clients[ secret ]
         .requestAuthToken( {
           secret,
-          encrypt,
+          encrypt: this.encrypt,
           cellSlug
         } );
       if ( !this.clients[ secret ].getAuthToken() ) {
@@ -398,7 +397,7 @@ export default class Test {
       if ( !response.success() ) {
         this.debug( response );
       }
-      console.assert( response.status() === 'accepted', response );
+      console.assert( response.success(), response );
     }
 
     // Default response
