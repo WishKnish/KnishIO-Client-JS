@@ -677,6 +677,42 @@ export default class KnishIOClient {
     this.subscribe().unsubscribeAll();
   }
 
+
+  /**
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {string|null} key
+   * @param {string|null} value
+   * @param {object[]|null} metas
+   * @returns {Promise<ResponseAtom>}
+   */
+  async queryMetaViaAtom ( {
+    metaType,
+    metaId,
+    key = null,
+    value = null,
+    metas = null
+  } ) {
+    if ( key ) {
+      const item = { key };
+      metas = metas || [];
+
+      if ( value ) {
+        item[ 'value' ] = value;
+      }
+
+      metas.push( metas );
+    }
+
+    return await this.queryAtom( {
+      metaType,
+      metaId,
+      metas,
+      isotopes: [ 'C', 'M' ],
+      latest: true
+    } );
+  }
+
   /**
    * Retrieves metadata for the given metaType and provided parameters
    *
@@ -1762,7 +1798,7 @@ export default class KnishIOClient {
     const response = await this.executeQuery( query );
 
     // Did the authorization molecule get accepted?
-    if ( response.status() === 'accepted' ) {
+    if ( response.success() ) {
 
       // Create & set an auth token from the response data
       const authToken = AuthToken.create( response.payload(), wallet );
