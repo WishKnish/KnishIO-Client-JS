@@ -666,6 +666,7 @@ export default class KnishIOClient {
    * @param {string|null} key
    * @param {string|null} value
    * @param {object[]|null} metas
+   * @param {object[]|null} QueryArgs
    * @returns {Promise<ResponseAtom>}
    */
   async queryMetaViaAtom ( {
@@ -673,7 +674,11 @@ export default class KnishIOClient {
     metaId,
     key = null,
     value = null,
-    metas = null
+    metas = null,
+    QueryArgs = {
+      limit: 15,
+      offset: 1
+    }
   } ) {
     if ( key ) {
       const item = { key };
@@ -691,7 +696,8 @@ export default class KnishIOClient {
       metaId,
       metas,
       isotopes: [ 'C', 'M' ],
-      latest: true
+      latest: true,
+      QueryArgs
     } );
   }
 
