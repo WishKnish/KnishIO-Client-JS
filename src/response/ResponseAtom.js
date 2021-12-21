@@ -90,6 +90,13 @@ export default class ResponseAtom extends Response {
 
     if ( metaTypeData.instances ) {
       response.instances = metaTypeData.instances;
+
+      for ( let i in response.instances ) {
+        let instance = response.instances[ i ];
+        if ( instance.metasJson ) {
+          response.instances[ i ].metas = JSON.parse( instance.metasJson );
+        }
+      }
     }
 
     if ( metaTypeData.instanceCount ) {
