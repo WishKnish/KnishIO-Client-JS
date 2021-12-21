@@ -107,7 +107,7 @@ export default class QueryAtom extends Query {
           metasJson,
           batchId,
           value,
-          bundleHashs,
+          bundleHashes,
           cellSlugs,
           createdAt,
           otsFragment
@@ -240,8 +240,8 @@ export default class QueryAtom extends Query {
     }
 
     if ( metaType ) {
-      metaIds = metaIds || [];
-      metaIds.push( metaType );
+      metaTypes = metaTypes || [];
+      metaTypes.push( metaType );
     }
 
     if ( metaId ) {
