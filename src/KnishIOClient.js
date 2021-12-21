@@ -1171,8 +1171,7 @@ export default class KnishIOClient {
   async createMeta ( {
     metaType,
     metaId,
-    meta = null,
-    policy = {}
+    meta = null
   } ) {
 
     /**
@@ -1187,15 +1186,13 @@ export default class KnishIOClient {
       }
     );
 
-    const metas = meta || {};
-
     query.fillMolecule( {
       metaType,
       metaId,
-      meta: metas,
-      policy
+      meta: meta || {}
     } );
-
+    /* console.log(query.$__molecule);
+    throw new Error('Stop');*/
     return await query.execute( {} );
   }
 
@@ -1232,7 +1229,7 @@ export default class KnishIOClient {
   async createPolicy( {
     metaType,
     metaId,
-    policy = {}
+    meta = {}
   } ) {
     /**
      * @type {MutationCreatePolicy}
@@ -1244,7 +1241,7 @@ export default class KnishIOClient {
     query.fillMolecule( {
       metaType,
       metaId,
-      policy
+      meta
     } );
 
     return await query.execute( {} );

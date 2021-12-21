@@ -63,14 +63,12 @@ export default class MutationCreateMeta extends MutationProposeMolecule {
   fillMolecule ( {
     metaType,
     metaId,
-    meta,
-    policy
+    meta
   } ) {
     this.$__molecule.initMeta( {
       meta,
       metaType,
-      metaId,
-      policy
+      metaId
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check();

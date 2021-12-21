@@ -263,11 +263,10 @@ export default class Molecule {
    * @param {string} metaType
    * @param {string} metaId
    * @param {object} meta
-   * @param {object} policy
    *
    * @return {Molecule}
    */
-  addPolicyAtom( { metaType, metaId, meta = {}, policy = {} } ) {
+  addPolicyAtom( { metaType, metaId, meta = {} } ) {
 
     this.molecularHash = null;
 
@@ -276,7 +275,7 @@ export default class Molecule {
         token: 'USER',
         metaType,
         metaId,
-        meta: Meta.policy( this.finalMetas( meta ), policy ),
+        meta: Meta.policy( this.finalMetas( meta ) ),
         index: this.generateIndex()
       } )
     );
@@ -504,17 +503,19 @@ export default class Molecule {
     metaId,
     meta
   } ) {
-    for ( let key of [ 'conditions', 'callback', 'rule' ] ) {
+    const metas = Meta.aggregateMeta( meta );
+    const rules = metas[ 'rules' ] || {};
 
-      if ( typeof meta[ key ] === 'undefined' ) {
+    for ( let key of [ 'conditions', 'callback', 'rule' ] ) {
+      if ( typeof rules[ key ] === 'undefined' ) {
         throw new MetaMissingException( `Molecule::createRule() - Value for required meta key ${ key } in missing!` );
       }
+    }
 
-      for ( let item of [ '[object Object]', '[object Array]' ] ) {
-        if ( Object.prototype.toString.call( meta[ key ] ) === item ) {
-          meta[ key ] = JSON.stringify( meta[ key ] );
-        }
-      }
+    metas[ 'rules' ] = rules;
+
+    if ( [ '[object Object]', '[object Array]' ].includes( Object.prototype.toString.call( rules ) ) ) {
+      metas[ 'rules' ] = JSON.stringify( rules );
     }
 
     this.addAtom(
@@ -524,7 +525,7 @@ export default class Molecule {
         token: this.sourceWallet.token,
         metaType,
         metaId,
-        meta: this.finalMetas( meta, this.sourceWallet ),
+        meta: this.finalMetas( metas, this.sourceWallet ),
         index: this.generateIndex()
       } )
     );
@@ -630,8 +631,7 @@ export default class Molecule {
   initMeta ( {
     meta,
     metaType,
-    metaId,
-    policy
+    metaId
   } ) {
 
     this.molecularHash = null;
@@ -654,8 +654,7 @@ export default class Molecule {
     this.addPolicyAtom( {
       metaType,
       metaId,
-      meta,
-      policy
+      meta
     } );
 
     // User remainder atom

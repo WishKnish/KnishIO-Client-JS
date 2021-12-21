@@ -243,24 +243,28 @@ export default class CheckMolecule {
 
     for ( let atom of CheckMolecule.isotopeFilter( 'R', molecule.atoms ) ) {
       const metas = atom.aggregatedMeta();
-      for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
 
-        if ( !metas.hasOwnProperty( key ) ) {
-          throw new MetaMissingException( `Check::isotopeR() - Required meta field "${ key }" is missing!` );
-        }
-      }
-
-      try {
-        const conditions = JSON.parse( metas[ 'conditions' ] ),
-          callback = JSON.parse( metas[ 'callback' ] );
-      } catch ( err ) {
+      if ( !Object.keys( metas ).some( i => [ 'rules', 'policy' ].includes( i ) ) ) {
         throw new MetaMissingException( 'Check::isotopeR() - Condition is formatted incorrectly!' );
       }
-      
-        if ( conditions === 'policy' &&
-          callback.length &&
-          !callback.every( i => [ 'read', 'write' ].includes( i[ 'action' ] ) ) ) {
-          throw new MetaMissingException( 'Check::isotopeR() - Mixing rules with politics!' );
+
+      if ( metas.hasOwnProperty( 'rules' ) ) {
+        const rules = metas.rules;
+
+        for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
+
+          if ( !rules.hasOwnProperty( key ) ) {
+            throw new MetaMissingException( `Check::isotopeR() - Required meta field "${ key }" is missing!` );
+          }
+        }
+
+        let conditions = [];
+
+        try {
+          conditions = JSON.parse( rules[ 'conditions' ] );
+        }
+        catch ( err ) {
+          throw new MetaMissingException( 'Check::isotopeR() - Condition is formatted incorrectly!' );
         }
 
         if ( Array.isArray( conditions ) && conditions.length ) {
@@ -275,6 +279,21 @@ export default class CheckMolecule {
             }
           }
         }
+      }
+
+      if ( metas.hasOwnProperty( 'policy' ) ) {
+        let policy = {};
+
+        try {
+          policy = JSON.parse( metas[ 'policy' ] );
+        } catch ( err ) {
+          throw new MetaMissingException( 'Check::isotopeR() - Condition is formatted incorrectly!' );
+        }
+
+        if ( !Object.keys(policy).every( i => [ 'read', 'write' ].includes( i ) ) ) {
+          throw new MetaMissingException( 'Check::isotopeR() - Mixing rules with politics!' );
+        }
+      }
     }
 
     return true;

@@ -114,39 +114,17 @@ export default class Meta {
   /**
    *
    * @param {object|null} meta
-   * @param {object|null} policy
    * @returns {object}
    */
-  static policy ( meta, policy ) {
-    const metas = {
-      conditions: 'policy',
-      rule: meta[ 'rule' ] || [],
-      callback: meta[ 'callback' ] || {}
-    };
+  static policy ( meta ) {
+    const metas = deepCloning( meta || {} );
 
-    if ( policy ) {
-      for ( const [ policyKey, value ] of Object.entries( policy || {} ) ) {
+    metas[ 'policy' ] = Meta.__defaultPolicy( metas[ 'policy' ] || {}, meta );
 
-        if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
-          metas[ 'callback' ][ policyKey ] = {};
-
-          for ( const [ key, content ] of Object.entries( value ) ) {
-            metas[ 'callback' ][ policyKey ][ key ] = content;
-          }
-        }
-      }
-    }
-
-    metas[ 'callback' ] = Meta.__defaultPolicy( metas[ 'callback' ], meta );
-
-    for ( const policyKey of [ 'conditions', 'rule', 'callback' ] ) {
+    for ( const policyKey of [ 'policy' ] ) {
       metas[ policyKey ] = Array.isArray( metas[ policyKey ] ) ||
       Object.prototype.toString.call( metas[ policyKey ] ) === '[object Object]' ?
         JSON.stringify( metas[ policyKey ] ) : metas[ policyKey ];
-
-      if ( policyKey === 'conditions' && Object.prototype.toString.call( metas[ policyKey ] ) === '[object String]' ) {
-        metas[ policyKey ] = JSON.stringify( metas[ policyKey ] );
-      }
     }
 
     return metas;

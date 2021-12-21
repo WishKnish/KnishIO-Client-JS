@@ -52,13 +52,12 @@ export default class MutationCreatePolicy extends MutationProposeMolecule {
   fillMolecule ( {
     metaType,
     metaId,
-    policy = {}
+    meta = {}
   } ) {
     this.$__molecule.addPolicyAtom( {
       metaType,
       metaId,
-      meta: {},
-      policy
+      meta
     } );
     this.$__molecule.addUserRemainderAtom( this.$__molecule.remainderWallet );
     this.$__molecule.sign( {} );
