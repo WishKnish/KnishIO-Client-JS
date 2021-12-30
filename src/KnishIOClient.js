@@ -530,6 +530,28 @@ export default class KnishIOClient {
 
 
   /**
+   *
+   * @param query
+   * @param variables
+   * @returns {Promise<*>}
+   */
+  async executeQuery( query, variables = null ) {
+    /*
+    if ( true || this.$__authToken && this.$__authToken.isExpired() ) {
+      await this.requestAuthToken( {
+        secret: this.$__secret,
+        cellSlug: this.$__cellSlug,
+        encrypt: this.$__encrypt
+      } );
+    }
+    */
+    return query.execute( {
+      variables
+    } );
+  }
+
+
+  /**
    * Retrieves the balance wallet for a specified Knish.IO identity and token slug
    *
    * @param {string} token
@@ -547,11 +569,9 @@ export default class KnishIOClient {
     const query = this.createQuery( QueryBalance );
 
     // Execute query with either the provided bundle hash or the active client's bundle
-    return query.execute( {
-      variables: {
-        bundleHash: bundle || this.getBundle(),
-        token
-      }
+    return this.executeQuery( query,{
+      bundleHash: bundle || this.getBundle(),
+      token
     } );
   }
 
@@ -661,6 +681,7 @@ export default class KnishIOClient {
     this.subscribe().unsubscribeAll();
   }
 
+
   /**
    * @param {string} metaType
    * @param {string} metaId
@@ -764,10 +785,8 @@ export default class KnishIOClient {
     }
 
 
-    return query.execute( {
-      variables,
-      fields
-    } )
+
+    return this.executeQuery( query, variables )
       .then( ( response ) => {
         return response.payload();
       } );
@@ -813,10 +832,7 @@ export default class KnishIOClient {
       filter: filter
     };
 
-    return query.execute( {
-      variables,
-      fields
-    } )
+    return this.executeQuery( query, variables )
       .then( ( response ) => {
         return response.data();
       } );
@@ -838,8 +854,8 @@ export default class KnishIOClient {
 
     const query = this.createQuery( QueryBatch );
 
-    return await query.execute( {
-      variables: { batchId: batchId }
+    return await this.executeQuery( query, {
+      batchId
     } );
   }
 
@@ -859,8 +875,8 @@ export default class KnishIOClient {
 
     const query = this.createQuery( QueryBatchHistory );
 
-    return await query.execute( {
-      variables: { batchId: batchId }
+    return await this.executeQuery( query, {
+      batchId
     } );
   }
 
@@ -936,37 +952,36 @@ export default class KnishIOClient {
     /** @type QueryAtom */
     const query = this.createQuery( QueryAtom );
 
-    return await query.execute( {
-      variables: QueryAtom.createVariables( {
-        molecularHashes,
-        molecularHash,
-        bundleHashes,
-        bundleHash,
-        positions,
-        position,
-        walletAddresses,
-        walletAddress,
-        isotopes,
-        isotope,
-        tokenSlugs,
-        tokenSlug,
-        cellSlugs,
-        cellSlug,
-        batchIds,
-        batchId,
-        values,
-        value,
-        metaTypes,
-        metaType,
-        metaIds,
-        metaId,
-        indexes,
-        index,
-        filter,
-        latest,
-        QueryArgs
-      } )
-    } );
+
+    return await this.executeQuery( query, QueryAtom.createVariables( {
+      molecularHashes,
+      molecularHash,
+      bundleHashes,
+      bundleHash,
+      positions,
+      position,
+      walletAddresses,
+      walletAddress,
+      isotopes,
+      isotope,
+      tokenSlugs,
+      tokenSlug,
+      cellSlugs,
+      cellSlug,
+      batchIds,
+      batchId,
+      values,
+      value,
+      metaTypes,
+      metaType,
+      metaIds,
+      metaId,
+      indexes,
+      index,
+      filter,
+      latest,
+      QueryArgs
+    } ) );
   }
 
   /**
@@ -993,7 +1008,7 @@ export default class KnishIOClient {
 
     query.fillMolecule( newWallet );
 
-    return await query.execute( {} );
+    return await this.executeQuery( query );
   }
 
   /**
@@ -1012,12 +1027,10 @@ export default class KnishIOClient {
 
     const query = this.createQuery( QueryActiveSession );
 
-    return await query.execute( {
-      variables: {
-        bundleHash,
-        metaType,
-        metaId
-      }
+    return await this.executeQuery( query,{
+      bundleHash,
+      metaType,
+      metaId
     } );
   }
 
@@ -1050,19 +1063,17 @@ export default class KnishIOClient {
   } ) {
     const query = this.createQuery( QueryUserActivity );
 
-    return await query.execute( {
-      variables: {
-        bundleHash,
-        metaType,
-        metaId,
-        ipAddress,
-        browser,
-        osCpu,
-        resolution,
-        timeZone,
-        countBy,
-        interval
-      }
+    return await this.executeQuery( query, {
+      bundleHash,
+      metaType,
+      metaId,
+      ipAddress,
+      browser,
+      osCpu,
+      resolution,
+      timeZone,
+      countBy,
+      interval
     } );
   }
 
@@ -1093,18 +1104,16 @@ export default class KnishIOClient {
   } ) {
     const query = this.createQuery( MutationActiveSession );
 
-    return await query.execute( {
-      variables: {
-        bundleHash: bundle,
-        metaType,
-        metaId,
-        ipAddress,
-        browser,
-        osCpu,
-        resolution,
-        timeZone,
-        json: JSON.stringify( json )
-      }
+    return await this.executeQuery( query, {
+      bundleHash: bundle,
+      metaType,
+      metaId,
+      ipAddress,
+      browser,
+      osCpu,
+      resolution,
+      timeZone,
+      json: JSON.stringify( json )
     } );
   }
 
@@ -1175,7 +1184,7 @@ export default class KnishIOClient {
       meta: meta || {}
     } );
 
-    return await query.execute( {} );
+    return await this.executeQuery( query );
   }
 
   /**
@@ -1184,6 +1193,7 @@ export default class KnishIOClient {
    * @param {string} metaType
    * @param {string} metaId
    * @param {array|object} metadata
+   * @param {object|null} policy
    * @return {Promise<ResponseCreateMeta>}
    */
   async createMeta ( {
@@ -1214,7 +1224,7 @@ export default class KnishIOClient {
       policy
     } );
 
-    return await query.execute( {} );
+    return await this.executeQuery( query );
   }
 
   /**
@@ -1244,7 +1254,7 @@ export default class KnishIOClient {
       code
     } );
 
-    return await query.execute( {} );
+    return await this.executeQuery( query );
   }
 
   async createPolicy( {
@@ -1265,7 +1275,7 @@ export default class KnishIOClient {
       policy
     } );
 
-    return await query.execute( {} );
+    return await this.executeQuery( query );
   }
 
   /**
@@ -1279,11 +1289,9 @@ export default class KnishIOClient {
     metaId
   } ) {
     const query = this.createQuery( QueryPolicy );
-    return query.execute( {
-      variables: {
-        metaType,
-        metaId
-      }
+    return await this.executeQuery( query, {
+      metaType,
+      metaId
     } );
   }
 
@@ -1309,15 +1317,15 @@ export default class KnishIOClient {
      * @type {QueryWalletList}
      */
     const walletQuery = this.createQuery( QueryWalletList );
-    return walletQuery.execute( {
-      variables: {
-        bundleHash: bundle ? bundle : this.getBundle(),
-        token: token,
-        unspent: unspent
-      }
-    } ).then( ( response ) => {
-      return response.payload();
-    } );
+
+    return this.executeQuery( walletQuery, {
+      bundleHash: bundle ? bundle : this.getBundle(),
+      token,
+      unspent
+    } )
+      .then( ( response ) => {
+        return response.payload();
+      } );
   }
 
   /**
@@ -1343,11 +1351,9 @@ export default class KnishIOClient {
      */
     const shadowWalletQuery = this.createQuery( QueryWalletList );
 
-    return shadowWalletQuery.execute( {
-      variables: {
-        bundleHash: bundle,
-        token: token
-      }
+    return this.executeQuery( shadowWalletQuery, {
+      bundleHash: bundle,
+      token
     } )
       .then( ( /** ResponseWalletList */ response ) => {
         return response.payload();
@@ -1389,10 +1395,8 @@ export default class KnishIOClient {
       latest
     } );
 
-    return query.execute( {
-      variables,
-      fields
-    } )
+
+    return this.executeQuery( query, variables )
       .then( ( /** ResponseWalletBundle */ response ) => {
         return raw ? response : response.payload();
       } );
@@ -1411,10 +1415,9 @@ export default class KnishIOClient {
      * @type {QueryContinuId}
      */
     const query = this.createQuery( QueryContinuId );
-    return query.execute( {
-      variables: {
-        bundle: bundle
-      }
+
+    return this.executeQuery( query, {
+      bundle
     } );
   }
 
@@ -1445,8 +1448,10 @@ export default class KnishIOClient {
 
 
     // Get a token & init is Stackable flag for batch ID initialization
-    const tokenResponse = await this.createQuery( QueryToken )
-      .execute( { slug: token } );
+    const queryToken = this.createQuery( QueryToken );
+    const tokenResponse = await this.executeQuery( queryToken, {
+      slug: token
+    } );
     const isStackable = Dot.get( tokenResponse.data(), '0.fungibility' ) === 'stackable';
 
     // NON-stackable tokens & batch ID is NOT NULL - error
@@ -1519,7 +1524,7 @@ export default class KnishIOClient {
       batchId
     } );
 
-    return await query.execute( {} );
+    return await this.executeQuery( query );
   }
 
   /**
@@ -1549,7 +1554,7 @@ export default class KnishIOClient {
       batchId
     } );
 
-    return await query.execute( {} );
+    return await this.executeQuery( query );
   }
 
 
@@ -1689,8 +1694,7 @@ export default class KnishIOClient {
       amount
     } );
 
-
-    return await query.execute( {} );
+    return await this.executeQuery( query );
   }
 
 
@@ -1759,7 +1763,8 @@ export default class KnishIOClient {
     molecule.sign( {} );
     molecule.check();
 
-    return ( new MutationProposeMolecule( this.client(), molecule ) ).execute( {} );
+    const query = ( new MutationProposeMolecule( this.client(), molecule ) );
+    return this.executeQuery( query );
   }
 
 
@@ -1790,26 +1795,15 @@ export default class KnishIOClient {
     /**
      * @type {ResponseRequestAuthorizationGuest}
      */
-    const response = await query.execute( {
-      variables: {
-        cellSlug,
-        pubkey: wallet.pubkey,
-        encrypt
-      }
+    const response = await this.executeQuery( query, {
+      cellSlug,
+      pubkey: wallet.pubkey,
+      encrypt
     } );
 
-    // Did the authorization molecule get accepted?
-    if ( response.success() ) {
-
-      // Create & set an auth token from the response data
-      const authToken = AuthToken.create( response.payload(), wallet );
-      this.setAuthToken( authToken );
-
-    } else {
-
-      throw new AuthorizationRejectedException( `KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }` );
-
-    }
+    // Create & set an auth token from the response data
+    const authToken = AuthToken.create( response.payload(), wallet );
+    this.setAuthToken( authToken );
 
     return response;
   }
@@ -1853,7 +1847,7 @@ export default class KnishIOClient {
     /**
      * @type {ResponseRequestAuthorization}
      */
-    const response = await query.execute( {} );
+    const response = await this.executeQuery( query );
 
     // Did the authorization molecule get accepted?
     if ( response.success() ) {

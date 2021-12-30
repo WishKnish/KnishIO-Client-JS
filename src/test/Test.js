@@ -7,6 +7,16 @@ import {
 import ResponseMolecule from '../response/ResponseProposeMolecule';
 
 
+/*
+
+import Test from '@wishknish/knishio-client-js/src/test/Test';
+
+let uri = 'https://lumen.knishio/graphql';
+let test = new Test( uri );
+test.testAll();
+
+*/
+
 export default class Test {
 
   /**
@@ -56,6 +66,7 @@ export default class Test {
    */
   async testAll () {
     await this.client( this.secrets[ 0 ] );
+    return;
     await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
