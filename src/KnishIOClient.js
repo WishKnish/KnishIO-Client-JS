@@ -92,6 +92,7 @@ import AuthorizationRejectedException from './exception/AuthorizationRejectedExc
 import QueryAtom from './query/QueryAtom';
 import QueryPolicy from './query/QueryPolicy';
 import MutationCreatePolicy from './mutation/MutationCreatePolicy';
+import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom';
 
 
 /**
@@ -663,38 +664,24 @@ export default class KnishIOClient {
   /**
    * @param {string} metaType
    * @param {string} metaId
-   * @param {string|null} key
-   * @param {string|null} value
-   * @param {object[]|null} metas
+   * @param {object[]|null} filter
    * @param {object[]|null} QueryArgs
    * @returns {Promise<ResponseAtom>}
    */
   async queryMetaViaAtom ( {
     metaType,
     metaId,
-    key = null,
-    value = null,
-    metas = null,
+    filter = null,
     QueryArgs = {
       limit: 15,
       offset: 1
     }
   } ) {
-    if ( key ) {
-      const item = { key };
-      metas = metas || [];
-
-      if ( value ) {
-        item[ 'value' ] = value;
-      }
-
-      metas.push( metas );
-    }
 
     return await this.queryAtom( {
       metaType,
       metaId,
-      metas,
+      filter,
       isotopes: [ 'C', 'M' ],
       latest: true,
       QueryArgs
@@ -715,6 +702,7 @@ export default class KnishIOClient {
    * @param {object|null} queryArgs
    * @param {string|null} count
    * @param {string|null} countBy
+   * @param {boolean} throughAtom
    * @return {Promise<ResponseMetaType>}
    */
   queryMeta ( {
@@ -728,29 +716,53 @@ export default class KnishIOClient {
     filter = null,
     queryArgs = null,
     count = null,
-    countBy = null
+    countBy = null,
+    throughAtom = false
   } ) {
 
     if ( this.$__logging ) {
       console.info( `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
     }
 
-    /**
-     * @type {QueryMetaType}
-     */
-    const query = this.createQuery( QueryMetaType );
-    const variables = QueryMetaType.createVariables( {
-      metaType,
-      metaId,
-      key,
-      value,
-      latest,
-      latestMetas,
-      filter,
-      queryArgs,
-      count,
-      countBy
-    } );
+    let query = null;
+    let variables = null;
+
+    if ( throughAtom ) {
+      /**
+       * @type {QueryMetaTypeViaAtom}
+       */
+      query = this.createQuery( QueryMetaTypeViaAtom );
+      variables = QueryMetaTypeViaAtom.createVariables( {
+        metaType,
+        metaId,
+        key,
+        value,
+        latest,
+        latestMetas,
+        filter,
+        queryArgs,
+        countBy
+      } );
+    }
+    else {
+      /**
+       * @type {QueryMetaType}
+       */
+      query = this.createQuery( QueryMetaType );
+      variables = QueryMetaType.createVariables( {
+        metaType,
+        metaId,
+        key,
+        value,
+        latest,
+        latestMetas,
+        filter,
+        queryArgs,
+        count,
+        countBy
+      } );
+    }
+
 
     return query.execute( {
       variables,
@@ -879,10 +891,10 @@ export default class KnishIOClient {
    * @param {string} metaId
    * @param {string[]} indexes
    * @param {number} index
-   * @param {object} metas,
+   * @param {object[]} filter,
    * @param {boolean} latest
    * @param {object} QueryArgs
-   * @return {Promise<ResponseAtom>}
+   * @return {Promise<Response>}
    */
   async queryAtom ( {
     molecularHashes,
@@ -909,7 +921,7 @@ export default class KnishIOClient {
     metaId,
     indexes,
     index,
-    metas,
+    filter,
     latest,
     QueryArgs = {
       limit: 15,
@@ -950,14 +962,14 @@ export default class KnishIOClient {
         metaId,
         indexes,
         index,
-        metas,
+        filter,
         latest,
         QueryArgs
       } )
     } );
   }
 
-  /*
+  /**
    * Builds and executes a molecule to issue a new Wallet on the ledger
    *
    * @param {string} token

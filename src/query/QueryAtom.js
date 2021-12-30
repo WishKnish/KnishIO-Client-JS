@@ -74,7 +74,7 @@ export default class QueryAtom extends Query {
       $metaTypes: [String!],
       $metaIds: [String!],
       $indexes: [String!],
-      $metas: [ MetaInput! ],
+      $filter: [ MetaFilter! ],
       $latest: Boolean,
       $queryArgs: QueryArgs,
     ) {
@@ -91,7 +91,7 @@ export default class QueryAtom extends Query {
         metaTypes: $metaTypes,
         metaIds: $metaIds,
         indexes: $indexes,
-        metas: $metas,
+        filter: $filter,
         latest: $latest,
         queryArgs: $queryArgs,
       ) {
@@ -160,7 +160,7 @@ export default class QueryAtom extends Query {
    * @param {string} metaId
    * @param {number[]} indexes
    * @param {number} index
-   * @param {object} metas,
+   * @param {object[]} filter,
    * @param {boolean} latest
    * @param {object} QueryArgs
    * @return {object}
@@ -190,7 +190,7 @@ export default class QueryAtom extends Query {
     metaId,
     indexes,
     index,
-    metas,
+    filter,
     latest,
     QueryArgs
   } ) {
@@ -267,7 +267,7 @@ export default class QueryAtom extends Query {
       metaTypes: metaTypes,
       metaIds: metaIds,
       indexes: indexes,
-      metas: metas,
+      filter: filter,
       latest: latest,
       QueryArgs: QueryArgs
     };

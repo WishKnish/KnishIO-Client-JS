@@ -48,11 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 
 import Response from './Response';
 
-/**
- * Response for MetaType Query
- */
-export default class ResponseMetaType extends Response {
-
+export default class ResponseMetaTypeViaAtom extends Response {
   /**
    * Class constructor
    *
@@ -66,15 +62,10 @@ export default class ResponseMetaType extends Response {
     super( {
       query,
       json,
-      dataKey: 'data.MetaType'
+      dataKey: 'data.MetaTypeViaAtom'
     } );
   }
 
-  /**
-   * Returns meta type instance results
-   *
-   * @return {null|*}
-   */
   payload () {
     const metaTypeData = this.data();
 
