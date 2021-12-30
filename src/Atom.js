@@ -100,6 +100,123 @@ export default class Atom {
 
   }
 
+  static get create() {
+    return {
+      C ( {
+        position = null,
+        walletAddress = null,
+        token = null,
+        value = null,
+        batchId = null,
+        metaType = null,
+        metaId = null,
+        meta = null,
+        otsFragment = null,
+        index = null
+      } ) {
+        arguments[0]['isotope'] = 'C';
+
+        return new Atom( arguments[ 0 ] );
+      },
+      I ( {
+        position = null,
+        walletAddress = null,
+        token = null,
+        value = null,
+        batchId = null,
+        metaType = null,
+        metaId = null,
+        meta = null,
+        otsFragment = null,
+        index = null
+      } ) {
+        arguments[0]['isotope'] = 'I';
+
+        return new Atom( arguments[ 0 ] );
+      },
+      M ( {
+        position = null,
+        walletAddress = null,
+        token = null,
+        value = null,
+        batchId = null,
+        metaType = null,
+        metaId = null,
+        meta = null,
+        otsFragment = null,
+        index = null
+      } ) {
+        arguments[0]['isotope'] = 'M';
+
+        return new Atom( arguments[ 0 ] );
+      },
+      T ( {
+        position = null,
+        walletAddress = null,
+        token = null,
+        value = null,
+        batchId = null,
+        metaType = null,
+        metaId = null,
+        meta = null,
+        otsFragment = null,
+        index = null
+      } ) {
+        arguments[0]['isotope'] = 'T';
+
+        return new Atom( arguments[ 0 ] );
+      },
+      U ( {
+        position = null,
+        walletAddress = null,
+        token = null,
+        value = null,
+        batchId = null,
+        metaType = null,
+        metaId = null,
+        meta = null,
+        otsFragment = null,
+        index = null
+      } ) {
+        arguments[0]['isotope'] = 'U';
+
+        return new Atom( arguments[ 0 ] );
+      },
+      V ( {
+        position = null,
+        walletAddress = null,
+        token = null,
+        value = null,
+        batchId = null,
+        metaType = null,
+        metaId = null,
+        meta = null,
+        otsFragment = null,
+        index = null
+      } ) {
+        arguments[0]['isotope'] = 'V';
+
+        return new Atom( arguments[ 0 ] );
+      },
+      R ( {
+        position = null,
+        walletAddress = null,
+        token = null,
+        value = null,
+        batchId = null,
+        metaType = null,
+        metaId = null,
+        meta = null,
+        otsFragment = null,
+        index = null
+      } ) {
+        arguments[0]['isotope'] = 'R';
+
+        return new Atom( arguments[ 0 ] );
+      }
+    };
+  }
+
   static get hashSchema () {
     return new Map( [
       [ 'position', null ],

@@ -251,23 +251,30 @@ export default class CheckMolecule {
       }
 
       try {
-        const conditions = JSON.parse( metas[ 'conditions' ] );
-
-        for ( let condition of conditions ) {
-          const keys = Object.keys( condition ),
-            property = keys.filter( function ( n ) {
-              return [ 'key', 'value', 'comparison' ].indexOf( n ) !== -1;
-            } ),
-            property2 = keys.filter( function ( n ) {
-              return [ 'managedBy' ].indexOf( n ) !== -1;
-            } );
-          if ( property.length < 3 && property2.length < 1 ) {
-            throw new MetaMissingException( 'Check::isotopeR() - Required condition field is missing!' );
-          }
-        }
+        const conditions = JSON.parse( metas[ 'conditions' ] ),
+          callback = JSON.parse( metas[ 'callback' ] );
       } catch ( err ) {
         throw new MetaMissingException( 'Check::isotopeR() - Condition is formatted incorrectly!' );
       }
+      
+        if ( conditions === 'policy' &&
+          callback.length &&
+          !callback.every( i => [ 'read', 'write' ].includes( i[ 'action' ] ) ) ) {
+          throw new MetaMissingException( 'Check::isotopeR() - Mixing rules with politics!' );
+        }
+
+        if ( Array.isArray( conditions ) && conditions.length ) {
+
+          for ( let condition of conditions ) {
+            const keys = Object.keys( condition ),
+              property = keys.filter( n => [ 'key', 'value', 'comparison' ].indexOf( n ) !== -1 ),
+              property2 = keys.filter( n => [ 'managedBy' ].indexOf( n ) !== -1 );
+
+            if ( property.length < 3 && property2.length ) {
+              throw new MetaMissingException( 'Check::isotopeR() - Required condition field is missing!' );
+            }
+          }
+        }
     }
 
     return true;
