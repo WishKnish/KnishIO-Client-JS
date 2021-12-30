@@ -50,7 +50,7 @@ import { charsetBaseConvert } from './libraries/strings';
 import Meta from './Meta';
 
 /**
- * Atom class used to form micro-transactions within a Molecule
+ * Atom class used to form microtransactions within a Molecule
  */
 export default class Atom {
 

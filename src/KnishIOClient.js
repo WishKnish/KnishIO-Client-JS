@@ -235,7 +235,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Returns whether or not the end-to-end encryption protocol is enabled
+   * Returns whether the end-to-end encryption protocol is enabled
    *
    * @return {boolean}
    */
@@ -244,7 +244,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Deinitializes the Knish.IO client session so that a new session can replace it
+   * De-initializes the Knish.IO client session so that a new session can replace it
    */
   deinitialize () {
     if ( this.$__logging ) {
@@ -344,7 +344,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Returns whether or not a secret is being stored for this session
+   * Returns whether a secret is being stored for this session
    *
    * @return {boolean}
    */
@@ -377,7 +377,7 @@ export default class KnishIOClient {
   }
 
   /**
-   * Returns whether or not a bundle hash is being stored for this session
+   * Returns whether a bundle hash is being stored for this session
    *
    * @return {boolean}
    */
@@ -745,8 +745,8 @@ export default class KnishIOClient {
       console.info( `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
     }
 
-    let query = null;
-    let variables = null;
+    let query;
+    let variables;
 
     if ( throughAtom ) {
       /**

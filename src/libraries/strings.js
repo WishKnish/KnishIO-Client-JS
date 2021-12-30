@@ -82,7 +82,7 @@ export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, dest
   // Modified by MLM to work with BigInteger: https://github.com/peterolson/BigInteger.js
   // This is able to convert extremely large numbers; At any base equal to or less than the symbol table length
 
-  // The reasoning behind capital first is because it comes first in a ASCII/Unicode character map
+  // The reasoning behind capital first is because it comes first in an ASCII/Unicode character map
   // 96 symbols support up to base 96
   const baseSymbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡';
 
