@@ -535,7 +535,7 @@ export default class KnishIOClient {
    * @param variables
    * @returns {Promise<*>}
    */
-  async executeQuery( query, variables = null ) {
+  async executeQuery ( query, variables = null ) {
     /*
     if ( true || this.$__authToken && this.$__authToken.isExpired() ) {
       await this.requestAuthToken( {
@@ -569,7 +569,7 @@ export default class KnishIOClient {
     const query = this.createQuery( QueryBalance );
 
     // Execute query with either the provided bundle hash or the active client's bundle
-    return this.executeQuery( query,{
+    return this.executeQuery( query, {
       bundleHash: bundle || this.getBundle(),
       token
     } );
@@ -764,8 +764,7 @@ export default class KnishIOClient {
         queryArgs,
         countBy
       } );
-    }
-    else {
+    } else {
       /**
        * @type {QueryMetaType}
        */
@@ -783,7 +782,6 @@ export default class KnishIOClient {
         countBy
       } );
     }
-
 
 
     return this.executeQuery( query, variables )
@@ -1027,7 +1025,7 @@ export default class KnishIOClient {
 
     const query = this.createQuery( QueryActiveSession );
 
-    return await this.executeQuery( query,{
+    return await this.executeQuery( query, {
       bundleHash,
       metaType,
       metaId
@@ -1257,7 +1255,7 @@ export default class KnishIOClient {
     return await this.executeQuery( query );
   }
 
-  async createPolicy( {
+  async createPolicy ( {
     metaType,
     metaId,
     policy = {}
@@ -1284,7 +1282,7 @@ export default class KnishIOClient {
    * @param {string} metaId
    * @returns {ResponsePolicy}
    */
-  async queryPolicy( {
+  async queryPolicy ( {
     metaType,
     metaId
   } ) {
@@ -1801,9 +1799,18 @@ export default class KnishIOClient {
       encrypt
     } );
 
-    // Create & set an auth token from the response data
-    const authToken = AuthToken.create( response.payload(), wallet );
-    this.setAuthToken( authToken );
+    // Did the authorization molecule get accepted?
+    if ( response.success() ) {
+
+      // Create & set an auth token from the response data
+      const authToken = AuthToken.create( response.payload(), wallet );
+      this.setAuthToken( authToken );
+
+    } else {
+
+      throw new AuthorizationRejectedException( `KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }` );
+
+    }
 
     return response;
   }

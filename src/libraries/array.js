@@ -49,9 +49,9 @@ export function deepCloning (
  * @param arrays
  * @returns {*[]}
  */
-export function diff( ...arrays ) {
+export function diff ( ...arrays ) {
 
-  return [].concat( ...arrays.map( ( arr, i) => {
+  return [].concat( ...arrays.map( ( arr, i ) => {
 
     const others = arrays.slice( 0 );
 

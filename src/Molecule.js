@@ -267,7 +267,12 @@ export default class Molecule {
    *
    * @return {Molecule}
    */
-  addPolicyAtom( { metaType, metaId, meta = {}, policy = {} } ) {
+  addPolicyAtom ( {
+    metaType,
+    metaId,
+    meta = {},
+    policy = {}
+  } ) {
 
     this.molecularHash = null;
 

@@ -100,7 +100,7 @@ export default class Atom {
 
   }
 
-  static get create() {
+  static get create () {
     return {
       C ( {
         position = null,
@@ -114,7 +114,7 @@ export default class Atom {
         otsFragment = null,
         index = null
       } ) {
-        arguments[0]['isotope'] = 'C';
+        arguments[ 0 ][ 'isotope' ] = 'C';
 
         return new Atom( arguments[ 0 ] );
       },
@@ -130,7 +130,7 @@ export default class Atom {
         otsFragment = null,
         index = null
       } ) {
-        arguments[0]['isotope'] = 'I';
+        arguments[ 0 ][ 'isotope' ] = 'I';
 
         return new Atom( arguments[ 0 ] );
       },
@@ -146,7 +146,7 @@ export default class Atom {
         otsFragment = null,
         index = null
       } ) {
-        arguments[0]['isotope'] = 'M';
+        arguments[ 0 ][ 'isotope' ] = 'M';
 
         return new Atom( arguments[ 0 ] );
       },
@@ -162,7 +162,7 @@ export default class Atom {
         otsFragment = null,
         index = null
       } ) {
-        arguments[0]['isotope'] = 'T';
+        arguments[ 0 ][ 'isotope' ] = 'T';
 
         return new Atom( arguments[ 0 ] );
       },
@@ -178,7 +178,7 @@ export default class Atom {
         otsFragment = null,
         index = null
       } ) {
-        arguments[0]['isotope'] = 'U';
+        arguments[ 0 ][ 'isotope' ] = 'U';
 
         return new Atom( arguments[ 0 ] );
       },
@@ -194,7 +194,7 @@ export default class Atom {
         otsFragment = null,
         index = null
       } ) {
-        arguments[0]['isotope'] = 'V';
+        arguments[ 0 ][ 'isotope' ] = 'V';
 
         return new Atom( arguments[ 0 ] );
       },
@@ -210,7 +210,7 @@ export default class Atom {
         otsFragment = null,
         index = null
       } ) {
-        arguments[0]['isotope'] = 'R';
+        arguments[ 0 ][ 'isotope' ] = 'R';
 
         return new Atom( arguments[ 0 ] );
       }

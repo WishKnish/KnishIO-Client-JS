@@ -160,11 +160,14 @@ export default class Meta {
    */
   static __defaultPolicy ( policy, meta ) {
     const _policy = deepCloning( policy );
-    const readPolicy = Array.from(_policy).filter( item => item.action === 'read' );
-    const writePolicy = Array.from(_policy).filter( item => item.action === 'write' );
+    const readPolicy = Array.from( _policy ).filter( item => item.action === 'read' );
+    const writePolicy = Array.from( _policy ).filter( item => item.action === 'write' );
     const metaKey = Object.keys( meta || {} );
 
-    for ( const [ type, value ] of Object.entries({ read: readPolicy, write: writePolicy } ) ) {
+    for ( const [ type, value ] of Object.entries( {
+      read: readPolicy,
+      write: writePolicy
+    } ) ) {
 
       const policyKey = value.map( item => item.key );
 

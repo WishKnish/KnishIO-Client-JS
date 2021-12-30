@@ -61,15 +61,15 @@ export default class QueryMetaTypeViaAtom extends Query {
 
     this.$__query = gql`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String) {
       MetaTypeViaAtom(
-      metaTypes: $metaTypes
-      metaIds: $metaIds
-      values: $values
-      filter: $filter,
-      latest: $latest,
-      queryArgs: $queryArgs
-      countBy: $countBy
-    ) {
-      metaType,
+        metaTypes: $metaTypes
+        metaIds: $metaIds
+        values: $values
+        filter: $filter,
+        latest: $latest,
+        queryArgs: $queryArgs
+        countBy: $countBy
+      ) {
+        metaType,
         instanceCount {
           key,
           value
@@ -90,8 +90,8 @@ export default class QueryMetaTypeViaAtom extends Query {
           currentPage,
           total
         }
-    }
-  }`;
+      }
+    }`;
   }
 
   /**
