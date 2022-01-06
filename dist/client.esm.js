@@ -428,7 +428,7 @@ import{shake256 as e}from"js-sha3";import t from"big-integer";import{decode as s
           metaType,
           metaId,
           createdAt,
-          metas(latest:$latest) {
+          metas {
             molecularHash,
             position,
             key,
