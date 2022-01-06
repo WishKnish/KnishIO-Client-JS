@@ -78,7 +78,7 @@ export default class QueryMetaTypeViaAtom extends Query {
           metaType,
           metaId,
           createdAt,
-          metas(latest:$latest) {
+          metas {
             molecularHash,
             position,
             key,
