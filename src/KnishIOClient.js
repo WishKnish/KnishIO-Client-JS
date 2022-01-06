@@ -686,14 +686,14 @@ export default class KnishIOClient {
    * @param {string} metaType
    * @param {string} metaId
    * @param {object[]|null} filter
-   * @param {object[]|null} QueryArgs
+   * @param {object[]|null} queryArgs
    * @returns {Promise<ResponseAtom>}
    */
   async queryMetaViaAtom ( {
     metaType,
     metaId,
     filter = null,
-    QueryArgs = {
+    queryArgs = {
       limit: 15,
       offset: 1
     }
@@ -705,7 +705,7 @@ export default class KnishIOClient {
       filter,
       isotopes: [ 'C', 'M' ],
       latest: true,
-      QueryArgs
+      queryArgs
     } );
   }
 
@@ -907,7 +907,7 @@ export default class KnishIOClient {
    * @param {number} index
    * @param {object[]} filter,
    * @param {boolean} latest
-   * @param {object} QueryArgs
+   * @param {object} queryArgs
    * @return {Promise<Response>}
    */
   async queryAtom ( {
@@ -937,7 +937,7 @@ export default class KnishIOClient {
     index,
     filter,
     latest,
-    QueryArgs = {
+    queryArgs = {
       limit: 15,
       offset: 1
     }
@@ -978,7 +978,7 @@ export default class KnishIOClient {
       index,
       filter,
       latest,
-      QueryArgs
+      queryArgs
     } ) );
   }
 
