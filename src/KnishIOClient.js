@@ -546,15 +546,17 @@ export default class KnishIOClient {
    * @returns {Promise<*>}
    */
   async executeQuery ( query, variables = null ) {
-    /*
-    if ( true || this.$__authToken && this.$__authToken.isExpired() ) {
+    // console.info( `KnishIOClient::executeQuery() - Check token expiration... ${ this.$__authToken.$__expiresAt * 1000 } == ${ Date.now() } ` );
+    if ( this.$__authToken && this.$__authToken.isExpired() ) {
+      console.info( `KnishIOClient::executeQuery() - Access token is expired. Getting new one...` );
+
       await this.requestAuthToken( {
         secret: this.$__secret,
         cellSlug: this.$__cellSlug,
         encrypt: this.$__encrypt
       } );
     }
-    */
+
     return query.execute( {
       variables
     } );
@@ -1803,7 +1805,7 @@ export default class KnishIOClient {
     /**
      * @type {ResponseRequestAuthorizationGuest}
      */
-    const response = await this.executeQuery( query, {
+    const response = await query.execute( {
       cellSlug,
       pubkey: wallet.pubkey,
       encrypt
@@ -1864,7 +1866,8 @@ export default class KnishIOClient {
     /**
      * @type {ResponseRequestAuthorization}
      */
-    const response = await this.executeQuery( query );
+    const response = await query.execute( {} );
+
 
     // Did the authorization molecule get accepted?
     if ( response.success() ) {
@@ -1936,7 +1939,7 @@ export default class KnishIOClient {
 
     // Set auth token
     if ( this.$__logging ) {
-      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.token }...` );
+      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.getToken() }...` );
     }
 
     // Switch encryption mode if it has been changed
