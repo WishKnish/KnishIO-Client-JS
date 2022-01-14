@@ -162,7 +162,7 @@ export default class QueryAtom extends Query {
    * @param {number} index
    * @param {object[]} filter,
    * @param {boolean} latest
-   * @param {object} QueryArgs
+   * @param {object} queryArgs
    * @return {object}
    */
   static createVariables ( {
@@ -192,7 +192,7 @@ export default class QueryAtom extends Query {
     index,
     filter,
     latest,
-    QueryArgs
+    queryArgs
   } ) {
     if ( molecularHash ) {
       molecularHashes = molecularHashes || [];
@@ -269,7 +269,7 @@ export default class QueryAtom extends Query {
       indexes: indexes,
       filter: filter,
       latest: latest,
-      QueryArgs: QueryArgs
+      queryArgs: queryArgs
     };
   }
 }

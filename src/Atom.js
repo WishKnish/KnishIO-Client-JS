@@ -314,8 +314,8 @@ export default class Atom {
 
         const value = molecularHashSchema.get( property );
 
-        // Old atoms support (without batch_id field)
-        if ( [ 'batchId', 'pubkey', 'characters' ].includes( property ) && value === null ) {
+        // All nullable values does not hashing (only custom keys)
+        if ( value === null && ![ 'position', 'walletAddress' ].includes( property ) ) {
           continue;
         }
 
@@ -330,16 +330,8 @@ export default class Atom {
           continue;
         }
 
-        // Hash position, wallet address, or isotope
-        if ( [ 'position', 'walletAddress', 'isotope' ].includes( property ) ) {
-          molecularSponge.update( value === null ? '' : String( value ) );
-          continue;
-        }
-
         // Some other property that we haven't anticipated
-        if ( value !== null ) {
-          molecularSponge.update( String( value ) );
-        }
+        molecularSponge.update( value === null ? '' : String( value ) );
       }
     }
 

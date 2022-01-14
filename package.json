@@ -1,6 +1,6 @@
 {
   "name": "@wishknish/knishio-client-js",
-  "version": "0.4.36",
+  "version": "0.4.39",
   "productName": "Knish.IO Javascript SDK Client",
   "description": "JavaScript implementation of the Knish.IO SDK to consume Knish.IO GraphQL APIs.",
   "license": "GPL-3.0-or-later",

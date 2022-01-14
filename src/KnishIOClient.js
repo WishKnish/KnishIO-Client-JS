@@ -105,6 +105,7 @@ export default class KnishIOClient {
    * Class constructor
    *
    * @param {string} uri
+   * @param {string|null} cellSlug
    * @param {string|null} socketUri
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
@@ -112,6 +113,7 @@ export default class KnishIOClient {
    */
   constructor ( {
     uri,
+    cellSlug = null,
     client = null,
     socketUri = null,
     serverSdkVersion = 3,
@@ -119,6 +121,7 @@ export default class KnishIOClient {
   } ) {
     this.initialize( {
       uri,
+      cellSlug,
       socketUri,
       client,
       serverSdkVersion,
@@ -130,6 +133,7 @@ export default class KnishIOClient {
    * Initializes a new Knish.IO client session
    *
    * @param {string|[]} uri
+   * @param {string|null} cellSlug
    * @param {string|null} socketUri
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
@@ -137,6 +141,7 @@ export default class KnishIOClient {
    */
   initialize ( {
     uri,
+    cellSlug = null,
     socketUri = null,
     client = null,
     serverSdkVersion = 3,
@@ -147,6 +152,11 @@ export default class KnishIOClient {
     this.$__uris = typeof uri === 'object' ? uri : [ uri ];
     this.$__authTokenObjects = {};
     this.$__authInProcess = false;
+
+    if( cellSlug ) {
+      this.setCellSlug( cellSlug );
+    }
+
     for ( let i in this.$__uris ) {
       let url = this.$__uris [ i ];
       this.$__authTokenObjects[ url ] = null;
@@ -888,7 +898,7 @@ export default class KnishIOClient {
    * @param {number} index
    * @param {object[]} filter,
    * @param {boolean} latest
-   * @param {object} QueryArgs
+   * @param {object} queryArgs
    * @return {Promise<Response>}
    */
   async queryAtom ( {
@@ -918,7 +928,7 @@ export default class KnishIOClient {
     index,
     filter,
     latest,
-    QueryArgs = {
+    queryArgs = {
       limit: 15,
       offset: 1
     }
@@ -959,7 +969,7 @@ export default class KnishIOClient {
       index,
       filter,
       latest,
-      QueryArgs
+      queryArgs
     } ) );
   }
 
