@@ -65,8 +65,12 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
-    await this.client( this.secrets[ 0 ] );
+    /*
+    await this.testTokenExpiration();
     return;
+    */
+
+    await this.client( this.secrets[ 0 ] );
     await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
@@ -82,6 +86,28 @@ export default class Test {
     await this.testQueryShadowWallets();
     await this.testQueryBundle();
     await this.testQueryBalance();
+  }
+
+
+  /**
+   *
+   * @returns {Promise<void>}
+   */
+  async testTokenExpiration() {
+    const client = await this.client( this.secrets[ 0 ] );
+    const fnTimeout = ( timeout ) => {
+      setTimeout( client => {
+        console.warn( `setTimeout ${ timeout }` );
+        client.queryMeta( {
+          metaType: 'metaType',
+          metaId: 'metaId'
+        } );
+      }, timeout, client, timeout );
+    };
+    fnTimeout( 3000 );
+    fnTimeout( 30000 );
+    fnTimeout( 61000 );
+    fnTimeout( 64000 );
   }
 
   /**
