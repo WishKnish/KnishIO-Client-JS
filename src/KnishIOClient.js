@@ -153,7 +153,7 @@ export default class KnishIOClient {
     this.$__authTokenObjects = {};
     this.$__authInProcess = false;
 
-    if( cellSlug ) {
+    if ( cellSlug ) {
       this.setCellSlug( cellSlug );
     }
 
@@ -548,7 +548,7 @@ export default class KnishIOClient {
   async executeQuery ( query, variables = null ) {
     // console.info( `KnishIOClient::executeQuery() - Check token expiration... ${ this.$__authToken.$__expiresAt * 1000 } == ${ Date.now() } ` );
     if ( this.$__authToken && this.$__authToken.isExpired() ) {
-      console.info( `KnishIOClient::executeQuery() - Access token is expired. Getting new one...` );
+      console.info( 'KnishIOClient::executeQuery() - Access token is expired. Getting new one...' );
 
       await this.requestAuthToken( {
         secret: this.$__secret,

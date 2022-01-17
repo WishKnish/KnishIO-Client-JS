@@ -93,7 +93,7 @@ export default class Test {
    *
    * @returns {Promise<void>}
    */
-  async testTokenExpiration() {
+  async testTokenExpiration () {
     const client = await this.client( this.secrets[ 0 ] );
     const fnTimeout = ( timeout ) => {
       setTimeout( client => {
