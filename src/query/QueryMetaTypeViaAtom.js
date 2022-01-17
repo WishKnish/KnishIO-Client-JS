@@ -59,11 +59,11 @@ export default class QueryMetaTypeViaAtom extends Query {
   constructor ( apolloClient ) {
     super( apolloClient );
 
-    this.$__query = gql`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String) {
+    this.$__query = gql`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!] ) {
       MetaTypeViaAtom(
         metaTypes: $metaTypes
         metaIds: $metaIds
-        values: $values
+        atomValues: $atomValues
         filter: $filter,
         latest: $latest,
         queryArgs: $queryArgs
@@ -78,7 +78,7 @@ export default class QueryMetaTypeViaAtom extends Query {
           metaType,
           metaId,
           createdAt,
-          metas {
+          metas( values: $values, keys: $keys ) {
             molecularHash,
             position,
             key,
@@ -114,6 +114,9 @@ export default class QueryMetaTypeViaAtom extends Query {
    * @param {string|array|null} metaId
    * @param {string|null} key
    * @param {string|null} value
+   * @param {array|null} values
+   * @param {array|null} keys
+   * @param {array|null} atomValues
    * @param {boolean|null} latest
    * @param {boolean|null} latestMetas
    * @param {array|null} filter
@@ -126,6 +129,9 @@ export default class QueryMetaTypeViaAtom extends Query {
     metaId = null,
     key = null,
     value = null,
+    keys = null,
+    values = null,
+    atomValues = null,
     latest = null,
     latestMetas = true,
     filter = null,
@@ -134,12 +140,24 @@ export default class QueryMetaTypeViaAtom extends Query {
   } ) {
     const variables = {};
 
+    if ( atomValues ) {
+      variables[ 'atomValues' ] = atomValues;
+    }
+
+    if ( keys ) {
+      variables[ 'keys' ] = keys;
+    }
+
+    if ( values ) {
+      variables[ 'values' ] = values;
+    }
+
     if ( metaType ) {
-      variables[ 'metaTypes' ] = [ metaType ];
+      variables[ 'metaTypes' ] = typeof metaType === 'string' ? [ metaType ] : metaType;
     }
 
     if ( metaId ) {
-      variables[ 'metaIds' ] = [ metaId ];
+      variables[ 'metaIds' ] = typeof metaId === 'string' ? [ metaId ] : metaId;
     }
 
     if ( countBy ) {

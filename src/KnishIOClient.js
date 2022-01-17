@@ -691,34 +691,6 @@ export default class KnishIOClient {
     this.subscribe().unsubscribeAll();
   }
 
-
-  /**
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {object[]|null} filter
-   * @param {object[]|null} queryArgs
-   * @returns {Promise<ResponseAtom>}
-   */
-  async queryMetaViaAtom ( {
-    metaType,
-    metaId,
-    filter = null,
-    queryArgs = {
-      limit: 15,
-      offset: 1
-    }
-  } ) {
-
-    return await this.queryAtom( {
-      metaType,
-      metaId,
-      filter,
-      isotopes: [ 'C', 'M' ],
-      latest: true,
-      queryArgs
-    } );
-  }
-
   /**
    * Retrieves metadata for the given metaType and provided parameters
    *
@@ -734,6 +706,9 @@ export default class KnishIOClient {
    * @param {string|null} count
    * @param {string|null} countBy
    * @param {boolean} throughAtom
+   * @param {array|null} values
+   * @param {array|null} keys
+   * @param {array|null} atomValues
    * @return {Promise<ResponseMetaType>}
    */
   queryMeta ( {
@@ -748,7 +723,10 @@ export default class KnishIOClient {
     queryArgs = null,
     count = null,
     countBy = null,
-    throughAtom = false
+    throughAtom = false,
+    values = null,
+    keys = null,
+    atomValues = null
   } ) {
 
     if ( this.$__logging ) {
@@ -772,7 +750,10 @@ export default class KnishIOClient {
         latestMetas,
         filter,
         queryArgs,
-        countBy
+        countBy,
+        values,
+        keys,
+        atomValues
       } );
     } else {
       /**
