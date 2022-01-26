@@ -119,35 +119,23 @@ export default class Meta {
    */
   static policy ( meta, policy ) {
     const metas = {
-      conditions: 'policy',
-      rule: meta[ 'rule' ] || [],
-      callback: meta[ 'callback' ] || {}
+      policy: {}
     };
 
     if ( policy ) {
       for ( const [ policyKey, value ] of Object.entries( policy || {} ) ) {
 
         if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
-          metas[ 'callback' ][ policyKey ] = {};
+          metas.policy[ policyKey ] = {};
 
           for ( const [ key, content ] of Object.entries( value ) ) {
-            metas[ 'callback' ][ policyKey ][ key ] = content;
+            metas.policy[ policyKey ][ key ] = content;
           }
         }
       }
     }
 
-    metas[ 'callback' ] = Meta.__defaultPolicy( metas[ 'callback' ], meta );
-
-    for ( const policyKey of [ 'conditions', 'rule', 'callback' ] ) {
-      metas[ policyKey ] = Array.isArray( metas[ policyKey ] ) ||
-      Object.prototype.toString.call( metas[ policyKey ] ) === '[object Object]' ?
-        JSON.stringify( metas[ policyKey ] ) : metas[ policyKey ];
-
-      if ( policyKey === 'conditions' && Object.prototype.toString.call( metas[ policyKey ] ) === '[object String]' ) {
-        metas[ policyKey ] = JSON.stringify( metas[ policyKey ] );
-      }
-    }
+    metas.policy = JSON.stringify( Meta.__defaultPolicy( metas.policy, meta ) );
 
     return metas;
   }

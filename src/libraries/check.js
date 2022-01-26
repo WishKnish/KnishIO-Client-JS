@@ -243,35 +243,35 @@ export default class CheckMolecule {
 
     for ( let atom of CheckMolecule.isotopeFilter( 'R', molecule.atoms ) ) {
       const metas = atom.aggregatedMeta();
-      for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
 
-        if ( !metas.hasOwnProperty( key ) ) {
-          throw new MetaMissingException( `Check::isotopeR() - Required meta field "${ key }" is missing!` );
+      if ( metas.policy ) {
+        const policy = JSON.parse( metas.policy );
+
+        if ( !Object.keys( policy ).every( i => [ 'read', 'write' ].includes( i ) ) ) {
+          throw new MetaMissingException( 'Check::isotopeR() - Mixing rules with politics!' );
         }
       }
 
-      try {
-        const conditions = JSON.parse( metas[ 'conditions' ] ),
-          callback = JSON.parse( metas[ 'callback' ] );
-      } catch ( err ) {
-        throw new MetaMissingException( 'Check::isotopeR() - Condition is formatted incorrectly!' );
-      }
+      if ( metas.rule ) {
+        const rule = JSON.parse( metas.rule );
 
-      if ( conditions === 'policy' &&
-        callback.length &&
-        !callback.every( i => [ 'read', 'write' ].includes( i[ 'action' ] ) ) ) {
-        throw new MetaMissingException( 'Check::isotopeR() - Mixing rules with politics!' );
-      }
+        for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
+          if ( !rule.hasOwnProperty( key ) ) {
+            throw new MetaMissingException( `Check::isotopeR() - Required meta field "${ key }" is missing!` );
+          }
+        }
 
-      if ( Array.isArray( conditions ) && conditions.length ) {
+        const conditions = rule[ 'conditions' ];
 
-        for ( let condition of conditions ) {
-          const keys = Object.keys( condition ),
-            property = keys.filter( n => [ 'key', 'value', 'comparison' ].indexOf( n ) !== -1 ),
-            property2 = keys.filter( n => [ 'managedBy' ].indexOf( n ) !== -1 );
+        if ( Array.isArray( conditions ) && conditions.length ) {
+          for ( let condition of conditions ) {
+            const keys = Object.keys( condition ),
+              property = keys.filter( n => [ 'key', 'value', 'comparison' ].indexOf( n ) !== -1 ),
+              property2 = keys.filter( n => [ 'managedBy' ].indexOf( n ) !== -1 );
 
-          if ( property.length < 3 && property2.length ) {
-            throw new MetaMissingException( 'Check::isotopeR() - Required condition field is missing!' );
+            if ( property.length < 3 && property2.length ) {
+              throw new MetaMissingException( 'Check::isotopeR() - Required condition field is missing!' );
+            }
           }
         }
       }
