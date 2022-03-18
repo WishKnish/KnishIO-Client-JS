@@ -461,30 +461,29 @@ export default class KnishIOClient {
       console.info( 'KnishIOClient::createMolecule() - Creating a new molecule...' );
     }
 
-    const _secret = secret || this.getSecret();
-    let _sourceWallet = sourceWallet;
+    secret = secret || this.getSecret();
 
     // Sets the source wallet as the last remainder wallet (to maintain ContinuID)
-    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() ) {
-      _sourceWallet = this.getRemainderWallet();
+    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() ) {
+      sourceWallet = this.getRemainderWallet();
     }
 
     // Unable to use last remainder wallet; Figure out what wallet to use:
-    if ( _sourceWallet === null ) {
-      _sourceWallet = await this.getSourceWallet();
+    if ( sourceWallet === null ) {
+      sourceWallet = await this.getSourceWallet();
     }
 
     // Set the remainder wallet for the next transaction
     this.remainderWallet = remainderWallet || Wallet.create( {
-      secretOrBundle: _secret,
+      secretOrBundle: secret,
       token: 'USER',
-      batchId: _sourceWallet.batchId,
-      characters: _sourceWallet.characters
+      batchId: sourceWallet.batchId,
+      characters: sourceWallet.characters
     } );
 
     return new Molecule( {
-      secret: _secret,
-      sourceWallet: _sourceWallet,
+      secret,
+      sourceWallet,
       remainderWallet: this.getRemainderWallet(),
       cellSlug: this.cellSlug()
     } );
