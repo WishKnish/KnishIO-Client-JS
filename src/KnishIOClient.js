@@ -1795,6 +1795,66 @@ export default class KnishIOClient {
   }
 
 
+
+  /**
+   * Builds and executes a molecule to destroy the specified Token units
+   *
+   * @param {string} token
+   * @param {number|null} amount
+   * @param {array|null} units
+   * @param {Wallet|null} sourceWallet
+   * @return {Promise<unknown>}
+   */
+  async replenishToken ( {
+    token,
+    amount = null,
+    units = [],
+    sourceWallet = null
+  } ) {
+
+
+    if ( sourceWallet === null ) {
+      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+    }
+    /*
+    if ( !sourceWallet ) {
+      throw new TransferWalletException( 'Source wallet is missing or invalid.' );
+    }
+    */
+
+    // Remainder wallet
+    let remainderWallet = Wallet.create( {
+      secretOrBundle: this.getSecret(),
+      token,
+      characters: sourceWallet.characters
+    } );
+
+    // Batch ID default initialization
+    remainderWallet.initBatchId( {
+      sourceWallet,
+      isRemainder: true
+    } );
+
+
+    // Burn tokens
+    let molecule = await this.createMolecule( {
+      secret: null,
+      sourceWallet,
+      remainderWallet
+    } );
+    molecule.replenishTokens( {
+      amount,
+      units
+    } );
+    molecule.sign( {} );
+    molecule.check();
+
+
+    const query = ( new MutationProposeMolecule( this.client(), molecule ) );
+    return this.executeQuery( query );
+  }
+
+
   /**
    * Request a guest auth token
    *

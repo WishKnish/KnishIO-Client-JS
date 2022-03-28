@@ -159,12 +159,25 @@ export default class Molecule {
     meta = meta || {};
     wallet = wallet || this.sourceWallet;
 
+    meta[ 'pubkey' ] = wallet.pubkey;
+    meta[ 'characters' ] = wallet.characters;
+
+    return meta;
+  }
+
+
+  /**
+   *
+   * @param wallet
+   * @param meta
+   * @returns {*[]}
+   */
+  tokenUnitMetas ( wallet, meta = [] ) {
+
+    // Add token units meta key
     if ( wallet.hasTokenUnits() ) {
       meta[ 'tokenUnits' ] = wallet.tokenUnitsJson();
     }
-
-    meta[ 'pubkey' ] = wallet.pubkey;
-    meta[ 'characters' ] = wallet.characters;
 
     return meta;
   }
@@ -187,49 +200,6 @@ export default class Molecule {
     return metas;
   }
 
-
-  /*
-   * Replenishes non-finite token supplies
-   *
-   * @param {number} amount
-   * @param {string} token
-   * @param {array|object} metas
-   * @return {Molecule}
-   */
-  replenishTokens ( {
-    amount,
-    token,
-    metas
-  } ) {
-    metas.action = 'add';
-
-    for ( let key of [ 'address', 'position', 'batchId' ] ) {
-      if ( typeof metas[ key ] === 'undefined' ) {
-        throw new MetaMissingException( `Molecule::replenishTokens() - Missing ${ key } in meta!` );
-      }
-    }
-
-    this.molecularHash = null;
-
-    this.atoms.push(
-      Atom.create.C( {
-        position: this.sourceWallet.position,
-        walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
-        amount,
-        batchId: this.sourceWallet.batchId,
-        metaType: 'token',
-        metaId: token,
-        meta: this.finalMetas( metas ),
-        index: this.generateIndex()
-      } )
-    );
-
-    this.addUserRemainderAtom( this.remainderWallet );
-    this.atoms = Atom.sortAtoms( this.atoms );
-
-    return this;
-  }
 
   /**
    * Add user remainder atom for ContinuID
@@ -322,7 +292,7 @@ export default class Molecule {
         token: this.sourceWallet.token,
         value: -amount,
         batchId: this.sourceWallet.batchId,
-        meta: this.finalMetas( {} ),
+        meta: this.finalMetas( this.tokenUnitMetas( this.sourceWallet ) ),
         index: this.generateIndex()
       } )
     );
@@ -336,7 +306,7 @@ export default class Molecule {
         batchId: this.remainderWallet.batchId,
         metaType: walletBundle ? 'walletBundle' : null,
         metaId: walletBundle,
-        meta: this.finalMetas( {}, this.remainderWallet ),
+        meta: this.finalMetas( this.tokenUnitMetas( this.remainderWallet ), this.remainderWallet ),
         index: this.generateIndex()
       } )
     );
@@ -345,6 +315,83 @@ export default class Molecule {
 
     return this;
 
+  }
+
+
+  /*
+   * Replenishes non-finite token supplies
+   *
+   * @param {number} amount
+   * @param {string} token
+   * @param {array|object} metas
+   * @return {Molecule}
+   */
+  replenishToken ( {
+    amount,
+    units
+  } ) {
+
+    if ( amount < 0 ) {
+      // throw new NegativeMeaningException( 'It is impossible to use a negative value for the number of tokens' );
+    }
+
+    // Special code for the token unit logic
+    if ( units ) {
+
+      // Prepare token units to formatted style
+      units = Wallet.getTokenUnits( units );
+
+      // Merge token units with source wallet & new items
+      for ( const units of unit ) {
+        this.remainderWallet.tokenUnits.push( unit );
+      }
+      this.remainderWallet.balance = this.remainderWallet.tokenUnits.length;
+
+      // Override first atom'a token units to replenish values
+      this.sourceWallet->tokenUnits = units;
+      this.sourceWallet.balance = this.sourceWallet.tokenUnits.length;
+    }
+
+    // Update wallet's balances
+    else {
+      this.remainderWallet.balance = this.sourceWallet.balance + amount;
+      this.sourceWallet.balance = amount;
+    }
+
+
+    this.molecularHash = null;
+
+    // Initializing a new Atom to remove tokens from source
+    this.atoms.push(
+      Atom.create.V( {
+        position: this.sourceWallet.position,
+        walletAddress: this.sourceWallet.address,
+        token: this.sourceWallet.token,
+        value: this.sourceWallet.balance,
+        batchId: this.sourceWallet.batchId,
+        meta: this.finalMetas( this.tokenUnitMetas( this.sourceWallet ) ),
+        index: this.generateIndex()
+      } )
+    );
+
+    this.atoms.push(
+      Atom.create.V( {
+        position: this.remainderWallet.position,
+        walletAddress: this.remainderWallet.address,
+        token: this.sourceWallet.token,
+        value: this.remainderWallet.balance,
+        batchId: this.remainderWallet.batchId,
+        metaType: walletBundle ? 'walletBundle' : null,
+        metaId: walletBundle,
+        meta: this.finalMetas( this.tokenUnitMetas( this.remainderWallet ), this.remainderWallet ),
+        index: this.generateIndex()
+      } )
+    );
+
+    this.addUserRemainderAtom( this.remainderWallet );
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
   }
 
   /**
@@ -374,7 +421,7 @@ export default class Molecule {
         token: this.sourceWallet.token,
         value: -amount,
         batchId: this.sourceWallet.batchId,
-        meta: this.finalMetas( {} ),
+        meta: this.finalMetas( this.tokenUnitMetas( this.sourceWallet ) ),
         index: this.generateIndex()
       } )
     );
@@ -389,7 +436,7 @@ export default class Molecule {
         batchId: recipientWallet.batchId,
         metaType: 'walletBundle',
         metaId: recipientWallet.bundle,
-        meta: this.finalMetas( {}, recipientWallet ),
+        meta: this.finalMetas( this.tokenUnitMetas( recipientWallet ), recipientWallet ),
         index: this.generateIndex()
       } )
     );
@@ -403,7 +450,7 @@ export default class Molecule {
         batchId: this.remainderWallet.batchId,
         metaType: 'walletBundle',
         metaId: this.sourceWallet.bundle,
-        meta: this.finalMetas( {}, this.remainderWallet ),
+        meta: this.finalMetas( this.tokenUnitMetas( this.remainderWallet ), this.remainderWallet ),
         index: this.generateIndex()
       } )
     );
