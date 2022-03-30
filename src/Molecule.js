@@ -348,7 +348,7 @@ export default class Molecule {
       this.remainderWallet.balance = this.remainderWallet.tokenUnits.length;
 
       // Override first atom'a token units to replenish values
-      this.sourceWallet->tokenUnits = units;
+      this.sourceWallet.tokenUnits = units;
       this.sourceWallet.balance = this.sourceWallet.tokenUnits.length;
     }
 
