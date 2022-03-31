@@ -312,16 +312,16 @@ export default class Test {
     let client = await this.client( this.secrets[ 0 ] );
     response = await client.replenishToken( {
       token: this.tokenSlugs[ 0 ],
-      amount: 10,
+      amount: 25,
     } );
-    this.checkResponse( response, 'testBurnToken' );
+    this.checkResponse( response, 'testReplenishToken' );
 
     response = await client.replenishToken( {
       token: this.tokenSlugs[ 2 ],
       amount: 0,
       units: this.replenishTokenUnits,
     } );
-    this.checkResponse( response, 'testBurnUnitToken' );
+    this.checkResponse( response, 'testReplenishUnitToken' );
   }
 
   /**

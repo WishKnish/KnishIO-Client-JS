@@ -262,6 +262,7 @@ export default class Molecule {
     return this;
   }
 
+
   /**
    * Burns some amount of tokens from a wallet
    *
@@ -328,21 +329,22 @@ export default class Molecule {
    */
   replenishToken ( {
     amount,
-    units
+    units = []
   } ) {
 
     if ( amount < 0 ) {
-      // throw new NegativeMeaningException( 'It is impossible to use a negative value for the number of tokens' );
+      throw new NegativeAmountException( 'Molecule::replenishToken() - Amount to replenish must be positive!' );
     }
 
     // Special code for the token unit logic
-    if ( units ) {
+    if ( units.length ) {
 
       // Prepare token units to formatted style
       units = Wallet.getTokenUnits( units );
 
       // Merge token units with source wallet & new items
-      for ( const units of unit ) {
+      this.remainderWallet.tokenUnits = this.sourceWallet.tokenUnits;
+      for ( const unit of units ) {
         this.remainderWallet.tokenUnits.push( unit );
       }
       this.remainderWallet.balance = this.remainderWallet.tokenUnits.length;
@@ -357,7 +359,6 @@ export default class Molecule {
       this.remainderWallet.balance = this.sourceWallet.balance + amount;
       this.sourceWallet.balance = amount;
     }
-
 
     this.molecularHash = null;
 
@@ -374,6 +375,7 @@ export default class Molecule {
       } )
     );
 
+    const walletBundle = this.remainderWallet.bundle;
     this.atoms.push(
       Atom.create.V( {
         position: this.remainderWallet.position,
@@ -388,7 +390,6 @@ export default class Molecule {
       } )
     );
 
-    this.addUserRemainderAtom( this.remainderWallet );
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;

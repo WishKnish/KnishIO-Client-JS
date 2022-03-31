@@ -1842,7 +1842,7 @@ export default class KnishIOClient {
       sourceWallet,
       remainderWallet
     } );
-    molecule.replenishTokens( {
+    molecule.replenishToken( {
       amount,
       units
     } );
