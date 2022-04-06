@@ -1,5 +1,4 @@
 import CodeException from '../exception/CodeException';
-import { Operation } from '@apollo/client/core';
 
 export default class Subscribe {
   /**

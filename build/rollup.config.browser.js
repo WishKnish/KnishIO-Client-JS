@@ -1,7 +1,8 @@
 import base from './rollup.config.base';
 import { terser } from 'rollup-plugin-terser';
+import inject from '@rollup/plugin-inject';
 import globals from './globals';
-import nodePolyfills from 'rollup-plugin-node-polyfills';
+import injectConfig from './inject';
 
 const config = Object.assign( {}, base, {
   output: {
@@ -11,7 +12,7 @@ const config = Object.assign( {}, base, {
     globals: globals
   },
   plugins: [
-    nodePolyfills(),
+    inject( injectConfig ),
     terser()
   ]
 } );
