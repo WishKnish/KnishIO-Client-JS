@@ -60,6 +60,7 @@ import MetaMissingException from './exception/MetaMissingException';
 import NegativeAmountException from './exception/NegativeAmountException';
 import { deepCloning } from './libraries/array';
 import Meta from './Meta';
+import Rule from './instance/Rules/Rule';
 
 const USE_META_CONTEXT = false;
 const DEFAULT_META_CONTEXT = 'https://www.schema.org';
@@ -501,26 +502,27 @@ export default class Molecule {
    *
    * @param {string} metaType
    * @param {string} metaId
-   * @param {object|array} meta
+   * @param {object[]} rule,
+   * @param {object} policy
    * @return {Molecule}
    */
   createRule ( {
     metaType,
     metaId,
-    meta
+    rule,
+    policy = {}
   } ) {
-    for ( let key of [ 'conditions', 'callback', 'rule' ] ) {
+    const $rules = [];
 
-      if ( typeof meta[ key ] === 'undefined' ) {
-        throw new MetaMissingException( `Molecule::createRule() - Value for required meta key ${ key } in missing!` );
-      }
-
-      for ( let item of [ '[object Object]', '[object Array]' ] ) {
-        if ( Object.prototype.toString.call( meta[ key ] ) === item ) {
-          meta[ key ] = JSON.stringify( meta[ key ] );
-        }
-      }
+    for ( const $rule of rule ) {
+      $rules.push( $rule instanceof Rule ? $rule : Rule.toObject( $rule ) );
     }
+
+    const rules = {
+      rule: JSON.stringify( $rules )
+    };
+
+    const policies = Meta.policy( rules, policy );
 
     this.addAtom(
       Atom.create.R( {
@@ -529,7 +531,7 @@ export default class Molecule {
         token: this.sourceWallet.token,
         metaType,
         metaId,
-        meta: this.finalMetas( meta, this.sourceWallet ),
+        meta: { ...rules, ...policies },
         index: this.generateIndex()
       } )
     );

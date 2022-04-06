@@ -46,9 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import {
-  ApolloLink,
-  Operation,
-  NextLink
+  ApolloLink
 } from '@apollo/client/core';
 import Echo from 'laravel-echo';
 import createRequestHandler from './handler';

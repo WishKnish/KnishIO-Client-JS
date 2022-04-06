@@ -45,123 +45,98 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import CodeException from '../exception/CodeException';
-import Response from '../response/Response';
 
-export default class Query {
+import Callback from './Callback';
+import RuleArgumentException from './exception/RuleArgumentException';
+
+
+export default class Rule {
+  // which metadata field are we targeting? (if we're dealing with a ledger object like a Wallet,
+  // this could be internal fields like 'amount', etc.)
+  #key
+  // what is the target value that will trigger the rule? (meta value OR token amount)
+  #value
+  // same list of possible options as when querying
+  #comparison
+  #callback
+
   /**
    *
-   * @param {ApolloClient} apolloClient
+   * @param {string} key
+   * @param {string} value
+   * @param {string} comparison
+   * @param {Callback[]} callback
    */
-  constructor ( apolloClient ) {
-    this.client = apolloClient;
-    this.$__variables = null;
-    this.$__query = null;
-  }
-
-
-  /**
-   * Return a response object
-   * Used at KnishIOClient::createMolecule => sets the source wallet from the remainder one stored in response object
-   * @return {Response}
-   */
-  response () {
-    return this.$__response;
-  }
-
-  /**
-   * Builds a Response based on JSON input
-   *
-   * @param response
-   * @return {Promise<Response>}
-   */
-  async createResponseRaw ( response ) {
-    return this.createResponse( response );
-  }
-
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {Response}
-   */
-  createResponse ( json ) {
-    return new Response( {
-      query: this,
-      json
-    } );
-  }
-
-  /**
-   * Creates a new Request for the given parameters
-   *
-   * @param {object} variables
-   * @return {Operation}
-   */
-  createQuery ( { variables = null } ) {
-    this.$__variables = this.compiledVariables( variables );
-
-    // Uri is a required parameter
-    let uri = this.uri();
-
-    if ( !uri ) {
-      throw new CodeException( 'Query::createQuery() - Node URI was not initialized for this client instance!' );
+  constructor ( {
+    key,
+    value,
+    comparison = '===',
+    callback = []
+  } ) {
+    if ( !key ) {
+      throw new RuleArgumentException( 'Rule structure violated, missing mandatory "key" parameter!' );
     }
 
-    if ( this.$__query === null ) {
-      throw new CodeException( 'Query::createQuery() - GraphQL subscription was not initialized!' );
+    if ( !value ) {
+      throw new RuleArgumentException( 'Rule structure violated, missing mandatory "value" parameter' );
     }
 
+    for ( const element of callback ) {
+      if ( ! ( element instanceof Callback ) ) {
+        throw new RuleArgumentException();
+      }
+    }
+
+    this.#key = key;
+    this.#value = value;
+    this.#comparison = comparison;
+    this.#callback = callback;
+  }
+
+  /**
+   *
+   * @param {string} comparison
+   */
+  set comparison ( comparison ) {
+    this.#comparison = comparison;
+  }
+
+  set callback ( callback ) {
+    this.#callback.push( callback );
+  }
+
+  toJSON () {
     return {
-      query: this.$__query,
-      variables: this.variables()
+      key: this.#key,
+      value: this.#value,
+      comparison: this.#comparison,
+      callback: this.#callback
     };
   }
 
   /**
-   * Sends the Query to a Knish.IO node and returns the Response
    *
-   * @param {object} variables
-   * @return {Promise<Response>}
+   * @param {object} object
+   *
+   * @return {Rule}
    */
-  async execute ( { variables = null } ) {
+  static toObject ( object ) {
 
-    this.$__request = this.createQuery( {
-      variables
+    const rule = new Rule( {
+      key: object.key,
+      value: object.value
     } );
 
-    let response = await this.client.query( this.$__request );
+    if ( object.comparison ) {
+      rule.comparison = object.comparison;
+    }
 
-    this.$__response = await this.createResponseRaw( response );
+    if ( object.callback ) {
+      for ( const callback of object.callback ) {
+        rule.callback = callback instanceof Callback ? callback : Callback.toObject( callback );
+      }
+    }
 
-    return this.$__response;
-  }
-
-  /**
-   * Returns a variables object for the Query
-   *
-   * @param {object} variables
-   * @return {object}
-   */
-  compiledVariables ( variables = null ) {
-    return variables || {};
-  }
-
-  /**
-   * Returns the Knish.IO endpoint URI
-   *
-   * @return {string}
-   */
-  uri () {
-    return this.client.getUri();
-  }
-
-  /**
-   * Returns the query variables object
-   *
-   * @return {object|null}
-   */
-  variables () {
-    return this.$__variables;
+    return rule;
   }
 }

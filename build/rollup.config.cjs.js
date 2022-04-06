@@ -12,7 +12,7 @@ const config = Object.assign( {}, base, {
   },
   plugins: [
     cjs( {
-      exclude: 'src/* src/** src/**/*'
+      exclude: 'src/* src/** src/**/* src/**/** src/**/**/*'
     } ),
     terser()
   ]

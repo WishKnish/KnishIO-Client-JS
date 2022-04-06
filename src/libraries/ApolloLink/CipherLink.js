@@ -1,7 +1,5 @@
 import {
-  ApolloLink,
-  Operation,
-  NextLink
+  ApolloLink
 } from '@apollo/client/core';
 import { print } from 'graphql';
 import { gql } from '@apollo/client/core';

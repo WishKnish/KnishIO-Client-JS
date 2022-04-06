@@ -93,6 +93,7 @@ import QueryAtom from './query/QueryAtom';
 import QueryPolicy from './query/QueryPolicy';
 import MutationCreatePolicy from './mutation/MutationCreatePolicy';
 import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom';
+import MutationCreateRule from './mutation/MutationCreateRule';
 
 
 /**
@@ -1173,6 +1174,42 @@ export default class KnishIOClient {
       recipientWallet,
       amount,
       meta: meta || {}
+    } );
+
+    return await this.executeQuery( query );
+  }
+
+  /**
+   *
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {object[]} rule
+   * @param {object} policy
+   * @returns {Promise<ResponseCreateRule>}
+   */
+  async createRule ( {
+    metaType,
+    metaId,
+    rule,
+    policy = {}
+  } ) {
+    /**
+     * @type {MutationCreateRule}
+     */
+    const query = await this.createMoleculeMutation( {
+        mutationClass: MutationCreateRule,
+        molecule: await this.createMolecule( {
+          secret: this.getSecret(),
+          sourceWallet: await this.getSourceWallet()
+        } )
+      }
+    );
+
+    query.fillMolecule( {
+      metaType,
+      metaId,
+      rule,
+      policy
     } );
 
     return await this.executeQuery( query );

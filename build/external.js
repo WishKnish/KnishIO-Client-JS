@@ -1,4 +1,7 @@
 export default [
+  '@apollo/client/core',
+  '@apollo/client/cache',
+  '@apollo/client/link/error',
   '@stablelib/base64',
   '@stablelib/utf8',
   'apollo-cache-inmemory',

@@ -45,51 +45,80 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import {
-  ApolloLink
-} from '@apollo/client/core';
+
+import Meta from './Meta';
+import RuleArgumentException from './exception/RuleArgumentException';
 
 
-class AuthLink extends ApolloLink {
+export default class Callback {
+  // server to execute signed molecule with given atom meta; other options: 'reject' (reject matches);
+  // 'accept' (reject non-matches), 'burn' (require appropriate burning of tokens in same molecule)
+  #action
+  // supporting metadata for executing callback goes here
+  #meta = null
 
-  constructor () {
-    super();
+  /**
+   *
+   * @param {string} action
+   * @param {Meta|null} meta
+   */
+  constructor ( {
+    action,
+    meta
+  } ) {
+    if ( meta ) {
+      this.meta = meta;
+    }
 
-    this.auth = '';
+    if ( !action ) {
+      throw new RuleArgumentException( 'Callback structure violated, missing mandatory "action" parameter.' );
+    }
+
+    this.#action = action;
+  }
+
+  set meta ( meta ) {
+    if ( ! ( meta instanceof Meta ) ) {
+      throw new RuleArgumentException( 'Incorrect meta argument. The meta argument can only be an instance of the Meta class.' );
+    }
+
+    this.#meta = meta;
+  }
+
+  toJSON () {
+    const meta = {
+      action: this.#action
+    };
+
+    if ( this.#meta ) {
+      meta.meta = this.#meta;
+    }
+
+    return meta;
   }
 
   /**
    *
-   * @return {string}
-   */
-  getAuthToken () {
-    return this.auth;
-  }
-
-  /**
-   * @param {string} auth
-   */
-  setAuthToken ( auth ) {
-    this.auth = auth;
-  }
-
-  /**
+   * @param {object} object
    *
-   * @param {Operation} operation
-   * @param {NextLink} forward
-   * @return {*}
+   * @return Callback
    */
-  request ( operation, forward ) {
+  static toObject ( object ) {
+    const callback = new Callback( {
+      action: object.action,
+      meta: null
+    } );
 
-    operation.setContext( ( { headers = {} } ) => ( {
-      headers: {
-        ...headers,
-        'X-Auth-Token': this.getAuthToken()
-      }
-    } ) );
+    if ( object.meta ) {
+      callback.meta = new Meta( {
+        metaType: object.meta.metaType,
+        metaId: object.meta.metaId,
+        isotope: object.meta.isotope,
+        token: object.meta.token,
+        amount: object.meta.amount
+      } );
+    }
 
-    return forward( operation );
+    return callback;
   }
 }
-
-export default AuthLink;

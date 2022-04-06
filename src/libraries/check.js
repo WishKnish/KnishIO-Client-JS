@@ -253,25 +253,21 @@ export default class CheckMolecule {
       }
 
       if ( metas.rule ) {
-        const rule = JSON.parse( metas.rule );
+        const rules = JSON.parse( metas.rule );
 
-        for ( let key of [ 'callback', 'conditions', 'rule' ] ) {
-          if ( !rule.hasOwnProperty( key ) ) {
-            throw new MetaMissingException( `Check::isotopeR() - Required meta field "${ key }" is missing!` );
-          }
+        if ( !Array.isArray( rules ) ) {
+          throw new MetaMissingException( 'Check::isotopeR() - Incorrect rule format!' );
         }
 
-        const conditions = rule[ 'conditions' ];
+        if ( rules.length < 1 ) {
+          throw new MetaMissingException( 'Check::isotopeR() - No rules!' );
+        }
 
-        if ( Array.isArray( conditions ) && conditions.length ) {
-          for ( let condition of conditions ) {
-            const keys = Object.keys( condition ),
-              property = keys.filter( n => [ 'key', 'value', 'comparison' ].indexOf( n ) !== -1 ),
-              property2 = keys.filter( n => [ 'managedBy' ].indexOf( n ) !== -1 );
+        for ( const rule of rules ) {
+          const keys = Object.keys(rule).filter( value => [ 'key', 'value', 'callback' ].includes( value ) );
 
-            if ( property.length < 3 && property2.length ) {
-              throw new MetaMissingException( 'Check::isotopeR() - Required condition field is missing!' );
-            }
+          if ( keys.length < 3 ) {
+            throw new MetaMissingException( 'Check::isotopeR() - Necessary rule fields are missing!' );
           }
         }
       }

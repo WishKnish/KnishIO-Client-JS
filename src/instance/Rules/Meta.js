@@ -45,51 +45,46 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import {
-  ApolloLink
-} from '@apollo/client/core';
 
+export default class Meta {
 
-class AuthLink extends ApolloLink {
-
-  constructor () {
-    super();
-
-    this.auth = '';
-  }
+  #metaType
+  #metaId
+  #isotope
+  #token
+  #amount
 
   /**
    *
-   * @return {string}
+   * @param {string} metaType
+   * @param {string} metaId
+   * @param {string} isotope
+   * @param {string} token
+   * @param {number} amount
    */
-  getAuthToken () {
-    return this.auth;
+  constructor ( {
+    metaType,
+    // keyword that will be automatically replaced on server with sender's wallet bundle,
+    metaId,
+    isotope,
+    token,
+    amount
+  } ) {
+    this.#metaType = metaType;
+    this.#metaId = metaId;
+    this.#isotope = isotope;
+    this.#token = token;
+    this.#amount = amount;
   }
 
-  /**
-   * @param {string} auth
-   */
-  setAuthToken ( auth ) {
-    this.auth = auth;
-  }
 
-  /**
-   *
-   * @param {Operation} operation
-   * @param {NextLink} forward
-   * @return {*}
-   */
-  request ( operation, forward ) {
-
-    operation.setContext( ( { headers = {} } ) => ( {
-      headers: {
-        ...headers,
-        'X-Auth-Token': this.getAuthToken()
-      }
-    } ) );
-
-    return forward( operation );
+  toJSON () {
+    return {
+      metaType: this.#metaType,
+      metaId: this.#metaId,
+      isotope: this.#isotope,
+      token: this.#token,
+      amount: this.#amount
+    };
   }
 }
-
-export default AuthLink;
