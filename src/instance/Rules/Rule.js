@@ -51,14 +51,6 @@ import RuleArgumentException from './exception/RuleArgumentException';
 
 
 export default class Rule {
-  // which metadata field are we targeting? (if we're dealing with a ledger object like a Wallet,
-  // this could be internal fields like 'amount', etc.)
-  _key
-  // what is the target value that will trigger the rule? (meta value OR token amount)
-  _value
-  // same list of possible options as when querying
-  _comparison
-  _callback
 
   /**
    *

@@ -51,11 +51,6 @@ import RuleArgumentException from './exception/RuleArgumentException';
 
 
 export default class Callback {
-  // server to execute signed molecule with given atom meta; other options: 'reject' (reject matches);
-  // 'accept' (reject non-matches), 'burn' (require appropriate burning of tokens in same molecule)
-  _action
-  // supporting metadata for executing callback goes here
-  _meta = null
 
   /**
    *

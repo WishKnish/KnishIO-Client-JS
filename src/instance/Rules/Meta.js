@@ -48,12 +48,6 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 
 export default class Meta {
 
-  _metaType
-  _metaId
-  _isotope
-  _token
-  _amount
-
   /**
    *
    * @param {string} metaType
