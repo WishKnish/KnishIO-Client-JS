@@ -110,8 +110,7 @@
     "not ie <= 8"
   ],
   "scripts": {
-    "build": "yarn build:browser && yarn build:es && yarn build:umd && yarn build:cjs",
-    "build:browser": "rollup --config build/rollup.config.browser.js",
+    "build": "yarn build:es && yarn build:umd && yarn build:cjs",
     "build:es": "rollup --config build/rollup.config.es.js",
     "build:umd": "rollup --config build/rollup.config.umd.js",
     "build:cjs": "rollup --config build/rollup.config.cjs.js",
