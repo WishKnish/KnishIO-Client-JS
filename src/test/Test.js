@@ -62,7 +62,7 @@ export default class Test {
       [ 'unit_id_12' ],
       [ 'unit_id_13' ],
       [ 'unit_id_14' ],
-      [ 'unit_id_15' ],
+      [ 'unit_id_15' ]
     ];
   }
 
@@ -312,14 +312,14 @@ export default class Test {
     let client = await this.client( this.secrets[ 0 ] );
     response = await client.replenishToken( {
       token: this.tokenSlugs[ 0 ],
-      amount: 25,
+      amount: 25
     } );
     this.checkResponse( response, 'testReplenishToken' );
 
     response = await client.replenishToken( {
       token: this.tokenSlugs[ 2 ],
       amount: 0,
-      units: this.replenishTokenUnits,
+      units: this.replenishTokenUnits
     } );
     this.checkResponse( response, 'testReplenishUnitToken' );
   }

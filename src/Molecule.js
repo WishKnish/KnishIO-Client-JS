@@ -56,7 +56,6 @@ import CheckMolecule from './libraries/check';
 import { generateBundleHash } from './libraries/crypto';
 import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
-import MetaMissingException from './exception/MetaMissingException';
 import NegativeAmountException from './exception/NegativeAmountException';
 import { deepCloning } from './libraries/array';
 import Meta from './Meta';
@@ -520,7 +519,7 @@ export default class Molecule {
     for ( const walletKey of [ 'walletAddress', 'walletPosition', 'walletPubkey', 'walletCharacters' ] ) {
       // Importing wallet fields into meta object
       if ( !meta[ walletKey ] ) {
-        meta[ walletKey ] = recipientWallet[ walletKey.toLowerCase().substr( 6 ) ];
+        meta[ walletKey ] = recipientWallet[ walletKey.toLowerCase().substring( 6 ) ];
       }
     }
 
