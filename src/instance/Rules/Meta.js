@@ -48,11 +48,11 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 
 export default class Meta {
 
-  #metaType
-  #metaId
-  #isotope
-  #token
-  #amount
+  _metaType
+  _metaId
+  _isotope
+  _token
+  _amount
 
   /**
    *
@@ -70,21 +70,21 @@ export default class Meta {
     token,
     amount
   } ) {
-    this.#metaType = metaType;
-    this.#metaId = metaId;
-    this.#isotope = isotope;
-    this.#token = token;
-    this.#amount = amount;
+    this._metaType = metaType;
+    this._metaId = metaId;
+    this._isotope = isotope;
+    this._token = token;
+    this._amount = amount;
   }
 
 
   toJSON () {
     return {
-      metaType: this.#metaType,
-      metaId: this.#metaId,
-      isotope: this.#isotope,
-      token: this.#token,
-      amount: this.#amount
+      metaType: this._metaType,
+      metaId: this._metaId,
+      isotope: this._isotope,
+      token: this._token,
+      amount: this._amount
     };
   }
 }
