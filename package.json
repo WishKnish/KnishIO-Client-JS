@@ -88,7 +88,7 @@
     "@babel/preset-env": "^7.12.13",
     "@babel/runtime": "^7.12.13",
     "@rollup/plugin-babel": "^5.2.3",
-    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-commonjs": "^21.0.3",
     "@rollup/plugin-inject": "^4.0.4",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-replace": "^4.0.0",
