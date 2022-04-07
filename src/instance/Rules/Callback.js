@@ -51,11 +51,6 @@ import RuleArgumentException from './exception/RuleArgumentException';
 
 
 export default class Callback {
-  // server to execute signed molecule with given atom meta; other options: 'reject' (reject matches);
-  // 'accept' (reject non-matches), 'burn' (require appropriate burning of tokens in same molecule)
-  #action
-  // supporting metadata for executing callback goes here
-  #meta = null
 
   /**
    *
@@ -74,7 +69,7 @@ export default class Callback {
       throw new RuleArgumentException( 'Callback structure violated, missing mandatory "action" parameter.' );
     }
 
-    this.#action = action;
+    this._action = action;
   }
 
   set meta ( meta ) {
@@ -82,16 +77,16 @@ export default class Callback {
       throw new RuleArgumentException( 'Incorrect meta argument. The meta argument can only be an instance of the Meta class.' );
     }
 
-    this.#meta = meta;
+    this._meta = meta;
   }
 
   toJSON () {
     const meta = {
-      action: this.#action
+      action: this._action
     };
 
-    if ( this.#meta ) {
-      meta.meta = this.#meta;
+    if ( this._meta ) {
+      meta.meta = this._meta;
     }
 
     return meta;

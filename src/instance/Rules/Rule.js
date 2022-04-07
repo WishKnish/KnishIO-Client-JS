@@ -51,14 +51,6 @@ import RuleArgumentException from './exception/RuleArgumentException';
 
 
 export default class Rule {
-  // which metadata field are we targeting? (if we're dealing with a ledger object like a Wallet,
-  // this could be internal fields like 'amount', etc.)
-  #key
-  // what is the target value that will trigger the rule? (meta value OR token amount)
-  #value
-  // same list of possible options as when querying
-  #comparison
-  #callback
 
   /**
    *
@@ -87,10 +79,10 @@ export default class Rule {
       }
     }
 
-    this.#key = key;
-    this.#value = value;
-    this.#comparison = comparison;
-    this.#callback = callback;
+    this._key = key;
+    this._value = value;
+    this._comparison = comparison;
+    this._callback = callback;
   }
 
   /**
@@ -98,19 +90,19 @@ export default class Rule {
    * @param {string} comparison
    */
   set comparison ( comparison ) {
-    this.#comparison = comparison;
+    this._comparison = comparison;
   }
 
   set callback ( callback ) {
-    this.#callback.push( callback );
+    this._callback.push( callback );
   }
 
   toJSON () {
     return {
-      key: this.#key,
-      value: this.#value,
-      comparison: this.#comparison,
-      callback: this.#callback
+      key: this._key,
+      value: this._value,
+      comparison: this._comparison,
+      callback: this._callback
     };
   }
 

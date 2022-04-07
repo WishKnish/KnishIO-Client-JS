@@ -58,6 +58,12 @@ export default class Test {
       [ 'unit_id_10' ],
       [ 'unit_id_11' ]
     ];
+    this.replenishTokenUnits = [
+      [ 'unit_id_12' ],
+      [ 'unit_id_13' ],
+      [ 'unit_id_14' ],
+      [ 'unit_id_15' ]
+    ];
   }
 
 
@@ -80,6 +86,7 @@ export default class Test {
     await this.testRequestTokens();
     await this.testTransferToken();
     await this.testBurnToken();
+    await this.testReplenishToken();
     await this.testClaimShadowWallet();
     await this.testQueryMeta();
     await this.testQueryWallets();
@@ -278,24 +285,43 @@ export default class Test {
    *
    */
   async testBurnToken () {
-
-    let bundleHash = generateBundleHash( this.secrets[ 1 ] );
     let response;
 
     let client = await this.client( this.secrets[ 0 ] );
     response = await client.burnTokens( {
       token: this.tokenSlugs[ 0 ],
-      amount: 10,
-      batchId: 'batch_3'
+      amount: 10
     } );
     this.checkResponse( response, 'testBurnToken' );
 
     response = await client.burnTokens( {
       token: this.tokenSlugs[ 2 ],
-      units: [ 'unit_id_3', 'unit_id_4' ],
-      batchId: 'batch_4'
+      units: [ 'unit_id_3', 'unit_id_4' ]
     } );
     this.checkResponse( response, 'testBurnUnitToken' );
+  }
+
+
+  /**
+   *
+   */
+  async testReplenishToken () {
+
+    let response;
+
+    let client = await this.client( this.secrets[ 0 ] );
+    response = await client.replenishToken( {
+      token: this.tokenSlugs[ 0 ],
+      amount: 25
+    } );
+    this.checkResponse( response, 'testReplenishToken' );
+
+    response = await client.replenishToken( {
+      token: this.tokenSlugs[ 2 ],
+      amount: 0,
+      units: this.replenishTokenUnits
+    } );
+    this.checkResponse( response, 'testReplenishUnitToken' );
   }
 
   /**

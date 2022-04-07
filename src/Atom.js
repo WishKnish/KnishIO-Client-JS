@@ -319,6 +319,11 @@ export default class Atom {
           continue;
         }
 
+        // Excluded keys
+        if ( [ 'otsFragment', 'index' ].includes( property ) ) {
+          continue;
+        }
+
         // Hashing individual meta keys and values
         if ( property === 'meta' ) {
           for ( const meta of value ) {
