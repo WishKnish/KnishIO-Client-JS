@@ -165,9 +165,9 @@ export default class Wallet {
     let result = [];
     unitsData.forEach( unitData => {
       result.push( {
-        id: unitData.shift(),
-        name: unitData.shift(),
-        metas: unitData
+        id: unitData[ 0 ],
+        name: unitData[ 1 ],
+        fragmentZone: unitData.length > 2 ? unitData[ 2 ] : null,
       } );
     } );
     return result;
@@ -189,7 +189,7 @@ export default class Wallet {
     if ( this.hasTokenUnits() ) {
       const result = [];
       this.tokenUnits.forEach( tokenUnit => {
-        result.push( [ tokenUnit.id, tokenUnit.name ].concat( tokenUnit.metas ) );
+        result.push( [ tokenUnit.id, tokenUnit.name, tokenUnit.fragmentZone ] );
       } );
       return JSON.stringify( result );
     }

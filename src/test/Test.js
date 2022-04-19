@@ -132,7 +132,7 @@ export default class Test {
       meta: {
         name: this.tokenSlugs[ 0 ],
         fungibility: 'stackable',
-        supply: 'limited',
+        supply: 'replenishable',
         decimals: 0,
         icon: 'icon'
       },
@@ -165,7 +165,7 @@ export default class Test {
       units: this.tokenUnits,
       meta: {
         name: this.tokenSlugs[ 2 ],
-        supply: 'limited',
+        supply: 'replenishable',
         fungibility: 'stackable'
       },
       batchId: 'unit_batch_0'
@@ -227,7 +227,12 @@ export default class Test {
       contact: 'test@test.com',
       code: '1234'
     } );
-    this.checkResponse( response, 'testCreateIdentifier' );
+
+    console.log( ` ############### testCreateIdentifier ###############` );
+    if ( response.reason() !== 'Outdated code' ) {
+      console.error( 'Error with response.' )
+    }
+    this.debug( response );
   }
 
   /**
