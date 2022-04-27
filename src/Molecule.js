@@ -174,7 +174,7 @@ export default class Molecule {
   tokenUnitMetas ( wallet, meta = [] ) {
 
     // Add token units meta key
-    if ( wallet.hasTokenUnits() ) {
+    if ( wallet.tokenUnits.length ) {
       meta[ 'tokenUnits' ] = wallet.tokenUnitsJson();
     }
 

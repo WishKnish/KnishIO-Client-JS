@@ -33,36 +33,23 @@ export default class Test {
 
     this.clients = {};
     this.tokenUnits = [
-      [ 'unit_id_1', 'unit_name_1', 'unit_meta_1' ],
-      [ 'unit_id_2', 'unit_name_2', 'unit_meta_2' ],
-      [ 'unit_id_3', 'unit_name_3', 'unit_meta_3' ],
-      [ 'unit_id_4', 'unit_name_4', 'unit_meta_4' ],
-      [ 'unit_id_5', 'unit_name_5', 'unit_meta_5' ],
-      [ 'unit_id_6', 'unit_name_6', 'unit_meta_6' ],
-      [ 'unit_id_7', 'unit_name_7', 'unit_meta_7' ],
-      [ 'unit_id_8', 'unit_name_8', 'unit_meta_8' ],
-      [ 'unit_id_9', 'unit_name_9', 'unit_meta_9' ],
-      [ 'unit_id_10', 'unit_name_10', 'unit_meta_10' ],
-      [ 'unit_id_11', 'unit_name_11', 'unit_meta_11' ]
-    ];
-    this.tokenUnits = [
-      [ 'unit_id_1' ],
-      [ 'unit_id_2' ],
-      [ 'unit_id_3' ],
-      [ 'unit_id_4' ],
-      [ 'unit_id_5' ],
-      [ 'unit_id_6' ],
-      [ 'unit_id_7' ],
-      [ 'unit_id_8' ],
-      [ 'unit_id_9' ],
-      [ 'unit_id_10' ],
-      [ 'unit_id_11' ]
+      [ 'unit_id_1', 'unit_name_1' ],
+      [ 'unit_id_2', 'unit_name_2' ],
+      [ 'unit_id_3', 'unit_name_3' ],
+      [ 'unit_id_4', 'unit_name_4' ],
+      [ 'unit_id_5', 'unit_name_5' ],
+      [ 'unit_id_6', 'unit_name_6' ],
+      [ 'unit_id_7', 'unit_name_7' ],
+      [ 'unit_id_8', 'unit_name_8' ],
+      [ 'unit_id_9', 'unit_name_9' ],
+      [ 'unit_id_10', 'unit_name_10' ],
+      [ 'unit_id_11', 'unit_name_11' ]
     ];
     this.replenishTokenUnits = [
-      [ 'unit_id_12' ],
-      [ 'unit_id_13' ],
-      [ 'unit_id_14' ],
-      [ 'unit_id_15' ]
+      [ 'unit_id_12', 'unit_id_12' ],
+      [ 'unit_id_13', 'unit_id_13' ],
+      [ 'unit_id_14', 'unit_id_14' ],
+      [ 'unit_id_15', 'unit_id_15' ]
     ];
   }
 
