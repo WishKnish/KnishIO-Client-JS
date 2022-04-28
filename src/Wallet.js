@@ -62,6 +62,7 @@ import {
   hashShare
 } from './libraries/crypto';
 import BaseX from './libraries/BaseX';
+import TokenUnit from './TokenUnit';
 
 /**
  * Wallet class represents the set of public and private
@@ -164,21 +165,9 @@ export default class Wallet {
   static getTokenUnits ( unitsData ) {
     let result = [];
     unitsData.forEach( unitData => {
-      result.push( {
-        id: unitData.shift(),
-        name: unitData.shift(),
-        metas: unitData
-      } );
+      result.push( TokenUnit.createFromDB( unitData ) );
     } );
     return result;
-  }
-
-  /**
-   * Has token units?
-   * @return {boolean}
-   */
-  hasTokenUnits () {
-    return !!this.tokenUnits && this.tokenUnits.length > 0;
   }
 
   /**
@@ -186,10 +175,10 @@ export default class Wallet {
    */
   tokenUnitsJson () {
 
-    if ( this.hasTokenUnits() ) {
+    if ( this.tokenUnits.length ) {
       const result = [];
       this.tokenUnits.forEach( tokenUnit => {
-        result.push( [ tokenUnit.id, tokenUnit.name ].concat( tokenUnit.metas ) );
+        result.push( tokenUnit.toRawData() );
       } );
       return JSON.stringify( result );
     }
@@ -206,7 +195,7 @@ export default class Wallet {
    * @param recipientWallet
    */
   splitUnits (
-    units,
+    units,  // Array: token unit IDs
     remainderWallet,
     recipientWallet = null
   ) {
