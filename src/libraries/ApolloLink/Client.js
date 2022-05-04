@@ -55,7 +55,8 @@ import { InMemoryCache } from '@apollo/client/cache';
 import { onError } from '@apollo/client/link/error';
 
 import HttpLink from './HttpLink';
-import EchoLink from './EchoLink';
+import PusherLink from './PusherLink';
+import { parse } from 'uri-js';
 import AuthLink from './AuthLink';
 import { errorHandler } from './handler';
 import CipherLink from './CipherLink';
@@ -82,7 +83,7 @@ class Client extends ApolloClient {
     const auth = new AuthLink();
 
     let cipher = null;
-    let echo = null;
+    let socket = null;
 
     links.push( auth );
 
@@ -92,8 +93,12 @@ class Client extends ApolloClient {
     }
 
     if ( socketUri ) {
-      echo = new EchoLink( { socketUri: socketUri } );
-      links.push( echo );
+      const path = parse( serverUri );
+      socket = new PusherLink( {
+        socketUri: socketUri,
+        authEndpoint: `${ path.scheme }://${ path.host }/graphql/subscriptions/auth`
+      } );
+      links.push( socket );
     }
 
     links.push( concat( onError( errorHandler ), http ) );
@@ -125,7 +130,12 @@ class Client extends ApolloClient {
     this.__serverUri = serverUri;
     this.__socketUri = socketUri;
     this.__authLink = auth;
-    this.__echoLink = echo;
+    /**
+     *
+     * @type {PusherLink}
+     * @private
+     */
+    this.__socket = socket;
     this.__cipherLink = cipher;
 
     this.__pubkey = null;
@@ -169,13 +179,29 @@ class Client extends ApolloClient {
     this.__pubkey = pubkey;
     this.__authLink.setAuthToken( token );
 
-    if ( this.__echoLink ) {
-      this.__echoLink.setAuthToken( token );
+    if ( this.__socket ) {
+      this.__socket.setAuthToken( token );
     }
 
     if ( this.__cipherLink ) {
       this.__cipherLink.setWallet( this.__wallet );
       this.__cipherLink.setPubKey( this.__pubkey );
+    }
+  }
+
+  socketDisconnect() {
+    if ( this.__socket ) {
+      this.__socket.disconnect();
+    }
+  }
+
+  /**
+   *
+   * @param {string} channel
+   */
+  unsubscribeFromChannel( channel ) {
+    if ( this.__socket ) {
+      this.__socket.unsubscribeFromChannel( channel );
     }
   }
 

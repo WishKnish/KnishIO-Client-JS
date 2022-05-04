@@ -49,8 +49,8 @@
     "graphql": "^16.3.0",
     "isomorphic-fetch": "^3.0.0",
     "js-sha3": "^0.8.0",
-    "laravel-echo": "^1.11.4",
-    "socket.io-client": "^2.4.0",
+    "uri-js": "^4.4.1",
+    "pusher-js": "^7.0.6",
     "tweetnacl": "^1.0.3",
     "tweetnacl-sealedbox-js": "^1.2.0"
   },
