@@ -226,9 +226,9 @@ export default class Test {
       code: '1234'
     } );
 
-    console.log( ` ############### testCreateIdentifier ###############` );
+    console.log( ' ############### testCreateIdentifier ###############' );
     if ( response.reason() !== 'Outdated code' ) {
-      console.error( 'Error with response.' )
+      console.error( 'Error with response.' );
     }
     this.debug( response );
   }

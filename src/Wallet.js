@@ -195,7 +195,7 @@ export default class Wallet {
    * @param recipientWallet
    */
   splitUnits (
-    units,  // Array: token unit IDs
+    units, // Array: token unit IDs
     remainderWallet,
     recipientWallet = null
   ) {

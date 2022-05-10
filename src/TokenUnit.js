@@ -109,7 +109,7 @@ export default class TokenUnit {
    * @return array
    */
   toData() {
-    return [ this.id, this.name, this.metas, ];
+    return [ this.id, this.name, this.metas ];
   }
 
   /**
