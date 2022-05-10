@@ -21,7 +21,9 @@ export default [
   'js-sha3',
   'laravel-echo',
   'libraries/array',
+  'pusher-js',
   'socket.io-client',
   'tweetnacl',
-  'tweetnacl-sealedbox-js'
+  'tweetnacl-sealedbox-js',
+  'uri-js'
 ];

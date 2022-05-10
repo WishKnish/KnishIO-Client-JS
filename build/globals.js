@@ -15,5 +15,7 @@ export default {
   '@apollo/client/link/error': 'apolloClientLinkError',
   'laravel-echo': 'Echo',
   'socket.io-client': 'io',
-  'graphql': 'graphql'
+  'graphql': 'graphql',
+  'pusher-js': 'pusherJs',
+  'uri-js': 'uriJs'
 };
