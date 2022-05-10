@@ -83,14 +83,13 @@ export default class ApolloClient {
     } );
 
     if ( this.$__client ) {
-
-      this.unsubscribeAll();
-
       client.setAuthData( {
         token: this.$__client.getAuthToken(),
         pubkey: this.$__client.getPubKey(),
         wallet: this.$__client.getWallet()
       } );
+
+      this.socketDisconnect();
     }
 
     this.$__client = client;
@@ -114,8 +113,9 @@ export default class ApolloClient {
    * @param {string} operationName
    */
   unsubscribe ( operationName ) {
-    if ( this.$__subscribers[ operationName ] ) {
+    if ( this.$__subscribers.hasOwnProperty( operationName ) ) {
       this.$__subscribers[ operationName ].unsubscribe();
+      this.$__client.unsubscribeFromChannel( operationName );
       delete this.$__subscribers[ operationName ];
     }
   }
@@ -125,10 +125,13 @@ export default class ApolloClient {
    */
   unsubscribeAll () {
     for ( let subscribe in this.$__subscribers ) {
-      if ( this.$__subscribers.hasOwnProperty( subscribe ) ) {
-        this.unsubscribe( subscribe );
-      }
+      this.unsubscribe( subscribe );
     }
+  }
+
+  socketDisconnect() {
+    this.$__client.socketDisconnect();
+    this.$__subscribers = {};
   }
 
   /**

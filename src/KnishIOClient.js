@@ -590,15 +590,15 @@ export default class KnishIOClient {
   /**
    * @param {string|null} bundle
    * @param {function} closure
-   * @return {string}
+   * @return {Promise<string>}
    */
-  subscribeCreateMolecule ( {
+  async subscribeCreateMolecule ( {
     bundle,
     closure
   } ) {
     const subscribe = this.createSubscribe( CreateMoleculeSubscribe );
 
-    return subscribe.execute( {
+    return await subscribe.execute( {
       variables: {
         bundle: bundle || this.getBundle()
       },
