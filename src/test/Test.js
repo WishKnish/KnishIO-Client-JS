@@ -6,18 +6,27 @@ import {
 } from '../libraries/crypto';
 import ResponseMolecule from '../response/ResponseProposeMolecule';
 
-
 /*
 
 import Test from '@wishknish/knishio-client-js/src/test/Test';
+import { KNISHIO_SETTINGS, } from 'src/libraries/constants/knishio';
 
-let uri = 'https://lumen.knishio/graphql';
-let test = new Test( uri );
-test.testAll();
+// Run all test
+await Test.run( KNISHIO_SETTINGS.serverUri );
 
 */
 
 export default class Test {
+
+  /**
+   * Run all
+   */
+  static async run( uris ) {
+    for ( let i in uris ) {
+      let test = new Test( uris[ i ] );
+      await test.testAll();
+    }
+  }
 
   /**
    *
@@ -58,6 +67,8 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
+    console.info(`Executing test for: ${ this.graphqlUrl }...`);
+
     /*
     await this.testTokenExpiration();
     return;
