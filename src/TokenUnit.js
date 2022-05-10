@@ -108,7 +108,7 @@ export default class TokenUnit {
   /**
    * @return array
    */
-  toRawData() {
+  toData() {
     return [ this.id, this.name, this.metas, ];
   }
 

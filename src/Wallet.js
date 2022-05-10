@@ -178,7 +178,7 @@ export default class Wallet {
     if ( this.tokenUnits.length ) {
       const result = [];
       this.tokenUnits.forEach( tokenUnit => {
-        result.push( tokenUnit.toRawData() );
+        result.push( tokenUnit.toData() );
       } );
       return JSON.stringify( result );
     }
