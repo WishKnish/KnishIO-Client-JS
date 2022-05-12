@@ -21,7 +21,7 @@ export default class Test {
   /**
    * Run all
    */
-  static async run( uris ) {
+  static async run ( uris ) {
     for ( let i in uris ) {
       let test = new Test( uris[ i ] );
       await test.testAll();
@@ -67,7 +67,7 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
-    console.info(`Executing test for: ${ this.graphqlUrl }...`);
+    console.info( `Executing test for: ${ this.graphqlUrl }...` );
 
     /*
     await this.testTokenExpiration();

@@ -74,7 +74,7 @@ export default class Rule {
     }
 
     for ( const element of callback ) {
-      if ( ! ( element instanceof Callback ) ) {
+      if ( !( element instanceof Callback ) ) {
         throw new RuleArgumentException();
       }
     }

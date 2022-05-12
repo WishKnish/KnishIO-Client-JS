@@ -73,7 +73,7 @@ export default class Callback {
   }
 
   set meta ( meta ) {
-    if ( ! ( meta instanceof Meta ) ) {
+    if ( !( meta instanceof Meta ) ) {
       throw new RuleArgumentException( 'Incorrect meta argument. The meta argument can only be an instance of the Meta class.' );
     }
 

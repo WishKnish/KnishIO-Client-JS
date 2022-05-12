@@ -264,7 +264,7 @@ export default class CheckMolecule {
         }
 
         for ( const rule of rules ) {
-          const keys = Object.keys(rule).filter( value => [ 'key', 'value', 'callback' ].includes( value ) );
+          const keys = Object.keys( rule ).filter( value => [ 'key', 'value', 'callback' ].includes( value ) );
 
           if ( keys.length < 3 ) {
             throw new MetaMissingException( 'Check::isotopeR() - Necessary rule fields are missing!' );

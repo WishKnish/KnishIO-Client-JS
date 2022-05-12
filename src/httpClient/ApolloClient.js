@@ -129,7 +129,7 @@ export default class ApolloClient {
     }
   }
 
-  socketDisconnect() {
+  socketDisconnect () {
     this.$__client.socketDisconnect();
     this.$__subscribers = {};
   }

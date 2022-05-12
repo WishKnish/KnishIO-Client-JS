@@ -1,4 +1,3 @@
-
 /*
                                (
                               (/(
@@ -57,7 +56,7 @@ export default class TokenUnit {
    * @param data
    * @returns {*}
    */
-  static createFromGraphQL( data ) {
+  static createFromGraphQL ( data ) {
     let metas = data[ 'metas' ] || {};
     if ( metas.length ) {
       metas = JSON.parse( metas );
@@ -77,7 +76,7 @@ export default class TokenUnit {
    * @param data
    * @returns {TokenUnit}
    */
-  static createFromDB( data ) {
+  static createFromDB ( data ) {
     return new TokenUnit(
       data[ 0 ],
       data[ 1 ],
@@ -91,7 +90,7 @@ export default class TokenUnit {
    * @param name
    * @param metas
    */
-  constructor( id, name, metas ) {
+  constructor ( id, name, metas ) {
     this.id = id;
     this.name = name;
     this.metas = metas;
@@ -101,14 +100,14 @@ export default class TokenUnit {
    *
    * @returns {*|null}
    */
-  getFragmentZone() {
+  getFragmentZone () {
     return this.metas[ 'fragmentZone' ] || null;
   }
 
   /**
    * @return array
    */
-  toData() {
+  toData () {
     return [ this.id, this.name, this.metas ];
   }
 
@@ -116,7 +115,7 @@ export default class TokenUnit {
    *
    * @returns {{metas: string, name: *, id: *}}
    */
-  toGraphQLResponse() {
+  toGraphQLResponse () {
     return {
       id: this.id,
       name: this.name,

@@ -189,7 +189,7 @@ class Client extends ApolloClient {
     }
   }
 
-  socketDisconnect() {
+  socketDisconnect () {
     if ( this.__socket ) {
       this.__socket.disconnect();
     }
@@ -199,7 +199,7 @@ class Client extends ApolloClient {
    *
    * @param {string} channel
    */
-  unsubscribeFromChannel( channel ) {
+  unsubscribeFromChannel ( channel ) {
     if ( this.__socket ) {
       this.__socket.unsubscribeFromChannel( channel );
     }
