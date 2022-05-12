@@ -49,6 +49,7 @@ import { ApolloLink, Observable } from '@apollo/client/core';
 import Pusher from 'pusher-js';
 import { parse } from 'uri-js';
 import CodeException from '../../exception/CodeException';
+import Dot from '../Dot';
 
 
 class PusherLink extends ApolloLink {
@@ -153,7 +154,7 @@ class PusherLink extends ApolloLink {
             forward( operation ).subscribe({
                 next: ( data ) => {
                     // If the operation has the subscription channel, it's a subscription
-                    subscriptionChannel = data?.extensions?.lighthouse_subscriptions.channel ?? null;
+                    subscriptionChannel = Dot.get( data, 'extensions.lighthouse_subscriptions.channel' );
 
                     // No subscription found in the response, pipe data through
                     if ( !subscriptionChannel ) {
