@@ -198,6 +198,22 @@ export default class Atom {
 
         return new Atom( arguments[ 0 ] );
       },
+      F ( {
+        position = null,
+        walletAddress = null,
+        token = null,
+        value = null,
+        batchId = null,
+        metaType = null,
+        metaId = null,
+        meta = null,
+        otsFragment = null,
+        index = null
+      } ) {
+        arguments[ 0 ][ 'isotope' ] = 'F';
+
+        return new Atom( arguments[ 0 ] );
+      },
       R ( {
         position = null,
         walletAddress = null,
