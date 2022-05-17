@@ -61,7 +61,7 @@ class PusherLink extends ApolloLink {
   constructor ( {
     socketUri,
     authEndpoint,
-    appKey = 'app-key'
+    appKey = 'knishio'
   } ) {
     console.log( 'PusherLink::constructor()...' );
     super();

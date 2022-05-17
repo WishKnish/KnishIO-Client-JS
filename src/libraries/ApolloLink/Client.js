@@ -65,15 +65,18 @@ class Client extends ApolloClient {
 
   /**
    * @param {string} serverUri
-   * @param {string} socketUri
+   * @param {object|null} soketi
    * @param {boolean} encrypt
    */
   constructor ( {
     serverUri,
-    socketUri,
+    soketi = null,
     encrypt = false
   } ) {
-
+    const _socket = {
+      ...{ socketUri: null, appKey: 'knishio' },
+      ...soketi || {}
+    };
     const links = [];
     const http = new HttpLink( {
       uri: serverUri,
@@ -92,11 +95,12 @@ class Client extends ApolloClient {
       links.push( cipher );
     }
 
-    if ( socketUri ) {
+    if ( _socket && _socket.socketUri ) {
       const path = parse( serverUri );
       socket = new PusherLink( {
-        socketUri: socketUri,
-        authEndpoint: `${ path.scheme }://${ path.host }/graphql/subscriptions/auth`
+        socketUri: _socket.socketUri,
+        authEndpoint: `${ path.scheme }://${ path.host }/graphql/subscriptions/auth`,
+        appKey: _socket.appKey
       } );
       links.push( socket );
     }
@@ -128,7 +132,7 @@ class Client extends ApolloClient {
     } );
 
     this.__serverUri = serverUri;
-    this.__socketUri = socketUri;
+    this.__soketi = _socket;
     this.__authLink = auth;
     /**
      *
@@ -213,10 +217,10 @@ class Client extends ApolloClient {
   }
 
   /**
-   * @return {string}
+   * @return {string|null}
    */
   getSocketUri () {
-    return this.__socketUri;
+    return this.__soketi.socketUri;
   }
 
 }
