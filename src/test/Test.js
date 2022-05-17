@@ -367,73 +367,38 @@ export default class Test {
    */
   async testFuseToken() {
 
+    let tokenSlug = this.tokenSlugs[ 4 ];
+
     let recipientSecret = generateSecret();
-    let recipientClient = this.client( recipientSecret );
+    let recipientClient = await this.client( recipientSecret );
 
     let fusedTokenUnit = new TokenUnit( 'fusedTokenUnitId' );
 
     let client = await this.client( this.secrets[ 0 ] );
     let response = await client.fuseToken( {
       recipient: recipientSecret,
-      tokenSlug: this.tokenSlugs[ 4 ],
+      tokenSlug: tokenSlug,
       newTokenUnit: fusedTokenUnit,
       fusedTokenUnitIds: this.fusedTokenUnitIds
     } );
-    console.error( response );
-    // this.checkResponse( response, 'testReplenishToken' );
+    this.checkResponse( response, 'testReplenishToken' );
 
+    let walletRecipient = ( await recipientClient.queryBalance( { token: tokenSlug } ) ).payload();
+    let walletRemainder = ( await client.queryBalance( { token: tokenSlug } ) ).payload();
 
-    /*
+    // Check recipient wallet
+    console.assert( walletRecipient.tokenUnits.length, 1 );
+    console.assert( walletRecipient.tokenUnits[ 0 ].id, 'fusedTokenUnitId' );
 
-    // Fuse token units
-    $response = $this->client->fuseToken(
-      $recipientSecret, $this->fragmentZonesSlug, $fusedTokenUnit, $this->fusedTokenUnitIds
+    console.assert( walletRemainder.tokenUnits.length, 6 );
+    let remainderTokenUnitIds = [];
+    walletRemainder.tokenUnits.forEach( ( tokenUnit ) => {
+      remainderTokenUnitIds.push( tokenUnit.id );
+    } );
+    console.assert(
+      remainderTokenUnitIds,
+      [ 'unit_id_6', 'unit_id_7', 'unit_id_8', 'unit_id_9', 'unit_id_10', 'unit_id_11' ]
     );
-    Helper::checkResponse( $response );
-    $wallet = Helper::checkWallet(
-      $recipientClient,
-      $recipientClient->getBundle(),
-      $this->fragmentZonesSlug,
-      [ $fusedTokenUnit->id ],
-      true
-    );
-    $fusedTokenUnitIds = Arr::pluck( $wallet->tokenUnits[ 0 ]->metas[ 'fusedTokenUnits' ], 'id' );
-    TestCase::assertEquals( $this->fusedTokenUnitIds, $fusedTokenUnitIds );
-
-    $remainderTokenUnitIds = array_values( array_diff(
-      Arr::pluck( array_merge( $this->tokenUnits, $this->replenishTokenUnits ), 0 ),
-      $this->fusedTokenUnitIds
-    ) );
-    Helper::checkWallet(
-      $this->client,
-      $this->client->getBundle(),
-      $this->fragmentZonesSlug,
-      $remainderTokenUnitIds,
-      true
-    );
-
-    // Check all token units from the token model
-    $allTokenUnitIds = \WishKnish\KnishIO\Models\Token::getTokenUnits( $this->fragmentZonesSlug, true );
-    TestCase::assertEquals( $allTokenUnitIds, [
-      'unit_id_1',
-      'unit_id_2',
-      'unit_id_3',
-      'unit_id_4',
-      'unit_id_5',
-      'unit_id_6',
-      'unit_id_7',
-      'unit_id_8',
-      'unit_id_9',
-      'unit_id_10',
-      'unit_id_11',
-      'unit_id_12',
-      'fusedTokenUnitId',
-      'unit_id_16',
-      'unit_id_17',
-    ] );
-
-     */
-
   }
 
   /**

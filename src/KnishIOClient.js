@@ -1874,8 +1874,6 @@ export default class KnishIOClient {
       sourceWallet = ( await this.queryBalance( { token: tokenSlug } ) ).payload();
     }
 
-    console.error( sourceWallet );
-
     // Check source wallet
     if ( sourceWallet === null ) {
       throw new TransferBalanceException( 'Source wallet is missing or invalid.' );
@@ -1938,8 +1936,6 @@ export default class KnishIOClient {
     molecule.fuseToken( sourceWallet.tokenUnits, recipientWallet );
     molecule.sign( {} );
     molecule.check();
-
-    console.error( molecule );
 
     const query = ( new MutationProposeMolecule( this.client(), molecule ) );
     return this.executeQuery( query );
