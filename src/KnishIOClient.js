@@ -107,7 +107,7 @@ export default class KnishIOClient {
    *
    * @param {string} uri
    * @param {string|null} cellSlug
-   * @param {string|null} socketUri
+   * @param {object|null} socket
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
@@ -116,14 +116,14 @@ export default class KnishIOClient {
     uri,
     cellSlug = null,
     client = null,
-    socketUri = null,
+    socket = null,
     serverSdkVersion = 3,
     logging = false
   } ) {
     this.initialize( {
       uri,
       cellSlug,
-      socketUri,
+      socket,
       client,
       serverSdkVersion,
       logging
@@ -135,7 +135,7 @@ export default class KnishIOClient {
    *
    * @param {string|[]} uri
    * @param {string|null} cellSlug
-   * @param {string|null} socketUri
+   * @param {object|null} socket
    * @param {ApolloClient|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
@@ -143,7 +143,7 @@ export default class KnishIOClient {
   initialize ( {
     uri,
     cellSlug = null,
-    socketUri = null,
+    socket = null,
     client = null,
     serverSdkVersion = 3,
     logging = false
@@ -169,7 +169,10 @@ export default class KnishIOClient {
 
     this.reset();
     this.$__client = client || new ApolloClient( {
-      socketUri: socketUri,
+      socket: {
+        ...{ socketUri: null, appKey: 'knishio' },
+        ...socket || {}
+      },
       serverUri: this.getRandomUri()
     } );
 
