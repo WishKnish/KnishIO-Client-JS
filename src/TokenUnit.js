@@ -60,7 +60,7 @@ export default class TokenUnit {
     let metas = data[ 'metas' ] || {};
     if ( metas.length ) {
       metas = JSON.parse( metas );
-      if ( !metas.length ) { // set an empty object instead of an array
+      if ( !metas ) { // set an empty object instead of an array
         metas = {};
       }
     }
@@ -93,7 +93,7 @@ export default class TokenUnit {
   constructor ( id, name, metas ) {
     this.id = id;
     this.name = name;
-    this.metas = metas;
+    this.metas = metas || {};
   }
 
   /**

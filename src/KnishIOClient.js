@@ -1815,11 +1815,10 @@ export default class KnishIOClient {
     if ( sourceWallet === null ) {
       sourceWallet = ( await this.queryBalance( { token } ) ).payload();
     }
-    /*
     if ( !sourceWallet ) {
-      throw new TransferWalletException( 'Source wallet is missing or invalid.' );
+      throw new TransferBalanceException( 'Source wallet is missing or invalid.' );
     }
-    */
+
 
     // Remainder wallet
     let remainderWallet = Wallet.create( {
@@ -1848,6 +1847,95 @@ export default class KnishIOClient {
     molecule.sign( {} );
     molecule.check();
 
+
+    const query = ( new MutationProposeMolecule( this.client(), molecule ) );
+    return this.executeQuery( query );
+  }
+
+
+  /**
+   *
+   * @param recipient
+   * @param tokenSlug
+   * @param newTokenUnit
+   * @param fusedTokenUnitIds
+   * @param sourceWallet
+   * @returns {Promise<*>}
+   */
+  async fuseToken( {
+    recipient,
+    tokenSlug,
+    newTokenUnit,
+    fusedTokenUnitIds,
+    sourceWallet = null
+  }  ) {
+
+    if ( sourceWallet === null ) {
+      sourceWallet = ( await this.queryBalance( { token: tokenSlug } ) ).payload();
+    }
+
+    // Check source wallet
+    if ( sourceWallet === null ) {
+      throw new TransferBalanceException( 'Source wallet is missing or invalid.' );
+    }
+    if ( !sourceWallet.tokenUnits || !sourceWallet.tokenUnits.length ) {
+      throw new TransferBalanceException( 'Source wallet does not have token units.' );
+    }
+    if ( !fusedTokenUnitIds.length ) {
+      throw new TransferBalanceException( 'Fused token unit list is empty.' );
+    }
+
+    // Check fused token units
+    let sourceTokenUnitIds = [];
+    sourceWallet.tokenUnits.forEach( ( tokenUnit ) => {
+      sourceTokenUnitIds.push( tokenUnit.id );
+    } );
+    fusedTokenUnitIds.forEach( ( tokenUnitId ) => {
+      if ( !sourceTokenUnitIds.includes( tokenUnitId ) ) {
+        throw new TransferBalanceException( `Fused token unit ID = ${ tokenUnitId } does not found in the source wallet.` );
+      }
+    } );
+
+
+    // Generate new recipient wallet if only recipient secret has been passed
+    let recipientWallet = recipient;
+    if ( !( recipient instanceof Wallet ) ) {
+      recipientWallet = Wallet.create( {
+        secretOrBundle: recipient,
+        token: tokenSlug,
+      } );
+    }
+    // Set batch ID
+    recipientWallet.initBatchId( { sourceWallet } );
+
+    // Remainder wallet
+    let remainderWallet = Wallet.create( {
+      secretOrBundle: this.getSecret(),
+      token: tokenSlug,
+      batchId: sourceWallet.batchId,
+      characters: sourceWallet.characters
+    } );
+    remainderWallet.initBatchId( {
+      sourceWallet,
+      isRemainder: true
+    } )
+
+
+    // Split token units (fused)
+    sourceWallet.splitUnits( fusedTokenUnitIds, remainderWallet );
+
+    // Set recipient new fused token unit
+    newTokenUnit.metas[ 'fusedTokenUnits' ] = sourceWallet.tokenUnits;
+    recipientWallet.tokenUnits = [ newTokenUnit ];
+
+    // Burn tokens
+    let molecule = await this.createMolecule( {
+      sourceWallet,
+      remainderWallet
+    } );
+    molecule.fuseToken( sourceWallet.tokenUnits, recipientWallet );
+    molecule.sign( {} );
+    molecule.check();
 
     const query = ( new MutationProposeMolecule( this.client(), molecule ) );
     return this.executeQuery( query );

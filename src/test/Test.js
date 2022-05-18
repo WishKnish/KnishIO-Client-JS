@@ -5,6 +5,7 @@ import {
   generateSecret
 } from '../libraries/crypto';
 import ResponseMolecule from '../response/ResponseProposeMolecule';
+import TokenUnit from "@wishknish/knishio-client-js/src/TokenUnit";
 
 /*
 
@@ -36,7 +37,7 @@ export default class Test {
   constructor ( graphqlUrl, encrypt = false ) {
     this.encrypt = encrypt;
     this.secrets = [ generateSecret(), generateSecret() ];
-    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT' ];
+    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES' ];
     this.graphqlUrl = graphqlUrl;
     console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` );
 
@@ -60,6 +61,26 @@ export default class Test {
       [ 'unit_id_14', 'unit_id_14' ],
       [ 'unit_id_15', 'unit_id_15' ]
     ];
+
+    // Generate token units with fragment zones
+    let getTokenUnitsFZ = ( tokenUnits, from = 0 ) => {
+      let result = [];
+      tokenUnits.forEach( ( tokenUnit, key ) => {
+        let tokenUnitFZ = Array.from( tokenUnit );
+        tokenUnitFZ.push( { fragmentZone: from + key } );
+        result.push( tokenUnitFZ );
+      } )
+      return result;
+    };
+    this.tokenUnitsFZ = getTokenUnitsFZ( this.tokenUnits );
+    this.replenishTokenUnitsFZ = getTokenUnitsFZ( Array.from( this.replenishTokenUnits ), this.tokenUnits.length );
+    this.fragmentZones = this.tokenUnitsFZ.length + this.replenishTokenUnitsFZ.length;
+
+    // Init fused token unit IDs
+    this.fusedTokenUnitIds = [];
+    this.tokenUnitsFZ.slice( 0, 5 ).forEach( ( tokenUnitData ) => {
+      this.fusedTokenUnitIds.push( tokenUnitData[ 0 ] );
+    } );
   }
 
 
@@ -69,15 +90,12 @@ export default class Test {
   async testAll () {
     console.info( `Executing test for: ${ this.graphqlUrl }...` );
 
-    /*
-    await this.testTokenExpiration();
-    return;
-    */
-
     await this.client( this.secrets[ 0 ] );
     await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
+    await this.testFuseToken();
+    return;
     await this.testCreateWallet();
     await this.testCreateMeta();
     await this.testCreateIdentifier();
@@ -185,6 +203,21 @@ export default class Test {
       batchId: 'server_unit_batch_0'
     } );
     this.checkResponse( responses[ 3 ], 'testCreateToken.3' );
+
+
+    // Create stackable unit token
+    responses[ 4 ] = await client.createToken( {
+      token: this.tokenSlugs[ 4 ],
+      units: this.tokenUnitsFZ,
+      meta: {
+        name: this.tokenSlugs[ 4 ],
+        supply: 'replenishable',
+        fungibility: 'stackable',
+        fragmentZones: this.fragmentZones,
+      },
+      batchId: 'unit_fz_batch_0'
+    } );
+    this.checkResponse( responses[ 4 ], 'testCreateToken.4' );
   }
 
   /**
@@ -325,6 +358,47 @@ export default class Test {
       units: this.replenishTokenUnits
     } );
     this.checkResponse( response, 'testReplenishUnitToken' );
+  }
+
+
+  /**
+   *
+   * @returns {Promise<void>}
+   */
+  async testFuseToken() {
+
+    let tokenSlug = this.tokenSlugs[ 4 ];
+
+    let recipientSecret = generateSecret();
+    let recipientClient = await this.client( recipientSecret );
+
+    let fusedTokenUnit = new TokenUnit( 'fusedTokenUnitId' );
+
+    let client = await this.client( this.secrets[ 0 ] );
+    let response = await client.fuseToken( {
+      recipient: recipientSecret,
+      tokenSlug: tokenSlug,
+      newTokenUnit: fusedTokenUnit,
+      fusedTokenUnitIds: this.fusedTokenUnitIds
+    } );
+    this.checkResponse( response, 'testReplenishToken' );
+
+    let walletRecipient = ( await recipientClient.queryBalance( { token: tokenSlug } ) ).payload();
+    let walletRemainder = ( await client.queryBalance( { token: tokenSlug } ) ).payload();
+
+    // Check recipient wallet
+    console.assert( walletRecipient.tokenUnits.length, 1 );
+    console.assert( walletRecipient.tokenUnits[ 0 ].id, 'fusedTokenUnitId' );
+
+    console.assert( walletRemainder.tokenUnits.length, 6 );
+    let remainderTokenUnitIds = [];
+    walletRemainder.tokenUnits.forEach( ( tokenUnit ) => {
+      remainderTokenUnitIds.push( tokenUnit.id );
+    } );
+    console.assert(
+      remainderTokenUnitIds,
+      [ 'unit_id_6', 'unit_id_7', 'unit_id_8', 'unit_id_9', 'unit_id_10', 'unit_id_11' ]
+    );
   }
 
   /**

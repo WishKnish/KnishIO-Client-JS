@@ -263,6 +263,72 @@ export default class Molecule {
 
 
   /**
+   *
+   * @param tokenUnits
+   * @param recipientWallet
+   * @returns {Molecule}
+   */
+  fuseToken( tokenUnits, recipientWallet ) {
+
+    // Calculate amount
+    let amount = tokenUnits.length;
+
+    if ( ( this.sourceWallet.balance - amount ) < 0 ) {
+      throw new BalanceInsufficientException();
+    }
+
+    this.molecularHash = null;
+
+    // Initializing a new Atom to remove tokens from source
+    this.atoms.push(
+      Atom.create.V( {
+        position: this.sourceWallet.position,
+        walletAddress: this.sourceWallet.address,
+        token: this.sourceWallet.token,
+        value: -amount,
+        batchId: this.sourceWallet.batchId,
+        meta: this.finalMetas( this.tokenUnitMetas( this.sourceWallet ) ),
+        index: this.generateIndex()
+      } )
+    );
+
+    // Add F isotope for fused tokens creation
+    this.atoms.push(
+      Atom.create.F( {
+        position: recipientWallet.position,
+        walletAddress: recipientWallet.address,
+        token: recipientWallet.token,
+        value: 1,
+        batchId: recipientWallet.batchId,
+        metaType: 'walletBundle',
+        metaId: recipientWallet.bundle,
+        meta: this.finalMetas( this.tokenUnitMetas( recipientWallet ) ),
+        index: this.generateIndex()
+      } )
+    );
+
+    // Initializing a new Atom to remove tokens from source
+    this.atoms.push(
+      Atom.create.V( {
+        position: this.remainderWallet.position,
+        walletAddress: this.remainderWallet.address,
+        token: this.remainderWallet.token,
+        value: this.sourceWallet.balance - amount,
+        batchId: this.remainderWallet.batchId,
+        metaType: 'walletBundle',
+        metaId: this.sourceWallet.bundle,
+        meta: this.finalMetas( this.tokenUnitMetas( this.remainderWallet ), this.remainderWallet ),
+        index: this.generateIndex()
+      } )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+  }
+
+
+  /**
    * Burns some amount of tokens from a wallet
    *
    * @param {number} amount
