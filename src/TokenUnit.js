@@ -105,6 +105,14 @@ export default class TokenUnit {
   }
 
   /**
+   *
+   * @returns {*|null}
+   */
+  getFusedTokenUnits () {
+    return this.metas[ 'fusedTokenUnits' ] || null;
+  }
+
+  /**
    * @return array
    */
   toData () {

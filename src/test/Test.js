@@ -390,6 +390,18 @@ export default class Test {
     console.assert( walletRecipient.tokenUnits.length, 1 );
     console.assert( walletRecipient.tokenUnits[ 0 ].id, 'fusedTokenUnitId' );
 
+
+    // --- Check fused token units in the recipient wallet
+    let fusedTokenUnits = walletRecipient.tokenUnits[ 0 ].getFusedTokenUnits();
+    console.assert( fusedTokenUnits.length, this.fusedTokenUnitIds.length );
+    // Get token unit IDs from the fused meta data of the fused token unit
+    let dbFusedTokenUnitIds = [];
+    fusedTokenUnits.forEach( ( tokenUnit ) => {
+      dbFusedTokenUnitIds.push( tokenUnit[ 0 ] );
+    } );
+    // ---
+
+    // --- Check remainder token units
     console.assert( walletRemainder.tokenUnits.length, 6 );
     let remainderTokenUnitIds = [];
     walletRemainder.tokenUnits.forEach( ( tokenUnit ) => {

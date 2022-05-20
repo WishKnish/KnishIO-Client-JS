@@ -1925,7 +1925,7 @@ export default class KnishIOClient {
     sourceWallet.splitUnits( fusedTokenUnitIds, remainderWallet );
 
     // Set recipient new fused token unit
-    newTokenUnit.metas[ 'fusedTokenUnits' ] = sourceWallet.tokenUnits;
+    newTokenUnit.metas[ 'fusedTokenUnits' ] = sourceWallet.getTokenUnitsData();
     recipientWallet.tokenUnits = [ newTokenUnit ];
 
     // Burn tokens

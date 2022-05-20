@@ -173,17 +173,12 @@ export default class Wallet {
   /**
    * @return string|null
    */
-  tokenUnitsJson () {
-
-    if ( this.tokenUnits.length ) {
-      const result = [];
-      this.tokenUnits.forEach( tokenUnit => {
-        result.push( tokenUnit.toData() );
-      } );
-      return JSON.stringify( result );
-    }
-
-    return null;
+  getTokenUnitsData () {
+    const result = [];
+    this.tokenUnits.forEach( tokenUnit => {
+      result.push( tokenUnit.toData() );
+    } );
+    return result;
   }
 
 
