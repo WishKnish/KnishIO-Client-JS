@@ -53,18 +53,18 @@ export default class ApolloClient {
 
   /**
    * @param {string} serverUri
-   * @param {string|null} socketUri
+   * @param {object|null} socket
    * @param {boolean} encrypt
    */
   constructor ( {
     serverUri,
-    socketUri = null,
+    socket = null,
     encrypt = false
   } ) {
 
     this.$__subscribers = {};
     this.$__uri = serverUri;
-    this.$__socketUri = socketUri;
+    this.$__socket = { ...{ socketUri: null, appKey: 'knishio' }, ...socket || {}};
     this.$__client = null;
 
     this.restartTransport( encrypt );
@@ -78,7 +78,7 @@ export default class ApolloClient {
   restartTransport ( encrypt = false ) {
     const client = new Client( {
       serverUri: this.$__uri,
-      socketUri: this.$__socketUri,
+      soketi: this.$__socket,
       encrypt
     } );
 
@@ -221,17 +221,19 @@ export default class ApolloClient {
   }
 
   /**
-   * @return {string}
+   * @return {string|null}
    */
   getSocketUri () {
-    return this.$__socketUri;
+    return this.$__socket ? this.$__socket.socketUri : null;
   }
 
   /**
+   *
    * @param {string} socketUri
+   * @param {string} appKey
    */
-  setSocketUri ( socketUri ) {
-    this.$__socketUri = socketUri;
+  setSocketUri ( { socketUri, appKey } ) {
+    this.$__socket = arguments.length ? arguments[0] : this.$__socket;
   }
 
 }
