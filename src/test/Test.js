@@ -5,7 +5,7 @@ import {
   generateSecret
 } from '../libraries/crypto';
 import ResponseMolecule from '../response/ResponseProposeMolecule';
-import TokenUnit from '@wishknish/knishio-client-js/src/TokenUnit';
+import TokenUnit from '../TokenUnit';
 
 /*
 
