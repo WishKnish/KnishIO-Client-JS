@@ -170,7 +170,10 @@ export default class KnishIOClient {
     this.reset();
     this.$__client = client || new ApolloClient( {
       socket: {
-        ...{ socketUri: null, appKey: 'knishio' },
+        ...{
+          socketUri: null,
+          appKey: 'knishio'
+        },
         ...socket || {}
       },
       serverUri: this.getRandomUri()
@@ -1865,13 +1868,13 @@ export default class KnishIOClient {
    * @param sourceWallet
    * @returns {Promise<*>}
    */
-  async fuseToken( {
+  async fuseToken ( {
     recipient,
     tokenSlug,
     newTokenUnit,
     fusedTokenUnitIds,
     sourceWallet = null
-  }  ) {
+  } ) {
 
     if ( sourceWallet === null ) {
       sourceWallet = ( await this.queryBalance( { token: tokenSlug } ) ).payload();
@@ -1905,7 +1908,7 @@ export default class KnishIOClient {
     if ( !( recipient instanceof Wallet ) ) {
       recipientWallet = Wallet.create( {
         secretOrBundle: recipient,
-        token: tokenSlug,
+        token: tokenSlug
       } );
     }
     // Set batch ID
@@ -1921,7 +1924,7 @@ export default class KnishIOClient {
     remainderWallet.initBatchId( {
       sourceWallet,
       isRemainder: true
-    } )
+    } );
 
 
     // Split token units (fused)

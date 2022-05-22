@@ -268,7 +268,7 @@ export default class Molecule {
    * @param recipientWallet
    * @returns {Molecule}
    */
-  fuseToken( tokenUnits, recipientWallet ) {
+  fuseToken ( tokenUnits, recipientWallet ) {
 
     // Calculate amount
     let amount = tokenUnits.length;

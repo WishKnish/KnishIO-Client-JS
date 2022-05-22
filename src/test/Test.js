@@ -5,7 +5,7 @@ import {
   generateSecret
 } from '../libraries/crypto';
 import ResponseMolecule from '../response/ResponseProposeMolecule';
-import TokenUnit from "@wishknish/knishio-client-js/src/TokenUnit";
+import TokenUnit from '@wishknish/knishio-client-js/src/TokenUnit';
 
 /*
 
@@ -69,7 +69,7 @@ export default class Test {
         let tokenUnitFZ = Array.from( tokenUnit );
         tokenUnitFZ.push( { fragmentZone: from + key } );
         result.push( tokenUnitFZ );
-      } )
+      } );
       return result;
     };
     this.tokenUnitsFZ = getTokenUnitsFZ( this.tokenUnits );
@@ -213,7 +213,7 @@ export default class Test {
         name: this.tokenSlugs[ 4 ],
         supply: 'replenishable',
         fungibility: 'stackable',
-        fragmentZones: this.fragmentZones,
+        fragmentZones: this.fragmentZones
       },
       batchId: 'unit_fz_batch_0'
     } );
@@ -365,7 +365,7 @@ export default class Test {
    *
    * @returns {Promise<void>}
    */
-  async testFuseToken() {
+  async testFuseToken () {
 
     let tokenSlug = this.tokenSlugs[ 4 ];
 

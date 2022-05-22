@@ -64,7 +64,12 @@ export default class ApolloClient {
 
     this.$__subscribers = {};
     this.$__uri = serverUri;
-    this.$__socket = { ...{ socketUri: null, appKey: 'knishio' }, ...socket || {}};
+    this.$__socket = {
+      ...{
+        socketUri: null,
+        appKey: 'knishio'
+      }, ...socket || {}
+    };
     this.$__client = null;
 
     this.restartTransport( encrypt );
@@ -232,8 +237,11 @@ export default class ApolloClient {
    * @param {string} socketUri
    * @param {string} appKey
    */
-  setSocketUri ( { socketUri, appKey } ) {
-    this.$__socket = arguments.length ? arguments[0] : this.$__socket;
+  setSocketUri ( {
+    socketUri,
+    appKey
+  } ) {
+    this.$__socket = arguments.length ? arguments[ 0 ] : this.$__socket;
   }
 
 }
