@@ -46,33 +46,41 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-export default class Meta {
+import RuleArgumentException from './exception/RuleArgumentException';
 
-  constructor ( {} ) {
-    const args = arguments[0];
+export default class Condition {
 
-    for ( const key in args ) {
-      this[ `__${key}` ] = args[ key ];
-    }
-  }
+    constructor ( { key, value, comparison } ) {
 
-  /**
-   *
-   * @return {{}}
-   */
-  toJSON () {
-    const object = {};
-
-    for ( const item of Object.keys( this ) ) {
-      if ( item.substring( 0, 2 ) === '__' ) {
-        object[ item.substring( 2, item.length ) ] = this[ item ];
+      if ( [ key, value, comparison ].some( item => !item ) ) {
+        throw new RuleArgumentException( 'Condition::constructor( { key, value, comparison } ) - not all class parameters are initialised!' );
       }
+
+      this.__key = key;
+      this.__value = value;
+      this.__comparison = comparison;
     }
 
-    return object;
-  }
+    /**
+     * @return {{comparison, value, key}}
+     */
+    toJSON () {
+      return {
+         key: this.__key,
+         value: this.__value,
+         comparison: this.__comparison
+      };
+    }
 
-  static toObject ( object ) {
-    return new this( object );
-  }
+    /**
+     * @param object
+     * @return {Condition}
+     */
+    static toObject ( object ) {
+      return new this( {
+        key: object.key,
+        value: object.value,
+        comparison: object.comparison
+      } );
+    }
 }
