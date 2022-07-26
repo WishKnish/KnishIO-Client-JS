@@ -467,7 +467,12 @@ export default class KnishIOClient {
     secret = secret || this.getSecret();
 
     // Sets the source wallet as the last remainder wallet (to maintain ContinuID)
-    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() ) {
+    if ( !sourceWallet &&
+      this.lastMoleculeQuery &&
+      this.getRemainderWallet().token === 'USER' &&
+      this.lastMoleculeQuery.response() &&
+      this.lastMoleculeQuery.response().success()
+    ) {
       sourceWallet = this.getRemainderWallet();
     }
 
@@ -1707,23 +1712,79 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-        sourceWallet: sourceWallet,
-        remainderWallet: this.remainderWallet
-      } ),
-
-      /**
-       * @type {MutationTransferTokens}
-       */
-      query = await this.createMoleculeMutation( {
-        mutationClass: MutationTransferTokens,
-        molecule
-      } );
+      sourceWallet: sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationTransferTokens}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationTransferTokens,
+      molecule
+    } );
 
     query.fillMolecule( {
       recipientWallet,
       amount
     } );
 
+    return await this.executeQuery( query );
+  }
+
+
+  /**
+   *
+   * @param tokenSlug
+   * @param amount
+   * @param tradingPairs
+   * @param sourceWallet
+   * @returns {Promise<function(*): *>}
+   */
+  async depositBufferToken ( {
+    tokenSlug,
+    amount,
+    tradingPairs,
+    sourceWallet = null
+  } ) {
+
+    if ( sourceWallet === null ) {
+      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+    }
+
+    // Do you have enough tokens?
+    if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
+      throw new TransferBalanceException();
+    }
+
+    // Remainder wallet
+    this.remainderWallet = Wallet.create( {
+      secretOrBundle: this.getSecret(),
+      token: tokenSlug,
+      characters: sourceWallet.characters
+    } );
+    this.remainderWallet.initBatchId( {
+      sourceWallet,
+      isRemainder: true
+    } );
+
+
+    // Build the molecule itself
+    const molecule = await this.createMolecule( {
+      sourceWallet: sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationTransferTokens}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationDepositBufferToken,
+      molecule
+    } );
+
+    query.fillMolecule( {
+      recipientWallet,
+      amount
+    } );
     return await this.executeQuery( query );
   }
 

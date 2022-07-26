@@ -543,15 +543,13 @@ export default class Molecule {
       position: newWallet.position,
       amount: 0,
       batchId: newWallet.batchId,
-      pubkey: newWallet.pubkey,
-      characters: newWallet.characters
     };
 
     this.atoms.push(
       Atom.create.C( {
         position: this.sourceWallet.position,
         walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
+        token: 'USER',
         batchId: this.sourceWallet.batchId,
         metaType: 'wallet',
         metaId: newWallet.address,

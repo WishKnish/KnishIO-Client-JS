@@ -95,7 +95,6 @@ export default class Test {
 
     await this.testCreateToken();
     await this.testFuseToken();
-    return;
     await this.testCreateWallet();
     await this.testCreateMeta();
     await this.testCreateIdentifier();
@@ -104,6 +103,7 @@ export default class Test {
     await this.testBurnToken();
     await this.testReplenishToken();
     await this.testClaimShadowWallet();
+    await this.testWalletBufferTransactions();
     await this.testQueryMeta();
     await this.testQueryWallets();
     await this.testQueryShadowWallets();
@@ -377,11 +377,11 @@ export default class Test {
     let client = await this.client( this.secrets[ 0 ] );
     let response = await client.fuseToken( {
       recipient: recipientSecret,
-      tokenSlug: tokenSlug,
+      tokenSlug,
       newTokenUnit: fusedTokenUnit,
       fusedTokenUnitIds: this.fusedTokenUnitIds
     } );
-    this.checkResponse( response, 'testReplenishToken' );
+    this.checkResponse( response, 'testFuseToken' );
 
     let walletRecipient = ( await recipientClient.queryBalance( { token: tokenSlug } ) ).payload();
     let walletRemainder = ( await client.queryBalance( { token: tokenSlug } ) ).payload();
@@ -431,6 +431,15 @@ export default class Test {
       batchId: balanceResponse.payload().batchId
     } );
     this.checkResponse( response, 'testClaimShadowWallet' );
+  }
+
+
+  /**
+   *
+   * @returns {Promise<void>}
+   */
+  async testWalletBufferTransactions () {
+
   }
 
   /**
