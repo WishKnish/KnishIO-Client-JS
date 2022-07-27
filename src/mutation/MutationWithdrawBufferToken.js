@@ -50,22 +50,21 @@ import MutationProposeMolecule from './MutationProposeMolecule';
 /**
  *
  */
-export default class MutationDepositBufferToken extends MutationProposeMolecule {
+export default class MutationWithdrawBufferToken extends MutationProposeMolecule {
 
   /**
-   * Fills the Molecule with provided wallet and amount data
    *
-   * @param recipientWallet
-   * @param amount
+   * @param recipients
+   * @param signingWallet
    */
   fillMolecule ( {
-    amount,
-    tradingPairs
+    recipients,
+    signingWallet
   } ) {
 
-    this.$__molecule.initDepositBuffer( {
-      amount,
-      tradingPairs
+    this.$__molecule.initWithdrawBuffer( {
+      recipients,
+      signingWallet
     } );
     this.$__molecule.sign( {} );
     this.$__molecule.check( this.$__molecule.sourceWallet );
