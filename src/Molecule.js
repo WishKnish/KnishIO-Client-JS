@@ -542,7 +542,11 @@ export default class Molecule {
     }
 
     // Create a buffer wallet
-    let bufferWallet = Wallet.create( this.secret, this.sourceWallet.token, this.sourceWallet.batchId );
+    let bufferWallet = Wallet.create( {
+      secretOrBundle: this.secret,
+      token: this.sourceWallet.token,
+      batchId: this.sourceWallet.batchId
+    } );
     bufferWallet.tradePairs = tradingPairs;
 
     this.molecularHash = null;
@@ -627,6 +631,7 @@ export default class Molecule {
         position: signingWallet.position,
       } );
     }
+    console.error( firstAtomMetas );
 
     this.molecularHash = null;
 

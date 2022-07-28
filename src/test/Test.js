@@ -37,7 +37,7 @@ export default class Test {
   constructor ( graphqlUrl, encrypt = false ) {
     this.encrypt = encrypt;
     this.secrets = [ generateSecret(), generateSecret() ];
-    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES' ];
+    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES', 'UTSLUG0', 'UTSLUG1' ];
     this.graphqlUrl = graphqlUrl;
     console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` );
 
@@ -94,6 +94,8 @@ export default class Test {
     await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
+    await this.testWalletBufferTransactions();
+    return;
     await this.testFuseToken();
     await this.testCreateWallet();
     await this.testCreateMeta();
@@ -218,6 +220,23 @@ export default class Test {
       batchId: 'unit_fz_batch_0'
     } );
     this.checkResponse( responses[ 4 ], 'testCreateToken.4' );
+
+    // --- Tokens for trading
+    client = await this.client( this.secrets[ 0 ] );
+    for ( const tokenSlug of [ this.tokenSlugs[ 5 ], this.tokenSlugs[ 6 ] ] ) {
+      responses[ 0 ] = await client.createToken( {
+        token: tokenSlug,
+        amount: 1000.000000000000,
+        meta: {
+          name: tokenSlug,
+          fungibility: 'fungible',
+          supply: 'limited',
+          decimals: 0,
+          icon: 'icon'
+        },
+      } );
+      this.checkResponse( responses[ 0 ], 'testCreateToken.' + tokenSlug );
+    }
   }
 
   /**
@@ -439,6 +458,25 @@ export default class Test {
    * @returns {Promise<void>}
    */
   async testWalletBufferTransactions () {
+    let client = await this.client( this.secrets[ 0 ] );
+
+    // Deposit buffer
+    let tradingPairs = {};
+    tradingPairs[ this.tokenSlugs[ 1 ] ] = 100;
+    tradingPairs[ this.tokenSlugs[ 3 ] ] = 200;
+    let response = await client.depositBufferToken( {
+      tokenSlug: this.tokenSlugs[ 5 ],
+      amount: 200,
+      tradingPairs
+    } );
+    this.checkResponse( response, 'testWalletBufferTransactions: depositBufferToken' );
+
+    // Withdraw buffer
+    await client.withdrawBufferToken( {
+      tokenSlug: this.tokenSlugs[ 5 ],
+      amount: 100
+    } );
+    this.checkResponse( response, 'testWalletBufferTransactions: withdrawBufferToken' );
 
   }
 

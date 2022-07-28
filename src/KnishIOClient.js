@@ -94,6 +94,8 @@ import QueryPolicy from './query/QueryPolicy';
 import MutationCreatePolicy from './mutation/MutationCreatePolicy';
 import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom';
 import MutationCreateRule from './mutation/MutationCreateRule';
+import MutationDepositBufferToken from './mutation/MutationDepositBufferToken';
+import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken';
 
 
 /**
@@ -580,7 +582,8 @@ export default class KnishIOClient {
    */
   async queryBalance ( {
     token,
-    bundle = null
+    bundle = null,
+    type = 'regular'
   } ) {
 
     /**
@@ -591,7 +594,8 @@ export default class KnishIOClient {
     // Execute query with either the provided bundle hash or the active client's bundle
     return this.executeQuery( query, {
       bundleHash: bundle || this.getBundle(),
-      token
+      token,
+      type
     } );
   }
 
@@ -1748,7 +1752,7 @@ export default class KnishIOClient {
   } ) {
 
     if ( sourceWallet === null ) {
-      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+      sourceWallet = ( await this.queryBalance( { token: tokenSlug } ) ).payload();
     }
 
     // Do you have enough tokens?
@@ -1770,20 +1774,77 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-      sourceWallet: sourceWallet,
+      sourceWallet,
       remainderWallet: this.remainderWallet
     } ),
     /**
-     * @type {MutationTransferTokens}
+     * @type {MutationDepositBufferToken}
      */
     query = await this.createMoleculeMutation( {
       mutationClass: MutationDepositBufferToken,
       molecule
     } );
-
     query.fillMolecule( {
-      recipientWallet,
-      amount
+      amount,
+      tradingPairs
+    } );
+    return await this.executeQuery( query );
+  }
+
+
+  /**
+   *
+   * @param tokenSlug
+   * @param amount
+   * @param sourceWallet
+   * @param signingWallet
+   * @returns {Promise<void>}
+   */
+  async withdrawBufferToken( {
+    tokenSlug,
+    amount,
+    sourceWallet = null,
+    signingWallet = null
+  } ) {
+
+    // Get a source wallet
+    if ( sourceWallet === null ) {
+      sourceWallet = ( await this.queryBalance( { token: tokenSlug, type: 'buffer' } ) ).payload();
+      console.error( sourceWallet );
+    }
+    if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
+      throw new TransferBalanceException();
+    }
+
+    // Remainder wallet
+    this.remainderWallet = Wallet.create( {
+      secretOrBundle: this.getSecret(),
+      token: tokenSlug,
+      characters: sourceWallet.characters
+    } );
+    this.remainderWallet.initBatchId( {
+      sourceWallet,
+      isRemainder: true
+    } );
+
+
+    // Build the molecule itself
+    const molecule = await this.createMolecule( {
+      sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationWithdrawBufferToken}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationWithdrawBufferToken,
+      molecule
+    } );
+    let recipients = {};
+    recipients[ this.getBundle() ] = amount;
+    query.fillMolecule( {
+      recipients,
+      signingWallet
     } );
     return await this.executeQuery( query );
   }

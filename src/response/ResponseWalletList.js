@@ -116,6 +116,15 @@ export default class ResponseWalletList extends Response {
         wallet.tokenUnits.push( TokenUnit.createFromGraphQL( tokenUnitData ) );
       }
     }
+
+    wallet.tradePairs = {};
+    if ( data.tradePairs.length ) {
+      for ( let tradePair of data.tradePairs ) {
+        wallet.tradePairs[ tradePair[ 'tokenSlug' ] ] = tradePair[ 'amount' ];
+      }
+    }
+    console.error( data );
+
     wallet.molecules = data.molecules;
     wallet.balance = Number( data.amount );
     wallet.pubkey = data.pubkey;
