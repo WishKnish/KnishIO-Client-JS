@@ -631,7 +631,6 @@ export default class Molecule {
         position: signingWallet.position,
       } );
     }
-    console.error( firstAtomMetas );
 
     this.molecularHash = null;
 

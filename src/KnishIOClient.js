@@ -1810,22 +1810,13 @@ export default class KnishIOClient {
     // Get a source wallet
     if ( sourceWallet === null ) {
       sourceWallet = ( await this.queryBalance( { token: tokenSlug, type: 'buffer' } ) ).payload();
-      console.error( sourceWallet );
     }
     if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
       throw new TransferBalanceException();
     }
 
     // Remainder wallet
-    this.remainderWallet = Wallet.create( {
-      secretOrBundle: this.getSecret(),
-      token: tokenSlug,
-      characters: sourceWallet.characters
-    } );
-    this.remainderWallet.initBatchId( {
-      sourceWallet,
-      isRemainder: true
-    } );
+    this.remainderWallet = sourceWallet;
 
 
     // Build the molecule itself

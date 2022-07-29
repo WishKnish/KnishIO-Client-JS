@@ -94,8 +94,6 @@ export default class Test {
     await this.client( this.secrets[ 1 ] );
 
     await this.testCreateToken();
-    await this.testWalletBufferTransactions();
-    return;
     await this.testFuseToken();
     await this.testCreateWallet();
     await this.testCreateMeta();
