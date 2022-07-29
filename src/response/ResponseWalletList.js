@@ -111,7 +111,7 @@ export default class ResponseWalletList extends Response {
       wallet.tokenFungibility = data.token.fungibility;
     }
 
-    if ( data.tokenUnits.length ) {
+    if ( data.tokenUnits && data.tokenUnits.length ) {
       for ( let tokenUnitData of data.tokenUnits ) {
         wallet.tokenUnits.push( TokenUnit.createFromGraphQL( tokenUnitData ) );
       }

@@ -74,7 +74,10 @@ class Client extends ApolloClient {
     encrypt = false
   } ) {
     const _socket = {
-      ...{ socketUri: null, appKey: 'knishio' },
+      ...{
+        socketUri: null,
+        appKey: 'knishio'
+      },
       ...soketi || {}
     };
     const links = [];
