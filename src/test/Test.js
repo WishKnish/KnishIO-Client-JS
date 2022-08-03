@@ -317,7 +317,7 @@ export default class Test {
 
     let client = await this.client( this.secrets[ 0 ] );
     response = await client.transferToken( {
-      recipient: bundleHash,
+      bundleHash,
       token: this.tokenSlugs[ 0 ],
       amount: 10,
       batchId: 'batch_1'
@@ -325,7 +325,7 @@ export default class Test {
     this.checkResponse( response, 'testTransferToken' );
 
     response = await client.transferToken( {
-      recipient: bundleHash,
+      bundleHash,
       token: this.tokenSlugs[ 2 ],
       units: [ 'unit_id_1', 'unit_id_2' ],
       batchId: 'batch_2'
@@ -393,7 +393,7 @@ export default class Test {
 
     let client = await this.client( this.secrets[ 0 ] );
     let response = await client.fuseToken( {
-      recipient: recipientSecret,
+      bundleHash: recipientClient.getBundle(),
       tokenSlug,
       newTokenUnit: fusedTokenUnit,
       fusedTokenUnitIds: this.fusedTokenUnitIds

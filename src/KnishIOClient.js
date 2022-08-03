@@ -1635,17 +1635,16 @@ export default class KnishIOClient {
 
   /**
    * Creates and executes a Molecule that moves tokens from one user to another
-   *
-   * @param {Wallet|string} recipient
-   * @param {string} token
-   * @param {number|null} amount
-   * @param {array|null} units
-   * @param {string|null} batchId
-   * @param {Wallet|null} sourceWallet
-   * @return {Promise<Response>}
+   * @param bundleHash
+   * @param token
+   * @param amount
+   * @param units
+   * @param batchId
+   * @param sourceWallet
+   * @returns {Promise<*>}
    */
   async transferToken ( {
-    recipient,
+    bundleHash,
     token,
     amount = null,
     units = [],
@@ -1674,20 +1673,10 @@ export default class KnishIOClient {
     }
 
     // Attempt to get the recipient's wallet, if not provided
-    let recipientWallet = recipient instanceof Wallet ? recipient : ( await this.queryBalance( {
-      token,
-      bundle: recipient
-    } ) ).payload();
-
-
-    // If no wallet was found, prepare to send to bundle
-    // This will typically result in a shadow wallet
-    if ( recipientWallet === null ) {
-      recipientWallet = Wallet.create( {
-        secretOrBundle: recipient,
-        token
-      } );
-    }
+    let recipientWallet = Wallet.create( {
+      secretOrBundle: bundleHash,
+      token
+    } );
 
     // Compute the batch ID for the recipient
     // (typically used by stackable tokens)
@@ -1974,7 +1963,7 @@ export default class KnishIOClient {
 
   /**
    *
-   * @param recipient
+   * @param bundleHash
    * @param tokenSlug
    * @param newTokenUnit
    * @param fusedTokenUnitIds
@@ -1982,7 +1971,7 @@ export default class KnishIOClient {
    * @returns {Promise<*>}
    */
   async fuseToken ( {
-    recipient,
+    bundleHash,
     tokenSlug,
     newTokenUnit,
     fusedTokenUnitIds,
@@ -2017,13 +2006,11 @@ export default class KnishIOClient {
 
 
     // Generate new recipient wallet if only recipient secret has been passed
-    let recipientWallet = recipient;
-    if ( !( recipient instanceof Wallet ) ) {
-      recipientWallet = Wallet.create( {
-        secretOrBundle: recipient,
-        token: tokenSlug
-      } );
-    }
+    let recipientWallet = Wallet.create( {
+      secretOrBundle: bundleHash,
+      token: tokenSlug
+    } );
+
     // Set batch ID
     recipientWallet.initBatchId( { sourceWallet } );
 
