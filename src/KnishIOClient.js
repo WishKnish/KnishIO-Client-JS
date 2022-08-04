@@ -602,6 +602,33 @@ export default class KnishIOClient {
     } );
   }
 
+
+  /**
+   *
+   * @param token
+   * @param amount
+   * @returns {Promise<void>}
+   */
+  async querySourceWallet( {
+    token,
+    amount,
+    type = 'regular'
+  } ) {
+    let sourceWallet = ( await this.queryBalance( { token, type } ) ).payload();
+
+    // Do you have enough tokens?
+    if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
+      throw new TransferBalanceException();
+    }
+
+    // Check shadow wallet
+    if ( !sourceWallet.position || !sourceWallet.address ) {
+      throw new TransferBalanceException( 'Source wallet can not be a shadow wallet.' );
+    }
+
+    return sourceWallet;
+  }
+
   /**
    * @param {string|null} bundle
    * @param {function} closure
@@ -1652,10 +1679,6 @@ export default class KnishIOClient {
     sourceWallet = null
   } ) {
 
-    if ( sourceWallet === null ) {
-      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
-    }
-
     // Calculate amount & set meta key
     if ( units.length > 0 ) {
 
@@ -1665,6 +1688,11 @@ export default class KnishIOClient {
       }
 
       amount = units.length;
+    }
+
+    // Get a source wallet
+    if ( sourceWallet === null ) {
+      sourceWallet = await this.querySourceWallet( { token, amount } );
     }
 
     // Do you have enough tokens?
@@ -1743,13 +1771,9 @@ export default class KnishIOClient {
     sourceWallet = null
   } ) {
 
+    // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = ( await this.queryBalance( { token: tokenSlug } ) ).payload();
-    }
-
-    // Do you have enough tokens?
-    if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
-      throw new TransferBalanceException();
+      sourceWallet = await this.querySourceWallet( { token: tokenSlug, amount } );
     }
 
     // Remainder wallet
@@ -1801,10 +1825,7 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = ( await this.queryBalance( { token: tokenSlug, type: 'buffer' } ) ).payload();
-    }
-    if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
-      throw new TransferBalanceException();
+      sourceWallet = await this.querySourceWallet( { token: tokenSlug, amount, type: 'buffer' } );
     }
 
     // Remainder wallet
@@ -1849,8 +1870,9 @@ export default class KnishIOClient {
     sourceWallet = null
   } ) {
 
+    // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+      sourceWallet = await this.querySourceWallet( { token, amount } );
     }
 
     // Remainder wallet
