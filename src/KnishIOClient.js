@@ -48,8 +48,8 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Dot from './libraries/Dot';
 import Decimal from './libraries/Decimal';
 import {
-  generateBundleHash,
   generateBatchId,
+  generateBundleHash,
   generateSecret
 } from './libraries/crypto';
 import Molecule from './Molecule';
@@ -160,8 +160,8 @@ export default class KnishIOClient {
       this.setCellSlug( cellSlug );
     }
 
-    for ( let i in this.$__uris ) {
-      let url = this.$__uris [ i ];
+    for ( let uriKey in this.$__uris ) {
+      let url = this.$__uris [ uriKey ];
       this.$__authTokenObjects[ url ] = null;
     }
 
@@ -581,7 +581,8 @@ export default class KnishIOClient {
    *
    * @param {string} token
    * @param {string|null} bundle
-   * @return {Promise<ResponseBalance>}
+   * @param {string} type
+   * @returns {Promise<*>}
    */
   async queryBalance ( {
     token,
@@ -602,19 +603,22 @@ export default class KnishIOClient {
     } );
   }
 
-
   /**
    *
-   * @param token
-   * @param amount
-   * @returns {Promise<void>}
+   * @param {string} token
+   * @param {number} amount
+   * @param {string} type
+   * @returns {Promise<{address}|{position}|*>}
    */
-  async querySourceWallet( {
+  async querySourceWallet ( {
     token,
     amount,
     type = 'regular'
   } ) {
-    let sourceWallet = ( await this.queryBalance( { token, type } ) ).payload();
+    let sourceWallet = ( await this.queryBalance( {
+      token,
+      type
+    } ) ).payload();
 
     // Do you have enough tokens?
     if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
@@ -1662,12 +1666,12 @@ export default class KnishIOClient {
 
   /**
    * Creates and executes a Molecule that moves tokens from one user to another
-   * @param bundleHash
-   * @param token
-   * @param amount
-   * @param units
-   * @param batchId
-   * @param sourceWallet
+   * @param {string} bundleHash
+   * @param {string} token
+   * @param {number|null} amount
+   * @param {[]} units
+   * @param {string|null} batchId
+   * @param {Wallet|null} sourceWallet
    * @returns {Promise<*>}
    */
   async transferToken ( {
@@ -1692,7 +1696,10 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = await this.querySourceWallet( { token, amount } );
+      sourceWallet = await this.querySourceWallet( {
+        token,
+        amount
+      } );
     }
 
     // Do you have enough tokens?
@@ -1736,16 +1743,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-      sourceWallet: sourceWallet,
-      remainderWallet: this.remainderWallet
-    } ),
-    /**
-     * @type {MutationTransferTokens}
-     */
-    query = await this.createMoleculeMutation( {
-      mutationClass: MutationTransferTokens,
-      molecule
-    } );
+        sourceWallet: sourceWallet,
+        remainderWallet: this.remainderWallet
+      } ),
+      /**
+       * @type {MutationTransferTokens}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationTransferTokens,
+        molecule
+      } );
 
     query.fillMolecule( {
       recipientWallet,
@@ -1773,7 +1780,10 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = await this.querySourceWallet( { token: tokenSlug, amount } );
+      sourceWallet = await this.querySourceWallet( {
+        token: tokenSlug,
+        amount
+      } );
     }
 
     // Remainder wallet
@@ -1790,16 +1800,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-      sourceWallet,
-      remainderWallet: this.remainderWallet
-    } ),
-    /**
-     * @type {MutationDepositBufferToken}
-     */
-    query = await this.createMoleculeMutation( {
-      mutationClass: MutationDepositBufferToken,
-      molecule
-    } );
+        sourceWallet,
+        remainderWallet: this.remainderWallet
+      } ),
+      /**
+       * @type {MutationDepositBufferToken}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationDepositBufferToken,
+        molecule
+      } );
     query.fillMolecule( {
       amount,
       tradingPairs
@@ -1816,7 +1826,7 @@ export default class KnishIOClient {
    * @param signingWallet
    * @returns {Promise<void>}
    */
-  async withdrawBufferToken( {
+  async withdrawBufferToken ( {
     tokenSlug,
     amount,
     sourceWallet = null,
@@ -1825,7 +1835,11 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = await this.querySourceWallet( { token: tokenSlug, amount, type: 'buffer' } );
+      sourceWallet = await this.querySourceWallet( {
+        token: tokenSlug,
+        amount,
+        type: 'buffer'
+      } );
     }
 
     // Remainder wallet
@@ -1834,16 +1848,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-      sourceWallet,
-      remainderWallet: this.remainderWallet
-    } ),
-    /**
-     * @type {MutationWithdrawBufferToken}
-     */
-    query = await this.createMoleculeMutation( {
-      mutationClass: MutationWithdrawBufferToken,
-      molecule
-    } );
+        sourceWallet,
+        remainderWallet: this.remainderWallet
+      } ),
+      /**
+       * @type {MutationWithdrawBufferToken}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationWithdrawBufferToken,
+        molecule
+      } );
     let recipients = {};
     recipients[ this.getBundle() ] = amount;
     query.fillMolecule( {
@@ -1872,7 +1886,10 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = await this.querySourceWallet( { token, amount } );
+      sourceWallet = await this.querySourceWallet( {
+        token,
+        amount
+      } );
     }
 
     // Remainder wallet

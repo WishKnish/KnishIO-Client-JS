@@ -1,3 +1,50 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
 import KnishIOClient from '../KnishIOClient';
 import Dot from '../libraries/Dot';
 import {
@@ -23,8 +70,8 @@ export default class Test {
    * Run all
    */
   static async run ( uris ) {
-    for ( let i in uris ) {
-      let test = new Test( uris[ i ] );
+    for ( let uriIndex in uris ) {
+      let test = new Test( uris[ uriIndex ] );
       await test.testAll();
     }
   }
@@ -231,9 +278,9 @@ export default class Test {
           supply: 'limited',
           decimals: 0,
           icon: 'icon'
-        },
+        }
       } );
-      this.checkResponse( responses[ 0 ], 'testCreateToken.' + tokenSlug );
+      this.checkResponse( responses[ 0 ], `testCreateToken.${ tokenSlug }` );
     }
   }
 
@@ -411,7 +458,8 @@ export default class Test {
     // --- Check fused token units in the recipient wallet
     let fusedTokenUnits = walletRecipient.tokenUnits[ 0 ].getFusedTokenUnits();
     console.assert( fusedTokenUnits.length, this.fusedTokenUnitIds.length );
-    // Get token unit IDs from the fused meta data of the fused token unit
+
+    // Get token unit IDs from the fused metadata of the fused token unit
     let dbFusedTokenUnitIds = [];
     fusedTokenUnits.forEach( ( tokenUnit ) => {
       dbFusedTokenUnitIds.push( tokenUnit[ 0 ] );

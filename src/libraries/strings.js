@@ -36,8 +36,8 @@ export function chunkSubstr ( str, size ) {
   const numChunks = Math.ceil( str.length / size ),
     chunks = [];
 
-  for ( let i = 0, o = 0; i < numChunks; ++i, o += size ) {
-    chunks[ i ] = str.substr( o, size );
+  for ( let chunkIndex = 0, o = 0; chunkIndex < numChunks; ++chunkIndex, o += size ) {
+    chunks[ chunkIndex ] = str.substr( o, size );
   }
 
   return chunks;
@@ -101,8 +101,8 @@ export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, dest
   // First convert to base 10
   let val = bigInt( 0 );
 
-  for ( let i = 0; i < src.length; i++ ) {
-    val = val.multiply( fromBase ).add( srcSymbolTable.indexOf( src.charAt( i ) ) );
+  for ( let charIndex = 0; charIndex < src.length; charIndex++ ) {
+    val = val.multiply( fromBase ).add( srcSymbolTable.indexOf( src.charAt( charIndex ) ) );
   }
 
   if ( val.lesser( 0 ) ) {

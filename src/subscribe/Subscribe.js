@@ -14,8 +14,8 @@ export default class Subscribe {
   /**
    * Creates a new Request for the given parameters
    *
-   * @param {object} variables
-   * @return {Operation}
+   * @param {{}} variables
+   * @returns {{variables: (Object|null), fetchPolicy: string, query: null}}
    */
   createSubscribe ( {
     variables = null
@@ -43,7 +43,7 @@ export default class Subscribe {
   /**
    * Sends the Query to a Knish.IO node and returns the Response
    *
-   * @param {object} variables
+   * @param {{}} variables
    * @param {function} closure
    * @return {string}
    */

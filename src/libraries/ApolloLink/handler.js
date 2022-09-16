@@ -45,9 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import {
-  Observable
-} from '@apollo/client/core';
+import { Observable } from '@apollo/client/core';
 
 /**
  * @param {Echo} echoClient

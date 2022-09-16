@@ -53,7 +53,10 @@ import {
   hexToBase64
 } from './libraries/strings';
 import CheckMolecule from './libraries/check';
-import { generateBundleHash, generateBatchId } from './libraries/crypto';
+import {
+  generateBatchId,
+  generateBundleHash
+} from './libraries/crypto';
 import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
 import NegativeAmountException from './exception/NegativeAmountException';
@@ -415,7 +418,7 @@ export default class Molecule {
       }
       this.remainderWallet.balance = this.remainderWallet.tokenUnits.length;
 
-      // Override first atom'a token units to replenish values
+      // Override first atom's token units to replenish values
       this.sourceWallet.tokenUnits = units;
       this.sourceWallet.balance = this.sourceWallet.tokenUnits.length;
     }
@@ -533,7 +536,7 @@ export default class Molecule {
    * @param amount
    * @param tradingPairs
    */
-  initDepositBuffer( {
+  initDepositBuffer ( {
     amount,
     tradingPairs
   } ) {
@@ -598,13 +601,13 @@ export default class Molecule {
     return this;
   }
 
-
   /**
    *
-   * @param amount
-   * @param tradingPairs
+   * @param {{}} recipients
+   * @param {Wallet|{}} signingWallet
+   * @returns {Molecule}
    */
-  initWithdrawBuffer( {
+  initWithdrawBuffer ( {
     recipients,
     signingWallet = null
   } ) {
@@ -628,7 +631,7 @@ export default class Molecule {
       // Set a metas signing position for molecule correct reconciliation
       firstAtomMetas.signingWallet = JSON.stringify( {
         address: signingWallet.address,
-        position: signingWallet.position,
+        position: signingWallet.position
       } );
     }
 
@@ -653,7 +656,7 @@ export default class Molecule {
         Atom.create.V( {
           token: this.sourceWallet.token,
           value: recipientAmount,
-          batchId: this.sourceWallet.batchId ? generateBatchId() : null,
+          batchId: this.sourceWallet.batchId ? generateBatchId( {} ) : null,
           metaType: 'walletBundle',
           metaId: recipientBundle,
           meta: {},
@@ -699,7 +702,7 @@ export default class Molecule {
       bundle: newWallet.bundle,
       position: newWallet.position,
       amount: 0,
-      batchId: newWallet.batchId,
+      batchId: newWallet.batchId
     };
 
     this.atoms.push(

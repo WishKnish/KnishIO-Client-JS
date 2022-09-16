@@ -47,8 +47,8 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
 import Callback from './Callback';
-import RuleArgumentException from './exception/RuleArgumentException';
 import Condition from './Condition';
+import RuleArgumentException from './exception/RuleArgumentException';
 import MetaMissingException from '../../exception/MetaMissingException';
 
 
@@ -56,8 +56,8 @@ export default class Rule {
 
   /**
    *
-   * @param {Condition[]} comparison
-   * @param {Callback[]} callback
+   * @param {Condition[]} condition
+   * @param  {Callback[]} callback
    */
   constructor ( {
     condition = [],
@@ -82,16 +82,22 @@ export default class Rule {
 
   /**
    *
-   * @param {Condition[]} condition
+   * @param {Condition[]|{}} condition
    */
   set comparison ( condition ) {
     this.__condition.push( condition instanceof Condition ? condition : Condition.toObject( condition ) );
   }
 
+  /**
+   * @param {Callback[]|{}} callback
+   */
   set callback ( callback ) {
     this.__callback.push( callback instanceof Callback ? callback : Callback.toObject( callback ) );
   }
 
+  /**
+   * @returns {{condition: *, callback: Callback[]}}
+   */
   toJSON () {
     return {
       condition: this.__condition,

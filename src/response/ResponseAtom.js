@@ -47,6 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
 import Response from './Response';
+import Query from '../query/Query';
 
 /**
  * Response for MetaType Query
@@ -91,10 +92,10 @@ export default class ResponseAtom extends Response {
     if ( metaTypeData.instances ) {
       response.instances = metaTypeData.instances;
 
-      for ( let i in response.instances ) {
-        let instance = response.instances[ i ];
+      for ( let instanceKey in response.instances ) {
+        let instance = response.instances[ instanceKey ];
         if ( instance.metasJson ) {
-          response.instances[ i ].metas = JSON.parse( instance.metasJson );
+          response.instances[ instanceKey ].metas = JSON.parse( instance.metasJson );
         }
       }
     }
