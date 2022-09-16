@@ -22,6 +22,7 @@ import {
 } from './strings';
 import { shake256 } from 'js-sha3';
 import KnishIOInvalidPolicyException from './../exception/KnishIOInvalidPolicyException';
+import Rule from '../instance/Rules/Rule';
 
 /**
  *
@@ -259,16 +260,12 @@ export default class CheckMolecule {
           throw new MetaMissingException( 'Check::isotopeR() - Incorrect rule format!' );
         }
 
-        if ( rules.length < 1 ) {
-          throw new MetaMissingException( 'Check::isotopeR() - No rules!' );
+        for ( const item of rules ) {
+          Rule.toObject( item );
         }
 
-        for ( const rule of rules ) {
-          const keys = Object.keys( rule ).filter( value => [ 'key', 'value', 'callback' ].includes( value ) );
-
-          if ( keys.length < 3 ) {
-            throw new MetaMissingException( 'Check::isotopeR() - Necessary rule fields are missing!' );
-          }
+        if ( rules.length < 1 ) {
+          throw new MetaMissingException( 'Check::isotopeR() - No rules!' );
         }
       }
     }

@@ -55,11 +55,15 @@ export default class Callback {
   /**
    *
    * @param {string} action
+   * @param {string|null} metaType
+   * @param {string|null} metaId
    * @param {Meta|null} meta
    */
   constructor ( {
     action,
-    meta
+    metaType= null,
+    metaId = null,
+    meta = null
   } ) {
     if ( meta ) {
       this.meta = meta;
@@ -69,24 +73,49 @@ export default class Callback {
       throw new RuleArgumentException( 'Callback structure violated, missing mandatory "action" parameter.' );
     }
 
-    this._action = action;
+    this.__metaId = metaId;
+    this.__metaType = metaType;
+    this.__action = action;
   }
 
   set meta ( meta ) {
-    if ( !( meta instanceof Meta ) ) {
-      throw new RuleArgumentException( 'Incorrect meta argument. The meta argument can only be an instance of the Meta class.' );
-    }
-
-    this._meta = meta;
+    this.__meta = meta instanceof Meta ? meta : Meta.toObject( meta );
   }
 
+  /**
+   *
+   * @param {string} metaType
+   */
+  set metaType ( metaType ) {
+    this.__metaType = metaType;
+  }
+
+  /**
+   *
+   * @param {string} metaId
+   */
+  set metaId ( metaId ) {
+    this.__metaId = metaId;
+  }
+
+
+  /**
+   *
+   * @return {{action: string}}
+   */
   toJSON () {
     const meta = {
-      action: this._action
+      action: this.__action
     };
 
-    if ( this._meta ) {
-      meta.meta = this._meta;
+    if ( this.__metaType ) {
+      meta.metaType = this.__metaType;
+    }
+    if ( this.__metaId ) {
+      meta.metaId = this.__metaId;
+    }
+    if ( this.__meta ) {
+      meta.meta = this.__meta;
     }
 
     return meta;
@@ -101,17 +130,21 @@ export default class Callback {
   static toObject ( object ) {
     const callback = new Callback( {
       action: object.action,
+      metaType: null,
+      metaId: null,
       meta: null
     } );
 
+    if ( object.metaType ) {
+      callback.metaType = object.metaType;
+    }
+
+    if ( object.metaId ) {
+      callback.metaId = object.metaId;
+    }
+
     if ( object.meta ) {
-      callback.meta = new Meta( {
-        metaType: object.meta.metaType,
-        metaId: object.meta.metaId,
-        isotope: object.meta.isotope,
-        token: object.meta.token,
-        amount: object.meta.amount
-      } );
+      callback.meta = object.meta;
     }
 
     return callback;
