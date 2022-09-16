@@ -37,7 +37,7 @@ export default class Test {
   constructor ( graphqlUrl, encrypt = false ) {
     this.encrypt = encrypt;
     this.secrets = [ generateSecret(), generateSecret() ];
-    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES' ];
+    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES', 'UTSLUG0', 'UTSLUG1' ];
     this.graphqlUrl = graphqlUrl;
     console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` );
 
@@ -95,7 +95,6 @@ export default class Test {
 
     await this.testCreateToken();
     await this.testFuseToken();
-    return;
     await this.testCreateWallet();
     await this.testCreateMeta();
     await this.testCreateIdentifier();
@@ -104,6 +103,7 @@ export default class Test {
     await this.testBurnToken();
     await this.testReplenishToken();
     await this.testClaimShadowWallet();
+    await this.testWalletBufferTransactions();
     await this.testQueryMeta();
     await this.testQueryWallets();
     await this.testQueryShadowWallets();
@@ -218,6 +218,23 @@ export default class Test {
       batchId: 'unit_fz_batch_0'
     } );
     this.checkResponse( responses[ 4 ], 'testCreateToken.4' );
+
+    // --- Tokens for trading
+    client = await this.client( this.secrets[ 0 ] );
+    for ( const tokenSlug of [ this.tokenSlugs[ 5 ], this.tokenSlugs[ 6 ] ] ) {
+      responses[ 0 ] = await client.createToken( {
+        token: tokenSlug,
+        amount: 1000.000000000000,
+        meta: {
+          name: tokenSlug,
+          fungibility: 'fungible',
+          supply: 'limited',
+          decimals: 0,
+          icon: 'icon'
+        },
+      } );
+      this.checkResponse( responses[ 0 ], 'testCreateToken.' + tokenSlug );
+    }
   }
 
   /**
@@ -300,7 +317,7 @@ export default class Test {
 
     let client = await this.client( this.secrets[ 0 ] );
     response = await client.transferToken( {
-      recipient: bundleHash,
+      bundleHash,
       token: this.tokenSlugs[ 0 ],
       amount: 10,
       batchId: 'batch_1'
@@ -308,7 +325,7 @@ export default class Test {
     this.checkResponse( response, 'testTransferToken' );
 
     response = await client.transferToken( {
-      recipient: bundleHash,
+      bundleHash,
       token: this.tokenSlugs[ 2 ],
       units: [ 'unit_id_1', 'unit_id_2' ],
       batchId: 'batch_2'
@@ -376,12 +393,12 @@ export default class Test {
 
     let client = await this.client( this.secrets[ 0 ] );
     let response = await client.fuseToken( {
-      recipient: recipientSecret,
-      tokenSlug: tokenSlug,
+      bundleHash: recipientClient.getBundle(),
+      tokenSlug,
       newTokenUnit: fusedTokenUnit,
       fusedTokenUnitIds: this.fusedTokenUnitIds
     } );
-    this.checkResponse( response, 'testReplenishToken' );
+    this.checkResponse( response, 'testFuseToken' );
 
     let walletRecipient = ( await recipientClient.queryBalance( { token: tokenSlug } ) ).payload();
     let walletRemainder = ( await client.queryBalance( { token: tokenSlug } ) ).payload();
@@ -431,6 +448,34 @@ export default class Test {
       batchId: balanceResponse.payload().batchId
     } );
     this.checkResponse( response, 'testClaimShadowWallet' );
+  }
+
+
+  /**
+   *
+   * @returns {Promise<void>}
+   */
+  async testWalletBufferTransactions () {
+    let client = await this.client( this.secrets[ 0 ] );
+
+    // Deposit buffer
+    let tradingPairs = {};
+    tradingPairs[ this.tokenSlugs[ 1 ] ] = 100;
+    tradingPairs[ this.tokenSlugs[ 3 ] ] = 200;
+    let response = await client.depositBufferToken( {
+      tokenSlug: this.tokenSlugs[ 5 ],
+      amount: 200,
+      tradingPairs
+    } );
+    this.checkResponse( response, 'testWalletBufferTransactions: depositBufferToken' );
+
+    // Withdraw buffer
+    await client.withdrawBufferToken( {
+      tokenSlug: this.tokenSlugs[ 5 ],
+      amount: 100
+    } );
+    this.checkResponse( response, 'testWalletBufferTransactions: withdrawBufferToken' );
+
   }
 
   /**

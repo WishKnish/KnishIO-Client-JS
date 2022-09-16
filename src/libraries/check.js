@@ -2,6 +2,7 @@ import AtomIndexException from './../exception/AtomIndexException';
 import AtomsMissingException from './../exception/AtomsMissingException';
 import MolecularHashMismatchException from './../exception/MolecularHashMismatchException';
 import MolecularHashMissingException from './../exception/MolecularHashMissingException';
+import KnishIOInvalidPolicyException from './../exception/KnishIOInvalidPolicyException';
 import SignatureMalformedException from './../exception/SignatureMalformedException';
 import SignatureMismatchException from './../exception/SignatureMismatchException';
 import TransferBalanceException from './../exception/TransferBalanceException';
@@ -16,13 +17,13 @@ import BatchIdException from './../exception/BatchIdException';
 import Atom from './../Atom';
 import Meta from './../Meta';
 import Wallet from './../Wallet';
+import Rule from '../instance/Rules/Rule';
 import {
   base64ToHex,
   chunkSubstr
 } from './strings';
 import { shake256 } from 'js-sha3';
-import KnishIOInvalidPolicyException from './../exception/KnishIOInvalidPolicyException';
-import Rule from '../instance/Rules/Rule';
+import Dot from './../libraries/Dot';
 
 /**
  *
@@ -422,11 +423,8 @@ export default class CheckMolecule {
 
     CheckMolecule.missing( molecule );
 
-    // Determine first atom
-    const firstAtom = molecule.atoms[ 0 ],
-      walletAddress = firstAtom.walletAddress,
-      // Convert Hm to numeric notation via EnumerateMolecule(Hm)
-      normalizedHash = CheckMolecule.normalizedHash( molecule.molecularHash );
+    // Convert Hm to numeric notation via EnumerateMolecule(Hm)
+    const normalizedHash = CheckMolecule.normalizedHash( molecule.molecularHash );
 
     // Rebuilding OTS out of all the atoms
     let ots = molecule.atoms.map(
@@ -468,7 +466,22 @@ export default class CheckMolecule {
       // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
       address = shake256.create( 256 ).update( digest ).hex();
 
-    if ( address !== walletAddress ) {
+
+    // Signing atom
+    let signingAtom = molecule.atoms[ 0 ];
+
+    // Get a signing address
+    let signingAddress = signingAtom.walletAddress;
+
+    // Get signing wallet from first atom's metas
+    let signingWallet = Dot.get( signingAtom.aggregatedMeta(), 'signingWallet' );
+
+    // Try to get custom signing address from the metas (local molecule with server secret)
+    if ( signingWallet ) {
+      signingAddress = Dot.get( JSON.parse( signingWallet ), 'address' );
+    }
+
+    if ( address !== signingAddress ) {
       throw new SignatureMismatchException();
     }
 

@@ -45,55 +45,30 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import { gql } from '@apollo/client/core';
-import ResponseBalance from '../response/ResponseBalance';
+import MutationProposeMolecule from './MutationProposeMolecule';
 
 /**
- * Query for getting the balance of a given wallet or token slug
+ *
  */
-export default class QueryBalance extends Query {
+export default class MutationDepositBufferToken extends MutationProposeMolecule {
+
   /**
-   * Class constructor
+   * Fills the Molecule with provided wallet and amount data
    *
-   * @param apolloClient
+   * @param recipientWallet
+   * @param amount
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  fillMolecule ( {
+    amount,
+    tradingPairs
+  } ) {
 
-    this.$__query = gql`query( $address: String, $bundleHash: String, $type: String, $token: String, $position: String ) {
-      Balance( address: $address, bundleHash: $bundleHash, type: $type, token: $token, position: $position ) {
-        address,
-        bundleHash,
-        type,
-        tokenSlug,
-        batchId,
-        position,
-        amount,
-        characters,
-        pubkey,
-        createdAt,
-        tokenUnits {
-          id,
-          name,
-          metas
-        },
-        tradePairs {
-          tokenSlug,
-          amount
-        }
-      }
-    }`;
-  }
-
-  /**
-   * @param {object} json
-   * @return {ResponseBalance}
-   */
-  createResponse ( json ) {
-    return new ResponseBalance( {
-      query: this,
-      json
+    this.$__molecule.initDepositBuffer( {
+      amount,
+      tradingPairs
     } );
+    this.$__molecule.sign( {} );
+    this.$__molecule.check( this.$__molecule.sourceWallet );
   }
+
 }

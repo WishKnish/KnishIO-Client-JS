@@ -94,6 +94,8 @@ import QueryPolicy from './query/QueryPolicy';
 import MutationCreatePolicy from './mutation/MutationCreatePolicy';
 import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom';
 import MutationCreateRule from './mutation/MutationCreateRule';
+import MutationDepositBufferToken from './mutation/MutationDepositBufferToken';
+import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken';
 
 
 /**
@@ -470,7 +472,12 @@ export default class KnishIOClient {
     secret = secret || this.getSecret();
 
     // Sets the source wallet as the last remainder wallet (to maintain ContinuID)
-    if ( !sourceWallet && this.lastMoleculeQuery && this.getRemainderWallet().token !== 'AUTH' && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() ) {
+    if ( !sourceWallet &&
+      this.lastMoleculeQuery &&
+      this.getRemainderWallet().token === 'USER' &&
+      this.lastMoleculeQuery.response() &&
+      this.lastMoleculeQuery.response().success()
+    ) {
       sourceWallet = this.getRemainderWallet();
     }
 
@@ -578,7 +585,8 @@ export default class KnishIOClient {
    */
   async queryBalance ( {
     token,
-    bundle = null
+    bundle = null,
+    type = 'regular'
   } ) {
 
     /**
@@ -589,8 +597,36 @@ export default class KnishIOClient {
     // Execute query with either the provided bundle hash or the active client's bundle
     return this.executeQuery( query, {
       bundleHash: bundle || this.getBundle(),
-      token
+      token,
+      type
     } );
+  }
+
+
+  /**
+   *
+   * @param token
+   * @param amount
+   * @returns {Promise<void>}
+   */
+  async querySourceWallet( {
+    token,
+    amount,
+    type = 'regular'
+  } ) {
+    let sourceWallet = ( await this.queryBalance( { token, type } ) ).payload();
+
+    // Do you have enough tokens?
+    if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
+      throw new TransferBalanceException();
+    }
+
+    // Check shadow wallet
+    if ( !sourceWallet.position || !sourceWallet.address ) {
+      throw new TransferBalanceException( 'Source wallet can not be a shadow wallet.' );
+    }
+
+    return sourceWallet;
   }
 
   /**
@@ -1626,27 +1662,22 @@ export default class KnishIOClient {
 
   /**
    * Creates and executes a Molecule that moves tokens from one user to another
-   *
-   * @param {Wallet|string} recipient
-   * @param {string} token
-   * @param {number|null} amount
-   * @param {array|null} units
-   * @param {string|null} batchId
-   * @param {Wallet|null} sourceWallet
-   * @return {Promise<Response>}
+   * @param bundleHash
+   * @param token
+   * @param amount
+   * @param units
+   * @param batchId
+   * @param sourceWallet
+   * @returns {Promise<*>}
    */
   async transferToken ( {
-    recipient,
+    bundleHash,
     token,
     amount = null,
     units = [],
     batchId = null,
     sourceWallet = null
   } ) {
-
-    if ( sourceWallet === null ) {
-      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
-    }
 
     // Calculate amount & set meta key
     if ( units.length > 0 ) {
@@ -1659,26 +1690,21 @@ export default class KnishIOClient {
       amount = units.length;
     }
 
+    // Get a source wallet
+    if ( sourceWallet === null ) {
+      sourceWallet = await this.querySourceWallet( { token, amount } );
+    }
+
     // Do you have enough tokens?
     if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
       throw new TransferBalanceException();
     }
 
     // Attempt to get the recipient's wallet, if not provided
-    let recipientWallet = recipient instanceof Wallet ? recipient : ( await this.queryBalance( {
-      token,
-      bundle: recipient
-    } ) ).payload();
-
-
-    // If no wallet was found, prepare to send to bundle
-    // This will typically result in a shadow wallet
-    if ( recipientWallet === null ) {
-      recipientWallet = Wallet.create( {
-        secretOrBundle: recipient,
-        token
-      } );
-    }
+    let recipientWallet = Wallet.create( {
+      secretOrBundle: bundleHash,
+      token
+    } );
 
     // Compute the batch ID for the recipient
     // (typically used by stackable tokens)
@@ -1710,23 +1736,120 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-        sourceWallet: sourceWallet,
-        remainderWallet: this.remainderWallet
-      } ),
-
-      /**
-       * @type {MutationTransferTokens}
-       */
-      query = await this.createMoleculeMutation( {
-        mutationClass: MutationTransferTokens,
-        molecule
-      } );
+      sourceWallet: sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationTransferTokens}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationTransferTokens,
+      molecule
+    } );
 
     query.fillMolecule( {
       recipientWallet,
       amount
     } );
 
+    return await this.executeQuery( query );
+  }
+
+
+  /**
+   *
+   * @param tokenSlug
+   * @param amount
+   * @param tradingPairs
+   * @param sourceWallet
+   * @returns {Promise<function(*): *>}
+   */
+  async depositBufferToken ( {
+    tokenSlug,
+    amount,
+    tradingPairs,
+    sourceWallet = null
+  } ) {
+
+    // Get a source wallet
+    if ( sourceWallet === null ) {
+      sourceWallet = await this.querySourceWallet( { token: tokenSlug, amount } );
+    }
+
+    // Remainder wallet
+    this.remainderWallet = Wallet.create( {
+      secretOrBundle: this.getSecret(),
+      token: tokenSlug,
+      characters: sourceWallet.characters
+    } );
+    this.remainderWallet.initBatchId( {
+      sourceWallet,
+      isRemainder: true
+    } );
+
+
+    // Build the molecule itself
+    const molecule = await this.createMolecule( {
+      sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationDepositBufferToken}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationDepositBufferToken,
+      molecule
+    } );
+    query.fillMolecule( {
+      amount,
+      tradingPairs
+    } );
+    return await this.executeQuery( query );
+  }
+
+
+  /**
+   *
+   * @param tokenSlug
+   * @param amount
+   * @param sourceWallet
+   * @param signingWallet
+   * @returns {Promise<void>}
+   */
+  async withdrawBufferToken( {
+    tokenSlug,
+    amount,
+    sourceWallet = null,
+    signingWallet = null
+  } ) {
+
+    // Get a source wallet
+    if ( sourceWallet === null ) {
+      sourceWallet = await this.querySourceWallet( { token: tokenSlug, amount, type: 'buffer' } );
+    }
+
+    // Remainder wallet
+    this.remainderWallet = sourceWallet;
+
+
+    // Build the molecule itself
+    const molecule = await this.createMolecule( {
+      sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationWithdrawBufferToken}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationWithdrawBufferToken,
+      molecule
+    } );
+    let recipients = {};
+    recipients[ this.getBundle() ] = amount;
+    query.fillMolecule( {
+      recipients,
+      signingWallet
+    } );
     return await this.executeQuery( query );
   }
 
@@ -1747,8 +1870,9 @@ export default class KnishIOClient {
     sourceWallet = null
   } ) {
 
+    // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = ( await this.queryBalance( { token } ) ).payload();
+      sourceWallet = await this.querySourceWallet( { token, amount } );
     }
 
     // Remainder wallet
@@ -1861,7 +1985,7 @@ export default class KnishIOClient {
 
   /**
    *
-   * @param recipient
+   * @param bundleHash
    * @param tokenSlug
    * @param newTokenUnit
    * @param fusedTokenUnitIds
@@ -1869,7 +1993,7 @@ export default class KnishIOClient {
    * @returns {Promise<*>}
    */
   async fuseToken ( {
-    recipient,
+    bundleHash,
     tokenSlug,
     newTokenUnit,
     fusedTokenUnitIds,
@@ -1904,13 +2028,11 @@ export default class KnishIOClient {
 
 
     // Generate new recipient wallet if only recipient secret has been passed
-    let recipientWallet = recipient;
-    if ( !( recipient instanceof Wallet ) ) {
-      recipientWallet = Wallet.create( {
-        secretOrBundle: recipient,
-        token: tokenSlug
-      } );
-    }
+    let recipientWallet = Wallet.create( {
+      secretOrBundle: bundleHash,
+      token: tokenSlug
+    } );
+
     // Set batch ID
     recipientWallet.initBatchId( { sourceWallet } );
 

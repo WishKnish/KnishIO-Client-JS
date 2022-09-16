@@ -53,11 +53,12 @@ import {
   hexToBase64
 } from './libraries/strings';
 import CheckMolecule from './libraries/check';
-import { generateBundleHash } from './libraries/crypto';
+import { generateBundleHash, generateBatchId } from './libraries/crypto';
 import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
 import NegativeAmountException from './exception/NegativeAmountException';
 import { deepCloning } from './libraries/array';
+import Dot from './libraries/Dot';
 import Meta from './Meta';
 import Rule from './instance/Rules/Rule';
 
@@ -526,6 +527,162 @@ export default class Molecule {
     return this;
   }
 
+
+  /**
+   *
+   * @param amount
+   * @param tradingPairs
+   */
+  initDepositBuffer( {
+    amount,
+    tradingPairs
+  } ) {
+    if ( this.sourceWallet.balance - amount < 0 ) {
+      throw new BalanceInsufficientException();
+    }
+
+    // Create a buffer wallet
+    let bufferWallet = Wallet.create( {
+      secretOrBundle: this.secret,
+      token: this.sourceWallet.token,
+      batchId: this.sourceWallet.batchId
+    } );
+    bufferWallet.tradePairs = tradingPairs;
+
+    this.molecularHash = null;
+
+    // Initializing a new Atom to remove tokens from source
+    this.atoms.push(
+      Atom.create.V( {
+        position: this.sourceWallet.position,
+        walletAddress: this.sourceWallet.address,
+        token: this.sourceWallet.token,
+        value: -amount,
+        batchId: this.sourceWallet.batchId,
+        meta: this.finalMetas( this.tokenUnitMetas( this.sourceWallet ) ),
+        index: this.generateIndex()
+      } )
+    );
+
+    // Initializing a new Atom to add tokens to recipient
+    this.atoms.push(
+      Atom.create.B( {
+        position: bufferWallet.position,
+        walletAddress: bufferWallet.address,
+        token: this.sourceWallet.token,
+        value: amount,
+        batchId: bufferWallet.batchId,
+        metaType: 'walletBundle',
+        metaId: this.sourceWallet.bundle,
+        meta: this.finalMetas( { tradePairs: JSON.stringify( bufferWallet.tradePairs ) }, bufferWallet ),
+        index: this.generateIndex()
+      } )
+    );
+
+    this.atoms.push(
+      Atom.create.V( {
+        position: this.remainderWallet.position,
+        walletAddress: this.remainderWallet.address,
+        token: this.sourceWallet.token,
+        value: this.sourceWallet.balance - amount,
+        batchId: this.remainderWallet.batchId,
+        metaType: 'walletBundle',
+        metaId: this.sourceWallet.bundle,
+        meta: this.finalMetas( this.tokenUnitMetas( this.remainderWallet ), this.remainderWallet ),
+        index: this.generateIndex()
+      } )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+  }
+
+
+  /**
+   *
+   * @param amount
+   * @param tradingPairs
+   */
+  initWithdrawBuffer( {
+    recipients,
+    signingWallet = null
+  } ) {
+
+    // Calculate final amount from all recipients
+    let amount = 0;
+    for ( const [ recipientBundle, recipientAmount ] of Object.entries( recipients || {} ) ) {
+      amount += recipientAmount;
+    }
+    if ( this.sourceWallet.balance - amount < 0 ) {
+      throw new BalanceInsufficientException();
+    }
+
+    // First atom metas
+    let firstAtomMetas = this.finalMetas( this.tokenUnitMetas( this.sourceWallet ) );
+    firstAtomMetas.tradePairs = JSON.stringify( this.sourceWallet.tradePairs );
+
+    // Custom signing wallet logic
+    if ( signingWallet ) {
+
+      // Set a metas signing position for molecule correct reconciliation
+      firstAtomMetas.signingWallet = JSON.stringify( {
+        address: signingWallet.address,
+        position: signingWallet.position,
+      } );
+    }
+
+    this.molecularHash = null;
+
+    // Initializing a new Atom to remove tokens from source
+    this.atoms.push(
+      Atom.create.B( {
+        position: this.sourceWallet.position,
+        walletAddress: this.sourceWallet.address,
+        token: this.sourceWallet.token,
+        value: -amount,
+        batchId: this.sourceWallet.batchId,
+        meta: firstAtomMetas,
+        index: this.generateIndex()
+      } )
+    );
+
+    // Initializing a new Atom to add tokens to recipient
+    for ( const [ recipientBundle, recipientAmount ] of Object.entries( recipients || {} ) ) {
+      this.atoms.push(
+        Atom.create.V( {
+          token: this.sourceWallet.token,
+          value: recipientAmount,
+          batchId: this.sourceWallet.batchId ? generateBatchId() : null,
+          metaType: 'walletBundle',
+          metaId: recipientBundle,
+          meta: {},
+          index: this.generateIndex()
+        } )
+      );
+    }
+
+    let lastAtomMetas = this.finalMetas( this.tokenUnitMetas( this.remainderWallet ), this.remainderWallet );
+    lastAtomMetas.tradePairs = JSON.stringify( this.sourceWallet.tradePairs );
+    this.atoms.push(
+      Atom.create.B( {
+        position: this.remainderWallet.position,
+        walletAddress: this.remainderWallet.address,
+        token: this.sourceWallet.token,
+        value: this.sourceWallet.balance - amount,
+        batchId: this.remainderWallet.batchId,
+        metaType: 'walletBundle',
+        metaId: this.sourceWallet.bundle,
+        meta: lastAtomMetas,
+        index: this.generateIndex()
+      } )
+    );
+
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+  }
+
   /**
    * Builds Atoms to define a new wallet on the ledger
    *
@@ -543,15 +700,13 @@ export default class Molecule {
       position: newWallet.position,
       amount: 0,
       batchId: newWallet.batchId,
-      pubkey: newWallet.pubkey,
-      characters: newWallet.characters
     };
 
     this.atoms.push(
       Atom.create.C( {
         position: this.sourceWallet.position,
         walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
+        token: 'USER',
         batchId: this.sourceWallet.batchId,
         metaType: 'wallet',
         metaId: newWallet.address,
@@ -911,10 +1066,27 @@ export default class Molecule {
       atoms: this.atoms
     } );
 
-    // Determine signing atom
-    const signingAtom = this.atoms[ 0 ],
-      // Generate the private signing key for this molecule
-      key = Wallet.generatePrivateKey( {
+    // Signing atom
+    const signingAtom = this.atoms[ 0 ];
+
+    // Set signing position from the first atom
+    let signingPosition = signingAtom.position;
+
+    // Get signing wallet from first atom's metas
+    let signingWallet = Dot.get( signingAtom.aggregatedMeta(), 'signingWallet' );
+
+    // Try to get custom signing position from the metas (local molecule with server secret)
+    if ( signingWallet ) {
+      signingPosition = Dot.get( JSON.parse( signingWallet ), 'position' );
+    }
+
+    // Signing position is required
+    if ( !signingPosition ) {
+      throw new SigningWalletException();
+    }
+
+    // Generate the private signing key for this molecule
+    const key = Wallet.generatePrivateKey( {
         secret: this.secret,
         token: signingAtom.token,
         position: signingAtom.position
