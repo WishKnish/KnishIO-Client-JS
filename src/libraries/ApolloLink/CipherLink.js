@@ -1,8 +1,8 @@
 import {
-  ApolloLink
+  ApolloLink,
+  gql
 } from '@apollo/client/core';
 import { print } from 'graphql';
-import { gql } from '@apollo/client/core';
 import {
   operationName,
   operationType

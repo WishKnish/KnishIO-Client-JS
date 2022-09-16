@@ -48,8 +48,8 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Dot from './libraries/Dot';
 import Decimal from './libraries/Decimal';
 import {
-  generateBundleHash,
   generateBatchId,
+  generateBundleHash,
   generateSecret
 } from './libraries/crypto';
 import Molecule from './Molecule';
@@ -609,12 +609,15 @@ export default class KnishIOClient {
    * @param amount
    * @returns {Promise<void>}
    */
-  async querySourceWallet( {
+  async querySourceWallet ( {
     token,
     amount,
     type = 'regular'
   } ) {
-    let sourceWallet = ( await this.queryBalance( { token, type } ) ).payload();
+    let sourceWallet = ( await this.queryBalance( {
+      token,
+      type
+    } ) ).payload();
 
     // Do you have enough tokens?
     if ( sourceWallet === null || Decimal.cmp( sourceWallet.balance, amount ) < 0 ) {
@@ -1692,7 +1695,10 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = await this.querySourceWallet( { token, amount } );
+      sourceWallet = await this.querySourceWallet( {
+        token,
+        amount
+      } );
     }
 
     // Do you have enough tokens?
@@ -1736,16 +1742,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-      sourceWallet: sourceWallet,
-      remainderWallet: this.remainderWallet
-    } ),
-    /**
-     * @type {MutationTransferTokens}
-     */
-    query = await this.createMoleculeMutation( {
-      mutationClass: MutationTransferTokens,
-      molecule
-    } );
+        sourceWallet: sourceWallet,
+        remainderWallet: this.remainderWallet
+      } ),
+      /**
+       * @type {MutationTransferTokens}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationTransferTokens,
+        molecule
+      } );
 
     query.fillMolecule( {
       recipientWallet,
@@ -1773,7 +1779,10 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = await this.querySourceWallet( { token: tokenSlug, amount } );
+      sourceWallet = await this.querySourceWallet( {
+        token: tokenSlug,
+        amount
+      } );
     }
 
     // Remainder wallet
@@ -1790,16 +1799,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-      sourceWallet,
-      remainderWallet: this.remainderWallet
-    } ),
-    /**
-     * @type {MutationDepositBufferToken}
-     */
-    query = await this.createMoleculeMutation( {
-      mutationClass: MutationDepositBufferToken,
-      molecule
-    } );
+        sourceWallet,
+        remainderWallet: this.remainderWallet
+      } ),
+      /**
+       * @type {MutationDepositBufferToken}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationDepositBufferToken,
+        molecule
+      } );
     query.fillMolecule( {
       amount,
       tradingPairs
@@ -1816,7 +1825,7 @@ export default class KnishIOClient {
    * @param signingWallet
    * @returns {Promise<void>}
    */
-  async withdrawBufferToken( {
+  async withdrawBufferToken ( {
     tokenSlug,
     amount,
     sourceWallet = null,
@@ -1825,7 +1834,11 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = await this.querySourceWallet( { token: tokenSlug, amount, type: 'buffer' } );
+      sourceWallet = await this.querySourceWallet( {
+        token: tokenSlug,
+        amount,
+        type: 'buffer'
+      } );
     }
 
     // Remainder wallet
@@ -1834,16 +1847,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-      sourceWallet,
-      remainderWallet: this.remainderWallet
-    } ),
-    /**
-     * @type {MutationWithdrawBufferToken}
-     */
-    query = await this.createMoleculeMutation( {
-      mutationClass: MutationWithdrawBufferToken,
-      molecule
-    } );
+        sourceWallet,
+        remainderWallet: this.remainderWallet
+      } ),
+      /**
+       * @type {MutationWithdrawBufferToken}
+       */
+      query = await this.createMoleculeMutation( {
+        mutationClass: MutationWithdrawBufferToken,
+        molecule
+      } );
     let recipients = {};
     recipients[ this.getBundle() ] = amount;
     query.fillMolecule( {
@@ -1872,7 +1885,10 @@ export default class KnishIOClient {
 
     // Get a source wallet
     if ( sourceWallet === null ) {
-      sourceWallet = await this.querySourceWallet( { token, amount } );
+      sourceWallet = await this.querySourceWallet( {
+        token,
+        amount
+      } );
     }
 
     // Remainder wallet

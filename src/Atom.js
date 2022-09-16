@@ -139,7 +139,8 @@ export default class Atom {
         };
       } );
     }
-    return Atom.isotopeCallbacks;;
+    return Atom.isotopeCallbacks;
+    ;
   }
 
   /**

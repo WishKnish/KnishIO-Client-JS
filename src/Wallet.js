@@ -52,13 +52,13 @@ import {
   isHex
 } from './libraries/strings';
 import {
-  generateEncPrivateKey,
-  generateEncPublicKey,
   decryptMessage,
   encryptMessage,
-  generateBundleHash,
-  generateWalletPosition,
   generateBatchId,
+  generateBundleHash,
+  generateEncPrivateKey,
+  generateEncPublicKey,
+  generateWalletPosition,
   hashShare
 } from './libraries/crypto';
 import BaseX from './libraries/BaseX';

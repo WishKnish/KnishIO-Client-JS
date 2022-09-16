@@ -95,7 +95,8 @@ export default class Response {
   /**
    *
    */
-  init () {}
+  init () {
+  }
 
   /**
    * @return {*}

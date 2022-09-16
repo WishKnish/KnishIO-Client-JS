@@ -53,7 +53,10 @@ import {
   hexToBase64
 } from './libraries/strings';
 import CheckMolecule from './libraries/check';
-import { generateBundleHash, generateBatchId } from './libraries/crypto';
+import {
+  generateBatchId,
+  generateBundleHash
+} from './libraries/crypto';
 import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
 import NegativeAmountException from './exception/NegativeAmountException';
@@ -533,7 +536,7 @@ export default class Molecule {
    * @param amount
    * @param tradingPairs
    */
-  initDepositBuffer( {
+  initDepositBuffer ( {
     amount,
     tradingPairs
   } ) {
@@ -604,7 +607,7 @@ export default class Molecule {
    * @param amount
    * @param tradingPairs
    */
-  initWithdrawBuffer( {
+  initWithdrawBuffer ( {
     recipients,
     signingWallet = null
   } ) {
