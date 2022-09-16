@@ -2,6 +2,7 @@ import AtomIndexException from './../exception/AtomIndexException';
 import AtomsMissingException from './../exception/AtomsMissingException';
 import MolecularHashMismatchException from './../exception/MolecularHashMismatchException';
 import MolecularHashMissingException from './../exception/MolecularHashMissingException';
+import KnishIOInvalidPolicyException from './../exception/KnishIOInvalidPolicyException';
 import SignatureMalformedException from './../exception/SignatureMalformedException';
 import SignatureMismatchException from './../exception/SignatureMismatchException';
 import TransferBalanceException from './../exception/TransferBalanceException';
@@ -16,12 +17,12 @@ import BatchIdException from './../exception/BatchIdException';
 import Atom from './../Atom';
 import Meta from './../Meta';
 import Wallet from './../Wallet';
+import Rule from '../instance/Rules/Rule';
 import {
   base64ToHex,
   chunkSubstr
 } from './strings';
 import { shake256 } from 'js-sha3';
-import KnishIOInvalidPolicyException from './../exception/KnishIOInvalidPolicyException';
 import Dot from './../libraries/Dot';
 
 /**
@@ -260,16 +261,12 @@ export default class CheckMolecule {
           throw new MetaMissingException( 'Check::isotopeR() - Incorrect rule format!' );
         }
 
-        if ( rules.length < 1 ) {
-          throw new MetaMissingException( 'Check::isotopeR() - No rules!' );
+        for ( const item of rules ) {
+          Rule.toObject( item );
         }
 
-        for ( const rule of rules ) {
-          const keys = Object.keys( rule ).filter( value => [ 'key', 'value', 'callback' ].includes( value ) );
-
-          if ( keys.length < 3 ) {
-            throw new MetaMissingException( 'Check::isotopeR() - Necessary rule fields are missing!' );
-          }
+        if ( rules.length < 1 ) {
+          throw new MetaMissingException( 'Check::isotopeR() - No rules!' );
         }
       }
     }
