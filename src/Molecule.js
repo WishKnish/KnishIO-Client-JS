@@ -628,7 +628,7 @@ export default class Molecule {
       // Set a metas signing position for molecule correct reconciliation
       firstAtomMetas.signingWallet = JSON.stringify( {
         address: signingWallet.address,
-        position: signingWallet.position,
+        position: signingWallet.position
       } );
     }
 
@@ -699,7 +699,7 @@ export default class Molecule {
       bundle: newWallet.bundle,
       position: newWallet.position,
       amount: 0,
-      batchId: newWallet.batchId,
+      batchId: newWallet.batchId
     };
 
     this.atoms.push(

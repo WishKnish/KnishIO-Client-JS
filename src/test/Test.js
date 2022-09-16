@@ -231,9 +231,9 @@ export default class Test {
           supply: 'limited',
           decimals: 0,
           icon: 'icon'
-        },
+        }
       } );
-      this.checkResponse( responses[ 0 ], 'testCreateToken.' + tokenSlug );
+      this.checkResponse( responses[ 0 ], `testCreateToken.${ tokenSlug}` );
     }
   }
 

@@ -50,6 +50,12 @@ import RuleArgumentException from './exception/RuleArgumentException';
 
 export default class Condition {
 
+  /**
+   *
+   * @param key
+   * @param value
+   * @param comparison
+   */
     constructor ( { key, value, comparison } ) {
 
       if ( [ key, value, comparison ].some( item => !item ) ) {

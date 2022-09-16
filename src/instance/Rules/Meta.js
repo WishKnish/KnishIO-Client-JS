@@ -58,7 +58,7 @@ export default class Meta {
 
   /**
    *
-   * @return {{}}
+   * @returns {{}}
    */
   toJSON () {
     const object = {};

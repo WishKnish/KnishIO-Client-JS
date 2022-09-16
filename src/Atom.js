@@ -134,7 +134,7 @@ export default class Atom {
             metaId,
             meta,
             otsFragment,
-            index,
+            index
           } );
         };
       } );
