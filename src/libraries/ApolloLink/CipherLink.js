@@ -51,8 +51,8 @@ class CipherLink extends ApolloLink {
   /**
    *
    * @param {Operation} operation
-   * @param {NextLink} forward
-   * @return {*}
+   * @param {NextLink | undefined} forward
+   * @returns {Observable<FetchResult> | null}
    */
   request ( operation, forward ) {
 

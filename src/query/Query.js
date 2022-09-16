@@ -95,8 +95,8 @@ export default class Query {
   /**
    * Creates a new Request for the given parameters
    *
-   * @param {object} variables
-   * @return {Operation}
+   * @param {{}} variables
+   * @returns {{variables: (Object|null), query: null}}
    */
   createQuery ( { variables = null } ) {
     this.$__variables = this.compiledVariables( variables );

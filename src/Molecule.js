@@ -418,7 +418,7 @@ export default class Molecule {
       }
       this.remainderWallet.balance = this.remainderWallet.tokenUnits.length;
 
-      // Override first atom'a token units to replenish values
+      // Override first atom's token units to replenish values
       this.sourceWallet.tokenUnits = units;
       this.sourceWallet.balance = this.sourceWallet.tokenUnits.length;
     }
@@ -601,11 +601,11 @@ export default class Molecule {
     return this;
   }
 
-
   /**
    *
-   * @param amount
-   * @param tradingPairs
+   * @param {{}} recipients
+   * @param {Wallet|{}} signingWallet
+   * @returns {Molecule}
    */
   initWithdrawBuffer ( {
     recipients,
@@ -656,7 +656,7 @@ export default class Molecule {
         Atom.create.V( {
           token: this.sourceWallet.token,
           value: recipientAmount,
-          batchId: this.sourceWallet.batchId ? generateBatchId() : null,
+          batchId: this.sourceWallet.batchId ? generateBatchId( {} ) : null,
           metaType: 'walletBundle',
           metaId: recipientBundle,
           meta: {},

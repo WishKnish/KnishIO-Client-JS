@@ -458,7 +458,8 @@ export default class Test {
     // --- Check fused token units in the recipient wallet
     let fusedTokenUnits = walletRecipient.tokenUnits[ 0 ].getFusedTokenUnits();
     console.assert( fusedTokenUnits.length, this.fusedTokenUnitIds.length );
-    // Get token unit IDs from the fused meta data of the fused token unit
+
+    // Get token unit IDs from the fused metadata of the fused token unit
     let dbFusedTokenUnitIds = [];
     fusedTokenUnits.forEach( ( tokenUnit ) => {
       dbFusedTokenUnitIds.push( tokenUnit[ 0 ] );

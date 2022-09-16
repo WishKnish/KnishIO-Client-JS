@@ -140,7 +140,6 @@ export default class Atom {
       } );
     }
     return Atom.isotopeCallbacks;
-    ;
   }
 
   /**
@@ -244,7 +243,7 @@ export default class Atom {
 
         const value = molecularHashSchema.get( property );
 
-        // All nullable values does not hashing (only custom keys)
+        // All nullable values are not hashed (only custom keys)
         if ( value === null && ![ 'position', 'walletAddress' ].includes( property ) ) {
           continue;
         }

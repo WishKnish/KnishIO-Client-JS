@@ -57,8 +57,8 @@ class HttpLink extends RootHttpLink {
   /**
    *
    * @param {Operation} operation
-   * @param {NextLink} forward
-   * @return {*}
+   * @param {NextLink | undefined} forward
+   * @returns {Observable<FetchResult> | null}
    */
   request ( operation, forward ) {
     return forward( operation );

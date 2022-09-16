@@ -56,8 +56,8 @@ export default class Rule {
 
   /**
    *
-   * @param {Condition[]} comparison
-   * @param {Callback[]} callback
+   * @param {Condition[]} condition
+   * @param  {Callback[]} callback
    */
   constructor ( {
     condition = [],

@@ -581,7 +581,8 @@ export default class KnishIOClient {
    *
    * @param {string} token
    * @param {string|null} bundle
-   * @return {Promise<ResponseBalance>}
+   * @param {string} type
+   * @returns {Promise<*>}
    */
   async queryBalance ( {
     token,
@@ -602,12 +603,12 @@ export default class KnishIOClient {
     } );
   }
 
-
   /**
    *
-   * @param token
-   * @param amount
-   * @returns {Promise<void>}
+   * @param {string} token
+   * @param {number} amount
+   * @param {string} type
+   * @returns {Promise<{address}|{position}|*>}
    */
   async querySourceWallet ( {
     token,
@@ -1665,12 +1666,12 @@ export default class KnishIOClient {
 
   /**
    * Creates and executes a Molecule that moves tokens from one user to another
-   * @param bundleHash
-   * @param token
-   * @param amount
-   * @param units
-   * @param batchId
-   * @param sourceWallet
+   * @param {string} bundleHash
+   * @param {string} token
+   * @param {number|null} amount
+   * @param {[]} units
+   * @param {string|null} batchId
+   * @param {Wallet|null} sourceWallet
    * @returns {Promise<*>}
    */
   async transferToken ( {

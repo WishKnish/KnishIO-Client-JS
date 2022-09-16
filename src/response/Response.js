@@ -47,6 +47,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import InvalidResponseException from '../exception/InvalidResponseException';
 import UnauthenticatedException from '../exception/UnauthenticatedException';
+import Query from '../query/Query';
 import Dot from '../libraries/Dot';
 
 /**

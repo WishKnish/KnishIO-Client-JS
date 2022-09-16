@@ -172,7 +172,8 @@ export default class Wallet {
   }
 
   /**
-   * @return string|null
+   *
+   * @returns {*[]}
    */
   getTokenUnitsData () {
     const result = [];
