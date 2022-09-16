@@ -70,8 +70,8 @@ export default class Test {
    * Run all
    */
   static async run ( uris ) {
-    for ( let i in uris ) {
-      let test = new Test( uris[ i ] );
+    for ( let uriIndex in uris ) {
+      let test = new Test( uris[ uriIndex ] );
       await test.testAll();
     }
   }

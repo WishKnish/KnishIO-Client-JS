@@ -160,8 +160,8 @@ export default class KnishIOClient {
       this.setCellSlug( cellSlug );
     }
 
-    for ( let i in this.$__uris ) {
-      let url = this.$__uris [ i ];
+    for ( let uriKey in this.$__uris ) {
+      let url = this.$__uris [ uriKey ];
       this.$__authTokenObjects[ url ] = null;
     }
 
