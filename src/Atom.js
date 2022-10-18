@@ -233,11 +233,13 @@ export default class Atom {
       atomList = Atom.sortAtoms( atoms );
 
     // Hashing each atom in the molecule to produce a molecular hash
+    let hashingValues = [];
     for ( const atom of atomList ) {
 
       const molecularHashSchema = Atom.molecularHashSchema( atom );
 
-      molecularSponge.update( String( numberOfAtoms ) );
+      hashingValues.push( String( numberOfAtoms ) );
+      // molecularSponge.update( String( numberOfAtoms ) );
 
       for ( const property of molecularHashSchema.keys() ) {
 
@@ -257,16 +259,24 @@ export default class Atom {
         if ( property === 'meta' ) {
           for ( const meta of value ) {
             if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
-              molecularSponge.update( String( meta.key ) );
-              molecularSponge.update( String( meta.value ) );
+              hashingValues.push( String( meta.key ) );
+              hashingValues.push( String( meta.value ) );
+              // molecularSponge.update( String( meta.key ) );
+              // molecularSponge.update( String( meta.value ) );
             }
           }
           continue;
         }
 
         // Some other property that we haven't anticipated
-        molecularSponge.update( value === null ? '' : String( value ) );
+        // molecularSponge.update( value === null ? '' : String( value ) );
+        hashingValues.push( value === null ? '' : String( value ) );
       }
+    }
+    console.error( hashingValues );
+
+    for ( const hashingValue of hashingValues ) {
+      molecularSponge.update( hashingValue );
     }
 
     // Return the hash in the requested format

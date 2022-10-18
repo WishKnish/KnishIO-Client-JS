@@ -52,7 +52,7 @@ import {
   chunkSubstr,
   hexToBase64
 } from './libraries/strings';
-import CheckMolecule from './libraries/check';
+import CheckMolecule from './libraries/CheckMolecule';
 import {
   generateBatchId,
   generateBundleHash
