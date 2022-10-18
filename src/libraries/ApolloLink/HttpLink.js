@@ -45,9 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import {
-  HttpLink as RootHttpLink
-} from '@apollo/client/core';
+import { HttpLink as RootHttpLink } from '@apollo/client/core';
 
 
 class HttpLink extends RootHttpLink {
@@ -59,8 +57,8 @@ class HttpLink extends RootHttpLink {
   /**
    *
    * @param {Operation} operation
-   * @param {NextLink} forward
-   * @return {*}
+   * @param {NextLink | undefined} forward
+   * @returns {Observable<FetchResult> | null}
    */
   request ( operation, forward ) {
     return forward( operation );

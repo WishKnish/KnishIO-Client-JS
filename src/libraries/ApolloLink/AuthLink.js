@@ -45,9 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import {
-  ApolloLink
-} from '@apollo/client/core';
+import { ApolloLink } from '@apollo/client/core';
 
 
 class AuthLink extends ApolloLink {
@@ -76,8 +74,8 @@ class AuthLink extends ApolloLink {
   /**
    *
    * @param {Operation} operation
-   * @param {NextLink} forward
-   * @return {*}
+   * @param {NextLink | undefined} forward
+   * @returns {Observable<FetchResult> | null}
    */
   request ( operation, forward ) {
 

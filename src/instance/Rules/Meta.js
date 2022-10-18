@@ -49,16 +49,16 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 export default class Meta {
 
   constructor ( {} ) {
-    const args = arguments[0];
+    const args = arguments[ 0 ];
 
     for ( const key in args ) {
-      this[ `__${key}` ] = args[ key ];
+      this[ `__${ key }` ] = args[ key ];
     }
   }
 
   /**
    *
-   * @return {{}}
+   * @returns {{}}
    */
   toJSON () {
     const object = {};

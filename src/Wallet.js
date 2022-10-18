@@ -52,13 +52,13 @@ import {
   isHex
 } from './libraries/strings';
 import {
-  generateEncPrivateKey,
-  generateEncPublicKey,
   decryptMessage,
   encryptMessage,
-  generateBundleHash,
-  generateWalletPosition,
   generateBatchId,
+  generateBundleHash,
+  generateEncPrivateKey,
+  generateEncPublicKey,
+  generateWalletPosition,
   hashShare
 } from './libraries/crypto';
 import BaseX from './libraries/BaseX';
@@ -97,6 +97,7 @@ export default class Wallet {
     this.privkey = null;
     this.pubkey = null;
     this.tokenUnits = [];
+    this.tradePairs = {};
 
     this.bundle = secret ? generateBundleHash( secret ) : null;
     this.batchId = batchId;
@@ -171,7 +172,8 @@ export default class Wallet {
   }
 
   /**
-   * @return string|null
+   *
+   * @returns {*[]}
    */
   getTokenUnitsData () {
     const result = [];
@@ -462,7 +464,7 @@ export default class Wallet {
 
       let workingFragment = keyFragments[ index ];
 
-      for ( let i = 1; i <= 16; i++ ) {
+      for ( let fragmentCount = 1; fragmentCount <= 16; fragmentCount++ ) {
 
         workingFragment = shake256.create( 512 ).update( workingFragment ).hex();
 

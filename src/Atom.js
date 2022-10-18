@@ -100,139 +100,52 @@ export default class Atom {
 
   }
 
+  /**
+   *
+   * @returns {{}}
+   */
   static get create () {
-    return {
-      C ( {
-        position = null,
-        walletAddress = null,
-        token = null,
-        value = null,
-        batchId = null,
-        metaType = null,
-        metaId = null,
-        meta = null,
-        otsFragment = null,
-        index = null
-      } ) {
-        arguments[ 0 ][ 'isotope' ] = 'C';
-
-        return new Atom( arguments[ 0 ] );
-      },
-      I ( {
-        position = null,
-        walletAddress = null,
-        token = null,
-        value = null,
-        batchId = null,
-        metaType = null,
-        metaId = null,
-        meta = null,
-        otsFragment = null,
-        index = null
-      } ) {
-        arguments[ 0 ][ 'isotope' ] = 'I';
-
-        return new Atom( arguments[ 0 ] );
-      },
-      M ( {
-        position = null,
-        walletAddress = null,
-        token = null,
-        value = null,
-        batchId = null,
-        metaType = null,
-        metaId = null,
-        meta = null,
-        otsFragment = null,
-        index = null
-      } ) {
-        arguments[ 0 ][ 'isotope' ] = 'M';
-
-        return new Atom( arguments[ 0 ] );
-      },
-      T ( {
-        position = null,
-        walletAddress = null,
-        token = null,
-        value = null,
-        batchId = null,
-        metaType = null,
-        metaId = null,
-        meta = null,
-        otsFragment = null,
-        index = null
-      } ) {
-        arguments[ 0 ][ 'isotope' ] = 'T';
-
-        return new Atom( arguments[ 0 ] );
-      },
-      U ( {
-        position = null,
-        walletAddress = null,
-        token = null,
-        value = null,
-        batchId = null,
-        metaType = null,
-        metaId = null,
-        meta = null,
-        otsFragment = null,
-        index = null
-      } ) {
-        arguments[ 0 ][ 'isotope' ] = 'U';
-
-        return new Atom( arguments[ 0 ] );
-      },
-      V ( {
-        position = null,
-        walletAddress = null,
-        token = null,
-        value = null,
-        batchId = null,
-        metaType = null,
-        metaId = null,
-        meta = null,
-        otsFragment = null,
-        index = null
-      } ) {
-        arguments[ 0 ][ 'isotope' ] = 'V';
-
-        return new Atom( arguments[ 0 ] );
-      },
-      F ( {
-        position = null,
-        walletAddress = null,
-        token = null,
-        value = null,
-        batchId = null,
-        metaType = null,
-        metaId = null,
-        meta = null,
-        otsFragment = null,
-        index = null
-      } ) {
-        arguments[ 0 ][ 'isotope' ] = 'F';
-
-        return new Atom( arguments[ 0 ] );
-      },
-      R ( {
-        position = null,
-        walletAddress = null,
-        token = null,
-        value = null,
-        batchId = null,
-        metaType = null,
-        metaId = null,
-        meta = null,
-        otsFragment = null,
-        index = null
-      } ) {
-        arguments[ 0 ][ 'isotope' ] = 'R';
-
-        return new Atom( arguments[ 0 ] );
-      }
-    };
+    if ( !Atom.isotopeCallbacks ) {
+      let isotopes = [
+        'C', 'I', 'M', 'T', 'U', 'V', 'F', 'R', 'B'
+      ];
+      Atom.isotopeCallbacks = {};
+      isotopes.forEach( ( isotope ) => {
+        Atom.isotopeCallbacks[ isotope ] = ( {
+          position = null,
+          walletAddress = null,
+          token = null,
+          value = null,
+          batchId = null,
+          metaType = null,
+          metaId = null,
+          meta = null,
+          otsFragment = null,
+          index = null
+        } ) => {
+          return new Atom( {
+            isotope,
+            position,
+            walletAddress,
+            token,
+            value,
+            batchId,
+            metaType,
+            metaId,
+            meta,
+            otsFragment,
+            index
+          } );
+        };
+      } );
+    }
+    return Atom.isotopeCallbacks;
   }
 
+  /**
+   *
+   * @returns {Map<string, null>}
+   */
   static get hashSchema () {
     return new Map( [
       [ 'position', null ],
@@ -330,7 +243,7 @@ export default class Atom {
 
         const value = molecularHashSchema.get( property );
 
-        // All nullable values does not hashing (only custom keys)
+        // All nullable values are not hashed (only custom keys)
         if ( value === null && ![ 'position', 'walletAddress' ].includes( property ) ) {
           continue;
         }

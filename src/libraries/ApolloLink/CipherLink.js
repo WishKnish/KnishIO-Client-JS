@@ -1,8 +1,8 @@
 import {
-  ApolloLink
+  ApolloLink,
+  gql
 } from '@apollo/client/core';
 import { print } from 'graphql';
-import { gql } from '@apollo/client/core';
 import {
   operationName,
   operationType
@@ -51,8 +51,8 @@ class CipherLink extends ApolloLink {
   /**
    *
    * @param {Operation} operation
-   * @param {NextLink} forward
-   * @return {*}
+   * @param {NextLink | undefined} forward
+   * @returns {Observable<FetchResult> | null}
    */
   request ( operation, forward ) {
 

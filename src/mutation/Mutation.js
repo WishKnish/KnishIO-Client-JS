@@ -62,18 +62,13 @@ export default class Mutation extends Query {
   /**
    * Creates a new Request for the given parameters
    *
-   * @param {object} variables
-   * @param {array|object|null} fields
-   * @return {Operation}
+   * @param {{}} variables
+   * @returns {{variables: (Object|null), query: null}}
    */
   createQuery ( { variables = null } ) {
-
     const request = super.createQuery( { variables } );
-
     request.mutation = request.query;
-
     delete request.query;
-
     return request;
   }
 

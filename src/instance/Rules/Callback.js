@@ -68,7 +68,7 @@ export default class Callback {
    */
   constructor ( {
     action,
-    metaType= null,
+    metaType = null,
     metaId = null,
     meta = null,
     address = null,

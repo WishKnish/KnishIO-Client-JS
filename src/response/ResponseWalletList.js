@@ -111,11 +111,18 @@ export default class ResponseWalletList extends Response {
       wallet.tokenFungibility = data.token.fungibility;
     }
 
-    if ( data.tokenUnits && data.tokenUnits.length ) {
+    if ( data.tokenUnits.length ) {
       for ( let tokenUnitData of data.tokenUnits ) {
         wallet.tokenUnits.push( TokenUnit.createFromGraphQL( tokenUnitData ) );
       }
     }
+
+    if ( data.tradePairs.length ) {
+      for ( let tradePair of data.tradePairs ) {
+        wallet.tradePairs[ tradePair[ 'tokenSlug' ] ] = tradePair[ 'amount' ];
+      }
+    }
+
     wallet.molecules = data.molecules;
     wallet.balance = Number( data.amount );
     wallet.pubkey = data.pubkey;
