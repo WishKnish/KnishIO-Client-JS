@@ -2,7 +2,7 @@ import AtomIndexException from './../exception/AtomIndexException';
 import AtomsMissingException from './../exception/AtomsMissingException';
 import MolecularHashMismatchException from './../exception/MolecularHashMismatchException';
 import MolecularHashMissingException from './../exception/MolecularHashMissingException';
-import KnishIOInvalidPolicyException from './../exception/KnishIOInvalidPolicyException';
+import PolicyInvalidException from './../exception/PolicyInvalidException';
 import SignatureMalformedException from './../exception/SignatureMalformedException';
 import SignatureMismatchException from './../exception/SignatureMismatchException';
 import TransferBalanceException from './../exception/TransferBalanceException';
@@ -160,13 +160,13 @@ export default class CheckMolecule {
             if ( !policyArray.includes( policyName ) ) {
 
               if ( !Object.keys( metas ).includes( policyName ) ) {
-                throw new KnishIOInvalidPolicyException( `${ policyName } is missing from the meta.` );
+                throw new PolicyInvalidException( `${ policyName } is missing from the meta.` );
               }
 
               for ( const value of policyValue ) {
 
                 if ( !Wallet.isBundleHash( value ) && ![ 'all', 'self' ].includes( value ) ) {
-                  throw new KnishIOInvalidPolicyException( `${ value } does not correspond to the format of the policy.` );
+                  throw new PolicyInvalidException( `${ value } does not correspond to the format of the policy.` );
                 }
               }
             }
