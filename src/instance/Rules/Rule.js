@@ -120,6 +120,7 @@ export default class Rule {
     }
 
     for ( const callback of object.callback ) {
+      console.log(callback);
       rule.callback = callback;
     }
 
