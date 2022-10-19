@@ -48,6 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import { shake256 } from 'js-sha3';
 import { charsetBaseConvert } from './libraries/strings';
 import Meta from './Meta';
+import AtomMeta from './AtomMeta';
 
 /**
  * Atom class used to form microtransactions within a Molecule
@@ -117,6 +118,46 @@ export default class Atom {
     this.otsFragment = otsFragment;
     this.createdAt = String( +new Date );
 
+  }
+
+
+  /**
+   *
+   * @param {Wallet} wallet
+   * @param isotope
+   * @param value
+   * @param metaType
+   * @param metaId
+   * @param {AtomMeta} meta
+   * @param batchId
+   * @returns {Atom}
+   */
+  static create(
+    wallet,
+    isotope,
+    value = null,
+    metaType = null,
+    metaId = null,
+    meta = null,
+    batchId = null,
+  ) {
+    // If meta object is not passed - create it
+    if ( !meta ) {
+      meta = new AtomMeta;
+    }
+
+    // Create the final atom's object
+    return new Atom( {
+      position: wallet.position,
+      walletAddress: wallet.address,
+      isotope,
+      token: wallet.token,
+      value,
+      batchId,
+      metaType,
+      metaId,
+      meta: meta.addWallet( wallet ).get()
+    } );
   }
 
   /**

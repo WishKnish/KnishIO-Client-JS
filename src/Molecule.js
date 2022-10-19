@@ -205,30 +205,41 @@ export default class Molecule {
 
 
   /**
+   *
+   * @param {Atom} atom
+   * @returns {Molecule}
+   */
+  addAtom ( atom ): Molecule {
+
+    this.molecularHash = null;
+
+    // Set atom's index
+    atom.index = this.generateIndex();
+
+    // Add atom
+    this.atoms.push( atom );
+
+    // Sort atoms
+    this.atoms = Atom.sortAtoms( this.atoms );
+
+    return this;
+  }
+
+
+  /**
    * Add user remainder atom for ContinuID
    *
    * @param {Wallet} userRemainderWallet
    * @return {Molecule}
    */
-  addUserRemainderAtom ( userRemainderWallet ) {
-
-    this.molecularHash = null;
-
-    // Remainder atom
-    this.atoms.push(
-      Atom.create.I( {
-        position: userRemainderWallet.position,
-        walletAddress: userRemainderWallet.address,
-        token: userRemainderWallet.token,
-        metaType: 'walletBundle',
-        metaId: userRemainderWallet.bundle,
-        meta: this.finalMetas( {}, userRemainderWallet ),
-        index: this.generateIndex()
-      } )
-    );
-
-    this.atoms = Atom.sortAtoms( this.atoms );
-
+  addContinuIdAtom () {
+    this.addAtom( Atom.create(
+      this.remainderWallet,
+      'I',
+      null,
+      'walletBundle',
+      this.remainderWallet.bundle,
+    ) );
     return this;
   }
 
@@ -718,7 +729,7 @@ export default class Molecule {
       } )
     );
 
-    this.addUserRemainderAtom( this.remainderWallet );
+    this.addContinuIdAtom();
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -763,7 +774,7 @@ export default class Molecule {
     );
 
     // User remainder atom
-    this.addUserRemainderAtom( this.remainderWallet );
+    this.addContinuIdAtom();
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -808,7 +819,7 @@ export default class Molecule {
     );
 
     // User remainder atom
-    this.addUserRemainderAtom( this.remainderWallet );
+    this.addContinuIdAtom();
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -850,7 +861,7 @@ export default class Molecule {
     );
 
     // User remainder atom
-    this.addUserRemainderAtom( this.remainderWallet );
+    this.addContinuIdAtom();
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -890,7 +901,7 @@ export default class Molecule {
       } )
     );
 
-    this.addUserRemainderAtom( this.remainderWallet );
+    this.addContinuIdAtom();
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -937,7 +948,7 @@ export default class Molecule {
     } );
 
     // User remainder atom
-    this.addUserRemainderAtom( this.remainderWallet );
+    this.addContinuIdAtom();
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -983,7 +994,7 @@ export default class Molecule {
     );
 
     // User remainder atom
-    this.addUserRemainderAtom( this.remainderWallet );
+    this.addContinuIdAtom();
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
@@ -1012,7 +1023,7 @@ export default class Molecule {
     );
 
     // User remainder atom
-    this.addUserRemainderAtom( this.remainderWallet );
+    this.addContinuIdAtom();
     this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;

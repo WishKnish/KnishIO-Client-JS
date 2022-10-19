@@ -45,36 +45,89 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule';
-import ResponseCreatePolicy from '../response/ResponseCreatePolicy';
 
-export default class MutationCreatePolicy extends MutationProposeMolecule {
-  fillMolecule ( {
-    metaType,
-    metaId,
-    policy = {}
-  } ) {
-    this.$__molecule.addPolicyAtom( {
-      metaType,
-      metaId,
-      meta: {},
-      policy
-    } );
-    this.$__molecule.addContinuIdAtom();
-    this.$__molecule.sign( {} );
-    this.$__molecule.check();
+/**
+ * Atom class used to form microtransactions within a Molecule
+ */
+export default class AtomMeta {
+
+  /**
+   *
+   * @param meta
+   */
+  constructor( meta = {} ) {
+    this.meta = meta;
   }
 
   /**
-   * Builds a new Response object from a JSON string
    *
-   * @param {object} json
-   * @return {ResponseCreatePolicy}
+   * @param meta
+   * @returns {AtomMeta}
    */
-  createResponse ( json ) {
-    return new ResponseCreatePolicy( {
-      query: this,
-      json
-    } );
+  merge( meta ) {
+    this.meta = Object.assign( this.meta, meta );
+    return this;
   }
+
+  /**
+   *
+   * @param context
+   * @returns {AtomMeta}
+   */
+  addContext( context ) {
+    this.merge( { context: context } );
+    return this;
+  }
+
+  /**
+   *
+   * @param wallet
+   * @returns {AtomMeta}
+   */
+  addWallet( wallet ) {
+    let walletMeta = {
+      pubkey: wallet.pubkey,
+      characters: wallet.characters
+    };
+
+    // Add token units meta key
+    if ( wallet.tokenUnits && wallet.tokenUnits.length ) {
+      walletMeta.tokenUnits = JSON.stringify( wallet.getTokenUnitsData() );
+    }
+    // Add trade rates meta key
+    if ( wallet.tradeRates && wallet.tradeRates.length ) {
+      walletMeta.tradeRates = JSON.stringify( wallet.tradeRates );
+    }
+
+    // Merge all wallet's metas
+    this.merge( walletMeta );
+    return this;
+  }
+
+  /**
+   *
+   * @param wallet
+   * @returns {AtomMeta}
+   */
+  addSigningWallet( wallet ) {
+    this.merge( {
+      signingWallet: JSON.stringify( {
+        address: wallet.address,
+        position: wallet.position,
+        pubkey: wallet.pubkey,
+        characters: wallet.characters,
+      } )
+    } );
+    return this;
+  }
+
+
+  /**
+   *
+   * @returns {*}
+   */
+  get() {
+    return this.meta;
+  }
+
 }
