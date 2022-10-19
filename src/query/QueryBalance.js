@@ -78,7 +78,7 @@ export default class QueryBalance extends Query {
           name,
           metas
         },
-        tradePairs {
+        tradeRates {
           tokenSlug,
           amount
         }

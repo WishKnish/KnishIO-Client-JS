@@ -507,13 +507,13 @@ export default class Test {
     let client = await this.client( this.secrets[ 0 ] );
 
     // Deposit buffer
-    let tradingPairs = {};
-    tradingPairs[ this.tokenSlugs[ 1 ] ] = 100;
-    tradingPairs[ this.tokenSlugs[ 3 ] ] = 200;
+    let tradeRates = {};
+    tradeRates[ this.tokenSlugs[ 1 ] ] = 200 / 100;
+    tradeRates[ this.tokenSlugs[ 3 ] ] = 200 / 200;
     let response = await client.depositBufferToken( {
       tokenSlug: this.tokenSlugs[ 5 ],
       amount: 200,
-      tradingPairs
+      tradeRates
     } );
     this.checkResponse( response, 'testWalletBufferTransactions: depositBufferToken' );
 

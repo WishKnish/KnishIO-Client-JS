@@ -1767,14 +1767,14 @@ export default class KnishIOClient {
    *
    * @param tokenSlug
    * @param amount
-   * @param tradingPairs
+   * @param tradeRates
    * @param sourceWallet
    * @returns {Promise<function(*): *>}
    */
   async depositBufferToken ( {
     tokenSlug,
     amount,
-    tradingPairs,
+    tradeRates,
     sourceWallet = null
   } ) {
 
@@ -1812,7 +1812,7 @@ export default class KnishIOClient {
       } );
     query.fillMolecule( {
       amount,
-      tradingPairs
+      tradeRates
     } );
     return await this.executeQuery( query );
   }

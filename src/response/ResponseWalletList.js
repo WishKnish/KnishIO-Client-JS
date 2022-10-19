@@ -117,9 +117,9 @@ export default class ResponseWalletList extends Response {
       }
     }
 
-    if ( data.tradePairs.length ) {
-      for ( let tradePair of data.tradePairs ) {
-        wallet.tradePairs[ tradePair[ 'tokenSlug' ] ] = tradePair[ 'amount' ];
+    if ( data.tradeRates.length ) {
+      for ( let tradeRate of data.tradeRates ) {
+        wallet.tradeRates[ tradeRate[ 'tokenSlug' ] ] = tradeRate[ 'amount' ];
       }
     }
 

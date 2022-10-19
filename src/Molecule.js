@@ -534,11 +534,11 @@ export default class Molecule {
   /**
    *
    * @param amount
-   * @param tradingPairs
+   * @param tradeRates
    */
   initDepositBuffer ( {
     amount,
-    tradingPairs
+    tradeRates
   } ) {
     if ( this.sourceWallet.balance - amount < 0 ) {
       throw new BalanceInsufficientException();
@@ -550,7 +550,7 @@ export default class Molecule {
       token: this.sourceWallet.token,
       batchId: this.sourceWallet.batchId
     } );
-    bufferWallet.tradePairs = tradingPairs;
+    bufferWallet.tradeRates = tradeRates;
 
     this.molecularHash = null;
 
@@ -577,7 +577,7 @@ export default class Molecule {
         batchId: bufferWallet.batchId,
         metaType: 'walletBundle',
         metaId: this.sourceWallet.bundle,
-        meta: this.finalMetas( { tradePairs: JSON.stringify( bufferWallet.tradePairs ) }, bufferWallet ),
+        meta: this.finalMetas( { tradeRates: JSON.stringify( bufferWallet.tradeRates ) }, bufferWallet ),
         index: this.generateIndex()
       } )
     );
@@ -623,7 +623,7 @@ export default class Molecule {
 
     // First atom metas
     let firstAtomMetas = this.finalMetas( this.tokenUnitMetas( this.sourceWallet ) );
-    firstAtomMetas.tradePairs = JSON.stringify( this.sourceWallet.tradePairs );
+    firstAtomMetas.tradeRates = JSON.stringify( this.sourceWallet.tradeRates );
 
     // Custom signing wallet logic
     if ( signingWallet ) {
@@ -666,7 +666,7 @@ export default class Molecule {
     }
 
     let lastAtomMetas = this.finalMetas( this.tokenUnitMetas( this.remainderWallet ), this.remainderWallet );
-    lastAtomMetas.tradePairs = JSON.stringify( this.sourceWallet.tradePairs );
+    lastAtomMetas.tradeRates = JSON.stringify( this.sourceWallet.tradeRates );
     this.atoms.push(
       Atom.create.B( {
         position: this.remainderWallet.position,
