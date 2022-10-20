@@ -46,6 +46,12 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
+import {
+  deepCloning,
+  diff
+} from "../../../../../knishio-client-js/src/libraries/array";
+import Meta from './Meta';
+
 /**
  * Atom class used to form microtransactions within a Molecule
  */
@@ -101,6 +107,33 @@ export default class AtomMeta {
 
     // Merge all wallet's metas
     this.merge( walletMeta );
+    return this;
+  }
+
+
+  /**
+   *
+   * @param policy
+   * @returns {AtomMeta}
+   */
+  addPolicy( policy ) {
+    let policyMeta = {};
+    if ( policy ) {
+      for ( const [ policyKey, value ] of Object.entries( policy || {} ) ) {
+
+        if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
+          policyMeta[ policyKey ] = {};
+
+          for ( const [ key, content ] of Object.entries( value ) ) {
+            policyMeta[ policyKey ][ key ] = content;
+          }
+        }
+      }
+    }
+
+    this.merge( {
+      policy: JSON.stringify( Meta.__defaultPolicy( policyMeta, this.meta ) );
+    } );
     return this;
   }
 

@@ -122,41 +122,46 @@ export default class Atom {
 
 
   /**
-   *
-   * @param {Wallet} wallet
+   * 
    * @param isotope
+   * @param wallet
    * @param value
    * @param metaType
    * @param metaId
-   * @param {AtomMeta} meta
+   * @param meta
    * @param batchId
    * @returns {Atom}
    */
-  static create(
-    wallet,
+  static create( {
     isotope,
+    wallet = null,
     value = null,
     metaType = null,
     metaId = null,
     meta = null,
     batchId = null,
-  ) {
+  } ) {
     // If meta object is not passed - create it
     if ( !meta ) {
       meta = new AtomMeta;
     }
 
+    // If wallet has been passed => add related metas
+    if ( wallet ) {
+      meta.addWallet( wallet );
+    }
+
     // Create the final atom's object
     return new Atom( {
-      position: wallet.position,
-      walletAddress: wallet.address,
+      position: wallet ? wallet.position : null,
+      walletAddress: wallet ? wallet.address : null,
       isotope,
-      token: wallet.token,
+      token: wallet ? wallet.token : null,
       value,
       batchId,
       metaType,
       metaId,
-      meta: meta.addWallet( wallet ).get()
+      meta: meta.get()
     } );
   }
 
