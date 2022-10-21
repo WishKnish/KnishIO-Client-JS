@@ -49,122 +49,84 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import {
   diff
 } from "../../../../../knishio-client-js/src/libraries/array";
-import PolicyMeta from './PolicyMeta';
 
-const USE_META_CONTEXT = false;
-const DEFAULT_META_CONTEXT = 'https://www.schema.org';
 
 /**
  *
  */
-export default class AtomMeta {
-
-  /**
-   *
-   * @param meta
-   */
-  constructor( meta = {} ) {
-    this.meta = meta;
-  }
-
-  /**
-   *
-   * @param meta
-   * @returns {AtomMeta}
-   */
-  merge( meta ) {
-    this.meta = Object.assign( this.meta, meta );
-    return this;
-  }
-
-  /**
-   *
-   * @param context
-   * @returns {AtomMeta}
-   */
-  addContext( context = null ) {
-
-    // Add context key if it is enabled
-    if ( USE_META_CONTEXT ) {
-      this.merge( { context: context || DEFAULT_META_CONTEXT } );
-    }
-
-    return this;
-  }
-
-  /**
-   *
-   * @param wallet
-   * @returns {AtomMeta}
-   */
-  addWallet( wallet ) {
-    let walletMeta = {
-      pubkey: wallet.pubkey,
-      characters: wallet.characters
-    };
-
-    // Add token units meta key
-    if ( wallet.tokenUnits && wallet.tokenUnits.length ) {
-      walletMeta.tokenUnits = JSON.stringify( wallet.getTokenUnitsData() );
-    }
-    // Add trade rates meta key
-    if ( wallet.tradeRates && wallet.tradeRates.length ) {
-      walletMeta.tradeRates = JSON.stringify( wallet.tradeRates );
-    }
-
-    // Merge all wallet's metas
-    this.merge( walletMeta );
-    return this;
-  }
-
+export default class PolicyMeta {
 
   /**
    *
    * @param policy
-   * @todo move logic to the separated class
-   * @returns {AtomMeta}
+   * @returns {{}}
    */
-  addPolicy( policy ) {
+  static normalizePolicy( policy = {} ) {
+    let policyMeta = {};
+    for ( const [ policyKey, value ] of Object.entries( policy || {} ) ) {
+      if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
 
-    // Policy does not passed: do nothing
-    if ( !policy ) {
-      return this;
+        policyMeta[ policyKey ] = {};
+        for ( const [ key, content ] of Object.entries( value ) ) {
+          policyMeta[ policyKey ][ key ] = content;
+        }
+      }
     }
-
-    // Policy meta intialization
-    let policyMeta = new PolicyMeta( policy, Object.keys( this.meta ) );
-
-    this.merge( {
-      policy: policyMeta.toJson(),
-    } );
-
-    return this;
+    return policyMeta;
   }
 
   /**
    *
-   * @param wallet
-   * @returns {AtomMeta}
+   * @param policy
+   * @param metaKeys
    */
-  addSigningWallet( wallet ) {
-    this.merge( {
-      signingWallet: JSON.stringify( {
-        address: wallet.address,
-        position: wallet.position,
-        pubkey: wallet.pubkey,
-        characters: wallet.characters,
-      } )
-    } );
-    return this;
+  constructor( policy = {}, metaKeys = {} ) {
+    this.policy = PolicyMeta.normalizePolicy( policy );
+    this.fillDefault( metaKeys );
+  }
+
+  /**
+   *
+   */
+  fillDefault( metaKeys = {} ) {
+    const readPolicy = Array.from( this.policy ).filter( item => item.action === 'read' );
+    const writePolicy = Array.from( this.policy ).filter( item => item.action === 'write' );
+
+    for ( const [ type, value ] of Object.entries( {
+      read: readPolicy,
+      write: writePolicy
+    } ) ) {
+
+      const policyKey = value.map( item => item.key );
+
+      if ( !this.policy[ type ] ) {
+        this.policy[ type ] = {};
+      }
+
+      for ( const key of diff( metaKeys, policyKey ) ) {
+        if ( !this.policy[ type ][ key ] ) {
+          this.policy[ type ][ key ] = ( type === 'write' && ![ 'characters', 'pubkey' ].includes( key ) ) ? [ 'self' ] : [ 'all' ];
+        }
+      }
+    }
   }
 
 
   /**
    *
-   * @returns {*}
+   * @returns {{}|*}
    */
   get() {
-    return this.meta;
+    return this.policy;
+  }
+
+
+  /**
+   *
+   * @returns {string}
+   */
+  toJson() {
+    return JSON.stringify( this.get() );
   }
 
 }

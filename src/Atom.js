@@ -122,7 +122,7 @@ export default class Atom {
 
 
   /**
-   * 
+   *
    * @param isotope
    * @param wallet
    * @param value
@@ -148,7 +148,14 @@ export default class Atom {
 
     // If wallet has been passed => add related metas
     if ( wallet ) {
+
+      // Add wallet's meta
       meta.addWallet( wallet );
+
+      // If batch ID does not passed: set it from the wallet
+      if ( !batchId ) {
+        batchId = wallet.batchId;
+      }
     }
 
     // Create the final atom's object

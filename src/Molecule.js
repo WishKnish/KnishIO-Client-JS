@@ -66,8 +66,6 @@ import Dot from './libraries/Dot';
 import Meta from './Meta';
 import Rule from './instance/Rules/Rule';
 
-const USE_META_CONTEXT = false;
-const DEFAULT_META_CONTEXT = 'https://www.schema.org';
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -114,19 +112,16 @@ export default class Molecule {
    * @return {number}
    */
   static generateNextAtomIndex ( atoms ) {
-
-    const length = atoms.length - 1;
-
-    return ( length > -1 ) ? atoms[ length ].index + 1 : 0;
+    return atoms.length;
   }
 
   /**
-   * Returns the Meta Type for ContinuID
+   * Generates the next atomic index
    *
-   * @return {string}
+   * @return {number}
    */
-  continuIdMetaType () {
-    return 'walletBundle';
+  generateIndex () {
+    return Molecule.generateNextAtomIndex( this.atoms );
   }
 
   /**
@@ -141,77 +136,13 @@ export default class Molecule {
   }
 
   /**
-   * Adds an atom to an existing Molecule
-   *
-   * @param {Atom} atom
-   * @return {Molecule}
-   */
-  addAtom ( atom ) {
-    this.molecularHash = null;
-    this.atoms.push( atom );
-    this.atoms = Atom.sortAtoms( this.atoms );
-    return this;
-  }
-
-  /**
-   * Final meta array
-   * @param meta
-   * @param wallet
-   * @return {{}}
-   */
-  finalMetas ( meta = null, wallet = null ) {
-    meta = meta || {};
-    wallet = wallet || this.sourceWallet;
-
-    meta[ 'pubkey' ] = wallet.pubkey;
-    meta[ 'characters' ] = wallet.characters;
-
-    return meta;
-  }
-
-
-  /**
-   *
-   * @param wallet
-   * @param meta
-   * @returns {*[]}
-   */
-  tokenUnitMetas ( wallet, meta = [] ) {
-
-    // Add token units meta key
-    if ( wallet.tokenUnits && wallet.tokenUnits.length ) {
-      meta[ 'tokenUnits' ] = JSON.stringify( wallet.getTokenUnitsData() );
-    }
-
-    return meta;
-  }
-
-
-  /**
-   * @param {object|array|null} metas
-   * @param {string|null} context
-   *
-   * @return array
-   */
-  contextMetas ( metas = null, context = null ) {
-    metas = metas || {};
-
-    // Add context key if it is enabled
-    if ( USE_META_CONTEXT ) {
-      metas[ 'context' ] = context || DEFAULT_META_CONTEXT;
-    }
-
-    return metas;
-  }
-
-
-  /**
    *
    * @param {Atom} atom
    * @returns {Molecule}
    */
-  addAtom ( atom ): Molecule {
+  addAtom ( atom ) {
 
+    // Reset the molecular hash
     this.molecularHash = null;
 
     // Set atom's index
@@ -260,14 +191,14 @@ export default class Molecule {
   } ) {
 
     // AtomMeta object initialization
-    let meta = new AtomMeta( meta );
-    meta.addPolicy( policy )
+    let atomMeta = new AtomMeta( meta );
+    atomMeta.addPolicy( policy )
 
     this.addAtom( Atom.create( {
       isotope: 'R',
       metaType,
       metaId,
-      meta,
+      meta: atomMeta,
     } ) );
     return this;
   }
@@ -347,7 +278,7 @@ export default class Molecule {
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - amount,,
+      value: this.sourceWallet.balance - amount,
       metaType: walletBundle ? 'walletBundle' : null,
       metaId: walletBundle,
     } ) );
@@ -663,27 +594,24 @@ export default class Molecule {
       $rules.push( $rule instanceof Rule ? $rule : Rule.toObject( $rule ) );
     }
 
-    const rules = {
+    const meta = {
       rule: JSON.stringify( $rules )
     };
 
-    const policies = Meta.policy( rules, policy );
+    atomMeta.addPolicy( policy )
 
-    this.addAtom(
-      Atom.create.R( {
-        position: this.sourceWallet.position,
-        walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
-        metaType,
-        metaId,
-        meta: { ...rules, ...policies },
-        index: this.generateIndex()
-      } )
-    );
+    const policies = Meta.policy( meta, policy );
+
+    this.addAtom( Atom.create( {
+      isotope: 'R',
+      wallet: this.sourceWallet,
+      metaType,
+      metaId,
+      meta: new AtomMeta( { ...meta, ...policies } ),
+    } ) );
 
     // User remainder atom
     this.addContinuIdAtom();
-    this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
   }
@@ -700,8 +628,6 @@ export default class Molecule {
     wallet
   } ) {
 
-    this.molecularHash = null;
-
     // Generate a wallet metas
     let metas = {
       tokenSlug: token,
@@ -710,22 +636,16 @@ export default class Molecule {
       batchId: wallet.batchId
     };
 
-    // Create an 'C' atom
-    this.atoms.push(
-      Atom.create.C( {
-        position: this.sourceWallet.position,
-        walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
-        metaType: 'wallet',
-        metaId: wallet.address,
-        meta: this.finalMetas( this.contextMetas( metas ) ),
-        index: this.generateIndex()
-      } )
-    );
+    this.addAtom( Atom.create( {
+      isotope: 'C',
+      wallet: this.sourceWallet,
+      metaType: 'wallet',
+      metaId: wallet.address,
+      meta: new AtomMeta( { ...rules, ...policies } ),
+    } ) );
 
     // User remainder atom
     this.addContinuIdAtom();
-    this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
   }
@@ -745,27 +665,20 @@ export default class Molecule {
     code
   } ) {
 
-    this.molecularHash = null;
-
     const meta = {
       code: code,
       hash: generateBundleHash( contact.trim() )
     };
 
-    this.atoms.push(
-      Atom.create.C( {
-        position: this.sourceWallet.position,
-        walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
-        metaType: 'identifier',
-        metaId: type,
-        meta: this.finalMetas( meta, this.sourceWallet ),
-        index: this.generateIndex()
-      } )
-    );
+    this.addAtom( Atom.create( {
+      isotope: 'C',
+      wallet: this.sourceWallet,
+      metaType: 'identifier',
+      metaId: type,
+      meta: new AtomMeta( meta ),
+    } ) );
 
     this.addContinuIdAtom();
-    this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
   }
@@ -786,22 +699,14 @@ export default class Molecule {
     policy
   } ) {
 
-    this.molecularHash = null;
-
-
     // Initializing a new Atom to hold our metadata
-    this.atoms.push(
-      Atom.create.M( {
-        position: this.sourceWallet.position,
-        walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
-        batchId: this.sourceWallet.batchId,
-        metaType,
-        metaId,
-        meta: this.finalMetas( meta, this.sourceWallet ),
-        index: this.generateIndex()
-      } )
-    );
+    this.addAtom( Atom.create( {
+      isotope: 'M',
+      wallet: this.sourceWallet,
+      metaType,
+      metaId,
+      meta: new AtomMeta( meta ),
+    } ) );
 
     this.addPolicyAtom( {
       metaType,
@@ -812,7 +717,6 @@ export default class Molecule {
 
     // User remainder atom
     this.addContinuIdAtom();
-    this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
   }
@@ -838,27 +742,20 @@ export default class Molecule {
     batchId = null
   } ) {
 
-    this.molecularHash = null;
-
     meta.token = token;
 
-    this.atoms.push(
-      Atom.create.T( {
-        position: this.sourceWallet.position,
-        walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
-        value: amount,
-        batchId,
-        metaType,
-        metaId,
-        meta: this.finalMetas( meta ),
-        index: this.generateIndex()
-      } )
-    );
+    this.addAtom( Atom.create( {
+      isotope: 'T',
+      wallet: this.sourceWallet,
+      value: amount,
+      metaType,
+      metaId,
+      meta: new AtomMeta( meta ),
+      batchId,
+    } ) );
 
     // User remainder atom
     this.addContinuIdAtom();
-    this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
   }
@@ -871,23 +768,16 @@ export default class Molecule {
    * @return {Molecule}
    */
   initAuthorization ( { meta } ) {
-    this.molecularHash = null;
 
-    // Initializing a new Atom to hold our metadata
-    this.atoms.push(
-      Atom.create.U( {
-        position: this.sourceWallet.position,
-        walletAddress: this.sourceWallet.address,
-        token: this.sourceWallet.token,
-        batchId: this.sourceWallet.batchId,
-        meta: this.finalMetas( meta ),
-        index: this.generateIndex()
-      } )
-    );
+    this.addAtom( Atom.create( {
+      isotope: 'U',
+      wallet: this.sourceWallet,
+      meta: new AtomMeta( meta ),
+      batchId,
+    } ) );
 
     // User remainder atom
     this.addContinuIdAtom();
-    this.atoms = Atom.sortAtoms( this.atoms );
 
     return this;
   }
@@ -898,7 +788,6 @@ export default class Molecule {
    * @return {Molecule}
    */
   clear () {
-
     this.molecularHash = null;
     this.bundle = null;
     this.status = null;
@@ -1005,15 +894,6 @@ export default class Molecule {
   }
 
   /**
-   * Generates the next atomic index
-   *
-   * @return {number}
-   */
-  generateIndex () {
-    return Molecule.generateNextAtomIndex( this.atoms );
-  }
-
-  /**
    * Converts a JSON object into a Molecule Structure instance
    *
    * @param {string} json
@@ -1114,7 +994,6 @@ export default class Molecule {
     molecule,
     sourceWallet = null
   } ) {
-
     return CheckMolecule.molecularHash( molecule )
       && CheckMolecule.ots( molecule )
       && CheckMolecule.index( molecule )
