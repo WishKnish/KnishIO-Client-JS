@@ -48,7 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 
 import {
   diff
-} from 'libraries/array';
+} from './libraries/array';
 
 
 /**
