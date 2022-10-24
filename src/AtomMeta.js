@@ -48,7 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 
 import {
   diff
-} from "../../../../../knishio-client-js/src/libraries/array";
+} from 'libraries/array';
 import PolicyMeta from './PolicyMeta';
 
 const USE_META_CONTEXT = false;
@@ -135,7 +135,7 @@ export default class AtomMeta {
     let policyMeta = new PolicyMeta( policy, Object.keys( this.meta ) );
 
     this.merge( {
-      policy: policyMeta.toJson(),
+      policy: policyMeta.toJson()
     } );
 
     return this;
@@ -152,7 +152,7 @@ export default class AtomMeta {
         address: wallet.address,
         position: wallet.position,
         pubkey: wallet.pubkey,
-        characters: wallet.characters,
+        characters: wallet.characters
       } )
     } );
     return this;
