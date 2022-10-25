@@ -60,7 +60,7 @@ import Test from '@wishknish/knishio-client-js/src/test/Test';
 import { KNISHIO_SETTINGS, } from 'src/libraries/constants/knishio';
 
 // Run all test
-await Test.run( KNISHIO_SETTINGS.serverUri );
+await Test.run( KNISHIO_SETTINGS.serverUriConfig );
 
 */
 

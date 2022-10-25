@@ -173,48 +173,6 @@ export default class Atom {
   }
 
   /**
-   *
-   * @returns {{}}
-   */
-  static get create () {
-    if ( !Atom.isotopeCallbacks ) {
-      let isotopes = [
-        'C', 'I', 'M', 'T', 'U', 'V', 'F', 'R', 'B'
-      ];
-      Atom.isotopeCallbacks = {};
-      isotopes.forEach( ( isotope ) => {
-        Atom.isotopeCallbacks[ isotope ] = ( {
-          position = null,
-          walletAddress = null,
-          token = null,
-          value = null,
-          batchId = null,
-          metaType = null,
-          metaId = null,
-          meta = null,
-          otsFragment = null,
-          index = null
-        } ) => {
-          return new Atom( {
-            isotope,
-            position,
-            walletAddress,
-            token,
-            value,
-            batchId,
-            metaType,
-            metaId,
-            meta,
-            otsFragment,
-            index
-          } );
-        };
-      } );
-    }
-    return Atom.isotopeCallbacks;
-  }
-
-  /**
    * Get aggregated meta from stored normalized ones
    */
   aggregatedMeta () {

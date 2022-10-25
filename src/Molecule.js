@@ -228,7 +228,7 @@ export default class Molecule {
 
     // Add F isotope for fused tokens creation
     this.addAtom( Atom.create( {
-      isotope: 'V',
+      isotope: 'F',
       wallet: recipientWallet,
       value: 1,
       metaType: 'walletBundle',
@@ -284,7 +284,6 @@ export default class Molecule {
     } ) );
 
     return this;
-
   }
 
 
@@ -341,7 +340,7 @@ export default class Molecule {
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.remainderWallet,
-      value: this.sourceWallet.balance,
+      value: this.remainderWallet.balance,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle,
     } ) );
@@ -550,8 +549,8 @@ export default class Molecule {
 
     this.molecularHash = null;
 
+    // Importing wallet fields into meta object
     for ( const walletKey of [ 'walletAddress', 'walletPosition', 'walletPubkey', 'walletCharacters' ] ) {
-      // Importing wallet fields into meta object
       if ( !meta[ walletKey ] ) {
         meta[ walletKey ] = recipientWallet[ walletKey.toLowerCase().substring( 6 ) ];
       }
@@ -641,7 +640,7 @@ export default class Molecule {
       wallet: this.sourceWallet,
       metaType: 'wallet',
       metaId: wallet.address,
-      meta: new AtomMeta( { ...rules, ...policies } ),
+      meta: new AtomMeta( metas ),
     } ) );
 
     // User remainder atom
@@ -773,7 +772,6 @@ export default class Molecule {
       isotope: 'U',
       wallet: this.sourceWallet,
       meta: new AtomMeta( meta ),
-      batchId,
     } ) );
 
     // User remainder atom
