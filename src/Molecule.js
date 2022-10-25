@@ -106,6 +106,28 @@ export default class Molecule {
   }
 
   /**
+   *
+   * @param {string|array} isotope
+   * @param atoms
+   * @returns {*[]}
+   */
+  static isotopeFilter ( isotopes, atoms ) {
+    if ( !Array.isArray( isotopes ) ) {
+      isotopes = [ isotopes ];
+    }
+    return atoms.filter( atom => isotopes.includes( atom.isotope ) );
+  }
+
+  /**
+   *
+   * @param isotopes
+   * @returns {*[]}
+   */
+  getIsotopes( isotopes ) {
+    return Molecule.isotopeFilter( isotopes, this.atoms );
+  }
+
+  /**
    * Generates the next atomic index
    *
    * @param {array} atoms
@@ -858,7 +880,7 @@ export default class Molecule {
       // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
       keyChunks = chunkSubstr( key, 128 ),
       // Convert Hm to numeric notation, and then normalize
-      normalizedHash = CheckMolecule.normalizedHash( this.molecularHash );
+      normalizedHash = this.normalizedHash();
 
     // Building a one-time-signature
     let signatureFragments = '';
@@ -970,39 +992,106 @@ export default class Molecule {
   /**
    * Validates the current molecular structure
    *
-   * @param {Wallet|null} sourceWallet
-   * @return {boolean}
+   * @param senderWallet
    */
-  check ( sourceWallet = null ) {
-    return Molecule.verify( {
-      molecule: this,
-      sourceWallet
-    } );
+  check ( senderWallet = null ) {
+    ( new CheckMolecule( this ) ).verify( senderWallet );
   }
 
   /**
+   * Convert Hm to numeric notation via EnumerateMolecule(Hm)
    *
-   * Verifies a specified molecule
-   *
-   * @param {Molecule} molecule
-   * @param {Wallet|null} sourceWallet
-   * @return {boolean}
+   * @returns {Array}
    */
-  static verify ( {
-    molecule,
-    sourceWallet = null
-  } ) {
-    return CheckMolecule.molecularHash( molecule )
-      && CheckMolecule.ots( molecule )
-      && CheckMolecule.index( molecule )
-      && CheckMolecule.batchId( molecule )
-      && CheckMolecule.continuId( molecule )
-      && CheckMolecule.isotopeM( molecule )
-      && CheckMolecule.isotopeT( molecule )
-      && CheckMolecule.isotopeC( molecule )
-      && CheckMolecule.isotopeU( molecule )
-      && CheckMolecule.isotopeI( molecule )
-      && CheckMolecule.isotopeR( molecule )
-      && CheckMolecule.isotopeV( molecule, sourceWallet );
+  normalizedHash () {
+    return Molecule.normalize( Molecule.enumerate( this.molecularHash ) );
   }
+
+  /**
+   * Accept a string of letters and numbers, and outputs a collection of decimals representing each
+   * character according to a pre-defined dictionary. Input string would typically be 64-character
+   * hexadecimal string featuring numbers from 0 to 9 and characters from a to f - a total of 15
+   * unique symbols. To ensure that string has an even number of symbols, convert it to Base 17
+   * (adding G as a possible symbol). Map each symbol to integer values as follows:
+   *  0   1   2   3   4   5   6   7  8  9  a   b   c   d   e   f   g
+   * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
+   *
+   * @param {string} hash
+   * @return {array}
+   */
+  static enumerate ( hash ) {
+
+    const mapped = {
+        '0': -8,
+        '1': -7,
+        '2': -6,
+        '3': -5,
+        '4': -4,
+        '5': -3,
+        '6': -2,
+        '7': -1,
+        '8': 0,
+        '9': 1,
+        'a': 2,
+        'b': 3,
+        'c': 4,
+        'd': 5,
+        'e': 6,
+        'f': 7,
+        'g': 8
+      },
+      target = [],
+      hashList = hash.toLowerCase().split( '' );
+
+    for ( let index = 0, len = hashList.length; index < len; ++index ) {
+
+      const symbol = hashList[ index ];
+
+      if ( typeof mapped[ symbol ] !== 'undefined' ) {
+        target[ index ] = mapped[ symbol ];
+      }
+    }
+
+    return target;
+  }
+
+  /**
+   * Normalize enumerated string to ensure that the total sum of all symbols is exactly zero. This
+   * ensures that exactly 50% of the WOTS+ key is leaked with each usage, ensuring predictable key
+   * safety:
+   * The sum of each symbol within Hm shall be presented by m
+   *  While m0 iterate across that set’s integers as Im:
+   *    If m0 and Im>-8 , let Im=Im-1
+   *    If m<0 and Im<8 , let Im=Im+1
+   *    If m=0, stop the iteration
+   *
+   * @param {array} mappedHashArray
+   * @return {array}
+   */
+  static normalize ( mappedHashArray ) {
+
+    let total = mappedHashArray.reduce( ( total, num ) => total + num );
+
+    const total_condition = total < 0;
+
+    while ( total < 0 || total > 0 ) {
+
+      for ( const index of Object.keys( mappedHashArray ) ) {
+
+        const condition = total_condition ? mappedHashArray[ index ] < 8 : mappedHashArray[ index ] > -8;
+
+        if ( condition ) {
+
+          const process = total_condition ? [ ++mappedHashArray[ index ], ++total ] : [ --mappedHashArray[ index ], --total ];
+
+          if ( 0 === total ) {
+            break;
+          }
+        }
+      }
+    }
+
+    return mappedHashArray;
+  }
+
 }

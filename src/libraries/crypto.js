@@ -61,17 +61,12 @@ export function generateSecret ( seed = null, length = 2048 ) {
   console.info( `Crypto::generateSecret() - Computing new secret${ seed ? ' from existing seed' : '' }...` );
 
   if ( seed ) {
-
     const sponge = shake256.create( length * 2 );
-
     sponge.update( seed );
-
     return sponge.hex();
-
-  } else {
-
+  }
+  else {
     return randomString( length );
-
   }
 }
 
