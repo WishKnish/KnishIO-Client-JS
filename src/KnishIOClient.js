@@ -202,64 +202,17 @@ export default class KnishIOClient {
    * @return {boolean}
    */
   switchEncryption ( encrypt ) {
-    if ( this.hasEncryption() === encrypt ) {
+    if ( this.$__encrypt === encrypt ) {
       return false;
     }
-
     if ( this.$__logging ) {
-      console.warn( 'KnishIOClient::switchEncryption() - Node not respecting requested encryption policy!' );
+      console.info( `KnishIOClient::switchEncryption() - Forcing encryption ${ encrypt ? 'on' : 'off' } to match node...` );
     }
 
-    if ( encrypt ) {
-
-      if ( this.$__logging ) {
-        console.info( 'KnishIOClient::switchEncryption() - Forcing encryption on to match node...' );
-      }
-      this.enableEncryption();
-
-    } else {
-
-      if ( this.$__logging ) {
-        console.info( 'KnishIOClient::switchEncryption() - Forcing encryption off to match node...' );
-      }
-      this.disableEncryption();
-
-    }
+    // Set encryption
+    this.$__encrypt = encrypt;
+    this.$__client.setEncryption( encrypt );
     return true;
-  }
-
-
-  /**
-   *  Enables end-to-end encryption protocol.
-   *  Note: this will cause all active subscriptions to be unsubscribed.
-   */
-  enableEncryption () {
-    if ( this.$__logging ) {
-      console.info( 'KnishIOClient::enableEncryption() - Enabling end-to-end encryption mode...' );
-    }
-    this.$__encrypt = true;
-    this.$__client.enableEncryption();
-  }
-
-  /**
-   *  Disables end-to-end encryption protocol.
-   *  Note: this will cause all active subscriptions to be unsubscribed.
-   */
-  disableEncryption () {
-    if ( this.$__logging ) {
-      console.info( 'KnishIOClient::disableEncryption() - Disabling end-to-end encryption mode...' );
-    }
-    this.$__encrypt = false;
-    this.$__client.disableEncryption();
-  }
-
-  /**
-   * Returns whether the end-to-end encryption protocol is enabled
-   *
-   * @return {boolean}
-   */
-  hasEncryption () {
-    return this.$__encrypt;
   }
 
   /**
@@ -432,7 +385,7 @@ export default class KnishIOClient {
         secret: this.getSecret()
       } );
     } else {
-      sourceWallet.key = Wallet.generatePrivateKey( {
+      sourceWallet.key = Wallet.generateKey( {
         secret: this.getSecret(),
         token: sourceWallet.token,
         position: sourceWallet.position
@@ -1800,16 +1753,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-        sourceWallet,
-        remainderWallet: this.remainderWallet
-      } ),
-      /**
-       * @type {MutationDepositBufferToken}
-       */
-      query = await this.createMoleculeMutation( {
-        mutationClass: MutationDepositBufferToken,
-        molecule
-      } );
+      sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationDepositBufferToken}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationDepositBufferToken,
+      molecule
+    } );
     query.fillMolecule( {
       amount,
       tradeRates
@@ -1848,16 +1801,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-        sourceWallet,
-        remainderWallet: this.remainderWallet
-      } ),
-      /**
-       * @type {MutationWithdrawBufferToken}
-       */
-      query = await this.createMoleculeMutation( {
-        mutationClass: MutationWithdrawBufferToken,
-        molecule
-      } );
+      sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationWithdrawBufferToken}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationWithdrawBufferToken,
+      molecule
+    } );
     let recipients = {};
     recipients[ this.getBundle() ] = amount;
     query.fillMolecule( {

@@ -346,7 +346,7 @@ export default class CheckMolecule {
         }
 
         // Making sure we're in integer land
-        value = 1.0 * vAtom.value;
+        value = vAtom.value * 1;
 
         if ( Number.isNaN( value ) ) {
           throw new TypeError( 'Invalid isotope "V" values' );
@@ -391,7 +391,7 @@ export default class CheckMolecule {
         throw new TypeError( 'Invalid isotope "V" values' );
       }
 
-      const remainder = ( senderWallet.balance * 1.0 ) + ( value * 1.0 );
+      const remainder = ( senderWallet.balance * 1 ) + ( value * 1 );
 
       // Is there enough balance to send?
       if ( remainder < 0 ) {

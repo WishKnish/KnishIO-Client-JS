@@ -102,7 +102,6 @@ export default class Atom {
     otsFragment = null,
     index = null
   } ) {
-
     this.position = position;
     this.walletAddress = walletAddress;
     this.isotope = isotope;
@@ -117,7 +116,6 @@ export default class Atom {
     this.index = index;
     this.otsFragment = otsFragment;
     this.createdAt = String( +new Date );
-
   }
 
 
@@ -191,19 +189,18 @@ export default class Atom {
       properties = Object.keys( new Atom( {} ) );
 
     for ( const property in target ) {
-
       if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
-
         delete target[ property ];
-
       }
-
     }
 
     return target;
-
   }
 
+  /**
+   *
+   * @returns {*[]}
+   */
   getHashableValues() {
     const hashableValues = [];
     for ( let property of Atom.getHashableProps() ) {
@@ -285,14 +282,10 @@ export default class Atom {
    * @return {array}
    */
   static sortAtoms ( atoms ) {
-
     const atomList = [ ...atoms ];
 
     // Sort based on atomic index
     atomList.sort( ( first, second ) => {
-      if ( first.index === second.index ) {
-        return 0;
-      }
       return first.index < second.index ? -1 : 1;
     } );
 

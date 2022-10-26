@@ -872,7 +872,7 @@ export default class Molecule {
     }
 
     // Generate the private signing key for this molecule
-    const key = Wallet.generatePrivateKey( {
+    const key = Wallet.generateKey( {
         secret: this.secret,
         token: signingAtom.token,
         position: signingAtom.position

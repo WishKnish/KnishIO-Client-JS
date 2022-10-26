@@ -47,7 +47,6 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
 import { shake256 } from 'js-sha3';
 import { randomString } from './strings';
-import Soda from './../libraries/Soda';
 
 /**
  * Generates a secret based on an optional seed
@@ -104,71 +103,4 @@ export function generateBatchId ( {
   }
 
   return randomString( 64 );
-}
-
-
-/**
- * Generate wallet position
- *
- * @return {string}
- */
-export function generateWalletPosition ( saltLength = 64 ) {
-  return randomString( saltLength, 'abcdef0123456789' );
-}
-
-/**
- * Encrypts the given message or data with the recipient's public key
- *
- * @param message
- * @param {string} recipientPublicKey
- * @param {string|null} characters
- * @return {string}
- */
-export function encryptMessage ( message, recipientPublicKey, characters = null ) {
-  return ( new Soda( characters ) ).encrypt( message, recipientPublicKey );
-}
-
-/**
- * Uses the given private key to decrypt an encrypted message
- *
- * @param {string} message
- * @param {string} privateKey
- * @param {string} publicKey
- * @param {string|null} characters
- * @return {null|any}
- */
-export function decryptMessage ( message, privateKey, publicKey, characters = null ) {
-  return ( new Soda( characters ) ).decrypt( message, privateKey, publicKey );
-}
-
-/**
- * Derives a private key for encrypting data with the given key
- *
- * @param {string} key
- * @param {string|null} characters
- * @return {string}
- */
-export function generateEncPrivateKey ( key, characters = null ) {
-  return ( new Soda( characters ) ).generatePrivateKey( key );
-}
-
-/**
- * Derives a public key for encrypting data for this wallet's consumption
- *
- * @param {string} privateKey
- * @param {string|null} characters
- * @return {string}
- */
-export function generateEncPublicKey ( privateKey, characters = null ) {
-  return ( new Soda( characters ) ).generatePublicKey( privateKey );
-}
-
-/**
- *
- * @param {string} key
- * @param {string|null} characters
- * @return {string}
- */
-export function hashShare ( key, characters = null ) {
-  return ( new Soda( characters ) ).shortHash( key );
 }

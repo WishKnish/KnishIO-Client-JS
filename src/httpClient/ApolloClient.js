@@ -101,17 +101,11 @@ export default class ApolloClient {
   }
 
   /**
-   *  If you have subscriptions, you unsubscribe
+   *
+   * @param encryption
    */
-  enableEncryption () {
-    this.restartTransport( true );
-  }
-
-  /**
-   *  If you have subscriptions, you unsubscribe
-   */
-  disableEncryption () {
-    this.restartTransport();
+  setEncryption( encrypt = false ) {
+    this.restartTransport( encrypt );
   }
 
   /**
@@ -134,6 +128,9 @@ export default class ApolloClient {
     }
   }
 
+  /**
+   *
+   */
   socketDisconnect () {
     this.$__client.socketDisconnect();
     this.$__subscribers = {};
