@@ -63,7 +63,7 @@ export default class PolicyMeta {
    */
   static normalizePolicy( policy = {} ) {
     let policyMeta = {};
-    for ( const [ policyKey, value ] of Object.entries( policy || {} ) ) {
+    for ( const [ policyKey, value ] of Object.entries( policy ) ) {
       if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
 
         policyMeta[ policyKey ] = {};

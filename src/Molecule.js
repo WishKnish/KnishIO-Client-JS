@@ -615,23 +615,23 @@ export default class Molecule {
       $rules.push( $rule instanceof Rule ? $rule : Rule.toObject( $rule ) );
     }
 
-    const meta = {
+    // Create atom meta with rules
+    let atomMeta = new AtomMeta( {
       rule: JSON.stringify( $rules )
-    };
+    } );
 
+    // Add policies to meta object
     atomMeta.addPolicy( policy )
-
-    const policies = Meta.policy( meta, policy );
 
     this.addAtom( Atom.create( {
       isotope: 'R',
       wallet: this.sourceWallet,
       metaType,
       metaId,
-      meta: new AtomMeta( { ...meta, ...policies } ),
+      meta: atomMeta,
     } ) );
 
-    // User remainder atom
+    // User continuID atom
     this.addContinuIdAtom();
 
     return this;
