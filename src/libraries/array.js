@@ -62,3 +62,12 @@ export function diff ( ...arrays ) {
     return arr.filter( item => !unique.includes( item ) );
   } ) );
 }
+
+ /**
+ *
+ * @param arrays
+ * @return {*[]}
+ */
+export function intersect ( ...arrays ) {
+  return arrays.reduce( ( first, second ) => first.filter( item => second.includes( item ) ) );
+}

@@ -171,3 +171,11 @@ export function base64ToHex ( string ) {
 export function isHex ( str ) {
   return /^[A-F0-9]+$/i.test( str );
 }
+
+/**
+ * @param {string} str
+ * @return {boolean}
+ */
+export function isNumeric( str ) {
+  return (typeof(str) === 'number' || typeof(str) === 'string' && str.trim() !== '') && !isNaN(str);
+}
