@@ -82,7 +82,7 @@ export default class QueryWalletList extends Query {
           name,
           metas
         },
-        tradePairs {
+        tradeRates {
           tokenSlug,
           amount
         }

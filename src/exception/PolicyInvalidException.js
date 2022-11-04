@@ -50,7 +50,7 @@ import BaseException from './BaseException';
 /**
  * Exception for bad GraphQL responses
  */
-export default class KnishIOInvalidPolicyException extends BaseException {
+export default class PolicyInvalidException extends BaseException {
   /**
    * Class constructor
    *
@@ -60,6 +60,6 @@ export default class KnishIOInvalidPolicyException extends BaseException {
    */
   constructor ( message = '', fileName = null, lineNumber = null ) {
     super( message, fileName, lineNumber );
-    this.name = 'KnishIOInvalidPolicyException';
+    this.name = 'PolicyInvalidException';
   }
 }

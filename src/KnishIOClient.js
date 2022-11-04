@@ -91,7 +91,6 @@ import BatchIdException from './exception/BatchIdException';
 import AuthorizationRejectedException from './exception/AuthorizationRejectedException';
 import QueryAtom from './query/QueryAtom';
 import QueryPolicy from './query/QueryPolicy';
-import MutationCreatePolicy from './mutation/MutationCreatePolicy';
 import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom';
 import MutationCreateRule from './mutation/MutationCreateRule';
 import MutationDepositBufferToken from './mutation/MutationDepositBufferToken';
@@ -202,64 +201,17 @@ export default class KnishIOClient {
    * @return {boolean}
    */
   switchEncryption ( encrypt ) {
-    if ( this.hasEncryption() === encrypt ) {
+    if ( this.$__encrypt === encrypt ) {
       return false;
     }
-
     if ( this.$__logging ) {
-      console.warn( 'KnishIOClient::switchEncryption() - Node not respecting requested encryption policy!' );
+      console.info( `KnishIOClient::switchEncryption() - Forcing encryption ${ encrypt ? 'on' : 'off' } to match node...` );
     }
 
-    if ( encrypt ) {
-
-      if ( this.$__logging ) {
-        console.info( 'KnishIOClient::switchEncryption() - Forcing encryption on to match node...' );
-      }
-      this.enableEncryption();
-
-    } else {
-
-      if ( this.$__logging ) {
-        console.info( 'KnishIOClient::switchEncryption() - Forcing encryption off to match node...' );
-      }
-      this.disableEncryption();
-
-    }
+    // Set encryption
+    this.$__encrypt = encrypt;
+    this.$__client.setEncryption( encrypt );
     return true;
-  }
-
-
-  /**
-   *  Enables end-to-end encryption protocol.
-   *  Note: this will cause all active subscriptions to be unsubscribed.
-   */
-  enableEncryption () {
-    if ( this.$__logging ) {
-      console.info( 'KnishIOClient::enableEncryption() - Enabling end-to-end encryption mode...' );
-    }
-    this.$__encrypt = true;
-    this.$__client.enableEncryption();
-  }
-
-  /**
-   *  Disables end-to-end encryption protocol.
-   *  Note: this will cause all active subscriptions to be unsubscribed.
-   */
-  disableEncryption () {
-    if ( this.$__logging ) {
-      console.info( 'KnishIOClient::disableEncryption() - Disabling end-to-end encryption mode...' );
-    }
-    this.$__encrypt = false;
-    this.$__client.disableEncryption();
-  }
-
-  /**
-   * Returns whether the end-to-end encryption protocol is enabled
-   *
-   * @return {boolean}
-   */
-  hasEncryption () {
-    return this.$__encrypt;
   }
 
   /**
@@ -432,7 +384,7 @@ export default class KnishIOClient {
         secret: this.getSecret()
       } );
     } else {
-      sourceWallet.key = Wallet.generatePrivateKey( {
+      sourceWallet.key = Wallet.generateKey( {
         secret: this.getSecret(),
         token: sourceWallet.token,
         position: sourceWallet.position
@@ -1330,24 +1282,36 @@ export default class KnishIOClient {
     return await this.executeQuery( query );
   }
 
+  /**
+   *
+   * @param metaType
+   * @param metaId
+   * @param policy
+   * @returns {Promise<*>}
+   */
   async createPolicy ( {
     metaType,
     metaId,
     policy = {}
   } ) {
-    /**
-     * @type {MutationCreatePolicy}
-     */
-    const query = await this.createMoleculeMutation( {
-      mutationClass: MutationCreatePolicy
-    } );
 
-    query.fillMolecule( {
+    // Create a molecule
+    let molecule = await this.createMolecule( {} );
+    molecule.addPolicyAtom( {
       metaType,
       metaId,
+      meta: {},
       policy
     } );
+    molecule.addContinuIdAtom();
+    molecule.sign( {} );
+    molecule.check();
 
+    // Create & execute a mutation
+    const query = await this.createMoleculeMutation( {
+      mutationClass: MutationProposeMolecule,
+      molecule
+    } );
     return await this.executeQuery( query );
   }
 
@@ -1767,14 +1731,14 @@ export default class KnishIOClient {
    *
    * @param tokenSlug
    * @param amount
-   * @param tradingPairs
+   * @param tradeRates
    * @param sourceWallet
    * @returns {Promise<function(*): *>}
    */
   async depositBufferToken ( {
     tokenSlug,
     amount,
-    tradingPairs,
+    tradeRates,
     sourceWallet = null
   } ) {
 
@@ -1800,19 +1764,19 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-        sourceWallet,
-        remainderWallet: this.remainderWallet
-      } ),
-      /**
-       * @type {MutationDepositBufferToken}
-       */
-      query = await this.createMoleculeMutation( {
-        mutationClass: MutationDepositBufferToken,
-        molecule
-      } );
+      sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationDepositBufferToken}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationDepositBufferToken,
+      molecule
+    } );
     query.fillMolecule( {
       amount,
-      tradingPairs
+      tradeRates
     } );
     return await this.executeQuery( query );
   }
@@ -1848,16 +1812,16 @@ export default class KnishIOClient {
 
     // Build the molecule itself
     const molecule = await this.createMolecule( {
-        sourceWallet,
-        remainderWallet: this.remainderWallet
-      } ),
-      /**
-       * @type {MutationWithdrawBufferToken}
-       */
-      query = await this.createMoleculeMutation( {
-        mutationClass: MutationWithdrawBufferToken,
-        molecule
-      } );
+      sourceWallet,
+      remainderWallet: this.remainderWallet
+    } ),
+    /**
+     * @type {MutationWithdrawBufferToken}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationWithdrawBufferToken,
+      molecule
+    } );
     let recipients = {};
     recipients[ this.getBundle() ] = amount;
     query.fillMolecule( {
@@ -1925,19 +1889,17 @@ export default class KnishIOClient {
 
     }
 
-    // Burn tokens
-    let molecule = await this.createMolecule( {
-      secret: null,
-      sourceWallet,
-      remainderWallet
-    } );
-    molecule.burnToken( {
-      amount
-    } );
+    // Create a molecule
+    let molecule = await this.createMolecule( { sourceWallet, remainderWallet } );
+    molecule.burnToken( { amount } );
     molecule.sign( {} );
     molecule.check();
 
-    const query = ( new MutationProposeMolecule( this.client(), molecule ) );
+    // Create & execute a mutation
+    const query = await this.createMoleculeMutation( {
+      mutationClass: MutationProposeMolecule,
+      molecule
+    } );
     return this.executeQuery( query );
   }
 
@@ -1981,21 +1943,17 @@ export default class KnishIOClient {
     } );
 
 
-    // Burn tokens
-    let molecule = await this.createMolecule( {
-      secret: null,
-      sourceWallet,
-      remainderWallet
-    } );
-    molecule.replenishToken( {
-      amount,
-      units
-    } );
+    // Create a molecule
+    let molecule = await this.createMolecule( { sourceWallet, remainderWallet } );
+    molecule.replenishToken( { amount, units } );
     molecule.sign( {} );
     molecule.check();
 
-
-    const query = ( new MutationProposeMolecule( this.client(), molecule ) );
+    // Create & execute a mutation
+    const query = await this.createMoleculeMutation( {
+      mutationClass: MutationProposeMolecule,
+      molecule
+    } );
     return this.executeQuery( query );
   }
 
@@ -2073,16 +2031,17 @@ export default class KnishIOClient {
     newTokenUnit.metas[ 'fusedTokenUnits' ] = sourceWallet.getTokenUnitsData();
     recipientWallet.tokenUnits = [ newTokenUnit ];
 
-    // Burn tokens
-    let molecule = await this.createMolecule( {
-      sourceWallet,
-      remainderWallet
-    } );
+    // Create a molecule
+    let molecule = await this.createMolecule( { sourceWallet, remainderWallet } );
     molecule.fuseToken( sourceWallet.tokenUnits, recipientWallet );
     molecule.sign( {} );
     molecule.check();
 
-    const query = ( new MutationProposeMolecule( this.client(), molecule ) );
+    // Create & execute a mutation
+    const query = await this.createMoleculeMutation( {
+      mutationClass: MutationProposeMolecule,
+      molecule
+    } );
     return this.executeQuery( query );
   }
 

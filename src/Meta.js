@@ -56,20 +56,6 @@ import {
 export default class Meta {
 
   /**
-   * Class constructor
-   *
-   * @param {array} meta
-   */
-  constructor ( {
-    meta
-  } ) {
-
-    this.meta = meta;
-    this.createdAt = +new Date;
-
-  }
-
-  /**
    * Normalizes the meta array into the standard {key: ..., value: ...} format
    *
    * @param {array|object} meta
@@ -111,65 +97,4 @@ export default class Meta {
     return aggregate;
   }
 
-  /**
-   *
-   * @param {object|null} meta
-   * @param {object|null} policy
-   * @returns {object}
-   */
-  static policy ( meta, policy ) {
-    const metas = {
-      policy: {}
-    };
-
-    if ( policy ) {
-      for ( const [ policyKey, value ] of Object.entries( policy || {} ) ) {
-
-        if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
-          metas.policy[ policyKey ] = {};
-
-          for ( const [ key, content ] of Object.entries( value ) ) {
-            metas.policy[ policyKey ][ key ] = content;
-          }
-        }
-      }
-    }
-
-    metas.policy = JSON.stringify( Meta.__defaultPolicy( metas.policy, meta ) );
-
-    return metas;
-  }
-
-  /**
-   *
-   * @param {{}} policy
-   * @param {object} meta
-   * @returns {object}
-   */
-  static __defaultPolicy ( policy, meta ) {
-    const _policy = deepCloning( policy );
-    const readPolicy = Array.from( _policy ).filter( item => item.action === 'read' );
-    const writePolicy = Array.from( _policy ).filter( item => item.action === 'write' );
-    const metaKey = Object.keys( meta || {} );
-
-    for ( const [ type, value ] of Object.entries( {
-      read: readPolicy,
-      write: writePolicy
-    } ) ) {
-
-      const policyKey = value.map( item => item.key );
-
-      if ( !_policy[ type ] ) {
-        _policy[ type ] = {};
-      }
-
-      for ( const key of diff( metaKey, policyKey ) ) {
-        if ( !_policy[ type ][ key ] ) {
-          _policy[ type ][ key ] = ( type === 'write' && ![ 'characters', 'pubkey' ].includes( key ) ) ? [ 'self' ] : [ 'all' ];
-        }
-      }
-    }
-
-    return _policy;
-  }
 }

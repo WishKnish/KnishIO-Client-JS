@@ -87,7 +87,7 @@ class CipherLink extends ApolloLink {
 
     operation.operationName = null;
     operation.query = gql`query ( $Hash: String! ) { CipherHash ( Hash: $Hash ) { hash } }`;
-    operation.variables = { Hash: JSON.stringify( wallet.encryptMyMessage( cipher, pubKey ) ) };
+    operation.variables = { Hash: JSON.stringify( wallet.encryptMessage( cipher, pubKey ) ) };
 
     return forward( operation ).map( data => {
 
@@ -99,7 +99,7 @@ class CipherLink extends ApolloLink {
 
       if ( response.CipherHash && response.CipherHash.hash ) {
         const encrypted = JSON.parse( response.CipherHash.hash );
-        const decryption = wallet.decryptMyMessage( encrypted );
+        const decryption = wallet.decryptMessage( encrypted );
 
         if ( decryption === null ) {
           throw new CodeException( 'CipherLink::request() - Unable to decrypt response!' );

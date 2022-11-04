@@ -48,11 +48,31 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import { shake256 } from 'js-sha3';
 import { charsetBaseConvert } from './libraries/strings';
 import Meta from './Meta';
+import AtomMeta from './AtomMeta';
 
 /**
  * Atom class used to form microtransactions within a Molecule
  */
 export default class Atom {
+
+  /**
+   *
+   * @returns {string[]}
+   */
+  static getHashableProps () {
+    return [
+      'position',
+      'walletAddress',
+      'isotope',
+      'token',
+      'value',
+      'batchId',
+      'metaType',
+      'metaId',
+      'meta',
+      'createdAt',
+    ];
+  }
 
   /**
    * Class constructor
@@ -82,7 +102,6 @@ export default class Atom {
     otsFragment = null,
     index = null
   } ) {
-
     this.position = position;
     this.walletAddress = walletAddress;
     this.isotope = isotope;
@@ -97,68 +116,58 @@ export default class Atom {
     this.index = index;
     this.otsFragment = otsFragment;
     this.createdAt = String( +new Date );
-
   }
+
 
   /**
    *
-   * @returns {{}}
+   * @param isotope
+   * @param wallet
+   * @param value
+   * @param metaType
+   * @param metaId
+   * @param meta
+   * @param batchId
+   * @returns {Atom}
    */
-  static get create () {
-    if ( !Atom.isotopeCallbacks ) {
-      let isotopes = [
-        'C', 'I', 'M', 'T', 'U', 'V', 'F', 'R', 'B'
-      ];
-      Atom.isotopeCallbacks = {};
-      isotopes.forEach( ( isotope ) => {
-        Atom.isotopeCallbacks[ isotope ] = ( {
-          position = null,
-          walletAddress = null,
-          token = null,
-          value = null,
-          batchId = null,
-          metaType = null,
-          metaId = null,
-          meta = null,
-          otsFragment = null,
-          index = null
-        } ) => {
-          return new Atom( {
-            isotope,
-            position,
-            walletAddress,
-            token,
-            value,
-            batchId,
-            metaType,
-            metaId,
-            meta,
-            otsFragment,
-            index
-          } );
-        };
-      } );
+  static create( {
+    isotope,
+    wallet = null,
+    value = null,
+    metaType = null,
+    metaId = null,
+    meta = null,
+    batchId = null,
+  } ) {
+    // If meta object is not passed - create it
+    if ( !meta ) {
+      meta = new AtomMeta;
     }
-    return Atom.isotopeCallbacks;
-  }
 
-  /**
-   *
-   * @returns {Map<string, null>}
-   */
-  static get hashSchema () {
-    return new Map( [
-      [ 'position', null ],
-      [ 'walletAddress', null ],
-      [ 'isotope', null ],
-      [ 'token', null ],
-      [ 'value', null ],
-      [ 'batchId', null ],
-      [ 'metaType', null ],
-      [ 'metaId', null ],
-      [ 'meta', null ],
-      [ 'createdAt', null ]
-    ] );
+    // If wallet has been passed => add related metas
+    if ( wallet ) {
+
+      // Add wallet's meta
+      meta.addWallet( wallet );
+
+      // If batch ID does not passed: set it from the wallet
+      if ( !batchId ) {
+        batchId = wallet.batchId;
+      }
+    }
+
+    // Create the final atom's object
+    return new Atom( {
+      position: wallet ? wallet.position : null,
+      walletAddress: wallet ? wallet.address : null,
+      isotope,
+      token: wallet ? wallet.token : null,
+      value,
+      batchId,
+      metaType,
+      metaId,
+      meta: meta.get()
+    } );
   }
 
   /**
@@ -180,39 +189,43 @@ export default class Atom {
       properties = Object.keys( new Atom( {} ) );
 
     for ( const property in target ) {
-
       if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
-
         delete target[ property ];
-
       }
-
     }
 
     return target;
-
   }
 
   /**
-   * Populates and returns a schema object according to hash priority list
-   * to ensure consistent hashing results across multiple platforms
    *
-   * @param {Atom} atom
-   *
-   * @return {object}
+   * @returns {*[]}
    */
-  static molecularHashSchema ( atom ) {
-    const schema = Atom.hashSchema;
+  getHashableValues() {
+    const hashableValues = [];
+    for ( let property of Atom.getHashableProps() ) {
+      const value = this[ property ];
 
-    for ( const property in atom ) {
-      if ( atom.hasOwnProperty( property ) ) {
-        if ( schema.has( property ) ) {
-          schema.set( property, atom[ property ] );
+      // All nullable values are not hashed (only custom keys)
+      if ( value === null && ![ 'position', 'walletAddress' ].includes( property ) ) {
+        continue;
+      }
+
+      // Hashing individual meta keys and values
+      if ( property === 'meta' ) {
+        for ( const meta of value ) {
+          if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
+            hashableValues.push( String( meta.key ) );
+            hashableValues.push( String( meta.value ) );
+          }
         }
       }
+      // Default value
+      else {
+        hashableValues.push( value === null ? '' : String( value ) );
+      }
     }
-
-    return schema;
+    return hashableValues;
   }
 
   /**
@@ -233,40 +246,19 @@ export default class Atom {
       atomList = Atom.sortAtoms( atoms );
 
     // Hashing each atom in the molecule to produce a molecular hash
+    let hashableValues = [];
     for ( const atom of atomList ) {
 
-      const molecularHashSchema = Atom.molecularHashSchema( atom );
+      // Add number of atoms (???)
+      hashableValues.push( String( numberOfAtoms ) );
 
-      molecularSponge.update( String( numberOfAtoms ) );
+      // Add atom's properties
+      hashableValues = hashableValues.concat( atom.getHashableValues() );
+    }
 
-      for ( const property of molecularHashSchema.keys() ) {
-
-        const value = molecularHashSchema.get( property );
-
-        // All nullable values are not hashed (only custom keys)
-        if ( value === null && ![ 'position', 'walletAddress' ].includes( property ) ) {
-          continue;
-        }
-
-        // Excluded keys
-        if ( [ 'otsFragment', 'index' ].includes( property ) ) {
-          continue;
-        }
-
-        // Hashing individual meta keys and values
-        if ( property === 'meta' ) {
-          for ( const meta of value ) {
-            if ( typeof meta.value !== 'undefined' && meta.value !== null ) {
-              molecularSponge.update( String( meta.key ) );
-              molecularSponge.update( String( meta.value ) );
-            }
-          }
-          continue;
-        }
-
-        // Some other property that we haven't anticipated
-        molecularSponge.update( value === null ? '' : String( value ) );
-      }
+    // Add hash values to the sponge
+    for ( const hashableValue of hashableValues ) {
+      molecularSponge.update( hashableValue );
     }
 
     // Return the hash in the requested format
@@ -290,14 +282,10 @@ export default class Atom {
    * @return {array}
    */
   static sortAtoms ( atoms ) {
-
     const atomList = [ ...atoms ];
 
     // Sort based on atomic index
     atomList.sort( ( first, second ) => {
-      if ( first.index === second.index ) {
-        return 0;
-      }
       return first.index < second.index ? -1 : 1;
     } );
 

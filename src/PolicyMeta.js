@@ -45,36 +45,88 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule';
-import ResponseCreatePolicy from '../response/ResponseCreatePolicy';
 
-export default class MutationCreatePolicy extends MutationProposeMolecule {
-  fillMolecule ( {
-    metaType,
-    metaId,
-    policy = {}
-  } ) {
-    this.$__molecule.addPolicyAtom( {
-      metaType,
-      metaId,
-      meta: {},
-      policy
-    } );
-    this.$__molecule.addUserRemainderAtom( this.$__molecule.remainderWallet );
-    this.$__molecule.sign( {} );
-    this.$__molecule.check();
+import {
+  diff
+} from './libraries/array';
+
+
+/**
+ *
+ */
+export default class PolicyMeta {
+
+  /**
+   *
+   * @param policy
+   * @returns {{}}
+   */
+  static normalizePolicy( policy = {} ) {
+    let policyMeta = {};
+    for ( const [ policyKey, value ] of Object.entries( policy ) ) {
+      if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
+
+        policyMeta[ policyKey ] = {};
+        for ( const [ key, content ] of Object.entries( value ) ) {
+          policyMeta[ policyKey ][ key ] = content;
+        }
+      }
+    }
+    return policyMeta;
   }
 
   /**
-   * Builds a new Response object from a JSON string
    *
-   * @param {object} json
-   * @return {ResponseCreatePolicy}
+   * @param policy
+   * @param metaKeys
    */
-  createResponse ( json ) {
-    return new ResponseCreatePolicy( {
-      query: this,
-      json
-    } );
+  constructor( policy = {}, metaKeys = {} ) {
+    this.policy = PolicyMeta.normalizePolicy( policy );
+    this.fillDefault( metaKeys );
   }
+
+  /**
+   *
+   */
+  fillDefault( metaKeys = {} ) {
+    const readPolicy = Array.from( this.policy ).filter( item => item.action === 'read' );
+    const writePolicy = Array.from( this.policy ).filter( item => item.action === 'write' );
+
+    for ( const [ type, value ] of Object.entries( {
+      read: readPolicy,
+      write: writePolicy
+    } ) ) {
+
+      const policyKey = value.map( item => item.key );
+
+      if ( !this.policy[ type ] ) {
+        this.policy[ type ] = {};
+      }
+
+      for ( const key of diff( metaKeys, policyKey ) ) {
+        if ( !this.policy[ type ][ key ] ) {
+          this.policy[ type ][ key ] = ( type === 'write' && ![ 'characters', 'pubkey' ].includes( key ) ) ? [ 'self' ] : [ 'all' ];
+        }
+      }
+    }
+  }
+
+
+  /**
+   *
+   * @returns {{}|*}
+   */
+  get() {
+    return this.policy;
+  }
+
+
+  /**
+   *
+   * @returns {string}
+   */
+  toJson() {
+    return JSON.stringify( this.get() );
+  }
+
 }

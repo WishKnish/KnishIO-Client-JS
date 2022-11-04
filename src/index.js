@@ -63,13 +63,8 @@ import {
   randomString
 } from './libraries/strings';
 import {
-  decryptMessage,
-  encryptMessage,
   generateBundleHash,
-  generateEncPrivateKey,
-  generateEncPublicKey,
   generateSecret,
-  hashShare
 } from './libraries/crypto';
 
 export {
@@ -92,10 +87,5 @@ export {
 
   // crypto
   generateSecret,
-  decryptMessage,
-  encryptMessage,
   generateBundleHash,
-  generateEncPrivateKey,
-  generateEncPublicKey,
-  hashShare
 };

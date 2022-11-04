@@ -49,20 +49,16 @@ import { shake256 } from 'js-sha3';
 import bigInt from 'big-integer/BigInteger';
 import {
   chunkSubstr,
-  isHex
+  isHex,
+  randomString
 } from './libraries/strings';
 import {
-  decryptMessage,
-  encryptMessage,
   generateBatchId,
-  generateBundleHash,
-  generateEncPrivateKey,
-  generateEncPublicKey,
-  generateWalletPosition,
-  hashShare
+  generateBundleHash
 } from './libraries/crypto';
 import BaseX from './libraries/BaseX';
 import TokenUnit from './TokenUnit';
+import Soda from './libraries/Soda';
 
 /**
  * Wallet class represents the set of public and private
@@ -97,16 +93,35 @@ export default class Wallet {
     this.privkey = null;
     this.pubkey = null;
     this.tokenUnits = [];
-    this.tradePairs = {};
+    this.tradeRates = {};
 
-    this.bundle = secret ? generateBundleHash( secret ) : null;
+    this.bundle = null;
     this.batchId = batchId;
     this.position = position;
     this.characters = characters || 'BASE64';
 
     if ( secret ) {
-      this.position = this.position || generateWalletPosition();
-      this.prepareKeys( secret );
+
+      // Set bundle from the secret
+      this.bundle = generateBundleHash( secret );
+
+      // Generate a position for non-shadow wallet if not initialized
+      this.position = this.position || Wallet.generatePosition();
+
+      // Key & address initialization
+      this.key = Wallet.generateKey( {
+        secret,
+        token: this.token,
+        position: this.position
+      } );
+      this.address = Wallet.generateAddress( this.key );
+
+      // Soda object initialization
+      this.soda = new Soda( characters );
+
+      // Private & pubkey initialization
+      this.privkey = this.soda.generatePrivateKey( this.key );
+      this.pubkey = this.soda.generatePublicKey( this.privkey );
     }
   }
 
@@ -128,7 +143,7 @@ export default class Wallet {
 
     let secret = Wallet.isBundleHash( secretOrBundle ) ? null : secretOrBundle;
     let bundle = secret ? generateBundleHash( secret ) : secretOrBundle;
-    let position = secret ? generateWalletPosition() : null;
+    let position = secret ? Wallet.generatePosition() : null;
 
     // Wallet initialization
     let wallet = new Wallet( {
@@ -251,65 +266,17 @@ export default class Wallet {
   }
 
   /**
-   * Prepares wallet for signing by generating all required keys
-   *
-   * @param {string} secret
-   */
-  prepareKeys ( secret ) {
-    if ( this.key === null && this.address === null ) {
-      this.key = Wallet.generatePrivateKey( {
-        secret,
-        token: this.token,
-        position: this.position
-      } );
-      this.address = Wallet.generatePublicKey( this.key );
-      this.getMyEncPrivateKey();
-      this.getMyEncPublicKey();
-    }
-  }
-
-  /**
-   * Derives a private key for encrypting data with this wallet's key
-   *
-   * @return {string}
-   */
-  getMyEncPrivateKey () {
-
-    if ( this.privkey === null && this.key !== null ) {
-      this.privkey = generateEncPrivateKey( this.key, this.characters );
-    }
-
-    return this.privkey;
-  }
-
-  /**
-   * Derives a public key for encrypting data for this wallet's consumption
-   *
-   * @return {string}
-   */
-  getMyEncPublicKey () {
-
-    const privateKey = this.getMyEncPrivateKey();
-
-    if ( !this.pubkey && privateKey ) {
-      this.pubkey = generateEncPublicKey( privateKey, this.characters );
-    }
-
-    return this.pubkey;
-  }
-
-  /**
    * Encrypts a message for this wallet instance
    *
    * @param {object|array} message
    * @return {object}
    */
-  encryptMyMessage ( message ) {
+  encryptMessage ( message ) {
 
     const encrypt = {};
 
     for ( let index = 1, length = arguments.length; index < length; index++ ) {
-      encrypt[ hashShare( arguments[ index ], this.characters ) ] = encryptMessage( message, arguments[ index ], this.characters );
+      encrypt[ this.soda.shortHash( arguments[ index ] ) ] = this.soda.encrypt( message, arguments[ index ] );
     }
 
     return encrypt;
@@ -321,7 +288,7 @@ export default class Wallet {
    * @param {string|object} message
    * @return {null|any}
    */
-  decryptMyMessage ( message ) {
+  decryptMessage ( message ) {
 
     const pubKey = this.getMyEncPublicKey();
     let encrypt = message;
@@ -330,10 +297,10 @@ export default class Wallet {
       && typeof message === 'object'
       && Object.prototype.toString.call( message ) === '[object Object]' ) {
 
-      encrypt = message[ hashShare( pubKey, this.characters ) ] || '';
+      encrypt = message[ this.soda.shortHash( pubKey ) ] || '';
     }
 
-    return decryptMessage( encrypt, this.getMyEncPrivateKey(), pubKey, this.characters );
+    return this.soda.decrypt( encrypt, this.getMyEncPrivateKey(), pubKey );
   }
 
   /**
@@ -342,7 +309,7 @@ export default class Wallet {
    * @returns {Buffer|ArrayBuffer|Uint8Array}
    */
   decryptBinary ( message ) {
-    const decrypt = this.decryptMyMessage( message );
+    const decrypt = this.decryptMessage( message );
     return ( new BaseX( { characters: 'BASE64' } ) ).decode( decrypt );
   }
 
@@ -355,7 +322,7 @@ export default class Wallet {
 
     const messageBase64 = ( new BaseX( { characters: 'BASE64' } ) ).encode( message );
 
-    return this.encryptMyMessage( messageBase64, ...arg );
+    return this.encryptMessage( messageBase64, ...arg );
   }
 
   /**
@@ -381,7 +348,7 @@ export default class Wallet {
       }
 
       // Encrypting message
-      const encryptedData = this.encryptMyMessage( data, publicKey, ...publicKeys );
+      const encryptedData = this.encryptMessage( data, publicKey, ...publicKeys );
       return btoa( JSON.stringify( encryptedData ) );
 
     }
@@ -403,7 +370,7 @@ export default class Wallet {
       try {
 
         const decrypted = JSON.parse( atob( data ) );
-        return this.decryptMyMessage( decrypted ) || fallbackValue;
+        return this.decryptMessage( decrypted ) || fallbackValue;
 
       } catch ( e ) {
 
@@ -424,7 +391,7 @@ export default class Wallet {
    * @param {string} position
    * @return {string}
    */
-  static generatePrivateKey ( {
+  static generateKey ( {
     secret,
     token,
     position
@@ -448,12 +415,12 @@ export default class Wallet {
   }
 
   /**
-   * Generates a public key (wallet address)
+   * Generates a wallet address
    *
    * @param {string} key
    * @return {string}
    */
-  static generatePublicKey ( key ) {
+  static generateAddress ( key ) {
 
     // Subdivide private key into 16 fragments of 128 characters each
     const keyFragments = chunkSubstr( key, 128 ),
@@ -475,5 +442,14 @@ export default class Wallet {
 
     // Producing wallet address
     return shake256.create( 256 ).update( digestSponge.hex() ).hex();
+  }
+
+  /**
+   *
+   * @param saltLength
+   * @returns {string}
+   */
+  static generatePosition ( saltLength = 64 ) {
+    return randomString( saltLength, 'abcdef0123456789' );
   }
 }
