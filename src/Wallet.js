@@ -290,7 +290,7 @@ export default class Wallet {
    */
   decryptMessage ( message ) {
 
-    const pubKey = this.getMyEncPublicKey();
+    const pubKey = this.pubkey;
     let encrypt = message;
 
     if ( message !== null
@@ -300,7 +300,7 @@ export default class Wallet {
       encrypt = message[ this.soda.shortHash( pubKey ) ] || '';
     }
 
-    return this.soda.decrypt( encrypt, this.getMyEncPrivateKey(), pubKey );
+    return this.soda.decrypt( encrypt, this.privkey, pubKey );
   }
 
   /**
@@ -340,7 +340,7 @@ export default class Wallet {
     if ( data ) {
 
       // Retrieving sender's encryption public key
-      const publicKey = this.getMyEncPublicKey();
+      const publicKey = this.pubkey;
 
       // If the additional public keys is supplied as a string, convert to array
       if ( typeof publicKeys === 'string' ) {
