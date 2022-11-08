@@ -301,8 +301,8 @@ export default class Molecule {
       isotope: 'V',
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
-      metaType: walletBundle ? 'walletBundle' : null,
-      metaId: walletBundle,
+      metaType: 'walletBundle',
+      metaId: this.remainderWallet.bundle,
     } ) );
 
     return this;
@@ -498,6 +498,8 @@ export default class Molecule {
       wallet: this.sourceWallet,
       value: -amount,
       meta: firstAtomMeta,
+      metaType: 'walletBundle',
+      metaId: this.sourceWallet.bundle,
     } ) );
 
     // Initializing a new Atom to add tokens to recipient
@@ -654,6 +656,8 @@ export default class Molecule {
       tokenSlug: token,
       walletAddress: wallet.address,
       walletPosition: wallet.position,
+      pubkey: wallet.pubkey,
+      characters: wallet.characters,
       batchId: wallet.batchId
     };
 
