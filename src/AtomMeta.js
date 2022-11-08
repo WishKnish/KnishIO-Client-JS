@@ -126,11 +126,6 @@ export default class AtomMeta {
    */
   addPolicy( policy ) {
 
-    // Policy does not passed: do nothing
-    if ( !policy ) {
-      return this;
-    }
-
     // Policy meta intialization
     let policyMeta = new PolicyMeta( policy, Object.keys( this.meta ) );
 
