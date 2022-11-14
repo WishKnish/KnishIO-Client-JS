@@ -58,13 +58,15 @@ import {
   generateBatchId,
   generateBundleHash
 } from './libraries/crypto';
-import AtomsMissingException from './exception/AtomsMissingException';
-import BalanceInsufficientException from './exception/BalanceInsufficientException';
-import NegativeAmountException from './exception/NegativeAmountException';
 import { deepCloning } from './libraries/array';
 import Dot from './libraries/Dot';
 import Rule from './instance/Rules/Rule';
-import { SignatureMalformedException } from './exception';
+import {
+  AtomsMissingException,
+  BalanceInsufficientException,
+  NegativeAmountException,
+  SignatureMalformedException
+} from './exception';
 
 
 /**
@@ -124,7 +126,7 @@ export default class Molecule {
    * @param isotopes
    * @returns {*[]}
    */
-  getIsotopes( isotopes ) {
+  getIsotopes ( isotopes ) {
     return Molecule.isotopeFilter( isotopes, this.atoms );
   }
 
@@ -815,9 +817,7 @@ export default class Molecule {
     this.molecularHash = null;
     this.bundle = null;
     this.status = null;
-    this.createdAt = String(
-      +new Date
-    );
+    this.createdAt = String( +new Date );
     this.atoms = [];
 
     return this;
@@ -838,11 +838,7 @@ export default class Molecule {
   } ) {
 
     // Do we have atoms?
-    if ( this.atoms.length === 0 ||
-      this.atoms.filter(
-        atom => !( atom instanceof Atom )
-      ).length !== 0
-    ) {
+    if ( this.atoms.length === 0 || this.atoms.filter( atom => !( atom instanceof Atom ) ).length !== 0 ) {
       throw new AtomsMissingException();
     }
 
@@ -938,9 +934,7 @@ export default class Molecule {
 
       for ( const property of [ 'position', 'walletAddress', 'isotope' ] ) {
 
-        if ( typeof target.atoms[ index ][ property ] === 'undefined'
-          || null === target.atoms[ index ][ property ]
-        ) {
+        if ( typeof target.atoms[ index ][ property ] === 'undefined' || null === target.atoms[ index ][ property ] ) {
           throw new AtomsMissingException( 'MolecularStructure::jsonToObject() - Required Atom properties are missing!' );
         }
       }
@@ -948,9 +942,7 @@ export default class Molecule {
 
     for ( const property in target ) {
 
-      if ( target.hasOwnProperty( property )
-        && !properties.includes( property )
-      ) {
+      if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
         delete target[ property ];
       }
     }
