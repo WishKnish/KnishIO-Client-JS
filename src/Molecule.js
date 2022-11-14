@@ -61,13 +61,10 @@ import {
 import { deepCloning } from './libraries/array';
 import Dot from './libraries/Dot';
 import Rule from './instance/Rules/Rule';
-import {
-  AtomsMissingException,
-  BalanceInsufficientException,
-  NegativeAmountException,
-  SignatureMalformedException
-} from './exception';
-
+import AtomsMissingException from './exception/AtomsMissingException';
+import BalanceInsufficientException from './exception/BalanceInsufficientException';
+import NegativeAmountException from './exception/NegativeAmountException';
+import SignatureMalformedException from './exception/SignatureMalformedException';
 
 /**
  * Molecule class used for committing changes to the ledger

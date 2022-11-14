@@ -49,9 +49,8 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Meta from './Meta';
 import RuleArgumentException from './exception/RuleArgumentException';
 import { isNumeric } from '../../libraries/strings';
-import { CodeException } from '../../exception';
 import { intersect } from '../../libraries/array';
-
+import CodeException from '../../exception/CodeException';
 
 export default class Callback {
 
