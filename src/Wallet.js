@@ -98,6 +98,7 @@ export default class Wallet {
     this.bundle = null;
     this.batchId = batchId;
     this.position = position;
+    this.characters = characters;
 
     if ( secret ) {
 
@@ -123,7 +124,7 @@ export default class Wallet {
       this.pubkey = this.soda.generatePublicKey( this.privkey );
 
       // Set characters
-      this.characters = characters || 'BASE64';
+      this.characters = this.characters || 'BASE64';
     }
   }
 
