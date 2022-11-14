@@ -70,7 +70,7 @@ export default class Atom {
       'metaType',
       'metaId',
       'meta',
-      'createdAt',
+      'createdAt'
     ];
   }
 
@@ -137,7 +137,7 @@ export default class Atom {
     metaType = null,
     metaId = null,
     meta = null,
-    batchId = null,
+    batchId = null
   } ) {
     // If meta object is not passed - create it
     if ( !meta ) {
