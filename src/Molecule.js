@@ -58,14 +58,13 @@ import {
   generateBatchId,
   generateBundleHash
 } from './libraries/crypto';
+import { deepCloning } from './libraries/array';
+import Dot from './libraries/Dot';
+import Rule from './instance/Rules/Rule';
 import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
 import NegativeAmountException from './exception/NegativeAmountException';
-import { deepCloning } from './libraries/array';
-import Dot from './libraries/Dot';
-import Meta from './Meta';
-import Rule from './instance/Rules/Rule';
-
+import SignatureMalformedException from './exception/SignatureMalformedException';
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -106,9 +105,10 @@ export default class Molecule {
   }
 
   /**
+   * Filters the atoms array by the supplied isotope list
    *
-   * @param {string|array} isotope
-   * @param atoms
+   * @param {string|array} isotopes
+   * @param {array} atoms
    * @returns {*[]}
    */
   static isotopeFilter ( isotopes, atoms ) {
@@ -123,7 +123,7 @@ export default class Molecule {
    * @param isotopes
    * @returns {*[]}
    */
-  getIsotopes( isotopes ) {
+  getIsotopes ( isotopes ) {
     return Molecule.isotopeFilter( isotopes, this.atoms );
   }
 
@@ -183,7 +183,6 @@ export default class Molecule {
   /**
    * Add user remainder atom for ContinuID
    *
-   * @param {Wallet} userRemainderWallet
    * @return {Molecule}
    */
   addContinuIdAtom () {
@@ -191,7 +190,7 @@ export default class Molecule {
       isotope: 'I',
       wallet: this.remainderWallet,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle,
+      metaId: this.remainderWallet.bundle
     } ) );
     return this;
   }
@@ -214,13 +213,13 @@ export default class Molecule {
 
     // AtomMeta object initialization
     let atomMeta = new AtomMeta( meta );
-    atomMeta.addPolicy( policy )
+    atomMeta.addPolicy( policy );
 
     this.addAtom( Atom.create( {
       isotope: 'R',
       metaType,
       metaId,
-      meta: atomMeta,
+      meta: atomMeta
     } ) );
     return this;
   }
@@ -245,7 +244,7 @@ export default class Molecule {
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount,
+      value: -amount
     } ) );
 
     // Add F isotope for fused tokens creation
@@ -254,7 +253,7 @@ export default class Molecule {
       wallet: recipientWallet,
       value: 1,
       metaType: 'walletBundle',
-      metaId: recipientWallet.bundle,
+      metaId: recipientWallet.bundle
     } ) );
 
     // Initializing a new Atom to remove tokens from source
@@ -263,7 +262,7 @@ export default class Molecule {
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle,
+      metaId: this.remainderWallet.bundle
     } ) );
 
     return this;
@@ -295,14 +294,14 @@ export default class Molecule {
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount,
+      value: -amount
     } ) );
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle,
+      metaId: this.remainderWallet.bundle
     } ) );
 
     return this;
@@ -356,7 +355,7 @@ export default class Molecule {
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: this.sourceWallet.balance,
+      value: this.sourceWallet.balance
     } ) );
 
     this.addAtom( Atom.create( {
@@ -364,7 +363,7 @@ export default class Molecule {
       wallet: this.remainderWallet,
       value: this.remainderWallet.balance,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle,
+      metaId: this.remainderWallet.bundle
     } ) );
 
     return this;
@@ -393,7 +392,7 @@ export default class Molecule {
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount,
+      value: -amount
     } ) );
     // Initializing a new Atom to add tokens to recipient
     this.addAtom( Atom.create( {
@@ -401,7 +400,7 @@ export default class Molecule {
       wallet: recipientWallet,
       value: amount,
       metaType: 'walletBundle',
-      metaId: recipientWallet.bundle,
+      metaId: recipientWallet.bundle
     } ) );
     // Ininitlizing a remainder atom
     this.addAtom( Atom.create( {
@@ -409,7 +408,7 @@ export default class Molecule {
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle,
+      metaId: this.remainderWallet.bundle
     } ) );
 
     return this;
@@ -443,7 +442,7 @@ export default class Molecule {
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount,
+      value: -amount
     } ) );
 
     // Initializing a new Atom to add tokens to recipient
@@ -452,7 +451,7 @@ export default class Molecule {
       wallet: bufferWallet,
       value: amount,
       metaType: 'walletBundle',
-      metaId: this.sourceWallet.bundle,
+      metaId: this.sourceWallet.bundle
     } ) );
 
     this.addAtom( Atom.create( {
@@ -460,7 +459,7 @@ export default class Molecule {
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
-      metaId: this.sourceWallet.bundle,
+      metaId: this.sourceWallet.bundle
     } ) );
 
     return this;
@@ -499,7 +498,7 @@ export default class Molecule {
       value: -amount,
       meta: firstAtomMeta,
       metaType: 'walletBundle',
-      metaId: this.sourceWallet.bundle,
+      metaId: this.sourceWallet.bundle
     } ) );
 
     // Initializing a new Atom to add tokens to recipient
@@ -510,7 +509,7 @@ export default class Molecule {
         value: recipientAmount,
         batchId: this.sourceWallet.batchId ? generateBatchId( {} ) : null,
         metaType: 'walletBundle',
-        metaId: recipientBundle,
+        metaId: recipientBundle
       } ) );
     }
 
@@ -519,7 +518,7 @@ export default class Molecule {
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle,
+      metaId: this.remainderWallet.bundle
     } ) );
 
     return this;
@@ -549,7 +548,7 @@ export default class Molecule {
       wallet: this.sourceWallet,
       metaType: 'wallet',
       metaId: newWallet.address,
-      meta,
+      meta
     } ) );
 
     this.addContinuIdAtom();
@@ -588,7 +587,7 @@ export default class Molecule {
       metaType: 'token',
       metaId: recipientWallet.token,
       meta: new AtomMeta( meta ),
-      batchId: recipientWallet.batchId,
+      batchId: recipientWallet.batchId
     } ) );
 
     // User remainder atom
@@ -623,14 +622,14 @@ export default class Molecule {
     } );
 
     // Add policies to meta object
-    atomMeta.addPolicy( policy )
+    atomMeta.addPolicy( policy );
 
     this.addAtom( Atom.create( {
       isotope: 'R',
       wallet: this.sourceWallet,
       metaType,
       metaId,
-      meta: atomMeta,
+      meta: atomMeta
     } ) );
 
     // User continuID atom
@@ -666,7 +665,7 @@ export default class Molecule {
       wallet: this.sourceWallet,
       metaType: 'wallet',
       metaId: wallet.address,
-      meta: new AtomMeta( metas ),
+      meta: new AtomMeta( metas )
     } ) );
 
     // User remainder atom
@@ -700,7 +699,7 @@ export default class Molecule {
       wallet: this.sourceWallet,
       metaType: 'identifier',
       metaId: type,
-      meta: new AtomMeta( meta ),
+      meta: new AtomMeta( meta )
     } ) );
 
     this.addContinuIdAtom();
@@ -730,7 +729,7 @@ export default class Molecule {
       wallet: this.sourceWallet,
       metaType,
       metaId,
-      meta: new AtomMeta( meta ),
+      meta: new AtomMeta( meta )
     } ) );
 
     this.addPolicyAtom( {
@@ -776,7 +775,7 @@ export default class Molecule {
       metaType,
       metaId,
       meta: new AtomMeta( meta ),
-      batchId,
+      batchId
     } ) );
 
     // User remainder atom
@@ -797,7 +796,7 @@ export default class Molecule {
     this.addAtom( Atom.create( {
       isotope: 'U',
       wallet: this.sourceWallet,
-      meta: new AtomMeta( meta ),
+      meta: new AtomMeta( meta )
     } ) );
 
     // User remainder atom
@@ -815,9 +814,7 @@ export default class Molecule {
     this.molecularHash = null;
     this.bundle = null;
     this.status = null;
-    this.createdAt = String(
-      +new Date
-    );
+    this.createdAt = String( +new Date );
     this.atoms = [];
 
     return this;
@@ -838,11 +835,7 @@ export default class Molecule {
   } ) {
 
     // Do we have atoms?
-    if ( this.atoms.length === 0 ||
-      this.atoms.filter(
-        atom => !( atom instanceof Atom )
-      ).length !== 0
-    ) {
+    if ( this.atoms.length === 0 || this.atoms.filter( atom => !( atom instanceof Atom ) ).length !== 0 ) {
       throw new AtomsMissingException();
     }
 
@@ -872,7 +865,7 @@ export default class Molecule {
 
     // Signing position is required
     if ( !signingPosition ) {
-      throw new SigningWalletException();
+      throw new SignatureMalformedException( 'Signing wallet must have a position!' );
     }
 
     // Generate the private signing key for this molecule
@@ -938,9 +931,7 @@ export default class Molecule {
 
       for ( const property of [ 'position', 'walletAddress', 'isotope' ] ) {
 
-        if ( typeof target.atoms[ index ][ property ] === 'undefined'
-          || null === target.atoms[ index ][ property ]
-        ) {
+        if ( typeof target.atoms[ index ][ property ] === 'undefined' || null === target.atoms[ index ][ property ] ) {
           throw new AtomsMissingException( 'MolecularStructure::jsonToObject() - Required Atom properties are missing!' );
         }
       }
@@ -948,9 +939,7 @@ export default class Molecule {
 
     for ( const property in target ) {
 
-      if ( target.hasOwnProperty( property )
-        && !properties.includes( property )
-      ) {
+      if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
         delete target[ property ];
       }
     }

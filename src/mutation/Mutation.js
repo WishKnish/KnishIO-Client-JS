@@ -75,7 +75,8 @@ export default class Mutation extends Query {
   /**
    * Sends the Query to a Knish.IO node and returns the Response
    *
-   * @param {object} variables
+   * @param variables
+   * @returns {Promise<Response>}
    */
   async execute ( { variables = null } ) {
 

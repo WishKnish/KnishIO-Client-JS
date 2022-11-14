@@ -64,7 +64,7 @@ import {
 } from './libraries/strings';
 import {
   generateBundleHash,
-  generateSecret,
+  generateSecret
 } from './libraries/crypto';
 
 export {
@@ -87,5 +87,5 @@ export {
 
   // crypto
   generateSecret,
-  generateBundleHash,
+  generateBundleHash
 };

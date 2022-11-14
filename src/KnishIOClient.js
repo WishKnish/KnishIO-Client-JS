@@ -2049,8 +2049,8 @@ export default class KnishIOClient {
   /**
    * Request a guest auth token
    *
-   * @param cellSlug
-   * @param encrypt
+   * @param {string} cellSlug
+   * @param {boolean} encrypt
    * @returns {Promise<ResponseRequestAuthorizationGuest>}
    */
   async requestGuestAuthToken ( {
@@ -2070,14 +2070,16 @@ export default class KnishIOClient {
      */
     const query = await this.createQuery( MutationRequestAuthorizationGuest );
 
-    /**
-     * @type {ResponseRequestAuthorizationGuest}
-     */
-    const response = await query.execute( {
+    const variables = {
       cellSlug,
       pubkey: wallet.pubkey,
       encrypt
-    } );
+    };
+
+    /**
+     * @type {ResponseRequestAuthorizationGuest}
+     */
+    const response = await query.execute( variables );
 
     // Did the authorization molecule get accepted?
     if ( response.success() ) {

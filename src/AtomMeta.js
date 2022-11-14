@@ -46,9 +46,6 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import {
-  diff
-} from './libraries/array';
 import PolicyMeta from './PolicyMeta';
 
 const USE_META_CONTEXT = false;
