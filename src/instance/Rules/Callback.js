@@ -50,7 +50,7 @@ import Meta from './Meta';
 import RuleArgumentException from './exception/RuleArgumentException';
 import { isNumeric } from '../../libraries/strings';
 import { intersect } from '../../libraries/array';
-import CodeException from '../../exception/CodeException';
+import { CodeException } from '../../exception';
 
 export default class Callback {
 
