@@ -1124,33 +1124,31 @@ export default class KnishIOClient {
     units = []
   } ) {
 
-    // Stackable tokens need a new batch for every transfer
-    if ( Dot.get( meta || {}, 'fungibility' ) === 'stackable' ) {
+    const fungibility = Dot.get( meta || {}, 'fungibility' );
 
-      // No batch ID specified? Create a random one
-      if ( !batchId ) {
-        batchId = generateBatchId( {} );
+    // For stackable token - create a batch ID
+    if ( fungibility === 'stackable' ) {
+      meta.batchId = batchId || generateBatchId( {} );
+    }
+
+    // Special logic for token unit initialization (nonfungible || stackable)
+    if ( [ 'nonfungible', 'stackable' ].includes( fungibility ) && units.length > 0 ) {
+
+      // Stackable tokens with Unit IDs must not use decimals
+      if ( Dot.get( meta || {}, 'decimals' ) > 0 ) {
+        throw new StackableUnitDecimalsException();
       }
-      meta.batchId = batchId;
 
-      // Adding unit IDs to the token
-      if ( units.length > 0 ) {
-
-        // Stackable tokens with Unit IDs must not use decimals
-        if ( Dot.get( meta || {}, 'decimals' ) > 0 ) {
-          throw new StackableUnitDecimalsException();
-        }
-
-        // Can't create stackable units AND provide amount
-        if ( amount > 0 ) {
-          throw new StackableUnitAmountException();
-        }
-
-        // Calculating amount based on Unit IDs
-        amount = units.length;
-        meta.splittable = 1;
-        meta.tokenUnits = JSON.stringify( units );
+      // Can't create stackable units AND provide amount
+      if ( amount > 0 ) {
+        throw new StackableUnitAmountException();
       }
+
+      // Calculating amount based on Unit IDs
+      amount = units.length;
+      meta.splittable = 1;
+      meta.decimals = 0;
+      meta.tokenUnits = JSON.stringify( units );
     }
 
     // Creating the wallet that will receive the new tokens
