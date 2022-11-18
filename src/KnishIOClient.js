@@ -1124,6 +1124,7 @@ export default class KnishIOClient {
     units = []
   } ) {
 
+    // What is the fungibility mode for this token?
     const fungibility = Dot.get( meta || {}, 'fungibility' );
 
     // For stackable token - create a batch ID
