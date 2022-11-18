@@ -1127,7 +1127,7 @@ export default class KnishIOClient {
     // What is the fungibility mode for this token?
     const fungibility = Dot.get( meta || {}, 'fungibility' );
 
-    // Stackable tokens need a new batch for every transfer
+    // For stackable token - create a batch ID
     if ( fungibility === 'stackable' ) {
       meta.batchId = batchId || generateBatchId( {} );
     }
