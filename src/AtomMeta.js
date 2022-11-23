@@ -94,7 +94,7 @@ export default class AtomMeta {
    * @param wallet
    * @returns {AtomMeta}
    */
-  addWallet( wallet ) {
+  setAtomWallet( wallet ) {
     let walletMeta = {
       pubkey: wallet.pubkey,
       characters: wallet.characters
@@ -114,6 +114,54 @@ export default class AtomMeta {
     return this;
   }
 
+  /**
+   * Set full NEW wallet metadata
+   * Used for shadow wallet claim & wallet creation & token creation
+   *
+   * @param wallet
+   * @returns {AtomMeta}
+   */
+  setMetaWallet( wallet ) {
+    this.merge( {
+      walletTokenSlug: wallet.token,
+      walletBundleHash: wallet.bundle,
+      walletAddress: wallet.address,
+      walletPosition: wallet.position,
+      walletBatchId: wallet.batchId,
+      walletPubkey: wallet.pubkey,
+      walletCharacters: wallet.characters,
+    } );
+    return this;
+  }
+
+  /**
+   *
+   * @param shadowWalletClaim
+   * @returns {AtomMeta}
+   */
+  setShadowWalletClaim( shadowWalletClaim ) {
+    this.merge( { shadowWalletClaim: shadowWalletClaim * 1 } );
+    return this;
+  }
+
+  /**
+   *
+   * @param signingWallet
+   * @returns {AtomMeta}
+   */
+  setSigningWallet ( signingWallet ) {
+    this.merge( {
+      signingWallet: JSON.stringify( {
+        tokenSlug: signingWallet.token,
+        bundleHash: signingWallet.bundle,
+        address: signingWallet.address,
+        position: signingWallet.position,
+        pubkey: signingWallet.pubkey,
+        characters: signingWallet.characters,
+      } ),
+    } );
+    return this;
+  }
 
   /**
    *
@@ -132,24 +180,6 @@ export default class AtomMeta {
 
     return this;
   }
-
-  /**
-   *
-   * @param wallet
-   * @returns {AtomMeta}
-   */
-  addSigningWallet( wallet ) {
-    this.merge( {
-      signingWallet: JSON.stringify( {
-        address: wallet.address,
-        position: wallet.position,
-        pubkey: wallet.pubkey,
-        characters: wallet.characters
-      } )
-    } );
-    return this;
-  }
-
 
   /**
    *

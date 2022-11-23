@@ -148,7 +148,7 @@ export default class Atom {
     if ( wallet ) {
 
       // Add wallet's meta
-      meta.addWallet( wallet );
+      meta.setAtomWallet( wallet );
 
       // If batch ID does not passed: set it from the wallet
       if ( !batchId ) {

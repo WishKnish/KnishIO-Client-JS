@@ -1686,36 +1686,26 @@ export default class KnishIOClient {
       } );
     }
 
-    this.remainderWallet = Wallet.create( {
-      secretOrBundle: this.getSecret(),
-      token,
-      characters: sourceWallet.characters
-    } );
-    this.remainderWallet.initBatchId( {
-      sourceWallet,
-      isRemainder: true
-    } );
+    // Create a remainder from the source wallet
+    let remainderWallet = sourceWallet.createRemainder( this.getSecret() );
 
     // --- Token units splitting
     sourceWallet.splitUnits(
       units,
-      this.remainderWallet,
+      remainderWallet,
       recipientWallet
     );
     // ---
 
     // Build the molecule itself
-    const molecule = await this.createMolecule( {
-        sourceWallet: sourceWallet,
-        remainderWallet: this.remainderWallet
-      } ),
-      /**
-       * @type {MutationTransferTokens}
-       */
-      query = await this.createMoleculeMutation( {
-        mutationClass: MutationTransferTokens,
-        molecule
-      } );
+    const molecule = await this.createMolecule( { sourceWallet, remainderWallet } ),
+    /**
+     * @type {MutationTransferTokens}
+     */
+    query = await this.createMoleculeMutation( {
+      mutationClass: MutationTransferTokens,
+      molecule
+    } );
 
     query.fillMolecule( {
       recipientWallet,
@@ -1750,22 +1740,10 @@ export default class KnishIOClient {
     }
 
     // Remainder wallet
-    this.remainderWallet = Wallet.create( {
-      secretOrBundle: this.getSecret(),
-      token: tokenSlug,
-      characters: sourceWallet.characters
-    } );
-    this.remainderWallet.initBatchId( {
-      sourceWallet,
-      isRemainder: true
-    } );
-
+    let remainderWallet = sourceWallet.createRemainder( this.getSecret() );
 
     // Build the molecule itself
-    const molecule = await this.createMolecule( {
-      sourceWallet,
-      remainderWallet: this.remainderWallet
-    } ),
+    const molecule = await this.createMolecule( { sourceWallet, remainderWallet } ),
     /**
      * @type {MutationDepositBufferToken}
      */
@@ -1806,14 +1784,11 @@ export default class KnishIOClient {
     }
 
     // Remainder wallet
-    this.remainderWallet = sourceWallet;
+    let remainderWallet = sourceWallet;
 
 
     // Build the molecule itself
-    const molecule = await this.createMolecule( {
-      sourceWallet,
-      remainderWallet: this.remainderWallet
-    } ),
+    const molecule = await this.createMolecule( { sourceWallet, remainderWallet } ),
     /**
      * @type {MutationWithdrawBufferToken}
      */
@@ -1856,17 +1831,7 @@ export default class KnishIOClient {
     }
 
     // Remainder wallet
-    let remainderWallet = Wallet.create( {
-      secretOrBundle: this.getSecret(),
-      token,
-      characters: sourceWallet.characters
-    } );
-
-    // Batch ID default initialization
-    remainderWallet.initBatchId( {
-      sourceWallet,
-      isRemainder: true
-    } );
+    let remainderWallet = sourceWallet.createRemainder( this.getSecret() );
 
     // Calculate amount & set meta key
     if ( units.length > 0 ) {
@@ -1927,20 +1892,8 @@ export default class KnishIOClient {
       throw new TransferBalanceException( 'Source wallet is missing or invalid.' );
     }
 
-
     // Remainder wallet
-    let remainderWallet = Wallet.create( {
-      secretOrBundle: this.getSecret(),
-      token,
-      characters: sourceWallet.characters
-    } );
-
-    // Batch ID default initialization
-    remainderWallet.initBatchId( {
-      sourceWallet,
-      isRemainder: true
-    } );
-
+    let remainderWallet = sourceWallet.createRemainder( this.getSecret() );
 
     // Create a molecule
     let molecule = await this.createMolecule( { sourceWallet, remainderWallet } );
@@ -2011,17 +1964,7 @@ export default class KnishIOClient {
     recipientWallet.initBatchId( { sourceWallet } );
 
     // Remainder wallet
-    let remainderWallet = Wallet.create( {
-      secretOrBundle: this.getSecret(),
-      token: tokenSlug,
-      batchId: sourceWallet.batchId,
-      characters: sourceWallet.characters
-    } );
-    remainderWallet.initBatchId( {
-      sourceWallet,
-      isRemainder: true
-    } );
-
+    let remainderWallet = sourceWallet.createRemainder( this.getSecret() );
 
     // Split token units (fused)
     sourceWallet.splitUnits( fusedTokenUnitIds, remainderWallet );
