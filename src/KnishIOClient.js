@@ -723,7 +723,7 @@ export default class KnishIOClient {
     queryArgs = null,
     count = null,
     countBy = null,
-    throughAtom = false,
+    throughAtom = true,
     values = null,
     keys = null,
     atomValues = null
