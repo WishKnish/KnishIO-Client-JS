@@ -1356,42 +1356,10 @@ export default class KnishIOClient {
 
     return this.executeQuery( walletQuery, {
       bundleHash: bundle ? bundle : this.getBundle(),
-      token,
+      tokenSlug: token,
       unspent
     } )
       .then( ( response ) => {
-        return response.payload();
-      } );
-  }
-
-  /**
-   * Retrieves a list of your shadow wallets (balance, but no keys)
-   *
-   * @param {string} token
-   * @param {string|null} bundle
-   * @return {Promise<[]>}
-   */
-  queryShadowWallets ( {
-    token = 'KNISH',
-    bundle = null
-  } ) {
-
-    bundle = bundle || this.getBundle();
-
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryShadowWallets() - Querying ${ token } shadow wallets for ${ bundle }...` );
-    }
-
-    /**
-     * @type {QueryWalletList}
-     */
-    const shadowWalletQuery = this.createQuery( QueryWalletList );
-
-    return this.executeQuery( shadowWalletQuery, {
-      bundleHash: bundle,
-      token
-    } )
-      .then( ( /** ResponseWalletList */ response ) => {
         return response.payload();
       } );
   }
@@ -1605,7 +1573,7 @@ export default class KnishIOClient {
   } ) {
 
     // --- Get & check a shadow wallet list
-    const shadowWallets = await this.queryShadowWallets( { token } );
+    const shadowWallets = await this.queryWallets( { token } );
     if ( !shadowWallets || !Array.isArray( shadowWallets ) ) {
       throw new WalletShadowException();
     }
