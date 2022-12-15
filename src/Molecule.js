@@ -61,10 +61,12 @@ import {
 import { deepCloning } from './libraries/array';
 import Dot from './libraries/Dot';
 import Rule from './instance/Rules/Rule';
-import AtomsMissingException from './exception/AtomsMissingException';
-import BalanceInsufficientException from './exception/BalanceInsufficientException';
-import NegativeAmountException from './exception/NegativeAmountException';
-import SignatureMalformedException from './exception/SignatureMalformedException';
+import {
+  AtomsMissingException,
+  BalanceInsufficientException,
+  NegativeAmountException,
+  SignatureMalformedException
+} from './exception';
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -289,8 +291,6 @@ export default class Molecule {
       throw new BalanceInsufficientException();
     }
 
-    this.molecularHash = null;
-
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.sourceWallet,
@@ -349,8 +349,6 @@ export default class Molecule {
       this.sourceWallet.balance = amount;
     }
 
-    this.molecularHash = null;
-
     // Initializing a new Atom to remove tokens from source
     this.addAtom( Atom.create( {
       isotope: 'V',
@@ -385,8 +383,6 @@ export default class Molecule {
     if ( this.sourceWallet.balance - amount < 0 ) {
       throw new BalanceInsufficientException();
     }
-
-    this.molecularHash = null;
 
     // Initializing a new Atom to remove tokens from source
     this.addAtom( Atom.create( {
@@ -436,7 +432,6 @@ export default class Molecule {
     } );
     bufferWallet.tradeRates = tradeRates;
 
-    this.molecularHash = null;
 
     // Initializing a new Atom to remove tokens from source
     this.addAtom( Atom.create( {
@@ -488,7 +483,7 @@ export default class Molecule {
     // Set a metas signing position for molecule correct reconciliation
     let firstAtomMeta = new AtomMeta;
     if ( signingWallet ) {
-      firstAtomMeta.addSigningWallet( signingWallet );
+      firstAtomMeta.setSigningWallet( signingWallet );
     }
 
     // Initializing a new Atom to remove tokens from source
@@ -525,38 +520,6 @@ export default class Molecule {
   }
 
   /**
-   * Builds Atoms to define a new wallet on the ledger
-   *
-   * @param {Wallet} newWallet
-   * @return {Molecule}
-   */
-  initWalletCreation ( newWallet ) {
-
-    this.molecularHash = null;
-
-    let meta = new AtomMeta( {
-      address: newWallet.address,
-      token: newWallet.token,
-      bundle: newWallet.bundle,
-      position: newWallet.position,
-      amount: 0,
-      batchId: newWallet.batchId
-    } );
-
-    this.addAtom( Atom.create( {
-      isotope: 'C',
-      wallet: this.sourceWallet,
-      metaType: 'wallet',
-      metaId: newWallet.address,
-      meta
-    } ) );
-
-    this.addContinuIdAtom();
-
-    return this;
-  }
-
-  /**
    * Initialize a C-type molecule to issue a new type of token
    *
    * @param {Wallet} recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
@@ -570,14 +533,8 @@ export default class Molecule {
     meta
   } ) {
 
-    this.molecularHash = null;
-
-    // Importing wallet fields into meta object
-    for ( const walletKey of [ 'walletAddress', 'walletPosition', 'walletPubkey', 'walletCharacters' ] ) {
-      if ( !meta[ walletKey ] ) {
-        meta[ walletKey ] = recipientWallet[ walletKey.toLowerCase().substring( 6 ) ];
-      }
-    }
+    let atomMeta = new AtomMeta( meta );
+    atomMeta.setMetaWallet( recipientWallet );
 
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
     this.addAtom( Atom.create( {
@@ -586,7 +543,7 @@ export default class Molecule {
       value: amount,
       metaType: 'token',
       metaId: recipientWallet.token,
-      meta: new AtomMeta( meta ),
+      meta: atomMeta,
       batchId: recipientWallet.batchId
     } ) );
 
@@ -638,6 +595,31 @@ export default class Molecule {
     return this;
   }
 
+  /**
+   * Builds Atoms to define a new wallet on the ledger
+   *
+   * @param {Wallet} wallet
+   * @return {Molecule}
+   */
+  initWalletCreation ( wallet, atomMeta ) {
+
+    if ( !atomMeta ) {
+      atomMeta = new AtomMeta();
+    }
+    atomMeta.setMetaWallet( wallet );
+
+    this.addAtom( Atom.create( {
+      isotope: 'C',
+      wallet: this.sourceWallet,
+      metaType: 'wallet',
+      metaId: wallet.address,
+      meta: atomMeta
+    } ) );
+
+    this.addContinuIdAtom();
+
+    return this;
+  }
 
   /**
    * Init shadow wallet claim
@@ -645,33 +627,9 @@ export default class Molecule {
    * @param tokenSlug
    * @param wallet
    */
-  initShadowWalletClaim ( {
-    token,
-    wallet
-  } ) {
-
-    // Generate a wallet metas
-    let metas = {
-      tokenSlug: token,
-      walletAddress: wallet.address,
-      walletPosition: wallet.position,
-      pubkey: wallet.pubkey,
-      characters: wallet.characters,
-      batchId: wallet.batchId
-    };
-
-    this.addAtom( Atom.create( {
-      isotope: 'C',
-      wallet: this.sourceWallet,
-      metaType: 'wallet',
-      metaId: wallet.address,
-      meta: new AtomMeta( metas )
-    } ) );
-
-    // User remainder atom
-    this.addContinuIdAtom();
-
-    return this;
+  initShadowWalletClaim ( wallet ) {
+    let atomMeta = ( new AtomMeta() ).setShadowWalletClaim( true );
+    return this.initWalletCreation( wallet, atomMeta );
   }
 
   /**
