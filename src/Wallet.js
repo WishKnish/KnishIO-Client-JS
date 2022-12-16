@@ -70,14 +70,18 @@ export default class Wallet {
    * Class constructor
    *
    * @param {string|null} secret - typically a 2048-character biometric hash
+   * @param {string|null} bundle - 64-character hexadecimal user identifier
    * @param {string} token - slug for the token this wallet is intended for
+   * @param {string|null} address - hexadecimal public key for the signature of this wallet
    * @param {string|null} position - hexadecimal string used to salt the secret and produce one-time signatures
    * @param {string|null} batchId
    * @param {string|null} characters
    */
   constructor ( {
     secret = null,
+    bundle = null,
     token = 'USER',
+    address = null,
     position = null,
     batchId = null,
     characters = null
@@ -89,21 +93,21 @@ export default class Wallet {
 
     // Empty values
     this.key = null;
-    this.address = null;
     this.privkey = null;
     this.pubkey = null;
     this.tokenUnits = [];
     this.tradeRates = {};
 
-    this.bundle = null;
-    this.batchId = batchId;
+    this.address = address;
     this.position = position;
+    this.bundle = bundle;
+    this.batchId = batchId;
     this.characters = characters;
 
     if ( secret ) {
 
       // Set bundle from the secret
-      this.bundle = generateBundleHash( secret );
+      this.bundle = this.bundle || generateBundleHash( secret );
 
       // Generate a position for non-shadow wallet if not initialized
       this.position = this.position || Wallet.generatePosition();
@@ -114,7 +118,7 @@ export default class Wallet {
         token: this.token,
         position: this.position
       } );
-      this.address = Wallet.generateAddress( this.key );
+      this.address = this.address || Wallet.generateAddress( this.key );
 
       // Soda object initialization
       this.soda = new Soda( characters );
@@ -144,9 +148,18 @@ export default class Wallet {
     characters = null
   } ) {
 
-    let secret = Wallet.isBundleHash( secretOrBundle ) ? null : secretOrBundle;
-    let bundle = secret ? generateBundleHash( secret ) : secretOrBundle;
-    let position = secret ? Wallet.generatePosition() : null;
+    let secret = null;
+    let position = null;
+    let bundle = null;
+
+    if( Wallet.isBundleHash( secretOrBundle ) ) {
+      bundle = secretOrBundle;
+    }
+    else {
+      secret = secretOrBundle;
+      position = Wallet.generatePosition();
+      bundle = generateBundleHash( secret );
+    }
 
     // Wallet initialization
     let wallet = new Wallet( {

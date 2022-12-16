@@ -780,12 +780,14 @@ export default class Molecule {
    * Creates a one-time signature for a molecule and breaks it up across multiple atoms within that
    * molecule. Resulting 4096 byte (2048 character) string is the one-time signature, which is then compressed.
    *
+   * @param {string|null} bundle
    * @param {boolean} anonymous
    * @param {boolean} compressed
    * @return {string|null}
    * @throws {AtomsMissingException}
    */
   sign ( {
+    bundle = null,
     anonymous = false,
     compressed = true
   } ) {
@@ -796,8 +798,8 @@ export default class Molecule {
     }
 
     // Derive the user's bundle
-    if ( !anonymous ) {
-      this.bundle = generateBundleHash( this.secret );
+    if ( !anonymous && !this.bundle ) {
+      this.bundle = bundle ? bundle : generateBundleHash( this.secret );
     }
 
     // Hash atoms to get molecular hash

@@ -1303,7 +1303,9 @@ export default class KnishIOClient {
       policy
     } );
     molecule.addContinuIdAtom();
-    molecule.sign( {} );
+    molecule.sign( {
+      bundle: this.getBundle()
+    } );
     molecule.check();
 
     // Create & execute a mutation
@@ -1824,7 +1826,9 @@ export default class KnishIOClient {
     // Create a molecule
     let molecule = await this.createMolecule( { sourceWallet, remainderWallet } );
     molecule.burnToken( { amount } );
-    molecule.sign( {} );
+    molecule.sign( {
+      bundle: this.getBundle()
+    } );
     molecule.check();
 
     // Create & execute a mutation
@@ -1866,7 +1870,9 @@ export default class KnishIOClient {
     // Create a molecule
     let molecule = await this.createMolecule( { sourceWallet, remainderWallet } );
     molecule.replenishToken( { amount, units } );
-    molecule.sign( {} );
+    molecule.sign( {
+      bundle: this.getBundle()
+    } );
     molecule.check();
 
     // Create & execute a mutation
@@ -1944,7 +1950,9 @@ export default class KnishIOClient {
     // Create a molecule
     let molecule = await this.createMolecule( { sourceWallet, remainderWallet } );
     molecule.fuseToken( sourceWallet.tokenUnits, recipientWallet );
-    molecule.sign( {} );
+    molecule.sign( {
+      bundle: this.getBundle()
+    } );
     molecule.check();
 
     // Create & execute a mutation
