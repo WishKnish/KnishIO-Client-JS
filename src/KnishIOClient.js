@@ -1379,9 +1379,6 @@ export default class KnishIOClient {
    */
   queryBundle ( {
     bundle = null,
-    key = null,
-    value = null,
-    latest = true,
     fields = null,
     raw = false
   } ) {
@@ -1390,19 +1387,19 @@ export default class KnishIOClient {
       console.info( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundle ? ` for ${ bundle }` : '' }...` );
     }
 
+    // Bundle default init & to array convertion
+    if ( !bundle ) {
+      bundle = this.getBundle();
+    }
+    if ( typeof bundle === 'string' ) {
+      bundle = [ bundle ];
+    }
+
     /**
      * @type {QueryWalletBundle}
      */
     const query = this.createQuery( QueryWalletBundle );
-    const variables = QueryWalletBundle.createVariables( {
-      bundleHash: bundle || this.getBundle(),
-      key,
-      value,
-      latest
-    } );
-
-
-    return this.executeQuery( query, variables )
+    return this.executeQuery( query, { bundleHashes: bundle } )
       .then( ( /** ResponseWalletBundle */ response ) => {
         return raw ? response : response.payload();
       } );
