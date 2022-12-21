@@ -611,7 +611,8 @@ export default class Molecule {
       wallet: this.sourceWallet,
       metaType: 'wallet',
       metaId: wallet.address,
-      meta: atomMeta
+      meta: atomMeta,
+      batchId: wallet.batchId
     } ) );
 
     this.addContinuIdAtom();
