@@ -66,10 +66,6 @@ export default class QueryWalletList extends Query {
           fungibility,
           supply
         },
-        molecules {
-          molecularHash,
-          createdAt
-        }
         tokenSlug,
         batchId,
         position,
