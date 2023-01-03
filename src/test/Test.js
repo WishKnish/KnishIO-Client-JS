@@ -624,10 +624,11 @@ export default class Test {
   checkResponse ( response, key ) {
 
     console.log( ` ############### ${ key } ###############` );
-    console.log( response );
 
     // Check molecule response
     if ( response instanceof ResponseMolecule ) {
+      console.log( response );
+
       if ( !response.success() ) {
         this.debug( response );
       }
