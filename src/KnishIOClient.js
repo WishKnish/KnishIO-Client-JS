@@ -1372,8 +1372,6 @@ export default class KnishIOClient {
    *
    * @param {string|boolean|null} bundle
    * @param {string|array|null} key
-   * @param {string|array|null} value
-   * @param {boolean} latest
    * @param {object|null} fields
    * @param {boolean} raw
    * @return {Promise<ResponseWalletBundle|{}>}
