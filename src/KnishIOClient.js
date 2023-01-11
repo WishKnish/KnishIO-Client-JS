@@ -1155,6 +1155,7 @@ export default class KnishIOClient {
     // Creating the wallet that will receive the new tokens
     const recipientWallet = new Wallet( {
       secret: this.getSecret(),
+      bundle: this.getBundle(),
       token,
       batchId
     } );

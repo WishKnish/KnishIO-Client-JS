@@ -91,7 +91,7 @@ export default class AtomMeta {
 
   /**
    *
-   * @param wallet
+   * @param {Wallet} wallet
    * @returns {AtomMeta}
    */
   setAtomWallet( wallet ) {
@@ -118,7 +118,7 @@ export default class AtomMeta {
    * Set full NEW wallet metadata
    * Used for shadow wallet claim & wallet creation & token creation
    *
-   * @param wallet
+   * @param {Wallet} wallet
    * @returns {AtomMeta}
    */
   setMetaWallet( wallet ) {
@@ -146,7 +146,7 @@ export default class AtomMeta {
 
   /**
    *
-   * @param signingWallet
+   * @param {Wallet} signingWallet
    * @returns {AtomMeta}
    */
   setSigningWallet ( signingWallet ) {
@@ -171,7 +171,7 @@ export default class AtomMeta {
    */
   addPolicy( policy ) {
 
-    // Policy meta intialization
+    // Policy meta initialization
     let policyMeta = new PolicyMeta( policy, Object.keys( this.meta ) );
 
     this.merge( {
