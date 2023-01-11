@@ -129,7 +129,7 @@ export default class AtomMeta {
       walletPosition: wallet.position,
       walletBatchId: wallet.batchId,
       walletPubkey: wallet.pubkey,
-      walletCharacters: wallet.characters,
+      walletCharacters: wallet.characters
     } );
     return this;
   }
@@ -157,8 +157,8 @@ export default class AtomMeta {
         address: signingWallet.address,
         position: signingWallet.position,
         pubkey: signingWallet.pubkey,
-        characters: signingWallet.characters,
-      } ),
+        characters: signingWallet.characters
+      } )
     } );
     return this;
   }
