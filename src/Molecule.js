@@ -725,6 +725,8 @@ export default class Molecule {
 
     meta.token = token;
 
+    this.local = 1;
+
     this.addAtom( Atom.create( {
       isotope: 'T',
       wallet: this.sourceWallet,
