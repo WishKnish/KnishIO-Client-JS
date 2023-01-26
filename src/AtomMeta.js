@@ -151,14 +151,12 @@ export default class AtomMeta {
    */
   setSigningWallet ( signingWallet ) {
     this.merge( {
-      signingWallet: JSON.stringify( {
-        tokenSlug: signingWallet.token,
-        bundleHash: signingWallet.bundle,
-        address: signingWallet.address,
-        position: signingWallet.position,
-        pubkey: signingWallet.pubkey,
-        characters: signingWallet.characters,
-      } ),
+      signingTokenSlug: signingWallet.token,
+      signingBundleHash: signingWallet.bundle,
+      signingAddress: signingWallet.address,
+      signingPosition: signingWallet.position,
+      signingPubkey: signingWallet.pubkey,
+      signingCharacters: signingWallet.characters,
     } );
     return this;
   }
