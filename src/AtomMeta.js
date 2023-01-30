@@ -156,7 +156,7 @@ export default class AtomMeta {
       signingAddress: signingWallet.address,
       signingPosition: signingWallet.position,
       signingPubkey: signingWallet.pubkey,
-      signingCharacters: signingWallet.characters,
+      signingCharacters: signingWallet.characters
     } );
     return this;
   }
