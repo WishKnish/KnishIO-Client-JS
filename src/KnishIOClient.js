@@ -723,7 +723,7 @@ export default class KnishIOClient {
     queryArgs = null,
     count = null,
     countBy = null,
-    throughAtom = false,
+    throughAtom = true,
     values = null,
     keys = null,
     atomValues = null
@@ -1155,6 +1155,7 @@ export default class KnishIOClient {
     // Creating the wallet that will receive the new tokens
     const recipientWallet = new Wallet( {
       secret: this.getSecret(),
+      bundle: this.getBundle(),
       token,
       batchId
     } );
@@ -1371,8 +1372,6 @@ export default class KnishIOClient {
    *
    * @param {string|boolean|null} bundle
    * @param {string|array|null} key
-   * @param {string|array|null} value
-   * @param {boolean} latest
    * @param {object|null} fields
    * @param {boolean} raw
    * @return {Promise<ResponseWalletBundle|{}>}

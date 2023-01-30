@@ -90,12 +90,12 @@ export default class TestTokenUnit {
 
     this.clients = {};
     this.tokenUnits = [
-      [ 'unit_id_1', 'unit_name_1', {url: "test1.com"} ],
-      [ 'unit_id_2', 'unit_name_2', {url: "test2.com"} ],
-      [ 'unit_id_3', 'unit_name_3', {url: "test3.com"} ],
-      [ 'unit_id_4', 'unit_name_4', {url: "test4.com"} ],
-      [ 'unit_id_5', 'unit_name_5', {url: "test5.com"} ],
-      [ 'unit_id_6', 'unit_name_6', {url: "test6.com"} ],
+      [ 'unit_id_1', 'unit_name_1', {url: 'test1.com'} ],
+      [ 'unit_id_2', 'unit_name_2', {url: 'test2.com'} ],
+      [ 'unit_id_3', 'unit_name_3', {url: 'test3.com'} ],
+      [ 'unit_id_4', 'unit_name_4', {url: 'test4.com'} ],
+      [ 'unit_id_5', 'unit_name_5', {url: 'test5.com'} ],
+      [ 'unit_id_6', 'unit_name_6', {url: 'test6.com'} ]
     ];
   }
 
@@ -166,7 +166,7 @@ export default class TestTokenUnit {
     let response = await client.transferToken( {
       bundleHash,
       token: this.tokenSlugs[ 0 ],
-      units: [ 'unit_id_1', 'unit_id_2' ],
+      units: [ 'unit_id_1', 'unit_id_2' ]
     } );
     this.checkResponse( response, 'testTransferUnitToken.1' );
   }
@@ -183,7 +183,7 @@ export default class TestTokenUnit {
     let response = await client.transferToken( {
       bundleHash,
       token: this.tokenSlugs[ 0 ],
-      units: [ 'unit_id_3', 'unit_id_4' ],
+      units: [ 'unit_id_3', 'unit_id_4' ]
     } );
     this.checkResponse( response, 'testTransferUnitToken.2' );
   }
@@ -213,7 +213,7 @@ export default class TestTokenUnit {
     let response = await client.transferToken( {
       bundleHash,
       token: this.tokenSlugs[ 0 ],
-      units: [ 'unit_id_1', ],
+      units: [ 'unit_id_1' ]
     } );
     this.checkResponse( response, 'testTransferBackToken.1' );
   }
@@ -230,7 +230,7 @@ export default class TestTokenUnit {
     let response = await client.transferToken( {
       bundleHash,
       token: this.tokenSlugs[ 0 ],
-      units: [ 'unit_id_3' ],
+      units: [ 'unit_id_3' ]
     } );
     this.checkResponse( response, 'testTransferBackToken.2' );
   }

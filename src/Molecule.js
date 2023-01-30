@@ -597,9 +597,10 @@ export default class Molecule {
    * Builds Atoms to define a new wallet on the ledger
    *
    * @param {Wallet} wallet
+   * @param {AtomMeta|null} atomMeta
    * @return {Molecule}
    */
-  initWalletCreation ( wallet, atomMeta ) {
+  initWalletCreation ( wallet, atomMeta = null ) {
 
     if ( !atomMeta ) {
       atomMeta = new AtomMeta();
@@ -623,7 +624,6 @@ export default class Molecule {
   /**
    * Init shadow wallet claim
    *
-   * @param tokenSlug
    * @param wallet
    */
   initShadowWalletClaim ( wallet ) {

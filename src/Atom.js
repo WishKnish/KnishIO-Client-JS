@@ -121,13 +121,13 @@ export default class Atom {
 
   /**
    *
-   * @param isotope
-   * @param wallet
-   * @param value
-   * @param metaType
-   * @param metaId
-   * @param meta
-   * @param batchId
+   * @param {string} isotope
+   * @param {Wallet|null} wallet
+   * @param {int|null} value
+   * @param {string|null} metaType
+   * @param {string|null} metaId
+   * @param {array|object|null} meta
+   * @param {string|null} batchId
    * @returns {Atom}
    */
   static create( {
