@@ -120,7 +120,7 @@
     "build:webpack:dev:sub": "webpack --mode development --watch --stats-colors --profile --config ./webpack.config.sub.js",
     "build:webpack": "webpack --mode production --progress --stats-colors --profile",
     "lint": "eslint --ext .js src",
-    "test": "jest"
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "nodemonConfig": {
     "delay": 5500
