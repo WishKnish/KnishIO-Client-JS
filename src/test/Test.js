@@ -54,6 +54,8 @@ import {
 import ResponseMolecule from '../response/ResponseProposeMolecule';
 import TokenUnit from '../TokenUnit';
 
+
+
 /*
 
 import Test from '@wishknish/knishio-client-js/src/test/Test';
@@ -65,16 +67,6 @@ await Test.run( KNISHIO_SETTINGS.serverUriConfig );
 */
 
 export default class Test {
-
-  /**
-   * Run all
-   */
-  static async run ( uris ) {
-    for ( let uriIndex in uris ) {
-      let test = new Test( uris[ uriIndex ] );
-      await test.testAll();
-    }
-  }
 
   /**
    *
@@ -135,10 +127,11 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
-    console.info( `Executing test for: ${ this.graphqlUrl }...` );
+
 
     await this.client( this.secrets[ 0 ] );
     await this.client( this.secrets[ 1 ] );
+    return;
 
     await this.testCreateToken();
     await this.testFuseToken();

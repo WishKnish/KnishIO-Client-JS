@@ -103,7 +103,7 @@
     "webpack": "^5.71.0",
     "webpack-cli": "^4.9.2",
     "webpack-merge": "^5.8.0",
-    "jest": "^29.4.3"
+    "cli-color": "^2.0.3"
   },
   "browserslist": [
     "> 1%",
@@ -120,7 +120,7 @@
     "build:webpack:dev:sub": "webpack --mode development --watch --stats-colors --profile --config ./webpack.config.sub.js",
     "build:webpack": "webpack --mode production --progress --stats-colors --profile",
     "lint": "eslint --ext .js src",
-    "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
+    "test": "yarn build:cjs && test/query.test.js"
   },
   "nodemonConfig": {
     "delay": 5500
