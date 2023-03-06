@@ -53,42 +53,25 @@ import {
 } from '../libraries/crypto';
 import ResponseMolecule from '../response/ResponseProposeMolecule';
 import TokenUnit from '../TokenUnit';
+import TestCase from './TestCase';
 
-/*
 
-import Test from '@wishknish/knishio-client-js/src/test/Test';
-import { KNISHIO_SETTINGS, } from 'src/libraries/constants/knishio';
+/**
+ *
+ */
+export default class TestTokenUnit extends TestCase {
 
-// Run all test
-await TestTokenUnit.run( KNISHIO_SETTINGS.serverUriConfig );
-
-*/
-
-export default class TestTokenUnit {
-
-  /**
-   * Run all
-   */
-  static async run ( uris ) {
-    for ( let uriIndex in uris ) {
-      let test = new TestTokenUnit( uris[ uriIndex ] );
-      await test.testAll();
-    }
-  }
 
   /**
    *
    * @param graphqlUrl
    * @param encrypt
    */
-  constructor ( graphqlUrl, encrypt = false ) {
-    this.encrypt = encrypt;
-    this.secrets = [ generateSecret(), generateSecret() ];
-    this.tokenSlugs = [ 'UTNFUNGUNIT' ];
-    this.graphqlUrl = graphqlUrl;
-    console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` );
+  constructor ( graphqlUrl, logging = true, encrypt = false ) {
+    super( graphqlUrl, logging, encrypt );
 
-    this.clients = {};
+    this.tokenSlugs = [ 'UTNFUNGUNIT' ];
+
     this.tokenUnits = [
       [ 'unit_id_1', 'unit_name_1', {url: 'test1.com'} ],
       [ 'unit_id_2', 'unit_name_2', {url: 'test2.com'} ],
@@ -261,80 +244,5 @@ export default class TestTokenUnit {
     console.warn( `--- Query wallet: ${ title }: `, outputData );
   }
 
-
-  /**
-   * Get a client for each secret
-   *
-   * @param secret
-   * @param cellSlug
-   * @returns {Promise<*>}
-   */
-  async client ( secret, cellSlug = 'unit_test' ) {
-
-    // Create new client
-    if ( !this.clients[ secret ] ) {
-
-      // Create a client
-      this.clients[ secret ] = new KnishIOClient( {
-        uri: this.graphqlUrl,
-        logging: true
-      } );
-
-      // Auth the client
-      await this.clients[ secret ]
-        .requestAuthToken( {
-          secret,
-          encrypt: this.encrypt,
-          cellSlug
-        } );
-      if ( !this.clients[ secret ].getAuthToken() ) {
-        console.log( 'Error with authorize - get an empty response.' );
-      }
-    }
-
-    // Return the client by secret
-    return this.clients[ secret ];
-  }
-
-
-  /**
-   * Check a response
-   * @param response
-   * @param key
-   */
-  checkResponse ( response, key ) {
-
-    console.log( ` ############### ${ key } ###############` );
-    console.log( response );
-
-    // Check molecule response
-    if ( response instanceof ResponseMolecule ) {
-      if ( !response.success() ) {
-        this.debug( response );
-      }
-      console.assert( response.success(), response );
-    }
-
-    // Default response
-    else {
-      this.debug( response );
-    }
-  }
-
-
-  /**
-   * Debug output
-   * @param response
-   */
-  debug ( response ) {
-
-    // Reason data on the top of the output
-    if ( response.data && Dot.get( response.data() || {}, 'reason' ) ) {
-      console.log( response.data().reason );
-    } else {
-      console.log( response );
-    }
-
-  }
 
 }

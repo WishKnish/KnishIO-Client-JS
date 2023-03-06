@@ -164,9 +164,7 @@ export default class KnishIOClient {
       this.$__authTokenObjects[ url ] = null;
     }
 
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
-    }
+    this.log( `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...` );
 
     this.reset();
     this.$__client = client || new ApolloClient( {
@@ -204,9 +202,7 @@ export default class KnishIOClient {
     if ( this.$__encrypt === encrypt ) {
       return false;
     }
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::switchEncryption() - Forcing encryption ${ encrypt ? 'on' : 'off' } to match node...` );
-    }
+    this.log( `KnishIOClient::switchEncryption() - Forcing encryption ${ encrypt ? 'on' : 'off' } to match node...` );
 
     // Set encryption
     this.$__encrypt = encrypt;
@@ -218,9 +214,9 @@ export default class KnishIOClient {
    * De-initializes the Knish.IO client session so that a new session can replace it
    */
   deinitialize () {
-    if ( this.$__logging ) {
-      console.info( 'KnishIOClient::deinitialize() - Clearing the Knish.IO client session...' );
-    }
+
+    this.log( 'KnishIOClient::deinitialize() - Clearing the Knish.IO client session...' );
+
     this.reset();
   }
 
@@ -417,9 +413,7 @@ export default class KnishIOClient {
     remainderWallet = null
   } ) {
 
-    if ( this.$__logging ) {
-      console.info( 'KnishIOClient::createMolecule() - Creating a new molecule...' );
-    }
+    this.log( 'KnishIOClient::createMolecule() - Creating a new molecule...' );
 
     secret = secret || this.getSecret();
 
@@ -511,7 +505,6 @@ export default class KnishIOClient {
    * @returns {Promise<*>}
    */
   async executeQuery ( query, variables = null ) {
-    // console.info( `KnishIOClient::executeQuery() - Check token expiration... ${ this.$__authToken.$__expiresAt * 1000 } == ${ Date.now() } ` );
     if ( this.$__authToken && this.$__authToken.isExpired() ) {
       console.info( 'KnishIOClient::executeQuery() - Access token is expired. Getting new one...' );
 
@@ -729,9 +722,7 @@ export default class KnishIOClient {
     atomValues = null
   } ) {
 
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
-    }
+    this.log( `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
 
     let query;
     let variables;
@@ -804,9 +795,7 @@ export default class KnishIOClient {
     fields = null
   } ) {
 
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryMetaInstance() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
-    }
+    this.log( `KnishIOClient::queryMetaInstance() - Querying metaType: ${ metaType }, metaId: ${ metaId }...` );
 
     /**
      * @type {QueryMetaType}
@@ -837,9 +826,7 @@ export default class KnishIOClient {
     batchId
   } ) {
 
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryBatch() - Querying cascading meta instances for batchId: ${ batchId }...` );
-    }
+    this.log( `KnishIOClient::queryBatch() - Querying cascading meta instances for batchId: ${ batchId }...` );
 
     const query = this.createQuery( QueryBatch );
 
@@ -858,9 +845,7 @@ export default class KnishIOClient {
     batchId
   } ) {
 
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${ batchId }...` );
-    }
+    this.log( `KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${ batchId }...` );
 
     const query = this.createQuery( QueryBatchHistory );
 
@@ -934,9 +919,7 @@ export default class KnishIOClient {
     }
   } ) {
 
-    if ( this.$__logging ) {
-      console.info( 'KnishIOClient::queryAtom() - Querying atom instances' );
-    }
+    this.log( 'KnishIOClient::queryAtom() - Querying atom instances' );
 
     /** @type QueryAtom */
     const query = this.createQuery( QueryAtom );
@@ -1348,9 +1331,7 @@ export default class KnishIOClient {
     unspent = true
   } ) {
 
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryWallets() - Querying wallets${ bundle ? ` for ${ bundle }` : '' }...` );
-    }
+    this.log( `KnishIOClient::queryWallets() - Querying wallets${ bundle ? ` for ${ bundle }` : '' }...` );
 
     /**
      * @type {QueryWalletList}
@@ -1382,9 +1363,7 @@ export default class KnishIOClient {
     raw = false
   } ) {
 
-    if ( this.$__logging ) {
-      console.info( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundle ? ` for ${ bundle }` : '' }...` );
-    }
+    this.log( `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundle ? ` for ${ bundle }` : '' }...` );
 
     // Bundle default init & to array convertion
     if ( !bundle ) {
@@ -2088,9 +2067,7 @@ export default class KnishIOClient {
 
     // SDK versions 2 and below do not utilize an authorization token
     if ( this.$__serverSdkVersion < 3 ) {
-      if ( this.$__logging ) {
-        console.warn( 'KnishIOClient::authorize() - Server SDK version does not require an authorization...' );
-      }
+      this.log( 'KnishIOClient::authorize() - Server SDK version does not require an authorization...', 'warn' );
       return null;
     }
 
@@ -2123,7 +2100,7 @@ export default class KnishIOClient {
 
     // Set auth token
     if ( this.$__logging ) {
-      console.info( `KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.getToken() }...` );
+      this.log( `KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.getToken() }...` );
     }
 
     // Switch encryption mode if it has been changed
@@ -2146,9 +2123,7 @@ export default class KnishIOClient {
 
     // An empty auth token
     if ( !authToken ) {
-      if ( this.$__logging ) {
-        console.info( 'KnishIOClient::setAuthToken() - authToken object is empty.' );
-      }
+      this.log( 'KnishIOClient::setAuthToken() - authToken object is empty.' );
       return;
     }
 
@@ -2170,6 +2145,18 @@ export default class KnishIOClient {
    */
   getAuthToken () {
     return this.$__authToken;
+  }
+
+
+  /**
+   * Log message
+   * @param message
+   */
+  log( message, type = 'info' ) {
+    if ( !this.$__logging ) {
+      return;
+    }
+    console[type]( message );
   }
 
 }
