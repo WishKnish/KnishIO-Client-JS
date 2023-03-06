@@ -53,34 +53,24 @@ import {
 } from '../libraries/crypto';
 import ResponseMolecule from '../response/ResponseProposeMolecule';
 import TokenUnit from '../TokenUnit';
+import TestCase from './TestCase';
 
-
-
-/*
-
-import Test from '@wishknish/knishio-client-js/src/test/Test';
-import { KNISHIO_SETTINGS, } from 'src/libraries/constants/knishio';
-
-// Run all test
-await Test.run( KNISHIO_SETTINGS.serverUriConfig );
-
-*/
-
-export default class Test {
+/**
+ *
+ */
+export default class Test extends TestCase {
 
   /**
    *
    * @param graphqlUrl
+   * @param logging
    * @param encrypt
    */
-  constructor ( graphqlUrl, encrypt = false ) {
-    this.encrypt = encrypt;
-    this.secrets = [ generateSecret(), generateSecret() ];
-    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES', 'UTSLUG0', 'UTSLUG1' ];
-    this.graphqlUrl = graphqlUrl;
-    console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` );
+  constructor ( graphqlUrl, logging = true, encrypt = false ) {
+    super( graphqlUrl, logging, encrypt );
 
-    this.clients = {};
+    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES', 'UTSLUG0', 'UTSLUG1' ];
+
     this.tokenUnits = [
       [ 'unit_id_1', 'unit_name_1' ],
       [ 'unit_id_2', 'unit_name_2' ],
@@ -131,7 +121,6 @@ export default class Test {
 
     await this.client( this.secrets[ 0 ] );
     await this.client( this.secrets[ 1 ] );
-    return;
 
     await this.testCreateToken();
     await this.testFuseToken();
@@ -589,7 +578,7 @@ export default class Test {
       // Create a client
       this.clients[ secret ] = new KnishIOClient( {
         uri: this.graphqlUrl,
-        logging: true
+        logging: this.logging
       } );
 
       // Auth the client

@@ -6,8 +6,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+// npm test --serverUrl=http://laravel.knishio/graphql
+
 var cjs = require('./../dist/client.cjs');
-var clc = require("cli-color");
+var clc = require('cli-color');
 
 const serverUrl = process.env.npm_config_serverurl;
 if (!serverUrl) {
@@ -17,6 +19,5 @@ if (!serverUrl) {
 
 console.error( clc.green(`Starting test with url: ${ serverUrl }` ) );
 
-const test = new cjs.Test( serverUrl );
+const test = new cjs.Test( serverUrl, false );
 test.testAll();
-
