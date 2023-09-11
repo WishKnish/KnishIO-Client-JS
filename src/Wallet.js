@@ -45,8 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { shake256 } from 'js-sha3';
-import bigInt from 'big-integer/BigInteger';
+import jsSHA from 'jssha';
 import {
   chunkSubstr,
   isHex,
@@ -70,14 +69,18 @@ export default class Wallet {
    * Class constructor
    *
    * @param {string|null} secret - typically a 2048-character biometric hash
+   * @param {string|null} bundle - 64-character hexadecimal user identifier
    * @param {string} token - slug for the token this wallet is intended for
+   * @param {string|null} address - hexadecimal public key for the signature of this wallet
    * @param {string|null} position - hexadecimal string used to salt the secret and produce one-time signatures
    * @param {string|null} batchId
    * @param {string|null} characters
    */
   constructor ( {
     secret = null,
+    bundle = null,
     token = 'USER',
+    address = null,
     position = null,
     batchId = null,
     characters = null
@@ -89,21 +92,21 @@ export default class Wallet {
 
     // Empty values
     this.key = null;
-    this.address = null;
     this.privkey = null;
     this.pubkey = null;
     this.tokenUnits = [];
     this.tradeRates = {};
 
-    this.bundle = null;
-    this.batchId = batchId;
+    this.address = address;
     this.position = position;
+    this.bundle = bundle;
+    this.batchId = batchId;
     this.characters = characters;
 
     if ( secret ) {
 
       // Set bundle from the secret
-      this.bundle = generateBundleHash( secret );
+      this.bundle = this.bundle || generateBundleHash( secret );
 
       // Generate a position for non-shadow wallet if not initialized
       this.position = this.position || Wallet.generatePosition();
@@ -114,7 +117,7 @@ export default class Wallet {
         token: this.token,
         position: this.position
       } );
-      this.address = Wallet.generateAddress( this.key );
+      this.address = this.address || Wallet.generateAddress( this.key );
 
       // Soda object initialization
       this.soda = new Soda( characters );
@@ -144,9 +147,17 @@ export default class Wallet {
     characters = null
   } ) {
 
-    let secret = Wallet.isBundleHash( secretOrBundle ) ? null : secretOrBundle;
-    let bundle = secret ? generateBundleHash( secret ) : secretOrBundle;
-    let position = secret ? Wallet.generatePosition() : null;
+    let secret = null;
+    let position = null;
+    let bundle = null;
+
+    if ( Wallet.isBundleHash( secretOrBundle ) ) {
+      bundle = secretOrBundle;
+    } else {
+      secret = secretOrBundle;
+      position = Wallet.generatePosition();
+      bundle = generateBundleHash( secret );
+    }
 
     // Wallet initialization
     let wallet = new Wallet( {
@@ -240,6 +251,25 @@ export default class Wallet {
       recipientWallet.tokenUnits = recipientTokenUnits;
     }
     remainderWallet.tokenUnits = remainderTokenUnits;
+  }
+
+
+  /**
+   * Create a remainder wallet from the source one
+   *
+   * @param secret
+   */
+  createRemainder ( secret ) {
+    let remainderWallet = Wallet.create( {
+      secretOrBundle: secret,
+      token: this.token,
+      characters: this.characters
+    } );
+    remainderWallet.initBatchId( {
+      sourceWallet: this,
+      isRemainder: true
+    } );
+    return remainderWallet;
   }
 
   /**
@@ -401,20 +431,24 @@ export default class Wallet {
   } ) {
 
     // Converting secret to bigInt
-    const bigIntSecret = bigInt( secret, 16 ),
-      // Adding new position to the user secret to produce the indexed key
-      indexedKey = bigIntSecret.add( bigInt( position, 16 ) ),
-      // Hashing the indexed key to produce the intermediate key
-      intermediateKeySponge = shake256.create( 8192 );
+    const bigIntSecret = BigInt( `0x${secret}` );
 
-    intermediateKeySponge.update( indexedKey.toString( 16 ) );
+    // Adding new position to the user secret to produce the indexed key
+    const indexedKey = bigIntSecret + BigInt( `0x${position}` );
+
+    // Hashing the indexed key to produce the intermediate key
+    const intermediateKeySponge = new jsSHA( 'SHAKE256', 'TEXT' );
+
+    intermediateKeySponge.update( indexedKey.toString(16) );
 
     if ( token ) {
       intermediateKeySponge.update( token );
     }
 
     // Hashing the intermediate key to produce the private key
-    return shake256.create( 8192 ).update( intermediateKeySponge.hex() ).hex();
+    const privateKeySponge = new jsSHA( 'SHAKE256', 'TEXT' );
+    privateKeySponge.update( intermediateKeySponge.getHash( 'HEX', { outputLen: 8192 } ) );
+    return privateKeySponge.getHash( 'HEX', { outputLen: 8192 } );
   }
 
   /**
@@ -428,23 +462,23 @@ export default class Wallet {
     // Subdivide private key into 16 fragments of 128 characters each
     const keyFragments = chunkSubstr( key, 128 ),
       // Generating wallet digest
-      digestSponge = shake256.create( 8192 );
+      digestSponge = new jsSHA( 'SHAKE256', 'TEXT' );
 
     for ( const index in keyFragments ) {
-
       let workingFragment = keyFragments[ index ];
-
       for ( let fragmentCount = 1; fragmentCount <= 16; fragmentCount++ ) {
-
-        workingFragment = shake256.create( 512 ).update( workingFragment ).hex();
-
+        const workingSponge = new jsSHA( 'SHAKE256', 'TEXT' );
+        workingSponge.update( workingFragment );
+        workingFragment = workingSponge.getHash( 'HEX', { outputLen: 512 } );
       }
 
       digestSponge.update( workingFragment );
     }
 
     // Producing wallet address
-    return shake256.create( 256 ).update( digestSponge.hex() ).hex();
+    const outputSponge = new jsSHA( 'SHAKE256', 'TEXT' );
+    outputSponge.update( digestSponge.getHash( 'HEX', { outputLen: 8192 } ) );
+    return outputSponge.getHash( 'HEX', { outputLen: 256 } );
   }
 
   /**

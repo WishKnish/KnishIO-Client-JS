@@ -1,7 +1,6 @@
 import Base64 from './Base64';
 import Base58 from './Base58';
 import base from 'base-x';
-import { Buffer } from 'buffer';
 
 
 export default class BaseX {
@@ -29,8 +28,15 @@ export default class BaseX {
    * @param {Buffer|ArrayBuffer|Uint8Array} data
    * @return {string}
    */
-  encode ( data ) {
-    return this.$encoder.encode( Buffer.from( data ) );
+  encode(data) {
+    // If data is already a Uint8Array, proceed as-is; otherwise, convert it
+    const uint8Array = data instanceof Uint8Array ? data : new Uint8Array(data);
+
+    // Convert the Uint8Array to a binary string
+    const binaryString = String.fromCharCode(...uint8Array);
+
+    // Encode using your existing encoder
+    return this.$encoder.encode(binaryString);
   }
 
   /**

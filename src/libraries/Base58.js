@@ -1,5 +1,4 @@
 import base from 'base-x';
-import { Buffer } from 'buffer';
 
 
 export default class Base58 {

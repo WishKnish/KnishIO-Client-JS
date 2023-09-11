@@ -6,6 +6,5 @@ export default {
     gql: [ '@apollo/client/core', 'gql' ],
     from: [ '@apollo/client/core', 'from' ],
     concat: [ '@apollo/client/core', 'concat' ],
-    Observable: [ '@apollo/client/core', 'Observable' ],
-    shake256: [ 'js-sha3', 'shake256' ]
+    Observable: [ '@apollo/client/core', 'Observable' ]
 };

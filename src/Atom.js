@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { shake256 } from 'js-sha3';
+import jsSHA from 'jssha';
 import { charsetBaseConvert } from './libraries/strings';
 import Meta from './Meta';
 import AtomMeta from './AtomMeta';
@@ -121,13 +121,13 @@ export default class Atom {
 
   /**
    *
-   * @param isotope
-   * @param wallet
-   * @param value
-   * @param metaType
-   * @param metaId
-   * @param meta
-   * @param batchId
+   * @param {string} isotope
+   * @param {Wallet|null} wallet
+   * @param {int|null} value
+   * @param {string|null} metaType
+   * @param {string|null} metaId
+   * @param {array|object|null} meta
+   * @param {string|null} batchId
    * @returns {Atom}
    */
   static create( {
@@ -148,7 +148,7 @@ export default class Atom {
     if ( wallet ) {
 
       // Add wallet's meta
-      meta.addWallet( wallet );
+      meta.setAtomWallet( wallet );
 
       // If batch ID does not passed: set it from the wallet
       if ( !batchId ) {
@@ -241,16 +241,16 @@ export default class Atom {
     output = 'base17'
   } ) {
 
-    const molecularSponge = shake256.create( 256 ),
-      numberOfAtoms = atoms.length,
-      atomList = Atom.sortAtoms( atoms );
+    const molecularSponge = new jsSHA('SHAKE256', 'TEXT');
+    const numberOfAtoms = String( atoms.length );
+    const atomList = Atom.sortAtoms( atoms );
 
     // Hashing each atom in the molecule to produce a molecular hash
     let hashableValues = [];
     for ( const atom of atomList ) {
 
       // Add number of atoms (???)
-      hashableValues.push( String( numberOfAtoms ) );
+      hashableValues.push( numberOfAtoms );
 
       // Add atom's properties
       hashableValues = hashableValues.concat( atom.getHashableValues() );
@@ -264,13 +264,13 @@ export default class Atom {
     // Return the hash in the requested format
     switch ( output ) {
       case 'hex': {
-        return molecularSponge.hex();
+        return molecularSponge.getHash('HEX', { outputLen: 256 } );
       }
       case 'array': {
-        return molecularSponge.array();
+        return molecularSponge.getHash('ARRAYBUFFER', { outputLen: 256 } );
       }
       default: {
-        return charsetBaseConvert( molecularSponge.hex(), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
+        return charsetBaseConvert( molecularSponge.getHash('HEX', { outputLen: 256 } ), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
       }
     }
   }

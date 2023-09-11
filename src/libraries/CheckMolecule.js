@@ -22,7 +22,7 @@ import {
   base64ToHex,
   chunkSubstr
 } from './strings';
-import { shake256 } from 'js-sha3';
+import jsSHA from 'jssha';
 import Dot from './../libraries/Dot';
 
 /**
@@ -391,7 +391,7 @@ export default class CheckMolecule {
         throw new TypeError( 'Invalid isotope "V" values' );
       }
 
-      const remainder = ( senderWallet.balance * 1 ) + ( value * 1 );
+      const remainder = senderWallet.balance + value;
 
       // Is there enough balance to send?
       if ( remainder < 0 ) {
@@ -470,17 +470,21 @@ export default class CheckMolecule {
       let workingChunk = otsChunks[ index ];
 
       for ( let iterationCount = 0, condition = 8 + normalizedHash[ index ]; iterationCount < condition; iterationCount++ ) {
-        workingChunk = shake256.create( 512 ).update( workingChunk ).hex();
+        workingChunk = (new jsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', {outputLen: 512 });
       }
 
       keyFragments += workingChunk;
     }
 
     // Absorb the hashed Kk into the sponge to receive the digest Dk
-    const digest = shake256.create( 8192 ).update( keyFragments ).hex(),
-      // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
-      address = shake256.create( 256 ).update( digest ).hex();
+    const digestSponge = new jsSHA('SHAKE256', 'TEXT');
+    digestSponge.update( keyFragments );
+    const digest = digestSponge.getHash('HEX', {outputLen: 8192 });
 
+    // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
+    const addressSponge = new jsSHA('SHAKE256', 'TEXT');
+    addressSponge.update( digest );
+    const address = addressSponge.getHash('HEX', {outputLen: 256 });
 
     // Signing atom
     let signingAtom = this.molecule.atoms[ 0 ];

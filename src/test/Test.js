@@ -153,7 +153,6 @@ export default class Test {
     await this.testWalletBufferTransactions();
     await this.testQueryMeta();
     await this.testQueryWallets();
-    await this.testQueryShadowWallets();
     await this.testQueryBundle();
     await this.testQueryBalance();
   }
@@ -547,16 +546,6 @@ export default class Test {
     this.checkResponse( response, 'testQueryWallets' );
   }
 
-  /**
-   *
-   */
-  async testQueryShadowWallets () {
-    let client = await this.client( this.secrets[ 1 ] );
-    let response = await client.queryShadowWallets( {
-      token: this.tokenSlugs[ 0 ]
-    } );
-    this.checkResponse( response, 'testQueryShadowWallets' );
-  }
 
   /**
    *
@@ -635,10 +624,11 @@ export default class Test {
   checkResponse ( response, key ) {
 
     console.log( ` ############### ${ key } ###############` );
-    console.log( response );
 
     // Check molecule response
     if ( response instanceof ResponseMolecule ) {
+      console.log( response );
+
       if ( !response.success() ) {
         this.debug( response );
       }

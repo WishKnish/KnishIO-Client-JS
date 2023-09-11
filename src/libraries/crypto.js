@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
-import { shake256 } from 'js-sha3';
 import { randomString } from './strings';
+import jsSHA from 'jssha';
 
 /**
  * Generates a secret based on an optional seed
@@ -60,11 +60,10 @@ export function generateSecret ( seed = null, length = 2048 ) {
   console.info( `Crypto::generateSecret() - Computing new secret${ seed ? ' from existing seed' : '' }...` );
 
   if ( seed ) {
-    const sponge = shake256.create( length * 2 );
+    const sponge = new jsSHA( 'SHAKE256', 'TEXT' );
     sponge.update( seed );
-    return sponge.hex();
-  }
-  else {
+    return sponge.getHash( 'HEX', { outputLen: length * 2 } );
+  } else {
     return randomString( length );
   }
 }
@@ -79,9 +78,9 @@ export function generateBundleHash ( secret ) {
 
   console.info( 'Crypto::generateBundleHash() - Computing wallet bundle from secret...' );
 
-  const sponge = shake256.create( 256 );
+  const sponge = new jsSHA( 'SHAKE256', 'TEXT' );
   sponge.update( secret );
-  return sponge.hex();
+  return sponge.getHash( 'HEX', { outputLen: 256 } );
 
 }
 

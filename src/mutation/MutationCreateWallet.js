@@ -53,8 +53,8 @@ import ResponseCreateWallet from '../response/ResponseCreateWallet';
  */
 export default class MutationCreateWallet extends MutationProposeMolecule {
 
-  fillMolecule ( newWallet ) {
-    this.$__molecule.initWalletCreation( newWallet );
+  fillMolecule ( wallet ) {
+    this.$__molecule.initWalletCreation( wallet );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
   }

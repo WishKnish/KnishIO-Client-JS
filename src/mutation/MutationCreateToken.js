@@ -63,7 +63,9 @@ export default class MutationCreateToken extends MutationProposeMolecule {
       amount,
       meta: meta || {}
     } );
-    this.$__molecule.sign( {} );
+    this.$__molecule.sign( {
+      bundle: recipientWallet.bundle
+    } );
     this.$__molecule.check();
   }
 

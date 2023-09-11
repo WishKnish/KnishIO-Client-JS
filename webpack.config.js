@@ -1,4 +1,5 @@
-let path = require( 'path' );
+let path = require( 'node:path' );
+const webpack = require('webpack');
 
 module.exports = ( env, argv ) => ( {
   entry: path.resolve( __dirname, argv.mode === 'development' ? 'index.js' : 'src/index.js' ),
@@ -7,6 +8,12 @@ module.exports = ( env, argv ) => ( {
     path: path.resolve( __dirname, 'dist' ),
     filename: argv.mode === 'development' ? 'KnishIOClientJSDev.js' : 'KnishIOClientJS.js'
   },
+  plugins:[
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+      Buffer: ['buffer', 'Buffer']
+    })
+  ],
   module: {
     rules: [
       {

@@ -1,6 +1,6 @@
 import base from './rollup.config.base';
 import globals from './globals';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import inject from '@rollup/plugin-inject';
 import injectConfig from './inject';
 

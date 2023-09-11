@@ -1,10 +1,4 @@
-import bigInt from 'big-integer';
 import Hex from './Hex';
-import {
-  decode as decodeBase64,
-  encode as encodeBase64
-} from '@stablelib/base64';
-import getRandomValues from 'get-random-values';
 
 if ( !String.prototype.trim ) {
   String.prototype.trim = function () {
@@ -54,7 +48,7 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
 
   let array = new Uint8Array( length );
 
-  array = getRandomValues( array );
+  array = crypto.getRandomValues( array );
 
   array = array.map( x => alphabet.charCodeAt( x % alphabet.length ) );
 
@@ -65,63 +59,38 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
  * Convert charset between bases and alphabets
  *
  * @param src
- * @param fromBase
- * @param toBase
- * @param srcSymbolTable
- * @param destSymbolTable
+ * @param {int} fromBase
+ * @param {int} toBase
+ * @param { string} srcSymbolTable
+ * @param {string} destSymbolTable
  * @return {boolean|string|number}
  */
-export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, destSymbolTable ) {
-
-  // From: convert.js: http://rot47.net/_js/convert.js
-  //	http://rot47.net
-  //	http://helloacm.com
-  //	http://codingforspeed.com
-  //	Dr Zhihua Lai
-  //
-  // Modified by MLM to work with BigInteger: https://github.com/peterolson/BigInteger.js
-  // This is able to convert extremely large numbers; At any base equal to or less than the symbol table length
-
-  // The reasoning behind capital first is because it comes first in an ASCII/Unicode character map
-  // 96 symbols support up to base 96
+export function charsetBaseConvert(src, fromBase, toBase, srcSymbolTable, destSymbolTable) {
   const baseSymbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡';
+  srcSymbolTable = srcSymbolTable || baseSymbols;
+  destSymbolTable = destSymbolTable || srcSymbolTable;
 
-  // Default the symbol table to a nice default table that supports up to base 96
-  srcSymbolTable = srcSymbolTable ? srcSymbolTable : baseSymbols;
-  // Default the desttable equal to the srctable if it isn't defined
-  destSymbolTable = destSymbolTable ? destSymbolTable : srcSymbolTable;
-
-  // Make sure we are not trying to convert out of the symbol table range
-  if ( fromBase > srcSymbolTable.length || toBase > destSymbolTable.length ) {
-
-    console.warn( 'Strings::charsetBaseConvert() - Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length );
+  if (fromBase > srcSymbolTable.length || toBase > destSymbolTable.length) {
+    console.warn('Strings::charsetBaseConvert() - Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length);
     return false;
   }
 
-  // First convert to base 10
-  let val = bigInt( 0 );
-
-  for ( let charIndex = 0; charIndex < src.length; charIndex++ ) {
-    val = val.multiply( fromBase ).add( srcSymbolTable.indexOf( src.charAt( charIndex ) ) );
+  // Convert from source base to BigInt in base 10
+  let val = BigInt(0);
+  for (let charIndex = 0; charIndex < src.length; charIndex++) {
+    val = val * BigInt(fromBase) + BigInt(srcSymbolTable.indexOf(src.charAt(charIndex)));
   }
 
-  if ( val.lesser( 0 ) ) {
-    return 0;
+  // Convert from BigInt in base 10 to destination base
+  let res = '';
+  while (val > 0) {
+    let r = val % BigInt(toBase);
+    res = destSymbolTable.charAt(Number(r)) + res;
+    val /= BigInt(toBase);
   }
 
-  // Then covert to any base
-  let r = val.mod( toBase ),
-    res = destSymbolTable.charAt( r ),
-    q = val.divide( toBase );
-
-  while ( !q.equals( 0 ) ) {
-
-    r = q.mod( toBase );
-    q = q.divide( toBase );
-    res = destSymbolTable.charAt( r ) + res;
-  }
-
-  return res;
+  // If the result is empty, it means the source was 0
+  return res || '0';
 }
 
 /**
@@ -151,7 +120,7 @@ export function hexStringToBuffer ( hexString ) {
  * @return {string}
  */
 export function hexToBase64 ( string ) {
-  return encodeBase64( Hex.toUint8Array( string ) );
+  return Buffer.from(string, 'ascii').toString('base64');
 }
 
 /**
@@ -161,7 +130,7 @@ export function hexToBase64 ( string ) {
  * @return {string}
  */
 export function base64ToHex ( string ) {
-  return Hex.toHex( decodeBase64( string ), {} );
+  return Buffer.from(string, 'base64').toString('ascii');
 }
 
 /**

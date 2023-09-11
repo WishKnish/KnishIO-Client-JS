@@ -69,10 +69,7 @@ export default class MutationClaimShadowWallet extends MutationProposeMolecule {
       batchId
     } );
 
-    this.$__molecule.initShadowWalletClaim( {
-      token,
-      wallet
-    } );
+    this.$__molecule.initShadowWalletClaim( wallet );
     this.$__molecule.sign( {} );
     this.$__molecule.check();
   }

@@ -48,7 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Atom from './Atom';
 import AtomMeta from './AtomMeta';
 import Wallet from './Wallet';
-import { shake256 } from 'js-sha3';
+import jsSHA from 'jssha';
 import {
   chunkSubstr,
   hexToBase64
@@ -289,8 +289,6 @@ export default class Molecule {
       throw new BalanceInsufficientException();
     }
 
-    this.molecularHash = null;
-
     this.addAtom( Atom.create( {
       isotope: 'V',
       wallet: this.sourceWallet,
@@ -349,8 +347,6 @@ export default class Molecule {
       this.sourceWallet.balance = amount;
     }
 
-    this.molecularHash = null;
-
     // Initializing a new Atom to remove tokens from source
     this.addAtom( Atom.create( {
       isotope: 'V',
@@ -385,8 +381,6 @@ export default class Molecule {
     if ( this.sourceWallet.balance - amount < 0 ) {
       throw new BalanceInsufficientException();
     }
-
-    this.molecularHash = null;
 
     // Initializing a new Atom to remove tokens from source
     this.addAtom( Atom.create( {
@@ -436,7 +430,6 @@ export default class Molecule {
     } );
     bufferWallet.tradeRates = tradeRates;
 
-    this.molecularHash = null;
 
     // Initializing a new Atom to remove tokens from source
     this.addAtom( Atom.create( {
@@ -488,7 +481,7 @@ export default class Molecule {
     // Set a metas signing position for molecule correct reconciliation
     let firstAtomMeta = new AtomMeta;
     if ( signingWallet ) {
-      firstAtomMeta.addSigningWallet( signingWallet );
+      firstAtomMeta.setSigningWallet( signingWallet );
     }
 
     // Initializing a new Atom to remove tokens from source
@@ -525,38 +518,6 @@ export default class Molecule {
   }
 
   /**
-   * Builds Atoms to define a new wallet on the ledger
-   *
-   * @param {Wallet} newWallet
-   * @return {Molecule}
-   */
-  initWalletCreation ( newWallet ) {
-
-    this.molecularHash = null;
-
-    let meta = new AtomMeta( {
-      address: newWallet.address,
-      token: newWallet.token,
-      bundle: newWallet.bundle,
-      position: newWallet.position,
-      amount: 0,
-      batchId: newWallet.batchId
-    } );
-
-    this.addAtom( Atom.create( {
-      isotope: 'C',
-      wallet: this.sourceWallet,
-      metaType: 'wallet',
-      metaId: newWallet.address,
-      meta
-    } ) );
-
-    this.addContinuIdAtom();
-
-    return this;
-  }
-
-  /**
    * Initialize a C-type molecule to issue a new type of token
    *
    * @param {Wallet} recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
@@ -570,14 +531,8 @@ export default class Molecule {
     meta
   } ) {
 
-    this.molecularHash = null;
-
-    // Importing wallet fields into meta object
-    for ( const walletKey of [ 'walletAddress', 'walletPosition', 'walletPubkey', 'walletCharacters' ] ) {
-      if ( !meta[ walletKey ] ) {
-        meta[ walletKey ] = recipientWallet[ walletKey.toLowerCase().substring( 6 ) ];
-      }
-    }
+    let atomMeta = new AtomMeta( meta );
+    atomMeta.setMetaWallet( recipientWallet );
 
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
     this.addAtom( Atom.create( {
@@ -586,7 +541,7 @@ export default class Molecule {
       value: amount,
       metaType: 'token',
       metaId: recipientWallet.token,
-      meta: new AtomMeta( meta ),
+      meta: atomMeta,
       batchId: recipientWallet.batchId
     } ) );
 
@@ -638,40 +593,42 @@ export default class Molecule {
     return this;
   }
 
-
   /**
-   * Init shadow wallet claim
+   * Builds Atoms to define a new wallet on the ledger
    *
-   * @param tokenSlug
-   * @param wallet
+   * @param {Wallet} wallet
+   * @param {AtomMeta|null} atomMeta
+   * @return {Molecule}
    */
-  initShadowWalletClaim ( {
-    token,
-    wallet
-  } ) {
+  initWalletCreation ( wallet, atomMeta = null ) {
 
-    // Generate a wallet metas
-    let metas = {
-      tokenSlug: token,
-      walletAddress: wallet.address,
-      walletPosition: wallet.position,
-      pubkey: wallet.pubkey,
-      characters: wallet.characters,
-      batchId: wallet.batchId
-    };
+    if ( !atomMeta ) {
+      atomMeta = new AtomMeta();
+    }
+    atomMeta.setMetaWallet( wallet );
 
     this.addAtom( Atom.create( {
       isotope: 'C',
       wallet: this.sourceWallet,
       metaType: 'wallet',
       metaId: wallet.address,
-      meta: new AtomMeta( metas )
+      meta: atomMeta,
+      batchId: wallet.batchId
     } ) );
 
-    // User remainder atom
     this.addContinuIdAtom();
 
     return this;
+  }
+
+  /**
+   * Init shadow wallet claim
+   *
+   * @param wallet
+   */
+  initShadowWalletClaim ( wallet ) {
+    let atomMeta = ( new AtomMeta() ).setShadowWalletClaim( true );
+    return this.initWalletCreation( wallet, atomMeta );
   }
 
   /**
@@ -768,6 +725,8 @@ export default class Molecule {
 
     meta.token = token;
 
+    this.local = 1;
+
     this.addAtom( Atom.create( {
       isotope: 'T',
       wallet: this.sourceWallet,
@@ -824,12 +783,14 @@ export default class Molecule {
    * Creates a one-time signature for a molecule and breaks it up across multiple atoms within that
    * molecule. Resulting 4096 byte (2048 character) string is the one-time signature, which is then compressed.
    *
+   * @param {string|null} bundle
    * @param {boolean} anonymous
    * @param {boolean} compressed
    * @return {string|null}
    * @throws {AtomsMissingException}
    */
   sign ( {
+    bundle = null,
     anonymous = false,
     compressed = true
   } ) {
@@ -840,8 +801,8 @@ export default class Molecule {
     }
 
     // Derive the user's bundle
-    if ( !anonymous ) {
-      this.bundle = generateBundleHash( this.secret );
+    if ( !anonymous && !this.bundle ) {
+      this.bundle = bundle ? bundle : generateBundleHash( this.secret );
     }
 
     // Hash atoms to get molecular hash
@@ -887,7 +848,7 @@ export default class Molecule {
       let workingChunk = keyChunks[ index ];
 
       for ( let iterationCount = 0, condition = 8 - normalizedHash[ index ]; iterationCount < condition; iterationCount++ ) {
-        workingChunk = shake256.create( 512 ).update( workingChunk ).hex();
+        workingChunk = (new jsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', {outputLen: 512 });
       }
       signatureFragments += workingChunk;
     }
@@ -931,7 +892,7 @@ export default class Molecule {
 
       for ( const property of [ 'position', 'walletAddress', 'isotope' ] ) {
 
-        if ( typeof target.atoms[ index ][ property ] === 'undefined' || null === target.atoms[ index ][ property ] ) {
+        if ( target.atoms[ index ].isotope.toLowerCase() !== 'r' && (typeof target.atoms[ index ][ property ] === 'undefined' || null === target.atoms[ index ][ property ]) ) {
           throw new AtomsMissingException( 'MolecularStructure::jsonToObject() - Required Atom properties are missing!' );
         }
       }
