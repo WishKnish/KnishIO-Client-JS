@@ -215,7 +215,13 @@ export default class Molecule {
     let atomMeta = new AtomMeta( meta );
     atomMeta.addPolicy( policy );
 
+    const wallet = Wallet.create( {
+      secretOrBundle: this.secret || this.sourceWallet.bundle,
+      token: 'USER'
+    } );
+
     this.addAtom( Atom.create( {
+      wallet: wallet,
       isotope: 'R',
       metaType,
       metaId,

@@ -120,7 +120,7 @@ export function hexStringToBuffer ( hexString ) {
  * @return {string}
  */
 export function hexToBase64 ( string ) {
-  return Buffer.from(string, 'ascii').toString('base64');
+  return Buffer.from(string, 'hex').toString('base64');
 }
 
 /**
@@ -130,7 +130,7 @@ export function hexToBase64 ( string ) {
  * @return {string}
  */
 export function base64ToHex ( string ) {
-  return Buffer.from(string, 'base64').toString('ascii');
+  return Buffer.from(string, 'base64').toString('hex');
 }
 
 /**
