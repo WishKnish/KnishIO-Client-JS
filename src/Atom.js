@@ -49,6 +49,8 @@ import jsSHA from 'jssha';
 import { charsetBaseConvert } from './libraries/strings';
 import Meta from './Meta';
 import AtomMeta from './AtomMeta';
+import AtomsMissingException from './exception/AtomsMissingException';
+import versions from './versions/index';
 
 /**
  * Atom class used to form microtransactions within a Molecule
@@ -75,6 +77,16 @@ export default class Atom {
   }
 
   /**
+   *
+   * @returns {string[]}
+   */
+  static getUnclaimedProps() {
+    return [
+      'otsFragment'
+    ];
+  }
+
+  /**
    * Class constructor
    *
    * @param {string|null} position
@@ -88,6 +100,7 @@ export default class Atom {
    * @param {array|object|null} meta
    * @param {string|null} otsFragment
    * @param {number|null} index
+   * @param {string|null} version
    */
   constructor ( {
     position = null,
@@ -100,7 +113,8 @@ export default class Atom {
     metaId = null,
     meta = null,
     otsFragment = null,
-    index = null
+    index = null,
+    version = null
   } ) {
     this.position = position;
     this.walletAddress = walletAddress;
@@ -116,6 +130,7 @@ export default class Atom {
     this.index = index;
     this.otsFragment = otsFragment;
     this.createdAt = String( +new Date );
+    this.version = null !== version ? String( version ) : null;
   }
 
 
@@ -242,23 +257,40 @@ export default class Atom {
   } ) {
 
     const molecularSponge = new jsSHA('SHAKE256', 'TEXT');
-    const numberOfAtoms = String( atoms.length );
     const atomList = Atom.sortAtoms( atoms );
 
-    // Hashing each atom in the molecule to produce a molecular hash
-    let hashableValues = [];
-    for ( const atom of atomList ) {
-
-      // Add number of atoms (???)
-      hashableValues.push( numberOfAtoms );
-
-      // Add atom's properties
-      hashableValues = hashableValues.concat( atom.getHashableValues() );
+    if (atomList.length === 0) {
+      throw new AtomsMissingException();
     }
 
-    // Add hash values to the sponge
-    for ( const hashableValue of hashableValues ) {
-      molecularSponge.update( hashableValue );
+    atomList.map(atom => {
+      if ( !(atom instanceof Atom) ) {
+        throw new AtomsMissingException();
+      }
+    });
+
+    // Hashing each atom in the molecule to produce a molecular hash
+    if (atomList.every(atom => versions.hasOwnProperty(atom.version))) {
+      molecularSponge.update(JSON.stringify(atomList.map(atom => versions[atom.version].create(atom).view())));
+    }
+    else {
+
+      const numberOfAtoms = String( atoms.length );
+      let hashableValues = [];
+
+      for ( const atom of atomList ) {
+
+        // Add number of atoms (???)
+        hashableValues.push( numberOfAtoms );
+
+        // Add atom's properties
+        hashableValues = hashableValues.concat( atom.getHashableValues() );
+      }
+
+      // Add hash values to the sponge
+      for ( const hashableValue of hashableValues ) {
+        molecularSponge.update( hashableValue );
+      }
     }
 
     // Return the hash in the requested format
@@ -273,6 +305,14 @@ export default class Atom {
         return charsetBaseConvert( molecularSponge.getHash('HEX', { outputLen: 256 } ), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
       }
     }
+  }
+
+  static jsonSerialization (key, value) {
+    if (!Atom.getUnclaimedProps().includes(key)) {
+      return value;
+    }
+
+    return undefined;
   }
 
   /**

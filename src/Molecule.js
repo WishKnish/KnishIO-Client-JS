@@ -78,18 +78,21 @@ export default class Molecule {
    * @param {Wallet|null} sourceWallet
    * @param {Wallet|null} remainderWallet
    * @param {string|null} cellSlug
+   * @param {string|null} version
    */
   constructor ( {
     secret = null,
     sourceWallet = null,
     remainderWallet = null,
-    cellSlug = null
+    cellSlug = null,
+    version = null
   } ) {
 
     this.cellSlugOrigin = this.cellSlug = cellSlug;
     this.secret = secret;
     this.sourceWallet = sourceWallet;
     this.atoms = [];
+    this.version = version ? String(version) : null;
 
     // Set the remainder wallet for this transaction
     if ( remainderWallet || sourceWallet ) {
@@ -169,6 +172,7 @@ export default class Molecule {
 
     // Set atom's index
     atom.index = this.generateIndex();
+    atom.version = this.version;
 
     // Add atom
     this.atoms.push( atom );
@@ -941,7 +945,7 @@ export default class Molecule {
    */
   toJSON () {
     let clone = deepCloning( this );
-    for ( let key of [ 'remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin' ] ) {
+    for ( let key of [ 'remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin', 'version' ] ) {
       if ( clone.hasOwnProperty( key ) ) {
         delete clone[ key ];
       }
