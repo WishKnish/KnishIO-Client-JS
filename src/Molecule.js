@@ -65,6 +65,7 @@ import AtomsMissingException from './exception/AtomsMissingException';
 import BalanceInsufficientException from './exception/BalanceInsufficientException';
 import NegativeAmountException from './exception/NegativeAmountException';
 import SignatureMalformedException from './exception/SignatureMalformedException';
+import versions from './versions/index';
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -92,7 +93,9 @@ export default class Molecule {
     this.secret = secret;
     this.sourceWallet = sourceWallet;
     this.atoms = [];
-    this.version = version ? String(version) : null;
+    if (version !== null && versions.hasOwnProperty(version)) {
+      this.version = String(version);
+    }
 
     // Set the remainder wallet for this transaction
     if ( remainderWallet || sourceWallet ) {

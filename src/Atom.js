@@ -130,7 +130,9 @@ export default class Atom {
     this.index = index;
     this.otsFragment = otsFragment;
     this.createdAt = String( +new Date );
-    this.version = null !== version ? String( version ) : null;
+    if (version !== null && versions.hasOwnProperty(version)) {
+      this.version = String( version );
+    }
   }
 
 
@@ -270,7 +272,7 @@ export default class Atom {
     });
 
     // Hashing each atom in the molecule to produce a molecular hash
-    if (atomList.every(atom => versions.hasOwnProperty(atom.version))) {
+    if (atomList.every(atom => atom.version && versions.hasOwnProperty(atom.version))) {
       molecularSponge.update(JSON.stringify(atomList.map(atom => versions[atom.version].create(atom).view())));
     }
     else {
