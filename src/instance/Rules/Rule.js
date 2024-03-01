@@ -96,16 +96,6 @@ export default class Rule {
   }
 
   /**
-   * @returns {{condition: *, callback: Callback[]}}
-   */
-  toJSON () {
-    return {
-      condition: this.__condition,
-      callback: this.__callback
-    };
-  }
-
-  /**
    *
    * @param {object} object
    *
@@ -130,5 +120,15 @@ export default class Rule {
     }
 
     return rule;
+  }
+
+  /**
+   * @returns {{condition: *, callback: Callback[]}}
+   */
+  toJSON () {
+    return {
+      condition: this.__condition,
+      callback: this.__callback
+    };
   }
 }

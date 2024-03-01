@@ -12,22 +12,6 @@ export default class Base58 {
   }
 
   /**
-   * @param {Buffer} data
-   * @return {string}
-   */
-  encode ( data ) {
-    return this.$encoder.encode( Buffer.from( data ) );
-  }
-
-  /**
-   * @param {string} data
-   * @return {Buffer}
-   */
-  decode ( data ) {
-    return this.$encoder.decode( data );
-  }
-
-  /**
    * @return {string}
    * @constructor
    */
@@ -65,6 +49,22 @@ export default class Base58 {
    */
   get IPFS () {
     return '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  }
+
+  /**
+   * @param {Buffer} data
+   * @return {string}
+   */
+  encode ( data ) {
+    return this.$encoder.encode( Buffer.from( data ) );
+  }
+
+  /**
+   * @param {string} data
+   * @return {Buffer}
+   */
+  decode ( data ) {
+    return this.$encoder.decode( data );
   }
 
 }

@@ -25,29 +25,6 @@ export default class BaseX {
   }
 
   /**
-   * @param {Buffer|ArrayBuffer|Uint8Array} data
-   * @return {string}
-   */
-  encode(data) {
-    // If data is already a Uint8Array, proceed as-is; otherwise, convert it
-    const uint8Array = data instanceof Uint8Array ? data : new Uint8Array(data);
-
-    // Convert the Uint8Array to a binary string
-    const binaryString = String.fromCharCode(...uint8Array);
-
-    // Encode using your existing encoder
-    return this.$encoder.encode(binaryString);
-  }
-
-  /**
-   * @param {string} data
-   * @return {Buffer|ArrayBuffer|Uint8Array}
-   */
-  decode ( data ) {
-    return this.$encoder.decode( data );
-  }
-
-  /**
    * @return {string}
    * @constructor
    */
@@ -93,5 +70,28 @@ export default class BaseX {
    */
   get BASE67 () {
     return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~';
+  }
+
+  /**
+   * @param {Buffer|ArrayBuffer|Uint8Array} data
+   * @return {string}
+   */
+  encode ( data ) {
+    // If data is already a Uint8Array, proceed as-is; otherwise, convert it
+    const uint8Array = data instanceof Uint8Array ? data : new Uint8Array( data );
+
+    // Convert the Uint8Array to a binary string
+    const binaryString = String.fromCharCode( ...uint8Array );
+
+    // Encode using your existing encoder
+    return this.$encoder.encode( binaryString );
+  }
+
+  /**
+   * @param {string} data
+   * @return {Buffer|ArrayBuffer|Uint8Array}
+   */
+  decode ( data ) {
+    return this.$encoder.decode( data );
   }
 }

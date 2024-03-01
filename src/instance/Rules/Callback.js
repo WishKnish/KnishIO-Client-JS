@@ -106,7 +106,7 @@ export default class Callback {
    */
   set amount ( amount ) {
     if ( !isNumeric( amount ) ) {
-      throw new CodeException('Parameter amount should be a string containing numbers');
+      throw new CodeException( 'Parameter amount should be a string containing numbers' );
     }
     this.__amount = amount;
   }
@@ -149,45 +149,6 @@ export default class Callback {
    */
   set metaId ( metaId ) {
     this.__metaId = metaId;
-  }
-
-
-  /**
-   *
-   * @return {{action: string}}
-   */
-  toJSON () {
-    const meta = {
-      action: this.__action
-    };
-
-    if ( this.__metaType ) {
-      meta.metaType = this.__metaType;
-    }
-    if ( this.__metaId ) {
-      meta.metaId = this.__metaId;
-    }
-    if ( this.__meta ) {
-      meta.meta = this.__meta;
-    }
-
-    if ( this.__address ) {
-      meta.address = this.__address;
-    }
-
-    if ( this.__token ) {
-      meta.token = this.__token;
-    }
-
-    if ( this.__amount ) {
-      meta.amount = this.__amount;
-    }
-
-    if ( this.__comparison ) {
-      meta.comparison = this.__comparison;
-    }
-
-    return meta;
   }
 
   /**
@@ -233,6 +194,44 @@ export default class Callback {
   }
 
   /**
+   *
+   * @return {{action: string}}
+   */
+  toJSON () {
+    const meta = {
+      action: this.__action
+    };
+
+    if ( this.__metaType ) {
+      meta.metaType = this.__metaType;
+    }
+    if ( this.__metaId ) {
+      meta.metaId = this.__metaId;
+    }
+    if ( this.__meta ) {
+      meta.meta = this.__meta;
+    }
+
+    if ( this.__address ) {
+      meta.address = this.__address;
+    }
+
+    if ( this.__token ) {
+      meta.token = this.__token;
+    }
+
+    if ( this.__amount ) {
+      meta.amount = this.__amount;
+    }
+
+    if ( this.__comparison ) {
+      meta.comparison = this.__comparison;
+    }
+
+    return meta;
+  }
+
+  /**
    * @return {boolean}
    */
   isReject () {
@@ -243,7 +242,7 @@ export default class Callback {
    * @return {boolean}
    */
   isMeta () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'metaId', 'metaType', 'meta'] );
+    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'metaId', 'metaType', 'meta' ] );
 
     return prop.length === 4 && this._is( 'meta' );
   }
@@ -252,7 +251,7 @@ export default class Callback {
    * @return {boolean}
    */
   isCollect () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'address', 'token', 'amount', 'comparison'] );
+    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'address', 'token', 'amount', 'comparison' ] );
 
     return prop.length === 5 && this._is( 'collect' );
   }
@@ -261,7 +260,7 @@ export default class Callback {
    * @return {boolean}
    */
   isBuffer () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'address', 'token', 'amount', 'comparison'] );
+    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'address', 'token', 'amount', 'comparison' ] );
 
     return prop.length === 5 && this._is( 'buffer' );
   }
@@ -270,7 +269,7 @@ export default class Callback {
    * @return {boolean}
    */
   isRemit () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'token', 'amount'] );
+    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'token', 'amount' ] );
 
     return prop.length === 3 && this._is( 'remit' );
   }
@@ -279,7 +278,7 @@ export default class Callback {
    * @return {boolean}
    */
   isBurn () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'token', 'amount', 'comparison'] );
+    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'token', 'amount', 'comparison' ] );
 
     return prop.length === 4 && this._is( 'burn' );
   }
@@ -290,7 +289,7 @@ export default class Callback {
    * @return {boolean}
    * @private
    */
-  _is( type ) {
+  _is ( type ) {
     return this.__action.toLowerCase() === type.toLowerCase();
   }
 }

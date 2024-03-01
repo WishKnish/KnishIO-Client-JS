@@ -95,19 +95,6 @@ export default class QueryMetaTypeViaAtom extends Query {
   }
 
   /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseMetaTypeViaAtom}
-   */
-  createResponse ( json ) {
-    return new ResponseMetaTypeViaAtom( {
-      query: this,
-      json
-    } );
-  }
-
-  /**
    * Builds a GraphQL-friendly variables object based on input fields
    *
    * @param {string|array|null} metaType
@@ -192,5 +179,18 @@ export default class QueryMetaTypeViaAtom extends Query {
     }
 
     return variables;
+  }
+
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseMetaTypeViaAtom}
+   */
+  createResponse ( json ) {
+    return new ResponseMetaTypeViaAtom( {
+      query: this,
+      json
+    } );
   }
 }

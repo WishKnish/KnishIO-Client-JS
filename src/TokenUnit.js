@@ -53,6 +53,18 @@ export default class TokenUnit {
 
   /**
    *
+   * @param id
+   * @param name
+   * @param metas
+   */
+  constructor ( id, name, metas ) {
+    this.id = id;
+    this.name = name;
+    this.metas = metas || {};
+  }
+
+  /**
+   *
    * @param data
    * @returns {*}
    */
@@ -82,18 +94,6 @@ export default class TokenUnit {
       data[ 1 ],
       data.length > 2 ? data[ 2 ] : {}
     );
-  }
-
-  /**
-   *
-   * @param id
-   * @param name
-   * @param metas
-   */
-  constructor ( id, name, metas ) {
-    this.id = id;
-    this.name = name;
-    this.metas = metas || {};
   }
 
   /**

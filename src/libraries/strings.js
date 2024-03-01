@@ -65,28 +65,28 @@ export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
  * @param {string} destSymbolTable
  * @return {boolean|string|number}
  */
-export function charsetBaseConvert(src, fromBase, toBase, srcSymbolTable, destSymbolTable) {
+export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, destSymbolTable ) {
   const baseSymbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡';
   srcSymbolTable = srcSymbolTable || baseSymbols;
   destSymbolTable = destSymbolTable || srcSymbolTable;
 
-  if (fromBase > srcSymbolTable.length || toBase > destSymbolTable.length) {
-    console.warn('Strings::charsetBaseConvert() - Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length);
+  if ( fromBase > srcSymbolTable.length || toBase > destSymbolTable.length ) {
+    console.warn( 'Strings::charsetBaseConvert() - Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length );
     return false;
   }
 
   // Convert from source base to BigInt in base 10
-  let val = BigInt(0);
-  for (let charIndex = 0; charIndex < src.length; charIndex++) {
-    val = val * BigInt(fromBase) + BigInt(srcSymbolTable.indexOf(src.charAt(charIndex)));
+  let val = BigInt( 0 );
+  for ( let charIndex = 0; charIndex < src.length; charIndex++ ) {
+    val = val * BigInt( fromBase ) + BigInt( srcSymbolTable.indexOf( src.charAt( charIndex ) ) );
   }
 
   // Convert from BigInt in base 10 to destination base
   let res = '';
-  while (val > 0) {
-    let r = val % BigInt(toBase);
-    res = destSymbolTable.charAt(Number(r)) + res;
-    val /= BigInt(toBase);
+  while ( val > 0 ) {
+    let r = val % BigInt( toBase );
+    res = destSymbolTable.charAt( Number( r ) ) + res;
+    val /= BigInt( toBase );
   }
 
   // If the result is empty, it means the source was 0
@@ -120,7 +120,7 @@ export function hexStringToBuffer ( hexString ) {
  * @return {string}
  */
 export function hexToBase64 ( string ) {
-  return Buffer.from(string, 'hex').toString('base64');
+  return Buffer.from( string, 'hex' ).toString( 'base64' );
 }
 
 /**
@@ -130,7 +130,7 @@ export function hexToBase64 ( string ) {
  * @return {string}
  */
 export function base64ToHex ( string ) {
-  return Buffer.from(string, 'base64').toString('hex');
+  return Buffer.from( string, 'base64' ).toString( 'hex' );
 }
 
 /**
@@ -145,6 +145,6 @@ export function isHex ( str ) {
  * @param {string} str
  * @return {boolean}
  */
-export function isNumeric( str ) {
-  return (typeof(str) === 'number' || typeof(str) === 'string' && str.trim() !== '') && !isNaN(str);
+export function isNumeric ( str ) {
+  return ( typeof ( str ) === 'number' || typeof ( str ) === 'string' && str.trim() !== '' ) && !isNaN( str );
 }

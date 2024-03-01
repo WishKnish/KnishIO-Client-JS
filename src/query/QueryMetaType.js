@@ -89,19 +89,6 @@ export default class QueryMetaType extends Query {
   }
 
   /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseMetaType}
-   */
-  createResponse ( json ) {
-    return new ResponseMetaType( {
-      query: this,
-      json
-    } );
-  }
-
-  /**
    * Builds a GraphQL-friendly variables object based on input fields
    *
    * @param {string|array|null} metaType
@@ -177,6 +164,19 @@ export default class QueryMetaType extends Query {
     }
 
     return variables;
+  }
+
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseMetaType}
+   */
+  createResponse ( json ) {
+    return new ResponseMetaType( {
+      query: this,
+      json
+    } );
   }
 
 }

@@ -105,7 +105,7 @@ export default class ApolloClient {
    *
    * @param {boolean} encrypt
    */
-  setEncryption( encrypt = false ) {
+  setEncryption ( encrypt = false ) {
     this.restartTransport( encrypt );
   }
 

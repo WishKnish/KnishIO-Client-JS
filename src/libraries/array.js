@@ -63,7 +63,7 @@ export function diff ( ...arrays ) {
   } ) );
 }
 
- /**
+/**
  *
  * @param arrays
  * @return {*[]}

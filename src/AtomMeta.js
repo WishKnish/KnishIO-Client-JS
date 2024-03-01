@@ -60,7 +60,7 @@ export default class AtomMeta {
    *
    * @param meta
    */
-  constructor( meta = {} ) {
+  constructor ( meta = {} ) {
     this.meta = meta;
   }
 
@@ -69,7 +69,7 @@ export default class AtomMeta {
    * @param meta
    * @returns {AtomMeta}
    */
-  merge( meta ) {
+  merge ( meta ) {
     this.meta = Object.assign( this.meta, meta );
     return this;
   }
@@ -79,7 +79,7 @@ export default class AtomMeta {
    * @param context
    * @returns {AtomMeta}
    */
-  addContext( context = null ) {
+  addContext ( context = null ) {
 
     // Add context key if it is enabled
     if ( USE_META_CONTEXT ) {
@@ -94,7 +94,7 @@ export default class AtomMeta {
    * @param {Wallet} wallet
    * @returns {AtomMeta}
    */
-  setAtomWallet( wallet ) {
+  setAtomWallet ( wallet ) {
     let walletMeta = {
       pubkey: wallet.pubkey,
       characters: wallet.characters
@@ -121,7 +121,7 @@ export default class AtomMeta {
    * @param {Wallet} wallet
    * @returns {AtomMeta}
    */
-  setMetaWallet( wallet ) {
+  setMetaWallet ( wallet ) {
     this.merge( {
       walletTokenSlug: wallet.token,
       walletBundleHash: wallet.bundle,
@@ -139,7 +139,7 @@ export default class AtomMeta {
    * @param shadowWalletClaim
    * @returns {AtomMeta}
    */
-  setShadowWalletClaim( shadowWalletClaim ) {
+  setShadowWalletClaim ( shadowWalletClaim ) {
     this.merge( { shadowWalletClaim: shadowWalletClaim * 1 } );
     return this;
   }
@@ -169,7 +169,7 @@ export default class AtomMeta {
    * @todo move logic to the separated class
    * @returns {AtomMeta}
    */
-  addPolicy( policy ) {
+  addPolicy ( policy ) {
 
     // Policy meta initialization
     let policyMeta = new PolicyMeta( policy, Object.keys( this.meta ) );
@@ -185,7 +185,7 @@ export default class AtomMeta {
    *
    * @returns {*}
    */
-  get() {
+  get () {
     return this.meta;
   }
 

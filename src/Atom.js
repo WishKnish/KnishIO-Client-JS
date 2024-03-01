@@ -58,35 +58,6 @@ import versions from './versions/index';
 export default class Atom {
 
   /**
-   *
-   * @returns {string[]}
-   */
-  static getHashableProps () {
-    return [
-      'position',
-      'walletAddress',
-      'isotope',
-      'token',
-      'value',
-      'batchId',
-      'metaType',
-      'metaId',
-      'meta',
-      'createdAt'
-    ];
-  }
-
-  /**
-   *
-   * @returns {string[]}
-   */
-  static getUnclaimedProps() {
-    return [
-      'otsFragment'
-    ];
-  }
-
-  /**
    * Class constructor
    *
    * @param {string|null} position
@@ -130,11 +101,39 @@ export default class Atom {
     this.index = index;
     this.otsFragment = otsFragment;
     this.createdAt = String( +new Date );
-    if (version !== null && versions.hasOwnProperty(version)) {
+    if ( version !== null && versions.hasOwnProperty( version ) ) {
       this.version = String( version );
     }
   }
 
+  /**
+   *
+   * @returns {string[]}
+   */
+  static getHashableProps () {
+    return [
+      'position',
+      'walletAddress',
+      'isotope',
+      'token',
+      'value',
+      'batchId',
+      'metaType',
+      'metaId',
+      'meta',
+      'createdAt'
+    ];
+  }
+
+  /**
+   *
+   * @returns {string[]}
+   */
+  static getUnclaimedProps () {
+    return [
+      'otsFragment'
+    ];
+  }
 
   /**
    *
@@ -147,7 +146,7 @@ export default class Atom {
    * @param {string|null} batchId
    * @returns {Atom}
    */
-  static create( {
+  static create ( {
     isotope,
     wallet = null,
     value = null,
@@ -188,13 +187,6 @@ export default class Atom {
   }
 
   /**
-   * Get aggregated meta from stored normalized ones
-   */
-  aggregatedMeta () {
-    return Meta.aggregateMeta( this.meta );
-  }
-
-  /**
    * Converts a compliant JSON string into an Atom class instance
    *
    * @param {string} json
@@ -215,10 +207,105 @@ export default class Atom {
   }
 
   /**
+   * Produces a hash of the atoms inside a molecule.
+   * Used to generate the molecularHash field for Molecules.
+   *
+   * @param {array} atoms
+   * @param {string} output
+   * @return {number[]|*}
+   */
+  static hashAtoms ( {
+    atoms,
+    output = 'base17'
+  } ) {
+
+    const molecularSponge = new jsSHA( 'SHAKE256', 'TEXT' );
+    const atomList = Atom.sortAtoms( atoms );
+
+    if ( atomList.length === 0 ) {
+      throw new AtomsMissingException();
+    }
+
+    atomList.map( atom => {
+      if ( !( atom instanceof Atom ) ) {
+        throw new AtomsMissingException();
+      }
+    } );
+
+    // Hashing each atom in the molecule to produce a molecular hash
+    if ( atomList.every( atom => atom.version && versions.hasOwnProperty( atom.version ) ) ) {
+      molecularSponge.update( JSON.stringify( atomList.map( atom => versions[ atom.version ].create( atom ).view() ) ) );
+    } else {
+
+      const numberOfAtoms = String( atoms.length );
+      let hashableValues = [];
+
+      for ( const atom of atomList ) {
+
+        // Add number of atoms (???)
+        hashableValues.push( numberOfAtoms );
+
+        // Add atom's properties
+        hashableValues = hashableValues.concat( atom.getHashableValues() );
+      }
+
+      // Add hash values to the sponge
+      for ( const hashableValue of hashableValues ) {
+        molecularSponge.update( hashableValue );
+      }
+    }
+
+    // Return the hash in the requested format
+    switch ( output ) {
+      case 'hex': {
+        return molecularSponge.getHash( 'HEX', { outputLen: 256 } );
+      }
+      case 'array': {
+        return molecularSponge.getHash( 'ARRAYBUFFER', { outputLen: 256 } );
+      }
+      default: {
+        return charsetBaseConvert( molecularSponge.getHash( 'HEX', { outputLen: 256 } ), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
+      }
+    }
+  }
+
+  static jsonSerialization ( key, value ) {
+    if ( !Atom.getUnclaimedProps().includes( key ) ) {
+      return value;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Sort the atoms in a Molecule
+   *
+   * @param {array} atoms
+   * @return {array}
+   */
+  static sortAtoms ( atoms ) {
+    const atomList = [ ...atoms ];
+
+    // Sort based on atomic index
+    atomList.sort( ( first, second ) => {
+      return first.index < second.index ? -1 : 1;
+    } );
+
+    return atomList;
+  }
+
+  /**
+   * Get aggregated meta from stored normalized ones
+   */
+  aggregatedMeta () {
+    return Meta.aggregateMeta( this.meta );
+  }
+
+  /**
    *
    * @returns {*[]}
    */
-  getHashableValues() {
+  getHashableValues () {
     const hashableValues = [];
     for ( let property of Atom.getHashableProps() ) {
       const value = this[ property ];
@@ -243,94 +330,5 @@ export default class Atom {
       }
     }
     return hashableValues;
-  }
-
-  /**
-   * Produces a hash of the atoms inside a molecule.
-   * Used to generate the molecularHash field for Molecules.
-   *
-   * @param {array} atoms
-   * @param {string} output
-   * @return {number[]|*}
-   */
-  static hashAtoms ( {
-    atoms,
-    output = 'base17'
-  } ) {
-
-    const molecularSponge = new jsSHA('SHAKE256', 'TEXT');
-    const atomList = Atom.sortAtoms( atoms );
-
-    if (atomList.length === 0) {
-      throw new AtomsMissingException();
-    }
-
-    atomList.map(atom => {
-      if ( !(atom instanceof Atom) ) {
-        throw new AtomsMissingException();
-      }
-    });
-
-    // Hashing each atom in the molecule to produce a molecular hash
-    if (atomList.every(atom => atom.version && versions.hasOwnProperty(atom.version))) {
-      molecularSponge.update(JSON.stringify(atomList.map(atom => versions[atom.version].create(atom).view())));
-    }
-    else {
-
-      const numberOfAtoms = String( atoms.length );
-      let hashableValues = [];
-
-      for ( const atom of atomList ) {
-
-        // Add number of atoms (???)
-        hashableValues.push( numberOfAtoms );
-
-        // Add atom's properties
-        hashableValues = hashableValues.concat( atom.getHashableValues() );
-      }
-
-      // Add hash values to the sponge
-      for ( const hashableValue of hashableValues ) {
-        molecularSponge.update( hashableValue );
-      }
-    }
-
-    // Return the hash in the requested format
-    switch ( output ) {
-      case 'hex': {
-        return molecularSponge.getHash('HEX', { outputLen: 256 } );
-      }
-      case 'array': {
-        return molecularSponge.getHash('ARRAYBUFFER', { outputLen: 256 } );
-      }
-      default: {
-        return charsetBaseConvert( molecularSponge.getHash('HEX', { outputLen: 256 } ), 16, 17, '0123456789abcdef', '0123456789abcdefg' ).padStart( 64, '0' );
-      }
-    }
-  }
-
-  static jsonSerialization (key, value) {
-    if (!Atom.getUnclaimedProps().includes(key)) {
-      return value;
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Sort the atoms in a Molecule
-   *
-   * @param {array} atoms
-   * @return {array}
-   */
-  static sortAtoms ( atoms ) {
-    const atomList = [ ...atoms ];
-
-    // Sort based on atomic index
-    atomList.sort( ( first, second ) => {
-      return first.index < second.index ? -1 : 1;
-    } );
-
-    return atomList;
   }
 }

@@ -56,6 +56,10 @@ export default class Meta {
     }
   }
 
+  static toObject ( object ) {
+    return new this( object );
+  }
+
   /**
    *
    * @returns {{}}
@@ -70,9 +74,5 @@ export default class Meta {
     }
 
     return object;
-  }
-
-  static toObject ( object ) {
-    return new this( object );
   }
 }

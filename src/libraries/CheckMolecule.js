@@ -470,21 +470,21 @@ export default class CheckMolecule {
       let workingChunk = otsChunks[ index ];
 
       for ( let iterationCount = 0, condition = 8 + normalizedHash[ index ]; iterationCount < condition; iterationCount++ ) {
-        workingChunk = (new jsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', {outputLen: 512 });
+        workingChunk = ( new jsSHA( 'SHAKE256', 'TEXT' ) ).update( workingChunk ).getHash( 'HEX', { outputLen: 512 } );
       }
 
       keyFragments += workingChunk;
     }
 
     // Absorb the hashed Kk into the sponge to receive the digest Dk
-    const digestSponge = new jsSHA('SHAKE256', 'TEXT');
+    const digestSponge = new jsSHA( 'SHAKE256', 'TEXT' );
     digestSponge.update( keyFragments );
-    const digest = digestSponge.getHash('HEX', {outputLen: 8192 });
+    const digest = digestSponge.getHash( 'HEX', { outputLen: 8192 } );
 
     // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
-    const addressSponge = new jsSHA('SHAKE256', 'TEXT');
+    const addressSponge = new jsSHA( 'SHAKE256', 'TEXT' );
     addressSponge.update( digest );
-    const address = addressSponge.getHash('HEX', {outputLen: 256 });
+    const address = addressSponge.getHash( 'HEX', { outputLen: 256 } );
 
     // Signing atom
     let signingAtom = this.molecule.atoms[ 0 ];

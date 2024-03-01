@@ -201,6 +201,80 @@ export default class Wallet {
   }
 
   /**
+   * Generates a private key for the given parameters
+   *
+   * @param {string} secret
+   * @param {string} token
+   * @param {string} position
+   * @return {string}
+   */
+  static generateKey ( {
+    secret,
+    token,
+    position
+  } ) {
+
+    // Converting secret to bigInt
+    const bigIntSecret = BigInt( `0x${ secret }` );
+
+    // Adding new position to the user secret to produce the indexed key
+    const indexedKey = bigIntSecret + BigInt( `0x${ position }` );
+
+    // Hashing the indexed key to produce the intermediate key
+    const intermediateKeySponge = new jsSHA( 'SHAKE256', 'TEXT' );
+
+    intermediateKeySponge.update( indexedKey.toString( 16 ) );
+
+    if ( token ) {
+      intermediateKeySponge.update( token );
+    }
+
+    // Hashing the intermediate key to produce the private key
+    const privateKeySponge = new jsSHA( 'SHAKE256', 'TEXT' );
+    privateKeySponge.update( intermediateKeySponge.getHash( 'HEX', { outputLen: 8192 } ) );
+    return privateKeySponge.getHash( 'HEX', { outputLen: 8192 } );
+  }
+
+  /**
+   * Generates a wallet address
+   *
+   * @param {string} key
+   * @return {string}
+   */
+  static generateAddress ( key ) {
+
+    // Subdivide private key into 16 fragments of 128 characters each
+    const keyFragments = chunkSubstr( key, 128 ),
+      // Generating wallet digest
+      digestSponge = new jsSHA( 'SHAKE256', 'TEXT' );
+
+    for ( const index in keyFragments ) {
+      let workingFragment = keyFragments[ index ];
+      for ( let fragmentCount = 1; fragmentCount <= 16; fragmentCount++ ) {
+        const workingSponge = new jsSHA( 'SHAKE256', 'TEXT' );
+        workingSponge.update( workingFragment );
+        workingFragment = workingSponge.getHash( 'HEX', { outputLen: 512 } );
+      }
+
+      digestSponge.update( workingFragment );
+    }
+
+    // Producing wallet address
+    const outputSponge = new jsSHA( 'SHAKE256', 'TEXT' );
+    outputSponge.update( digestSponge.getHash( 'HEX', { outputLen: 8192 } ) );
+    return outputSponge.getHash( 'HEX', { outputLen: 256 } );
+  }
+
+  /**
+   *
+   * @param saltLength
+   * @returns {string}
+   */
+  static generatePosition ( saltLength = 64 ) {
+    return randomString( saltLength, 'abcdef0123456789' );
+  }
+
+  /**
    *
    * @returns {*[]}
    */
@@ -211,7 +285,6 @@ export default class Wallet {
     } );
     return result;
   }
-
 
   /**
    * Split token units
@@ -252,7 +325,6 @@ export default class Wallet {
     }
     remainderWallet.tokenUnits = remainderTokenUnits;
   }
-
 
   /**
    * Create a remainder wallet from the source one
@@ -415,78 +487,4 @@ export default class Wallet {
     }
 
   };
-
-  /**
-   * Generates a private key for the given parameters
-   *
-   * @param {string} secret
-   * @param {string} token
-   * @param {string} position
-   * @return {string}
-   */
-  static generateKey ( {
-    secret,
-    token,
-    position
-  } ) {
-
-    // Converting secret to bigInt
-    const bigIntSecret = BigInt( `0x${secret}` );
-
-    // Adding new position to the user secret to produce the indexed key
-    const indexedKey = bigIntSecret + BigInt( `0x${position}` );
-
-    // Hashing the indexed key to produce the intermediate key
-    const intermediateKeySponge = new jsSHA( 'SHAKE256', 'TEXT' );
-
-    intermediateKeySponge.update( indexedKey.toString(16) );
-
-    if ( token ) {
-      intermediateKeySponge.update( token );
-    }
-
-    // Hashing the intermediate key to produce the private key
-    const privateKeySponge = new jsSHA( 'SHAKE256', 'TEXT' );
-    privateKeySponge.update( intermediateKeySponge.getHash( 'HEX', { outputLen: 8192 } ) );
-    return privateKeySponge.getHash( 'HEX', { outputLen: 8192 } );
-  }
-
-  /**
-   * Generates a wallet address
-   *
-   * @param {string} key
-   * @return {string}
-   */
-  static generateAddress ( key ) {
-
-    // Subdivide private key into 16 fragments of 128 characters each
-    const keyFragments = chunkSubstr( key, 128 ),
-      // Generating wallet digest
-      digestSponge = new jsSHA( 'SHAKE256', 'TEXT' );
-
-    for ( const index in keyFragments ) {
-      let workingFragment = keyFragments[ index ];
-      for ( let fragmentCount = 1; fragmentCount <= 16; fragmentCount++ ) {
-        const workingSponge = new jsSHA( 'SHAKE256', 'TEXT' );
-        workingSponge.update( workingFragment );
-        workingFragment = workingSponge.getHash( 'HEX', { outputLen: 512 } );
-      }
-
-      digestSponge.update( workingFragment );
-    }
-
-    // Producing wallet address
-    const outputSponge = new jsSHA( 'SHAKE256', 'TEXT' );
-    outputSponge.update( digestSponge.getHash( 'HEX', { outputLen: 8192 } ) );
-    return outputSponge.getHash( 'HEX', { outputLen: 256 } );
-  }
-
-  /**
-   *
-   * @param saltLength
-   * @returns {string}
-   */
-  static generatePosition ( saltLength = 64 ) {
-    return randomString( saltLength, 'abcdef0123456789' );
-  }
 }

@@ -121,19 +121,6 @@ export default class QueryAtom extends Query {
   }
 
   /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseAtom}
-   */
-  createResponse ( json ) {
-    return new ResponseAtom( {
-      query: this,
-      json
-    } );
-  }
-
-  /**
    * Queries Knish.IO Atoms
    *
    * @param {string[]} molecularHashes
@@ -271,5 +258,18 @@ export default class QueryAtom extends Query {
       latest: latest,
       queryArgs: queryArgs
     };
+  }
+
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseAtom}
+   */
+  createResponse ( json ) {
+    return new ResponseAtom( {
+      query: this,
+      json
+    } );
   }
 }

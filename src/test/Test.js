@@ -67,16 +67,6 @@ await Test.run( KNISHIO_SETTINGS.serverUriConfig );
 export default class Test {
 
   /**
-   * Run all
-   */
-  static async run ( uris ) {
-    for ( let uriIndex in uris ) {
-      let test = new Test( uris[ uriIndex ] );
-      await test.testAll();
-    }
-  }
-
-  /**
    *
    * @param graphqlUrl
    * @param encrypt
@@ -130,6 +120,15 @@ export default class Test {
     } );
   }
 
+  /**
+   * Run all
+   */
+  static async run ( uris ) {
+    for ( let uriIndex in uris ) {
+      let test = new Test( uris[ uriIndex ] );
+      await test.testAll();
+    }
+  }
 
   /**
    * Test all KnishIOClient functions

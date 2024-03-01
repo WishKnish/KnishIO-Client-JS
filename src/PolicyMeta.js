@@ -46,9 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import {
-  diff
-} from './libraries/array';
+import { diff } from './libraries/array';
 
 
 /**
@@ -59,9 +57,19 @@ export default class PolicyMeta {
   /**
    *
    * @param policy
+   * @param metaKeys
+   */
+  constructor ( policy = {}, metaKeys = {} ) {
+    this.policy = PolicyMeta.normalizePolicy( policy );
+    this.fillDefault( metaKeys );
+  }
+
+  /**
+   *
+   * @param policy
    * @returns {{}}
    */
-  static normalizePolicy( policy = {} ) {
+  static normalizePolicy ( policy = {} ) {
     let policyMeta = {};
     for ( const [ policyKey, value ] of Object.entries( policy ) ) {
       if ( value !== null && [ 'read', 'write' ].includes( policyKey ) ) {
@@ -77,18 +85,8 @@ export default class PolicyMeta {
 
   /**
    *
-   * @param policy
-   * @param metaKeys
    */
-  constructor( policy = {}, metaKeys = {} ) {
-    this.policy = PolicyMeta.normalizePolicy( policy );
-    this.fillDefault( metaKeys );
-  }
-
-  /**
-   *
-   */
-  fillDefault( metaKeys = {} ) {
+  fillDefault ( metaKeys = {} ) {
     const readPolicy = Array.from( this.policy ).filter( item => item.action === 'read' );
     const writePolicy = Array.from( this.policy ).filter( item => item.action === 'write' );
 
@@ -116,7 +114,7 @@ export default class PolicyMeta {
    *
    * @returns {{}|*}
    */
-  get() {
+  get () {
     return this.policy;
   }
 
@@ -125,7 +123,7 @@ export default class PolicyMeta {
    *
    * @returns {string}
    */
-  toJson() {
+  toJson () {
     return JSON.stringify( this.get() );
   }
 

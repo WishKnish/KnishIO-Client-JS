@@ -56,6 +56,25 @@ export default class AuthToken {
 
   /**
    *
+   * @param {string} token
+   * @param {number} expiresAt
+   * @param {boolean} encrypt
+   * @param {string} pubkey
+   */
+  constructor ( {
+    token,
+    expiresAt,
+    encrypt,
+    pubkey
+  } ) {
+    this.$__token = token;
+    this.$__expiresAt = expiresAt;
+    this.$__pubkey = pubkey;
+    this.$__encrypt = encrypt;
+  }
+
+  /**
+   *
    * @param data
    * @param wallet
    * @returns {AuthToken}
@@ -65,7 +84,6 @@ export default class AuthToken {
     authToken.setWallet( wallet );
     return authToken;
   }
-
 
   /**
    *
@@ -87,27 +105,6 @@ export default class AuthToken {
       encrypt: snapshot.encrypt
     }, wallet );
   }
-
-
-  /**
-   *
-   * @param {string} token
-   * @param {number} expiresAt
-   * @param {boolean} encrypt
-   * @param {string} pubkey
-   */
-  constructor ( {
-    token,
-    expiresAt,
-    encrypt,
-    pubkey
-  } ) {
-    this.$__token = token;
-    this.$__expiresAt = expiresAt;
-    this.$__pubkey = pubkey;
-    this.$__encrypt = encrypt;
-  }
-
 
   /**
    *

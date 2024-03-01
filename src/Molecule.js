@@ -93,8 +93,8 @@ export default class Molecule {
     this.secret = secret;
     this.sourceWallet = sourceWallet;
     this.atoms = [];
-    if (version !== null && versions.hasOwnProperty(version)) {
-      this.version = String(version);
+    if ( version !== null && versions.hasOwnProperty( version ) ) {
+      this.version = String( version );
     }
 
     // Set the remainder wallet for this transaction
@@ -108,6 +108,15 @@ export default class Molecule {
     }
 
     this.clear();
+  }
+
+  /**
+   * Returns the cell slug delimiter
+   *
+   * @return {string}
+   */
+  get cellSlugDelimiter () {
+    return '.';
   }
 
   /**
@@ -125,15 +134,6 @@ export default class Molecule {
   }
 
   /**
-   *
-   * @param isotopes
-   * @returns {*[]}
-   */
-  getIsotopes ( isotopes ) {
-    return Molecule.isotopeFilter( isotopes, this.atoms );
-  }
-
-  /**
    * Generates the next atomic index
    *
    * @param {array} atoms
@@ -141,6 +141,141 @@ export default class Molecule {
    */
   static generateNextAtomIndex ( atoms ) {
     return atoms.length;
+  }
+
+  /**
+   * Converts a JSON object into a Molecule Structure instance
+   *
+   * @param {string} json
+   * @return {object}
+   * @throws {AtomsMissingException}
+   */
+  static jsonToObject ( json ) {
+    const target = Object.assign( new Molecule( {} ), JSON.parse( json ) ),
+      properties = Object.keys( new Molecule( {} ) );
+
+    if ( !Array.isArray( target.atoms ) ) {
+      throw new AtomsMissingException();
+    }
+
+    for ( const index in Object.keys( target.atoms ) ) {
+
+      target.atoms[ index ] = Atom.jsonToObject( JSON.stringify( target.atoms[ index ] ) );
+
+      for ( const property of [ 'position', 'walletAddress', 'isotope' ] ) {
+
+        if ( target.atoms[ index ].isotope.toLowerCase() !== 'r' && ( typeof target.atoms[ index ][ property ] === 'undefined' || null === target.atoms[ index ][ property ] ) ) {
+          throw new AtomsMissingException( 'MolecularStructure::jsonToObject() - Required Atom properties are missing!' );
+        }
+      }
+    }
+
+    for ( const property in target ) {
+
+      if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
+        delete target[ property ];
+      }
+    }
+
+    target.atoms = Atom.sortAtoms( target.atoms );
+
+    return target;
+  }
+
+  /**
+   * Accept a string of letters and numbers, and outputs a collection of decimals representing each
+   * character according to a pre-defined dictionary. Input string would typically be 64-character
+   * hexadecimal string featuring numbers from 0 to 9 and characters from a to f - a total of 15
+   * unique symbols. To ensure that string has an even number of symbols, convert it to Base 17
+   * (adding G as a possible symbol). Map each symbol to integer values as follows:
+   *  0   1   2   3   4   5   6   7  8  9  a   b   c   d   e   f   g
+   * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
+   *
+   * @param {string} hash
+   * @return {array}
+   */
+  static enumerate ( hash ) {
+
+    const mapped = {
+        '0': -8,
+        '1': -7,
+        '2': -6,
+        '3': -5,
+        '4': -4,
+        '5': -3,
+        '6': -2,
+        '7': -1,
+        '8': 0,
+        '9': 1,
+        'a': 2,
+        'b': 3,
+        'c': 4,
+        'd': 5,
+        'e': 6,
+        'f': 7,
+        'g': 8
+      },
+      target = [],
+      hashList = hash.toLowerCase().split( '' );
+
+    for ( let index = 0, len = hashList.length; index < len; ++index ) {
+
+      const symbol = hashList[ index ];
+
+      if ( typeof mapped[ symbol ] !== 'undefined' ) {
+        target[ index ] = mapped[ symbol ];
+      }
+    }
+
+    return target;
+  }
+
+  /**
+   * Normalize enumerated string to ensure that the total sum of all symbols is exactly zero. This
+   * ensures that exactly 50% of the WOTS+ key is leaked with each usage, ensuring predictable key
+   * safety:
+   * The sum of each symbol within Hm shall be presented by m
+   *  While m0 iterate across that set’s integers as Im:
+   *    If m0 and Im>-8 , let Im=Im-1
+   *    If m<0 and Im<8 , let Im=Im+1
+   *    If m=0, stop the iteration
+   *
+   * @param {array} mappedHashArray
+   * @return {array}
+   */
+  static normalize ( mappedHashArray ) {
+
+    let total = mappedHashArray.reduce( ( total, num ) => total + num );
+
+    const total_condition = total < 0;
+
+    while ( total < 0 || total > 0 ) {
+
+      for ( const index of Object.keys( mappedHashArray ) ) {
+
+        const condition = total_condition ? mappedHashArray[ index ] < 8 : mappedHashArray[ index ] > -8;
+
+        if ( condition ) {
+
+          const process = total_condition ? [ ++mappedHashArray[ index ], ++total ] : [ --mappedHashArray[ index ], --total ];
+
+          if ( 0 === total ) {
+            break;
+          }
+        }
+      }
+    }
+
+    return mappedHashArray;
+  }
+
+  /**
+   *
+   * @param isotopes
+   * @returns {*[]}
+   */
+  getIsotopes ( isotopes ) {
+    return Molecule.isotopeFilter( isotopes, this.atoms );
   }
 
   /**
@@ -185,7 +320,6 @@ export default class Molecule {
 
     return this;
   }
-
 
   /**
    * Add user remainder atom for ContinuID
@@ -237,7 +371,6 @@ export default class Molecule {
     return this;
   }
 
-
   /**
    *
    * @param tokenUnits
@@ -281,7 +414,6 @@ export default class Molecule {
     return this;
   }
 
-
   /**
    * Burns some amount of tokens from a wallet
    *
@@ -317,7 +449,6 @@ export default class Molecule {
 
     return this;
   }
-
 
   /*
    * Replenishes non-finite token supplies
@@ -420,7 +551,6 @@ export default class Molecule {
 
     return this;
   }
-
 
   /**
    *
@@ -861,7 +991,7 @@ export default class Molecule {
       let workingChunk = keyChunks[ index ];
 
       for ( let iterationCount = 0, condition = 8 - normalizedHash[ index ]; iterationCount < condition; iterationCount++ ) {
-        workingChunk = (new jsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', {outputLen: 512 });
+        workingChunk = ( new jsSHA( 'SHAKE256', 'TEXT' ) ).update( workingChunk ).getHash( 'HEX', { outputLen: 512 } );
       }
       signatureFragments += workingChunk;
     }
@@ -882,54 +1012,6 @@ export default class Molecule {
     }
 
     return lastPosition;
-  }
-
-  /**
-   * Converts a JSON object into a Molecule Structure instance
-   *
-   * @param {string} json
-   * @return {object}
-   * @throws {AtomsMissingException}
-   */
-  static jsonToObject ( json ) {
-    const target = Object.assign( new Molecule( {} ), JSON.parse( json ) ),
-      properties = Object.keys( new Molecule( {} ) );
-
-    if ( !Array.isArray( target.atoms ) ) {
-      throw new AtomsMissingException();
-    }
-
-    for ( const index in Object.keys( target.atoms ) ) {
-
-      target.atoms[ index ] = Atom.jsonToObject( JSON.stringify( target.atoms[ index ] ) );
-
-      for ( const property of [ 'position', 'walletAddress', 'isotope' ] ) {
-
-        if ( target.atoms[ index ].isotope.toLowerCase() !== 'r' && (typeof target.atoms[ index ][ property ] === 'undefined' || null === target.atoms[ index ][ property ]) ) {
-          throw new AtomsMissingException( 'MolecularStructure::jsonToObject() - Required Atom properties are missing!' );
-        }
-      }
-    }
-
-    for ( const property in target ) {
-
-      if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
-        delete target[ property ];
-      }
-    }
-
-    target.atoms = Atom.sortAtoms( target.atoms );
-
-    return target;
-  }
-
-  /**
-   * Returns the cell slug delimiter
-   *
-   * @return {string}
-   */
-  get cellSlugDelimiter () {
-    return '.';
   }
 
   /**
@@ -972,93 +1054,6 @@ export default class Molecule {
    */
   normalizedHash () {
     return Molecule.normalize( Molecule.enumerate( this.molecularHash ) );
-  }
-
-  /**
-   * Accept a string of letters and numbers, and outputs a collection of decimals representing each
-   * character according to a pre-defined dictionary. Input string would typically be 64-character
-   * hexadecimal string featuring numbers from 0 to 9 and characters from a to f - a total of 15
-   * unique symbols. To ensure that string has an even number of symbols, convert it to Base 17
-   * (adding G as a possible symbol). Map each symbol to integer values as follows:
-   *  0   1   2   3   4   5   6   7  8  9  a   b   c   d   e   f   g
-   * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
-   *
-   * @param {string} hash
-   * @return {array}
-   */
-  static enumerate ( hash ) {
-
-    const mapped = {
-        '0': -8,
-        '1': -7,
-        '2': -6,
-        '3': -5,
-        '4': -4,
-        '5': -3,
-        '6': -2,
-        '7': -1,
-        '8': 0,
-        '9': 1,
-        'a': 2,
-        'b': 3,
-        'c': 4,
-        'd': 5,
-        'e': 6,
-        'f': 7,
-        'g': 8
-      },
-      target = [],
-      hashList = hash.toLowerCase().split( '' );
-
-    for ( let index = 0, len = hashList.length; index < len; ++index ) {
-
-      const symbol = hashList[ index ];
-
-      if ( typeof mapped[ symbol ] !== 'undefined' ) {
-        target[ index ] = mapped[ symbol ];
-      }
-    }
-
-    return target;
-  }
-
-  /**
-   * Normalize enumerated string to ensure that the total sum of all symbols is exactly zero. This
-   * ensures that exactly 50% of the WOTS+ key is leaked with each usage, ensuring predictable key
-   * safety:
-   * The sum of each symbol within Hm shall be presented by m
-   *  While m0 iterate across that set’s integers as Im:
-   *    If m0 and Im>-8 , let Im=Im-1
-   *    If m<0 and Im<8 , let Im=Im+1
-   *    If m=0, stop the iteration
-   *
-   * @param {array} mappedHashArray
-   * @return {array}
-   */
-  static normalize ( mappedHashArray ) {
-
-    let total = mappedHashArray.reduce( ( total, num ) => total + num );
-
-    const total_condition = total < 0;
-
-    while ( total < 0 || total > 0 ) {
-
-      for ( const index of Object.keys( mappedHashArray ) ) {
-
-        const condition = total_condition ? mappedHashArray[ index ] < 8 : mappedHashArray[ index ] > -8;
-
-        if ( condition ) {
-
-          const process = total_condition ? [ ++mappedHashArray[ index ], ++total ] : [ --mappedHashArray[ index ], --total ];
-
-          if ( 0 === total ) {
-            break;
-          }
-        }
-      }
-    }
-
-    return mappedHashArray;
   }
 
 }

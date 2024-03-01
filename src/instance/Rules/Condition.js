@@ -72,17 +72,6 @@ export default class Condition {
   }
 
   /**
-   * @return {{comparison, value, key}}
-   */
-  toJSON () {
-    return {
-      key: this.__key,
-      value: this.__value,
-      comparison: this.__comparison
-    };
-  }
-
-  /**
    * @param object
    * @return {Condition}
    */
@@ -92,5 +81,16 @@ export default class Condition {
       value: object.value,
       comparison: object.comparison
     } );
+  }
+
+  /**
+   * @return {{comparison, value, key}}
+   */
+  toJSON () {
+    return {
+      key: this.__key,
+      value: this.__value,
+      comparison: this.__comparison
+    };
   }
 }

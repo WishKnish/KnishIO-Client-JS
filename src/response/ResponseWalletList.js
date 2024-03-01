@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Response from './Response';
 import Query from '../query/Query';
+import Response from './Response';
 import Wallet from '../Wallet';
 import TokenUnit from '../TokenUnit';
 
@@ -122,7 +122,7 @@ export default class ResponseWalletList extends Response {
         wallet.tradeRates[ tradeRate[ 'tokenSlug' ] ] = tradeRate[ 'amount' ];
       }
     }
-    
+
     wallet.balance = Number( data.amount );
     wallet.pubkey = data.pubkey;
     wallet.createdAt = data.createdAt;
