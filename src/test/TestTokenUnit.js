@@ -127,7 +127,7 @@ export default class TestTokenUnit {
   }
 
   /**
-   * @throws \Exception
+   * @throws Exception
    */
   async testCreateToken () {
 

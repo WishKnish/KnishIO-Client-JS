@@ -179,7 +179,7 @@ export default class Test {
   }
 
   /**
-   * @throws \Exception
+   * @throws Exception
    */
   async testCreateToken () {
 
@@ -569,7 +569,7 @@ export default class Test {
   }
 
   /**
-   * @throws \Exception
+   * @throws Exception
    */
   async testQueryBalance () {
     let client = await this.client( this.secrets[ 0 ] );
