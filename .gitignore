@@ -4,7 +4,6 @@ yarn.lock
 package.lock
 package-lock.json
 index.js
-index.html
 subscribe.js
 subscribe.html
 webpack.config.sub.js
