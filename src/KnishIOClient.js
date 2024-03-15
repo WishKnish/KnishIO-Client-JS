@@ -95,7 +95,7 @@ import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom'
 import MutationCreateRule from './mutation/MutationCreateRule'
 import MutationDepositBufferToken from './mutation/MutationDepositBufferToken'
 import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken'
-import { getFingerprint } from '@thumbmarkjs/thumbmarkjs'
+import { getFingerprint, getFingerprintData } from '@thumbmarkjs/thumbmarkjs'
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -367,6 +367,10 @@ export default class KnishIOClient {
    */
   getFingerprint () {
     return getFingerprint()
+  }
+
+  getFingerprintData () {
+    return getFingerprintData()
   }
 
   /**
