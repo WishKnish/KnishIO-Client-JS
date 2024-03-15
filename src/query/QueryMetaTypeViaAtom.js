@@ -45,10 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import { gql } from '@apollo/client/core';
-import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom';
-
+import Query from './Query'
+import { gql } from '@apollo/client/core'
+import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom'
 
 export default class QueryMetaTypeViaAtom extends Query {
   /**
@@ -56,8 +55,8 @@ export default class QueryMetaTypeViaAtom extends Query {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
 
     this.$__query = gql`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!] ) {
       MetaTypeViaAtom(
@@ -91,7 +90,7 @@ export default class QueryMetaTypeViaAtom extends Query {
           total
         }
       }
-    }`;
+    }`
   }
 
   /**
@@ -111,7 +110,7 @@ export default class QueryMetaTypeViaAtom extends Query {
    * @param {string|null} countBy
    * @return {{}}
    */
-  static createVariables ( {
+  static createVariables ({
     metaType = null,
     metaId = null,
     key = null,
@@ -124,61 +123,60 @@ export default class QueryMetaTypeViaAtom extends Query {
     filter = null,
     queryArgs = null,
     countBy = null
-  } ) {
-    const variables = {};
+  }) {
+    const variables = {}
 
-    if ( atomValues ) {
-      variables[ 'atomValues' ] = atomValues;
+    if (atomValues) {
+      variables.atomValues = atomValues
     }
 
-    if ( keys ) {
-      variables[ 'keys' ] = keys;
+    if (keys) {
+      variables.keys = keys
     }
 
-    if ( values ) {
-      variables[ 'values' ] = values;
+    if (values) {
+      variables.values = values
     }
 
-    if ( metaType ) {
-      variables[ 'metaTypes' ] = typeof metaType === 'string' ? [ metaType ] : metaType;
+    if (metaType) {
+      variables.metaTypes = typeof metaType === 'string' ? [metaType] : metaType
     }
 
-    if ( metaId ) {
-      variables[ 'metaIds' ] = typeof metaId === 'string' ? [ metaId ] : metaId;
+    if (metaId) {
+      variables.metaIds = typeof metaId === 'string' ? [metaId] : metaId
     }
 
-    if ( countBy ) {
-      variables[ 'countBy' ] = countBy;
+    if (countBy) {
+      variables.countBy = countBy
     }
 
-    if ( filter ) {
-      variables[ 'filter' ] = filter;
+    if (filter) {
+      variables.filter = filter
     }
 
-    if ( key && value ) {
-      variables[ 'filter' ] = variables[ 'filter' ] || [];
-      variables[ 'filter' ].push( {
+    if (key && value) {
+      variables.filter = variables.filter || []
+      variables.filter.push({
         key,
         value,
-        'comparison': '='
-      } );
+        comparison: '='
+      })
     }
 
-    if ( latest ) {
-      variables[ 'latest' ] = !!latest;
-      variables[ 'latest' ] = !!latestMetas;
+    if (latest) {
+      variables.latest = !!latest
+      variables.latest = !!latestMetas
     }
 
-    if ( queryArgs ) {
-
-      if ( typeof queryArgs.limit === 'undefined' || queryArgs.limit === 0 ) {
-        queryArgs.limit = '*';
+    if (queryArgs) {
+      if (typeof queryArgs.limit === 'undefined' || queryArgs.limit === 0) {
+        queryArgs.limit = '*'
       }
 
-      variables[ 'queryArgs' ] = queryArgs;
+      variables.queryArgs = queryArgs
     }
 
-    return variables;
+    return variables
   }
 
   /**
@@ -187,10 +185,10 @@ export default class QueryMetaTypeViaAtom extends Query {
    * @param {object} json
    * @return {ResponseMetaTypeViaAtom}
    */
-  createResponse ( json ) {
-    return new ResponseMetaTypeViaAtom( {
+  createResponse (json) {
+    return new ResponseMetaTypeViaAtom({
       query: this,
       json
-    } );
+    })
   }
 }

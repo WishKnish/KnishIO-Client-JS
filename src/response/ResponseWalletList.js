@@ -45,31 +45,30 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from '../query/Query';
-import Response from './Response';
-import Wallet from '../Wallet';
-import TokenUnit from '../TokenUnit';
+import Query from '../query/Query'
+import Response from './Response'
+import Wallet from '../Wallet'
+import TokenUnit from '../TokenUnit'
 
 /**
  * Response for Wallet List query
  */
 export default class ResponseWalletList extends Response {
-
   /**
    * Class constructor
    *
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.Wallet'
-    } );
+    })
   }
 
   /**
@@ -79,55 +78,55 @@ export default class ResponseWalletList extends Response {
    * @param {string|null} secret
    * @return {Wallet}
    */
-  static toClientWallet ( {
+  static toClientWallet ({
     data,
     secret = null
-  } ) {
-    let wallet;
+  }) {
+    let wallet
 
-    if ( data.position === null || typeof data.position === 'undefined' ) {
-      wallet = Wallet.create( {
+    if (data.position === null || typeof data.position === 'undefined') {
+      wallet = Wallet.create({
         secretOrBundle: data.bundleHash,
         token: data.tokenSlug,
         batchId: data.batchId,
         characters: data.characters
-      } );
+      })
     } else {
-      wallet = new Wallet( {
+      wallet = new Wallet({
         secret,
         token: data.tokenSlug,
         position: data.position,
         batchId: data.batchId,
         characters: data.characters
-      } );
-      wallet.address = data.address;
-      wallet.bundle = data.bundleHash;
+      })
+      wallet.address = data.address
+      wallet.bundle = data.bundleHash
     }
 
-    if ( data.token ) {
-      wallet.tokenName = data.token.name;
-      wallet.tokenAmount = data.token.amount;
-      wallet.tokenSupply = data.token.supply;
-      wallet.tokenFungibility = data.token.fungibility;
+    if (data.token) {
+      wallet.tokenName = data.token.name
+      wallet.tokenAmount = data.token.amount
+      wallet.tokenSupply = data.token.supply
+      wallet.tokenFungibility = data.token.fungibility
     }
 
-    if ( data.tokenUnits.length ) {
-      for ( let tokenUnitData of data.tokenUnits ) {
-        wallet.tokenUnits.push( TokenUnit.createFromGraphQL( tokenUnitData ) );
+    if (data.tokenUnits.length) {
+      for (const tokenUnitData of data.tokenUnits) {
+        wallet.tokenUnits.push(TokenUnit.createFromGraphQL(tokenUnitData))
       }
     }
 
-    if ( data.tradeRates.length ) {
-      for ( let tradeRate of data.tradeRates ) {
-        wallet.tradeRates[ tradeRate[ 'tokenSlug' ] ] = tradeRate[ 'amount' ];
+    if (data.tradeRates.length) {
+      for (const tradeRate of data.tradeRates) {
+        wallet.tradeRates[tradeRate.tokenSlug] = tradeRate.amount
       }
     }
 
-    wallet.balance = Number( data.amount );
-    wallet.pubkey = data.pubkey;
-    wallet.createdAt = data.createdAt;
+    wallet.balance = Number(data.amount)
+    wallet.pubkey = data.pubkey
+    wallet.createdAt = data.createdAt
 
-    return wallet;
+    return wallet
   }
 
   /**
@@ -136,24 +135,23 @@ export default class ResponseWalletList extends Response {
    * @param secret
    * @return {null|[Wallet]}
    */
-  getWallets ( secret = null ) {
+  getWallets (secret = null) {
+    const list = this.data()
 
-    const list = this.data();
-
-    if ( !list ) {
-      return null;
+    if (!list) {
+      return null
     }
 
-    const wallets = [];
+    const wallets = []
 
-    for ( let data of list ) {
-      wallets.push( ResponseWalletList.toClientWallet( {
+    for (const data of list) {
+      wallets.push(ResponseWalletList.toClientWallet({
         data,
         secret
-      } ) );
+      }))
     }
 
-    return wallets;
+    return wallets
   }
 
   /**
@@ -162,6 +160,6 @@ export default class ResponseWalletList extends Response {
    * @return {null|[Wallet]}
    */
   payload () {
-    return this.getWallets();
+    return this.getWallets()
   }
 }

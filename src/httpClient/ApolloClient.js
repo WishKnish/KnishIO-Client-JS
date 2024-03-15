@@ -45,34 +45,32 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { operationName } from '../libraries/ApolloLink/handler';
-import Client from '../libraries/ApolloLink/Client';
-
+import { operationName } from '../libraries/ApolloLink/handler'
+import Client from '../libraries/ApolloLink/Client'
 
 export default class ApolloClient {
-
   /**
    * @param {string} serverUri
    * @param {object|null} socket
    * @param {boolean} encrypt
    */
-  constructor ( {
+  constructor ({
     serverUri,
     socket = null,
     encrypt = false
-  } ) {
-
-    this.$__subscribers = {};
-    this.$__uri = serverUri;
+  }) {
+    this.$__subscribers = {}
+    this.$__uri = serverUri
     this.$__socket = {
       ...{
         socketUri: null,
         appKey: 'knishio'
-      }, ...socket || {}
-    };
-    this.$__client = null;
+      },
+...socket || {}
+    }
+    this.$__client = null
 
-    this.restartTransport( encrypt );
+    this.restartTransport(encrypt)
   }
 
   /**
@@ -80,24 +78,24 @@ export default class ApolloClient {
    *
    * @param {boolean} encrypt
    */
-  restartTransport ( encrypt = false ) {
-    const client = new Client( {
+  restartTransport (encrypt = false) {
+    const client = new Client({
       serverUri: this.$__uri,
       soketi: this.$__socket,
       encrypt
-    } );
+    })
 
-    if ( this.$__client ) {
-      client.setAuthData( {
+    if (this.$__client) {
+      client.setAuthData({
         token: this.$__client.getAuthToken(),
         pubkey: this.$__client.getPubKey(),
         wallet: this.$__client.getWallet()
-      } );
+      })
 
-      this.socketDisconnect();
+      this.socketDisconnect()
     }
 
-    this.$__client = client;
+    this.$__client = client
   }
 
   /**
@@ -105,18 +103,18 @@ export default class ApolloClient {
    *
    * @param {boolean} encrypt
    */
-  setEncryption ( encrypt = false ) {
-    this.restartTransport( encrypt );
+  setEncryption (encrypt = false) {
+    this.restartTransport(encrypt)
   }
 
   /**
    * @param {string} operationName
    */
-  unsubscribe ( operationName ) {
-    if ( this.$__subscribers.hasOwnProperty( operationName ) ) {
-      this.$__subscribers[ operationName ].unsubscribe();
-      this.$__client.unsubscribeFromChannel( operationName );
-      delete this.$__subscribers[ operationName ];
+  unsubscribe (operationName) {
+    if (this.$__subscribers.hasOwnProperty(operationName)) {
+      this.$__subscribers[operationName].unsubscribe()
+      this.$__client.unsubscribeFromChannel(operationName)
+      delete this.$__subscribers[operationName]
     }
   }
 
@@ -124,8 +122,8 @@ export default class ApolloClient {
    *
    */
   unsubscribeAll () {
-    for ( let subscribe in this.$__subscribers ) {
-      this.unsubscribe( subscribe );
+    for (const subscribe in this.$__subscribers) {
+      this.unsubscribe(subscribe)
     }
   }
 
@@ -133,8 +131,8 @@ export default class ApolloClient {
    *
    */
   socketDisconnect () {
-    this.$__client.socketDisconnect();
-    this.$__subscribers = {};
+    this.$__client.socketDisconnect()
+    this.$__subscribers = {}
   }
 
   /**
@@ -143,16 +141,16 @@ export default class ApolloClient {
    *
    * @return {string}
    */
-  subscribe ( request, closure ) {
-    const operation = operationName( request );
+  subscribe (request, closure) {
+    const operation = operationName(request)
 
-    this.unsubscribe( operation );
+    this.unsubscribe(operation)
 
-    this.$__subscribers[ operation ] = this.$__client
-      .subscribe( request )
-      .subscribe( data => closure( data ) );
+    this.$__subscribers[operation] = this.$__client
+      .subscribe(request)
+      .subscribe(data => closure(data))
 
-    return operation;
+    return operation
   }
 
   /**
@@ -160,8 +158,8 @@ export default class ApolloClient {
    * @param request
    * @returns {Promise<*>}
    */
-  async query ( request ) {
-    return await this.$__client.query( request );
+  async query (request) {
+    return await this.$__client.query(request)
   }
 
   /**
@@ -169,8 +167,8 @@ export default class ApolloClient {
    * @param request
    * @returns {Promise<*>}
    */
-  async mutate ( request ) {
-    return await this.$__client.mutate( request );
+  async mutate (request) {
+    return await this.$__client.mutate(request)
   }
 
   /**
@@ -180,16 +178,16 @@ export default class ApolloClient {
    * @param {string} pubkey
    * @param {Wallet|null} wallet
    */
-  setAuthData ( {
+  setAuthData ({
     token,
     pubkey,
     wallet
-  } ) {
-    this.$__client.setAuthData( {
+  }) {
+    this.$__client.setAuthData({
       token,
       pubkey,
       wallet
-    } );
+    })
   }
 
   /**
@@ -198,11 +196,11 @@ export default class ApolloClient {
    * @return {string|null}
    */
   getAuthToken () {
-    let authTokenObject = this.$__client.getAuthToken();
-    if ( !authTokenObject ) {
-      return null;
+    const authTokenObject = this.$__client.getAuthToken()
+    if (!authTokenObject) {
+      return null
     }
-    return authTokenObject.getToken();
+    return authTokenObject.getToken()
   }
 
   /**
@@ -211,7 +209,7 @@ export default class ApolloClient {
    * @return {string}
    */
   getUri () {
-    return this.$__uri;
+    return this.$__uri
   }
 
   /**
@@ -219,15 +217,15 @@ export default class ApolloClient {
    *
    * @param {string} uri
    */
-  setUri ( uri ) {
-    this.$__uri = uri;
+  setUri (uri) {
+    this.$__uri = uri
   }
 
   /**
    * @return {string|null}
    */
   getSocketUri () {
-    return this.$__socket ? this.$__socket.socketUri : null;
+    return this.$__socket ? this.$__socket.socketUri : null
   }
 
   /**
@@ -235,11 +233,10 @@ export default class ApolloClient {
    * @param {string} socketUri
    * @param {string} appKey
    */
-  setSocketUri ( {
+  setSocketUri ({
     socketUri,
     appKey
-  } ) {
-    this.$__socket = arguments.length ? arguments[ 0 ] : this.$__socket;
+  }) {
+    this.$__socket = arguments.length ? arguments[0] : this.$__socket
   }
-
 }

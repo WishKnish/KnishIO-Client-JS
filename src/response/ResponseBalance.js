@@ -45,30 +45,29 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from '../query/Query';
-import Response from './Response';
-import ResponseWalletList from './ResponseWalletList';
+import Query from '../query/Query'
+import Response from './Response'
+import ResponseWalletList from './ResponseWalletList'
 
 /**
  * Response for balance query
  */
 export default class ResponseBalance extends Response {
-
   /**
    * Class constructor
    *
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.Balance'
-    } );
+    })
   }
 
   /**
@@ -77,14 +76,14 @@ export default class ResponseBalance extends Response {
    * @return {null|Wallet}
    */
   payload () {
-    const walletData = this.data();
+    const walletData = this.data()
 
-    if ( !walletData || !walletData[ 'bundleHash' ] || !walletData[ 'tokenSlug' ] ) {
-      return null;
+    if (!walletData || !walletData.bundleHash || !walletData.tokenSlug) {
+      return null
     }
 
-    return ResponseWalletList.toClientWallet( {
+    return ResponseWalletList.toClientWallet({
       data: walletData
-    } );
+    })
   }
 }

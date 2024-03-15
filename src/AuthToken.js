@@ -46,14 +46,12 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Wallet from './Wallet';
+import Wallet from './Wallet'
 
 /**
  *
  */
 export default class AuthToken {
-
-
   /**
    *
    * @param {string} token
@@ -61,16 +59,16 @@ export default class AuthToken {
    * @param {boolean} encrypt
    * @param {string} pubkey
    */
-  constructor ( {
+  constructor ({
     token,
     expiresAt,
     encrypt,
     pubkey
-  } ) {
-    this.$__token = token;
-    this.$__expiresAt = expiresAt;
-    this.$__pubkey = pubkey;
-    this.$__encrypt = encrypt;
+  }) {
+    this.$__token = token
+    this.$__expiresAt = expiresAt
+    this.$__pubkey = pubkey
+    this.$__encrypt = encrypt
   }
 
   /**
@@ -79,10 +77,10 @@ export default class AuthToken {
    * @param wallet
    * @returns {AuthToken}
    */
-  static create ( data, wallet ) {
-    let authToken = new AuthToken( data );
-    authToken.setWallet( wallet );
-    return authToken;
+  static create (data, wallet) {
+    const authToken = new AuthToken(data)
+    authToken.setWallet(wallet)
+    return authToken
   }
 
   /**
@@ -91,27 +89,27 @@ export default class AuthToken {
    * @param {string} secret
    * @return {AuthToken}
    */
-  static restore ( snapshot, secret ) {
-    let wallet = new Wallet( {
+  static restore (snapshot, secret) {
+    const wallet = new Wallet({
       secret,
       token: 'AUTH',
       position: snapshot.wallet.position,
       characters: snapshot.wallet.characters
-    } );
-    return AuthToken.create( {
+    })
+    return AuthToken.create({
       token: snapshot.token,
       expiresAt: snapshot.expiresAt,
       pubkey: snapshot.pubkey,
       encrypt: snapshot.encrypt
-    }, wallet );
+    }, wallet)
   }
 
   /**
    *
    * @param {Wallet} wallet
    */
-  setWallet ( wallet ) {
-    this.$__wallet = wallet;
+  setWallet (wallet) {
+    this.$__wallet = wallet
   }
 
   /**
@@ -119,7 +117,7 @@ export default class AuthToken {
    * @return {Wallet}
    */
   getWallet () {
-    return this.$__wallet;
+    return this.$__wallet
   }
 
   /**
@@ -136,25 +134,23 @@ export default class AuthToken {
         position: this.$__wallet.position,
         characters: this.$__wallet.characters
       }
-    };
+    }
   }
-
 
   /**
    *
    * @return {string}
    */
   getToken () {
-    return this.$__token;
+    return this.$__token
   }
-
 
   /**
    *
    * @return {string}
    */
   getPubkey () {
-    return this.$__pubkey;
+    return this.$__pubkey
   }
 
   /**
@@ -162,7 +158,7 @@ export default class AuthToken {
    * @return {number}
    */
   getExpireInterval () {
-    return ( this.$__expiresAt * 1000 ) - Date.now();
+    return (this.$__expiresAt * 1000) - Date.now()
   }
 
   /**
@@ -170,9 +166,8 @@ export default class AuthToken {
    * @return {boolean}
    */
   isExpired () {
-    return !this.$__expiresAt || this.getExpireInterval() < 0;
+    return !this.$__expiresAt || this.getExpireInterval() < 0
   }
-
 
   /**
    * Get auth data for the final client (apollo)
@@ -183,7 +178,6 @@ export default class AuthToken {
       token: this.getToken(),
       pubkey: this.getPubkey(),
       wallet: this.getWallet()
-    };
+    }
   }
-
 }

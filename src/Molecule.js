@@ -45,33 +45,32 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Atom from './Atom';
-import AtomMeta from './AtomMeta';
-import Wallet from './Wallet';
-import jsSHA from 'jssha';
+import Atom from './Atom'
+import AtomMeta from './AtomMeta'
+import Wallet from './Wallet'
+import jsSHA from 'jssha'
 import {
   chunkSubstr,
   hexToBase64
-} from './libraries/strings';
-import CheckMolecule from './libraries/CheckMolecule';
+} from './libraries/strings'
+import CheckMolecule from './libraries/CheckMolecule'
 import {
   generateBatchId,
   generateBundleHash
-} from './libraries/crypto';
-import { deepCloning } from './libraries/array';
-import Dot from './libraries/Dot';
-import Rule from './instance/Rules/Rule';
-import AtomsMissingException from './exception/AtomsMissingException';
-import BalanceInsufficientException from './exception/BalanceInsufficientException';
-import NegativeAmountException from './exception/NegativeAmountException';
-import SignatureMalformedException from './exception/SignatureMalformedException';
-import versions from './versions/index';
+} from './libraries/crypto'
+import { deepCloning } from './libraries/array'
+import Dot from './libraries/Dot'
+import Rule from './instance/Rules/Rule'
+import AtomsMissingException from './exception/AtomsMissingException'
+import BalanceInsufficientException from './exception/BalanceInsufficientException'
+import NegativeAmountException from './exception/NegativeAmountException'
+import SignatureMalformedException from './exception/SignatureMalformedException'
+import versions from './versions/index'
 
 /**
  * Molecule class used for committing changes to the ledger
  */
 export default class Molecule {
-
   /**
    * Class constructor
    *
@@ -81,33 +80,32 @@ export default class Molecule {
    * @param {string|null} cellSlug
    * @param {string|null} version
    */
-  constructor ( {
+  constructor ({
     secret = null,
     sourceWallet = null,
     remainderWallet = null,
     cellSlug = null,
     version = null
-  } ) {
-
-    this.cellSlugOrigin = this.cellSlug = cellSlug;
-    this.secret = secret;
-    this.sourceWallet = sourceWallet;
-    this.atoms = [];
-    if ( version !== null && versions.hasOwnProperty( version ) ) {
-      this.version = String( version );
+  }) {
+    this.cellSlugOrigin = this.cellSlug = cellSlug
+    this.secret = secret
+    this.sourceWallet = sourceWallet
+    this.atoms = []
+    if (version !== null && versions.hasOwnProperty(version)) {
+      this.version = String(version)
     }
 
     // Set the remainder wallet for this transaction
-    if ( remainderWallet || sourceWallet ) {
-      this.remainderWallet = remainderWallet || Wallet.create( {
+    if (remainderWallet || sourceWallet) {
+      this.remainderWallet = remainderWallet || Wallet.create({
         secretOrBundle: secret,
         token: sourceWallet.token,
         batchId: sourceWallet.batchId,
         characters: sourceWallet.characters
-      } );
+      })
     }
 
-    this.clear();
+    this.clear()
   }
 
   /**
@@ -116,7 +114,7 @@ export default class Molecule {
    * @return {string}
    */
   get cellSlugDelimiter () {
-    return '.';
+    return '.'
   }
 
   /**
@@ -126,11 +124,11 @@ export default class Molecule {
    * @param {array} atoms
    * @returns {*[]}
    */
-  static isotopeFilter ( isotopes, atoms ) {
-    if ( !Array.isArray( isotopes ) ) {
-      isotopes = [ isotopes ];
+  static isotopeFilter (isotopes, atoms) {
+    if (!Array.isArray(isotopes)) {
+      isotopes = [isotopes]
     }
-    return atoms.filter( atom => isotopes.includes( atom.isotope ) );
+    return atoms.filter(atom => isotopes.includes(atom.isotope))
   }
 
   /**
@@ -139,8 +137,8 @@ export default class Molecule {
    * @param {array} atoms
    * @return {number}
    */
-  static generateNextAtomIndex ( atoms ) {
-    return atoms.length;
+  static generateNextAtomIndex (atoms) {
+    return atoms.length
   }
 
   /**
@@ -150,36 +148,33 @@ export default class Molecule {
    * @return {object}
    * @throws {AtomsMissingException}
    */
-  static jsonToObject ( json ) {
-    const target = Object.assign( new Molecule( {} ), JSON.parse( json ) ),
-      properties = Object.keys( new Molecule( {} ) );
+  static jsonToObject (json) {
+    const target = Object.assign(new Molecule({}), JSON.parse(json))
+      const properties = Object.keys(new Molecule({}))
 
-    if ( !Array.isArray( target.atoms ) ) {
-      throw new AtomsMissingException();
+    if (!Array.isArray(target.atoms)) {
+      throw new AtomsMissingException()
     }
 
-    for ( const index in Object.keys( target.atoms ) ) {
+    for (const index in Object.keys(target.atoms)) {
+      target.atoms[index] = Atom.jsonToObject(JSON.stringify(target.atoms[index]))
 
-      target.atoms[ index ] = Atom.jsonToObject( JSON.stringify( target.atoms[ index ] ) );
-
-      for ( const property of [ 'position', 'walletAddress', 'isotope' ] ) {
-
-        if ( target.atoms[ index ].isotope.toLowerCase() !== 'r' && ( typeof target.atoms[ index ][ property ] === 'undefined' || null === target.atoms[ index ][ property ] ) ) {
-          throw new AtomsMissingException( 'MolecularStructure::jsonToObject() - Required Atom properties are missing!' );
+      for (const property of ['position', 'walletAddress', 'isotope']) {
+        if (target.atoms[index].isotope.toLowerCase() !== 'r' && (typeof target.atoms[index][property] === 'undefined' || target.atoms[index][property] === null)) {
+          throw new AtomsMissingException('MolecularStructure::jsonToObject() - Required Atom properties are missing!')
         }
       }
     }
 
-    for ( const property in target ) {
-
-      if ( target.hasOwnProperty( property ) && !properties.includes( property ) ) {
-        delete target[ property ];
+    for (const property in target) {
+      if (target.hasOwnProperty(property) && !properties.includes(property)) {
+        delete target[property]
       }
     }
 
-    target.atoms = Atom.sortAtoms( target.atoms );
+    target.atoms = Atom.sortAtoms(target.atoms)
 
-    return target;
+    return target
   }
 
   /**
@@ -194,40 +189,38 @@ export default class Molecule {
    * @param {string} hash
    * @return {array}
    */
-  static enumerate ( hash ) {
-
+  static enumerate (hash) {
     const mapped = {
-        '0': -8,
-        '1': -7,
-        '2': -6,
-        '3': -5,
-        '4': -4,
-        '5': -3,
-        '6': -2,
-        '7': -1,
-        '8': 0,
-        '9': 1,
-        'a': 2,
-        'b': 3,
-        'c': 4,
-        'd': 5,
-        'e': 6,
-        'f': 7,
-        'g': 8
-      },
-      target = [],
-      hashList = hash.toLowerCase().split( '' );
+        0: -8,
+        1: -7,
+        2: -6,
+        3: -5,
+        4: -4,
+        5: -3,
+        6: -2,
+        7: -1,
+        8: 0,
+        9: 1,
+        a: 2,
+        b: 3,
+        c: 4,
+        d: 5,
+        e: 6,
+        f: 7,
+        g: 8
+      }
+      const target = []
+      const hashList = hash.toLowerCase().split('')
 
-    for ( let index = 0, len = hashList.length; index < len; ++index ) {
+    for (let index = 0, len = hashList.length; index < len; ++index) {
+      const symbol = hashList[index]
 
-      const symbol = hashList[ index ];
-
-      if ( typeof mapped[ symbol ] !== 'undefined' ) {
-        target[ index ] = mapped[ symbol ];
+      if (typeof mapped[symbol] !== 'undefined') {
+        target[index] = mapped[symbol]
       }
     }
 
-    return target;
+    return target
   }
 
   /**
@@ -243,30 +236,26 @@ export default class Molecule {
    * @param {array} mappedHashArray
    * @return {array}
    */
-  static normalize ( mappedHashArray ) {
+  static normalize (mappedHashArray) {
+    let total = mappedHashArray.reduce((total, num) => total + num)
 
-    let total = mappedHashArray.reduce( ( total, num ) => total + num );
+    const total_condition = total < 0
 
-    const total_condition = total < 0;
+    while (total < 0 || total > 0) {
+      for (const index of Object.keys(mappedHashArray)) {
+        const condition = total_condition ? mappedHashArray[index] < 8 : mappedHashArray[index] > -8
 
-    while ( total < 0 || total > 0 ) {
+        if (condition) {
+          const process = total_condition ? [++mappedHashArray[index], ++total] : [--mappedHashArray[index], --total]
 
-      for ( const index of Object.keys( mappedHashArray ) ) {
-
-        const condition = total_condition ? mappedHashArray[ index ] < 8 : mappedHashArray[ index ] > -8;
-
-        if ( condition ) {
-
-          const process = total_condition ? [ ++mappedHashArray[ index ], ++total ] : [ --mappedHashArray[ index ], --total ];
-
-          if ( 0 === total ) {
-            break;
+          if (total === 0) {
+            break
           }
         }
       }
     }
 
-    return mappedHashArray;
+    return mappedHashArray
   }
 
   /**
@@ -274,8 +263,8 @@ export default class Molecule {
    * @param isotopes
    * @returns {*[]}
    */
-  getIsotopes ( isotopes ) {
-    return Molecule.isotopeFilter( isotopes, this.atoms );
+  getIsotopes (isotopes) {
+    return Molecule.isotopeFilter(isotopes, this.atoms)
   }
 
   /**
@@ -284,7 +273,7 @@ export default class Molecule {
    * @return {number}
    */
   generateIndex () {
-    return Molecule.generateNextAtomIndex( this.atoms );
+    return Molecule.generateNextAtomIndex(this.atoms)
   }
 
   /**
@@ -292,9 +281,9 @@ export default class Molecule {
    *
    * @param {Molecule} molecule
    */
-  fill ( molecule ) {
-    for ( let key in Object.keys( molecule ) ) {
-      this[ key ] = molecule[ key ];
+  fill (molecule) {
+    for (const key in Object.keys(molecule)) {
+      this[key] = molecule[key]
     }
   }
 
@@ -303,22 +292,21 @@ export default class Molecule {
    * @param {Atom} atom
    * @returns {Molecule}
    */
-  addAtom ( atom ) {
-
+  addAtom (atom) {
     // Reset the molecular hash
-    this.molecularHash = null;
+    this.molecularHash = null
 
     // Set atom's index
-    atom.index = this.generateIndex();
-    atom.version = this.version;
+    atom.index = this.generateIndex()
+    atom.version = this.version
 
     // Add atom
-    this.atoms.push( atom );
+    this.atoms.push(atom)
 
     // Sort atoms
-    this.atoms = Atom.sortAtoms( this.atoms );
+    this.atoms = Atom.sortAtoms(this.atoms)
 
-    return this;
+    return this
   }
 
   /**
@@ -327,13 +315,13 @@ export default class Molecule {
    * @return {Molecule}
    */
   addContinuIdAtom () {
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'I',
       wallet: this.remainderWallet,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
-    } ) );
-    return this;
+    }))
+    return this
   }
 
   /**
@@ -345,30 +333,29 @@ export default class Molecule {
    *
    * @return {Molecule}
    */
-  addPolicyAtom ( {
+  addPolicyAtom ({
     metaType,
     metaId,
     meta = {},
     policy = {}
-  } ) {
-
+  }) {
     // AtomMeta object initialization
-    let atomMeta = new AtomMeta( meta );
-    atomMeta.addPolicy( policy );
+    const atomMeta = new AtomMeta(meta)
+    atomMeta.addPolicy(policy)
 
-    const wallet = Wallet.create( {
+    const wallet = Wallet.create({
       secretOrBundle: this.secret || this.sourceWallet.bundle,
       token: 'USER'
-    } );
+    })
 
-    this.addAtom( Atom.create( {
-      wallet: wallet,
+    this.addAtom(Atom.create({
+      wallet,
       isotope: 'R',
       metaType,
       metaId,
       meta: atomMeta
-    } ) );
-    return this;
+    }))
+    return this
   }
 
   /**
@@ -377,41 +364,40 @@ export default class Molecule {
    * @param recipientWallet
    * @returns {Molecule}
    */
-  fuseToken ( tokenUnits, recipientWallet ) {
-
+  fuseToken (tokenUnits, recipientWallet) {
     // Calculate amount
-    let amount = tokenUnits.length;
+    const amount = tokenUnits.length
 
-    if ( ( this.sourceWallet.balance - amount ) < 0 ) {
-      throw new BalanceInsufficientException();
+    if ((this.sourceWallet.balance - amount) < 0) {
+      throw new BalanceInsufficientException()
     }
 
     // Initializing a new Atom to remove tokens from source
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
       value: -amount
-    } ) );
+    }))
 
     // Add F isotope for fused tokens creation
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'F',
       wallet: recipientWallet,
       value: 1,
       metaType: 'walletBundle',
       metaId: recipientWallet.bundle
-    } ) );
+    }))
 
     // Initializing a new Atom to remove tokens from source
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
-    } ) );
+    }))
 
-    return this;
+    return this
   }
 
   /**
@@ -421,33 +407,32 @@ export default class Molecule {
    * @param {string|null} walletBundle
    * @return {Molecule}
    */
-  burnToken ( {
+  burnToken ({
     amount,
     walletBundle = null
-  } ) {
-
-    if ( amount < 0.0 ) {
-      throw new NegativeAmountException( 'Molecule::burnToken() - Amount to burn must be positive!' );
+  }) {
+    if (amount < 0.0) {
+      throw new NegativeAmountException('Molecule::burnToken() - Amount to burn must be positive!')
     }
 
-    if ( ( this.sourceWallet.balance - amount ) < 0 ) {
-      throw new BalanceInsufficientException();
+    if ((this.sourceWallet.balance - amount) < 0) {
+      throw new BalanceInsufficientException()
     }
 
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
       value: -amount
-    } ) );
-    this.addAtom( Atom.create( {
+    }))
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
-    } ) );
+    }))
 
-    return this;
+    return this
   }
 
   /*
@@ -458,55 +443,53 @@ export default class Molecule {
    * @param {array|object} metas
    * @return {Molecule}
    */
-  replenishToken ( {
+  replenishToken ({
     amount,
     units = []
-  } ) {
-
-    if ( amount < 0 ) {
-      throw new NegativeAmountException( 'Molecule::replenishToken() - Amount to replenish must be positive!' );
+  }) {
+    if (amount < 0) {
+      throw new NegativeAmountException('Molecule::replenishToken() - Amount to replenish must be positive!')
     }
 
     // Special code for the token unit logic
-    if ( units.length ) {
-
+    if (units.length) {
       // Prepare token units to formatted style
-      units = Wallet.getTokenUnits( units );
+      units = Wallet.getTokenUnits(units)
 
       // Merge token units with source wallet & new items
-      this.remainderWallet.tokenUnits = this.sourceWallet.tokenUnits;
-      for ( const unit of units ) {
-        this.remainderWallet.tokenUnits.push( unit );
+      this.remainderWallet.tokenUnits = this.sourceWallet.tokenUnits
+      for (const unit of units) {
+        this.remainderWallet.tokenUnits.push(unit)
       }
-      this.remainderWallet.balance = this.remainderWallet.tokenUnits.length;
+      this.remainderWallet.balance = this.remainderWallet.tokenUnits.length
 
       // Override first atom's token units to replenish values
-      this.sourceWallet.tokenUnits = units;
-      this.sourceWallet.balance = this.sourceWallet.tokenUnits.length;
+      this.sourceWallet.tokenUnits = units
+      this.sourceWallet.balance = this.sourceWallet.tokenUnits.length
     }
 
     // Update wallet's balances
     else {
-      this.remainderWallet.balance = this.sourceWallet.balance + amount;
-      this.sourceWallet.balance = amount;
+      this.remainderWallet.balance = this.sourceWallet.balance + amount
+      this.sourceWallet.balance = amount
     }
 
     // Initializing a new Atom to remove tokens from source
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
       value: this.sourceWallet.balance
-    } ) );
+    }))
 
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
       value: this.remainderWallet.balance,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
-    } ) );
+    }))
 
-    return this;
+    return this
   }
 
   /**
@@ -517,39 +500,38 @@ export default class Molecule {
    * @param {number} amount
    * @return {Molecule}
    */
-  initValue ( {
+  initValue ({
     recipientWallet,
     amount
-  } ) {
-
-    if ( this.sourceWallet.balance - amount < 0 ) {
-      throw new BalanceInsufficientException();
+  }) {
+    if (this.sourceWallet.balance - amount < 0) {
+      throw new BalanceInsufficientException()
     }
 
     // Initializing a new Atom to remove tokens from source
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
       value: -amount
-    } ) );
+    }))
     // Initializing a new Atom to add tokens to recipient
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: recipientWallet,
       value: amount,
       metaType: 'walletBundle',
       metaId: recipientWallet.bundle
-    } ) );
+    }))
     // Ininitlizing a remainder atom
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
-    } ) );
+    }))
 
-    return this;
+    return this
   }
 
   /**
@@ -557,48 +539,47 @@ export default class Molecule {
    * @param amount
    * @param tradeRates
    */
-  initDepositBuffer ( {
+  initDepositBuffer ({
     amount,
     tradeRates
-  } ) {
-    if ( this.sourceWallet.balance - amount < 0 ) {
-      throw new BalanceInsufficientException();
+  }) {
+    if (this.sourceWallet.balance - amount < 0) {
+      throw new BalanceInsufficientException()
     }
 
     // Create a buffer wallet
-    let bufferWallet = Wallet.create( {
+    const bufferWallet = Wallet.create({
       secretOrBundle: this.secret,
       token: this.sourceWallet.token,
       batchId: this.sourceWallet.batchId
-    } );
-    bufferWallet.tradeRates = tradeRates;
-
+    })
+    bufferWallet.tradeRates = tradeRates
 
     // Initializing a new Atom to remove tokens from source
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
       value: -amount
-    } ) );
+    }))
 
     // Initializing a new Atom to add tokens to recipient
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'B',
       wallet: bufferWallet,
       value: amount,
       metaType: 'walletBundle',
       metaId: this.sourceWallet.bundle
-    } ) );
+    }))
 
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
       metaId: this.sourceWallet.bundle
-    } ) );
+    }))
 
-    return this;
+    return this
   }
 
   /**
@@ -607,57 +588,56 @@ export default class Molecule {
    * @param {Wallet|{}} signingWallet
    * @returns {Molecule}
    */
-  initWithdrawBuffer ( {
+  initWithdrawBuffer ({
     recipients,
     signingWallet = null
-  } ) {
-
+  }) {
     // Calculate final amount from all recipients
-    let amount = 0;
-    for ( const [ recipientBundle, recipientAmount ] of Object.entries( recipients || {} ) ) {
-      amount += recipientAmount;
+    let amount = 0
+    for (const [recipientBundle, recipientAmount] of Object.entries(recipients || {})) {
+      amount += recipientAmount
     }
-    if ( this.sourceWallet.balance - amount < 0 ) {
-      throw new BalanceInsufficientException();
+    if (this.sourceWallet.balance - amount < 0) {
+      throw new BalanceInsufficientException()
     }
 
     // Set a metas signing position for molecule correct reconciliation
-    let firstAtomMeta = new AtomMeta;
-    if ( signingWallet ) {
-      firstAtomMeta.setSigningWallet( signingWallet );
+    const firstAtomMeta = new AtomMeta()
+    if (signingWallet) {
+      firstAtomMeta.setSigningWallet(signingWallet)
     }
 
     // Initializing a new Atom to remove tokens from source
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'B',
       wallet: this.sourceWallet,
       value: -amount,
       meta: firstAtomMeta,
       metaType: 'walletBundle',
       metaId: this.sourceWallet.bundle
-    } ) );
+    }))
 
     // Initializing a new Atom to add tokens to recipient
-    for ( const [ recipientBundle, recipientAmount ] of Object.entries( recipients || {} ) ) {
-      this.addAtom( new Atom( {
+    for (const [recipientBundle, recipientAmount] of Object.entries(recipients || {})) {
+      this.addAtom(new Atom({
         isotope: 'V',
         token: this.sourceWallet.token,
         value: recipientAmount,
-        batchId: this.sourceWallet.batchId ? generateBatchId( {} ) : null,
+        batchId: this.sourceWallet.batchId ? generateBatchId({}) : null,
         metaType: 'walletBundle',
         metaId: recipientBundle
-      } ) );
+      }))
     }
 
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'B',
       wallet: this.remainderWallet,
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
-    } ) );
+    }))
 
-    return this;
+    return this
   }
 
   /**
@@ -668,17 +648,16 @@ export default class Molecule {
    * @param {array|object} meta - additional fields to configure the token
    * @return {Molecule}
    */
-  initTokenCreation ( {
+  initTokenCreation ({
     recipientWallet,
     amount,
     meta
-  } ) {
-
-    let atomMeta = new AtomMeta( meta );
-    atomMeta.setMetaWallet( recipientWallet );
+  }) {
+    const atomMeta = new AtomMeta(meta)
+    atomMeta.setMetaWallet(recipientWallet)
 
     // The primary atom tells the ledger that a certain amount of the new token is being issued.
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'C',
       wallet: this.sourceWallet,
       value: amount,
@@ -686,12 +665,12 @@ export default class Molecule {
       metaId: recipientWallet.token,
       meta: atomMeta,
       batchId: recipientWallet.batchId
-    } ) );
+    }))
 
     // User remainder atom
-    this.addContinuIdAtom();
+    this.addContinuIdAtom()
 
-    return this;
+    return this
   }
 
   /**
@@ -702,38 +681,38 @@ export default class Molecule {
    * @param {object} policy
    * @return {Molecule}
    */
-  createRule ( {
+  createRule ({
     metaType,
     metaId,
     rule,
     policy = {}
-  } ) {
-    const $rules = [];
+  }) {
+    const $rules = []
 
-    for ( const $rule of rule ) {
-      $rules.push( $rule instanceof Rule ? $rule : Rule.toObject( $rule ) );
+    for (const $rule of rule) {
+      $rules.push($rule instanceof Rule ? $rule : Rule.toObject($rule))
     }
 
     // Create atom meta with rules
-    let atomMeta = new AtomMeta( {
-      rule: JSON.stringify( $rules )
-    } );
+    const atomMeta = new AtomMeta({
+      rule: JSON.stringify($rules)
+    })
 
     // Add policies to meta object
-    atomMeta.addPolicy( policy );
+    atomMeta.addPolicy(policy)
 
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'R',
       wallet: this.sourceWallet,
       metaType,
       metaId,
       meta: atomMeta
-    } ) );
+    }))
 
     // User continuID atom
-    this.addContinuIdAtom();
+    this.addContinuIdAtom()
 
-    return this;
+    return this
   }
 
   /**
@@ -743,25 +722,24 @@ export default class Molecule {
    * @param {AtomMeta|null} atomMeta
    * @return {Molecule}
    */
-  initWalletCreation ( wallet, atomMeta = null ) {
-
-    if ( !atomMeta ) {
-      atomMeta = new AtomMeta();
+  initWalletCreation (wallet, atomMeta = null) {
+    if (!atomMeta) {
+      atomMeta = new AtomMeta()
     }
-    atomMeta.setMetaWallet( wallet );
+    atomMeta.setMetaWallet(wallet)
 
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'C',
       wallet: this.sourceWallet,
       metaType: 'wallet',
       metaId: wallet.address,
       meta: atomMeta,
       batchId: wallet.batchId
-    } ) );
+    }))
 
-    this.addContinuIdAtom();
+    this.addContinuIdAtom()
 
-    return this;
+    return this
   }
 
   /**
@@ -769,9 +747,9 @@ export default class Molecule {
    *
    * @param wallet
    */
-  initShadowWalletClaim ( wallet ) {
-    let atomMeta = ( new AtomMeta() ).setShadowWalletClaim( true );
-    return this.initWalletCreation( wallet, atomMeta );
+  initShadowWalletClaim (wallet) {
+    const atomMeta = (new AtomMeta()).setShadowWalletClaim(true)
+    return this.initWalletCreation(wallet, atomMeta)
   }
 
   /**
@@ -783,28 +761,27 @@ export default class Molecule {
    *
    * @return {Molecule}
    */
-  initIdentifierCreation ( {
+  initIdentifierCreation ({
     type,
     contact,
     code
-  } ) {
-
+  }) {
     const meta = {
-      code: code,
-      hash: generateBundleHash( contact.trim() )
-    };
+      code,
+      hash: generateBundleHash(contact.trim(), 'Molecule::initIdentifierCreation')
+    }
 
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'C',
       wallet: this.sourceWallet,
       metaType: 'identifier',
       metaId: type,
-      meta: new AtomMeta( meta )
-    } ) );
+      meta: new AtomMeta(meta)
+    }))
 
-    this.addContinuIdAtom();
+    this.addContinuIdAtom()
 
-    return this;
+    return this
   }
 
   /**
@@ -816,33 +793,32 @@ export default class Molecule {
    * @param {object} policy
    * @return {Molecule}
    */
-  initMeta ( {
+  initMeta ({
     meta,
     metaType,
     metaId,
     policy
-  } ) {
-
+  }) {
     // Initializing a new Atom to hold our metadata
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'M',
       wallet: this.sourceWallet,
       metaType,
       metaId,
-      meta: new AtomMeta( meta )
-    } ) );
+      meta: new AtomMeta(meta)
+    }))
 
-    this.addPolicyAtom( {
+    this.addPolicyAtom({
       metaType,
       metaId,
       meta,
       policy
-    } );
+    })
 
     // User remainder atom
-    this.addContinuIdAtom();
+    this.addContinuIdAtom()
 
-    return this;
+    return this
   }
 
   /**
@@ -857,33 +833,32 @@ export default class Molecule {
    *
    * @return {Molecule}
    */
-  initTokenRequest ( {
+  initTokenRequest ({
     token,
     amount,
     metaType,
     metaId,
     meta = {},
     batchId = null
-  } ) {
+  }) {
+    meta.token = token
 
-    meta.token = token;
+    this.local = 1
 
-    this.local = 1;
-
-    this.addAtom( Atom.create( {
+    this.addAtom(Atom.create({
       isotope: 'T',
       wallet: this.sourceWallet,
       value: amount,
       metaType,
       metaId,
-      meta: new AtomMeta( meta ),
+      meta: new AtomMeta(meta),
       batchId
-    } ) );
+    }))
 
     // User remainder atom
-    this.addContinuIdAtom();
+    this.addContinuIdAtom()
 
-    return this;
+    return this
   }
 
   /**
@@ -893,18 +868,17 @@ export default class Molecule {
    *
    * @return {Molecule}
    */
-  initAuthorization ( { meta } ) {
-
-    this.addAtom( Atom.create( {
+  initAuthorization ({ meta }) {
+    this.addAtom(Atom.create({
       isotope: 'U',
       wallet: this.sourceWallet,
-      meta: new AtomMeta( meta )
-    } ) );
+      meta: new AtomMeta(meta)
+    }))
 
     // User remainder atom
-    this.addContinuIdAtom();
+    this.addContinuIdAtom()
 
-    return this;
+    return this
   }
 
   /**
@@ -913,13 +887,13 @@ export default class Molecule {
    * @return {Molecule}
    */
   clear () {
-    this.molecularHash = null;
-    this.bundle = null;
-    this.status = null;
-    this.createdAt = String( +new Date );
-    this.atoms = [];
+    this.molecularHash = null
+    this.bundle = null
+    this.status = null
+    this.createdAt = String(+new Date())
+    this.atoms = []
 
-    return this;
+    return this
   }
 
   /**
@@ -932,86 +906,84 @@ export default class Molecule {
    * @return {string|null}
    * @throws {AtomsMissingException}
    */
-  sign ( {
+  sign ({
     bundle = null,
     anonymous = false,
     compressed = true
-  } ) {
-
+  }) {
     // Do we have atoms?
-    if ( this.atoms.length === 0 || this.atoms.filter( atom => !( atom instanceof Atom ) ).length !== 0 ) {
-      throw new AtomsMissingException();
+    if (this.atoms.length === 0 || this.atoms.filter(atom => !(atom instanceof Atom)).length !== 0) {
+      throw new AtomsMissingException()
     }
 
     // Derive the user's bundle
-    if ( !anonymous && !this.bundle ) {
-      this.bundle = bundle ? bundle : generateBundleHash( this.secret );
+    if (!anonymous && !this.bundle) {
+      this.bundle = bundle || generateBundleHash(this.secret, 'Molecule::sign')
     }
 
     // Hash atoms to get molecular hash
-    this.molecularHash = Atom.hashAtoms( {
+    this.molecularHash = Atom.hashAtoms({
       atoms: this.atoms
-    } );
+    })
 
     // Signing atom
-    const signingAtom = this.atoms[ 0 ];
+    const signingAtom = this.atoms[0]
 
     // Set signing position from the first atom
-    let signingPosition = signingAtom.position;
+    let signingPosition = signingAtom.position
 
     // Get signing wallet from first atom's metas
-    let signingWallet = Dot.get( signingAtom.aggregatedMeta(), 'signingWallet' );
+    const signingWallet = Dot.get(signingAtom.aggregatedMeta(), 'signingWallet')
 
     // Try to get custom signing position from the metas (local molecule with server secret)
-    if ( signingWallet ) {
-      signingPosition = Dot.get( JSON.parse( signingWallet ), 'position' );
+    if (signingWallet) {
+      signingPosition = Dot.get(JSON.parse(signingWallet), 'position')
     }
 
     // Signing position is required
-    if ( !signingPosition ) {
-      throw new SignatureMalformedException( 'Signing wallet must have a position!' );
+    if (!signingPosition) {
+      throw new SignatureMalformedException('Signing wallet must have a position!')
     }
 
     // Generate the private signing key for this molecule
-    const key = Wallet.generateKey( {
+    const key = Wallet.generateKey({
         secret: this.secret,
         token: signingAtom.token,
         position: signingAtom.position
-      } ),
+      })
       // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
-      keyChunks = chunkSubstr( key, 128 ),
+      const keyChunks = chunkSubstr(key, 128)
       // Convert Hm to numeric notation, and then normalize
-      normalizedHash = this.normalizedHash();
+      const normalizedHash = this.normalizedHash()
 
     // Building a one-time-signature
-    let signatureFragments = '';
+    let signatureFragments = ''
 
-    for ( const index in keyChunks ) {
+    for (const index in keyChunks) {
+      let workingChunk = keyChunks[index]
 
-      let workingChunk = keyChunks[ index ];
-
-      for ( let iterationCount = 0, condition = 8 - normalizedHash[ index ]; iterationCount < condition; iterationCount++ ) {
-        workingChunk = ( new jsSHA( 'SHAKE256', 'TEXT' ) ).update( workingChunk ).getHash( 'HEX', { outputLen: 512 } );
+      for (let iterationCount = 0, condition = 8 - normalizedHash[index]; iterationCount < condition; iterationCount++) {
+        workingChunk = (new jsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
       }
-      signatureFragments += workingChunk;
+      signatureFragments += workingChunk
     }
 
     // Compressing the OTS
-    if ( compressed ) {
-      signatureFragments = hexToBase64( signatureFragments );
+    if (compressed) {
+      signatureFragments = hexToBase64(signatureFragments)
     }
 
     // Chunking the signature across multiple atoms
-    const chunkedSignature = chunkSubstr( signatureFragments, Math.ceil( signatureFragments.length / this.atoms.length ) );
+    const chunkedSignature = chunkSubstr(signatureFragments, Math.ceil(signatureFragments.length / this.atoms.length))
 
-    let lastPosition = null;
+    let lastPosition = null
 
-    for ( let chunkCount = 0, condition = chunkedSignature.length; chunkCount < condition; chunkCount++ ) {
-      this.atoms[ chunkCount ].otsFragment = chunkedSignature[ chunkCount ];
-      lastPosition = this.atoms[ chunkCount ].position;
+    for (let chunkCount = 0, condition = chunkedSignature.length; chunkCount < condition; chunkCount++) {
+      this.atoms[chunkCount].otsFragment = chunkedSignature[chunkCount]
+      lastPosition = this.atoms[chunkCount].position
     }
 
-    return lastPosition;
+    return lastPosition
   }
 
   /**
@@ -1020,7 +992,7 @@ export default class Molecule {
    * @return {string}
    */
   cellSlugBase () {
-    return ( this.cellSlug || '' ).split( this.cellSlugDelimiter )[ 0 ];
+    return (this.cellSlug || '').split(this.cellSlugDelimiter)[0]
   }
 
   /**
@@ -1029,13 +1001,13 @@ export default class Molecule {
    * @return {object}
    */
   toJSON () {
-    let clone = deepCloning( this );
-    for ( let key of [ 'remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin', 'version' ] ) {
-      if ( clone.hasOwnProperty( key ) ) {
-        delete clone[ key ];
+    const clone = deepCloning(this)
+    for (const key of ['remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin', 'version']) {
+      if (clone.hasOwnProperty(key)) {
+        delete clone[key]
       }
     }
-    return clone;
+    return clone
   }
 
   /**
@@ -1043,8 +1015,8 @@ export default class Molecule {
    *
    * @param senderWallet
    */
-  check ( senderWallet = null ) {
-    ( new CheckMolecule( this ) ).verify( senderWallet );
+  check (senderWallet = null) {
+    (new CheckMolecule(this)).verify(senderWallet)
   }
 
   /**
@@ -1053,7 +1025,6 @@ export default class Molecule {
    * @returns {Array}
    */
   normalizedHash () {
-    return Molecule.normalize( Molecule.enumerate( this.molecularHash ) );
+    return Molecule.normalize(Molecule.enumerate(this.molecularHash))
   }
-
 }

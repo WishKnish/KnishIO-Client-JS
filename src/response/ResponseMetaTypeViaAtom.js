@@ -46,8 +46,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Query from '../query/Query';
-import Response from './Response';
+import Query from '../query/Query'
+import Response from './Response'
 
 export default class ResponseMetaTypeViaAtom extends Response {
   /**
@@ -56,44 +56,44 @@ export default class ResponseMetaTypeViaAtom extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.MetaTypeViaAtom'
-    } );
+    })
   }
 
   payload () {
-    const metaTypeData = this.data();
+    const metaTypeData = this.data()
 
-    if ( !metaTypeData || metaTypeData.length === 0 ) {
-      return null;
+    if (!metaTypeData || metaTypeData.length === 0) {
+      return null
     }
 
-    let response = {
+    const response = {
       instances: {},
       instanceCount: {},
       paginatorInfo: {}
-    };
-
-    let metaData = metaTypeData.pop();
-
-    if ( metaData.instances ) {
-      response.instances = metaData.instances;
     }
 
-    if ( metaData.instanceCount ) {
-      response.instanceCount = metaData.instanceCount;
+    const metaData = metaTypeData.pop()
+
+    if (metaData.instances) {
+      response.instances = metaData.instances
     }
 
-    if ( metaData.paginatorInfo ) {
-      response.paginatorInfo = metaData.paginatorInfo;
+    if (metaData.instanceCount) {
+      response.instanceCount = metaData.instanceCount
     }
 
-    return response;
+    if (metaData.paginatorInfo) {
+      response.paginatorInfo = metaData.paginatorInfo
+    }
+
+    return response
   }
 }

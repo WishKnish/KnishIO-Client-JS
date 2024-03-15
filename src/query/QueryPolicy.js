@@ -46,9 +46,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Query from './Query';
-import { gql } from '@apollo/client/core';
-import ResponsePolicy from '../response/ResponsePolicy';
+import Query from './Query'
+import { gql } from '@apollo/client/core'
+import ResponsePolicy from '../response/ResponsePolicy'
 
 export default class QueryPolicy extends Query {
   /**
@@ -56,8 +56,8 @@ export default class QueryPolicy extends Query {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
 
     this.$__query = gql`query( $metaType: String, $metaId: String, ) {
       Policy( metaType: $metaType, metaId: $metaId ) {
@@ -70,7 +70,7 @@ export default class QueryPolicy extends Query {
         rule,
         createdAt
       }
-    }`;
+    }`
   }
 
   /**
@@ -79,10 +79,10 @@ export default class QueryPolicy extends Query {
    * @param {object} json
    * @return {ResponsePolicy}
    */
-  createResponse ( json ) {
-    return new ResponsePolicy( {
+  createResponse (json) {
+    return new ResponsePolicy({
       query: this,
       json
-    } );
+    })
   }
 }

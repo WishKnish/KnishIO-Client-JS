@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import ResponseQueryUserActivity from '../response/ResponseQueryUserActivity';
-import { gql } from '@apollo/client/core';
+import Query from './Query'
+import ResponseQueryUserActivity from '../response/ResponseQueryUserActivity'
+import { gql } from '@apollo/client/core'
 
 /**
  * Query for retrieving information about user activity
@@ -58,8 +58,8 @@ export default class QueryUserActivity extends Query {
    *
    * @param httpClient
    */
-  constructor ( httpClient ) {
-    super( httpClient );
+  constructor (httpClient) {
+    super(httpClient)
 
     this.$__query = gql`query UserActivity (
       $bundleHash:String,
@@ -134,7 +134,7 @@ export default class QueryUserActivity extends Query {
           }
         }
       }
-    }`;
+    }`
   }
 
   /**
@@ -143,11 +143,10 @@ export default class QueryUserActivity extends Query {
    * @param {object} json
    * @return {ResponseQueryUserActivity}
    */
-  createResponse ( json ) {
-    return new ResponseQueryUserActivity( {
+  createResponse (json) {
+    return new ResponseQueryUserActivity({
       query: this,
       json
-    } );
+    })
   }
-
 }

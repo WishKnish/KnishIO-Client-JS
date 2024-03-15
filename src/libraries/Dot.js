@@ -2,28 +2,23 @@
  *
  */
 export default class Dot {
-
   /**
    * @param {object|array} obj
    * @param {string} keys
    * @private
    */
-  static __init ( obj, keys ) {
+  static __init (obj, keys) {
+    this.arr = String(keys).split('.')
+    this.key = this.arr.shift()
 
-    this.arr = [];
-    this.key = null;
+    const numberKey = Number(this.key)
 
-    this.arr = String( keys ).split( '.' );
-    this.key = this.arr.shift();
-
-    const numberKey = Number( this.key );
-
-    if ( Number.isInteger( numberKey ) ) {
-      this.key = numberKey;
+    if (Number.isInteger(numberKey)) {
+      this.key = numberKey
     }
 
-    this.__nextKey = this.arr.length;
-    this.__next = this.__tic( obj );
+    this.__nextKey = this.arr.length
+    this.__next = this.__tic(obj)
   }
 
   /**
@@ -31,13 +26,12 @@ export default class Dot {
    * @return {boolean}
    * @private
    */
-  static __tic ( obj ) {
-
-    if ( !Array.isArray( obj ) && !( obj instanceof Object ) ) {
-      return false;
+  static __tic (obj) {
+    if (!Array.isArray(obj) && !(obj instanceof Object)) {
+      return false
     }
 
-    return typeof obj[ this.key ] !== 'undefined';
+    return typeof obj[this.key] !== 'undefined'
   }
 
   /**
@@ -45,18 +39,17 @@ export default class Dot {
    * @param {string} keys
    * @return {boolean}
    */
-  static has ( obj, keys ) {
+  static has (obj, keys) {
+    this.__init(obj, keys)
 
-    this.__init( obj, keys );
-
-    if ( !this.__next ) {
-      return false;
+    if (!this.__next) {
+      return false
     }
-    if ( this.__nextKey === 0 ) {
-      return true;
+    if (this.__nextKey === 0) {
+      return true
     }
 
-    return this.has( obj[ this.key ], this.arr.join( '.' ) );
+    return this.has(obj[this.key], this.arr.join('.'))
   }
 
   /**
@@ -65,17 +58,16 @@ export default class Dot {
    * @param {*} def
    * @return {*}
    */
-  static get ( obj, keys, def = null ) {
+  static get (obj, keys, def = null) {
+    this.__init(obj, keys)
 
-    this.__init( obj, keys );
-
-    if ( !this.__next ) {
-      return def;
+    if (!this.__next) {
+      return def
     }
-    if ( this.__nextKey === 0 ) {
-      return obj[ this.key ];
+    if (this.__nextKey === 0) {
+      return obj[this.key]
     }
 
-    return this.get( obj[ this.key ], this.arr.join( '.' ), def );
+    return this.get(obj[this.key], this.arr.join('.'), def)
   }
 }

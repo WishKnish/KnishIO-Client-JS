@@ -1,8 +1,7 @@
-import HashAtom from './HashAtom';
+import HashAtom from './HashAtom'
 
 export default class Version4 extends HashAtom {
-
-  constructor ( {
+  constructor ({
     position = null,
     walletAddress = null,
     isotope = null,
@@ -15,21 +14,21 @@ export default class Version4 extends HashAtom {
     index = null,
     createdAt = null,
     version = null
-  } ) {
-    super();
-    this.position = position;
-    this.walletAddress = walletAddress;
-    this.isotope = isotope;
-    this.token = token;
-    this.value = value;
-    this.batchId = batchId;
+  }) {
+    super()
+    this.position = position
+    this.walletAddress = walletAddress
+    this.isotope = isotope
+    this.token = token
+    this.value = value
+    this.batchId = batchId
 
-    this.metaType = metaType;
-    this.metaId = metaId;
-    this.meta = meta;
+    this.metaType = metaType
+    this.metaId = metaId
+    this.meta = meta
 
-    this.index = index;
-    this.createdAt = createdAt;
-    this.version = version;
+    this.index = index
+    this.createdAt = createdAt
+    this.version = version
   }
 }

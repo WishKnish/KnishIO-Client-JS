@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Mutation from '../mutation/Mutation';
-import ResponseActiveSession from '../response/ResponseActiveSession';
-import { gql } from '@apollo/client/core';
+import Mutation from '../mutation/Mutation'
+import ResponseActiveSession from '../response/ResponseActiveSession'
+import { gql } from '@apollo/client/core'
 
 /**
  * Mutation for declaring an active User Session with a given MetaAsset
@@ -58,8 +58,8 @@ export default class MutationActiveSession extends Mutation {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`mutation(
       $bundleHash: String!,
       $metaType: String!,
@@ -88,7 +88,7 @@ export default class MutationActiveSession extends Mutation {
         createdAt,
         updatedAt
       }
-    }`;
+    }`
   }
 
   /**
@@ -97,10 +97,10 @@ export default class MutationActiveSession extends Mutation {
    * @param {object} json
    * @return {ResponseActiveSession}
    */
-  createResponse ( json ) {
-    return new ResponseActiveSession( {
+  createResponse (json) {
+    return new ResponseActiveSession({
       query: this,
       json
-    } );
+    })
   }
 }

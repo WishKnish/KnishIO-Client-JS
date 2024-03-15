@@ -150,17 +150,27 @@ client.createMeta( {
     cellSlug: 'TESTCELL'
   } );
   handleResponse( { uri: client.uri() } );
-  handleResponse( 'Generating secret...' )
-  const secret = KnishIO.generateSecret( 'foo' );
-  handleResponse( { secret } )
-  handleResponse( 'Requesting auth token...' )
-  client.requestAuthToken( { secret } ).then( () => {
-    handleResponse( { authToken: client.getAuthToken() } )
+
+  handleResponse( 'Generating fingerprint...');
+  client.getFingerprint().then( fingerprint => {
+
+    handleResponse( { fingerprint } );
+
+    handleResponse( 'Generating secret based on fingerprint...' );
+    const secret = KnishIO.generateSecret( fingerprint );
+    handleResponse( { secret } );
+
+    handleResponse( 'Requesting auth token...' );
+    client.requestAuthToken( { secret } ).then( () => {
+      handleResponse( { authToken: client.getAuthToken() } )
+    } );
+
+    handleResponse( 'Generating bundle hash...' )
+    const bundle = client.getBundle()
+    handleResponse( { bundleHash: bundle } );
+    document.getElementById( 'metaId' ).value = bundle
+
   } );
-  handleResponse( 'Generating bundle hash...' )
-  const bundle = client.getBundle()
-  handleResponse( { bundleHash: bundle } );
-  document.getElementById( 'metaId' ).value = bundle
 
   function decycle ( obj, stack = [] ) {
     if ( !obj || typeof obj !== 'object' )

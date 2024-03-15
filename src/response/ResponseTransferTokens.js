@@ -45,13 +45,12 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseProposeMolecule from './ResponseProposeMolecule';
+import ResponseProposeMolecule from './ResponseProposeMolecule'
 
 /**
  * Response for token transfer queries
  */
 export default class ResponseTransferTokens extends ResponseProposeMolecule {
-
   /**
    * Returns result of the transfer
    *
@@ -61,12 +60,12 @@ export default class ResponseTransferTokens extends ResponseProposeMolecule {
     const result = {
         reason: null,
         status: null
-      },
-      data = this.data();
+      }
+      const data = this.data()
 
-    result.reason = typeof data.reason === 'undefined' ? 'Invalid response from server' : data.reason;
-    result.status = typeof data.status === 'undefined' ? 'rejected' : data.status;
+    result.reason = typeof data.reason === 'undefined' ? 'Invalid response from server' : data.reason
+    result.status = typeof data.status === 'undefined' ? 'rejected' : data.status
 
-    return result;
+    return result
   }
 }

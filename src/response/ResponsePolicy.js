@@ -46,8 +46,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Query from '../query/Query';
-import Response from './Response';
+import Query from '../query/Query'
+import Response from './Response'
 
 export default class ResponsePolicy extends Response {
   /**
@@ -56,16 +56,16 @@ export default class ResponsePolicy extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json
-    } );
-    this.dataKey = 'data.Policy';
-    this.init();
+    })
+    this.dataKey = 'data.Policy'
+    this.init()
   }
 
   /**
@@ -73,17 +73,16 @@ export default class ResponsePolicy extends Response {
    * @returns {null|object}
    */
   payload () {
+    const policy = this.data()
 
-    const policy = this.data();
-
-    if ( !policy ) {
-      return null;
+    if (!policy) {
+      return null
     }
 
-    if ( policy.callback ) {
-      return JSON.parse( policy.callback );
+    if (policy.callback) {
+      return JSON.parse(policy.callback)
     }
 
-    return null;
+    return null
   }
 }

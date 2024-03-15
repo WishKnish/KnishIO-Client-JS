@@ -45,17 +45,16 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import Response from '../response/Response';
-import { gql } from '@apollo/client/core';
-
+import Query from './Query'
+import Response from '../response/Response'
+import { gql } from '@apollo/client/core'
 
 /**
  * Query for retrieving Meta Asset information
  */
 export default class QueryBatch extends Query {
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`query( $batchId: String ) {
       Batch( batchId: $batchId ) {
         ${ QueryBatch.getFields() },
@@ -63,7 +62,7 @@ export default class QueryBatch extends Query {
           ${ QueryBatch.getFields() }
         }
       }
-    }`;
+    }`
   }
 
   static getFields () {
@@ -116,7 +115,7 @@ export default class QueryBatch extends Query {
               throughMetas {
                   key,
                   value
-              }`;
+              }`
   }
 
   /**
@@ -125,13 +124,12 @@ export default class QueryBatch extends Query {
    * @param {object} json
    * @return {Response}
    */
-  createResponse ( json ) {
-    let responseObject = new Response( {
+  createResponse (json) {
+    const responseObject = new Response({
       query: this,
       json
-    } );
-    responseObject.dataKey = 'data.Batch';
-    return responseObject;
+    })
+    responseObject.dataKey = 'data.Batch'
+    return responseObject
   }
-
 }

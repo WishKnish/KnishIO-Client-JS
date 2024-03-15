@@ -45,17 +45,16 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import ResponseWalletBundle from '../response/ResponseWalletBundle';
-import { gql } from '@apollo/client/core';
+import Query from './Query'
+import ResponseWalletBundle from '../response/ResponseWalletBundle'
+import { gql } from '@apollo/client/core'
 
 /**
  * Query for retrieving information about Wallet Bundles
  */
 export default class QueryWalletBundle extends Query {
-
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`query( $bundleHashes: [ String! ] ) {
       WalletBundle( bundleHashes: $bundleHashes ) {
         bundleHash,
@@ -68,7 +67,7 @@ export default class QueryWalletBundle extends Query {
         },
         createdAt
       }
-    }`;
+    }`
   }
 
   /**
@@ -77,12 +76,10 @@ export default class QueryWalletBundle extends Query {
    * @param {object} json
    * @return {ResponseWalletBundle}
    */
-  createResponse ( json ) {
-    return new ResponseWalletBundle( {
+  createResponse (json) {
+    return new ResponseWalletBundle({
       query: this,
       json
-    } );
+    })
   }
-
-
 }

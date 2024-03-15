@@ -46,31 +46,30 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Query from '../query/Query';
-import Response from './Response';
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
+import Query from '../query/Query'
+import Response from './Response'
+import Dot from '../libraries/Dot'
+import InvalidResponseException from '../exception/InvalidResponseException'
 
 /**
  * Response for Guest Authorization Request
  */
 export default class ResponseAuthorizationGuest extends Response {
-
   /**
    * Class constructor
    *
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.AccessToken'
-    } );
+    })
   }
 
   /**
@@ -79,7 +78,7 @@ export default class ResponseAuthorizationGuest extends Response {
    * @return {string}
    */
   reason () {
-    return 'Invalid response from server';
+    return 'Invalid response from server'
   }
 
   /**
@@ -88,7 +87,7 @@ export default class ResponseAuthorizationGuest extends Response {
    * @return {boolean}
    */
   success () {
-    return this.payload() !== null;
+    return this.payload() !== null
   }
 
   /**
@@ -97,7 +96,7 @@ export default class ResponseAuthorizationGuest extends Response {
    * @return {null|Wallet}
    */
   payload () {
-    return this.data();
+    return this.data()
   }
 
   /**
@@ -106,11 +105,11 @@ export default class ResponseAuthorizationGuest extends Response {
    * @param key
    * @return {*}
    */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` );
+  payloadKey (key) {
+    if (!Dot.has(this.payload(), key)) {
+      throw new InvalidResponseException(`ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!`)
     }
-    return Dot.get( this.payload(), key );
+    return Dot.get(this.payload(), key)
   }
 
   /**
@@ -119,7 +118,7 @@ export default class ResponseAuthorizationGuest extends Response {
    * @return {*}
    */
   token () {
-    return this.payloadKey( 'token' );
+    return this.payloadKey('token')
   }
 
   /**
@@ -128,6 +127,6 @@ export default class ResponseAuthorizationGuest extends Response {
    * @return {*}
    */
   time () {
-    return this.payloadKey( 'time' );
+    return this.payloadKey('time')
   }
 }

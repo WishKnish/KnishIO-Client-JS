@@ -45,17 +45,16 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import Response from '../response/Response';
-import { gql } from '@apollo/client/core';
+import Query from './Query'
+import Response from '../response/Response'
+import { gql } from '@apollo/client/core'
 
 /**
  * Query for retrieving Meta Asset information
  */
 export default class QueryMetaInstance extends Query {
-
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`query( $metaType: String!, $metaIds: [ String! ], $keys: [ String! ], $values: [ String! ], $filter: [ MetaFilter! ], $countBy: String, $queryArgs: QueryArgs, $latestMetas: Boolean) {
       MetaInstance( metaType: $metaType, metaIds: $metaIds, keys: $keys, values: $values, filter: $filter, countBy: $countBy, queryArgs: $queryArgs, latestMetas: $latestMetas ) {
         nodes {
@@ -79,7 +78,7 @@ export default class QueryMetaInstance extends Query {
           total
         }
       }
-    }`;
+    }`
   }
 
   /**
@@ -88,12 +87,11 @@ export default class QueryMetaInstance extends Query {
    * @param {object} json
    * @return {Response}
    */
-  createResponse ( json ) {
-    return new Response( {
+  createResponse (json) {
+    return new Response({
       query: this,
       json,
       dataKey: 'MetaInstance'
-    } );
+    })
   }
-
 }

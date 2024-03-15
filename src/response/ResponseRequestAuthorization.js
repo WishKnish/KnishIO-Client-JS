@@ -45,29 +45,26 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Dot from '../libraries/Dot';
-import InvalidResponseException from '../exception/InvalidResponseException';
-import ResponseProposeMolecule from './ResponseProposeMolecule';
+import Dot from '../libraries/Dot'
+import InvalidResponseException from '../exception/InvalidResponseException'
+import ResponseProposeMolecule from './ResponseProposeMolecule'
 
 /**
  * Response for auth token mutation
  */
 export default class ResponseRequestAuthorization extends ResponseProposeMolecule {
-
-
   /**
    * return the authorization key
    *
    * @param key
    * @return {*}
    */
-  payloadKey ( key ) {
-    if ( !Dot.has( this.payload(), key ) ) {
-      throw new InvalidResponseException( `ResponseRequestAuthorization::payloadKey() - '${ key }' key was not found in the payload!` );
+  payloadKey (key) {
+    if (!Dot.has(this.payload(), key)) {
+      throw new InvalidResponseException(`ResponseRequestAuthorization::payloadKey() - '${ key }' key was not found in the payload!`)
     }
-    return Dot.get( this.payload(), key );
+    return Dot.get(this.payload(), key)
   }
-
 
   /**
    * Returns the auth token
@@ -75,7 +72,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
    * @return {string}
    */
   token () {
-    return this.payloadKey( 'token' );
+    return this.payloadKey('token')
   }
 
   /**
@@ -84,7 +81,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
    * @return {string}
    */
   time () {
-    return this.payloadKey( 'time' );
+    return this.payloadKey('time')
   }
 
   /**
@@ -92,7 +89,7 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
    * @return {string}
    */
   encrypt () {
-    return this.payloadKey( 'encrypt' );
+    return this.payloadKey('encrypt')
   }
 
   /**
@@ -100,8 +97,6 @@ export default class ResponseRequestAuthorization extends ResponseProposeMolecul
    * @return {string}
    */
   pubKey () {
-    return this.payloadKey( 'key' );
+    return this.payloadKey('key')
   }
-
-
 }
