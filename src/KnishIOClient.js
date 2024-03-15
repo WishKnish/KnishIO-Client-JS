@@ -407,12 +407,14 @@ export default class KnishIOClient {
    * Instantiates a new Molecule and prepares this client session to operate on it
    *
    * @param secret
+   * @param bundle
    * @param sourceWallet
    * @param remainderWallet
    * @return {Promise<Molecule>}
    */
   async createMolecule ({
     secret = null,
+    bundle = null,
     sourceWallet = null,
     remainderWallet = null
   }) {
@@ -421,6 +423,7 @@ export default class KnishIOClient {
     }
 
     secret = secret || this.getSecret()
+    bundle = bundle || this.getBundle()
 
     // Sets the source wallet as the last remainder wallet (to maintain ContinuID)
     if (!sourceWallet &&
@@ -439,7 +442,8 @@ export default class KnishIOClient {
 
     // Set the remainder wallet for the next transaction
     this.remainderWallet = remainderWallet || Wallet.create({
-      secretOrBundle: secret,
+      secret,
+      bundle,
       token: 'USER',
       batchId: sourceWallet.batchId,
       characters: sourceWallet.characters
@@ -711,8 +715,8 @@ export default class KnishIOClient {
     metaId = null,
     key = null,
     value = null,
-    latest = null,
-    latestMetas = null,
+    latest = true,
+    latestMetas = true,
     fields = null,
     filter = null,
     queryArgs = null,
@@ -1484,7 +1488,7 @@ export default class KnishIOClient {
           metaId = to
         } else {
           to = Wallet.create({
-            secretOrBundle: to,
+            secret: to,
             token
           })
         }
@@ -1636,7 +1640,7 @@ export default class KnishIOClient {
 
     // Attempt to get the recipient's wallet, if not provided
     const recipientWallet = Wallet.create({
-      secretOrBundle: bundleHash,
+      bundle: bundleHash,
       token
     })
 
@@ -1932,7 +1936,7 @@ export default class KnishIOClient {
 
     // Generate new recipient wallet if only recipient secret has been passed
     const recipientWallet = Wallet.create({
-      secretOrBundle: bundleHash,
+      bundle: bundleHash,
       token: tokenSlug
     })
 
@@ -1969,11 +1973,11 @@ export default class KnishIOClient {
   }
 
   /**
-   * Request a guest auth token
-   *
-   * @param {string} cellSlug
-   * @param {boolean} encrypt
-   * @returns {Promise<ResponseRequestAuthorizationGuest>}
+   * Requests a guest authentication token using the fingerprint of the user.
+   * @param {Object} options - The options for the guest authentication token request.
+   * @param {string} options.cellSlug - The slug of the cell to request the token for.
+   * @param {boolean} options.encrypt - Indicates whether the session should be encrypted.
+   * @returns {Promise<ResponseRequestAuthorizationGuest>} - A promise that resolves to the response of the guest authentication token request.
    */
   async requestGuestAuthToken ({
     cellSlug,
@@ -1983,7 +1987,7 @@ export default class KnishIOClient {
 
     // Create a wallet for encryption
     const wallet = new Wallet({
-      secret: generateSecret(),
+      secret: generateSecret(await this.getFingerprint()),
       token: 'AUTH'
     })
 

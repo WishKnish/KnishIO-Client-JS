@@ -58,6 +58,7 @@ import {
 import BaseX from './libraries/BaseX'
 import TokenUnit from './TokenUnit'
 import Soda from './libraries/Soda'
+import WalletCredentialException from './exception/WalletCredentialException'
 
 /**
  * Wallet class represents the set of public and private
@@ -131,40 +132,42 @@ export default class Wallet {
   /**
    * Creates a new Wallet instance
    *
-   * @param {string} secretOrBundle
+   * @param {string|null} secret
+   * @param {string|null} bundle
    * @param {string} token
    * @param {string|null} batchId
    * @param {string|null} characters
    * @return {Wallet}
    */
   static create ({
-    secretOrBundle,
+    secret = null,
+    bundle = null,
     token,
     batchId = null,
     characters = null
   }) {
-    let secret = null
     let position = null
-    let bundle = null
 
-    if (Wallet.isBundleHash(secretOrBundle)) {
-      bundle = secretOrBundle
-    } else {
-      secret = secretOrBundle
+    // No credentials parameters provided?
+    if (!secret && !bundle) {
+      throw new WalletCredentialException()
+    }
+
+    // Secret, but no bundle?
+    if (secret && !bundle) {
       position = Wallet.generatePosition()
       bundle = generateBundleHash(secret, 'Wallet::create')
     }
 
     // Wallet initialization
-    const wallet = new Wallet({
+    return new Wallet({
       secret,
+      bundle,
       token,
       position,
       batchId,
       characters
     })
-    wallet.bundle = bundle
-    return wallet
   }
 
   /**
@@ -324,7 +327,7 @@ export default class Wallet {
    */
   createRemainder (secret) {
     const remainderWallet = Wallet.create({
-      secretOrBundle: secret,
+      secret,
       token: this.token,
       characters: this.characters
     })

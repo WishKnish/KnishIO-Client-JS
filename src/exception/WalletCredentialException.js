@@ -45,46 +45,21 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule'
-import Wallet from '../Wallet'
-import ResponseClaimShadowWallet from '../response/ResponseClaimShadowWallet'
+import BaseException from './BaseException'
 
 /**
- * Mutation for claiming a Shadow Wallet
+ * Thrown when failing to retrieve shadow wallets
  */
-export default class MutationClaimShadowWallet extends MutationProposeMolecule {
+export default class WalletCredentialException extends BaseException {
   /**
    * Class constructor
    *
-   * @param {string} token
-   * @param {string|null} batchId
+   * @param {string} message
+   * @param {string|null} fileName
+   * @param {number|null} lineNumber
    */
-  fillMolecule ({
-    token,
-    batchId = null
-  }) {
-    const wallet = Wallet.create({
-      secret: this.$__molecule.secret,
-      bundle: this.$__molecule.bundle,
-      token,
-      batchId
-    })
-
-    this.$__molecule.initShadowWalletClaim(wallet)
-    this.$__molecule.sign({})
-    this.$__molecule.check()
-  }
-
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseClaimShadowWallet}
-   */
-  createResponse (json) {
-    return new ResponseClaimShadowWallet({
-      query: this,
-      json
-    })
+  constructor (message = 'Attempting to create a wallet with no credentials (secret or bundle hash)', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
+    this.name = 'WalletCredentialException'
   }
 }

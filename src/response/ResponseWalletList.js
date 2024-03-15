@@ -86,7 +86,7 @@ export default class ResponseWalletList extends Response {
 
     if (data.position === null || typeof data.position === 'undefined') {
       wallet = Wallet.create({
-        secretOrBundle: data.bundleHash,
+        bundle: data.bundleHash,
         token: data.tokenSlug,
         batchId: data.batchId,
         characters: data.characters

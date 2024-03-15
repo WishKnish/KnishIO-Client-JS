@@ -75,6 +75,7 @@ export default class Molecule {
    * Class constructor
    *
    * @param {string|null} secret
+   * @param {string|null} bundle
    * @param {Wallet|null} sourceWallet
    * @param {Wallet|null} remainderWallet
    * @param {string|null} cellSlug
@@ -82,6 +83,7 @@ export default class Molecule {
    */
   constructor ({
     secret = null,
+    bundle = null,
     sourceWallet = null,
     remainderWallet = null,
     cellSlug = null,
@@ -89,6 +91,7 @@ export default class Molecule {
   }) {
     this.cellSlugOrigin = this.cellSlug = cellSlug
     this.secret = secret
+    this.bundle = bundle
     this.sourceWallet = sourceWallet
     this.atoms = []
     if (version !== null && versions.hasOwnProperty(version)) {
@@ -98,7 +101,8 @@ export default class Molecule {
     // Set the remainder wallet for this transaction
     if (remainderWallet || sourceWallet) {
       this.remainderWallet = remainderWallet || Wallet.create({
-        secretOrBundle: secret,
+        secret,
+        bundle,
         token: sourceWallet.token,
         batchId: sourceWallet.batchId,
         characters: sourceWallet.characters
@@ -344,7 +348,8 @@ export default class Molecule {
     atomMeta.addPolicy(policy)
 
     const wallet = Wallet.create({
-      secretOrBundle: this.secret || this.sourceWallet.bundle,
+      secret: this.secret,
+      bundle: this.sourceWallet.bundle,
       token: 'USER'
     })
 
@@ -549,7 +554,8 @@ export default class Molecule {
 
     // Create a buffer wallet
     const bufferWallet = Wallet.create({
-      secretOrBundle: this.secret,
+      secret: this.secret,
+      bundle: this.bundle,
       token: this.sourceWallet.token,
       batchId: this.sourceWallet.batchId
     })
