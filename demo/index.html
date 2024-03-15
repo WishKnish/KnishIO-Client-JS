@@ -61,6 +61,12 @@ const client = new KnishIO.KnishIOClient({uri: 'https://eteplitsky.testnet.knish
     <pre class="prettyprint">
 const secret = KnishIO.generateSecret('foo');
 client.requestAuthToken({ secret });
+
+// OR via fingerprint
+
+client.getFingerprint().then( fingerprint => {
+  client.requestAuthToken({ secret: KnishIO.generateSecret( fingerprint ) });
+}
     </pre>
     <hr />
 
@@ -152,11 +158,11 @@ client.createMeta( {
   handleResponse( { uri: client.uri() } );
 
   handleResponse( 'Generating fingerprint...');
-  client.getFingerprint().then( fingerprint => {
+  const fingerprint = client.getFingerprint().then( fingerprint => {
 
     handleResponse( { fingerprint } );
 
-    handleResponse( 'Generating secret based on fingerprint...' );
+    handleResponse( `Generating secret based on fingerprint ${ fingerprint }...` );
     const secret = KnishIO.generateSecret( fingerprint );
     handleResponse( { secret } );
 

@@ -361,9 +361,9 @@ export default class KnishIOClient {
   }
 
   /**
-   * Retrieves the fingerprint of the current user.
+   * Retrieves the device fingerprint.
    *
-   * @returns {Promise<string>} A Promise that resolves to a string representing the fingerprint.
+   * @returns {Promise<string>} A promise that resolves to the device fingerprint as a string.
    */
   getFingerprint () {
     return getFingerprint()

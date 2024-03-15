@@ -37065,9 +37065,9 @@ class mx {
     return this.$__bundle;
   }
   /**
-   * Retrieves the fingerprint of the current user.
+   * Retrieves the device fingerprint.
    *
-   * @returns {Promise<string>} A Promise that resolves to a string representing the fingerprint.
+   * @returns {Promise<string>} A promise that resolves to the device fingerprint as a string.
    */
   getFingerprint() {
     return ox();
@@ -38303,7 +38303,7 @@ class mx {
     }) {
       this.setCellSlug(e);
       const a = new tr({
-        secret: Yi(yield this.getFingerprint()),
+        secret: Yi(this.getFingerprint()),
         token: "AUTH"
       }), i = yield this.createQuery(o8), o = {
         cellSlug: e,
