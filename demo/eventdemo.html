@@ -1,0 +1,191 @@
+<html>
+<head>
+  <title>VanillaJS Test</title>
+  <script
+    type="text/javascript"
+    src="../dist/client.iife.js"
+  ></script>
+  <script
+    type="text/javascript"
+    src="eventdemo.js"
+  ></script>
+  <script
+    type="text/javascript"
+    src="json-formatter/json-formatter.umd.js"
+  ></script>
+  <link
+    href="prettify/prettify.css"
+    type="text/css"
+    rel="stylesheet"
+  />
+  <script
+    type="text/javascript"
+    src="prettify/prettify.js"
+  ></script>
+  <style type="text/css">
+    body {
+      display: flex;
+      flex-flow: row wrap;
+    }
+
+    #content > div, #output > div {
+      padding: 10px;
+    }
+
+    #content {
+      display: flex;
+      flex-flow: column;
+      width: 50%;
+    }
+
+    #output {
+      display: flex;
+      flex-flow: column;
+      width: 50%;
+    }
+
+    .prettyprint {
+      width: 100% !important;
+      display: block;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body onload="prettyPrint()">
+<div id="content">
+  <h4>Inputs</h4>
+  <div>
+    <strong>Step 1: Initialize KnishIOClientFactory</strong>
+    <pre class="prettyprint">
+const clientFactory = new KnishIOClientFactory('https://eteplitsky.testnet.knish.io/graphql', 'TESTCELL')
+    </pre>
+    <hr />
+
+    <strong>Step 2: Make instance of KnishIOClient</strong>
+    <pre class="prettyprint">
+clientFactory.makeClient().then( client => {
+  ...
+}
+    </pre>
+    <hr />
+
+    <strong>Step 3: Initialize KnishIOEventFactory</strong>
+    <pre class="prettyprint">
+const eventFactory = new KnishIOEventFactory(client, 'DemoEventMetaType')
+    </pre>
+
+    <strong>Step 4: Trigger Event</strong>
+    <pre class="prettyprint">
+eventFactory.makeEvent( eventType, { articleId: 'foo', tags: '["a","b","c"]', ... ).then( response => {
+  ...
+})
+    </pre>
+    <div>
+      <label for="eventType">Event Type:</label>
+      <input
+        type="text"
+        id="eventType"
+        name="eventType"
+        value="Click"
+      >
+    </div>
+    <div>
+      <input
+        type="submit"
+        value="Record Event"
+        onclick="handleRecordEvent()"
+      >
+    </div>
+    <hr />
+    <strong>Step 5: Retrieve Events</strong>
+    <pre class="prettyprint">
+const filter = [
+  {
+    "comparison": "=",
+    "key": "eventType",
+    "value": "Click"
+  }
+]
+eventFactory.getEvents( filter ).then( response => {
+  ...
+} )
+    </pre>
+    <div>
+      <input
+        type="submit"
+        value="Retrieve Events"
+        onclick="handleGetEvents()"
+      >
+    </div>
+  </div>
+</div>
+<div id="output">
+  <h4>Outputs</h4>
+  <div>
+    <div><span id="response"></span></div>
+  </div>
+</div>
+<script type="text/javascript">
+  handleResponse( 'Initializing client factory...' )
+  const clientFactory = new KnishIOClientFactory('https://eteplitsky.testnet.knish.io/graphql', 'TESTCELL')
+  handleResponse( 'Initializing client...' )
+  let eventFactory = null
+  clientFactory.makeClient().then( client => {
+    handleResponse( { uri: client.uri() } );
+    handleResponse( 'Initializing event factory...' )
+    eventFactory = new KnishIOEventFactory(client, 'DemoEventMetaType')
+    handleResponse( { eventMetaType: eventFactory.metaType } );
+  } )
+
+  function decycle ( obj, stack = [] ) {
+    if ( !obj || typeof obj !== 'object' )
+      return obj;
+
+    if ( stack.includes( obj ) )
+      return null;
+
+    let s = stack.concat( [ obj ] );
+
+    return Array.isArray( obj )
+      ? obj.map( x => decycle( x, s ) )
+      : Object.fromEntries(
+        Object.entries( obj )
+          .map( ( [ k, v ] ) => [ k, decycle( v, s ) ] ) );
+  }
+
+  function handleResponse ( response ) {
+    const formatter = new JSONFormatter( decycle( response ) );
+    document.getElementById( 'response' ).appendChild( formatter.render() );
+  }
+
+  function handleGetEvents () {
+    const eventType = document.getElementById( 'eventType' ).value;
+    const filter = [
+      {
+        "comparison": "=",
+        "key": "eventType",
+        "value": eventType
+      }
+    ]
+    handleResponse( `Querying ${ eventType } events...` );
+    eventFactory.getEvents( filter ).then( response => {
+      handleResponse( response );
+    } )
+  }
+
+  function handleRecordEvent () {
+    const eventType = document.getElementById( 'eventType' ).value;
+
+    if ( !eventType ) {
+      alert( 'eventType required' )
+      return false;
+    }
+
+    handleResponse( `Making new event of type ${ eventType }...`);
+    eventFactory.makeEvent( eventType ).then( response => {
+      handleResponse( response );
+    })
+  }
+</script>
+</body>
+</html>
