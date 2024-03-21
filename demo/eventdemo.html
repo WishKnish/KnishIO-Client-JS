@@ -61,22 +61,18 @@ const clientFactory = new KnishIOClientFactory('https://eteplitsky.testnet.knish
     </pre>
     <hr />
 
-    <strong>Step 2: Make instance of KnishIOClient</strong>
+    <strong>Step 2: Make instance of KnishIOEventFactory</strong>
     <pre class="prettyprint">
-clientFactory.makeClient().then( client => {
+clientFactory.makeEventFactory('DemoEventMetaType').then(eventFactory => {
   ...
-}
+});
     </pre>
     <hr />
 
-    <strong>Step 3: Initialize KnishIOEventFactory</strong>
+    <strong>Step 3: Trigger Event</strong>
     <pre class="prettyprint">
-const eventFactory = new KnishIOEventFactory(client, 'DemoEventMetaType')
-    </pre>
-
-    <strong>Step 4: Trigger Event</strong>
-    <pre class="prettyprint">
-eventFactory.makeEvent( eventType, { articleId: 'foo', tags: '["a","b","c"]', ... ).then( response => {
+// The first parameter is the key name containing event type in the supplied metadata object
+eventFactory.makeEvent('eventType', {eventType: 'Click', articleId: 'foo', tags: '["a","b","c"]', ...}).then(response => {
   ...
 })
     </pre>
@@ -97,7 +93,7 @@ eventFactory.makeEvent( eventType, { articleId: 'foo', tags: '["a","b","c"]', ..
       >
     </div>
     <hr />
-    <strong>Step 5: Retrieve Events</strong>
+    <strong>Step 4: Retrieve Events</strong>
     <pre class="prettyprint">
 const filter = [
   {
@@ -128,12 +124,10 @@ eventFactory.getEvents( filter ).then( response => {
 <script type="text/javascript">
   handleResponse( 'Initializing client factory...' )
   const clientFactory = new KnishIOClientFactory('https://eteplitsky.testnet.knish.io/graphql', 'TESTCELL')
-  handleResponse( 'Initializing client...' )
+  handleResponse( 'Initializing event factory...' )
   let eventFactory = null
-  clientFactory.makeClient().then( client => {
-    handleResponse( { uri: client.uri() } );
-    handleResponse( 'Initializing event factory...' )
-    eventFactory = new KnishIOEventFactory(client, 'DemoEventMetaType')
+  clientFactory.makeEventFactory('DemoEventMetaType').then( result => {
+    eventFactory = result
     handleResponse( { eventMetaType: eventFactory.metaType } );
   } )
 
@@ -160,13 +154,16 @@ eventFactory.getEvents( filter ).then( response => {
 
   function handleGetEvents () {
     const eventType = document.getElementById( 'eventType' ).value;
-    const filter = [
-      {
-        "comparison": "=",
-        "key": "eventType",
-        "value": eventType
-      }
-    ]
+    let filter = null;
+    if( eventType ) {
+      filter = [
+        {
+          "comparison": "=",
+          "key": "eventType",
+          "value": eventType
+        }
+      ]
+    }
     handleResponse( `Querying ${ eventType } events...` );
     eventFactory.getEvents( filter ).then( response => {
       handleResponse( response );
@@ -182,7 +179,7 @@ eventFactory.getEvents( filter ).then( response => {
     }
 
     handleResponse( `Making new event of type ${ eventType }...`);
-    eventFactory.makeEvent( eventType ).then( response => {
+    eventFactory.makeEvent( 'eventType', { eventType } ).then( response => {
       handleResponse( response );
     })
   }
