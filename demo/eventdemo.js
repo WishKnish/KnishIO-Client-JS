@@ -1,7 +1,16 @@
+/**
+ * A factory class for creating KnishIOClient instances and KnishIOEventFactory instances.
+ */
 class KnishIOClientFactory {
   uri = null
   cellSlug = null
 
+  /**
+   * Constructor for the KnishIOClientFactory class.
+   *
+   * @param {string} uri - API endpoint URL.
+   * @param {string} cellSlug - identifier of the cell used for this session.
+   */
   constructor (uri, cellSlug) {
     this.uri = uri
     this.cellSlug = cellSlug
@@ -137,6 +146,21 @@ class KnishIOEventFactory {
     return `${ hex.substring(0, 8) }-${ hex.substring(8, 12) }-${ hex.substring(12, 16) }-${ hex.substring(16, 20) }-${ hex.substring(20) }`
   }
 
+  /**
+   * Fetches the bundle from the client.
+   *
+   * @returns {string} A string containing the hexadecimal bundle hash.
+   */
+  getBundle () {
+    return this.client.getBundle()
+  }
+
+  /**
+   * Retrieves events based on a given filter.
+   *
+   * @param {Array} filter - An optional filter used to narrow down the events to retrieve.
+   * @returns {Promise<ResponseAtom>} - A promise that resolves to an object containing the events data.
+   */
   getEvents (filter = []) {
     return this.client.queryAtom({
       metaType: this.metaType,
@@ -145,6 +169,14 @@ class KnishIOEventFactory {
     })
   }
 
+  /**
+   * Makes an event with the specified event type key and event metadata.
+   *
+   * @param {string} eventTypeKey - The key used to identify the event type in the event metadata.
+   * @param {object} eventMeta - The metadata associated with the event.
+   * @throws {Error} If there is a duplicate usage of event metadata key or if the event type is missing.
+   * @returns {Promise<ResponseProposeMolecule>} A promise that resolves with the created event metadata.
+   */
   makeEvent (eventTypeKey = 'eventType', eventMeta = {}) {
     const meta = {}
     // Merging in host metadata
