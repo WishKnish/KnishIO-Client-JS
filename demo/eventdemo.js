@@ -177,11 +177,6 @@ class KnishIOEventFactory {
     const metaType = this.metaType
     const metaId = KnishIOEventFactory.generateUUID()
 
-    // Merging in host metadata
-    Object.keys(this.hostMeta).forEach(key => {
-      meta[key] = this.hostMeta[key]
-    })
-
     // Making sure event type is supplied
     if (!eventMeta[eventTypeKey]) {
       throw new Error('Event Type missing!')
@@ -193,19 +188,13 @@ class KnishIOEventFactory {
       delete eventMeta[eventTypeKey]
     }
 
-    // Merging in event metadata
-    Object.keys(eventMeta).forEach(key => {
-      if (!Object.keys(meta).includes(key)) {
-        meta[key] = eventMeta[key]
-      } else {
-        throw new Error(`Duplicate usage of event metadata key ${ key }!`)
-      }
-    })
+    // Merging in host metadata
+    const mergedMeta = Object.assign({}, this.hostMeta, eventMeta)
 
     return this.client.createMeta({
       metaType,
       metaId,
-      meta
+      meta: mergedMeta
     })
   }
 }
