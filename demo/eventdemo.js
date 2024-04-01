@@ -167,18 +167,14 @@ class KnishIOEventFactory {
   /**
    * Makes an event with the specified event type key and event metadata.
    *
+   * @param {string} eventType
    * @param {object} eventMeta - The metadata associated with the event.
    * @throws {Error} If there is a duplicate usage of event metadata key or if the event type is missing.
    * @returns {Promise<ResponseProposeMolecule>} A promise that resolves with the created event metadata.
    */
-  makeEvent (eventMeta = {}) {
+  makeEvent (eventType, eventMeta = {}) {
     const metaType = this.metaType
     const metaId = KnishIOEventFactory.generateUUID()
-
-    // Making sure event type is supplied
-    if (!eventMeta.eventType) {
-      throw new Error('Event Type missing!')
-    }
 
     // Merging in host metadata
     const mergedMeta = Object.assign({}, this.hostMeta, eventMeta)
