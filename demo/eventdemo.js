@@ -177,7 +177,7 @@ class KnishIOEventFactory {
     const metaId = KnishIOEventFactory.generateUUID()
 
     // Merging in host metadata
-    const mergedMeta = Object.assign({}, this.hostMeta, eventMeta)
+    const mergedMeta = Object.assign({ eventType }, this.hostMeta, eventMeta)
 
     return this.client.createMeta({
       metaType,
