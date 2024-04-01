@@ -173,7 +173,6 @@ class KnishIOEventFactory {
    * @returns {Promise<ResponseProposeMolecule>} A promise that resolves with the created event metadata.
    */
   makeEvent (eventTypeKey = 'eventType', eventMeta = {}) {
-    const meta = {}
     const metaType = this.metaType
     const metaId = KnishIOEventFactory.generateUUID()
 
