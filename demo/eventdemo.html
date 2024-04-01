@@ -72,7 +72,7 @@ clientFactory.makeEventFactory('DemoEventMetaType').then(eventFactory => {
     <strong>Step 3: Trigger Event</strong>
     <pre class="prettyprint">
 // The first parameter is the key name containing event type in the supplied metadata object
-eventFactory.makeEvent('eventType', {eventType: 'Click', articleId: 'foo', tags: '["a","b","c"]', ...}).then(response => {
+eventFactory.makeEvent({eventType: 'Click', articleId: 'foo', tags: '["a","b","c"]', ...}).then(response => {
   ...
 })
     </pre>
@@ -179,7 +179,7 @@ eventFactory.getEvents( filter ).then( response => {
     }
 
     handleResponse( `Making new event of type ${ eventType }...`);
-    eventFactory.makeEvent( 'eventType', { eventType } ).then( response => {
+    eventFactory.makeEvent( { eventType } ).then( response => {
       handleResponse( response );
     })
   }
