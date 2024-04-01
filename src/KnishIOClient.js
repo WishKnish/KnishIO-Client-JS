@@ -783,50 +783,6 @@ export default class KnishIOClient {
   }
 
   /**
-   * Retrieves metadata for the given metaType and provided parameters
-   *
-   * @param {string|array|null} metaType
-   * @param {string|array|null} metaId
-   * @param {string|array|null} key
-   * @param {string|array|null} value
-   * @param {boolean|null} latest
-   * @param {object|null} fields
-   * @param {object|null} filter
-   * @return {Promise<ResponseMetaType>}
-   */
-  queryMetaInstance ({
-    metaType,
-    metaId = null,
-    key = null,
-    value = null,
-    latest = null,
-    filter = null,
-    fields = null
-  }) {
-    if (this.$__logging) {
-      console.info(`KnishIOClient::queryMetaInstance() - Querying metaType: ${ metaType }, metaId: ${ metaId }...`)
-    }
-
-    /**
-     * @type {QueryMetaType}
-     */
-    const query = this.createQuery(QueryMetaType)
-    const variables = {
-      metaType,
-      metaIds: [metaId],
-      keys: [key],
-      values: [value],
-      latest,
-      filter
-    }
-
-    return this.executeQuery(query, variables)
-      .then((response) => {
-        return response.data()
-      })
-  }
-
-  /**
    * Query batch to get cascading meta instances by batchID
    *
    * @param batchId
