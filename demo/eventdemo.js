@@ -105,17 +105,12 @@ class KnishIOEventFactory {
    * @throws {Error} If there is an error fetching the IP address.
    */
   static async getUserIp () {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json')
-      if (!response.ok) {
-        throw new Error('Failed to fetch IP address')
-      }
-      const data = await response.json()
-      return data.ip
-    } catch (error) {
-      console.error('Error fetching IP address:', error)
-      throw error
+    const response = await fetch('https://api.ipify.org?format=json')
+    if (!response.ok) {
+      throw new Error('Failed to fetch IP address')
     }
+    const data = await response.json()
+    return data.ip
   }
 
   /**
@@ -125,8 +120,8 @@ class KnishIOEventFactory {
    */
   static generateUUID () {
     // Use crypto.getRandomValues if available, otherwise fallback to Math.random
-    const getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto) ||
-      typeof msCrypto !== 'undefined' && typeof window.msCrypto.getRandomValues === 'function' && msCrypto.getRandomValues.bind(msCrypto) ||
+    const getRandomValues = (typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto)) ||
+      (typeof msCrypto !== 'undefined' && typeof window.msCrypto.getRandomValues === 'function' && msCrypto.getRandomValues.bind(msCrypto)) ||
       function (buf) {
         for (let i = 0, r; i < buf.length; i++) {
           if ((i & 0x03) === 0) r = Math.random() * 0x100000000
@@ -179,18 +174,12 @@ class KnishIOEventFactory {
    */
   makeEvent (eventTypeKey = 'eventType', eventMeta = {}) {
     const meta = {}
+    const metaType = this.metaType
+    const metaId = KnishIOEventFactory.generateUUID()
+
     // Merging in host metadata
     Object.keys(this.hostMeta).forEach(key => {
       meta[key] = this.hostMeta[key]
-    })
-
-    // Merging in event metadata
-    Object.keys(eventMeta).forEach(key => {
-      if (!Object.keys(meta).includes(key)) {
-        meta[key] = eventMeta[key]
-      } else {
-        throw new Error(`Duplicate usage of event metadata key ${ key }!`)
-      }
     })
 
     // Making sure event type is supplied
@@ -204,15 +193,17 @@ class KnishIOEventFactory {
       delete eventMeta[eventTypeKey]
     }
 
-    const metaId = KnishIOEventFactory.generateUUID()
-    console.log({
-      metaType: this.metaType,
-      metaId,
-      meta
+    // Merging in event metadata
+    Object.keys(eventMeta).forEach(key => {
+      if (!Object.keys(meta).includes(key)) {
+        meta[key] = eventMeta[key]
+      } else {
+        throw new Error(`Duplicate usage of event metadata key ${ key }!`)
+      }
     })
 
     return this.client.createMeta({
-      metaType: this.metaType,
+      metaType,
       metaId,
       meta
     })
