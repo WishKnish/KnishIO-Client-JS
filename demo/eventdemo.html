@@ -129,6 +129,7 @@ eventFactory.getEvents( filter ).then( response => {
   clientFactory.makeEventFactory('DemoEventMetaType').then( result => {
     eventFactory = result
     handleResponse( { eventMetaType: eventFactory.metaType } );
+    handleResponse( { walletBundle: eventFactory.client.getBundle() } );
   } )
 
   function decycle ( obj, stack = [] ) {

@@ -28,12 +28,13 @@ class KnishIOClientFactory {
       cellSlug: this.cellSlug
     })
 
-    const fingerprint = client.getFingerprint()
-    const secret = KnishIO.generateSecret(fingerprint)
-    return client.requestAuthToken({
-      secret
-    }).then(() => {
-      return client
+    return client.getFingerprint().then(fingerprint => {
+      const secret = KnishIO.generateSecret(fingerprint)
+      return client.requestAuthToken({
+        secret
+      }).then(() => {
+        return client
+      })
     })
   }
 
