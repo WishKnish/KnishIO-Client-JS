@@ -4,9 +4,9 @@ export default class Base58 {
   /**
    * @param {object} options
    */
-  constructor ( options = {} ) {
-    this.$options = Object.assign( { characters: 'GMP' }, options )
-    this.$encoder = base( this[ this.$options.characters ] || this.GMP )
+  constructor (options = {}) {
+    this.$options = Object.assign({ characters: 'GMP' }, options)
+    this.$encoder = base(this[this.$options.characters] || this.GMP)
   }
 
   /**
@@ -53,15 +53,15 @@ export default class Base58 {
    * @param {Buffer} data
    * @return {string}
    */
-  encode ( data ) {
-    return this.$encoder.encode( Buffer.from( data ) )
+  encode (data) {
+    return this.$encoder.encode(Buffer.from(data))
   }
 
   /**
    * @param {string} data
    * @return {Buffer}
    */
-  decode ( data ) {
-    return this.$encoder.decode( data )
+  decode (data) {
+    return this.$encoder.decode(data)
   }
 }

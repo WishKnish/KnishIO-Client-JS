@@ -59,15 +59,15 @@ export default class ResponseAtom extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.Atom'
-    } )
+    })
   }
 
   /**
@@ -78,7 +78,7 @@ export default class ResponseAtom extends Response {
   payload () {
     const metaTypeData = this.data()
 
-    if ( !metaTypeData ) {
+    if (!metaTypeData) {
       return null
     }
 
@@ -88,22 +88,22 @@ export default class ResponseAtom extends Response {
       paginatorInfo: {}
     }
 
-    if ( metaTypeData.instances ) {
+    if (metaTypeData.instances) {
       response.instances = metaTypeData.instances
 
-      for ( const instanceKey in response.instances ) {
-        const instance = response.instances[ instanceKey ]
-        if ( instance.metasJson ) {
-          response.instances[ instanceKey ].metas = JSON.parse( instance.metasJson )
+      for (const instanceKey in response.instances) {
+        const instance = response.instances[instanceKey]
+        if (instance.metasJson) {
+          response.instances[instanceKey].metas = JSON.parse(instance.metasJson)
         }
       }
     }
 
-    if ( metaTypeData.instanceCount ) {
+    if (metaTypeData.instanceCount) {
       response.instanceCount = metaTypeData.instanceCount
     }
 
-    if ( metaTypeData.paginatorInfo ) {
+    if (metaTypeData.paginatorInfo) {
       response.paginatorInfo = metaTypeData.paginatorInfo
     }
 
@@ -114,10 +114,10 @@ export default class ResponseAtom extends Response {
     const response = this.payload()
     const metas = []
 
-    if ( response && response.instances ) {
-      for ( const instance of response.instances ) {
-        if ( instance.metasJson ) {
-          metas.push( JSON.parse( instance.metasJson ) )
+    if (response && response.instances) {
+      for (const instance of response.instances) {
+        if (instance.metasJson) {
+          metas.push(JSON.parse(instance.metasJson))
         }
       }
     }

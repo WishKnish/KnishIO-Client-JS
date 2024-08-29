@@ -58,8 +58,8 @@ export default class TransferMalformedException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'Token transfer atoms are malformed', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = 'Token transfer atoms are malformed', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'TransferMalformedException'
   }
 }

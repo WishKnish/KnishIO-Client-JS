@@ -58,8 +58,8 @@ export default class QueryToken extends Query {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient )
+  constructor (apolloClient) {
+    super(apolloClient)
 
     this.$__query = gql`query( $slug: String, $slugs: [ String! ], $limit: Int, $order: String ) {
       Token( slug: $slug, slugs: $slugs, limit: $limit, order: $order ) {
@@ -79,11 +79,11 @@ export default class QueryToken extends Query {
    * @param json
    * @returns {Response}
    */
-  createResponse ( json ) {
-    return new Response( {
+  createResponse (json) {
+    return new Response({
       query: this,
       json,
       dataKey: 'data.Token'
-    } )
+    })
   }
 }

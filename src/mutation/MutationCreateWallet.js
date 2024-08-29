@@ -52,9 +52,9 @@ import ResponseCreateWallet from '../response/ResponseCreateWallet'
  * Query for creating new Wallets
  */
 export default class MutationCreateWallet extends MutationProposeMolecule {
-  fillMolecule ( wallet ) {
-    this.$__molecule.initWalletCreation( wallet )
-    this.$__molecule.sign( {} )
+  fillMolecule (wallet) {
+    this.$__molecule.initWalletCreation(wallet)
+    this.$__molecule.sign({})
     this.$__molecule.check()
   }
 
@@ -64,10 +64,10 @@ export default class MutationCreateWallet extends MutationProposeMolecule {
    * @param {object} json
    * @return {ResponseCreateWallet}
    */
-  createResponse ( json ) {
-    return new ResponseCreateWallet( {
+  createResponse (json) {
+    return new ResponseCreateWallet({
       query: this,
       json
-    } )
+    })
   }
 }

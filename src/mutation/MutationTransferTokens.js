@@ -58,16 +58,16 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
    * @param recipientWallet
    * @param amount
    */
-  fillMolecule ( {
+  fillMolecule ({
     recipientWallet,
     amount
-  } ) {
-    this.$__molecule.initValue( {
+  }) {
+    this.$__molecule.initValue({
       recipientWallet,
       amount
-    } )
-    this.$__molecule.sign( {} )
-    this.$__molecule.check( this.$__molecule.sourceWallet )
+    })
+    this.$__molecule.sign({})
+    this.$__molecule.check(this.$__molecule.sourceWallet)
   }
 
   /**
@@ -76,10 +76,10 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
    * @param {object} json
    * @return {ResponseTransferTokens}
    */
-  createResponse ( json ) {
-    return new ResponseTransferTokens( {
+  createResponse (json) {
+    return new ResponseTransferTokens({
       query: this,
       json
-    } )
+    })
   }
 }

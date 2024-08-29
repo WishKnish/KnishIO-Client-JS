@@ -56,7 +56,7 @@ export default class TokenUnit {
    * @param name
    * @param metas
    */
-  constructor ( id, name, metas ) {
+  constructor (id, name, metas) {
     this.id = id
     this.name = name
     this.metas = metas || {}
@@ -67,11 +67,11 @@ export default class TokenUnit {
    * @param data
    * @returns {*}
    */
-  static createFromGraphQL ( data ) {
+  static createFromGraphQL (data) {
     let metas = data.metas || {}
-    if ( metas.length ) {
-      metas = JSON.parse( metas )
-      if ( !metas ) { // set an empty object instead of an array
+    if (metas.length) {
+      metas = JSON.parse(metas)
+      if (!metas) { // set an empty object instead of an array
         metas = {}
       }
     }
@@ -87,11 +87,11 @@ export default class TokenUnit {
    * @param data
    * @returns {TokenUnit}
    */
-  static createFromDB ( data ) {
+  static createFromDB (data) {
     return new TokenUnit(
-      data[ 0 ],
-      data[ 1 ],
-      data.length > 2 ? data[ 2 ] : {}
+      data[0],
+      data[1],
+      data.length > 2 ? data[2] : {}
     )
   }
 
@@ -115,7 +115,7 @@ export default class TokenUnit {
    * @return array
    */
   toData () {
-    return [ this.id, this.name, this.metas ]
+    return [this.id, this.name, this.metas]
   }
 
   /**
@@ -126,7 +126,7 @@ export default class TokenUnit {
     return {
       id: this.id,
       name: this.name,
-      metas: JSON.stringify( this.metas )
+      metas: JSON.stringify(this.metas)
     }
   }
 }

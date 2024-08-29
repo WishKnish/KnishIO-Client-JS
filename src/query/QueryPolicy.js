@@ -56,8 +56,8 @@ export default class QueryPolicy extends Query {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient )
+  constructor (apolloClient) {
+    super(apolloClient)
 
     this.$__query = gql`query( $metaType: String, $metaId: String, ) {
       Policy( metaType: $metaType, metaId: $metaId ) {
@@ -79,10 +79,10 @@ export default class QueryPolicy extends Query {
    * @param {object} json
    * @return {ResponsePolicy}
    */
-  createResponse ( json ) {
-    return new ResponsePolicy( {
+  createResponse (json) {
+    return new ResponsePolicy({
       query: this,
       json
-    } )
+    })
   }
 }

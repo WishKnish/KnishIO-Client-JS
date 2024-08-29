@@ -18,18 +18,18 @@ export default class Hex {
    * @param {object} options
    * @return {string}
    */
-  static toHex ( arr, options ) {
+  static toHex (arr, options) {
     /**
      * @param {number} val
      * @param {boolean} uppercase
      * @return {*}
      */
-    const numberToHex = ( val, uppercase ) => {
+    const numberToHex = (val, uppercase) => {
       const set = uppercase
-        ? [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' ]
-        : [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ]
+        ? ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
+        : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 
-      return set[ Math.floor( val / 16 ) ] + set[ val % 16 ]
+      return set[Math.floor(val / 16)] + set[val % 16]
     }
     const opts = Object.assign(
       {
@@ -44,17 +44,17 @@ export default class Hex {
     let group = 0
     let column = 0
 
-    for ( let i = 0; i < arr.length; ++i ) {
-      str += numberToHex( arr[ i ], opts.uppercase )
+    for (let i = 0; i < arr.length; ++i) {
+      str += numberToHex(arr[i], opts.uppercase)
 
-      if ( i === arr.length - 1 ) {
+      if (i === arr.length - 1) {
         break
       }
 
-      if ( opts.grouping > 0 && ++group === opts.grouping ) {
+      if (opts.grouping > 0 && ++group === opts.grouping) {
         group = 0
 
-        if ( opts.rowlength > 0 && ++column === opts.rowlength ) {
+        if (opts.rowlength > 0 && ++column === opts.rowlength) {
           column = 0
           str += '\n'
         } else {
@@ -77,28 +77,28 @@ export default class Hex {
    * @param {string} str
    * @return {Uint8Array}
    */
-  static toUint8Array ( str ) {
-    let target = str.toLowerCase().replace( /\s/g, '' )
+  static toUint8Array (str) {
+    let target = str.toLowerCase().replace(/\s/g, '')
 
-    if ( target.length % 2 === 1 ) {
+    if (target.length % 2 === 1) {
       target = `0${ target }`
     }
 
-    const buffer = new Uint8Array( Math.floor( target.length / 2 ) )
+    const buffer = new Uint8Array(Math.floor(target.length / 2))
     let curr = -1
 
-    for ( let i = 0; i < target.length; ++i ) {
-      const c = target[ i ]
-      const val = [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ].indexOf( c )
+    for (let i = 0; i < target.length; ++i) {
+      const c = target[i]
+      const val = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'].indexOf(c)
 
-      if ( val === -1 ) {
-        throw Error( 'unexpected character' )
+      if (val === -1) {
+        throw Error('unexpected character')
       }
 
-      if ( curr === -1 ) {
+      if (curr === -1) {
         curr = 16 * val
       } else {
-        buffer[ Math.floor( i / 2 ) ] = curr + val
+        buffer[Math.floor(i / 2)] = curr + val
         curr = -1
       }
     }

@@ -59,7 +59,7 @@ export default class AtomMeta {
    *
    * @param meta
    */
-  constructor ( meta = {} ) {
+  constructor (meta = {}) {
     this.meta = meta
   }
 
@@ -68,8 +68,8 @@ export default class AtomMeta {
    * @param meta
    * @returns {AtomMeta}
    */
-  merge ( meta ) {
-    this.meta = Object.assign( this.meta, meta )
+  merge (meta) {
+    this.meta = Object.assign(this.meta, meta)
     return this
   }
 
@@ -78,10 +78,10 @@ export default class AtomMeta {
    * @param context
    * @returns {AtomMeta}
    */
-  addContext ( context = null ) {
+  addContext (context = null) {
     // Add context key if it is enabled
-    if ( USE_META_CONTEXT ) {
-      this.merge( { context: context || DEFAULT_META_CONTEXT } )
+    if (USE_META_CONTEXT) {
+      this.merge({ context: context || DEFAULT_META_CONTEXT })
     }
 
     return this
@@ -92,23 +92,23 @@ export default class AtomMeta {
    * @param {Wallet} wallet
    * @returns {AtomMeta}
    */
-  setAtomWallet ( wallet ) {
+  setAtomWallet (wallet) {
     const walletMeta = {
       pubkey: wallet.pubkey,
       characters: wallet.characters
     }
 
     // Add token units meta key
-    if ( wallet.tokenUnits && wallet.tokenUnits.length ) {
-      walletMeta.tokenUnits = JSON.stringify( wallet.getTokenUnitsData() )
+    if (wallet.tokenUnits && wallet.tokenUnits.length) {
+      walletMeta.tokenUnits = JSON.stringify(wallet.getTokenUnitsData())
     }
     // Add trade rates meta key
-    if ( wallet.tradeRates && wallet.tradeRates.length ) {
-      walletMeta.tradeRates = JSON.stringify( wallet.tradeRates )
+    if (wallet.tradeRates && wallet.tradeRates.length) {
+      walletMeta.tradeRates = JSON.stringify(wallet.tradeRates)
     }
 
     // Merge all wallet's metas
-    this.merge( walletMeta )
+    this.merge(walletMeta)
     return this
   }
 
@@ -119,8 +119,8 @@ export default class AtomMeta {
    * @param {Wallet} wallet
    * @returns {AtomMeta}
    */
-  setMetaWallet ( wallet ) {
-    this.merge( {
+  setMetaWallet (wallet) {
+    this.merge({
       walletTokenSlug: wallet.token,
       walletBundleHash: wallet.bundle,
       walletAddress: wallet.address,
@@ -128,7 +128,7 @@ export default class AtomMeta {
       walletBatchId: wallet.batchId,
       walletPubkey: wallet.pubkey,
       walletCharacters: wallet.characters
-    } )
+    })
     return this
   }
 
@@ -137,8 +137,8 @@ export default class AtomMeta {
    * @param shadowWalletClaim
    * @returns {AtomMeta}
    */
-  setShadowWalletClaim ( shadowWalletClaim ) {
-    this.merge( { shadowWalletClaim: shadowWalletClaim * 1 } )
+  setShadowWalletClaim (shadowWalletClaim) {
+    this.merge({ shadowWalletClaim: shadowWalletClaim * 1 })
     return this
   }
 
@@ -147,17 +147,17 @@ export default class AtomMeta {
    * @param {Wallet} signingWallet
    * @returns {AtomMeta}
    */
-  setSigningWallet ( signingWallet ) {
-    this.merge( {
-      signingWallet: JSON.stringify( {
+  setSigningWallet (signingWallet) {
+    this.merge({
+      signingWallet: JSON.stringify({
         tokenSlug: signingWallet.token,
         bundleHash: signingWallet.bundle,
         address: signingWallet.address,
         position: signingWallet.position,
         pubkey: signingWallet.pubkey,
         characters: signingWallet.characters
-      } )
-    } )
+      })
+    })
     return this
   }
 
@@ -167,13 +167,13 @@ export default class AtomMeta {
    * @todo move logic to the separated class
    * @returns {AtomMeta}
    */
-  addPolicy ( policy ) {
+  addPolicy (policy) {
     // Policy meta initialization
-    const policyMeta = new PolicyMeta( policy, Object.keys( this.meta ) )
+    const policyMeta = new PolicyMeta(policy, Object.keys(this.meta))
 
-    this.merge( {
+    this.merge({
       policy: policyMeta.toJson()
-    } )
+    })
 
     return this
   }

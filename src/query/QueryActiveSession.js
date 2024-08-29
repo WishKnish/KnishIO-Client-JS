@@ -58,8 +58,8 @@ export default class QueryActiveSession extends Query {
    *
    * @param httpClient
    */
-  constructor ( httpClient ) {
-    super( httpClient )
+  constructor (httpClient) {
+    super(httpClient)
 
     this.$__query = gql`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
       ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {
@@ -77,10 +77,10 @@ export default class QueryActiveSession extends Query {
    * @param {object} json
    * @return {ResponseQueryActiveSession}
    */
-  createResponse ( json ) {
-    return new ResponseQueryActiveSession( {
+  createResponse (json) {
+    return new ResponseQueryActiveSession({
       query: this,
       json
-    } )
+    })
   }
 }

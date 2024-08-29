@@ -58,8 +58,8 @@ export default class WrongTokenTypeException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'Wrong type of token for this isotope', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = 'Wrong type of token for this isotope', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'WrongTokenTypeException'
   }
 }

@@ -56,14 +56,14 @@ export default class ResponsePolicy extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json
-    } )
+    })
     this.dataKey = 'data.Policy'
     this.init()
   }
@@ -75,12 +75,12 @@ export default class ResponsePolicy extends Response {
   payload () {
     const policy = this.data()
 
-    if ( !policy ) {
+    if (!policy) {
       return null
     }
 
-    if ( policy.callback ) {
-      return JSON.parse( policy.callback )
+    if (policy.callback) {
+      return JSON.parse(policy.callback)
     }
 
     return null

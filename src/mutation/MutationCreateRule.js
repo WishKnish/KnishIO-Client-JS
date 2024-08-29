@@ -59,19 +59,19 @@ export default class MutationCreateRule extends MutationProposeMolecule {
    * @param {object[]} rule
    * @param {object} policy
    */
-  fillMolecule ( {
+  fillMolecule ({
     metaType,
     metaId,
     rule,
     policy
-  } ) {
-    this.$__molecule.createRule( {
+  }) {
+    this.$__molecule.createRule({
       metaType,
       metaId,
       rule,
       policy
-    } )
-    this.$__molecule.sign( {} )
+    })
+    this.$__molecule.sign({})
     this.$__molecule.check()
   }
 
@@ -81,10 +81,10 @@ export default class MutationCreateRule extends MutationProposeMolecule {
    * @param {object} json
    * @return {ResponseCreateRule}
    */
-  createResponse ( json ) {
-    return new ResponseCreateRule( {
+  createResponse (json) {
+    return new ResponseCreateRule({
       query: this,
       json
-    } )
+    })
   }
 }

@@ -58,8 +58,8 @@ export default class QueryUserActivity extends Query {
    *
    * @param httpClient
    */
-  constructor ( httpClient ) {
-    super( httpClient )
+  constructor (httpClient) {
+    super(httpClient)
 
     this.$__query = gql`query UserActivity (
       $bundleHash:String,
@@ -143,10 +143,10 @@ export default class QueryUserActivity extends Query {
    * @param {object} json
    * @return {ResponseQueryUserActivity}
    */
-  createResponse ( json ) {
-    return new ResponseQueryUserActivity( {
+  createResponse (json) {
+    return new ResponseQueryUserActivity({
       query: this,
       json
-    } )
+    })
   }
 }

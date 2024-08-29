@@ -52,19 +52,19 @@ import ResponseCreateToken from '../response/ResponseCreateToken'
  * Query for creating new Tokens
  */
 export default class MutationCreateToken extends MutationProposeMolecule {
-  fillMolecule ( {
+  fillMolecule ({
     recipientWallet,
     amount,
     meta = null
-  } ) {
-    this.$__molecule.initTokenCreation( {
+  }) {
+    this.$__molecule.initTokenCreation({
       recipientWallet,
       amount,
       meta: meta || {}
-    } )
-    this.$__molecule.sign( {
+    })
+    this.$__molecule.sign({
       bundle: recipientWallet.bundle
-    } )
+    })
     this.$__molecule.check()
   }
 
@@ -74,10 +74,10 @@ export default class MutationCreateToken extends MutationProposeMolecule {
    * @param {object} json
    * @return {ResponseCreateToken}
    */
-  createResponse ( json ) {
-    return new ResponseCreateToken( {
+  createResponse (json) {
+    return new ResponseCreateToken({
       query: this,
       json
-    } )
+    })
   }
 }

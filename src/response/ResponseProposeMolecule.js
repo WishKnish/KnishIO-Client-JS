@@ -59,15 +59,15 @@ export default class ResponseProposeMolecule extends Response {
    * @param {MutationProposeMolecule} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.ProposeMolecule'
-    } )
+    })
     this.$__clientMolecule = query.molecule()
   }
 
@@ -75,12 +75,12 @@ export default class ResponseProposeMolecule extends Response {
    * Initialize response object with payload data
    */
   init () {
-    const payloadJson = Dot.get( this.data(), 'payload' )
+    const payloadJson = Dot.get(this.data(), 'payload')
     try {
-      this.$__payload = Object.prototype.toString.call( payloadJson ) === '[object String]'
-        ? JSON.parse( payloadJson )
+      this.$__payload = Object.prototype.toString.call(payloadJson) === '[object String]'
+        ? JSON.parse(payloadJson)
         : payloadJson
-    } catch ( err ) {
+    } catch (err) {
       this.$__payload = null
     }
   }
@@ -100,15 +100,15 @@ export default class ResponseProposeMolecule extends Response {
   molecule () {
     const data = this.data()
 
-    if ( !data ) {
+    if (!data) {
       return null
     }
 
-    const molecule = new Molecule( {} )
+    const molecule = new Molecule({})
 
-    molecule.molecularHash = Dot.get( data, 'molecularHash' )
-    molecule.status = Dot.get( data, 'status' )
-    molecule.createdAt = Dot.get( data, 'createdAt' )
+    molecule.molecularHash = Dot.get(data, 'molecularHash')
+    molecule.status = Dot.get(data, 'status')
+    molecule.createdAt = Dot.get(data, 'createdAt')
 
     return molecule
   }
@@ -128,7 +128,7 @@ export default class ResponseProposeMolecule extends Response {
    * @return {string}
    */
   status () {
-    return Dot.get( this.data(), 'status', 'rejected' )
+    return Dot.get(this.data(), 'status', 'rejected')
   }
 
   /**
@@ -137,7 +137,7 @@ export default class ResponseProposeMolecule extends Response {
    * @return {string}
    */
   reason () {
-    return Dot.get( this.data(), 'reason', 'Invalid response from server' )
+    return Dot.get(this.data(), 'reason', 'Invalid response from server')
   }
 
   /**

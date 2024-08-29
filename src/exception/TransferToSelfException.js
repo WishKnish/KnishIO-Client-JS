@@ -58,8 +58,8 @@ export default class TransferToSelfException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'Sender and recipient(s) cannot be the same', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = 'Sender and recipient(s) cannot be the same', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'TransferToSelfException'
   }
 }

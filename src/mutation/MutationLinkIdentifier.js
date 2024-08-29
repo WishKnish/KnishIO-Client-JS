@@ -58,8 +58,8 @@ export default class MutationLinkIdentifier extends Mutation {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient )
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`mutation( $bundle: String!, $type: String!, $content: String! ) {
       LinkIdentifier( bundle: $bundle, type: $type, content: $content ) {
         type,
@@ -77,10 +77,10 @@ export default class MutationLinkIdentifier extends Mutation {
    * @param {object} json
    * @return {ResponseLinkIdentifier}
    */
-  createResponse ( json ) {
-    return new ResponseLinkIdentifier( {
+  createResponse (json) {
+    return new ResponseLinkIdentifier({
       query: this,
       json
-    } )
+    })
   }
 }

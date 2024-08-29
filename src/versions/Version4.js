@@ -1,7 +1,7 @@
 import HashAtom from './HashAtom'
 
 export default class Version4 extends HashAtom {
-  constructor ( {
+  constructor ({
     position = null,
     walletAddress = null,
     isotope = null,
@@ -14,7 +14,7 @@ export default class Version4 extends HashAtom {
     index = null,
     createdAt = null,
     version = null
-  } ) {
+  }) {
     super()
     this.position = position
     this.walletAddress = walletAddress

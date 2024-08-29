@@ -59,15 +59,15 @@ export default class ResponseWalletBundle extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.WalletBundle'
-    } )
+    })
   }
 
   /**
@@ -78,16 +78,16 @@ export default class ResponseWalletBundle extends Response {
   payload () {
     const bundleData = this.data()
 
-    if ( !bundleData || bundleData.length === 0 ) {
+    if (!bundleData || bundleData.length === 0) {
       return null
     }
 
     const aggregate = {}
 
-    bundleData.forEach( bundle => {
-      bundle.metas = Meta.aggregateMeta( bundle.metas )
-      aggregate[ bundle.bundleHash ] = bundle
-    } )
+    bundleData.forEach(bundle => {
+      bundle.metas = Meta.aggregateMeta(bundle.metas)
+      aggregate[bundle.bundleHash] = bundle
+    })
 
     return aggregate
   }

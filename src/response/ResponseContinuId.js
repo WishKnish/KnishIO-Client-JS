@@ -59,15 +59,15 @@ export default class ResponseContinuId extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.ContinuId'
-    } )
+    })
   }
 
   /**
@@ -80,11 +80,11 @@ export default class ResponseContinuId extends Response {
 
     const continuId = this.data()
 
-    if ( continuId ) {
-      wallet = new Wallet( {
+    if (continuId) {
+      wallet = new Wallet({
         secret: null,
         token: continuId.tokenSlug
-      } )
+      })
       wallet.address = continuId.address
       wallet.position = continuId.position
       wallet.bundle = continuId.bundleHash

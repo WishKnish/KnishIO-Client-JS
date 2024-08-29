@@ -58,8 +58,8 @@ export default class MutationActiveSession extends Mutation {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient )
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`mutation(
       $bundleHash: String!,
       $metaType: String!,
@@ -97,10 +97,10 @@ export default class MutationActiveSession extends Mutation {
    * @param {object} json
    * @return {ResponseActiveSession}
    */
-  createResponse ( json ) {
-    return new ResponseActiveSession( {
+  createResponse (json) {
+    return new ResponseActiveSession({
       query: this,
       json
-    } )
+    })
   }
 }

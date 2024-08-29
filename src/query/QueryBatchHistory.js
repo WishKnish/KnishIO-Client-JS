@@ -54,8 +54,8 @@ import { gql } from '@apollo/client/core'
  * Query for retrieving Meta Asset information
  */
 export default class QueryBatchHistory extends Query {
-  constructor ( apolloClient ) {
-    super( apolloClient )
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`query( $batchId: String ) {
       BatchHistory( batchId: $batchId ) {
         ${ QueryBatch.getFields() }
@@ -69,11 +69,11 @@ export default class QueryBatchHistory extends Query {
    * @param {object} json
    * @return {Response}
    */
-  createResponse ( json ) {
-    const responseObject = new Response( {
+  createResponse (json) {
+    const responseObject = new Response({
       query: this,
       json
-    } )
+    })
     responseObject.dataKey = 'data.BatchHistory'
     return responseObject
   }

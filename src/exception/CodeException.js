@@ -56,8 +56,8 @@ export default class CodeException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'Code exception', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = 'Code exception', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'CodeException'
   }
 }

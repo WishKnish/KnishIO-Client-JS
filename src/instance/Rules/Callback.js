@@ -64,7 +64,7 @@ export default class Callback {
    * @param {string|null} amount
    * @param {string|null} comparison
    */
-  constructor ( {
+  constructor ({
     action,
     metaType = null,
     metaId = null,
@@ -73,13 +73,13 @@ export default class Callback {
     token = null,
     amount = null,
     comparison = null
-  } ) {
-    if ( meta ) {
+  }) {
+    if (meta) {
       this.meta = meta
     }
 
-    if ( !action ) {
-      throw new RuleArgumentException( 'Callback structure violated, missing mandatory "action" parameter.' )
+    if (!action) {
+      throw new RuleArgumentException('Callback structure violated, missing mandatory "action" parameter.')
     }
 
     this.__metaId = metaId
@@ -95,7 +95,7 @@ export default class Callback {
    *
    * @param {string} comparison
    */
-  set comparison ( comparison ) {
+  set comparison (comparison) {
     this.__comparison = comparison
   }
 
@@ -103,9 +103,9 @@ export default class Callback {
    *
    * @param {string} amount
    */
-  set amount ( amount ) {
-    if ( !isNumeric( amount ) ) {
-      throw new CodeException( 'Parameter amount should be a string containing numbers' )
+  set amount (amount) {
+    if (!isNumeric(amount)) {
+      throw new CodeException('Parameter amount should be a string containing numbers')
     }
     this.__amount = amount
   }
@@ -114,7 +114,7 @@ export default class Callback {
    *
    * @param {string} token
    */
-  set token ( token ) {
+  set token (token) {
     this.__token = token
   }
 
@@ -122,7 +122,7 @@ export default class Callback {
    *
    * @param {string} address
    */
-  set address ( address ) {
+  set address (address) {
     this.__address = address
   }
 
@@ -130,15 +130,15 @@ export default class Callback {
    *
    * @param {Meta|object} meta
    */
-  set meta ( meta ) {
-    this.__meta = meta instanceof Meta ? meta : Meta.toObject( meta )
+  set meta (meta) {
+    this.__meta = meta instanceof Meta ? meta : Meta.toObject(meta)
   }
 
   /**
    *
    * @param {string} metaType
    */
-  set metaType ( metaType ) {
+  set metaType (metaType) {
     this.__metaType = metaType
   }
 
@@ -146,7 +146,7 @@ export default class Callback {
    *
    * @param {string} metaId
    */
-  set metaId ( metaId ) {
+  set metaId (metaId) {
     this.__metaId = metaId
   }
 
@@ -156,36 +156,36 @@ export default class Callback {
    *
    * @return Callback
    */
-  static toObject ( object ) {
-    const callback = new Callback( {
+  static toObject (object) {
+    const callback = new Callback({
       action: object.action
-    } )
+    })
 
-    if ( object.metaType ) {
+    if (object.metaType) {
       callback.metaType = object.metaType
     }
 
-    if ( object.metaId ) {
+    if (object.metaId) {
       callback.metaId = object.metaId
     }
 
-    if ( object.meta ) {
+    if (object.meta) {
       callback.meta = object.meta
     }
 
-    if ( object.address ) {
+    if (object.address) {
       callback.address = object.address
     }
 
-    if ( object.token ) {
+    if (object.token) {
       callback.token = object.token
     }
 
-    if ( object.amount ) {
+    if (object.amount) {
       callback.amount = object.amount
     }
 
-    if ( object.comparison ) {
+    if (object.comparison) {
       callback.comparison = object.comparison
     }
 
@@ -201,29 +201,29 @@ export default class Callback {
       action: this.__action
     }
 
-    if ( this.__metaType ) {
+    if (this.__metaType) {
       meta.metaType = this.__metaType
     }
-    if ( this.__metaId ) {
+    if (this.__metaId) {
       meta.metaId = this.__metaId
     }
-    if ( this.__meta ) {
+    if (this.__meta) {
       meta.meta = this.__meta
     }
 
-    if ( this.__address ) {
+    if (this.__address) {
       meta.address = this.__address
     }
 
-    if ( this.__token ) {
+    if (this.__token) {
       meta.token = this.__token
     }
 
-    if ( this.__amount ) {
+    if (this.__amount) {
       meta.amount = this.__amount
     }
 
-    if ( this.__comparison ) {
+    if (this.__comparison) {
       meta.comparison = this.__comparison
     }
 
@@ -234,52 +234,52 @@ export default class Callback {
    * @return {boolean}
    */
   isReject () {
-    return this._is( 'reject' )
+    return this._is('reject')
   }
 
   /**
    * @return {boolean}
    */
   isMeta () {
-    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'metaId', 'metaType', 'meta' ] )
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'metaId', 'metaType', 'meta'])
 
-    return prop.length === 4 && this._is( 'meta' )
+    return prop.length === 4 && this._is('meta')
   }
 
   /**
    * @return {boolean}
    */
   isCollect () {
-    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'address', 'token', 'amount', 'comparison' ] )
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'address', 'token', 'amount', 'comparison'])
 
-    return prop.length === 5 && this._is( 'collect' )
+    return prop.length === 5 && this._is('collect')
   }
 
   /**
    * @return {boolean}
    */
   isBuffer () {
-    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'address', 'token', 'amount', 'comparison' ] )
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'address', 'token', 'amount', 'comparison'])
 
-    return prop.length === 5 && this._is( 'buffer' )
+    return prop.length === 5 && this._is('buffer')
   }
 
   /**
    * @return {boolean}
    */
   isRemit () {
-    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'token', 'amount' ] )
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'token', 'amount'])
 
-    return prop.length === 3 && this._is( 'remit' )
+    return prop.length === 3 && this._is('remit')
   }
 
   /**
    * @return {boolean}
    */
   isBurn () {
-    const prop = intersect( Object.keys( this.toJSON() ), [ 'action', 'token', 'amount', 'comparison' ] )
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'token', 'amount', 'comparison'])
 
-    return prop.length === 4 && this._is( 'burn' )
+    return prop.length === 4 && this._is('burn')
   }
 
   /**
@@ -288,7 +288,7 @@ export default class Callback {
    * @return {boolean}
    * @private
    */
-  _is ( type ) {
+  _is (type) {
     return this.__action.toLowerCase() === type.toLowerCase()
   }
 }

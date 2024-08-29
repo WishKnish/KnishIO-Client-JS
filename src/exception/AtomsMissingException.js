@@ -58,8 +58,8 @@ export default class AtomsMissingException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'The molecule does not contain atoms', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = 'The molecule does not contain atoms', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'AtomsMissingException'
   }
 }

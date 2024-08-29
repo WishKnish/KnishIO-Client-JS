@@ -58,8 +58,8 @@ export default class MetaMissingException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'Empty meta data.', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = 'Empty meta data.', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'MetaMissingException'
   }
 }

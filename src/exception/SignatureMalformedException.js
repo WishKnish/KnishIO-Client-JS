@@ -58,8 +58,8 @@ export default class SignatureMalformedException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'OTS malformed', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = 'OTS malformed', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'SignatureMalformedException'
   }
 }

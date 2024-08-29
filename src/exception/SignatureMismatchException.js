@@ -58,8 +58,8 @@ export default class SignatureMismatchException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'One-time signature (OTS) does not match!', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = 'One-time signature (OTS) does not match!', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'SignatureMismatchException'
   }
 }

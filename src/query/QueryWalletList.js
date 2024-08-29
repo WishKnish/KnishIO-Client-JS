@@ -53,8 +53,8 @@ import { gql } from '@apollo/client/core'
  * Query for getting a list of Wallets
  */
 export default class QueryWalletList extends Query {
-  constructor ( apolloClient ) {
-    super( apolloClient )
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`query( $bundleHash: String, $tokenSlug: String ) {
       Wallet( bundleHash: $bundleHash, tokenSlug: $tokenSlug ) {
         address,
@@ -91,10 +91,10 @@ export default class QueryWalletList extends Query {
    * @param {object} json
    * @return {ResponseWalletList}
    */
-  createResponse ( json ) {
-    return new ResponseWalletList( {
+  createResponse (json) {
+    return new ResponseWalletList({
       query: this,
       json
-    } )
+    })
   }
 }

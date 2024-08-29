@@ -58,8 +58,8 @@ export default class PolicyInvalidException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = '', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber )
+  constructor (message = '', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
     this.name = 'PolicyInvalidException'
   }
 }

@@ -59,42 +59,42 @@ export default class ResponseQueryActiveSession extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.ActiveUser'
-    } )
+    })
   }
 
   payload () {
     const list = this.data()
 
-    if ( !list ) {
+    if (!list) {
       return null
     }
 
     const activeUsers = []
 
-    for ( const item of list ) {
+    for (const item of list) {
       const activeSession = { ...item }
 
-      if ( activeSession.jsonData ) {
-        activeSession.jsonData = JSON.parse( activeSession.jsonData )
+      if (activeSession.jsonData) {
+        activeSession.jsonData = JSON.parse(activeSession.jsonData)
       }
 
-      if ( activeSession.createdAt ) {
-        activeSession.createdAt = new Date( activeSession.createdAt )
+      if (activeSession.createdAt) {
+        activeSession.createdAt = new Date(activeSession.createdAt)
       }
 
-      if ( activeSession.updatedAt ) {
-        activeSession.updatedAt = new Date( activeSession.updatedAt )
+      if (activeSession.updatedAt) {
+        activeSession.updatedAt = new Date(activeSession.updatedAt)
       }
 
-      activeUsers.push( activeSession )
+      activeUsers.push(activeSession)
     }
 
     return activeUsers

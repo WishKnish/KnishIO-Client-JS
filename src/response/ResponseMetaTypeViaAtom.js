@@ -56,21 +56,21 @@ export default class ResponseMetaTypeViaAtom extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.MetaTypeViaAtom'
-    } )
+    })
   }
 
   payload () {
     const metaTypeData = this.data()
 
-    if ( !metaTypeData || metaTypeData.length === 0 ) {
+    if (!metaTypeData || metaTypeData.length === 0) {
       return null
     }
 
@@ -82,15 +82,15 @@ export default class ResponseMetaTypeViaAtom extends Response {
 
     const metaData = metaTypeData.pop()
 
-    if ( metaData.instances ) {
+    if (metaData.instances) {
       response.instances = metaData.instances
     }
 
-    if ( metaData.instanceCount ) {
+    if (metaData.instanceCount) {
       response.instanceCount = metaData.instanceCount
     }
 
-    if ( metaData.paginatorInfo ) {
+    if (metaData.paginatorInfo) {
       response.paginatorInfo = metaData.paginatorInfo
     }
 

@@ -56,14 +56,14 @@ export default class ResponseActiveSession extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.ActiveSession'
-    } )
+    })
   }
 }
