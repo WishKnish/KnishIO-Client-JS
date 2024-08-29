@@ -160,6 +160,10 @@ client.createMeta( {
   handleResponse( 'Generating fingerprint...');
   const fingerprint = client.getFingerprint().then( fingerprint => {
 
+    client.getFingerprintData().then( fingerprintData => {
+      handleResponse( { fingerprintData } );
+    } );
+
     handleResponse( { fingerprint } );
 
     handleResponse( `Generating secret based on fingerprint ${ fingerprint }...` );
@@ -197,6 +201,7 @@ client.createMeta( {
   function handleResponse ( response ) {
     const formatter = new JSONFormatter( decycle( response ) );
     document.getElementById( 'response' ).appendChild( formatter.render() );
+    console.log(response);
   }
 
   function handleMetaQuery () {
