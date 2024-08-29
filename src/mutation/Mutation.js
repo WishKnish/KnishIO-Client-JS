@@ -46,6 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from '../query/Query'
+import Response from '../response/Response'
 
 /**
  * Base class used to construct various GraphQL mutations
@@ -65,20 +66,48 @@ export default class Mutation extends Query {
   }
 
   /**
-   * Sends the Query to a Knish.IO node and returns the Response
+   * Sends the Mutation to a Knish.IO node and returns the Response
    *
-   * @param variables
+   * @param {Object} options
+   * @param {Object} options.variables
+   * @param {Object} options.context
    * @returns {Promise<Response>}
    */
-  async execute ({ variables = null }) {
+  async execute ({ variables = null, context = {} }) {
     this.$__request = this.createQuery({
       variables
     })
 
-    const response = await this.client.mutate(this.$__request)
+    const mergedContext = {
+      ...context,
+      ...this.createQueryContext()
+    }
 
-    this.$__response = await this.createResponseRaw(response)
+    try {
+      const response = await this.client.mutate({
+        ...this.$__request,
+        context: mergedContext
+      })
 
-    return this.$__response
+      this.$__response = await this.createResponseRaw(response)
+
+      return this.$__response
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Mutation was cancelled')
+        // You might want to create a custom response for cancelled mutations
+        return new Response({
+          query: this,
+          json: { data: null, errors: [{ message: 'Mutation was cancelled' }] }
+        })
+      } else {
+        throw error
+      }
+    }
+  }
+
+  createQueryContext () {
+    // Override this method in subclasses if needed
+    return {}
   }
 }

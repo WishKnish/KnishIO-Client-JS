@@ -155,6 +155,7 @@ export default class KnishIOClient {
     this.$__uris = typeof uri === 'object' ? uri : [uri]
     this.$__authTokenObjects = {}
     this.$__authInProcess = false
+    this.abortControllers = new Map()
 
     if (cellSlug) {
       this.setCellSlug(cellSlug)
@@ -477,11 +478,11 @@ export default class KnishIOClient {
   /**
    * Builds a new instance of the provided Subscription class
    *
-   * @param subscribeClass
+   * @param SubscribeClass
    * @return {*}
    */
-  createSubscribe (subscribeClass) {
-    return new subscribeClass(this.subscribe())
+  createSubscribe (SubscribeClass) {
+    return new SubscribeClass(this.subscribe())
   }
 
   /**
@@ -519,10 +520,9 @@ export default class KnishIOClient {
    * @returns {Promise<*>}
    */
   async executeQuery (query, variables = null) {
-    // console.info( `KnishIOClient::executeQuery() - Check token expiration... ${ this.$__authToken.$__expiresAt * 1000 } == ${ Date.now() } ` );
+    // Check and refresh authorization token if needed
     if (this.$__authToken && this.$__authToken.isExpired()) {
       console.info('KnishIOClient::executeQuery() - Access token is expired. Getting new one...')
-
       await this.requestAuthToken({
         secret: this.$__secret,
         cellSlug: this.$__cellSlug,
@@ -530,9 +530,49 @@ export default class KnishIOClient {
       })
     }
 
-    return query.execute({
-      variables
-    })
+    // Create a new AbortController for this query
+    const abortController = new AbortController()
+    const queryKey = JSON.stringify({ query: query.$__query, variables })
+    this.abortControllers.set(queryKey, abortController)
+
+    try {
+      // Use the existing query execution method, but add the abort signal
+      const result = await query.execute({
+        variables,
+        context: {
+          fetchOptions: {
+            signal: abortController.signal
+          }
+        }
+      })
+
+      // Remove the AbortController after the query is complete
+      this.abortControllers.delete(queryKey)
+
+      return result
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Query was cancelled')
+      } else {
+        throw error
+      }
+    }
+  }
+
+  cancelQuery (query, variables = null) {
+    const queryKey = JSON.stringify({ query: query.$__query, variables })
+    const controller = this.abortControllers.get(queryKey)
+    if (controller) {
+      controller.abort()
+      this.abortControllers.delete(queryKey)
+    }
+  }
+
+  cancelAllQueries () {
+    for (const controller of this.abortControllers.values()) {
+      controller.abort()
+    }
+    this.abortControllers.clear()
   }
 
   /**

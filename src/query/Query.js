@@ -57,6 +57,8 @@ export default class Query {
     this.client = apolloClient
     this.$__variables = null
     this.$__query = null
+    this.$__response = null
+    this.$__request = null
   }
 
   /**
@@ -121,18 +123,38 @@ export default class Query {
    * Sends the Query to a Knish.IO node and returns the Response
    *
    * @param {object} variables
+   * @param {object} context
    * @return {Promise<Response>}
    */
-  async execute ({ variables = null }) {
-    this.$__request = this.createQuery({
-      variables
-    })
+  async execute ({ variables = null, context = {} }) {
+    this.$__request = this.createQuery({ variables })
 
-    const response = await this.client.query(this.$__request)
+    const mergedContext = {
+      ...context,
+      ...this.createQueryContext()
+    }
 
-    this.$__response = await this.createResponseRaw(response)
+    try {
+      const response = await this.client.query({
+        ...this.$__request,
+        context: mergedContext
+      })
 
-    return this.$__response
+      this.$__response = await this.createResponseRaw(response)
+
+      return this.$__response
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Query was cancelled')
+        // You might want to create a custom response for cancelled queries
+        return new Response({
+          query: this,
+          json: { data: null, errors: [{ message: 'Query was cancelled' }] }
+        })
+      } else {
+        throw error
+      }
+    }
   }
 
   /**
@@ -161,5 +183,10 @@ export default class Query {
    */
   variables () {
     return this.$__variables
+  }
+
+  createQueryContext () {
+    // Override this method in subclasses if needed
+    return {}
   }
 }
