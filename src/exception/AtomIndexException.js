@@ -58,8 +58,8 @@ export default class AtomIndexException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'There is an atom without an index', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'There is an atom without an index', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'AtomIndexException'
   }
 }

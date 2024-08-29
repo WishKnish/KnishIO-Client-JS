@@ -65,7 +65,7 @@ class AuthLink extends ApolloLink {
   /**
    * @param {string} auth
    */
-  setAuthToken (auth) {
+  setAuthToken ( auth ) {
     this.auth = auth
   }
 
@@ -75,15 +75,15 @@ class AuthLink extends ApolloLink {
    * @param {NextLink | undefined} forward
    * @returns {Observable<FetchResult> | null}
    */
-  request (operation, forward) {
-    operation.setContext(({ headers = {} }) => ({
+  request ( operation, forward ) {
+    operation.setContext( ( { headers = {} } ) => ( {
       headers: {
         ...headers,
         'X-Auth-Token': this.getAuthToken()
       }
-    }))
+    } ) )
 
-    return forward(operation)
+    return forward( operation )
   }
 }
 

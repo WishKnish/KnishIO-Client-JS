@@ -57,18 +57,18 @@ export default class Rule {
    * @param {Condition[]} condition
    * @param  {Callback[]} callback
    */
-  constructor ({
+  constructor ( {
     condition = [],
     callback = []
-  }) {
-    for (const element of condition) {
-      if (!(element instanceof Condition)) {
+  } ) {
+    for ( const element of condition ) {
+      if ( !( element instanceof Condition ) ) {
         throw new RuleArgumentException()
       }
     }
 
-    for (const element of callback) {
-      if (!(element instanceof Callback)) {
+    for ( const element of callback ) {
+      if ( !( element instanceof Callback ) ) {
         throw new RuleArgumentException()
       }
     }
@@ -81,15 +81,15 @@ export default class Rule {
    *
    * @param {Condition[]|{}} condition
    */
-  set comparison (condition) {
-    this.__condition.push(condition instanceof Condition ? condition : Condition.toObject(condition))
+  set comparison ( condition ) {
+    this.__condition.push( condition instanceof Condition ? condition : Condition.toObject( condition ) )
   }
 
   /**
    * @param {Callback[]|{}} callback
    */
-  set callback (callback) {
-    this.__callback.push(callback instanceof Callback ? callback : Callback.toObject(callback))
+  set callback ( callback ) {
+    this.__callback.push( callback instanceof Callback ? callback : Callback.toObject( callback ) )
   }
 
   /**
@@ -98,21 +98,21 @@ export default class Rule {
    *
    * @return {Rule}
    */
-  static toObject (object) {
-    if (!object.condition) {
-      throw new MetaMissingException('Rule::toObject() - Incorrect rule format! There is no condition field.')
+  static toObject ( object ) {
+    if ( !object.condition ) {
+      throw new MetaMissingException( 'Rule::toObject() - Incorrect rule format! There is no condition field.' )
     }
-    if (!object.callback) {
-      throw new MetaMissingException('Rule::toObject() - Incorrect rule format! There is no callback field.')
+    if ( !object.callback ) {
+      throw new MetaMissingException( 'Rule::toObject() - Incorrect rule format! There is no callback field.' )
     }
 
-    const rule = new Rule({})
+    const rule = new Rule( {} )
 
-    for (const condition of object.condition) {
+    for ( const condition of object.condition ) {
       rule.comparison = condition
     }
 
-    for (const callback of object.callback) {
+    for ( const callback of object.callback ) {
       rule.callback = callback
     }
 

@@ -54,11 +54,11 @@ export default class BaseException extends TypeError {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = null, fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = null, fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
 
-    if (message === null) {
-      throw new this(`Unknown ${ this.constructor.name }`)
+    if ( message === null ) {
+      throw new this( `Unknown ${ this.constructor.name }` )
     }
 
     this.name = 'BaseException'

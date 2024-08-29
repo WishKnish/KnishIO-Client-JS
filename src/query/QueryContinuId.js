@@ -53,8 +53,8 @@ import { gql } from '@apollo/client/core'
  * Queries the node for the next wallet to sign with for ContinuID
  */
 export default class QueryContinuId extends Query {
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor ( apolloClient ) {
+    super( apolloClient )
     this.$__query = gql`query ($bundle: String!) {
       ContinuId(bundle: $bundle) {
         address,
@@ -76,10 +76,10 @@ export default class QueryContinuId extends Query {
    * @param {object} json
    * @return {ResponseContinuId}
    */
-  createResponse (json) {
-    return new ResponseContinuId({
+  createResponse ( json ) {
+    return new ResponseContinuId( {
       query: this,
       json
-    })
+    } )
   }
 }

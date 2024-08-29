@@ -56,9 +56,9 @@ export default class MutationRequestAuthorization extends MutationProposeMolecul
    *
    * @param {object} meta
    */
-  fillMolecule ({ meta }) {
-    this.$__molecule.initAuthorization({ meta })
-    this.$__molecule.sign({})
+  fillMolecule ( { meta } ) {
+    this.$__molecule.initAuthorization( { meta } )
+    this.$__molecule.sign( {} )
     this.$__molecule.check()
   }
 
@@ -68,10 +68,10 @@ export default class MutationRequestAuthorization extends MutationProposeMolecul
    * @param {object} json
    * @return {ResponseRequestAuthorization}
    */
-  createResponse (json) {
-    return new ResponseRequestAuthorization({
+  createResponse ( json ) {
+    return new ResponseRequestAuthorization( {
       query: this,
       json
-    })
+    } )
   }
 }

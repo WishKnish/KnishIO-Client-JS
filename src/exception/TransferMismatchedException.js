@@ -56,8 +56,8 @@ export default class TransferMismatchedException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Token slugs for wallets in transfer do not match!', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Token slugs for wallets in transfer do not match!', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'TransferMismatchedException'
   }
 }

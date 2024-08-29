@@ -67,11 +67,11 @@ class Client extends ApolloClient {
    * @param {object|null} soketi
    * @param {boolean} encrypt
    */
-  constructor ({
+  constructor ( {
     serverUri,
     soketi = null,
     encrypt = false
-  }) {
+  } ) {
     const _socket = {
       ...{
         socketUri: null,
@@ -80,37 +80,37 @@ class Client extends ApolloClient {
       ...soketi || {}
     }
     const links = []
-    const http = new HttpLink({
+    const http = new HttpLink( {
       uri: serverUri,
       fetch,
       transportBatching: true
-    })
+    } )
     const auth = new AuthLink()
 
     let cipher = null
     let socket = null
 
-    links.push(auth)
+    links.push( auth )
 
-    if (encrypt) {
+    if ( encrypt ) {
       cipher = new CipherLink()
-      links.push(cipher)
+      links.push( cipher )
     }
 
-    if (_socket && _socket.socketUri) {
-      const path = parse(serverUri)
-      socket = new PusherLink({
+    if ( _socket && _socket.socketUri ) {
+      const path = parse( serverUri )
+      socket = new PusherLink( {
         socketUri: _socket.socketUri,
         authEndpoint: `${ path.scheme }://${ path.host }/graphql/subscriptions/auth`,
         appKey: _socket.appKey
-      })
-      links.push(socket)
+      } )
+      links.push( socket )
     }
 
-    links.push(concat(onError(errorHandler), http))
+    links.push( concat( onError( errorHandler ), http ) )
 
-    super({
-      link: from(links),
+    super( {
+      link: from( links ),
       cache: new InMemoryCache(),
       connectToDevTools: true,
       defaultOptions: {
@@ -131,7 +131,7 @@ class Client extends ApolloClient {
           errorPolicy: 'all'
         }
       }
-    })
+    } )
 
     this.__serverUri = serverUri
     this.__soketi = _socket
@@ -175,27 +175,27 @@ class Client extends ApolloClient {
    * @param {string|null} pubkey
    * @param {Wallet|null} wallet
    */
-  setAuthData ({
+  setAuthData ( {
     token,
     pubkey = null,
     wallet = null
-  }) {
+  } ) {
     this.__wallet = wallet
     this.__pubkey = pubkey
-    this.__authLink.setAuthToken(token)
+    this.__authLink.setAuthToken( token )
 
-    if (this.__socket) {
-      this.__socket.setAuthToken(token)
+    if ( this.__socket ) {
+      this.__socket.setAuthToken( token )
     }
 
-    if (this.__cipherLink) {
-      this.__cipherLink.setWallet(this.__wallet)
-      this.__cipherLink.setPubKey(this.__pubkey)
+    if ( this.__cipherLink ) {
+      this.__cipherLink.setWallet( this.__wallet )
+      this.__cipherLink.setPubKey( this.__pubkey )
     }
   }
 
   socketDisconnect () {
-    if (this.__socket) {
+    if ( this.__socket ) {
       this.__socket.disconnect()
     }
   }
@@ -204,9 +204,9 @@ class Client extends ApolloClient {
    *
    * @param {string} channel
    */
-  unsubscribeFromChannel (channel) {
-    if (this.__socket) {
-      this.__socket.unsubscribeFromChannel(channel)
+  unsubscribeFromChannel ( channel ) {
+    if ( this.__socket ) {
+      this.__socket.unsubscribeFromChannel( channel )
     }
   }
 

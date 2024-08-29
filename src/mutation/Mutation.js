@@ -55,8 +55,8 @@ export default class Mutation extends Query {
    *
    * @param {ApolloClient} apolloClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor ( apolloClient ) {
+    super( apolloClient )
   }
 
   /**
@@ -65,8 +65,8 @@ export default class Mutation extends Query {
    * @param {{}} variables
    * @returns {{variables: (Object|null), query: null}}
    */
-  createQuery ({ variables = null }) {
-    const request = super.createQuery({ variables })
+  createQuery ( { variables = null } ) {
+    const request = super.createQuery( { variables } )
     request.mutation = request.query
     delete request.query
     return request
@@ -78,14 +78,14 @@ export default class Mutation extends Query {
    * @param variables
    * @returns {Promise<Response>}
    */
-  async execute ({ variables = null }) {
-    this.$__request = this.createQuery({
+  async execute ( { variables = null } ) {
+    this.$__request = this.createQuery( {
       variables
-    })
+    } )
 
-    const response = await this.client.mutate(this.$__request)
+    const response = await this.client.mutate( this.$__request )
 
-    this.$__response = await this.createResponseRaw(response)
+    this.$__response = await this.createResponseRaw( response )
 
     return this.$__response
   }

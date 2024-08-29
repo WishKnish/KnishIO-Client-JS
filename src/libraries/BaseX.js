@@ -6,20 +6,20 @@ export default class BaseX {
   /**
    * @param {object} options
    */
-  constructor (options = {}) {
-    const basex = ['BASE2', 'BASE8', 'BASE11', 'BASE36', 'BASE62', 'BASE67']
-    const characters = ['BITCOIN', 'FLICKR', 'RIPPLE', 'IPFS']
-    const base64 = ['BASE64']
+  constructor ( options = {} ) {
+    const basex = [ 'BASE2', 'BASE8', 'BASE11', 'BASE36', 'BASE62', 'BASE67' ]
+    const characters = [ 'BITCOIN', 'FLICKR', 'RIPPLE', 'IPFS' ]
+    const base64 = [ 'BASE64' ]
 
-    this.$options = Object.assign({ characters: 'BASE64' }, options)
+    this.$options = Object.assign( { characters: 'BASE64' }, options )
     this.$encoder = new Base58()
 
-    if (base64.includes(this.$options.characters)) {
+    if ( base64.includes( this.$options.characters ) ) {
       this.$encoder = new Base64()
-    } else if (basex.includes(this.$options.characters)) {
-      this.$encoder = base(this[this.$options.characters])
-    } else if (characters.includes(this.$options.characters)) {
-      this.$encoder = new Base58(this.$options)
+    } else if ( basex.includes( this.$options.characters ) ) {
+      this.$encoder = base( this[ this.$options.characters ] )
+    } else if ( characters.includes( this.$options.characters ) ) {
+      this.$encoder = new Base58( this.$options )
     }
   }
 
@@ -75,22 +75,22 @@ export default class BaseX {
    * @param {Buffer|ArrayBuffer|Uint8Array} data
    * @return {string}
    */
-  encode (data) {
+  encode ( data ) {
     // If data is already a Uint8Array, proceed as-is; otherwise, convert it
-    const uint8Array = data instanceof Uint8Array ? data : new Uint8Array(data)
+    const uint8Array = data instanceof Uint8Array ? data : new Uint8Array( data )
 
     // Convert the Uint8Array to a binary string
-    const binaryString = String.fromCharCode(...uint8Array)
+    const binaryString = String.fromCharCode( ...uint8Array )
 
     // Encode using your existing encoder
-    return this.$encoder.encode(binaryString)
+    return this.$encoder.encode( binaryString )
   }
 
   /**
    * @param {string} data
    * @return {Buffer|ArrayBuffer|Uint8Array}
    */
-  decode (data) {
-    return this.$encoder.decode(data)
+  decode ( data ) {
+    return this.$encoder.decode( data )
   }
 }

@@ -58,8 +58,8 @@ export default class TransferUnbalancedException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Token transfer atoms are unbalanced', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Token transfer atoms are unbalanced', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'TransferUnbalancedException'
   }
 }

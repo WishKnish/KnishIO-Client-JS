@@ -60,19 +60,19 @@ export default class MutationCreateMeta extends MutationProposeMolecule {
    * @param {array|object} meta
    * @param {object} policy
    */
-  fillMolecule ({
+  fillMolecule ( {
     metaType,
     metaId,
     meta,
     policy
-  }) {
-    this.$__molecule.initMeta({
+  } ) {
+    this.$__molecule.initMeta( {
       meta,
       metaType,
       metaId,
       policy
-    })
-    this.$__molecule.sign({})
+    } )
+    this.$__molecule.sign( {} )
     this.$__molecule.check()
   }
 
@@ -82,10 +82,10 @@ export default class MutationCreateMeta extends MutationProposeMolecule {
    * @param {object} json
    * @return {ResponseCreateMeta}
    */
-  createResponse (json) {
-    return new ResponseCreateMeta({
+  createResponse ( json ) {
+    return new ResponseCreateMeta( {
       query: this,
       json
-    })
+    } )
   }
 }

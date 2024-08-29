@@ -58,8 +58,8 @@ export default class UnauthenticatedException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Authorization token missing or invalid.', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Authorization token missing or invalid.', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'UnauthenticatedException'
   }
 }

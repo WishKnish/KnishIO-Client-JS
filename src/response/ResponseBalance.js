@@ -59,15 +59,15 @@ export default class ResponseBalance extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ({
+  constructor ( {
     query,
     json
-  }) {
-    super({
+  } ) {
+    super( {
       query,
       json,
       dataKey: 'data.Balance'
-    })
+    } )
   }
 
   /**
@@ -78,12 +78,12 @@ export default class ResponseBalance extends Response {
   payload () {
     const walletData = this.data()
 
-    if (!walletData || !walletData.bundleHash || !walletData.tokenSlug) {
+    if ( !walletData || !walletData.bundleHash || !walletData.tokenSlug ) {
       return null
     }
 
-    return ResponseWalletList.toClientWallet({
+    return ResponseWalletList.toClientWallet( {
       data: walletData
-    })
+    } )
   }
 }

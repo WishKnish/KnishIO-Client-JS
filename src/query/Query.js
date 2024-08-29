@@ -53,7 +53,7 @@ export default class Query {
    *
    * @param {ApolloClient} apolloClient
    */
-  constructor (apolloClient) {
+  constructor ( apolloClient ) {
     this.client = apolloClient
     this.$__variables = null
     this.$__query = null
@@ -74,8 +74,8 @@ export default class Query {
    * @param response
    * @return {Promise<Response>}
    */
-  async createResponseRaw (response) {
-    return this.createResponse(response)
+  async createResponseRaw ( response ) {
+    return this.createResponse( response )
   }
 
   /**
@@ -84,11 +84,11 @@ export default class Query {
    * @param {object} json
    * @return {Response}
    */
-  createResponse (json) {
-    return new Response({
+  createResponse ( json ) {
+    return new Response( {
       query: this,
       json
-    })
+    } )
   }
 
   /**
@@ -97,18 +97,18 @@ export default class Query {
    * @param {{}} variables
    * @returns {{variables: (Object|null), query: null}}
    */
-  createQuery ({ variables = null }) {
-    this.$__variables = this.compiledVariables(variables)
+  createQuery ( { variables = null } ) {
+    this.$__variables = this.compiledVariables( variables )
 
     // Uri is a required parameter
     const uri = this.uri()
 
-    if (!uri) {
-      throw new CodeException('Query::createQuery() - Node URI was not initialized for this client instance!')
+    if ( !uri ) {
+      throw new CodeException( 'Query::createQuery() - Node URI was not initialized for this client instance!' )
     }
 
-    if (this.$__query === null) {
-      throw new CodeException('Query::createQuery() - GraphQL subscription was not initialized!')
+    if ( this.$__query === null ) {
+      throw new CodeException( 'Query::createQuery() - GraphQL subscription was not initialized!' )
     }
 
     return {
@@ -123,14 +123,14 @@ export default class Query {
    * @param {object} variables
    * @return {Promise<Response>}
    */
-  async execute ({ variables = null }) {
-    this.$__request = this.createQuery({
+  async execute ( { variables = null } ) {
+    this.$__request = this.createQuery( {
       variables
-    })
+    } )
 
-    const response = await this.client.query(this.$__request)
+    const response = await this.client.query( this.$__request )
 
-    this.$__response = await this.createResponseRaw(response)
+    this.$__response = await this.createResponseRaw( response )
 
     return this.$__response
   }
@@ -141,7 +141,7 @@ export default class Query {
    * @param {object} variables
    * @return {object}
    */
-  compiledVariables (variables = null) {
+  compiledVariables ( variables = null ) {
     return variables || {}
   }
 

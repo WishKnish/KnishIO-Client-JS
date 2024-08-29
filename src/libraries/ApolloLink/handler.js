@@ -50,11 +50,11 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  * @param {Operation} operation
  * @return {string}
  */
-export function operationName (operation) {
+export function operationName ( operation ) {
   const operationDefinition = operation.query
-    .definitions.find(definitionNode => definitionNode.kind === 'OperationDefinition')
+    .definitions.find( definitionNode => definitionNode.kind === 'OperationDefinition' )
   const fieldNode = operationDefinition.selectionSet
-    .selections.find(definitionNode => definitionNode.kind === 'Field')
+    .selections.find( definitionNode => definitionNode.kind === 'Field' )
 
   return fieldNode.name.value
 }
@@ -63,41 +63,41 @@ export function operationName (operation) {
  * @param {Operation} operation
  * @return {string}
  */
-export function operationType (operation) {
+export function operationType ( operation ) {
   const operationDefinition = operation.query
-    .definitions.find(definitionNode => definitionNode.kind === 'OperationDefinition')
+    .definitions.find( definitionNode => definitionNode.kind === 'OperationDefinition' )
 
   return operationDefinition.operation
 }
 
-export function errorHandler ({
+export function errorHandler ( {
   graphQLErrors,
   networkError,
   operation,
   forward,
   response
-}) {
-  if (graphQLErrors) {
-    graphQLErrors.map(({
+} ) {
+  if ( graphQLErrors ) {
+    graphQLErrors.map( ( {
       message,
       debugMessage,
       locations,
       path
-    }) => console.error(
+    } ) => console.error(
       `[GraphQL error]: ${ message }\r\n`,
       `  Message : ${ debugMessage }\r\n`,
       `  Path    : ${ path }\r\n`,
       `  Location: ${ locations }\r\n`
-    ))
+    ) )
   }
 
-  if (networkError) {
+  if ( networkError ) {
     const {
       name,
       statusCode,
       result = {}
     } = networkError
-    console.error(`[Network error]: ${ name }, status code: ${ statusCode }`)
+    console.error( `[Network error]: ${ name }, status code: ${ statusCode }` )
     // if you would also like to retry automatically on
     // network errors, we recommend that you use
     // apollo-link-retry

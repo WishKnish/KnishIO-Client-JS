@@ -58,8 +58,8 @@ export default class QueryAtom extends Query {
    *
    * @param apolloClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor ( apolloClient ) {
+    super( apolloClient )
 
     this.$__query = gql`query(
       $molecularHashes: [String!],
@@ -152,7 +152,7 @@ export default class QueryAtom extends Query {
    * @param {object} queryArgs
    * @return {object}
    */
-  static createVariables ({
+  static createVariables ( {
     molecularHashes,
     molecularHash,
     bundleHashes,
@@ -180,65 +180,65 @@ export default class QueryAtom extends Query {
     filter,
     latest,
     queryArgs
-  }) {
-    if (molecularHash) {
+  } ) {
+    if ( molecularHash ) {
       molecularHashes = molecularHashes || []
-      molecularHashes.push(molecularHash)
+      molecularHashes.push( molecularHash )
     }
 
-    if (bundleHash) {
+    if ( bundleHash ) {
       bundleHashes = bundleHashes || []
-      bundleHashes.push(bundleHash)
+      bundleHashes.push( bundleHash )
     }
 
-    if (position) {
+    if ( position ) {
       positions = positions || []
-      positions.push(position)
+      positions.push( position )
     }
 
-    if (walletAddress) {
+    if ( walletAddress ) {
       walletAddresses = walletAddresses || []
-      walletAddresses.push(walletAddress)
+      walletAddresses.push( walletAddress )
     }
 
-    if (isotope) {
+    if ( isotope ) {
       isotopes = isotopes || []
-      isotopes.push(isotope)
+      isotopes.push( isotope )
     }
 
-    if (tokenSlug) {
+    if ( tokenSlug ) {
       tokenSlugs = tokenSlugs || []
-      tokenSlugs.push(tokenSlug)
+      tokenSlugs.push( tokenSlug )
     }
 
-    if (cellSlug) {
+    if ( cellSlug ) {
       cellSlugs = cellSlugs || []
-      cellSlugs.push(cellSlug)
+      cellSlugs.push( cellSlug )
     }
 
-    if (batchId) {
+    if ( batchId ) {
       batchIds = batchIds || []
-      batchIds.push(batchId)
+      batchIds.push( batchId )
     }
 
-    if (value) {
+    if ( value ) {
       values = values || []
-      values.push(value)
+      values.push( value )
     }
 
-    if (metaType) {
+    if ( metaType ) {
       metaTypes = metaTypes || []
-      metaTypes.push(metaType)
+      metaTypes.push( metaType )
     }
 
-    if (metaId) {
+    if ( metaId ) {
       metaIds = metaIds || []
-      metaIds.push(metaId)
+      metaIds.push( metaId )
     }
 
-    if (index) {
+    if ( index ) {
       indexes = indexes || []
-      indexes.push(index)
+      indexes.push( index )
     }
 
     return {
@@ -266,10 +266,10 @@ export default class QueryAtom extends Query {
    * @param {object} json
    * @return {ResponseAtom}
    */
-  createResponse (json) {
-    return new ResponseAtom({
+  createResponse ( json ) {
+    return new ResponseAtom( {
       query: this,
       json
-    })
+    } )
   }
 }

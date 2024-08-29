@@ -55,23 +55,23 @@ export default class ResponseQueryUserActivity extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ({
+  constructor ( {
     query,
     json
-  }) {
-    super({
+  } ) {
+    super( {
       query,
       json,
       dataKey: 'data.UserActivity'
-    })
+    } )
   }
 
   payload () {
-    const data = JSON.parse(JSON.stringify(this.data()))
+    const data = JSON.parse( JSON.stringify( this.data() ) )
 
-    if (data.instances) {
-      for (const datum of data.instances) {
-        datum.jsonData = JSON.parse(datum.jsonData)
+    if ( data.instances ) {
+      for ( const datum of data.instances ) {
+        datum.jsonData = JSON.parse( datum.jsonData )
       }
     }
 

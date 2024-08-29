@@ -60,15 +60,15 @@ export default class ResponseWalletList extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ({
+  constructor ( {
     query,
     json
-  }) {
-    super({
+  } ) {
+    super( {
       query,
       json,
       dataKey: 'data.Wallet'
-    })
+    } )
   }
 
   /**
@@ -78,51 +78,51 @@ export default class ResponseWalletList extends Response {
    * @param {string|null} secret
    * @return {Wallet}
    */
-  static toClientWallet ({
+  static toClientWallet ( {
     data,
     secret = null
-  }) {
+  } ) {
     let wallet
 
-    if (data.position === null || typeof data.position === 'undefined') {
-      wallet = Wallet.create({
+    if ( data.position === null || typeof data.position === 'undefined' ) {
+      wallet = Wallet.create( {
         bundle: data.bundleHash,
         token: data.tokenSlug,
         batchId: data.batchId,
         characters: data.characters
-      })
+      } )
     } else {
-      wallet = new Wallet({
+      wallet = new Wallet( {
         secret,
         token: data.tokenSlug,
         position: data.position,
         batchId: data.batchId,
         characters: data.characters
-      })
+      } )
       wallet.address = data.address
       wallet.bundle = data.bundleHash
     }
 
-    if (data.token) {
+    if ( data.token ) {
       wallet.tokenName = data.token.name
       wallet.tokenAmount = data.token.amount
       wallet.tokenSupply = data.token.supply
       wallet.tokenFungibility = data.token.fungibility
     }
 
-    if (data.tokenUnits.length) {
-      for (const tokenUnitData of data.tokenUnits) {
-        wallet.tokenUnits.push(TokenUnit.createFromGraphQL(tokenUnitData))
+    if ( data.tokenUnits.length ) {
+      for ( const tokenUnitData of data.tokenUnits ) {
+        wallet.tokenUnits.push( TokenUnit.createFromGraphQL( tokenUnitData ) )
       }
     }
 
-    if (data.tradeRates.length) {
-      for (const tradeRate of data.tradeRates) {
-        wallet.tradeRates[tradeRate.tokenSlug] = tradeRate.amount
+    if ( data.tradeRates.length ) {
+      for ( const tradeRate of data.tradeRates ) {
+        wallet.tradeRates[ tradeRate.tokenSlug ] = tradeRate.amount
       }
     }
 
-    wallet.balance = Number(data.amount)
+    wallet.balance = Number( data.amount )
     wallet.pubkey = data.pubkey
     wallet.createdAt = data.createdAt
 
@@ -135,20 +135,20 @@ export default class ResponseWalletList extends Response {
    * @param secret
    * @return {null|[Wallet]}
    */
-  getWallets (secret = null) {
+  getWallets ( secret = null ) {
     const list = this.data()
 
-    if (!list) {
+    if ( !list ) {
       return null
     }
 
     const wallets = []
 
-    for (const data of list) {
-      wallets.push(ResponseWalletList.toClientWallet({
+    for ( const data of list ) {
+      wallets.push( ResponseWalletList.toClientWallet( {
         data,
         secret
-      }))
+      } ) )
     }
 
     return wallets

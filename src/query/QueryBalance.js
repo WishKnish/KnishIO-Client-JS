@@ -58,8 +58,8 @@ export default class QueryBalance extends Query {
    *
    * @param apolloClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor ( apolloClient ) {
+    super( apolloClient )
 
     this.$__query = gql`query( $address: String, $bundleHash: String, $type: String, $token: String, $position: String ) {
       Balance( address: $address, bundleHash: $bundleHash, type: $type, token: $token, position: $position ) {
@@ -90,10 +90,10 @@ export default class QueryBalance extends Query {
    * @param {object} json
    * @return {ResponseBalance}
    */
-  createResponse (json) {
-    return new ResponseBalance({
+  createResponse ( json ) {
+    return new ResponseBalance( {
       query: this,
       json
-    })
+    } )
   }
 }

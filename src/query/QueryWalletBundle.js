@@ -53,8 +53,8 @@ import { gql } from '@apollo/client/core'
  * Query for retrieving information about Wallet Bundles
  */
 export default class QueryWalletBundle extends Query {
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor ( apolloClient ) {
+    super( apolloClient )
     this.$__query = gql`query( $bundleHashes: [ String! ] ) {
       WalletBundle( bundleHashes: $bundleHashes ) {
         bundleHash,
@@ -76,10 +76,10 @@ export default class QueryWalletBundle extends Query {
    * @param {object} json
    * @return {ResponseWalletBundle}
    */
-  createResponse (json) {
-    return new ResponseWalletBundle({
+  createResponse ( json ) {
+    return new ResponseWalletBundle( {
       query: this,
       json
-    })
+    } )
   }
 }

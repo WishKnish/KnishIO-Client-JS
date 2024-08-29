@@ -70,61 +70,61 @@ export default class Test {
    * @param graphqlUrl
    * @param encrypt
    */
-  constructor (graphqlUrl, encrypt = false) {
+  constructor ( graphqlUrl, encrypt = false ) {
     this.encrypt = encrypt
-    this.secrets = [generateSecret(), generateSecret()]
-    this.tokenSlugs = ['TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES', 'UTSLUG0', 'UTSLUG1']
+    this.secrets = [ generateSecret(), generateSecret() ]
+    this.tokenSlugs = [ 'TESTTOKEN', 'UTENVSTACKABLE', 'UTSTACKUNIT', 'UTENVSTACKUNIT', 'UTSTACKUNITZONES', 'UTSLUG0', 'UTSLUG1' ]
     this.graphqlUrl = graphqlUrl
-    console.log(`---------- GraphQL URI: ${ this.graphqlUrl }`)
+    console.log( `---------- GraphQL URI: ${ this.graphqlUrl }` )
 
     this.clients = {}
     this.tokenUnits = [
-      ['unit_id_1', 'unit_name_1'],
-      ['unit_id_2', 'unit_name_2'],
-      ['unit_id_3', 'unit_name_3'],
-      ['unit_id_4', 'unit_name_4'],
-      ['unit_id_5', 'unit_name_5'],
-      ['unit_id_6', 'unit_name_6'],
-      ['unit_id_7', 'unit_name_7'],
-      ['unit_id_8', 'unit_name_8'],
-      ['unit_id_9', 'unit_name_9'],
-      ['unit_id_10', 'unit_name_10'],
-      ['unit_id_11', 'unit_name_11']
+      [ 'unit_id_1', 'unit_name_1' ],
+      [ 'unit_id_2', 'unit_name_2' ],
+      [ 'unit_id_3', 'unit_name_3' ],
+      [ 'unit_id_4', 'unit_name_4' ],
+      [ 'unit_id_5', 'unit_name_5' ],
+      [ 'unit_id_6', 'unit_name_6' ],
+      [ 'unit_id_7', 'unit_name_7' ],
+      [ 'unit_id_8', 'unit_name_8' ],
+      [ 'unit_id_9', 'unit_name_9' ],
+      [ 'unit_id_10', 'unit_name_10' ],
+      [ 'unit_id_11', 'unit_name_11' ]
     ]
     this.replenishTokenUnits = [
-      ['unit_id_12', 'unit_id_12'],
-      ['unit_id_13', 'unit_id_13'],
-      ['unit_id_14', 'unit_id_14'],
-      ['unit_id_15', 'unit_id_15']
+      [ 'unit_id_12', 'unit_id_12' ],
+      [ 'unit_id_13', 'unit_id_13' ],
+      [ 'unit_id_14', 'unit_id_14' ],
+      [ 'unit_id_15', 'unit_id_15' ]
     ]
 
     // Generate token units with fragment zones
-    const getTokenUnitsFZ = (tokenUnits, from = 0) => {
+    const getTokenUnitsFZ = ( tokenUnits, from = 0 ) => {
       const result = []
-      tokenUnits.forEach((tokenUnit, key) => {
-        const tokenUnitFZ = Array.from(tokenUnit)
-        tokenUnitFZ.push({ fragmentZone: from + key })
-        result.push(tokenUnitFZ)
-      })
+      tokenUnits.forEach( ( tokenUnit, key ) => {
+        const tokenUnitFZ = Array.from( tokenUnit )
+        tokenUnitFZ.push( { fragmentZone: from + key } )
+        result.push( tokenUnitFZ )
+      } )
       return result
     }
-    this.tokenUnitsFZ = getTokenUnitsFZ(this.tokenUnits)
-    this.replenishTokenUnitsFZ = getTokenUnitsFZ(Array.from(this.replenishTokenUnits), this.tokenUnits.length)
+    this.tokenUnitsFZ = getTokenUnitsFZ( this.tokenUnits )
+    this.replenishTokenUnitsFZ = getTokenUnitsFZ( Array.from( this.replenishTokenUnits ), this.tokenUnits.length )
     this.fragmentZones = this.tokenUnitsFZ.length + this.replenishTokenUnitsFZ.length
 
     // Init fused token unit IDs
     this.fusedTokenUnitIds = []
-    this.tokenUnitsFZ.slice(0, 5).forEach((tokenUnitData) => {
-      this.fusedTokenUnitIds.push(tokenUnitData[0])
-    })
+    this.tokenUnitsFZ.slice( 0, 5 ).forEach( ( tokenUnitData ) => {
+      this.fusedTokenUnitIds.push( tokenUnitData[ 0 ] )
+    } )
   }
 
   /**
    * Run all
    */
-  static async run (uris) {
-    for (const uriIndex in uris) {
-      const test = new Test(uris[uriIndex])
+  static async run ( uris ) {
+    for ( const uriIndex in uris ) {
+      const test = new Test( uris[ uriIndex ] )
       await test.testAll()
     }
   }
@@ -133,10 +133,10 @@ export default class Test {
    * Test all KnishIOClient functions
    */
   async testAll () {
-    console.info(`Executing test for: ${ this.graphqlUrl }...`)
+    console.info( `Executing test for: ${ this.graphqlUrl }...` )
 
-    await this.client(this.secrets[0])
-    await this.client(this.secrets[1])
+    await this.client( this.secrets[ 0 ] )
+    await this.client( this.secrets[ 1 ] )
 
     await this.testCreateToken()
     await this.testFuseToken()
@@ -160,20 +160,20 @@ export default class Test {
    * @returns {Promise<void>}
    */
   async testTokenExpiration () {
-    const client = await this.client(this.secrets[0])
-    const fnTimeout = (timeout) => {
-      setTimeout(client => {
-        console.warn(`setTimeout ${ timeout }`)
-        client.queryMeta({
+    const client = await this.client( this.secrets[ 0 ] )
+    const fnTimeout = ( timeout ) => {
+      setTimeout( client => {
+        console.warn( `setTimeout ${ timeout }` )
+        client.queryMeta( {
           metaType: 'metaType',
           metaId: 'metaId'
-        })
-      }, timeout, client, timeout)
+        } )
+      }, timeout, client, timeout )
     }
-    fnTimeout(3000)
-    fnTimeout(30000)
-    fnTimeout(61000)
-    fnTimeout(64000)
+    fnTimeout( 3000 )
+    fnTimeout( 30000 )
+    fnTimeout( 61000 )
+    fnTimeout( 64000 )
   }
 
   /**
@@ -183,85 +183,85 @@ export default class Test {
     const responses = {}
 
     // Regular stackable token
-    let client = await this.client(this.secrets[0])
-    responses[0] = await client.createToken({
-      token: this.tokenSlugs[0],
+    let client = await this.client( this.secrets[ 0 ] )
+    responses[ 0 ] = await client.createToken( {
+      token: this.tokenSlugs[ 0 ],
       amount: 1000.000000000000,
       meta: {
-        name: this.tokenSlugs[0],
+        name: this.tokenSlugs[ 0 ],
         fungibility: 'stackable',
         supply: 'replenishable',
         decimals: 0,
         icon: 'icon'
       },
       batchId: 'batch_0'
-    })
-    this.checkResponse(responses[0], 'testCreateToken.0')
+    } )
+    this.checkResponse( responses[ 0 ], 'testCreateToken.0' )
 
     // Server stackable token
-    const serverClient = await this.client(process.env.SECRET_TOKEN_KNISH)
-    responses[1] = await serverClient.createToken({
-      token: this.tokenSlugs[1],
+    const serverClient = await this.client( process.env.SECRET_TOKEN_KNISH )
+    responses[ 1 ] = await serverClient.createToken( {
+      token: this.tokenSlugs[ 1 ],
       amount: 1000.000000000000,
       meta: {
-        name: this.tokenSlugs[1],
+        name: this.tokenSlugs[ 1 ],
         fungibility: 'stackable',
         supply: 'limited',
         decimals: 0,
         icon: 'icon'
       },
       batchId: 'server_batch_0'
-    })
-    this.checkResponse(responses[1], 'testCreateToken.1')
+    } )
+    this.checkResponse( responses[ 1 ], 'testCreateToken.1' )
 
     // --------- UNITABLE TOKENS ----------
 
     // Create stackable unit token
-    responses[2] = await client.createToken({
-      token: this.tokenSlugs[2],
+    responses[ 2 ] = await client.createToken( {
+      token: this.tokenSlugs[ 2 ],
       units: this.tokenUnits,
       meta: {
-        name: this.tokenSlugs[2],
+        name: this.tokenSlugs[ 2 ],
         supply: 'replenishable',
         fungibility: 'stackable'
       },
       batchId: 'unit_batch_0'
-    })
-    this.checkResponse(responses[2], 'testCreateToken.2')
+    } )
+    this.checkResponse( responses[ 2 ], 'testCreateToken.2' )
 
     // --- SERVER CLIENT (used only for the testing - SECRET_TOKEN_KNISH is server var only!)
 
     // Create server stackable unit token
-    responses[3] = await serverClient.createToken({
-      token: this.tokenSlugs[3],
+    responses[ 3 ] = await serverClient.createToken( {
+      token: this.tokenSlugs[ 3 ],
       units: this.tokenUnits,
       meta: {
-        name: this.tokenSlugs[3],
+        name: this.tokenSlugs[ 3 ],
         supply: 'limited',
         fungibility: 'stackable'
       },
       batchId: 'server_unit_batch_0'
-    })
-    this.checkResponse(responses[3], 'testCreateToken.3')
+    } )
+    this.checkResponse( responses[ 3 ], 'testCreateToken.3' )
 
     // Create stackable unit token
-    responses[4] = await client.createToken({
-      token: this.tokenSlugs[4],
+    responses[ 4 ] = await client.createToken( {
+      token: this.tokenSlugs[ 4 ],
       units: this.tokenUnitsFZ,
       meta: {
-        name: this.tokenSlugs[4],
+        name: this.tokenSlugs[ 4 ],
         supply: 'replenishable',
         fungibility: 'stackable',
         fragmentZones: this.fragmentZones
       },
       batchId: 'unit_fz_batch_0'
-    })
-    this.checkResponse(responses[4], 'testCreateToken.4')
+    } )
+    this.checkResponse( responses[ 4 ], 'testCreateToken.4' )
 
     // --- Tokens for trading
-    client = await this.client(this.secrets[0])
-    for (const tokenSlug of [this.tokenSlugs[5], this.tokenSlugs[6]]) {
-      responses[0] = await client.createToken({
+    client = await this.client( this.secrets[ 0 ] )
+    for ( const tokenSlug of [ this.tokenSlugs[ 5 ], this.tokenSlugs[ 6 ] ] ) {
+      responses[ 0 ] = await client.createToken( {
         token: tokenSlug,
         amount: 1000.000000000000,
         meta: {
@@ -271,8 +271,8 @@ export default class Test {
           decimals: 0,
           icon: 'icon'
         }
-      })
-      this.checkResponse(responses[0], `testCreateToken.${ tokenSlug }`)
+      } )
+      this.checkResponse( responses[ 0 ], `testCreateToken.${ tokenSlug }` )
     }
   }
 
@@ -280,67 +280,67 @@ export default class Test {
    *
    */
   async testCreateWallet () {
-    const client = await this.client(this.secrets[0])
-    const response = await client.createWallet({
-      token: this.tokenSlugs[1]
-    })
-    this.checkResponse(response, 'testCreateWallet')
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.createWallet( {
+      token: this.tokenSlugs[ 1 ]
+    } )
+    this.checkResponse( response, 'testCreateWallet' )
   }
 
   /**
    *
    */
   async testCreateMeta () {
-    const client = await this.client(this.secrets[0])
-    const response = await client.createMeta({
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.createMeta( {
       metaType: 'metaType',
       metaId: 'metaId',
       meta: {
         key1: 'value1',
         key2: 'value2'
       }
-    })
-    this.checkResponse(response, 'testCreateMeta')
+    } )
+    this.checkResponse( response, 'testCreateMeta' )
   }
 
   /**
    *
    */
   async testCreateIdentifier () {
-    const client = await this.client(this.secrets[0])
-    const response = await client.createIdentifier({
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.createIdentifier( {
       type: 'email',
       contact: 'test@test.com',
       code: '1234'
-    })
+    } )
 
-    console.log(' ############### testCreateIdentifier ###############')
-    if (response.reason() !== 'Outdated code') {
-      console.error('Error with response.')
+    console.log( ' ############### testCreateIdentifier ###############' )
+    if ( response.reason() !== 'Outdated code' ) {
+      console.error( 'Error with response.' )
     }
-    this.debug(response)
+    this.debug( response )
   }
 
   /**
    *
    */
   async testRequestTokens () {
-    const client = await this.client(this.secrets[0])
-    let response = await client.requestTokens({
-      token: this.tokenSlugs[1],
+    const client = await this.client( this.secrets[ 0 ] )
+    let response = await client.requestTokens( {
+      token: this.tokenSlugs[ 1 ],
       amount: 10,
-      to: this.secrets[0],
+      to: this.secrets[ 0 ],
       batchId: 'batch_5'
-    })
-    this.checkResponse(response, 'testRequestTokens.1')
+    } )
+    this.checkResponse( response, 'testRequestTokens.1' )
 
-    response = await client.requestTokens({
-      token: this.tokenSlugs[3],
-      units: ['unit_id_10', 'unit_id_11'],
-      to: this.secrets[0],
+    response = await client.requestTokens( {
+      token: this.tokenSlugs[ 3 ],
+      units: [ 'unit_id_10', 'unit_id_11' ],
+      to: this.secrets[ 0 ],
       batchId: 'batch_6'
-    })
-    this.checkResponse(response, 'testRequestTokens.2')
+    } )
+    this.checkResponse( response, 'testRequestTokens.2' )
   }
 
   /**
@@ -348,25 +348,25 @@ export default class Test {
    * @return {Promise<void>}
    */
   async testTransferToken () {
-    const bundleHash = generateBundleHash(this.secrets[1])
+    const bundleHash = generateBundleHash( this.secrets[ 1 ] )
     let response
 
-    const client = await this.client(this.secrets[0])
-    response = await client.transferToken({
+    const client = await this.client( this.secrets[ 0 ] )
+    response = await client.transferToken( {
       bundleHash,
-      token: this.tokenSlugs[0],
+      token: this.tokenSlugs[ 0 ],
       amount: 10,
       batchId: 'batch_1'
-    })
-    this.checkResponse(response, 'testTransferToken')
+    } )
+    this.checkResponse( response, 'testTransferToken' )
 
-    response = await client.transferToken({
+    response = await client.transferToken( {
       bundleHash,
-      token: this.tokenSlugs[2],
-      units: ['unit_id_1', 'unit_id_2'],
+      token: this.tokenSlugs[ 2 ],
+      units: [ 'unit_id_1', 'unit_id_2' ],
       batchId: 'batch_2'
-    })
-    this.checkResponse(response, 'testTransferUnitToken')
+    } )
+    this.checkResponse( response, 'testTransferUnitToken' )
   }
 
   /**
@@ -375,18 +375,18 @@ export default class Test {
   async testBurnToken () {
     let response
 
-    const client = await this.client(this.secrets[0])
-    response = await client.burnTokens({
-      token: this.tokenSlugs[0],
+    const client = await this.client( this.secrets[ 0 ] )
+    response = await client.burnTokens( {
+      token: this.tokenSlugs[ 0 ],
       amount: 10
-    })
-    this.checkResponse(response, 'testBurnToken')
+    } )
+    this.checkResponse( response, 'testBurnToken' )
 
-    response = await client.burnTokens({
-      token: this.tokenSlugs[2],
-      units: ['unit_id_3', 'unit_id_4']
-    })
-    this.checkResponse(response, 'testBurnUnitToken')
+    response = await client.burnTokens( {
+      token: this.tokenSlugs[ 2 ],
+      units: [ 'unit_id_3', 'unit_id_4' ]
+    } )
+    this.checkResponse( response, 'testBurnUnitToken' )
   }
 
   /**
@@ -395,19 +395,19 @@ export default class Test {
   async testReplenishToken () {
     let response
 
-    const client = await this.client(this.secrets[0])
-    response = await client.replenishToken({
-      token: this.tokenSlugs[0],
+    const client = await this.client( this.secrets[ 0 ] )
+    response = await client.replenishToken( {
+      token: this.tokenSlugs[ 0 ],
       amount: 25
-    })
-    this.checkResponse(response, 'testReplenishToken')
+    } )
+    this.checkResponse( response, 'testReplenishToken' )
 
-    response = await client.replenishToken({
-      token: this.tokenSlugs[2],
+    response = await client.replenishToken( {
+      token: this.tokenSlugs[ 2 ],
       amount: 0,
       units: this.replenishTokenUnits
-    })
-    this.checkResponse(response, 'testReplenishUnitToken')
+    } )
+    this.checkResponse( response, 'testReplenishUnitToken' )
   }
 
   /**
@@ -415,49 +415,49 @@ export default class Test {
    * @returns {Promise<void>}
    */
   async testFuseToken () {
-    const tokenSlug = this.tokenSlugs[4]
+    const tokenSlug = this.tokenSlugs[ 4 ]
 
     const recipientSecret = generateSecret()
-    const recipientClient = await this.client(recipientSecret)
+    const recipientClient = await this.client( recipientSecret )
 
-    const fusedTokenUnit = new TokenUnit('fusedTokenUnitId')
+    const fusedTokenUnit = new TokenUnit( 'fusedTokenUnitId' )
 
-    const client = await this.client(this.secrets[0])
-    const response = await client.fuseToken({
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.fuseToken( {
       bundleHash: recipientClient.getBundle(),
       tokenSlug,
       newTokenUnit: fusedTokenUnit,
       fusedTokenUnitIds: this.fusedTokenUnitIds
-    })
-    this.checkResponse(response, 'testFuseToken')
+    } )
+    this.checkResponse( response, 'testFuseToken' )
 
-    const walletRecipient = (await recipientClient.queryBalance({ token: tokenSlug })).payload()
-    const walletRemainder = (await client.queryBalance({ token: tokenSlug })).payload()
+    const walletRecipient = ( await recipientClient.queryBalance( { token: tokenSlug } ) ).payload()
+    const walletRemainder = ( await client.queryBalance( { token: tokenSlug } ) ).payload()
 
     // Check recipient wallet
-    console.assert(walletRecipient.tokenUnits.length, 1)
-    console.assert(walletRecipient.tokenUnits[0].id, 'fusedTokenUnitId')
+    console.assert( walletRecipient.tokenUnits.length, 1 )
+    console.assert( walletRecipient.tokenUnits[ 0 ].id, 'fusedTokenUnitId' )
 
     // --- Check fused token units in the recipient wallet
-    const fusedTokenUnits = walletRecipient.tokenUnits[0].getFusedTokenUnits()
-    console.assert(fusedTokenUnits.length, this.fusedTokenUnitIds.length)
+    const fusedTokenUnits = walletRecipient.tokenUnits[ 0 ].getFusedTokenUnits()
+    console.assert( fusedTokenUnits.length, this.fusedTokenUnitIds.length )
 
     // Get token unit IDs from the fused metadata of the fused token unit
     const dbFusedTokenUnitIds = []
-    fusedTokenUnits.forEach((tokenUnit) => {
-      dbFusedTokenUnitIds.push(tokenUnit[0])
-    })
+    fusedTokenUnits.forEach( ( tokenUnit ) => {
+      dbFusedTokenUnitIds.push( tokenUnit[ 0 ] )
+    } )
     // ---
 
     // --- Check remainder token units
-    console.assert(walletRemainder.tokenUnits.length, 6)
+    console.assert( walletRemainder.tokenUnits.length, 6 )
     const remainderTokenUnitIds = []
-    walletRemainder.tokenUnits.forEach((tokenUnit) => {
-      remainderTokenUnitIds.push(tokenUnit.id)
-    })
+    walletRemainder.tokenUnits.forEach( ( tokenUnit ) => {
+      remainderTokenUnitIds.push( tokenUnit.id )
+    } )
     console.assert(
       remainderTokenUnitIds,
-      ['unit_id_6', 'unit_id_7', 'unit_id_8', 'unit_id_9', 'unit_id_10', 'unit_id_11']
+      [ 'unit_id_6', 'unit_id_7', 'unit_id_8', 'unit_id_9', 'unit_id_10', 'unit_id_11' ]
     )
   }
 
@@ -465,20 +465,20 @@ export default class Test {
    *
    */
   async testClaimShadowWallet () {
-    const client = await this.client(this.secrets[1])
+    const client = await this.client( this.secrets[ 1 ] )
 
     /**
      * @type {ResponseBalance}
      */
-    const balanceResponse = await client.queryBalance({
-      token: this.tokenSlugs[0]
-    })
+    const balanceResponse = await client.queryBalance( {
+      token: this.tokenSlugs[ 0 ]
+    } )
 
-    const response = await client.claimShadowWallet({
-      token: this.tokenSlugs[0],
+    const response = await client.claimShadowWallet( {
+      token: this.tokenSlugs[ 0 ],
       batchId: balanceResponse.payload().batchId
-    })
-    this.checkResponse(response, 'testClaimShadowWallet')
+    } )
+    this.checkResponse( response, 'testClaimShadowWallet' )
   }
 
   /**
@@ -486,79 +486,79 @@ export default class Test {
    * @returns {Promise<void>}
    */
   async testWalletBufferTransactions () {
-    const client = await this.client(this.secrets[0])
+    const client = await this.client( this.secrets[ 0 ] )
 
     // Deposit buffer
     const tradeRates = {}
-    tradeRates[this.tokenSlugs[1]] = 200 / 100
-    tradeRates[this.tokenSlugs[3]] = 200 / 200
-    const response = await client.depositBufferToken({
-      tokenSlug: this.tokenSlugs[5],
+    tradeRates[ this.tokenSlugs[ 1 ] ] = 200 / 100
+    tradeRates[ this.tokenSlugs[ 3 ] ] = 200 / 200
+    const response = await client.depositBufferToken( {
+      tokenSlug: this.tokenSlugs[ 5 ],
       amount: 200,
       tradeRates
-    })
-    this.checkResponse(response, 'testWalletBufferTransactions: depositBufferToken')
+    } )
+    this.checkResponse( response, 'testWalletBufferTransactions: depositBufferToken' )
 
     // Withdraw buffer
-    await client.withdrawBufferToken({
-      tokenSlug: this.tokenSlugs[5],
+    await client.withdrawBufferToken( {
+      tokenSlug: this.tokenSlugs[ 5 ],
       amount: 100
-    })
-    this.checkResponse(response, 'testWalletBufferTransactions: withdrawBufferToken')
+    } )
+    this.checkResponse( response, 'testWalletBufferTransactions: withdrawBufferToken' )
   }
 
   /**
    *
    */
   async testQueryMeta () {
-    const client = await this.client(this.secrets[0])
-    const response = await client.queryMeta({
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.queryMeta( {
       metaType: 'metaType',
       metaId: 'metaId'
-    })
-    this.checkResponse(response, 'testQueryMeta')
+    } )
+    this.checkResponse( response, 'testQueryMeta' )
   }
 
   /**
    *
    */
   async testQueryWallets () {
-    const client = await this.client(this.secrets[0])
-    const response = await client.queryWallets({})
-    this.checkResponse(response, 'testQueryWallets')
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.queryWallets( {} )
+    this.checkResponse( response, 'testQueryWallets' )
   }
 
   /**
    *
    */
   async testQueryBundle () {
-    const client = await this.client(this.secrets[0])
-    const response = await client.queryBundle({})
-    this.checkResponse(response, 'testQueryBundle')
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.queryBundle( {} )
+    this.checkResponse( response, 'testQueryBundle' )
   }
 
   /**
    *
    */
   async testQueryContinuId () {
-    const bundleHash = generateBundleHash(this.secrets[0])
+    const bundleHash = generateBundleHash( this.secrets[ 0 ] )
 
-    const client = await this.client(this.secrets[0])
-    const response = await client.queryContinuId({
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.queryContinuId( {
       bundle: bundleHash
-    })
-    this.checkResponse(response, 'testQueryContinuId')
+    } )
+    this.checkResponse( response, 'testQueryContinuId' )
   }
 
   /**
    * @throws Exception
    */
   async testQueryBalance () {
-    const client = await this.client(this.secrets[0])
-    const response = await client.queryBalance({
-      token: this.tokenSlugs[0]
-    })
-    this.checkResponse(response, 'testQueryBalance')
+    const client = await this.client( this.secrets[ 0 ] )
+    const response = await client.queryBalance( {
+      token: this.tokenSlugs[ 0 ]
+    } )
+    this.checkResponse( response, 'testQueryBalance' )
   }
 
   /**
@@ -568,29 +568,29 @@ export default class Test {
    * @param cellSlug
    * @returns {Promise<*>}
    */
-  async client (secret, cellSlug = 'unit_test') {
+  async client ( secret, cellSlug = 'unit_test' ) {
     // Create new client
-    if (!this.clients[secret]) {
+    if ( !this.clients[ secret ] ) {
       // Create a client
-      this.clients[secret] = new KnishIOClient({
+      this.clients[ secret ] = new KnishIOClient( {
         uri: this.graphqlUrl,
         logging: true
-      })
+      } )
 
       // Auth the client
-      await this.clients[secret]
-        .requestAuthToken({
+      await this.clients[ secret ]
+        .requestAuthToken( {
           secret,
           encrypt: this.encrypt,
           cellSlug
-        })
-      if (!this.clients[secret].getAuthToken()) {
-        console.log('Error with authorize - get an empty response.')
+        } )
+      if ( !this.clients[ secret ].getAuthToken() ) {
+        console.log( 'Error with authorize - get an empty response.' )
       }
     }
 
     // Return the client by secret
-    return this.clients[secret]
+    return this.clients[ secret ]
   }
 
   /**
@@ -598,22 +598,22 @@ export default class Test {
    * @param response
    * @param key
    */
-  checkResponse (response, key) {
-    console.log(` ############### ${ key } ###############`)
+  checkResponse ( response, key ) {
+    console.log( ` ############### ${ key } ###############` )
 
     // Check molecule response
-    if (response instanceof ResponseMolecule) {
-      console.log(response)
+    if ( response instanceof ResponseMolecule ) {
+      console.log( response )
 
-      if (!response.success()) {
-        this.debug(response)
+      if ( !response.success() ) {
+        this.debug( response )
       }
-      console.assert(response.success(), response)
+      console.assert( response.success(), response )
     }
 
     // Default response
     else {
-      this.debug(response)
+      this.debug( response )
     }
   }
 
@@ -621,12 +621,12 @@ export default class Test {
    * Debug output
    * @param response
    */
-  debug (response) {
+  debug ( response ) {
     // Reason data on the top of the output
-    if (response.data && Dot.get(response.data() || {}, 'reason')) {
-      console.log(response.data().reason)
+    if ( response.data && Dot.get( response.data() || {}, 'reason' ) ) {
+      console.log( response.data().reason )
     } else {
-      console.log(response)
+      console.log( response )
     }
   }
 }

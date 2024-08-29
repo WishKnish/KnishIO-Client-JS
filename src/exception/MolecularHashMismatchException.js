@@ -58,8 +58,8 @@ export default class MolecularHashMismatchException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'The molecular hash does not match', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'The molecular hash does not match', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'MolecularHashMismatchException'
   }
 }

@@ -60,11 +60,11 @@ export default class Response {
    * @param {object} json
    * @param {string|null} dataKey
    */
-  constructor ({
+  constructor ( {
     query,
     json,
     dataKey = null
-  }) {
+  } ) {
     this.dataKey = dataKey
     this.errorKey = 'exception'
     this.$__payload = null
@@ -72,14 +72,14 @@ export default class Response {
     this.$__originResponse = json
     this.$__response = json
 
-    if (typeof this.$__response === 'undefined' || this.$__response === null) {
+    if ( typeof this.$__response === 'undefined' || this.$__response === null ) {
       throw new InvalidResponseException()
     }
 
-    if (Dot.has(this.$__response, this.errorKey)) {
-      const error = Dot.get(this.$__response, this.errorKey)
+    if ( Dot.has( this.$__response, this.errorKey ) ) {
+      const error = Dot.get( this.$__response, this.errorKey )
 
-      if (String(error).includes('Unauthenticated')) {
+      if ( String( error ).includes( 'Unauthenticated' ) ) {
         throw new UnauthenticatedException()
       }
 
@@ -99,16 +99,16 @@ export default class Response {
    * @return {*}
    */
   data () {
-    if (!this.dataKey) {
+    if ( !this.dataKey ) {
       return this.response()
     }
 
     // Check key & return custom data from the response
-    if (!Dot.has(this.response(), this.dataKey)) {
+    if ( !Dot.has( this.response(), this.dataKey ) ) {
       throw new InvalidResponseException()
     }
 
-    return Dot.get(this.response(), this.dataKey)
+    return Dot.get( this.response(), this.dataKey )
   }
 
   /**

@@ -59,15 +59,15 @@ export default class ResponseLinkIdentifier extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ({
+  constructor ( {
     query,
     json
-  }) {
-    super({
+  } ) {
+    super( {
       query,
       json,
       dataKey: 'data.LinkIdentifier'
-    })
+    } )
   }
 
   /**
@@ -76,7 +76,7 @@ export default class ResponseLinkIdentifier extends Response {
    * @return {*}
    */
   success () {
-    return Dot.get(this.data(), 'set')
+    return Dot.get( this.data(), 'set' )
   }
 
   /**
@@ -85,6 +85,6 @@ export default class ResponseLinkIdentifier extends Response {
    * @return {*}
    */
   message () {
-    return Dot.get(this.data(), 'message')
+    return Dot.get( this.data(), 'message' )
   }
 }

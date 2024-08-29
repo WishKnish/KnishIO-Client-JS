@@ -58,8 +58,8 @@ export default class NegativeAmountException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Amount cannot be negative!', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Amount cannot be negative!', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'NegativeAmountException'
   }
 }

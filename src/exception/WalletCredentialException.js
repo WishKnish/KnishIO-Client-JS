@@ -58,8 +58,8 @@ export default class WalletCredentialException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Attempting to create a wallet with no credentials (secret or bundle hash)', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Attempting to create a wallet with no credentials (secret or bundle hash)', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'WalletCredentialException'
   }
 }

@@ -56,15 +56,15 @@ export default class MutationWithdrawBufferToken extends MutationProposeMolecule
    * @param recipients
    * @param signingWallet
    */
-  fillMolecule ({
+  fillMolecule ( {
     recipients,
     signingWallet
-  }) {
-    this.$__molecule.initWithdrawBuffer({
+  } ) {
+    this.$__molecule.initWithdrawBuffer( {
       recipients,
       signingWallet
-    })
-    this.$__molecule.sign({})
-    this.$__molecule.check(this.$__molecule.sourceWallet)
+    } )
+    this.$__molecule.sign( {} )
+    this.$__molecule.check( this.$__molecule.sourceWallet )
   }
 }

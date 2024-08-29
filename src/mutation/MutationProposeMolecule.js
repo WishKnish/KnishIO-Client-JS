@@ -55,8 +55,8 @@ export default class MutationProposeMolecule extends Mutation {
    * @param {ApolloClient} apolloClient
    * @param molecule
    */
-  constructor (apolloClient, molecule = null) {
-    super(apolloClient)
+  constructor ( apolloClient, molecule = null ) {
+    super( apolloClient )
     this.$__molecule = molecule
     this.$__remainderWallet = null
     this.$__query = gql`mutation( $molecule: MoleculeInput! ) {
@@ -81,8 +81,8 @@ export default class MutationProposeMolecule extends Mutation {
    * @param {object} variables
    * @return {object}
    */
-  compiledVariables (variables) {
-    const _variables = super.compiledVariables(variables)
+  compiledVariables ( variables ) {
+    const _variables = super.compiledVariables( variables )
 
     return { ..._variables, ...{ molecule: this.molecule() } }
   }
@@ -93,11 +93,11 @@ export default class MutationProposeMolecule extends Mutation {
    * @param {object} json
    * @return {ResponseProposeMolecule}
    */
-  createResponse (json) {
-    return new ResponseProposeMolecule({
+  createResponse ( json ) {
+    return new ResponseProposeMolecule( {
       query: this,
       json
-    })
+    } )
   }
 
   /**
@@ -106,13 +106,13 @@ export default class MutationProposeMolecule extends Mutation {
    * @param {object} variables
    * @return {Promise}
    */
-  async execute ({ variables = null }) {
+  async execute ( { variables = null } ) {
     variables = variables || {}
     variables.molecule = this.molecule()
 
-    return super.execute({
+    return super.execute( {
       variables
-    })
+    } )
   }
 
   /**

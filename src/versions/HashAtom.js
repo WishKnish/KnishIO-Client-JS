@@ -3,16 +3,16 @@ export default class HashAtom {
    *
    * @param {Atom} atom
    */
-  static create (atom) {
+  static create ( atom ) {
     const parameters = {}
 
-    for (const key of Object.keys(atom)) {
-      if (atom.hasOwnProperty(key)) {
-        parameters[key] = atom[key]
+    for ( const key of Object.keys( atom ) ) {
+      if ( atom.hasOwnProperty( key ) ) {
+        parameters[ key ] = atom[ key ]
       }
     }
 
-    return new this(parameters)
+    return new this( parameters )
   }
 
   /**
@@ -20,12 +20,12 @@ export default class HashAtom {
    * @param {Object|Array} object
    * @returns {Object|Array[]}
    */
-  static structure (object) {
-    switch (Object.prototype.toString.call(object)) {
+  static structure ( object ) {
+    switch ( Object.prototype.toString.call( object ) ) {
       case '[object Array]': {
         const result = []
-        for (const key in object) {
-          result.push(HashAtom.isStructure(object[key]) ? HashAtom.structure(object[key]) : object[key])
+        for ( const key in object ) {
+          result.push( HashAtom.isStructure( object[ key ] ) ? HashAtom.structure( object[ key ] ) : object[ key ] )
         }
 
         return result
@@ -33,22 +33,22 @@ export default class HashAtom {
 
       case '[object Object]': {
         const result = []
-        const keys = Object.keys(object).sort((first, second) => {
-          if (first === second) {
+        const keys = Object.keys( object ).sort( ( first, second ) => {
+          if ( first === second ) {
             return 0
           }
-          return (first < second) ? -1 : 1
-        })
+          return ( first < second ) ? -1 : 1
+        } )
 
-        for (const key of keys) {
-          if (object.hasOwnProperty(key)) {
+        for ( const key of keys ) {
+          if ( object.hasOwnProperty( key ) ) {
             const item = {}
-            item[key] = HashAtom.isStructure(object[key]) ? HashAtom.structure(object[key]) : object[key]
-            result.push(item)
+            item[ key ] = HashAtom.isStructure( object[ key ] ) ? HashAtom.structure( object[ key ] ) : object[ key ]
+            result.push( item )
           }
         }
 
-        if (result.length > 0) {
+        if ( result.length > 0 ) {
           return result
         }
 
@@ -64,8 +64,8 @@ export default class HashAtom {
    * @param {*} structure
    * @returns {boolean}
    */
-  static isStructure (structure) {
-    return ['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(structure))
+  static isStructure ( structure ) {
+    return [ '[object Object]', '[object Array]' ].includes( Object.prototype.toString.call( structure ) )
   }
 
   /**
@@ -73,6 +73,6 @@ export default class HashAtom {
    * @returns {Object[]}
    */
   view () {
-    return HashAtom.structure(this)
+    return HashAtom.structure( this )
   }
 }

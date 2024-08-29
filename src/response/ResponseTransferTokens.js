@@ -58,10 +58,10 @@ export default class ResponseTransferTokens extends ResponseProposeMolecule {
    */
   payload () {
     const result = {
-        reason: null,
-        status: null
-      }
-      const data = this.data()
+      reason: null,
+      status: null
+    }
+    const data = this.data()
 
     result.reason = typeof data.reason === 'undefined' ? 'Invalid response from server' : data.reason
     result.status = typeof data.status === 'undefined' ? 'rejected' : data.status

@@ -6,8 +6,8 @@ export default class Decimal {
    * @param {number} value
    * @return {number}
    */
-  static val (value) {
-    if (Math.abs(value * multiplier) < 1) {
+  static val ( value ) {
+    if ( Math.abs( value * multiplier ) < 1 ) {
       return 0.0
     }
 
@@ -20,17 +20,17 @@ export default class Decimal {
    * @param {boolean} debug
    * @return {number}
    */
-  static cmp (value1, value2, debug = false) {
-    const val1 = Decimal.val(value1) * multiplier
-      const val2 = Decimal.val(value2) * multiplier
+  static cmp ( value1, value2, debug = false ) {
+    const val1 = Decimal.val( value1 ) * multiplier
+    const val2 = Decimal.val( value2 ) * multiplier
 
     // Equal
-    if (Math.abs(val1 - val2) < 1) {
+    if ( Math.abs( val1 - val2 ) < 1 ) {
       return 0
     }
 
     // Greater or smaller
-    return (val1 > val2) ? 1 : -1
+    return ( val1 > val2 ) ? 1 : -1
   }
 
   /**
@@ -38,7 +38,7 @@ export default class Decimal {
    * @param {number} value2
    * @return {boolean}
    */
-  static equal (value1, value2) {
-    return (Decimal.cmp(value1, value2) === 0)
+  static equal ( value1, value2 ) {
+    return ( Decimal.cmp( value1, value2 ) === 0 )
   }
 }

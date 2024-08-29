@@ -61,15 +61,15 @@ export default class ResponseAuthorizationGuest extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ({
+  constructor ( {
     query,
     json
-  }) {
-    super({
+  } ) {
+    super( {
       query,
       json,
       dataKey: 'data.AccessToken'
-    })
+    } )
   }
 
   /**
@@ -105,11 +105,11 @@ export default class ResponseAuthorizationGuest extends Response {
    * @param key
    * @return {*}
    */
-  payloadKey (key) {
-    if (!Dot.has(this.payload(), key)) {
-      throw new InvalidResponseException(`ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!`)
+  payloadKey ( key ) {
+    if ( !Dot.has( this.payload(), key ) ) {
+      throw new InvalidResponseException( `ResponseAuthorizationGuest::payloadKey() - '${ key }' key is not found in the payload!` )
     }
-    return Dot.get(this.payload(), key)
+    return Dot.get( this.payload(), key )
   }
 
   /**
@@ -118,7 +118,7 @@ export default class ResponseAuthorizationGuest extends Response {
    * @return {*}
    */
   token () {
-    return this.payloadKey('token')
+    return this.payloadKey( 'token' )
   }
 
   /**
@@ -127,6 +127,6 @@ export default class ResponseAuthorizationGuest extends Response {
    * @return {*}
    */
   time () {
-    return this.payloadKey('time')
+    return this.payloadKey( 'time' )
   }
 }

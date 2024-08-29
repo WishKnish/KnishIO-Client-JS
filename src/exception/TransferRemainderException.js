@@ -58,8 +58,8 @@ export default class TransferRemainderException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Invalid remainder provided', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Invalid remainder provided', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'TransferRemainderException'
   }
 }

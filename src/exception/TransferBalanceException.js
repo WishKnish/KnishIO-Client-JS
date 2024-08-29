@@ -58,8 +58,8 @@ export default class TransferBalanceException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Insufficient balance to make transfer', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Insufficient balance to make transfer', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'TransferBalanceException'
   }
 }

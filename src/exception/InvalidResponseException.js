@@ -58,8 +58,8 @@ export default class InvalidResponseException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'GraphQL did not provide a valid response.', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'GraphQL did not provide a valid response.', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'InvalidResponseException'
   }
 }

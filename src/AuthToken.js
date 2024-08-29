@@ -59,12 +59,12 @@ export default class AuthToken {
    * @param {boolean} encrypt
    * @param {string} pubkey
    */
-  constructor ({
+  constructor ( {
     token,
     expiresAt,
     encrypt,
     pubkey
-  }) {
+  } ) {
     this.$__token = token
     this.$__expiresAt = expiresAt
     this.$__pubkey = pubkey
@@ -77,9 +77,9 @@ export default class AuthToken {
    * @param wallet
    * @returns {AuthToken}
    */
-  static create (data, wallet) {
-    const authToken = new AuthToken(data)
-    authToken.setWallet(wallet)
+  static create ( data, wallet ) {
+    const authToken = new AuthToken( data )
+    authToken.setWallet( wallet )
     return authToken
   }
 
@@ -89,26 +89,26 @@ export default class AuthToken {
    * @param {string} secret
    * @return {AuthToken}
    */
-  static restore (snapshot, secret) {
-    const wallet = new Wallet({
+  static restore ( snapshot, secret ) {
+    const wallet = new Wallet( {
       secret,
       token: 'AUTH',
       position: snapshot.wallet.position,
       characters: snapshot.wallet.characters
-    })
-    return AuthToken.create({
+    } )
+    return AuthToken.create( {
       token: snapshot.token,
       expiresAt: snapshot.expiresAt,
       pubkey: snapshot.pubkey,
       encrypt: snapshot.encrypt
-    }, wallet)
+    }, wallet )
   }
 
   /**
    *
    * @param {Wallet} wallet
    */
-  setWallet (wallet) {
+  setWallet ( wallet ) {
     this.$__wallet = wallet
   }
 
@@ -158,7 +158,7 @@ export default class AuthToken {
    * @return {number}
    */
   getExpireInterval () {
-    return (this.$__expiresAt * 1000) - Date.now()
+    return ( this.$__expiresAt * 1000 ) - Date.now()
   }
 
   /**

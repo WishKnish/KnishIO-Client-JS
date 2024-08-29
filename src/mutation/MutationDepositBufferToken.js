@@ -57,15 +57,15 @@ export default class MutationDepositBufferToken extends MutationProposeMolecule 
    * @param amount
    * @param tradeRates
    */
-  fillMolecule ({
+  fillMolecule ( {
     amount,
     tradeRates
-  }) {
-    this.$__molecule.initDepositBuffer({
+  } ) {
+    this.$__molecule.initDepositBuffer( {
       amount,
       tradeRates
-    })
-    this.$__molecule.sign({})
-    this.$__molecule.check(this.$__molecule.sourceWallet)
+    } )
+    this.$__molecule.sign( {} )
+    this.$__molecule.check( this.$__molecule.sourceWallet )
   }
 }

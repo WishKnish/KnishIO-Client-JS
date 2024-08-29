@@ -58,8 +58,8 @@ export default class StackableUnitDecimalsException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Stackable tokens with unit IDs cannot have decimal places!', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Stackable tokens with unit IDs cannot have decimal places!', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'StackableUnitDecimalsException'
   }
 }

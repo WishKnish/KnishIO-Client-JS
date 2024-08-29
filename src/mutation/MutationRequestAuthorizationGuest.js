@@ -55,8 +55,8 @@ export default class MutationRequestAuthorizationGuest extends Mutation {
    *
    * @param apolloClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor ( apolloClient ) {
+    super( apolloClient )
     this.$__query = gql`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
       AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {
         token,
@@ -72,10 +72,10 @@ export default class MutationRequestAuthorizationGuest extends Mutation {
    * @param {object} json
    * @return {ResponseRequestAuthorizationGuest}
    */
-  createResponse (json) {
-    return new ResponseRequestAuthorizationGuest({
+  createResponse ( json ) {
+    return new ResponseRequestAuthorizationGuest( {
       query: this,
       json
-    })
+    } )
   }
 }

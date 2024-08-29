@@ -58,8 +58,8 @@ export default class AuthorizationRejectedException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor (message = 'Authorization attempt rejected by ledger.', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
+  constructor ( message = 'Authorization attempt rejected by ledger.', fileName = null, lineNumber = null ) {
+    super( message, fileName, lineNumber )
     this.name = 'AuthorizationRejectedException'
   }
 }
