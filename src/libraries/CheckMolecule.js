@@ -1,3 +1,50 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+ */
 import AtomIndexException from './../exception/AtomIndexException'
 import AtomsMissingException from './../exception/AtomsMissingException'
 import MolecularHashMismatchException from './../exception/MolecularHashMismatchException'
@@ -22,7 +69,7 @@ import {
   base64ToHex,
   chunkSubstr
 } from './strings'
-import jsSHA from 'jssha'
+import JsSHA from 'jssha'
 import Dot from './../libraries/Dot'
 
 /**
@@ -225,14 +272,14 @@ export default class CheckMolecule {
 
       if (metaType === 'wallet') {
         for (const key of ['position', 'bundle']) {
-          if (!meta.hasOwnProperty(key) || !meta[key]) {
+          if (!Object.prototype.hasOwnProperty.call(meta, key) || !meta[key]) {
             throw new MetaMissingException(`Check::isotopeT() - Required meta field "${ key }" is missing!`)
           }
         }
       }
 
       for (const key of ['token']) {
-        if (!meta.hasOwnProperty(key) || !meta[key]) {
+        if (!Object.prototype.hasOwnProperty.call(meta, key) || !meta[key]) {
           throw new MetaMissingException(`Check::isotopeT() - Required meta field "${ key }" is missing!`)
         }
       }
@@ -317,7 +364,7 @@ export default class CheckMolecule {
     let value = 0
 
     for (const index in this.molecule.atoms) {
-      if (this.molecule.atoms.hasOwnProperty(index)) {
+      if (Object.prototype.hasOwnProperty.call(this.molecule.atoms, index)) {
         const vAtom = this.molecule.atoms[index]
 
         // Not V? Next...
@@ -379,8 +426,8 @@ export default class CheckMolecule {
       if (remainder !== sum) {
         throw new TransferRemainderException()
       }
-    } // No senderWallet, but have a remainder?
-    else if (value !== 0) {
+    } else if (value !== 0) {
+      // No senderWallet, but have a remainder?
       throw new TransferRemainderException()
     }
 
@@ -442,19 +489,19 @@ export default class CheckMolecule {
       let workingChunk = otsChunks[index]
 
       for (let iterationCount = 0, condition = 8 + normalizedHash[index]; iterationCount < condition; iterationCount++) {
-        workingChunk = (new jsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
+        workingChunk = (new JsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
       }
 
       keyFragments += workingChunk
     }
 
     // Absorb the hashed Kk into the sponge to receive the digest Dk
-    const digestSponge = new jsSHA('SHAKE256', 'TEXT')
+    const digestSponge = new JsSHA('SHAKE256', 'TEXT')
     digestSponge.update(keyFragments)
     const digest = digestSponge.getHash('HEX', { outputLen: 8192 })
 
     // Squeeze the sponge to retrieve a 128 byte (64 character) string that should match the sender’s wallet address
-    const addressSponge = new jsSHA('SHAKE256', 'TEXT')
+    const addressSponge = new JsSHA('SHAKE256', 'TEXT')
     addressSponge.update(digest)
     const address = addressSponge.getHash('HEX', { outputLen: 256 })
 

@@ -60,7 +60,7 @@ export default class Meta {
     const target = []
 
     for (const property in meta) {
-      if (meta.hasOwnProperty(property) && meta[property] !== null) {
+      if (Object.prototype.hasOwnProperty.call(meta, property) && meta[property] !== null) {
         target.push({
           key: property,
           value: (meta[property]).toString()

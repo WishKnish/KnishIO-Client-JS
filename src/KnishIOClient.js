@@ -302,9 +302,8 @@ export default class KnishIOClient {
         }).then(() => {
           // Success
         })
-      }
-      // Use stored authorization data
-      else {
+      } else {
+        // Use stored authorization data
         this.$__client.setAuthData(authTokenObject.getAuthData())
       }
     }
@@ -468,11 +467,11 @@ export default class KnishIOClient {
   /**
    * Builds a new instance of the provided Query class
    *
-   * @param queryClass
+   * @param QueryClass
    * @return {*}
    */
-  createQuery (queryClass) {
-    return new queryClass(this.client())
+  createQuery (QueryClass) {
+    return new QueryClass(this.client())
   }
 
   /**
@@ -2073,10 +2072,8 @@ export default class KnishIOClient {
         secret,
         encrypt
       })
-    }
-
-    // Guest
-    else {
+    } else {
+      // Guest
       response = await this.requestGuestAuthToken({
         cellSlug,
         encrypt

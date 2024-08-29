@@ -48,7 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Atom from './Atom'
 import AtomMeta from './AtomMeta'
 import Wallet from './Wallet'
-import jsSHA from 'jssha'
+import JsSHA from 'jssha'
 import {
   chunkSubstr,
   hexToBase64
@@ -79,7 +79,7 @@ export default class Molecule {
    * @param {Wallet|null} sourceWallet
    * @param {Wallet|null} remainderWallet
    * @param {string|null} cellSlug
-   * @param {string|null} version
+   * @param {string|number|null} version
    */
   constructor ({
     secret = null,
@@ -94,7 +94,7 @@ export default class Molecule {
     this.bundle = bundle
     this.sourceWallet = sourceWallet
     this.atoms = []
-    if (version !== null && versions.hasOwnProperty(version)) {
+    if (version !== null && Object.prototype.hasOwnProperty.call(versions, version)) {
       this.version = String(version)
     }
 
@@ -171,7 +171,7 @@ export default class Molecule {
     }
 
     for (const property in target) {
-      if (target.hasOwnProperty(property) && !properties.includes(property)) {
+      if (Object.prototype.hasOwnProperty.call(target, property) && !properties.includes(property)) {
         delete target[property]
       }
     }
@@ -243,14 +243,14 @@ export default class Molecule {
   static normalize (mappedHashArray) {
     let total = mappedHashArray.reduce((total, num) => total + num)
 
-    const total_condition = total < 0
+    const totalCondition = total < 0
 
     while (total < 0 || total > 0) {
       for (const index of Object.keys(mappedHashArray)) {
-        const condition = total_condition ? mappedHashArray[index] < 8 : mappedHashArray[index] > -8
+        const condition = totalCondition ? mappedHashArray[index] < 8 : mappedHashArray[index] > -8
 
         if (condition) {
-          const process = total_condition ? [++mappedHashArray[index], ++total] : [--mappedHashArray[index], --total]
+          const process = totalCondition ? [++mappedHashArray[index], ++total] : [--mappedHashArray[index], --total]
 
           if (total === 0) {
             break
@@ -471,10 +471,8 @@ export default class Molecule {
       // Override first atom's token units to replenish values
       this.sourceWallet.tokenUnits = units
       this.sourceWallet.balance = this.sourceWallet.tokenUnits.length
-    }
-
-    // Update wallet's balances
-    else {
+    } else {
+      // Update wallet's balances
       this.remainderWallet.balance = this.sourceWallet.balance + amount
       this.sourceWallet.balance = amount
     }
@@ -969,7 +967,7 @@ export default class Molecule {
       let workingChunk = keyChunks[index]
 
       for (let iterationCount = 0, condition = 8 - normalizedHash[index]; iterationCount < condition; iterationCount++) {
-        workingChunk = (new jsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
+        workingChunk = (new JsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
       }
       signatureFragments += workingChunk
     }
@@ -1009,7 +1007,7 @@ export default class Molecule {
   toJSON () {
     const clone = deepCloning(this)
     for (const key of ['remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin', 'version']) {
-      if (clone.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(clone, key)) {
         delete clone[key]
       }
     }

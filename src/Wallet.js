@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import jsSHA from 'jssha'
+import JsSHA from 'jssha'
 import {
   chunkSubstr,
   isHex,
@@ -218,7 +218,7 @@ export default class Wallet {
     const indexedKey = bigIntSecret + BigInt(`0x${ position }`)
 
     // Hashing the indexed key to produce the intermediate key
-    const intermediateKeySponge = new jsSHA('SHAKE256', 'TEXT')
+    const intermediateKeySponge = new JsSHA('SHAKE256', 'TEXT')
 
     intermediateKeySponge.update(indexedKey.toString(16))
 
@@ -227,7 +227,7 @@ export default class Wallet {
     }
 
     // Hashing the intermediate key to produce the private key
-    const privateKeySponge = new jsSHA('SHAKE256', 'TEXT')
+    const privateKeySponge = new JsSHA('SHAKE256', 'TEXT')
     privateKeySponge.update(intermediateKeySponge.getHash('HEX', { outputLen: 8192 }))
     return privateKeySponge.getHash('HEX', { outputLen: 8192 })
   }
@@ -242,12 +242,12 @@ export default class Wallet {
     // Subdivide private key into 16 fragments of 128 characters each
     const keyFragments = chunkSubstr(key, 128)
     // Generating wallet digest
-    const digestSponge = new jsSHA('SHAKE256', 'TEXT')
+    const digestSponge = new JsSHA('SHAKE256', 'TEXT')
 
     for (const index in keyFragments) {
       let workingFragment = keyFragments[index]
       for (let fragmentCount = 1; fragmentCount <= 16; fragmentCount++) {
-        const workingSponge = new jsSHA('SHAKE256', 'TEXT')
+        const workingSponge = new JsSHA('SHAKE256', 'TEXT')
         workingSponge.update(workingFragment)
         workingFragment = workingSponge.getHash('HEX', { outputLen: 512 })
       }
@@ -256,7 +256,7 @@ export default class Wallet {
     }
 
     // Producing wallet address
-    const outputSponge = new jsSHA('SHAKE256', 'TEXT')
+    const outputSponge = new JsSHA('SHAKE256', 'TEXT')
     outputSponge.update(digestSponge.getHash('HEX', { outputLen: 8192 }))
     return outputSponge.getHash('HEX', { outputLen: 256 })
   }

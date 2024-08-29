@@ -609,10 +609,8 @@ export default class Test {
         this.debug(response)
       }
       console.assert(response.success(), response)
-    }
-
-    // Default response
-    else {
+    } else {
+      // Default response
       this.debug(response)
     }
   }

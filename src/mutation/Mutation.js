@@ -52,14 +52,6 @@ import Query from '../query/Query'
  */
 export default class Mutation extends Query {
   /**
-   *
-   * @param {ApolloClient} apolloClient
-   */
-  constructor (apolloClient) {
-    super(apolloClient)
-  }
-
-  /**
    * Creates a new Request for the given parameters
    *
    * @param {{}} variables

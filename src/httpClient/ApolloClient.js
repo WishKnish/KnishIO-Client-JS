@@ -111,7 +111,7 @@ export default class ApolloClient {
    * @param {string} operationName
    */
   unsubscribe (operationName) {
-    if (this.$__subscribers.hasOwnProperty(operationName)) {
+    if (Object.prototype.hasOwnProperty.call(this.$__subscribers, operationName)) {
       this.$__subscribers[operationName].unsubscribe()
       this.$__client.unsubscribeFromChannel(operationName)
       delete this.$__subscribers[operationName]

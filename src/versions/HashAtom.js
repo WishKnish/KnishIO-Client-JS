@@ -7,7 +7,7 @@ export default class HashAtom {
     const parameters = {}
 
     for (const key of Object.keys(atom)) {
-      if (atom.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(atom, key)) {
         parameters[key] = atom[key]
       }
     }
@@ -41,7 +41,7 @@ export default class HashAtom {
         })
 
         for (const key of keys) {
-          if (object.hasOwnProperty(key)) {
+          if (Object.prototype.hasOwnProperty.call(object, key)) {
             const item = {}
             item[key] = HashAtom.isStructure(object[key]) ? HashAtom.structure(object[key]) : object[key]
             result.push(item)

@@ -144,5 +144,5 @@ export function isHex (str) {
  * @return {boolean}
  */
 export function isNumeric (str) {
-  return (typeof (str) === 'number' || typeof (str) === 'string' && str.trim() !== '') && !isNaN(str)
+  return (typeof (str) === 'number' || (typeof (str) === 'string' && str.trim() !== '')) && !isNaN(str)
 }

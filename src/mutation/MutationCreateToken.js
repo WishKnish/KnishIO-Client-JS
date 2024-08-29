@@ -52,6 +52,11 @@ import ResponseCreateToken from '../response/ResponseCreateToken'
  * Query for creating new Tokens
  */
 export default class MutationCreateToken extends MutationProposeMolecule {
+  /**
+   * @param {Wallet|null} recipientWallet
+   * @param {number|null} amount
+   * @param {object|null} meta
+   */
   fillMolecule ({
     recipientWallet,
     amount,

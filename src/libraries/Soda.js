@@ -1,10 +1,57 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              (((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+ */
 import BaseX from './BaseX'
 import { box } from 'tweetnacl'
 import {
   open,
   seal
 } from 'tweetnacl-sealedbox-js'
-import jsSHA from 'jssha'
+import JsSHA from 'jssha'
 
 export default class Soda {
   /**
@@ -60,7 +107,7 @@ export default class Soda {
    * @return {string}
    */
   generatePrivateKey (key) {
-    const sponge = new jsSHA('SHAKE256', 'TEXT')
+    const sponge = new JsSHA('SHAKE256', 'TEXT')
     sponge.update(key)
     const digest = sponge.getHash('HEX', { outputLen: box.secretKeyLength * 8 })
 
@@ -88,7 +135,7 @@ export default class Soda {
    * @return {string}
    */
   shortHash (key) {
-    const sponge = new jsSHA('SHAKE256', 'TEXT')
+    const sponge = new JsSHA('SHAKE256', 'TEXT')
     sponge.update(key)
     const digest = sponge.getHash('HEX', { outputLen: 64 })
 

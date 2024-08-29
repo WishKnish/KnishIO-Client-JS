@@ -296,10 +296,8 @@ export default class TestTokenUnit {
         this.debug(response)
       }
       console.assert(response.success(), response)
-    }
-
-    // Default response
-    else {
+    } else {
+      // Default response
       this.debug(response)
     }
   }

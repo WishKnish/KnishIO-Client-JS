@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import jsSHA from 'jssha'
+import JsSHA from 'jssha'
 import { charsetBaseConvert } from './libraries/strings'
 import Meta from './Meta'
 import AtomMeta from './AtomMeta'
@@ -100,7 +100,7 @@ export default class Atom {
     this.index = index
     this.otsFragment = otsFragment
     this.createdAt = String(+new Date())
-    if (version !== null && versions.hasOwnProperty(version)) {
+    if (version !== null && Object.prototype.hasOwnProperty.call(versions, version)) {
       this.version = String(version)
     }
   }
@@ -195,7 +195,7 @@ export default class Atom {
     const properties = Object.keys(new Atom({}))
 
     for (const property in target) {
-      if (target.hasOwnProperty(property) && !properties.includes(property)) {
+      if (Object.prototype.hasOwnProperty.call(target, property) && !properties.includes(property)) {
         delete target[property]
       }
     }
@@ -215,7 +215,7 @@ export default class Atom {
     atoms,
     output = 'base17'
   }) {
-    const molecularSponge = new jsSHA('SHAKE256', 'TEXT')
+    const molecularSponge = new JsSHA('SHAKE256', 'TEXT')
     const atomList = Atom.sortAtoms(atoms)
 
     if (atomList.length === 0) {
@@ -226,10 +226,11 @@ export default class Atom {
       if (!(atom instanceof Atom)) {
         throw new AtomsMissingException()
       }
+      return atom
     })
 
     // Hashing each atom in the molecule to produce a molecular hash
-    if (atomList.every(atom => atom.version && versions.hasOwnProperty(atom.version))) {
+    if (atomList.every(atom => atom.version && Object.prototype.hasOwnProperty.call(versions, atom.version))) {
       molecularSponge.update(JSON.stringify(atomList.map(atom => versions[atom.version].create(atom).view())))
     } else {
       const numberOfAtoms = String(atoms.length)
@@ -317,9 +318,8 @@ export default class Atom {
             hashableValues.push(String(meta.value))
           }
         }
-      }
-      // Default value
-      else {
+      } else {
+        // Default value
         hashableValues.push(value === null ? '' : String(value))
       }
     }
