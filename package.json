@@ -38,7 +38,7 @@
     "graphql"
   ],
   "dependencies": {
-    "@apollo/client": "^3.5.10",
+    "@apollo/client": "^3.11.5",
     "@thumbmarkjs/thumbmarkjs": "^0.14.4",
     "base-x": "^4.0.0",
     "buffer": "^6.0.3",
