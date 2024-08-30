@@ -93,7 +93,7 @@ export default class Mutation extends Query {
       return this.$__response
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log('Mutation was cancelled')
+        this.knishIOClient.log('warn', 'Mutation was cancelled')
         // You might want to create a custom response for cancelled mutations
         return new Response({
           query: this,

@@ -53,8 +53,13 @@ import { gql } from '@apollo/client/core'
  * Queries the node for the next wallet to sign with for ContinuID
  */
 export default class QueryContinuId extends Query {
-  constructor (apolloClient) {
-    super(apolloClient)
+  /**
+   * @param {ApolloClient} apolloClient
+   * @param {KnishIOClient} knishIOClient
+   */
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
+
     this.$__query = gql`query ($bundle: String!) {
       ContinuId(bundle: $bundle) {
         address,

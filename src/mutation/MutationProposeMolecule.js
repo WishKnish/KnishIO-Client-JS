@@ -51,12 +51,13 @@ import { gql } from '@apollo/client/core'
 
 export default class MutationProposeMolecule extends Mutation {
   /**
-   *
    * @param {ApolloClient} apolloClient
+   * @param {KnishIOClient} knishIOClient
    * @param molecule
    */
-  constructor (apolloClient, molecule = null) {
-    super(apolloClient)
+  constructor (apolloClient, knishIOClient, molecule) {
+    super(apolloClient, knishIOClient)
+
     this.$__molecule = molecule
     this.$__remainderWallet = null
     this.$__query = gql`mutation( $molecule: MoleculeInput! ) {

@@ -51,12 +51,11 @@ import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom'
 
 export default class QueryMetaTypeViaAtom extends Query {
   /**
-   * Class constructor
-   *
-   * @param apolloClient
+   * @param {ApolloClient} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
 
     this.$__query = gql`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!] ) {
       MetaTypeViaAtom(

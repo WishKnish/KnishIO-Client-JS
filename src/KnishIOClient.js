@@ -166,9 +166,7 @@ export default class KnishIOClient {
       this.$__authTokenObjects[url] = null
     }
 
-    if (this.$__logging) {
-      console.info(`KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...`)
-    }
+    this.log('info', `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...`)
 
     this.reset()
     this.$__client = client || new ApolloClient({
@@ -204,9 +202,7 @@ export default class KnishIOClient {
     if (this.$__encrypt === encrypt) {
       return false
     }
-    if (this.$__logging) {
-      console.info(`KnishIOClient::switchEncryption() - Forcing encryption ${ encrypt ? 'on' : 'off' } to match node...`)
-    }
+    this.log('info', `KnishIOClient::switchEncryption() - Forcing encryption ${ encrypt ? 'on' : 'off' } to match node...`)
 
     // Set encryption
     this.$__encrypt = encrypt
@@ -218,9 +214,7 @@ export default class KnishIOClient {
    * De-initializes the Knish.IO client session so that a new session can replace it
    */
   deinitialize () {
-    if (this.$__logging) {
-      console.info('KnishIOClient::deinitialize() - Clearing the Knish.IO client session...')
-    }
+    this.log('info', 'KnishIOClient::deinitialize() - Clearing the Knish.IO client session...')
     this.reset()
   }
 
@@ -327,7 +321,18 @@ export default class KnishIOClient {
    */
   setSecret (secret) {
     this.$__secret = secret
-    this.$__bundle = generateBundleHash(secret, 'setSecret')
+    this.$__bundle = this.hashSecret(secret, 'setSecret')
+  }
+
+  /**
+   * Hashes the user secret to produce a bundle hash
+   * @param {string} secret
+   * @param {string|null} source
+   * @returns {string}
+   */
+  hashSecret (secret, source = null) {
+    console.info(`KnishIOClient::hashSecret(${ source ? `source: ${ source }` : '' }) - Computing wallet bundle from secret...`)
+    return generateBundleHash(secret)
   }
 
   /**
@@ -425,9 +430,7 @@ export default class KnishIOClient {
     sourceWallet = null,
     remainderWallet = null
   }) {
-    if (this.$__logging) {
-      console.info('KnishIOClient::createMolecule() - Creating a new molecule...')
-    }
+    this.log('info', 'KnishIOClient::createMolecule() - Creating a new molecule...')
 
     secret = secret || this.getSecret()
     bundle = bundle || this.getBundle()
@@ -472,7 +475,7 @@ export default class KnishIOClient {
    * @return {*}
    */
   createQuery (QueryClass) {
-    return new QueryClass(this.client())
+    return new QueryClass(this.client(), this)
   }
 
   /**
@@ -495,14 +498,12 @@ export default class KnishIOClient {
     mutationClass,
     molecule = null
   }) {
-    if (this.$__logging) {
-      console.info(`KnishIOClient::createMoleculeQuery() - Creating a new ${ mutationClass.name } query...`)
-    }
+    this.log('info', `KnishIOClient::createMoleculeQuery() - Creating a new ${ mutationClass.name } query...`)
 
     // If you don't supply the molecule, we'll generate one for you
     const _molecule = molecule || await this.createMolecule({})
 
-    const mutation = new mutationClass(this.client(), _molecule)
+    const mutation = new mutationClass(this.client(), this, _molecule)
 
     if (!(mutation instanceof MutationProposeMolecule)) {
       throw new CodeException(`${ this.constructor.name }::createMoleculeMutation() - This method only accepts MutationProposeMolecule!`)
@@ -522,7 +523,7 @@ export default class KnishIOClient {
   async executeQuery (query, variables = null) {
     // Check and refresh authorization token if needed
     if (this.$__authToken && this.$__authToken.isExpired()) {
-      console.info('KnishIOClient::executeQuery() - Access token is expired. Getting new one...')
+      this.log('info', 'KnishIOClient::executeQuery() - Access token is expired. Getting new one...')
       await this.requestAuthToken({
         secret: this.$__secret,
         cellSlug: this.$__cellSlug,
@@ -552,7 +553,7 @@ export default class KnishIOClient {
       return result
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log('Query was cancelled')
+        this.log('warn', 'Query was cancelled')
       } else {
         throw error
       }
@@ -773,9 +774,7 @@ export default class KnishIOClient {
     keys = null,
     atomValues = null
   }) {
-    if (this.$__logging) {
-      console.info(`KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...`)
-    }
+    this.log('info', `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...`)
 
     let query
     let variables
@@ -833,12 +832,8 @@ export default class KnishIOClient {
   async queryBatch ({
     batchId
   }) {
-    if (this.$__logging) {
-      console.info(`KnishIOClient::queryBatch() - Querying cascading meta instances for batchId: ${ batchId }...`)
-    }
-
+    this.log('info', `KnishIOClient::queryBatch() - Querying cascading meta instances for batchId: ${ batchId }...`)
     const query = this.createQuery(QueryBatch)
-
     return await this.executeQuery(query, {
       batchId
     })
@@ -853,9 +848,7 @@ export default class KnishIOClient {
   async queryBatchHistory ({
     batchId
   }) {
-    if (this.$__logging) {
-      console.info(`KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${ batchId }...`)
-    }
+    this.log('info', `KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${ batchId }...`)
 
     const query = this.createQuery(QueryBatchHistory)
 
@@ -931,9 +924,7 @@ export default class KnishIOClient {
       offset: 1
     }
   }) {
-    if (this.$__logging) {
-      console.info('KnishIOClient::queryAtom() - Querying atom instances')
-    }
+    this.log('info', 'KnishIOClient::queryAtom() - Querying atom instances')
 
     /** @type QueryAtom */
     const query = this.createQuery(QueryAtom)
@@ -1349,9 +1340,7 @@ export default class KnishIOClient {
     token = null,
     unspent = true
   }) {
-    if (this.$__logging) {
-      console.info(`KnishIOClient::queryWallets() - Querying wallets${ bundle ? ` for ${ bundle }` : '' }...`)
-    }
+    this.log('info', `KnishIOClient::queryWallets() - Querying wallets${ bundle ? ` for ${ bundle }` : '' }...`)
 
     /**
      * @type {QueryWalletList}
@@ -1382,9 +1371,7 @@ export default class KnishIOClient {
     fields = null,
     raw = false
   }) {
-    if (this.$__logging) {
-      console.info(`KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundle ? ` for ${ bundle }` : '' }...`)
-    }
+    this.log('info', `KnishIOClient::queryBundle() - Querying wallet bundle metadata${ bundle ? ` for ${ bundle }` : '' }...`)
 
     // Bundle default init & to array convertion
     if (!bundle) {
@@ -2007,7 +1994,7 @@ export default class KnishIOClient {
     /**
      * @type {ResponseRequestAuthorizationGuest}
      */
-    const response = await query.execute({variables})
+    const response = await query.execute({ variables })
 
     // Did the authorization molecule get accepted?
     if (response.success()) {
@@ -2089,9 +2076,7 @@ export default class KnishIOClient {
   }) {
     // SDK versions 2 and below do not utilize an authorization token
     if (this.$__serverSdkVersion < 3) {
-      if (this.$__logging) {
-        console.warn('KnishIOClient::authorize() - Server SDK version does not require an authorization...')
-      }
+      this.log('warn', 'KnishIOClient::authorize() - Server SDK version does not require an authorization...')
       return null
     }
 
@@ -2121,9 +2106,7 @@ export default class KnishIOClient {
     }
 
     // Set auth token
-    if (this.$__logging) {
-      console.info(`KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.getToken() }...`)
-    }
+    this.log('info', `KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.getToken() }...`)
 
     // Switch encryption mode if it has been changed
     this.switchEncryption(encrypt)
@@ -2143,9 +2126,7 @@ export default class KnishIOClient {
   setAuthToken (authToken) {
     // An empty auth token
     if (!authToken) {
-      if (this.$__logging) {
-        console.info('KnishIOClient::setAuthToken() - authToken object is empty.')
-      }
+      this.log('info', 'KnishIOClient::setAuthToken() - authToken object is empty.')
       return
     }
 
@@ -2166,5 +2147,28 @@ export default class KnishIOClient {
    */
   getAuthToken () {
     return this.$__authToken
+  }
+
+  /**
+   * Writes the specified message to the console.
+   * @param {string} level
+   * @param {string} message
+   */
+  log (level, message) {
+    if (this.$__logging) {
+      switch (level) {
+        case 'info':
+          console.info(message)
+          break
+        case 'warn':
+          console.warn(message)
+          break
+        case 'error':
+          console.error(message)
+          break
+        default:
+          console.log(message)
+      }
+    }
   }
 }

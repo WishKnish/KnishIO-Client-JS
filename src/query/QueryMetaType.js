@@ -54,12 +54,11 @@ import { gql } from '@apollo/client/core'
  */
 export default class QueryMetaType extends Query {
   /**
-   * Class constructor
-   *
-   * @param apolloClient
+   * @param {ApolloClient} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
 
     this.$__query = gql`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean, $queryArgs: QueryArgs, $countBy: String ) {
       MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas, queryArgs: $queryArgs, countBy: $countBy ) {

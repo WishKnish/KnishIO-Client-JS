@@ -54,12 +54,11 @@ import ResponseBalance from '../response/ResponseBalance'
  */
 export default class QueryBalance extends Query {
   /**
-   * Class constructor
-   *
-   * @param apolloClient
+   * @param {ApolloClient} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
 
     this.$__query = gql`query( $address: String, $bundleHash: String, $type: String, $token: String, $position: String ) {
       Balance( address: $address, bundleHash: $bundleHash, type: $type, token: $token, position: $position ) {

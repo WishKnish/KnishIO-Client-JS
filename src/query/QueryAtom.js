@@ -54,12 +54,11 @@ import ResponseAtom from '../response/ResponseAtom'
  */
 export default class QueryAtom extends Query {
   /**
-   * Class constructor
-   *
-   * @param apolloClient
+   * @param {ApolloClient} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
 
     this.$__query = gql`query(
       $molecularHashes: [String!],

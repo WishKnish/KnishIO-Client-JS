@@ -54,12 +54,11 @@ import { gql } from '@apollo/client/core'
  */
 export default class QueryActiveSession extends Query {
   /**
-   * Class constructor
-   *
-   * @param httpClient
+   * @param {ApolloClient} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (httpClient) {
-    super(httpClient)
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
 
     this.$__query = gql`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
       ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {

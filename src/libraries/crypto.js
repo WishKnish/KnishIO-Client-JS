@@ -56,8 +56,7 @@ import JsSHA from 'jssha'
  * @return {string|*}
  */
 export function generateSecret (seed = null, length = 2048) {
-  console.info(`Crypto::generateSecret() - Computing new secret${ seed ? ' from existing seed' : '' }...`)
-
+  // console.info(`Crypto::generateSecret() - Computing new secret${ seed ? ' from existing seed' : '' }...`)
   if (seed) {
     const sponge = new JsSHA('SHAKE256', 'TEXT')
     sponge.update(seed)
@@ -75,8 +74,6 @@ export function generateSecret (seed = null, length = 2048) {
  * @return {string}
  */
 export function generateBundleHash (secret, source = null) {
-  console.info(`Crypto::generateBundleHash(${ source ? `source: ${ source }` : '' }) - Computing wallet bundle from secret...`)
-
   const sponge = new JsSHA('SHAKE256', 'TEXT')
   sponge.update(secret)
   return sponge.getHash('HEX', { outputLen: 256 })
