@@ -45,10 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { gql } from '@apollo/client/core';
-import Mutation from '../mutation/Mutation';
-import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthorizationGuest';
-
+import { gql } from '@apollo/client/core'
+import Mutation from '../mutation/Mutation'
+import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthorizationGuest'
 
 export default class MutationRequestAuthorizationGuest extends Mutation {
   /**
@@ -56,17 +55,16 @@ export default class MutationRequestAuthorizationGuest extends Mutation {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__query = gql`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
       AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {
         token,
         pubkey,
         expiresAt
       }
-    }`;
+    }`
   }
-
 
   /**
    * Returns a Response object
@@ -74,11 +72,10 @@ export default class MutationRequestAuthorizationGuest extends Mutation {
    * @param {object} json
    * @return {ResponseRequestAuthorizationGuest}
    */
-  createResponse ( json ) {
-    return new ResponseRequestAuthorizationGuest( {
+  createResponse (json) {
+    return new ResponseRequestAuthorizationGuest({
       query: this,
       json
-    } );
+    })
   }
-
 }

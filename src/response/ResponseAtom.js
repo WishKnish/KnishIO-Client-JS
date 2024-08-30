@@ -46,29 +46,28 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Response from './Response';
-import Query from '../query/Query';
+import Query from '../query/Query'
+import Response from './Response'
 
 /**
  * Response for MetaType Query
  */
 export default class ResponseAtom extends Response {
-
   /**
    * Class constructor
    *
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.Atom'
-    } );
+    })
   }
 
   /**
@@ -77,52 +76,52 @@ export default class ResponseAtom extends Response {
    * @return {null|*}
    */
   payload () {
-    const metaTypeData = this.data();
+    const metaTypeData = this.data()
 
-    if ( !metaTypeData ) {
-      return null;
+    if (!metaTypeData) {
+      return null
     }
 
-    let response = {
+    const response = {
       instances: [],
       instanceCount: {},
       paginatorInfo: {}
-    };
+    }
 
-    if ( metaTypeData.instances ) {
-      response.instances = metaTypeData.instances;
+    if (metaTypeData.instances) {
+      response.instances = metaTypeData.instances
 
-      for ( let instanceKey in response.instances ) {
-        let instance = response.instances[ instanceKey ];
-        if ( instance.metasJson ) {
-          response.instances[ instanceKey ].metas = JSON.parse( instance.metasJson );
+      for (const instanceKey in response.instances) {
+        const instance = response.instances[instanceKey]
+        if (instance.metasJson) {
+          response.instances[instanceKey].metas = JSON.parse(instance.metasJson)
         }
       }
     }
 
-    if ( metaTypeData.instanceCount ) {
-      response.instanceCount = metaTypeData.instanceCount;
+    if (metaTypeData.instanceCount) {
+      response.instanceCount = metaTypeData.instanceCount
     }
 
-    if ( metaTypeData.paginatorInfo ) {
-      response.paginatorInfo = metaTypeData.paginatorInfo;
+    if (metaTypeData.paginatorInfo) {
+      response.paginatorInfo = metaTypeData.paginatorInfo
     }
 
-    return response;
+    return response
   }
 
   metas () {
-    const response = this.payload();
-    const metas = [];
+    const response = this.payload()
+    const metas = []
 
-    if ( response && response.instances ) {
-      for ( const instance of response.instances ) {
-        if ( instance.metasJson ) {
-          metas.push( JSON.parse( instance.metasJson ) );
+    if (response && response.instances) {
+      for (const instance of response.instances) {
+        if (instance.metasJson) {
+          metas.push(JSON.parse(instance.metasJson))
         }
       }
     }
 
-    return metas;
+    return metas
   }
 }

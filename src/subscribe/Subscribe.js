@@ -1,14 +1,14 @@
-import CodeException from '../exception/CodeException';
+import CodeException from '../exception/CodeException'
 
 export default class Subscribe {
   /**
    *
    * @param {ApolloClient} apolloClient
    */
-  constructor ( apolloClient ) {
-    this.client = apolloClient;
-    this.$__variables = null;
-    this.$__subscribe = null;
+  constructor (apolloClient) {
+    this.client = apolloClient
+    this.$__variables = null
+    this.$__subscribe = null
   }
 
   /**
@@ -17,27 +17,27 @@ export default class Subscribe {
    * @param {{}} variables
    * @returns {{variables: (Object|null), fetchPolicy: string, query: null}}
    */
-  createSubscribe ( {
+  createSubscribe ({
     variables = null
-  } ) {
-    this.$__variables = this.compiledVariables( variables );
+  }) {
+    this.$__variables = this.compiledVariables(variables)
 
     // Uri is a required parameter
-    let uri = this.uri();
+    const uri = this.uri()
 
-    if ( !uri ) {
-      throw new CodeException( 'Subscribe::createSubscribe() - Node URI was not initialized for this client instance!' );
+    if (!uri) {
+      throw new CodeException('Subscribe::createSubscribe() - Node URI was not initialized for this client instance!')
     }
 
-    if ( this.$__subscribe === null ) {
-      throw new CodeException( 'Subscribe::createSubscribe() - GraphQL subscription was not initialized!' );
+    if (this.$__subscribe === null) {
+      throw new CodeException('Subscribe::createSubscribe() - GraphQL subscription was not initialized!')
     }
 
     return {
       query: this.$__subscribe,
       variables: this.variables(),
       fetchPolicy: 'no-cache'
-    };
+    }
   }
 
   /**
@@ -47,19 +47,19 @@ export default class Subscribe {
    * @param {function} closure
    * @return {string}
    */
-  async execute ( {
+  async execute ({
     variables = null,
     closure
-  } ) {
-    if ( !closure ) {
-      throw new CodeException( `${ this.constructor.name }::execute() - closure parameter is required!` );
+  }) {
+    if (!closure) {
+      throw new CodeException(`${ this.constructor.name }::execute() - closure parameter is required!`)
     }
 
-    this.$__request = this.createSubscribe( {
+    this.$__request = this.createSubscribe({
       variables
-    } );
+    })
 
-    return this.client.subscribe( this.$__request, closure );
+    return this.client.subscribe(this.$__request, closure)
   }
 
   /**
@@ -68,8 +68,8 @@ export default class Subscribe {
    * @param variables
    * @return {object}
    */
-  compiledVariables ( variables = null ) {
-    return variables || {};
+  compiledVariables (variables = null) {
+    return variables || {}
   }
 
   /**
@@ -78,7 +78,7 @@ export default class Subscribe {
    * @return {string}
    */
   uri () {
-    return this.client.getUri();
+    return this.client.getUri()
   }
 
   /**
@@ -87,6 +87,6 @@ export default class Subscribe {
    * @return {object|null}
    */
   variables () {
-    return this.$__variables;
+    return this.$__variables
   }
 }

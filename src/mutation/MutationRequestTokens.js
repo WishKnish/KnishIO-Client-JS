@@ -45,9 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule';
-import ResponseRequestTokens from '../response/ResponseRequestTokens';
-
+import MutationProposeMolecule from './MutationProposeMolecule'
+import ResponseRequestTokens from '../response/ResponseRequestTokens'
 
 export default class MutationRequestTokens extends MutationProposeMolecule {
   /**
@@ -60,25 +59,24 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
    * @param {object} meta
    * @param {string|null} batchId
    */
-  fillMolecule ( {
+  fillMolecule ({
     token,
     amount,
     metaType,
     metaId,
     meta = null,
     batchId = null
-  } ) {
-
-    this.$__molecule.initTokenRequest( {
+  }) {
+    this.$__molecule.initTokenRequest({
       token,
       amount,
       metaType,
       metaId,
       meta: meta || {},
       batchId
-    } );
-    this.$__molecule.sign( {} );
-    this.$__molecule.check();
+    })
+    this.$__molecule.sign({})
+    this.$__molecule.check()
   }
 
   /**
@@ -87,11 +85,10 @@ export default class MutationRequestTokens extends MutationProposeMolecule {
    * @param {object} json
    * @return {ResponseRequestTokens}
    */
-  createResponse ( json ) {
-    return new ResponseRequestTokens( {
+  createResponse (json) {
+    return new ResponseRequestTokens({
       query: this,
       json
-    } );
+    })
   }
-
 }

@@ -45,114 +45,65 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { operationName } from '../libraries/ApolloLink/handler';
-import Client from '../libraries/ApolloLink/Client';
-
+import Client from '../libraries/ApolloLink/Client'
 
 export default class ApolloClient {
-
   /**
    * @param {string} serverUri
    * @param {object|null} socket
    * @param {boolean} encrypt
    */
-  constructor ( {
+  constructor ({
     serverUri,
     socket = null,
     encrypt = false
-  } ) {
-
-    this.$__subscribers = {};
-    this.$__uri = serverUri;
-    this.$__socket = {
-      ...{
-        socketUri: null,
-        appKey: 'knishio'
-      }, ...socket || {}
-    };
-    this.$__client = null;
-
-    this.restartTransport( encrypt );
-  }
-
-  /**
-   * If you have subscriptions, you unsubscribe
-   *
-   * @param {boolean} encrypt
-   */
-  restartTransport ( encrypt = false ) {
-    const client = new Client( {
-      serverUri: this.$__uri,
-      soketi: this.$__socket,
+  }) {
+    this.$__client = new Client({
+      serverUri,
+      soketi: socket,
       encrypt
-    } );
+    })
+  }
 
-    if ( this.$__client ) {
-      client.setAuthData( {
-        token: this.$__client.getAuthToken(),
-        pubkey: this.$__client.getPubKey(),
-        wallet: this.$__client.getWallet()
-      } );
-
-      this.socketDisconnect();
+  setEncryption (encrypt = false) {
+    const clientConfig = {
+      serverUri: this.$__client.getServerUri(),
+      soketi: {
+        socketUri: this.$__client.getSocketUri(),
+        appKey: 'knishio'
+      },
+      encrypt
     }
 
-    this.$__client = client;
+    this.$__client = new Client(clientConfig)
   }
 
-  /**
-   * Sets the encryption mode for this session
-   *
-   * @param {boolean} encrypt
-   */
-  setEncryption( encrypt = false ) {
-    this.restartTransport( encrypt );
-  }
-
-  /**
-   * @param {string} operationName
-   */
-  unsubscribe ( operationName ) {
-    if ( this.$__subscribers.hasOwnProperty( operationName ) ) {
-      this.$__subscribers[ operationName ].unsubscribe();
-      this.$__client.unsubscribeFromChannel( operationName );
-      delete this.$__subscribers[ operationName ];
+  unsubscribe (operationName) {
+    if (Object.prototype.hasOwnProperty.call(this.$__subscribers, operationName)) {
+      this.$__subscribers[operationName].unsubscribe()
+      this.$__client.unsubscribeFromChannel(operationName)
+      delete this.$__subscribers[operationName]
     }
   }
 
-  /**
-   *
-   */
   unsubscribeAll () {
-    for ( let subscribe in this.$__subscribers ) {
-      this.unsubscribe( subscribe );
+    for (const subscribe in this.$__subscribers) {
+      this.unsubscribe(subscribe)
     }
   }
 
-  /**
-   *
-   */
   socketDisconnect () {
-    this.$__client.socketDisconnect();
-    this.$__subscribers = {};
+    this.$__client.socketDisconnect()
+    this.$__subscribers = {}
   }
 
   /**
-   * @param {Operation} request
-   * @param {function} closure
-   *
-   * @return {string}
+   * @param request
+   * @param closure
+   * @returns {Subscription}
    */
-  subscribe ( request, closure ) {
-    const operation = operationName( request );
-
-    this.unsubscribe( operation );
-
-    this.$__subscribers[ operation ] = this.$__client
-      .subscribe( request )
-      .subscribe( data => closure( data ) );
-
-    return operation;
+  subscribe (request, closure) {
+    return this.$__client.subscribe(request).subscribe(closure)
   }
 
   /**
@@ -160,8 +111,8 @@ export default class ApolloClient {
    * @param request
    * @returns {Promise<*>}
    */
-  async query ( request ) {
-    return await this.$__client.query( request );
+  async query (request) {
+    return await this.$__client.query(request)
   }
 
   /**
@@ -169,8 +120,8 @@ export default class ApolloClient {
    * @param request
    * @returns {Promise<*>}
    */
-  async mutate ( request ) {
-    return await this.$__client.mutate( request );
+  async mutate (request) {
+    return await this.$__client.mutate(request)
   }
 
   /**
@@ -180,16 +131,8 @@ export default class ApolloClient {
    * @param {string} pubkey
    * @param {Wallet|null} wallet
    */
-  setAuthData ( {
-    token,
-    pubkey,
-    wallet
-  } ) {
-    this.$__client.setAuthData( {
-      token,
-      pubkey,
-      wallet
-    } );
+  setAuthData ({ token, pubkey, wallet }) {
+    this.$__client.setAuthData({ token, pubkey, wallet })
   }
 
   /**
@@ -198,11 +141,7 @@ export default class ApolloClient {
    * @return {string|null}
    */
   getAuthToken () {
-    let authTokenObject = this.$__client.getAuthToken();
-    if ( !authTokenObject ) {
-      return null;
-    }
-    return authTokenObject.getToken();
+    return this.$__client.getAuthToken()
   }
 
   /**
@@ -211,7 +150,7 @@ export default class ApolloClient {
    * @return {string}
    */
   getUri () {
-    return this.$__uri;
+    return this.$__client.getServerUri()
   }
 
   /**
@@ -219,27 +158,33 @@ export default class ApolloClient {
    *
    * @param {string} uri
    */
-  setUri ( uri ) {
-    this.$__uri = uri;
+  setUri (uri) {
+    // This method might need to recreate the client with the new URI
+    const clientConfig = {
+      serverUri: uri,
+      soketi: {
+        socketUri: this.$__client.getSocketUri(),
+        appKey: 'knishio'
+      },
+      encrypt: !!this.$__client.cipherLink
+    }
+    this.$__client = new Client(clientConfig)
   }
 
   /**
    * @return {string|null}
    */
   getSocketUri () {
-    return this.$__socket ? this.$__socket.socketUri : null;
+    return this.$__client.getSocketUri()
   }
 
-  /**
-   *
-   * @param {string} socketUri
-   * @param {string} appKey
-   */
-  setSocketUri ( {
-    socketUri,
-    appKey
-  } ) {
-    this.$__socket = arguments.length ? arguments[ 0 ] : this.$__socket;
+  setSocketUri ({ socketUri, appKey }) {
+    // This method might need to recreate the client with the new socket URI
+    const clientConfig = {
+      serverUri: this.$__client.getServerUri(),
+      soketi: { socketUri, appKey },
+      encrypt: !!this.$__client.cipherLink
+    }
+    this.$__client = new Client(clientConfig)
   }
-
 }

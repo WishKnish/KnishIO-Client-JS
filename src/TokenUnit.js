@@ -50,25 +50,36 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  * AuthToken class
  */
 export default class TokenUnit {
+  /**
+   *
+   * @param id
+   * @param name
+   * @param metas
+   */
+  constructor (id, name, metas) {
+    this.id = id
+    this.name = name
+    this.metas = metas || {}
+  }
 
   /**
    *
    * @param data
    * @returns {*}
    */
-  static createFromGraphQL ( data ) {
-    let metas = data[ 'metas' ] || {};
-    if ( metas.length ) {
-      metas = JSON.parse( metas );
-      if ( !metas ) { // set an empty object instead of an array
-        metas = {};
+  static createFromGraphQL (data) {
+    let metas = data.metas || {}
+    if (metas.length) {
+      metas = JSON.parse(metas)
+      if (!metas) { // set an empty object instead of an array
+        metas = {}
       }
     }
     return new TokenUnit(
-      data[ 'id' ],
-      data[ 'name' ],
+      data.id,
+      data.name,
       metas
-    );
+    )
   }
 
   /**
@@ -76,24 +87,12 @@ export default class TokenUnit {
    * @param data
    * @returns {TokenUnit}
    */
-  static createFromDB ( data ) {
+  static createFromDB (data) {
     return new TokenUnit(
-      data[ 0 ],
-      data[ 1 ],
-      data.length > 2 ? data[ 2 ] : {}
-    );
-  }
-
-  /**
-   *
-   * @param id
-   * @param name
-   * @param metas
-   */
-  constructor ( id, name, metas ) {
-    this.id = id;
-    this.name = name;
-    this.metas = metas || {};
+      data[0],
+      data[1],
+      data.length > 2 ? data[2] : {}
+    )
   }
 
   /**
@@ -101,7 +100,7 @@ export default class TokenUnit {
    * @returns {*|null}
    */
   getFragmentZone () {
-    return this.metas[ 'fragmentZone' ] || null;
+    return this.metas.fragmentZone || null
   }
 
   /**
@@ -109,14 +108,14 @@ export default class TokenUnit {
    * @returns {*|null}
    */
   getFusedTokenUnits () {
-    return this.metas[ 'fusedTokenUnits' ] || null;
+    return this.metas.fusedTokenUnits || null
   }
 
   /**
    * @return array
    */
   toData () {
-    return [ this.id, this.name, this.metas ];
+    return [this.id, this.name, this.metas]
   }
 
   /**
@@ -127,8 +126,7 @@ export default class TokenUnit {
     return {
       id: this.id,
       name: this.name,
-      metas: JSON.stringify( this.metas )
-    };
+      metas: JSON.stringify(this.metas)
+    }
   }
-
 }

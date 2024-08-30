@@ -45,27 +45,26 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { shake256 } from 'js-sha3';
-import bigInt from 'big-integer/BigInteger';
+import JsSHA from 'jssha'
 import {
   chunkSubstr,
   isHex,
   randomString
-} from './libraries/strings';
+} from './libraries/strings'
 import {
   generateBatchId,
   generateBundleHash
-} from './libraries/crypto';
-import BaseX from './libraries/BaseX';
-import TokenUnit from './TokenUnit';
-import Soda from './libraries/Soda';
+} from './libraries/crypto'
+import BaseX from './libraries/BaseX'
+import TokenUnit from './TokenUnit'
+import Soda from './libraries/Soda'
+import WalletCredentialException from './exception/WalletCredentialException'
 
 /**
  * Wallet class represents the set of public and private
  * keys to sign Molecules
  */
 export default class Wallet {
-
   /**
    * Class constructor
    *
@@ -77,7 +76,7 @@ export default class Wallet {
    * @param {string|null} batchId
    * @param {string|null} characters
    */
-  constructor ( {
+  constructor ({
     secret = null,
     bundle = null,
     token = 'USER',
@@ -85,92 +84,90 @@ export default class Wallet {
     position = null,
     batchId = null,
     characters = null
-  } ) {
-
-    this.token = token;
-    this.balance = 0;
-    this.molecules = {};
+  }) {
+    this.token = token
+    this.balance = 0
+    this.molecules = {}
 
     // Empty values
-    this.key = null;
-    this.privkey = null;
-    this.pubkey = null;
-    this.tokenUnits = [];
-    this.tradeRates = {};
+    this.key = null
+    this.privkey = null
+    this.pubkey = null
+    this.tokenUnits = []
+    this.tradeRates = {}
 
-    this.address = address;
-    this.position = position;
-    this.bundle = bundle;
-    this.batchId = batchId;
-    this.characters = characters;
+    this.address = address
+    this.position = position
+    this.bundle = bundle
+    this.batchId = batchId
+    this.characters = characters
 
-    if ( secret ) {
-
+    if (secret) {
       // Set bundle from the secret
-      this.bundle = this.bundle || generateBundleHash( secret );
+      this.bundle = this.bundle || generateBundleHash(secret, 'Wallet::constructor')
 
       // Generate a position for non-shadow wallet if not initialized
-      this.position = this.position || Wallet.generatePosition();
+      this.position = this.position || Wallet.generatePosition()
 
       // Key & address initialization
-      this.key = Wallet.generateKey( {
+      this.key = Wallet.generateKey({
         secret,
         token: this.token,
         position: this.position
-      } );
-      this.address = this.address || Wallet.generateAddress( this.key );
+      })
+      this.address = this.address || Wallet.generateAddress(this.key)
 
       // Soda object initialization
-      this.soda = new Soda( characters );
+      this.soda = new Soda(characters)
 
       // Private & pubkey initialization
-      this.privkey = this.soda.generatePrivateKey( this.key );
-      this.pubkey = this.soda.generatePublicKey( this.privkey );
+      this.privkey = this.soda.generatePrivateKey(this.key)
+      this.pubkey = this.soda.generatePublicKey(this.privkey)
 
       // Set characters
-      this.characters = this.characters || 'BASE64';
+      this.characters = this.characters || 'BASE64'
     }
   }
 
   /**
    * Creates a new Wallet instance
    *
-   * @param {string} secretOrBundle
+   * @param {string|null} secret
+   * @param {string|null} bundle
    * @param {string} token
    * @param {string|null} batchId
    * @param {string|null} characters
    * @return {Wallet}
    */
-  static create ( {
-    secretOrBundle,
+  static create ({
+    secret = null,
+    bundle = null,
     token,
     batchId = null,
     characters = null
-  } ) {
+  }) {
+    let position = null
 
-    let secret = null;
-    let position = null;
-    let bundle = null;
-
-    if( Wallet.isBundleHash( secretOrBundle ) ) {
-      bundle = secretOrBundle;
+    // No credentials parameters provided?
+    if (!secret && !bundle) {
+      throw new WalletCredentialException()
     }
-    else {
-      secret = secretOrBundle;
-      position = Wallet.generatePosition();
-      bundle = generateBundleHash( secret );
+
+    // Secret, but no bundle?
+    if (secret && !bundle) {
+      position = Wallet.generatePosition()
+      bundle = generateBundleHash(secret, 'Wallet::create')
     }
 
     // Wallet initialization
-    let wallet = new Wallet( {
+    return new Wallet({
       secret,
+      bundle,
       token,
       position,
       batchId,
       characters
-    } );
-    wallet.bundle = bundle;
-    return wallet;
+    })
   }
 
   /**
@@ -179,13 +176,12 @@ export default class Wallet {
    * @param {string} maybeBundleHash
    * @return {boolean}
    */
-  static isBundleHash ( maybeBundleHash ) {
-
-    if ( typeof maybeBundleHash !== 'string' ) {
-      return false;
+  static isBundleHash (maybeBundleHash) {
+    if (typeof maybeBundleHash !== 'string') {
+      return false
     }
 
-    return maybeBundleHash.length === 64 && isHex( maybeBundleHash );
+    return maybeBundleHash.length === 64 && isHex(maybeBundleHash)
   }
 
   /**
@@ -194,12 +190,84 @@ export default class Wallet {
    * @param unitsData
    * @return {[]}
    */
-  static getTokenUnits ( unitsData ) {
-    let result = [];
-    unitsData.forEach( unitData => {
-      result.push( TokenUnit.createFromDB( unitData ) );
-    } );
-    return result;
+  static getTokenUnits (unitsData) {
+    const result = []
+    unitsData.forEach(unitData => {
+      result.push(TokenUnit.createFromDB(unitData))
+    })
+    return result
+  }
+
+  /**
+   * Generates a private key for the given parameters
+   *
+   * @param {string} secret
+   * @param {string} token
+   * @param {string} position
+   * @return {string}
+   */
+  static generateKey ({
+    secret,
+    token,
+    position
+  }) {
+    // Converting secret to bigInt
+    const bigIntSecret = BigInt(`0x${ secret }`)
+
+    // Adding new position to the user secret to produce the indexed key
+    const indexedKey = bigIntSecret + BigInt(`0x${ position }`)
+
+    // Hashing the indexed key to produce the intermediate key
+    const intermediateKeySponge = new JsSHA('SHAKE256', 'TEXT')
+
+    intermediateKeySponge.update(indexedKey.toString(16))
+
+    if (token) {
+      intermediateKeySponge.update(token)
+    }
+
+    // Hashing the intermediate key to produce the private key
+    const privateKeySponge = new JsSHA('SHAKE256', 'TEXT')
+    privateKeySponge.update(intermediateKeySponge.getHash('HEX', { outputLen: 8192 }))
+    return privateKeySponge.getHash('HEX', { outputLen: 8192 })
+  }
+
+  /**
+   * Generates a wallet address
+   *
+   * @param {string} key
+   * @return {string}
+   */
+  static generateAddress (key) {
+    // Subdivide private key into 16 fragments of 128 characters each
+    const keyFragments = chunkSubstr(key, 128)
+    // Generating wallet digest
+    const digestSponge = new JsSHA('SHAKE256', 'TEXT')
+
+    for (const index in keyFragments) {
+      let workingFragment = keyFragments[index]
+      for (let fragmentCount = 1; fragmentCount <= 16; fragmentCount++) {
+        const workingSponge = new JsSHA('SHAKE256', 'TEXT')
+        workingSponge.update(workingFragment)
+        workingFragment = workingSponge.getHash('HEX', { outputLen: 512 })
+      }
+
+      digestSponge.update(workingFragment)
+    }
+
+    // Producing wallet address
+    const outputSponge = new JsSHA('SHAKE256', 'TEXT')
+    outputSponge.update(digestSponge.getHash('HEX', { outputLen: 8192 }))
+    return outputSponge.getHash('HEX', { outputLen: 256 })
+  }
+
+  /**
+   *
+   * @param saltLength
+   * @returns {string}
+   */
+  static generatePosition (saltLength = 64) {
+    return randomString(saltLength, 'abcdef0123456789')
   }
 
   /**
@@ -207,13 +275,12 @@ export default class Wallet {
    * @returns {*[]}
    */
   getTokenUnitsData () {
-    const result = [];
-    this.tokenUnits.forEach( tokenUnit => {
-      result.push( tokenUnit.toData() );
-    } );
-    return result;
+    const result = []
+    this.tokenUnits.forEach(tokenUnit => {
+      result.push(tokenUnit.toData())
+    })
+    return result
   }
-
 
   /**
    * Split token units
@@ -227,32 +294,48 @@ export default class Wallet {
     remainderWallet,
     recipientWallet = null
   ) {
-
     // No units supplied, nothing to split
-    if ( units.length === 0 ) {
-      return;
+    if (units.length === 0) {
+      return
     }
 
     // Init recipient & remainder token units
-    let recipientTokenUnits = [];
-    let remainderTokenUnits = [];
-    this.tokenUnits.forEach( tokenUnit => {
-      if ( units.includes( tokenUnit.id ) ) {
-        recipientTokenUnits.push( tokenUnit );
+    const recipientTokenUnits = []
+    const remainderTokenUnits = []
+    this.tokenUnits.forEach(tokenUnit => {
+      if (units.includes(tokenUnit.id)) {
+        recipientTokenUnits.push(tokenUnit)
       } else {
-        remainderTokenUnits.push( tokenUnit );
+        remainderTokenUnits.push(tokenUnit)
       }
-    } );
-
+    })
 
     // Reset token units to the sending value
-    this.tokenUnits = recipientTokenUnits;
+    this.tokenUnits = recipientTokenUnits
 
     // Set token units to recipient & remainder
-    if ( recipientWallet !== null ) {
-      recipientWallet.tokenUnits = recipientTokenUnits;
+    if (recipientWallet !== null) {
+      recipientWallet.tokenUnits = recipientTokenUnits
     }
-    remainderWallet.tokenUnits = remainderTokenUnits;
+    remainderWallet.tokenUnits = remainderTokenUnits
+  }
+
+  /**
+   * Create a remainder wallet from the source one
+   *
+   * @param secret
+   */
+  createRemainder (secret) {
+    const remainderWallet = Wallet.create({
+      secret,
+      token: this.token,
+      characters: this.characters
+    })
+    remainderWallet.initBatchId({
+      sourceWallet: this,
+      isRemainder: true
+    })
+    return remainderWallet
   }
 
 
@@ -279,9 +362,9 @@ export default class Wallet {
    */
   isShadow () {
     return (
-      ( typeof this.position === 'undefined' || null === this.position ) &&
-      ( typeof this.address === 'undefined' || null === this.address )
-    );
+      (typeof this.position === 'undefined' || this.position === null) &&
+      (typeof this.address === 'undefined' || this.address === null)
+    )
   }
 
   /**
@@ -290,13 +373,12 @@ export default class Wallet {
    * @param {Wallet} sourceWallet
    * @param {boolean} isRemainder
    */
-  initBatchId ( {
+  initBatchId ({
     sourceWallet,
     isRemainder = false
-  } ) {
-
-    if ( sourceWallet.batchId ) {
-      this.batchId = isRemainder ? sourceWallet.batchId : generateBatchId( {} );
+  }) {
+    if (sourceWallet.batchId) {
+      this.batchId = isRemainder ? sourceWallet.batchId : generateBatchId({})
     }
   }
 
@@ -306,15 +388,14 @@ export default class Wallet {
    * @param {object|array} message
    * @return {object}
    */
-  encryptMessage ( message ) {
+  encryptMessage (message) {
+    const encrypt = {}
 
-    const encrypt = {};
-
-    for ( let index = 1, length = arguments.length; index < length; index++ ) {
-      encrypt[ this.soda.shortHash( arguments[ index ] ) ] = this.soda.encrypt( message, arguments[ index ] );
+    for (let index = 1, length = arguments.length; index < length; index++) {
+      encrypt[this.soda.shortHash(arguments[index])] = this.soda.encrypt(message, arguments[index])
     }
 
-    return encrypt;
+    return encrypt
   }
 
   /**
@@ -323,19 +404,17 @@ export default class Wallet {
    * @param {string|object} message
    * @return {null|any}
    */
-  decryptMessage ( message ) {
+  decryptMessage (message) {
+    const pubKey = this.pubkey
+    let encrypt = message
 
-    const pubKey = this.pubkey;
-    let encrypt = message;
-
-    if ( message !== null
-      && typeof message === 'object'
-      && Object.prototype.toString.call( message ) === '[object Object]' ) {
-
-      encrypt = message[ this.soda.shortHash( pubKey ) ] || '';
+    if (message !== null &&
+      typeof message === 'object' &&
+      Object.prototype.toString.call(message) === '[object Object]') {
+      encrypt = message[this.soda.shortHash(pubKey)] || ''
     }
 
-    return this.soda.decrypt( encrypt, this.privkey, pubKey );
+    return this.soda.decrypt(encrypt, this.privkey, pubKey)
   }
 
   /**
@@ -343,21 +422,21 @@ export default class Wallet {
    *
    * @returns {Buffer|ArrayBuffer|Uint8Array}
    */
-  decryptBinary ( message ) {
-    const decrypt = this.decryptMessage( message );
-    return ( new BaseX( { characters: 'BASE64' } ) ).decode( decrypt );
+  decryptBinary (message) {
+    const decrypt = this.decryptMessage(message)
+    return (new BaseX({ characters: 'BASE64' })).decode(decrypt)
   }
 
   /**
    * @param {Buffer|ArrayBuffer|Uint8Array} message
    * @returns {{string}}
    */
-  encryptBinary ( message ) {
-    const arg = Array.from( arguments ).slice( 1 );
+  encryptBinary (message) {
+    const arg = Array.from(arguments).slice(1)
 
-    const messageBase64 = ( new BaseX( { characters: 'BASE64' } ) ).encode( message );
+    const messageBase64 = (new BaseX({ characters: 'BASE64' })).encode(message)
 
-    return this.encryptMessage( messageBase64, ...arg );
+    return this.encryptMessage(messageBase64, ...arg)
   }
 
   /**
@@ -367,25 +446,22 @@ export default class Wallet {
    * @param {string|array} publicKeys
    * @return {string}
    */
-  encryptString ( {
+  encryptString ({
     data,
     publicKeys
-  } ) {
-
-    if ( data ) {
-
+  }) {
+    if (data) {
       // Retrieving sender's encryption public key
-      const publicKey = this.pubkey;
+      const publicKey = this.pubkey
 
       // If the additional public keys is supplied as a string, convert to array
-      if ( typeof publicKeys === 'string' ) {
-        publicKeys = [ publicKeys ];
+      if (typeof publicKeys === 'string') {
+        publicKeys = [publicKeys]
       }
 
       // Encrypting message
-      const encryptedData = this.encryptMessage( data, publicKey, ...publicKeys );
-      return btoa( JSON.stringify( encryptedData ) );
-
+      const encryptedData = this.encryptMessage(data, publicKey, ...publicKeys)
+      return btoa(JSON.stringify(encryptedData))
     }
   };
 
@@ -396,95 +472,19 @@ export default class Wallet {
    * @param {string|null} fallbackValue
    * @return {array|object}
    */
-  decryptString ( {
+  decryptString ({
     data,
     fallbackValue = null
-  } ) {
-
-    if ( data ) {
+  }) {
+    if (data) {
       try {
-
-        const decrypted = JSON.parse( atob( data ) );
-        return this.decryptMessage( decrypted ) || fallbackValue;
-
-      } catch ( e ) {
-
+        const decrypted = JSON.parse(atob(data))
+        return this.decryptMessage(decrypted) || fallbackValue
+      } catch (e) {
         // Probably not actually encrypted
-        console.error( e );
-        return fallbackValue || data;
-
+        console.error(e)
+        return fallbackValue || data
       }
     }
-
   };
-
-  /**
-   * Generates a private key for the given parameters
-   *
-   * @param {string} secret
-   * @param {string} token
-   * @param {string} position
-   * @return {string}
-   */
-  static generateKey ( {
-    secret,
-    token,
-    position
-  } ) {
-
-    // Converting secret to bigInt
-    const bigIntSecret = bigInt( secret, 16 ),
-      // Adding new position to the user secret to produce the indexed key
-      indexedKey = bigIntSecret.add( bigInt( position, 16 ) ),
-      // Hashing the indexed key to produce the intermediate key
-      intermediateKeySponge = shake256.create( 8192 );
-
-    intermediateKeySponge.update( indexedKey.toString( 16 ) );
-
-    if ( token ) {
-      intermediateKeySponge.update( token );
-    }
-
-    // Hashing the intermediate key to produce the private key
-    return shake256.create( 8192 ).update( intermediateKeySponge.hex() ).hex();
-  }
-
-  /**
-   * Generates a wallet address
-   *
-   * @param {string} key
-   * @return {string}
-   */
-  static generateAddress ( key ) {
-
-    // Subdivide private key into 16 fragments of 128 characters each
-    const keyFragments = chunkSubstr( key, 128 ),
-      // Generating wallet digest
-      digestSponge = shake256.create( 8192 );
-
-    for ( const index in keyFragments ) {
-
-      let workingFragment = keyFragments[ index ];
-
-      for ( let fragmentCount = 1; fragmentCount <= 16; fragmentCount++ ) {
-
-        workingFragment = shake256.create( 512 ).update( workingFragment ).hex();
-
-      }
-
-      digestSponge.update( workingFragment );
-    }
-
-    // Producing wallet address
-    return shake256.create( 256 ).update( digestSponge.hex() ).hex();
-  }
-
-  /**
-   *
-   * @param saltLength
-   * @returns {string}
-   */
-  static generatePosition ( saltLength = 64 ) {
-    return randomString( saltLength, 'abcdef0123456789' );
-  }
 }

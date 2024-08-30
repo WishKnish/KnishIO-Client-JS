@@ -1,119 +1,79 @@
-/*
-                               (
-                              (/(
-                              (//(
-                              (///(
-                             (/////(
-                             (//////(                          )
-                            (////////(                        (/)
-                            (////////(                       (///)
-                           (//////////(                      (////)
-                           (//////////(                     (//////)
-                          (////////////(                    (///////)
-                         (/////////////(                   (/////////)
-                        (//////////////(                  (///////////)
-                        (///////////////(                (/////////////)
-                       (////////////////(               (//////////////)
-                      (((((((((((((((((((              (((((((((((((((
-                     (((((((((((((((((((              ((((((((((((((
-                     (((((((((((((((((((            ((((((((((((((
-                    ((((((((((((((((((((           (((((((((((((
-                    ((((((((((((((((((((          ((((((((((((
-                    (((((((((((((((((((         ((((((((((((
-                    (((((((((((((((((((        ((((((((((
-                    ((((((((((((((((((/      (((((((((
-                    ((((((((((((((((((     ((((((((
-                    (((((((((((((((((    (((((((
-                   ((((((((((((((((((  (((((
-                   #################  ##
-                   ################  #
-                  ################# ##
-                 %################  ###
-                 ###############(   ####
-                ###############      ####
-               ###############       ######
-              %#############(        (#######
-             %#############           #########
-            ############(              ##########
-           ###########                  #############
-          #########                      ##############
-        %######
-
-        Powered by Knish.IO: Connecting a Decentralized World
-
-Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
-
-License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
-*/
 import {
   ApolloClient,
-  concat,
-  from
-} from '@apollo/client/core';
-import fetch from 'isomorphic-fetch';
-import { InMemoryCache } from '@apollo/client/cache';
-import { onError } from '@apollo/client/link/error';
-
-import HttpLink from './HttpLink';
-import PusherLink from './PusherLink';
-import { parse } from 'uri-js';
-import AuthLink from './AuthLink';
-import { errorHandler } from './handler';
-import CipherLink from './CipherLink';
+  InMemoryCache,
+  from,
+  split
+} from '@apollo/client/core'
+import { onError } from '@apollo/client/link/error'
+import { getMainDefinition } from '@apollo/client/utilities'
+import { createHttpLink } from '@apollo/client/link/http'
+import { setContext } from '@apollo/client/link/context'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { createClient } from 'graphql-ws'
+import fetch from 'isomorphic-fetch'
+import { errorHandler } from './handler'
+import CipherLink from './CipherLink'
 
 class Client extends ApolloClient {
-
   /**
    * @param {string} serverUri
    * @param {object|null} soketi
    * @param {boolean} encrypt
    */
-  constructor ( {
+  constructor ({
     serverUri,
     soketi = null,
     encrypt = false
-  } ) {
-    const _socket = {
-      ...{
-        socketUri: null,
-        appKey: 'knishio'
-      },
-      ...soketi || {}
-    };
-    const links = [];
-    const http = new HttpLink( {
+  }) {
+    const httpLink = createHttpLink({
       uri: serverUri,
-      fetch: fetch,
-      transportBatching: true
-    } );
-    const auth = new AuthLink();
+      fetch
+    })
 
-    let cipher = null;
-    let socket = null;
+    const authToken = ''
 
-    links.push( auth );
+    const authLink = setContext((_, { headers }) => ({
+      headers: {
+        ...headers,
+        'X-Auth-Token': authToken
+      }
+    }))
 
-    if ( encrypt ) {
-      cipher = new CipherLink();
-      links.push( cipher );
+    const errorLink = onError(errorHandler)
+
+    let link = from([authLink, errorLink, httpLink])
+
+    let cipherLink
+    if (encrypt) {
+      cipherLink = new CipherLink()
+      link = from([cipherLink, link])
     }
 
-    if ( _socket && _socket.socketUri ) {
-      const path = parse( serverUri );
-      socket = new PusherLink( {
-        socketUri: _socket.socketUri,
-        authEndpoint: `${ path.scheme }://${ path.host }/graphql/subscriptions/auth`,
-        appKey: _socket.appKey
-      } );
-      links.push( socket );
+    let wsLink
+    if (soketi && soketi.socketUri) {
+      wsLink = new GraphQLWsLink(createClient({
+        url: soketi.socketUri,
+        connectionParams: () => ({
+          authToken
+        })
+      }))
+
+      link = split(
+        ({ query }) => {
+          const definition = getMainDefinition(query)
+          return (
+            definition.kind === 'OperationDefinition' &&
+            definition.operation === 'subscription'
+          )
+        },
+        wsLink,
+        link
+      )
     }
 
-    links.push( concat( onError( errorHandler ), http ) );
-
-    super( {
-      link: from( links ),
+    super({
+      link,
       cache: new InMemoryCache(),
-      connectToDevTools: true,
       defaultOptions: {
         watchQuery: {
           fetchPolicy: 'no-cache',
@@ -126,106 +86,55 @@ class Client extends ApolloClient {
         mutate: {
           fetchPolicy: 'no-cache',
           errorPolicy: 'all'
-        },
-        subscribe: {
-          fetchPolicy: 'no-cache',
-          errorPolicy: 'all'
         }
       }
-    } );
+    })
 
-    this.__serverUri = serverUri;
-    this.__soketi = _socket;
-    this.__authLink = auth;
-    /**
-     *
-     * @type {PusherLink}
-     * @private
-     */
-    this.__socket = socket;
-    this.__cipherLink = cipher;
-
-    this.__pubkey = null;
-    this.__wallet = null;
+    this.serverUri = serverUri
+    this.soketi = soketi
+    this.authToken = authToken
+    this.pubkey = null
+    this.wallet = null
+    this.cipherLink = cipherLink
+    this.wsLink = wsLink
   }
 
-  /**
-   * @return {string}
-   */
+  setAuthData ({ token, pubkey, wallet }) {
+    this.authToken = token
+    this.pubkey = pubkey
+    this.wallet = wallet
+
+    if (this.cipherLink) {
+      this.cipherLink.setWallet(wallet)
+      this.cipherLink.setPubKey(pubkey)
+    }
+
+    if (this.wsLink) {
+      this.wsLink.client.connectionParams = () => ({
+        authToken: this.authToken
+      })
+    }
+  }
+
   getAuthToken () {
-    return this.__authLink.getAuthToken();
+    return this.authToken
   }
 
-  /**
-   *
-   * @return {string|null}
-   */
   getPubKey () {
-    return this.__pubkey;
+    return this.pubkey
   }
 
-  /**
-   * @return {Wallet|null}
-   */
   getWallet () {
-    return this.__wallet;
+    return this.wallet
   }
 
-  /**
-   * @param {string} token
-   * @param {string|null} pubkey
-   * @param {Wallet|null} wallet
-   */
-  setAuthData ( {
-    token,
-    pubkey = null,
-    wallet = null
-  } ) {
-
-    this.__wallet = wallet;
-    this.__pubkey = pubkey;
-    this.__authLink.setAuthToken( token );
-
-    if ( this.__socket ) {
-      this.__socket.setAuthToken( token );
-    }
-
-    if ( this.__cipherLink ) {
-      this.__cipherLink.setWallet( this.__wallet );
-      this.__cipherLink.setPubKey( this.__pubkey );
-    }
-  }
-
-  socketDisconnect () {
-    if ( this.__socket ) {
-      this.__socket.disconnect();
-    }
-  }
-
-  /**
-   *
-   * @param {string} channel
-   */
-  unsubscribeFromChannel ( channel ) {
-    if ( this.__socket ) {
-      this.__socket.unsubscribeFromChannel( channel );
-    }
-  }
-
-  /**
-   * @return {string}
-   */
   getServerUri () {
-    return this.__serverUri;
+    return this.serverUri
   }
 
-  /**
-   * @return {string|null}
-   */
   getSocketUri () {
-    return this.__soketi.socketUri;
+    return this.soketi ? this.soketi.socketUri : null
   }
-
 }
 
-export default Client;
+export default Client

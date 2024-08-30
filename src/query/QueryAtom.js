@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import { gql } from '@apollo/client/core';
-import ResponseAtom from '../response/ResponseAtom';
+import Query from './Query'
+import { gql } from '@apollo/client/core'
+import ResponseAtom from '../response/ResponseAtom'
 
 /**
  * Query for getting the balance of a given wallet or token slug
@@ -58,8 +58,8 @@ export default class QueryAtom extends Query {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
 
     this.$__query = gql`query(
       $molecularHashes: [String!],
@@ -117,20 +117,7 @@ export default class QueryAtom extends Query {
           total
         }
       }
-    }`;
-  }
-
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseAtom}
-   */
-  createResponse ( json ) {
-    return new ResponseAtom( {
-      query: this,
-      json
-    } );
+    }`
   }
 
   /**
@@ -165,7 +152,7 @@ export default class QueryAtom extends Query {
    * @param {object} queryArgs
    * @return {object}
    */
-  static createVariables ( {
+  static createVariables ({
     molecularHashes,
     molecularHash,
     bundleHashes,
@@ -193,83 +180,96 @@ export default class QueryAtom extends Query {
     filter,
     latest,
     queryArgs
-  } ) {
-    if ( molecularHash ) {
-      molecularHashes = molecularHashes || [];
-      molecularHashes.push( molecularHash );
+  }) {
+    if (molecularHash) {
+      molecularHashes = molecularHashes || []
+      molecularHashes.push(molecularHash)
     }
 
-    if ( bundleHash ) {
-      bundleHashes = bundleHashes || [];
-      bundleHashes.push( bundleHash );
+    if (bundleHash) {
+      bundleHashes = bundleHashes || []
+      bundleHashes.push(bundleHash)
     }
 
-    if ( position ) {
-      positions = positions || [];
-      positions.push( position );
+    if (position) {
+      positions = positions || []
+      positions.push(position)
     }
 
-    if ( walletAddress ) {
-      walletAddresses = walletAddresses || [];
-      walletAddresses.push( walletAddress );
+    if (walletAddress) {
+      walletAddresses = walletAddresses || []
+      walletAddresses.push(walletAddress)
     }
 
-    if ( isotope ) {
-      isotopes = isotopes || [];
-      isotopes.push( isotope );
+    if (isotope) {
+      isotopes = isotopes || []
+      isotopes.push(isotope)
     }
 
-    if ( tokenSlug ) {
-      tokenSlugs = tokenSlugs || [];
-      tokenSlugs.push( tokenSlug );
+    if (tokenSlug) {
+      tokenSlugs = tokenSlugs || []
+      tokenSlugs.push(tokenSlug)
     }
 
-    if ( cellSlug ) {
-      cellSlugs = cellSlugs || [];
-      cellSlugs.push( cellSlug );
+    if (cellSlug) {
+      cellSlugs = cellSlugs || []
+      cellSlugs.push(cellSlug)
     }
 
-    if ( batchId ) {
-      batchIds = batchIds || [];
-      batchIds.push( batchId );
+    if (batchId) {
+      batchIds = batchIds || []
+      batchIds.push(batchId)
     }
 
-    if ( value ) {
-      values = values || [];
-      values.push( value );
+    if (value) {
+      values = values || []
+      values.push(value)
     }
 
-    if ( metaType ) {
-      metaTypes = metaTypes || [];
-      metaTypes.push( metaType );
+    if (metaType) {
+      metaTypes = metaTypes || []
+      metaTypes.push(metaType)
     }
 
-    if ( metaId ) {
-      metaIds = metaIds || [];
-      metaIds.push( metaId );
+    if (metaId) {
+      metaIds = metaIds || []
+      metaIds.push(metaId)
     }
 
-    if ( index ) {
-      indexes = indexes || [];
-      indexes.push( index );
+    if (index) {
+      indexes = indexes || []
+      indexes.push(index)
     }
 
     return {
-      molecularHashes: molecularHashes,
-      bundleHashes: bundleHashes,
-      positions: positions,
-      walletAddresses: walletAddresses,
-      isotopes: isotopes,
-      tokenSlugs: tokenSlugs,
-      cellSlugs: cellSlugs,
-      batchIds: batchIds,
-      values: values,
-      metaTypes: metaTypes,
-      metaIds: metaIds,
-      indexes: indexes,
-      filter: filter,
-      latest: latest,
-      queryArgs: queryArgs
-    };
+      molecularHashes,
+      bundleHashes,
+      positions,
+      walletAddresses,
+      isotopes,
+      tokenSlugs,
+      cellSlugs,
+      batchIds,
+      values,
+      metaTypes,
+      metaIds,
+      indexes,
+      filter,
+      latest,
+      queryArgs
+    }
+  }
+
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseAtom}
+   */
+  createResponse (json) {
+    return new ResponseAtom({
+      query: this,
+      json
+    })
   }
 }

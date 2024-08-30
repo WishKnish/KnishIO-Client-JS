@@ -1,9 +1,9 @@
-import Subscribe from './Subscribe';
-import { gql } from '@apollo/client/core';
+import Subscribe from './Subscribe'
+import { gql } from '@apollo/client/core'
 
 export default class CreateMoleculeSubscribe extends Subscribe {
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
     this.$__subscribe = gql`
       subscription onCreateMolecule ( $bundle: String! ) {
         CreateMolecule( bundle: $bundle ) {
@@ -49,6 +49,6 @@ export default class CreateMoleculeSubscribe extends Subscribe {
           }
         }
       }
-    `;
+    `
   }
 }

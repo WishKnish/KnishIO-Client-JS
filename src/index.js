@@ -46,12 +46,12 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
 
-import Atom from './Atom';
-import Molecule from './Molecule';
-import Wallet from './Wallet';
-import Meta from './Meta';
-import KnishIOClient from './KnishIOClient';
-import Test from './test/Test';
+import Atom from './Atom'
+import Molecule from './Molecule'
+import Wallet from './Wallet'
+import Meta from './Meta'
+import KnishIOClient from './KnishIOClient'
+import Test from './test/Test'
 import {
   base64ToHex,
   bufferToHexString,
@@ -61,11 +61,11 @@ import {
   hexToBase64,
   isHex,
   randomString
-} from './libraries/strings';
+} from './libraries/strings'
 import {
   generateBundleHash,
   generateSecret
-} from './libraries/crypto';
+} from './libraries/crypto'
 
 export {
   Atom,
@@ -88,4 +88,4 @@ export {
   // crypto
   generateSecret,
   generateBundleHash
-};
+}

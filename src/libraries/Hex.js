@@ -2,7 +2,6 @@
  * Create Uint8Array buffers from hexadecimal strings, and vice versa.
  */
 export default class Hex {
-
   /**
    * Converts the given buffer to a string containing its hexadecimal representation.
    *
@@ -19,58 +18,52 @@ export default class Hex {
    * @param {object} options
    * @return {string}
    */
-  static toHex ( arr, options ) {
-
+  static toHex (arr, options) {
     /**
      * @param {number} val
      * @param {boolean} uppercase
      * @return {*}
      */
-    const numberToHex = ( val, uppercase ) => {
+    const numberToHex = (val, uppercase) => {
+      const set = uppercase
+        ? ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
+        : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 
-        const set = uppercase ?
-          [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' ] :
-          [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ];
-
-        return set[ Math.floor( val / 16 ) ] + set[ val % 16 ];
-
+      return set[Math.floor(val / 16)] + set[val % 16]
+    }
+    const opts = Object.assign(
+      {
+        grouping: 0,
+        rowlength: 0,
+        uppercase: false
       },
-      opts = Object.assign(
-        {
-          grouping: 0,
-          rowlength: 0,
-          uppercase: false
-        },
-        options || {}
-      );
+      options || {}
+    )
 
-    let str = '',
-      group = 0,
-      column = 0;
+    let str = ''
+    let group = 0
+    let column = 0
 
-    for ( let i = 0; i < arr.length; ++i ) {
+    for (let i = 0; i < arr.length; ++i) {
+      str += numberToHex(arr[i], opts.uppercase)
 
-      str += numberToHex( arr[ i ], opts.uppercase );
-
-      if ( i === arr.length - 1 ) {
-        break;
+      if (i === arr.length - 1) {
+        break
       }
 
-      if ( opts.grouping > 0 && ++group === opts.grouping ) {
+      if (opts.grouping > 0 && ++group === opts.grouping) {
+        group = 0
 
-        group = 0;
-
-        if ( opts.rowlength > 0 && ++column === opts.rowlength ) {
-
-          column = 0;
-          str += '\n';
+        if (opts.rowlength > 0 && ++column === opts.rowlength) {
+          column = 0
+          str += '\n'
         } else {
-          str += ' ';
+          str += ' '
         }
       }
     }
 
-    return str;
+    return str
   }
 
   /**
@@ -84,35 +77,32 @@ export default class Hex {
    * @param {string} str
    * @return {Uint8Array}
    */
-  static toUint8Array ( str ) {
+  static toUint8Array (str) {
+    let target = str.toLowerCase().replace(/\s/g, '')
 
-    let target = str.toLowerCase().replace( /\s/g, '' );
-
-    if ( target.length % 2 === 1 ) {
-      target = `0${ target }`;
+    if (target.length % 2 === 1) {
+      target = `0${ target }`
     }
 
-    let buffer = new Uint8Array( Math.floor( target.length / 2 ) ),
-      curr = -1;
+    const buffer = new Uint8Array(Math.floor(target.length / 2))
+    let curr = -1
 
-    for ( let i = 0; i < target.length; ++i ) {
+    for (let i = 0; i < target.length; ++i) {
+      const c = target[i]
+      const val = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'].indexOf(c)
 
-      let c = target[ i ],
-        val = [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ].indexOf( c );
-
-      if ( val === -1 ) {
-        throw Error( 'unexpected character' );
+      if (val === -1) {
+        throw Error('unexpected character')
       }
 
-      if ( curr === -1 ) {
-        curr = 16 * val;
+      if (curr === -1) {
+        curr = 16 * val
       } else {
-
-        buffer[ Math.floor( i / 2 ) ] = curr + val;
-        curr = -1;
+        buffer[Math.floor(i / 2)] = curr + val
+        curr = -1
       }
     }
 
-    return buffer;
+    return buffer
   }
 }

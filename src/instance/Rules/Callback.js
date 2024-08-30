@@ -46,14 +46,13 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Meta from './Meta';
-import RuleArgumentException from './exception/RuleArgumentException';
-import { isNumeric } from '../../libraries/strings';
-import { intersect } from '../../libraries/array';
-import CodeException from '../../exception/CodeException';
+import Meta from './Meta'
+import RuleArgumentException from './exception/RuleArgumentException'
+import { isNumeric } from '../../libraries/strings'
+import { intersect } from '../../libraries/array'
+import CodeException from '../../exception/CodeException'
 
 export default class Callback {
-
   /**
    *
    * @param {string} action
@@ -65,7 +64,7 @@ export default class Callback {
    * @param {string|null} amount
    * @param {string|null} comparison
    */
-  constructor ( {
+  constructor ({
     action,
     metaType = null,
     metaId = null,
@@ -74,120 +73,81 @@ export default class Callback {
     token = null,
     amount = null,
     comparison = null
-  } ) {
-    if ( meta ) {
-      this.meta = meta;
+  }) {
+    if (meta) {
+      this.meta = meta
     }
 
-    if ( !action ) {
-      throw new RuleArgumentException( 'Callback structure violated, missing mandatory "action" parameter.' );
+    if (!action) {
+      throw new RuleArgumentException('Callback structure violated, missing mandatory "action" parameter.')
     }
 
-    this.__metaId = metaId;
-    this.__metaType = metaType;
-    this.__action = action;
-    this.__address = address;
-    this.__token = token;
-    this.__amount = amount;
-    this.__comparison = comparison;
+    this.__metaId = metaId
+    this.__metaType = metaType
+    this.__action = action
+    this.__address = address
+    this.__token = token
+    this.__amount = amount
+    this.__comparison = comparison
   }
 
   /**
    *
    * @param {string} comparison
    */
-  set comparison ( comparison ) {
-    this.__comparison = comparison;
+  set comparison (comparison) {
+    this.__comparison = comparison
   }
 
   /**
    *
    * @param {string} amount
    */
-  set amount ( amount ) {
-    if ( !isNumeric( amount ) ) {
-      throw new CodeException('Parameter amount should be a string containing numbers');
+  set amount (amount) {
+    if (!isNumeric(amount)) {
+      throw new CodeException('Parameter amount should be a string containing numbers')
     }
-    this.__amount = amount;
+    this.__amount = amount
   }
 
   /**
    *
    * @param {string} token
    */
-  set token ( token ) {
-    this.__token = token;
+  set token (token) {
+    this.__token = token
   }
 
   /**
    *
    * @param {string} address
    */
-  set address ( address ) {
-    this.__address = address;
+  set address (address) {
+    this.__address = address
   }
 
   /**
    *
    * @param {Meta|object} meta
    */
-  set meta ( meta ) {
-    this.__meta = meta instanceof Meta ? meta : Meta.toObject( meta );
+  set meta (meta) {
+    this.__meta = meta instanceof Meta ? meta : Meta.toObject(meta)
   }
 
   /**
    *
    * @param {string} metaType
    */
-  set metaType ( metaType ) {
-    this.__metaType = metaType;
+  set metaType (metaType) {
+    this.__metaType = metaType
   }
 
   /**
    *
    * @param {string} metaId
    */
-  set metaId ( metaId ) {
-    this.__metaId = metaId;
-  }
-
-
-  /**
-   *
-   * @return {{action: string}}
-   */
-  toJSON () {
-    const meta = {
-      action: this.__action
-    };
-
-    if ( this.__metaType ) {
-      meta.metaType = this.__metaType;
-    }
-    if ( this.__metaId ) {
-      meta.metaId = this.__metaId;
-    }
-    if ( this.__meta ) {
-      meta.meta = this.__meta;
-    }
-
-    if ( this.__address ) {
-      meta.address = this.__address;
-    }
-
-    if ( this.__token ) {
-      meta.token = this.__token;
-    }
-
-    if ( this.__amount ) {
-      meta.amount = this.__amount;
-    }
-
-    if ( this.__comparison ) {
-      meta.comparison = this.__comparison;
-    }
-
-    return meta;
+  set metaId (metaId) {
+    this.__metaId = metaId
   }
 
   /**
@@ -196,92 +156,130 @@ export default class Callback {
    *
    * @return Callback
    */
-  static toObject ( object ) {
-    const callback = new Callback( {
+  static toObject (object) {
+    const callback = new Callback({
       action: object.action
-    } );
+    })
 
-    if ( object.metaType ) {
-      callback.metaType = object.metaType;
+    if (object.metaType) {
+      callback.metaType = object.metaType
     }
 
-    if ( object.metaId ) {
-      callback.metaId = object.metaId;
+    if (object.metaId) {
+      callback.metaId = object.metaId
     }
 
-    if ( object.meta ) {
-      callback.meta = object.meta;
+    if (object.meta) {
+      callback.meta = object.meta
     }
 
-    if ( object.address ) {
-      callback.address = object.address;
+    if (object.address) {
+      callback.address = object.address
     }
 
-    if ( object.token ) {
-      callback.token = object.token;
+    if (object.token) {
+      callback.token = object.token
     }
 
-    if ( object.amount ) {
-      callback.amount = object.amount;
+    if (object.amount) {
+      callback.amount = object.amount
     }
 
-    if ( object.comparison ) {
-      callback.comparison = object.comparison;
+    if (object.comparison) {
+      callback.comparison = object.comparison
     }
 
-    return callback;
+    return callback
+  }
+
+  /**
+   *
+   * @return {{action: string}}
+   */
+  toJSON () {
+    const meta = {
+      action: this.__action
+    }
+
+    if (this.__metaType) {
+      meta.metaType = this.__metaType
+    }
+    if (this.__metaId) {
+      meta.metaId = this.__metaId
+    }
+    if (this.__meta) {
+      meta.meta = this.__meta
+    }
+
+    if (this.__address) {
+      meta.address = this.__address
+    }
+
+    if (this.__token) {
+      meta.token = this.__token
+    }
+
+    if (this.__amount) {
+      meta.amount = this.__amount
+    }
+
+    if (this.__comparison) {
+      meta.comparison = this.__comparison
+    }
+
+    return meta
   }
 
   /**
    * @return {boolean}
    */
   isReject () {
-    return this._is( 'reject' );
+    return this._is('reject')
   }
 
   /**
    * @return {boolean}
    */
   isMeta () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'metaId', 'metaType', 'meta'] );
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'metaId', 'metaType', 'meta'])
 
-    return prop.length === 4 && this._is( 'meta' );
+    return prop.length === 4 && this._is('meta')
   }
 
   /**
    * @return {boolean}
    */
   isCollect () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'address', 'token', 'amount', 'comparison'] );
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'address', 'token', 'amount', 'comparison'])
 
-    return prop.length === 5 && this._is( 'collect' );
+    return prop.length === 5 && this._is('collect')
   }
 
   /**
    * @return {boolean}
    */
   isBuffer () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'address', 'token', 'amount', 'comparison'] );
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'address', 'token', 'amount', 'comparison'])
 
-    return prop.length === 5 && this._is( 'buffer' );
+    return prop.length === 5 && this._is('buffer')
   }
 
   /**
    * @return {boolean}
    */
   isRemit () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'token', 'amount'] );
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'token', 'amount'])
 
-    return prop.length === 3 && this._is( 'remit' );
+    return prop.length === 3 && this._is('remit')
   }
 
   /**
    * @return {boolean}
    */
   isBurn () {
-    const prop = intersect( Object.keys( this.toJSON() ), ['action', 'token', 'amount', 'comparison'] );
+    const prop = intersect(Object.keys(this.toJSON()), ['action', 'token', 'amount', 'comparison'])
 
-    return prop.length === 4 && this._is( 'burn' );
+    return prop.length === 4 && this._is('burn')
   }
 
   /**
@@ -290,7 +288,7 @@ export default class Callback {
    * @return {boolean}
    * @private
    */
-  _is( type ) {
-    return this.__action.toLowerCase() === type.toLowerCase();
+  _is (type) {
+    return this.__action.toLowerCase() === type.toLowerCase()
   }
 }

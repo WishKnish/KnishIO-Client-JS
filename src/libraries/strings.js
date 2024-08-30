@@ -1,27 +1,21 @@
-import bigInt from 'big-integer';
-import Hex from './Hex';
-import {
-  decode as decodeBase64,
-  encode as encodeBase64
-} from '@stablelib/base64';
-import getRandomValues from 'get-random-values';
+import Hex from './Hex'
 
-if ( !String.prototype.trim ) {
+if (!String.prototype.trim) {
   String.prototype.trim = function () {
-    return this.replace( /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '' );
-  };
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '')
+  }
 }
 
-if ( !String.prototype.toCamelCase ) {
+if (!String.prototype.toCamelCase) {
   String.prototype.toCamelCase = function () {
-    return this.toLowerCase().replace( /[^a-zA-Z0-9]+(.)/g, ( m, chr ) => chr.toUpperCase() );
-  };
+    return this.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+  }
 }
 
-if ( !String.prototype.toSnakeCase ) {
+if (!String.prototype.toSnakeCase) {
   String.prototype.toSnakeCase = function () {
-    return this.replace( /[A-Z]/g, letter => `_${ letter.toLowerCase() }` );
-  };
+    return this.replace(/[A-Z]/g, letter => `_${ letter.toLowerCase() }`)
+  }
 }
 
 /**
@@ -31,16 +25,15 @@ if ( !String.prototype.toSnakeCase ) {
  * @param size
  * @return {any[]}
  */
-export function chunkSubstr ( str, size ) {
+export function chunkSubstr (str, size) {
+  const numChunks = Math.ceil(str.length / size)
+  const chunks = []
 
-  const numChunks = Math.ceil( str.length / size ),
-    chunks = [];
-
-  for ( let chunkIndex = 0, o = 0; chunkIndex < numChunks; ++chunkIndex, o += size ) {
-    chunks[ chunkIndex ] = str.substr( o, size );
+  for (let chunkIndex = 0, o = 0; chunkIndex < numChunks; ++chunkIndex, o += size) {
+    chunks[chunkIndex] = str.substr(o, size)
   }
 
-  return chunks;
+  return chunks
 }
 
 /**
@@ -50,78 +43,52 @@ export function chunkSubstr ( str, size ) {
  * @param alphabet
  * @return {string}
  */
-export function randomString ( length = 256, alphabet = 'abcdef0123456789' ) {
+export function randomString (length = 256, alphabet = 'abcdef0123456789') {
+  let array = new Uint8Array(length)
 
-  let array = new Uint8Array( length );
+  array = crypto.getRandomValues(array)
 
-  array = getRandomValues( array );
+  array = array.map(x => alphabet.charCodeAt(x % alphabet.length))
 
-  array = array.map( x => alphabet.charCodeAt( x % alphabet.length ) );
-
-  return String.fromCharCode.apply( null, array );
+  return String.fromCharCode.apply(null, array)
 }
 
 /**
  * Convert charset between bases and alphabets
  *
  * @param src
- * @param fromBase
- * @param toBase
- * @param srcSymbolTable
- * @param destSymbolTable
+ * @param {int} fromBase
+ * @param {int} toBase
+ * @param { string} srcSymbolTable
+ * @param {string} destSymbolTable
  * @return {boolean|string|number}
  */
-export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, destSymbolTable ) {
+export function charsetBaseConvert (src, fromBase, toBase, srcSymbolTable, destSymbolTable) {
+  const baseSymbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡'
+  srcSymbolTable = srcSymbolTable || baseSymbols
+  destSymbolTable = destSymbolTable || srcSymbolTable
 
-  // From: convert.js: http://rot47.net/_js/convert.js
-  //	http://rot47.net
-  //	http://helloacm.com
-  //	http://codingforspeed.com
-  //	Dr Zhihua Lai
-  //
-  // Modified by MLM to work with BigInteger: https://github.com/peterolson/BigInteger.js
-  // This is able to convert extremely large numbers; At any base equal to or less than the symbol table length
-
-  // The reasoning behind capital first is because it comes first in an ASCII/Unicode character map
-  // 96 symbols support up to base 96
-  const baseSymbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡';
-
-  // Default the symbol table to a nice default table that supports up to base 96
-  srcSymbolTable = srcSymbolTable ? srcSymbolTable : baseSymbols;
-  // Default the desttable equal to the srctable if it isn't defined
-  destSymbolTable = destSymbolTable ? destSymbolTable : srcSymbolTable;
-
-  // Make sure we are not trying to convert out of the symbol table range
-  if ( fromBase > srcSymbolTable.length || toBase > destSymbolTable.length ) {
-
-    console.warn( 'Strings::charsetBaseConvert() - Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length );
-    return false;
+  if (fromBase > srcSymbolTable.length || toBase > destSymbolTable.length) {
+    console.warn('Strings::charsetBaseConvert() - Can\'t convert', src, 'to base', toBase, 'greater than symbol table length. src-table:', srcSymbolTable.length, 'dest-table:', destSymbolTable.length)
+    return false
   }
 
-  // First convert to base 10
-  let val = bigInt( 0 );
-
-  for ( let charIndex = 0; charIndex < src.length; charIndex++ ) {
-    val = val.multiply( fromBase ).add( srcSymbolTable.indexOf( src.charAt( charIndex ) ) );
+  // Convert from source base to BigInt in base 10
+  let val = BigInt(0)
+  for (let charIndex = 0; charIndex < src.length; charIndex++) {
+    val = val * BigInt(fromBase) + BigInt(srcSymbolTable.indexOf(src.charAt(charIndex)))
   }
 
-  if ( val.lesser( 0 ) ) {
-    return 0;
+  // Convert from BigInt in base 10 to destination base
+  let res = ''
+  while (val > 0) {
+    const r = val % BigInt(toBase)
+    res = destSymbolTable.charAt(Number(r)) + res
+    val /= BigInt(toBase)
   }
 
-  // Then covert to any base
-  let r = val.mod( toBase ),
-    res = destSymbolTable.charAt( r ),
-    q = val.divide( toBase );
-
-  while ( !q.equals( 0 ) ) {
-
-    r = q.mod( toBase );
-    q = q.divide( toBase );
-    res = destSymbolTable.charAt( r ) + res;
-  }
-
-  return res;
+  // If the result is empty, it means the source was 0
+  return res || '0'
 }
 
 /**
@@ -130,8 +97,8 @@ export function charsetBaseConvert ( src, fromBase, toBase, srcSymbolTable, dest
  * @param byteArray
  * @return {string}
  */
-export function bufferToHexString ( byteArray ) {
-  return Hex.toHex( byteArray, {} );
+export function bufferToHexString (byteArray) {
+  return Hex.toHex(byteArray, {})
 }
 
 /**
@@ -140,8 +107,8 @@ export function bufferToHexString ( byteArray ) {
  * @param hexString
  * @return {Uint8Array}
  */
-export function hexStringToBuffer ( hexString ) {
-  return Hex.toUint8Array( hexString );
+export function hexStringToBuffer (hexString) {
+  return Hex.toUint8Array(hexString)
 }
 
 /**
@@ -150,8 +117,8 @@ export function hexStringToBuffer ( hexString ) {
  * @param string
  * @return {string}
  */
-export function hexToBase64 ( string ) {
-  return encodeBase64( Hex.toUint8Array( string ) );
+export function hexToBase64 (string) {
+  return Buffer.from(string, 'hex').toString('base64')
 }
 
 /**
@@ -160,22 +127,22 @@ export function hexToBase64 ( string ) {
  * @param {string} string
  * @return {string}
  */
-export function base64ToHex ( string ) {
-  return Hex.toHex( decodeBase64( string ), {} );
+export function base64ToHex (string) {
+  return Buffer.from(string, 'base64').toString('hex')
 }
 
 /**
  * @param {string} str
  * @return {boolean}
  */
-export function isHex ( str ) {
-  return /^[A-F0-9]+$/i.test( str );
+export function isHex (str) {
+  return /^[A-F0-9]+$/i.test(str)
 }
 
 /**
  * @param {string} str
  * @return {boolean}
  */
-export function isNumeric( str ) {
-  return (typeof(str) === 'number' || typeof(str) === 'string' && str.trim() !== '') && !isNaN(str);
+export function isNumeric (str) {
+  return (typeof (str) === 'number' || (typeof (str) === 'string' && str.trim() !== '')) && !isNaN(str)
 }

@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query';
-import ResponseMetaType from '../response/ResponseMetaType';
-import { gql } from '@apollo/client/core';
+import Query from './Query'
+import ResponseMetaType from '../response/ResponseMetaType'
+import { gql } from '@apollo/client/core'
 
 /**
  * Query for retrieving Meta Asset information
@@ -58,8 +58,8 @@ export default class QueryMetaType extends Query {
    *
    * @param apolloClient
    */
-  constructor ( apolloClient ) {
-    super( apolloClient );
+  constructor (apolloClient) {
+    super(apolloClient)
 
     this.$__query = gql`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $latestMetas: Boolean, $queryArgs: QueryArgs, $countBy: String ) {
       MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, latestMetas: $latestMetas, queryArgs: $queryArgs, countBy: $countBy ) {
@@ -85,20 +85,7 @@ export default class QueryMetaType extends Query {
           total
         }
       }
-    }`;
-  }
-
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseMetaType}
-   */
-  createResponse ( json ) {
-    return new ResponseMetaType( {
-      query: this,
-      json
-    } );
+    }`
   }
 
   /**
@@ -116,7 +103,7 @@ export default class QueryMetaType extends Query {
    * @param {string|null} countBy
    * @return {{}}
    */
-  static createVariables ( {
+  static createVariables ({
     metaType = null,
     metaId = null,
     key = null,
@@ -127,56 +114,66 @@ export default class QueryMetaType extends Query {
     queryArgs = null,
     count = null,
     countBy = null
-  } ) {
+  }) {
+    const variables = {}
 
-    const variables = {};
-
-    if ( metaType ) {
-      variables[ typeof metaType === 'string' ? 'metaType' : 'metaTypes' ] = metaType;
+    if (metaType) {
+      variables[typeof metaType === 'string' ? 'metaType' : 'metaTypes'] = metaType
     }
 
-    if ( metaId ) {
-      variables[ typeof metaId === 'string' ? 'metaId' : 'metaIds' ] = metaId;
+    if (metaId) {
+      variables[typeof metaId === 'string' ? 'metaId' : 'metaIds'] = metaId
     }
 
-    if ( key ) {
-      variables[ typeof key === 'string' ? 'key' : 'keys' ] = key;
+    if (key) {
+      variables[typeof key === 'string' ? 'key' : 'keys'] = key
     }
 
-    if ( value ) {
-      variables[ typeof value === 'string' ? 'value' : 'values' ] = value;
+    if (value) {
+      variables[typeof value === 'string' ? 'value' : 'values'] = value
     }
 
-    if ( latest ) {
-      variables[ 'latest' ] = !!latest;
+    if (latest) {
+      variables.latest = !!latest
     }
 
-    if ( latestMetas ) {
-      variables[ 'latestMetas' ] = !!latestMetas;
+    if (latestMetas) {
+      variables.latestMetas = !!latestMetas
     }
 
-    if ( filter ) {
-      variables[ 'filter' ] = filter;
+    if (filter) {
+      variables.filter = filter
     }
 
-    if ( queryArgs ) {
-
-      if ( typeof queryArgs.limit === 'undefined' || queryArgs.limit === 0 ) {
-        queryArgs.limit = '*';
+    if (queryArgs) {
+      if (typeof queryArgs.limit === 'undefined' || queryArgs.limit === 0) {
+        queryArgs.limit = '*'
       }
 
-      variables[ 'queryArgs' ] = queryArgs;
+      variables.queryArgs = queryArgs
     }
 
-    if ( count ) {
-      variables[ 'count' ] = count;
+    if (count) {
+      variables.count = count
     }
 
-    if ( countBy ) {
-      variables[ 'countBy' ] = countBy;
+    if (countBy) {
+      variables.countBy = countBy
     }
 
-    return variables;
+    return variables
   }
 
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseMetaType}
+   */
+  createResponse (json) {
+    return new ResponseMetaType({
+      query: this,
+      json
+    })
+  }
 }

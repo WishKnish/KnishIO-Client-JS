@@ -1,4 +1,4 @@
-import BaseException from '../../../exception/BaseException';
+import BaseException from '../../../exception/BaseException'
 
 export default class RuleArgumentException extends BaseException {
   /**
@@ -8,8 +8,8 @@ export default class RuleArgumentException extends BaseException {
    * @param {string|null} fileName
    * @param {number|null} lineNumber
    */
-  constructor ( message = 'An incorrect argument!', fileName = null, lineNumber = null ) {
-    super( message, fileName, lineNumber );
-    this.name = 'RuleArgumentException';
+  constructor (message = 'An incorrect argument!', fileName = null, lineNumber = null) {
+    super(message, fileName, lineNumber)
+    this.name = 'RuleArgumentException'
   }
 }

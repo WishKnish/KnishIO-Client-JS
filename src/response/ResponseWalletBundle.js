@@ -45,30 +45,29 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from '../query/Query';
-import Response from './Response';
-import Meta from '../Meta';
+import Query from '../query/Query'
+import Response from './Response'
+import Meta from '../Meta'
 
 /**
  * Response for Wallet Bundle query
  */
 export default class ResponseWalletBundle extends Response {
-
   /**
    * Class constructor
    *
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.WalletBundle'
-    } );
+    })
   }
 
   /**
@@ -77,19 +76,19 @@ export default class ResponseWalletBundle extends Response {
    * @return {{}|null}
    */
   payload () {
-    const bundleData = this.data();
+    const bundleData = this.data()
 
-    if ( !bundleData || bundleData.length === 0 ) {
-      return null;
+    if (!bundleData || bundleData.length === 0) {
+      return null
     }
 
-    const aggregate = {};
+    const aggregate = {}
 
-    bundleData.forEach( bundle => {
-      bundle.metas = Meta.aggregateMeta( bundle.metas );
-      aggregate[ bundle.bundleHash ] = bundle;
-    } );
+    bundleData.forEach(bundle => {
+      bundle.metas = Meta.aggregateMeta(bundle.metas)
+      aggregate[bundle.bundleHash] = bundle
+    })
 
-    return aggregate;
+    return aggregate
   }
 }

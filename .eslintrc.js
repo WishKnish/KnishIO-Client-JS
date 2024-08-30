@@ -2,33 +2,30 @@ module.exports = {
   root: true,
 
   parserOptions: {
-    parser: '@babel/eslint-parser',
-    sourceType: 'module',
-    requireConfigFile: false
+    ecmaVersion: 'latest',
+    sourceType: 'module'
   },
 
   env: {
-    browser: true
+    browser: true,
+    es2021: true
   },
 
-  // https://github.com/vuejs/eslint-plugin-vue#priority-a-essential-error-prevention
-  // consider switching to `plugin:vue/strongly-recommended` or `plugin:vue/recommended` for stricter rules.
   extends: [
-    'plugin:vue/recommended'
-    // 'airbnb-base'
+    'standard',
+    'plugin:vue/vue3-essential'
   ],
 
   // required to lint *.vue files
   plugins: [
-    'vue',
-    '@babel'
+    'vue'
   ],
 
   globals: {
-    'ga': true, // Google Analytics
-    'cordova': true,
-    '__statics': true,
-    'process': true
+    ga: true, // Google Analytics
+    cordova: true,
+    __statics: true,
+    process: true
   },
 
   // add your custom rules here
@@ -36,11 +33,11 @@ module.exports = {
     'no-param-reassign': 'off',
     'no-underscore-dangle': 'off',
     'max-len': 'off',
-    'semi': 1,
-    'comma-dangle': [ 'error', 'never' ],
-    'spaced-comment': [ 'error', 'always' ],
-    'quotes': [ 'error', 'single' ],
-    'prefer-template': [ 'error' ],
+    semi: 1,
+    'comma-dangle': ['error', 'never'],
+    'spaced-comment': ['error', 'always'],
+    quotes: ['error', 'single'],
+    'prefer-template': ['error'],
     'no-multi-spaces': 'error',
 
     // allow console.log during development only
@@ -53,4 +50,4 @@ module.exports = {
     // 'template-curly-spacing': [ "error", "always" ],
     indent: 'off'
   }
-};
+}

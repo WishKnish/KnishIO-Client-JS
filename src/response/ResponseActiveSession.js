@@ -46,8 +46,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Query from '../query/Query';
-import Response from './Response';
+import Query from '../query/Query'
+import Response from './Response'
 
 export default class ResponseActiveSession extends Response {
   /**
@@ -56,14 +56,14 @@ export default class ResponseActiveSession extends Response {
    * @param {Query} query
    * @param {object} json
    */
-  constructor ( {
+  constructor ({
     query,
     json
-  } ) {
-    super( {
+  }) {
+    super({
       query,
       json,
       dataKey: 'data.ActiveSession'
-    } );
+    })
   }
 }

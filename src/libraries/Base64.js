@@ -1,40 +1,46 @@
-import {
-  decode as decodeBase64,
-  encode as encodeBase64
-} from '@stablelib/base64';
-import { Buffer } from 'buffer';
-
-
 export default class Base64 {
   /**
    * @param {Buffer|ArrayBuffer|Uint8Array} data
    * @return {string}
    */
-  static encode ( data ) {
-    return encodeBase64( data );
+  static encode (data) {
+    // Convert the Uint8Array to a binary string
+    const binaryString = String.fromCharCode(...data)
+
+    // Encode the binary string as base64
+    return btoa(binaryString)
   }
 
   /**
    * @param {string} data
    * @return {Buffer|ArrayBuffer|Uint8Array}
    */
-  static decode ( data ) {
-    return Buffer.from( decodeBase64( data ) );
+  static decode (data) {
+    // Decode the base64 input
+    const binaryString = atob(data)
+
+    // Convert the binary string to a Uint8Array
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+
+    return bytes
   }
 
   /**
    * @param {Buffer|ArrayBuffer|Uint8Array} data
    * @return {string}
    */
-  encode ( data ) {
-    return Base64.encode( data );
+  encode (data) {
+    return Base64.encode(data)
   }
 
   /**
    * @param {string} data
    * @return {Buffer|ArrayBuffer|Uint8Array}
    */
-  decode ( data ) {
-    return Base64.decode( data );
+  decode (data) {
+    return Base64.decode(data)
   }
 }
