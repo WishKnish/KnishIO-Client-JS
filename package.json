@@ -47,6 +47,7 @@
     "isomorphic-fetch": "^3.0.0",
     "jssha": "^3.3.0",
     "pusher-js": "^7.0.6",
+    "subscriptions-transport-ws": "^0.11.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-sealedbox-js": "^1.2.0",
     "uri-js": "^4.4.1"
