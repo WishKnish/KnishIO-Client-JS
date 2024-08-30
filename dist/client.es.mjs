@@ -30118,23 +30118,21 @@ class dh extends Tr {
   }
   /**
    * Sends the Mutation to a Knish.IO node and returns the Response
-   *
-   * @param {Object} options
-   * @param {Object} options.variables
-   * @param {Object||null} options.context
-   * @returns {Promise<Response>}
+   * @param {Object||null} variables
+   * @param {Object||null} context
+   * @returns {Promise<Response|null>}
    */
   execute(n) {
-    return ze(this, arguments, function* ({ variables: e = null, context: t = {} }) {
+    return ze(this, arguments, function* ({ variables: e = {}, context: t = {} }) {
       this.$__request = this.createQuery({
         variables: e
       });
       const a = $r($r({}, t), this.createQueryContext());
       try {
-        const i = yield this.client.mutate(Ei($r({}, this.$__request), {
+        const i = Ei($r({}, this.$__request), {
           context: a
-        }));
-        return this.$__response = yield this.createResponseRaw(i), this.$__response;
+        }), o = yield this.client.mutate(i);
+        return this.$__response = yield this.createResponseRaw(o), this.$__response;
       } catch (i) {
         if (i.name === "AbortError")
           return console.log("Mutation was cancelled"), new ur({

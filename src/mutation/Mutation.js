@@ -67,13 +67,11 @@ export default class Mutation extends Query {
 
   /**
    * Sends the Mutation to a Knish.IO node and returns the Response
-   *
-   * @param {Object} options
-   * @param {Object} options.variables
-   * @param {Object||null} options.context
-   * @returns {Promise<Response>}
+   * @param {Object||null} variables
+   * @param {Object||null} context
+   * @returns {Promise<Response|null>}
    */
-  async execute ({ variables = null, context = {} }) {
+  async execute ({ variables = {}, context = {} }) {
     this.$__request = this.createQuery({
       variables
     })
@@ -84,10 +82,11 @@ export default class Mutation extends Query {
     }
 
     try {
-      const response = await this.client.mutate({
+      const mutationParams = {
         ...this.$__request,
         context: mergedContext
-      })
+      }
+      const response = await this.client.mutate(mutationParams)
 
       this.$__response = await this.createResponseRaw(response)
 
