@@ -20,7 +20,6 @@ describe('KnishIOClient', () => {
     })
     client.setSecret(testSecret)
   })
-
   test('initializes client correctly', () => {
     expect(client.uri()).toBe(testUri)
     expect(client.cellSlug()).toBe('testCell')
@@ -28,7 +27,7 @@ describe('KnishIOClient', () => {
   })
 
   test('creates molecule correctly', async () => {
-    const molecule = await client.createMolecule()
+    const molecule = await client.createMolecule({})
     expect(molecule).toBeInstanceOf(Molecule)
     expect(molecule.secret).toBe(testSecret)
     expect(molecule.cellSlug).toBe('testCell')
@@ -64,10 +63,10 @@ describe('KnishIOClient', () => {
   })
 
   test('signs and checks molecule correctly', async () => {
-    const molecule = await client.createMolecule()
+    const molecule = await client.createMolecule({})
     molecule.addAtom(Wallet.create({ secret: testSecret, token: 'TEST' }))
 
-    molecule.sign()
+    molecule.sign({})
     expect(molecule.molecularHash).toBeTruthy()
 
     expect(() => molecule.check()).not.toThrow()

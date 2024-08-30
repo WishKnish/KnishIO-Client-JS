@@ -1,6 +1,13 @@
-import { describe, test, expect } from '@jest/globals'
+import {
+  describe,
+  test,
+  expect
+} from '@jest/globals'
 import Wallet from '../src/Wallet'
-import { generateSecret, generateBundleHash } from '../src'
+import {
+  generateSecret,
+  generateBundleHash
+} from '../src'
 
 describe('Wallet', () => {
   const testSecret = generateSecret()
@@ -23,7 +30,10 @@ describe('Wallet', () => {
   })
 
   test('generates correct key', () => {
-    const wallet = new Wallet({ secret: testSecret, token: 'TEST' })
+    const wallet = new Wallet({
+      secret: testSecret,
+      token: 'TEST'
+    })
     const key = Wallet.generateKey({
       secret: testSecret,
       token: 'TEST',
@@ -34,7 +44,10 @@ describe('Wallet', () => {
   })
 
   test('generates correct address', () => {
-    const wallet = new Wallet({ secret: testSecret, token: 'TEST' })
+    const wallet = new Wallet({
+      secret: testSecret,
+      token: 'TEST'
+    })
     expect(wallet.address).toHaveLength(64)
     expect(wallet.address).toMatch(/^[0-9a-f]+$/)
   })
@@ -52,7 +65,10 @@ describe('Wallet', () => {
   })
 
   test('encrypts and decrypts message correctly', () => {
-    const wallet = new Wallet({ secret: testSecret, token: 'TEST' })
+    const wallet = new Wallet({
+      secret: testSecret,
+      token: 'TEST'
+    })
     const message = { foo: 'bar' }
     const encrypted = wallet.encryptMessage(message, wallet.pubkey)
     const decrypted = wallet.decryptMessage(encrypted)
@@ -60,11 +76,23 @@ describe('Wallet', () => {
   })
 
   test('splits token units correctly', () => {
-    const wallet = new Wallet({ secret: testSecret, token: 'TEST' })
+    const wallet = new Wallet({
+      secret: testSecret,
+      token: 'TEST'
+    })
     wallet.tokenUnits = [
-      { id: 'unit1', name: 'Unit 1' },
-      { id: 'unit2', name: 'Unit 2' },
-      { id: 'unit3', name: 'Unit 3' }
+      {
+        id: 'unit1',
+        name: 'Unit 1'
+      },
+      {
+        id: 'unit2',
+        name: 'Unit 2'
+      },
+      {
+        id: 'unit3',
+        name: 'Unit 3'
+      }
     ]
     const remainderWallet = wallet.createRemainder(testSecret)
 

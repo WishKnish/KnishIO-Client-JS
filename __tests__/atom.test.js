@@ -1,11 +1,18 @@
-import { describe, test, expect } from '@jest/globals'
+import {
+  describe,
+  test,
+  expect
+} from '@jest/globals'
 import Atom from '../src/Atom'
 import Wallet from '../src/Wallet'
 import { generateSecret } from '../src'
 
 describe('Atom', () => {
   const testSecret = generateSecret()
-  const testWallet = new Wallet({ secret: testSecret, token: 'TEST' })
+  const testWallet = new Wallet({
+    secret: testSecret,
+    token: 'TEST'
+  })
 
   test('creates an atom with correct properties', () => {
     const atom = new Atom({
@@ -82,9 +89,24 @@ describe('Atom', () => {
   })
 
   test('sorts atoms correctly', () => {
-    const atom1 = Atom.create({ isotope: 'V', wallet: testWallet, value: '100', index: 1 })
-    const atom2 = Atom.create({ isotope: 'V', wallet: testWallet, value: '200', index: 0 })
-    const atom3 = Atom.create({ isotope: 'V', wallet: testWallet, value: '300', index: 2 })
+    const atom1 = Atom.create({
+      isotope: 'V',
+      wallet: testWallet,
+      value: '100'
+    })
+    atom1.index = 1
+    const atom2 = Atom.create({
+      isotope: 'V',
+      wallet: testWallet,
+      value: '200'
+    })
+    atom2.index = 0
+    const atom3 = Atom.create({
+      isotope: 'V',
+      wallet: testWallet,
+      value: '300'
+    })
+    atom3.index = 2
 
     const sortedAtoms = Atom.sortAtoms([atom1, atom2, atom3])
     expect(sortedAtoms[0].index).toBe(0)
