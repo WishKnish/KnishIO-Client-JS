@@ -1394,14 +1394,6 @@ export default class KnishIOClient {
       bundle = [bundle]
     }
 
-    // Bundle default init & to array convertion
-    if ( !bundle ) {
-      bundle = this.getBundle();
-    }
-    if ( typeof bundle === 'string' ) {
-      bundle = [ bundle ];
-    }
-
     /**
      * @type {QueryWalletBundle}
      */

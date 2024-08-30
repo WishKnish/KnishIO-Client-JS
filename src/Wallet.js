@@ -338,25 +338,6 @@ export default class Wallet {
     return remainderWallet
   }
 
-
-  /**
-   * Create a remainder wallet from the source one
-   *
-   * @param secret
-   */
-  createRemainder( secret ) {
-    let remainderWallet = Wallet.create( {
-      secretOrBundle: secret,
-      token: this.token,
-      characters: this.characters
-    } );
-    remainderWallet.initBatchId( {
-      sourceWallet: this,
-      isRemainder: true
-    } );
-    return remainderWallet;
-  }
-
   /**
    * @return boolean
    */
