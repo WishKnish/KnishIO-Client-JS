@@ -51,7 +51,6 @@ import Molecule from './Molecule'
 import Wallet from './Wallet'
 import Meta from './Meta'
 import KnishIOClient from './KnishIOClient'
-import Test from './test/Test'
 import {
   base64ToHex,
   bufferToHexString,
@@ -73,7 +72,6 @@ export {
   Wallet,
   Meta,
   KnishIOClient,
-  Test,
 
   // strings
   chunkSubstr,
