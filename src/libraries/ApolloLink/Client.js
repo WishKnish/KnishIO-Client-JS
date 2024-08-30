@@ -1,50 +1,3 @@
-/*
-                               (
-                              (/(
-                              (//(
-                              (///(
-                             (/////(
-                             (//////(                          )
-                            (////////(                        (/)
-                            (////////(                       (///)
-                           (//////////(                      (////)
-                           (//////////(                     (//////)
-                          (////////////(                    (///////)
-                         (/////////////(                   (/////////)
-                        (//////////////(                  (///////////)
-                        (///////////////(                (/////////////)
-                       (////////////////(               (//////////////)
-                      (((((((((((((((((((              (((((((((((((((
-                     (((((((((((((((((((              ((((((((((((((
-                     (((((((((((((((((((            ((((((((((((((
-                    ((((((((((((((((((((           (((((((((((((
-                    ((((((((((((((((((((          ((((((((((((
-                    (((((((((((((((((((         ((((((((((((
-                    (((((((((((((((((((        ((((((((((
-                    ((((((((((((((((((/      (((((((((
-                    ((((((((((((((((((     ((((((((
-                    (((((((((((((((((    (((((((
-                   ((((((((((((((((((  (((((
-                   #################  ##
-                   ################  #
-                  ################# ##
-                 %################  ###
-                 ###############(   ####
-                ###############      ####
-               ###############       ######
-              %#############(        (#######
-             %#############           #########
-            ############(              ##########
-           ###########                  #############
-          #########                      ##############
-        %######
-
-        Powered by Knish.IO: Connecting a Decentralized World
-
-Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
-
-License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
-*/
 import {
   ApolloClient,
   InMemoryCache,
@@ -55,7 +8,8 @@ import { onError } from '@apollo/client/link/error'
 import { getMainDefinition } from '@apollo/client/utilities'
 import { createHttpLink } from '@apollo/client/link/http'
 import { setContext } from '@apollo/client/link/context'
-import { WebSocketLink } from '@apollo/client/link/ws'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { createClient } from 'graphql-ws'
 import fetch from 'isomorphic-fetch'
 import { errorHandler } from './handler'
 import CipherLink from './CipherLink'
@@ -97,16 +51,12 @@ class Client extends ApolloClient {
 
     let wsLink
     if (soketi && soketi.socketUri) {
-      const webSocketConfig = {
-        uri: soketi.socketUri,
-        options: {
-          reconnect: true,
-          connectionParams: () => ({
-            authToken
-          })
-        }
-      }
-      wsLink = new WebSocketLink(webSocketConfig)
+      wsLink = new GraphQLWsLink(createClient({
+        url: soketi.socketUri,
+        connectionParams: () => ({
+          authToken
+        })
+      }))
 
       link = split(
         ({ query }) => {
@@ -160,7 +110,7 @@ class Client extends ApolloClient {
     }
 
     if (this.wsLink) {
-      this.wsLink.options.connectionParams = () => ({
+      this.wsLink.client.connectionParams = () => ({
         authToken: this.authToken
       })
     }
