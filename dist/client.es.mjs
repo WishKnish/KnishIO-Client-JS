@@ -30121,7 +30121,7 @@ class dh extends Tr {
    *
    * @param {Object} options
    * @param {Object} options.variables
-   * @param {Object} options.context
+   * @param {Object||null} options.context
    * @returns {Promise<Response>}
    */
   execute(n) {
@@ -34716,7 +34716,7 @@ class p8 {
         cellSlug: e,
         pubkey: a.pubkey,
         encrypt: t
-      }, u = yield i.execute(o);
+      }, u = yield i.execute({ variables: o });
       if (u.success()) {
         const c = Gi.create(u.payload(), a);
         this.setAuthToken(c);

@@ -70,7 +70,7 @@ export default class Mutation extends Query {
    *
    * @param {Object} options
    * @param {Object} options.variables
-   * @param {Object} options.context
+   * @param {Object||null} options.context
    * @returns {Promise<Response>}
    */
   async execute ({ variables = null, context = {} }) {

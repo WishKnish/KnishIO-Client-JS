@@ -2007,7 +2007,7 @@ export default class KnishIOClient {
     /**
      * @type {ResponseRequestAuthorizationGuest}
      */
-    const response = await query.execute(variables)
+    const response = await query.execute({variables})
 
     // Did the authorization molecule get accepted?
     if (response.success()) {
