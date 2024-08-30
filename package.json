@@ -43,7 +43,7 @@
     "base-x": "^4.0.0",
     "buffer": "^6.0.3",
     "core-js": "^3.32.1",
-    "graphql": "16.8.1",
+    "graphql": "^16.9.0",
     "isomorphic-fetch": "^3.0.0",
     "jssha": "^3.3.0",
     "pusher-js": "^7.0.6",
