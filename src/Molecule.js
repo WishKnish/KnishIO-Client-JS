@@ -108,8 +108,6 @@ export default class Molecule {
         characters: sourceWallet.characters
       })
     }
-
-    this.clear()
   }
 
   /**
