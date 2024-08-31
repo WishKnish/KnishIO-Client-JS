@@ -41,18 +41,12 @@
   ],
   "dependencies": {
     "@apollo/client": "^3.11.5",
+    "@noble/post-quantum": "^0.2.0",
     "@thumbmarkjs/thumbmarkjs": "^0.14.4",
-    "base-x": "^4.0.0",
-    "buffer": "^6.0.3",
-    "core-js": "^3.32.1",
     "graphql": "^16.9.0",
     "graphql-ws": "^5.16.0",
     "isomorphic-fetch": "^3.0.0",
-    "jssha": "^3.3.0",
-    "pusher-js": "^7.0.6",
-    "tweetnacl": "^1.0.3",
-    "tweetnacl-sealedbox-js": "^1.2.0",
-    "uri-js": "^4.4.1"
+    "jssha": "^3.3.0"
   },
   "files": [
     "/src"

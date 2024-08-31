@@ -64,14 +64,18 @@ describe('Wallet', () => {
     expect(shadowWallet.address).toBeNull()
   })
 
-  test('encrypts and decrypts message correctly', () => {
-    const wallet = new Wallet({
-      secret: testSecret,
-      token: 'TEST'
+  test('encrypts and decrypts message correctly', async () => {
+    const alice = new Wallet({
+      secret: testSecret
     })
+
+    const bob = new Wallet({
+      secret: generateSecret()
+    })
+
     const message = { foo: 'bar' }
-    const encrypted = wallet.encryptMessage(message, wallet.pubkey)
-    const decrypted = wallet.decryptMessage(encrypted)
+    const encrypted = await alice.encryptMessage(message, bob.pubkey)
+    const decrypted = await bob.decryptMessage(encrypted)
     expect(decrypted).toEqual(message)
   })
 
