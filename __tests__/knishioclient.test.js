@@ -5,36 +5,41 @@ import Molecule from '../src/Molecule'
 import { generateSecret } from '../src'
 
 // Mock ApolloClient
-jest.mock('../src/httpClient/ApolloClient')
+jest.mock('../src/libraries/apollo/ApolloClient')
 
 describe('KnishIOClient', () => {
-  let client
   const testUri = 'https://eteplitsky.testnet.knish.io:443/graphql'
   const testSecret = generateSecret()
+  let knishIOClientInstance = new KnishIOClient({
+    uri: testUri,
+    cellSlug: 'TESTCELL',
+    logging: false
+  })
 
   beforeEach(() => {
-    client = new KnishIOClient({
+    knishIOClientInstance = new KnishIOClient({
       uri: testUri,
       cellSlug: 'TESTCELL',
       logging: false
     })
-    client.setSecret(testSecret)
+    knishIOClientInstance.setSecret(testSecret)
   })
+
   test('initializes client correctly', () => {
-    expect(client.uri()).toBe(testUri)
-    expect(client.cellSlug()).toBe('testCell')
-    expect(client.getSecret()).toBe(testSecret)
+    expect(knishIOClientInstance.uri()).toBe(testUri)
+    expect(knishIOClientInstance.cellSlug()).toBe('testCell')
+    expect(knishIOClientInstance.getSecret()).toBe(testSecret)
   })
 
   test('creates molecule correctly', async () => {
-    const molecule = await client.createMolecule({})
+    const molecule = await knishIOClientInstance.createMolecule({})
     expect(molecule).toBeInstanceOf(Molecule)
     expect(molecule.secret).toBe(testSecret)
     expect(molecule.cellSlug).toBe('testCell')
   })
 
   test('creates wallet correctly', async () => {
-    const wallet = await client.getSourceWallet()
+    const wallet = await knishIOClientInstance.getSourceWallet()
     expect(wallet).toBeInstanceOf(Wallet)
     expect(wallet.token).toBe('USER')
     expect(wallet.bundle).toBeTruthy()
@@ -44,7 +49,7 @@ describe('KnishIOClient', () => {
     const recipientSecret = generateSecret()
     const recipientBundle = new Wallet({ secret: recipientSecret, token: 'TEST' }).bundle
 
-    const mutation = await client.createMoleculeMutation({
+    const mutation = await knishIOClientInstance.createMoleculeMutation({
       mutationClass: jest.fn()
     })
 
@@ -63,7 +68,7 @@ describe('KnishIOClient', () => {
   })
 
   test('signs and checks molecule correctly', async () => {
-    const molecule = await client.createMolecule({})
+    const molecule = await knishIOClientInstance.createMolecule({})
     molecule.addAtom(Wallet.create({ secret: testSecret, token: 'TEST' }))
 
     molecule.sign({})
@@ -73,17 +78,17 @@ describe('KnishIOClient', () => {
   })
 
   test('generates and verifies client fingerprint', async () => {
-    const fingerprint = await client.getFingerprint()
+    const fingerprint = await knishIOClientInstance.getFingerprint()
     expect(fingerprint).toBeTruthy()
     expect(typeof fingerprint).toBe('string')
 
-    const fingerprintData = await client.getFingerprintData()
+    const fingerprintData = await knishIOClientInstance.getFingerprintData()
     expect(fingerprintData).toBeTruthy()
     expect(typeof fingerprintData).toBe('object')
   })
 
   test('prepares token creation correctly', async () => {
-    const mutation = await client.createMoleculeMutation({
+    const mutation = await knishIOClientInstance.createMoleculeMutation({
       mutationClass: jest.fn()
     })
 
@@ -108,7 +113,7 @@ describe('KnishIOClient', () => {
   })
 
   test('prepares meta creation correctly', async () => {
-    const mutation = await client.createMoleculeMutation({
+    const mutation = await knishIOClientInstance.createMoleculeMutation({
       mutationClass: jest.fn()
     })
 
@@ -131,7 +136,7 @@ describe('KnishIOClient', () => {
   })
 
   test('prepares wallet creation correctly', async () => {
-    const mutation = await client.createMoleculeMutation({
+    const mutation = await knishIOClientInstance.createMoleculeMutation({
       mutationClass: jest.fn()
     })
 
@@ -148,7 +153,7 @@ describe('KnishIOClient', () => {
   })
 
   test('prepares shadow wallet claim correctly', async () => {
-    const mutation = await client.createMoleculeMutation({
+    const mutation = await knishIOClientInstance.createMoleculeMutation({
       mutationClass: jest.fn()
     })
 
@@ -167,21 +172,21 @@ describe('KnishIOClient', () => {
   })
 
   test('handles encryption toggle correctly', () => {
-    expect(client.switchEncryption(true)).toBe(true)
-    expect(client.switchEncryption(true)).toBe(false) // No change, already true
-    expect(client.switchEncryption(false)).toBe(true)
-    expect(client.switchEncryption(false)).toBe(false) // No change, already false
+    expect(knishIOClientInstance.switchEncryption(true)).toBe(true)
+    expect(knishIOClientInstance.switchEncryption(true)).toBe(false) // No change, already true
+    expect(knishIOClientInstance.switchEncryption(false)).toBe(true)
+    expect(knishIOClientInstance.switchEncryption(false)).toBe(false) // No change, already false
   })
 
   test('creates query correctly', () => {
     const MockQueryClass = jest.fn()
-    const query = client.createQuery(MockQueryClass)
-    expect(MockQueryClass).toHaveBeenCalledWith(client.client())
+    const query = knishIOClientInstance.createQuery(MockQueryClass)
+    expect(MockQueryClass).toHaveBeenCalledWith(knishIOClientInstance.client())
   })
 
   test('creates molecule mutation correctly', async () => {
     const MockMutationClass = jest.fn()
-    const mutation = await client.createMoleculeMutation({
+    const mutation = await knishIOClientInstance.createMoleculeMutation({
       mutationClass: MockMutationClass
     })
     expect(MockMutationClass).toHaveBeenCalled()
@@ -193,7 +198,7 @@ describe('KnishIOClient', () => {
       getToken: jest.fn().mockReturnValue('testToken'),
       getAuthData: jest.fn().mockReturnValue({ token: 'testToken', pubkey: 'testPubkey' })
     }
-    client.setAuthToken(mockAuthToken)
-    expect(client.getAuthToken()).toBe(mockAuthToken)
+    knishIOClientInstance.setAuthToken(mockAuthToken)
+    expect(knishIOClientInstance.getAuthToken()).toBe(mockAuthToken)
   })
 })

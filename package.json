@@ -40,7 +40,7 @@
     "graphql"
   ],
   "dependencies": {
-    "@apollo/client": "^3.11.5",
+    "@apollo/client": "^3.5.10",
     "@noble/post-quantum": "^0.2.0",
     "@thumbmarkjs/thumbmarkjs": "^0.14.4",
     "graphql": "^16.9.0",

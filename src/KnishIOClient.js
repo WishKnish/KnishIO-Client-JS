@@ -78,7 +78,7 @@ import UnauthenticatedException from './exception/UnauthenticatedException'
 import WalletShadowException from './exception/WalletShadowException'
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException'
 import StackableUnitAmountException from './exception/StackableUnitAmountException'
-import ApolloClient from './httpClient/ApolloClient'
+import ApolloClient from './libraries/apollo/ApolloClient'
 import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe'
 import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe'
 import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe'
@@ -151,6 +151,8 @@ export default class KnishIOClient {
     serverSdkVersion = 3,
     logging = false
   }) {
+    this.reset()
+
     this.$__logging = logging
     this.$__uris = typeof uri === 'object' ? uri : [uri]
     this.$__authTokenObjects = {}
@@ -168,7 +170,6 @@ export default class KnishIOClient {
 
     this.log('info', `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...`)
 
-    this.reset()
     this.$__client = client || new ApolloClient({
       socket: {
         ...{
