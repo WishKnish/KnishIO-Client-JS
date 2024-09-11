@@ -54,7 +54,7 @@ import { gql } from '@apollo/client/core'
  */
 export default class MutationLinkIdentifier extends Mutation {
   /**
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor (apolloClient, knishIOClient) {

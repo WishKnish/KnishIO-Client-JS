@@ -54,7 +54,7 @@ import ResponseBalance from '../response/ResponseBalance'
  */
 export default class QueryBalance extends Query {
   /**
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor (apolloClient, knishIOClient) {

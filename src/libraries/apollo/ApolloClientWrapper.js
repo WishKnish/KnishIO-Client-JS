@@ -5,7 +5,7 @@ import SubscriptionManager from './SubscriptionManager'
  * ApolloClient wrapper class
  * Provides a high-level interface for interacting with the GraphQL server
  */
-export default class ApolloClient {
+export default class ApolloClientWrapper {
   /**
    * @param {Object} config - Configuration object
    * @param {string} config.serverUri - URI of the GraphQL server

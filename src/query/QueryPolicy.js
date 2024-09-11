@@ -52,7 +52,7 @@ import ResponsePolicy from '../response/ResponsePolicy'
 
 export default class QueryPolicy extends Query {
   /**
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor (apolloClient, knishIOClient) {

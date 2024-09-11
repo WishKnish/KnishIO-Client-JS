@@ -54,7 +54,7 @@ import Response from '../response/Response'
  */
 export default class QueryToken extends Query {
   /**
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor (apolloClient, knishIOClient) {

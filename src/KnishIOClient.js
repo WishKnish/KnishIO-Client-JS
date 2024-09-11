@@ -78,7 +78,6 @@ import UnauthenticatedException from './exception/UnauthenticatedException'
 import WalletShadowException from './exception/WalletShadowException'
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException'
 import StackableUnitAmountException from './exception/StackableUnitAmountException'
-import ApolloClient from './libraries/apollo/ApolloClient'
 import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe'
 import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe'
 import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe'
@@ -99,6 +98,7 @@ import {
   getFingerprint,
   getFingerprintData
 } from '@thumbmarkjs/thumbmarkjs'
+import ApolloClientWrapper from './libraries/apollo/ApolloClientWrapper';
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -111,7 +111,7 @@ export default class KnishIOClient {
    * @param {string} uri
    * @param {string|null} cellSlug
    * @param {object|null} socket
-   * @param {ApolloClient|null} client
+   * @param {ApolloClientWrapper|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    */
@@ -139,7 +139,7 @@ export default class KnishIOClient {
    * @param {string|[]} uri
    * @param {string|null} cellSlug
    * @param {object|null} socket
-   * @param {ApolloClient|null} client
+   * @param {ApolloClientWrapper|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    */
@@ -170,7 +170,7 @@ export default class KnishIOClient {
 
     this.log('info', `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...`)
 
-    this.$__client = client || new ApolloClient({
+    this.$__client = client || new ApolloClientWrapper({
       socket: {
         ...{
           socketUri: null,
@@ -222,7 +222,7 @@ export default class KnishIOClient {
   /**
    * Subscribes the client to the node's broadcast socket
    *
-   * @return {ApolloClient}
+   * @return {ApolloClientWrapper}
    */
   subscribe () {
     if (!this.client().getSocketUri()) {
@@ -279,7 +279,7 @@ export default class KnishIOClient {
   /**
    * Returns the Apollo client class session
    *
-   * @return {ApolloClient}
+   * @return {ApolloClientWrapper}
    */
   client () {
     if (!this.$__authInProcess) {
@@ -332,7 +332,7 @@ export default class KnishIOClient {
    * @returns {string}
    */
   hashSecret (secret, source = null) {
-    console.info(`KnishIOClient::hashSecret(${ source ? `source: ${ source }` : '' }) - Computing wallet bundle from secret...`)
+    this.log('info', `KnishIOClient::hashSecret(${ source ? `source: ${ source }` : '' }) - Computing wallet bundle from secret...`)
     return generateBundleHash(secret)
   }
 

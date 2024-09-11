@@ -3,7 +3,7 @@ import CodeException from '../exception/CodeException'
 export default class Subscribe {
   /**
    *
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    */
   constructor (apolloClient) {
     this.client = apolloClient

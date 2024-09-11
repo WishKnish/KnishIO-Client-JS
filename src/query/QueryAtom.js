@@ -54,7 +54,7 @@ import ResponseAtom from '../response/ResponseAtom'
  */
 export default class QueryAtom extends Query {
   /**
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor (apolloClient, knishIOClient) {

@@ -51,7 +51,7 @@ import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom'
 
 export default class QueryMetaTypeViaAtom extends Query {
   /**
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor (apolloClient, knishIOClient) {

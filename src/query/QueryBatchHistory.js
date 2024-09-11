@@ -55,7 +55,7 @@ import { gql } from '@apollo/client/core'
  */
 export default class QueryBatchHistory extends Query {
   /**
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor (apolloClient, knishIOClient) {

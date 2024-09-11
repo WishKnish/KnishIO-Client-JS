@@ -51,7 +51,7 @@ import { gql } from '@apollo/client/core'
 
 export default class MutationProposeMolecule extends Mutation {
   /**
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
    * @param {KnishIOClient} knishIOClient
    * @param molecule
    */
