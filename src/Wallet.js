@@ -280,8 +280,17 @@ export default class Wallet {
     }
 
     const { publicKey, secretKey } = MlKEM768.keygen(seed)
-    this.pubkey = publicKey
-    this.privkey = secretKey
+    this.pubkey = this.serializeKey(publicKey)
+    this.privkey = secretKey // Note: We're keeping privkey as UInt8Array for security
+  }
+
+  serializeKey (key) {
+    return btoa(String.fromCharCode.apply(null, key))
+  }
+
+  deserializeKey (serializedKey) {
+    const binaryString = atob(serializedKey)
+    return new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i))
   }
 
   /**
@@ -380,10 +389,9 @@ export default class Wallet {
   async encryptMessage (message, recipientPubkey) {
     const messageString = JSON.stringify(message)
     const messageUint8 = new TextEncoder().encode(messageString)
-    const { cipherText, sharedSecret } = MlKEM768.encapsulate(recipientPubkey)
-
+    const deserializedPubkey = this.deserializeKey(recipientPubkey)
+    const { cipherText, sharedSecret } = MlKEM768.encapsulate(deserializedPubkey)
     const encryptedMessage = await this.encryptWithSharedSecret(messageUint8, sharedSecret)
-
     return {
       cipherText,
       encryptedMessage
