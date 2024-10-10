@@ -393,16 +393,16 @@ export default class Wallet {
     const { cipherText, sharedSecret } = MlKEM768.encapsulate(deserializedPubkey)
     const encryptedMessage = await this.encryptWithSharedSecret(messageUint8, sharedSecret)
     return {
-      cipherText,
-      encryptedMessage
+      cipherText: this.serializeKey(cipherText),
+      encryptedMessage: this.serializeKey(encryptedMessage)
     }
   }
 
   async decryptMessage (encryptedData) {
     const { cipherText, encryptedMessage } = encryptedData
-    const sharedSecret = MlKEM768.decapsulate(cipherText, this.privkey)
 
-    const decryptedUint8 = await this.decryptWithSharedSecret(encryptedMessage, sharedSecret)
+    const sharedSecret = MlKEM768.decapsulate(this.deserializeKey(cipherText), this.privkey)
+    const decryptedUint8 = await this.decryptWithSharedSecret(this.deserializeKey(encryptedMessage), sharedSecret)
 
     const decryptedString = new TextDecoder().decode(decryptedUint8)
     return JSON.parse(decryptedString)
