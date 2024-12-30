@@ -746,7 +746,6 @@ export default class KnishIOClient {
    * @param {string|array|null} key
    * @param {string|array|null} value
    * @param {boolean|null} latest
-   * @param {boolean|null} latestMetas
    * @param {object|null} fields
    * @param {object|null} filter
    * @param {object|null} queryArgs
@@ -764,7 +763,6 @@ export default class KnishIOClient {
     key = null,
     value = null,
     latest = true,
-    latestMetas = true,
     fields = null,
     filter = null,
     queryArgs = null,
@@ -791,7 +789,6 @@ export default class KnishIOClient {
         key,
         value,
         latest,
-        latestMetas,
         filter,
         queryArgs,
         countBy,
@@ -810,7 +807,6 @@ export default class KnishIOClient {
         key,
         value,
         latest,
-        latestMetas,
         filter,
         queryArgs,
         count,

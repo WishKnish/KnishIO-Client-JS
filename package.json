@@ -42,7 +42,7 @@
   "dependencies": {
     "@apollo/client": "3.5.10",
     "@noble/post-quantum": "^0.2.0",
-    "@thumbmarkjs/thumbmarkjs": "^0.14.4",
+    "@thumbmarkjs/thumbmarkjs": "^0.16.1",
     "graphql": "^16.9.0",
     "graphql-ws": "^5.16.0",
     "isomorphic-fetch": "^3.0.0",

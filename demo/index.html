@@ -76,7 +76,6 @@ client.queryMeta( {
   metaType: 'WalletBundle', // Or some other metaType
   metaId: 'BUNDLE_HASH_GOES_HERE', // Or some other metaId
   latest: true,
-  latestMetas: true,
   throughAtom: true
 } ).then( response => {
   ...
@@ -84,19 +83,27 @@ client.queryMeta( {
     </pre>
     <div>
       <label for="metaType">MetaType:</label> <input
-      type="text"
-      id="metaType"
-      name="metaType"
-      value="WalletBundle"
-    >
+        type="text"
+        id="metaType"
+        name="metaType"
+        value="WalletBundle"
+      >
     </div>
     <div>
       <label for="metaId">MetaID:</label> <input
-      type="text"
-      id="metaId"
-      name="metaId"
-      value=""
-    >
+        type="text"
+        id="metaId"
+        name="metaId"
+        value=""
+      >
+    </div>
+    <div>
+      <label for="latest">Latest:</label> <input
+        type="checkbox"
+        id="latest"
+        name="latest"
+        checked
+      >
     </div>
     <div>
       <input
@@ -111,6 +118,7 @@ client.queryMeta( {
 client.createMeta( {
   metaType: 'WalletBundle', // Or some other metaType
   metaId: 'BUNDLE_HASH_GOES_HERE', // Or some other metaId
+  latest: true, // False to get historical data
   meta: {
     'foo': 'bar',
     'baz': 'qux',
@@ -207,18 +215,18 @@ client.createMeta( {
   function handleMetaQuery () {
     const metaType = document.getElementById( 'metaType' ).value;
     const metaId = document.getElementById( 'metaId' ).value;
+    const latest = document.getElementById( 'latest' ).checked;
 
     if ( !metaType ) {
       alert( 'MetaType required at minimum' )
       return false;
     }
 
-    handleResponse( 'Querying ' + metaType + ':' + metaId );
+    handleResponse( 'Querying ' + metaType + ':' + metaId + ' with latest = ' + latest );
     client.queryMeta( {
       metaType,
       metaId,
-      latest: true,
-      latestMetas: true,
+      latest,
       throughAtom: true
     } ).then( response => {
       handleResponse( response );

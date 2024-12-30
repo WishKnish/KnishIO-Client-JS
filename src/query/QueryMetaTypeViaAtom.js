@@ -103,7 +103,6 @@ export default class QueryMetaTypeViaAtom extends Query {
    * @param {array|null} keys
    * @param {array|null} atomValues
    * @param {boolean|null} latest
-   * @param {boolean|null} latestMetas
    * @param {array|null} filter
    * @param {object|null} queryArgs
    * @param {string|null} countBy
@@ -118,7 +117,6 @@ export default class QueryMetaTypeViaAtom extends Query {
     values = null,
     atomValues = null,
     latest = null,
-    latestMetas = true,
     filter = null,
     queryArgs = null,
     countBy = null
@@ -162,10 +160,7 @@ export default class QueryMetaTypeViaAtom extends Query {
       })
     }
 
-    if (latest) {
-      variables.latest = !!latest
-      variables.latest = !!latestMetas
-    }
+    variables.latest = latest === true
 
     if (queryArgs) {
       if (typeof queryArgs.limit === 'undefined' || queryArgs.limit === 0) {
