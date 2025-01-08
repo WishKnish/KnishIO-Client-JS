@@ -83,27 +83,27 @@ client.queryMeta( {
     </pre>
     <div>
       <label for="metaType">MetaType:</label> <input
-        type="text"
-        id="metaType"
-        name="metaType"
-        value="WalletBundle"
-      >
+      type="text"
+      id="metaType"
+      name="metaType"
+      value="WalletBundle"
+    >
     </div>
     <div>
       <label for="metaId">MetaID:</label> <input
-        type="text"
-        id="metaId"
-        name="metaId"
-        value=""
-      >
+      type="text"
+      id="metaId"
+      name="metaId"
+      value=""
+    >
     </div>
     <div>
       <label for="latest">Latest:</label> <input
-        type="checkbox"
-        id="latest"
-        name="latest"
-        checked
-      >
+      type="checkbox"
+      id="latest"
+      name="latest"
+      checked
+    >
     </div>
     <div>
       <input
@@ -113,6 +113,7 @@ client.queryMeta( {
       >
     </div>
     <hr />
+
     <strong>Step 4: Record New Metadata</strong>
     <pre class="prettyprint">
 client.createMeta( {
@@ -149,6 +150,83 @@ client.createMeta( {
         onclick="handleMetaCreate()"
       >
     </div>
+    <hr />
+
+    <strong>Step 5: Encrypt/Decrypt Messages</strong>
+    <pre class="prettyprint">
+// Create your wallet (sender)
+const senderWallet = new KnishIO.Wallet({
+  secret: KnishIO.generateSecret('mySecret'),
+  // position: myOldPosition <-- optionally specify position to re-instantiate pubkey
+  token: 'TEST'
+});
+
+// Get your public key to share with others
+const myPublicKey = senderWallet.pubkey;
+
+// Store your wallet's position to re-instatiate the same pubkey in the future
+const myPosition = senderWallet.position
+
+// When you want to send an encrypted message to someone:
+const message = 'Secret message';
+
+// Use their public key to encrypt
+senderWallet.encryptMessage(message, recipientPublicKey).then(encryptedData => {
+  // Send encryptedData to recipient...
+});
+
+// When you receive an encrypted message:
+// Use your wallet to decrypt
+senderWallet.decryptMessage(encryptedData).then(decryptedMessage => {
+  console.log('Decrypted:', decryptedMessage);
+});
+    </pre>
+    <div>
+      <label for="message">Message:</label>
+      <input
+        type="text"
+        id="message"
+        name="message"
+        value="Secret message"
+      >
+    </div>
+    <div>
+      <label for="recipientSeed">Recipient's Seed:</label>
+      <input
+        type="text"
+        id="recipientSeed"
+        name="recipientSeed"
+        placeholder="Enter a seed value to generate recipient secret and wallet"
+      >
+    </div>
+    <div>
+      <label for="recipientPosition">Recipient's Wallet Position:</label>
+      <input
+        type="text"
+        id="recipientPosition"
+        name="recipientPosition"
+        placeholder="Enter a 64-character hexadecimal position value"
+      >
+    </div>
+    <div>
+      <label for="recipientPubkey">Recipient's Public Key:</label>
+      <input
+        type="text"
+        id="recipientPubkey"
+        name="recipientPubkey"
+        style="width: 400px;"
+        placeholder="Paste the recipient's public key here"
+      >
+    </div>
+    <div>
+      <button onclick="generateWallet()">Generate Recipient Wallet</button>
+      <button
+        onclick="handleEncryptionTest()"
+        disabled
+        id="encryptBtn"
+      >Encrypt Message
+      </button>
+    </div>
   </div>
 </div>
 <div id="output">
@@ -158,104 +236,181 @@ client.createMeta( {
   </div>
 </div>
 <script type="text/javascript">
-  handleResponse( 'Initializing client...' )
-  const client = new KnishIO.KnishIOClient( {
+  handleResponse('Initializing client...')
+  const client = new KnishIO.KnishIOClient({
     uri: 'https://eteplitsky.testnet.knish.io/graphql',
     cellSlug: 'TESTCELL'
-  } );
-  handleResponse( { uri: client.uri() } );
+  })
+  handleResponse({ uri: client.uri() })
 
-  handleResponse( 'Generating fingerprint...');
-  const fingerprint = client.getFingerprint().then( fingerprint => {
+  handleResponse('Generating fingerprint...')
+  const fingerprint = client.getFingerprint().then(fingerprint => {
 
-    client.getFingerprintData().then( fingerprintData => {
-      handleResponse( { fingerprintData } );
-    } );
+    client.getFingerprintData().then(fingerprintData => {
+      handleResponse({
+        fingerprint,
+        fingerprintData
+      })
 
-    handleResponse( { fingerprint } );
+      handleResponse(`Generating secret based on fingerprint ${ fingerprint }...`)
+      const secret = KnishIO.generateSecret(fingerprint)
+      client.setSecret(secret)
+      handleResponse('Generating bundle hash...')
+      const bundle = client.getBundle()
+      handleResponse({
+        secret,
+        bundleHash: bundle
+      })
+      document.getElementById('metaId').value = bundle
 
-    handleResponse( `Generating secret based on fingerprint ${ fingerprint }...` );
-    const secret = KnishIO.generateSecret( fingerprint );
-    handleResponse( { secret } );
+      handleResponse('Requesting auth token...')
+      client.requestAuthToken({}).then(() => {
+        handleResponse({ authToken: client.getAuthToken() })
 
-    handleResponse( 'Requesting auth token...' );
-    client.requestAuthToken( { secret } ).then( () => {
-      handleResponse( { authToken: client.getAuthToken() } )
-    } );
+        handleResponse('Obtaining public encryption key...')
+        client.getSourceWallet().then(sourceWallet => {
+          const pubkey = sourceWallet.pubkey
+          const deserializedKey = sourceWallet.deserializeKey(pubkey)
+          handleResponse({
+            pubkey,
+            deserializedKey
+          })
+        })
+      })
+    })
+  })
 
-    handleResponse( 'Generating bundle hash...' )
-    const bundle = client.getBundle()
-    handleResponse( { bundleHash: bundle } );
-    document.getElementById( 'metaId' ).value = bundle
+  function decycle (obj, stack = []) {
+    if ( !obj || typeof obj !== 'object' ) {
+      return obj
+    }
 
-  } );
+    if ( stack.includes(obj) ) {
+      return null
+    }
 
-  function decycle ( obj, stack = [] ) {
-    if ( !obj || typeof obj !== 'object' )
-      return obj;
+    let s = stack.concat([obj])
 
-    if ( stack.includes( obj ) )
-      return null;
-
-    let s = stack.concat( [ obj ] );
-
-    return Array.isArray( obj )
-      ? obj.map( x => decycle( x, s ) )
+    return Array.isArray(obj)
+      ? obj.map(x => decycle(x, s))
       : Object.fromEntries(
-        Object.entries( obj )
-          .map( ( [ k, v ] ) => [ k, decycle( v, s ) ] ) );
+        Object.entries(obj)
+          .map(([k, v]) => [k, decycle(v, s)]))
   }
 
-  function handleResponse ( response ) {
-    const formatter = new JSONFormatter( decycle( response ) );
-    document.getElementById( 'response' ).appendChild( formatter.render() );
-    console.log(response);
+  function handleResponse (response) {
+    const formatter = new JSONFormatter(decycle(response))
+    document.getElementById('response').appendChild(formatter.render())
+    console.log(response)
   }
 
   function handleMetaQuery () {
-    const metaType = document.getElementById( 'metaType' ).value;
-    const metaId = document.getElementById( 'metaId' ).value;
-    const latest = document.getElementById( 'latest' ).checked;
+    const metaType = document.getElementById('metaType').value
+    const metaId = document.getElementById('metaId').value
+    const latest = document.getElementById('latest').checked
 
     if ( !metaType ) {
-      alert( 'MetaType required at minimum' )
-      return false;
+      alert('MetaType required at minimum')
+      return false
     }
 
-    handleResponse( 'Querying ' + metaType + ':' + metaId + ' with latest = ' + latest );
-    client.queryMeta( {
+    handleResponse('Querying ' + metaType + ':' + metaId + ' with latest = ' + latest)
+    client.queryMeta({
       metaType,
       metaId,
       latest,
       throughAtom: true
-    } ).then( response => {
-      handleResponse( response );
-    } )
+    }).then(response => {
+      handleResponse(response)
+    })
 
   }
 
   function handleMetaCreate () {
-    const metaType = document.getElementById( 'metaType' ).value;
-    const metaId = document.getElementById( 'metaId' ).value;
-    const key = document.getElementById( 'key' ).value;
-    const value = document.getElementById( 'value' ).value;
+    const metaType = document.getElementById('metaType').value
+    const metaId = document.getElementById('metaId').value
+    const key = document.getElementById('key').value
+    const value = document.getElementById('value').value
 
     if ( !metaType || !metaId || !key || !value ) {
-      alert( 'metaType, metaId, key and value required' )
-      return false;
+      alert('metaType, metaId, key and value required')
+      return false
     }
 
-    handleResponse( 'Writing ' + key + ':' + value + ' to ' + metaType + ':' + metaId );
-    const meta = {};
-    meta[key] = value;
-    client.createMeta( {
+    handleResponse('Writing ' + key + ':' + value + ' to ' + metaType + ':' + metaId)
+    const meta = {}
+    meta[ key ] = value
+    client.createMeta({
       metaType,
       metaId,
       meta
-    } ).then( response => {
-      handleResponse( response );
-    } )
+    }).then(response => {
+      handleResponse(response)
+    })
+  }
 
+  function generateWallet () {
+
+    if ( !document.getElementById('recipientSeed').value ) {
+      document.getElementById('recipientSeed').value = KnishIO.generateSecret(null, 64)
+    }
+
+    const secret = KnishIO.generateSecret(document.getElementById('recipientSeed').value)
+
+    // Setting a random position if necessary
+    if ( !document.getElementById('recipientPosition').value ) {
+      document.getElementById('recipientPosition').value = KnishIO.generateSecret(null, 64)
+    }
+    const position = document.getElementById('recipientPosition').value
+
+    // Create recipient wallet
+    const recipientWallet = new KnishIO.Wallet({
+      secret,
+      position,
+      token: 'TEST'
+    })
+
+    // Enable encryption button
+    document.getElementById('encryptBtn').disabled = false
+
+    handleResponse('Recipient wallet generated successfully')
+    handleResponse({
+      recipientPubkey: recipientWallet.pubkey,
+      deserializedRecipientPubkey: recipientWallet.deserializeKey(recipientWallet.pubkey)
+    })
+    document.getElementById('recipientPubkey').value = recipientWallet.pubkey
+  }
+
+  async function handleEncryptionTest () {
+    const message = document.getElementById('message').value
+    const recipientPubkey = document.getElementById('recipientPubkey').value
+
+    if ( !message || !recipientPubkey ) {
+      alert('Message and recipient public key are required')
+      return false
+    }
+
+    try {
+      handleResponse('Encrypting message...')
+      const sourceWallet = await client.getSourceWallet()
+      const encryptedData = await sourceWallet.encryptMessage(message, recipientPubkey)
+      handleResponse({ encryptedData: encryptedData })
+
+      handleResponse('Simulating decryption (normally done by recipient)...')
+      const secret = KnishIO.generateSecret(document.getElementById('recipientSeed').value)
+      const position = document.getElementById('recipientPosition').value
+
+      // Create recipient wallet
+      const recipientWallet = new KnishIO.Wallet({
+        secret,
+        position,
+        token: 'TEST'
+      })
+      const decryptedMessage = await recipientWallet.decryptMessage(encryptedData)
+      handleResponse({ decryptedMessage })
+    } catch ( error ) {
+      handleResponse({ error: error.message })
+    }
   }
 </script>
 </body>
