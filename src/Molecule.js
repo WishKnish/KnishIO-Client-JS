@@ -732,16 +732,15 @@ export default class Molecule {
       atomMeta = new AtomMeta()
     }
     atomMeta.setMetaWallet(wallet)
-
-    this.addAtom(Atom.create({
+    const creationAtom = Atom.create({
       isotope: 'C',
       wallet: this.sourceWallet,
       metaType: 'wallet',
       metaId: wallet.address,
       meta: atomMeta,
       batchId: wallet.batchId
-    }))
-
+    })
+    this.addAtom(creationAtom)
     this.addContinuIdAtom()
 
     return this

@@ -109,8 +109,15 @@ describe('KnishIOClient', () => {
       mutationClass: MutationCreateToken
     })
 
-    await mutation.fillMolecule({
+    const recipientWallet = new Wallet({
+      secret: testSecret,
       token: 'NEWTOKEN',
+      position: '1234567890abcdef',
+      characters: 'BASE64'
+    })
+
+    await mutation.fillMolecule({
+      recipientWallet,
       amount: '1000000',
       meta: {
         name: 'New Token',
@@ -157,8 +164,13 @@ describe('KnishIOClient', () => {
       mutationClass: MutationCreateWallet
     })
 
-    await mutation.fillMolecule({
+    const wallet = new Wallet({
+      secret: testSecret,
       token: 'NEWTOKEN'
+    })
+
+    await mutation.fillMolecule({
+      wallet
     })
 
     const molecule = mutation.molecule()
@@ -204,7 +216,7 @@ describe('KnishIOClient', () => {
     })
     expect(variables).toBeInstanceOf(Object)
 
-    const queryObj = query.createQuery({variables})
+    const queryObj = query.createQuery({ variables })
     expect(queryObj).toBeInstanceOf(Object)
     expect(queryObj.variables).toBe(variables)
   })

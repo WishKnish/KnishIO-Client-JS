@@ -141,7 +141,7 @@ export default class Atom {
    * @param {int|null} value
    * @param {string|null} metaType
    * @param {string|null} metaId
-   * @param {array|object|null} meta
+   * @param {AtomMeta|array|object|null} meta
    * @param {string|null} batchId
    * @returns {Atom}
    */
@@ -157,6 +157,11 @@ export default class Atom {
     // If meta object is not passed - create it
     if (!meta) {
       meta = new AtomMeta()
+    }
+
+    // If meta object is not an instance of AtomMeta - create it from meta
+    if (!(meta instanceof AtomMeta)) {
+      meta = new AtomMeta(meta)
     }
 
     // If wallet has been passed => add related metas
