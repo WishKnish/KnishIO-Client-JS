@@ -40,17 +40,14 @@
     "graphql"
   ],
   "dependencies": {
-    "@apollo/client": "3.12.4",
+    "@apollo/client": "3.12.5",
     "@noble/post-quantum": "^0.3.0",
     "@thumbmarkjs/thumbmarkjs": "^0.16.1",
     "graphql": "^16.9.0",
-    "graphql-ws": "^5.16.0",
+    "graphql-ws": "^5.16.2",
     "isomorphic-fetch": "^3.0.0",
     "jssha": "^3.3.0"
   },
-  "files": [
-    "/src"
-  ],
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@rollup/plugin-babel": "^6.0.4",
@@ -79,5 +76,8 @@
     "lint": "eslint --ext .js src",
     "test": "jest",
     "test:coverage": "jest --coverage"
-  }
+  },
+  "files": [
+    "/src"
+  ]
 }

@@ -5022,7 +5022,7 @@ function pn(r) {
 (function(r) {
   r.debug = pn("debug"), r.log = pn("log"), r.warn = pn("warn"), r.error = pn("error");
 })(Xt);
-var us = "3.12.4";
+var us = "3.12.5";
 function Ye(r) {
   try {
     return r();
@@ -16425,34 +16425,39 @@ var cr = function(r) {
 }, Qy = function(r, e, t) {
   if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
   var n = t.apply(r, e || []), i, s = [];
-  return i = {}, o("next"), o("throw"), o("return"), i[Symbol.asyncIterator] = function() {
+  return i = Object.create((typeof AsyncIterator == "function" ? AsyncIterator : Object).prototype), a("next"), a("throw"), a("return", o), i[Symbol.asyncIterator] = function() {
     return this;
   }, i;
-  function o(p) {
-    n[p] && (i[p] = function(y) {
-      return new Promise(function(v, E) {
-        s.push([p, y, v, E]) > 1 || a(p, y);
-      });
-    });
+  function o(y) {
+    return function(v) {
+      return Promise.resolve(v).then(y, d);
+    };
   }
-  function a(p, y) {
+  function a(y, v) {
+    n[y] && (i[y] = function(E) {
+      return new Promise(function(w, b) {
+        s.push([y, E, w, b]) > 1 || c(y, E);
+      });
+    }, v && (i[y] = v(i[y])));
+  }
+  function c(y, v) {
     try {
-      c(n[p](y));
-    } catch (v) {
-      d(s[0][3], v);
+      l(n[y](v));
+    } catch (E) {
+      p(s[0][3], E);
     }
   }
-  function c(p) {
-    p.value instanceof cr ? Promise.resolve(p.value.v).then(l, u) : d(s[0][2], p);
+  function l(y) {
+    y.value instanceof cr ? Promise.resolve(y.value.v).then(u, d) : p(s[0][2], y);
   }
-  function l(p) {
-    a("next", p);
+  function u(y) {
+    c("next", y);
   }
-  function u(p) {
-    a("throw", p);
+  function d(y) {
+    c("throw", y);
   }
-  function d(p, y) {
-    p(y), s.shift(), s.length && a(s[0][0], s[0][1]);
+  function p(y, v) {
+    y(v), s.shift(), s.length && c(s[0][0], s[0][1]);
   }
 };
 function Hy(r) {
@@ -16783,11 +16788,17 @@ function Ai(r) {
 function Wy(r) {
   return [
     1e3,
+    // Normal Closure is not an erroneous close code
     1001,
+    // Going Away
     1006,
+    // Abnormal Closure
     1005,
+    // No Status Received
     1012,
+    // Service Restart
     1013,
+    // Try Again Later
     1014
     // Bad Gateway
   ].includes(r) ? !1 : r >= 1e3 && r <= 1999;
