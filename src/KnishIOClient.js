@@ -98,7 +98,7 @@ import {
   getFingerprint,
   getFingerprintData
 } from '@thumbmarkjs/thumbmarkjs'
-import ApolloClientWrapper from './libraries/apollo/ApolloClientWrapper';
+import ApolloClientWrapper from './libraries/apollo/ApolloClientWrapper'
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -154,10 +154,11 @@ export default class KnishIOClient {
     this.reset()
 
     this.$__logging = logging
-    this.$__uris = typeof uri === 'object' ? uri : [uri]
     this.$__authTokenObjects = {}
     this.$__authInProcess = false
     this.abortControllers = new Map()
+
+    this.setUri(uri)
 
     if (cellSlug) {
       this.setCellSlug(cellSlug)
@@ -265,6 +266,10 @@ export default class KnishIOClient {
    */
   setCellSlug (cellSlug) {
     this.$__cellSlug = cellSlug
+  }
+
+  setUri (uri) {
+    this.$__uris = typeof uri === 'object' ? uri : [uri]
   }
 
   /**

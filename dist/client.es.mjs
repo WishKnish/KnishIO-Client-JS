@@ -17519,7 +17519,7 @@ class km {
     serverSdkVersion: s = 3,
     logging: o = !1
   }) {
-    this.reset(), this.$__logging = o, this.$__uris = typeof e == "object" ? e : [e], this.$__authTokenObjects = {}, this.$__authInProcess = !1, this.abortControllers = /* @__PURE__ */ new Map(), t && this.setCellSlug(t);
+    this.reset(), this.$__logging = o, this.$__authTokenObjects = {}, this.$__authInProcess = !1, this.abortControllers = /* @__PURE__ */ new Map(), this.setUri(e), t && this.setCellSlug(t);
     for (const a in this.$__uris) {
       const c = this.$__uris[a];
       this.$__authTokenObjects[c] = null;
@@ -17595,6 +17595,9 @@ class km {
    */
   setCellSlug(e) {
     this.$__cellSlug = e;
+  }
+  setUri(e) {
+    this.$__uris = typeof e == "object" ? e : [e];
   }
   /**
    * Retrieves the endpoint URI for this session
