@@ -17583,9 +17583,18 @@ class km {
   /**
    * Returns the currently defined Cell identifier for this session
    *
+   * @deprecated Please use getCellSlug() instead
    * @return {string|null}
    */
   cellSlug() {
+    return this.getCellSlug();
+  }
+  /**
+   * Returns the currently defined Cell identifier for this session
+   *
+   * @return {string|null}
+   */
+  getCellSlug() {
     return this.$__cellSlug || null;
   }
   /**
@@ -17740,7 +17749,7 @@ class km {
       secret: e,
       sourceWallet: n,
       remainderWallet: this.getRemainderWallet(),
-      cellSlug: this.cellSlug(),
+      cellSlug: this.getCellSlug(),
       version: this.getServerSdkVersion()
     });
   }
@@ -17790,7 +17799,10 @@ class km {
       cellSlug: this.$__cellSlug,
       encrypt: this.$__encrypt
     }));
-    const n = new AbortController(), i = JSON.stringify({ query: e.$__query, variables: t });
+    const n = new AbortController(), i = JSON.stringify({
+      query: e.$__query,
+      variables: t
+    });
     this.abortControllers.set(i, n);
     try {
       const s = await e.execute({
@@ -17810,7 +17822,10 @@ class km {
     }
   }
   cancelQuery(e, t = null) {
-    const n = JSON.stringify({ query: e.$__query, variables: t }), i = this.abortControllers.get(n);
+    const n = JSON.stringify({
+      query: e.$__query,
+      variables: t
+    }), i = this.abortControllers.get(n);
     i && (i.abort(), this.abortControllers.delete(n));
   }
   cancelAllQueries() {
@@ -18911,7 +18926,7 @@ class km {
   }) {
     if (this.$__serverSdkVersion < 3)
       return this.log("warn", "KnishIOClient::authorize() - Server SDK version does not require an authorization..."), null;
-    e === null && t && (e = Ri(t)), this.$__authInProcess = !0;
+    e === null && t && (e = Ri(t)), n && this.setCellSlug(n), this.$__authInProcess = !0;
     let s;
     return e ? s = await this.requestProfileAuthToken({
       secret: e,

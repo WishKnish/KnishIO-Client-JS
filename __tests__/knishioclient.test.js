@@ -39,7 +39,7 @@ describe('KnishIOClient', () => {
 
   test('initializes client correctly', () => {
     expect(knishIOClientInstance.uri()).toBe(testUri)
-    expect(knishIOClientInstance.cellSlug()).toBe(testCell)
+    expect(knishIOClientInstance.getCellSlug()).toBe(testCell)
     expect(knishIOClientInstance.getSecret()).toBe(testSecret)
   })
 

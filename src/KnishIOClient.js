@@ -253,9 +253,19 @@ export default class KnishIOClient {
   /**
    * Returns the currently defined Cell identifier for this session
    *
+   * @deprecated Please use getCellSlug() instead
    * @return {string|null}
    */
   cellSlug () {
+    return this.getCellSlug()
+  }
+
+  /**
+   * Returns the currently defined Cell identifier for this session
+   *
+   * @return {string|null}
+   */
+  getCellSlug () {
     return this.$__cellSlug || null
   }
 
@@ -469,7 +479,7 @@ export default class KnishIOClient {
       secret,
       sourceWallet,
       remainderWallet: this.getRemainderWallet(),
-      cellSlug: this.cellSlug(),
+      cellSlug: this.getCellSlug(),
       version: this.getServerSdkVersion()
     })
   }
@@ -539,7 +549,10 @@ export default class KnishIOClient {
 
     // Create a new AbortController for this query
     const abortController = new AbortController()
-    const queryKey = JSON.stringify({ query: query.$__query, variables })
+    const queryKey = JSON.stringify({
+      query: query.$__query,
+      variables
+    })
     this.abortControllers.set(queryKey, abortController)
 
     try {
@@ -567,7 +580,10 @@ export default class KnishIOClient {
   }
 
   cancelQuery (query, variables = null) {
-    const queryKey = JSON.stringify({ query: query.$__query, variables })
+    const queryKey = JSON.stringify({
+      query: query.$__query,
+      variables
+    })
     const controller = this.abortControllers.get(queryKey)
     if (controller) {
       controller.abort()
@@ -2085,6 +2101,11 @@ export default class KnishIOClient {
     // Generate a secret from the seed if it has been passed
     if (secret === null && seed) {
       secret = generateSecret(seed)
+    }
+
+    // Set cell slug if it has been passed
+    if (cellSlug) {
+      this.setCellSlug(cellSlug)
     }
 
     // Auth in process...
