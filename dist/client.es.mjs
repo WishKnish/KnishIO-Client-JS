@@ -17613,8 +17613,17 @@ class km {
    *
    * @return {string}
    */
-  uri() {
+  getUri() {
     return this.$__client.getUri();
+  }
+  /**
+   * Retrieves the endpoint URI for this session
+   *
+   * @deprecated Please use getUri() instead
+   * @returns {string}
+   */
+  uri() {
+    return this.getUri();
   }
   /**
    * Returns the Apollo client class session
@@ -18946,7 +18955,7 @@ class km {
       this.log("info", "KnishIOClient::setAuthToken() - authToken object is empty.");
       return;
     }
-    this.$__authTokenObjects[this.uri()] = e, this.client().setAuthData(e.getAuthData()), this.$__authToken = e;
+    this.$__authTokenObjects[this.getUri()] = e, this.client().setAuthData(e.getAuthData()), this.$__authToken = e;
   }
   /**
    * Returns the current authorization token

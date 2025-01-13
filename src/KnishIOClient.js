@@ -287,8 +287,18 @@ export default class KnishIOClient {
    *
    * @return {string}
    */
-  uri () {
+  getUri () {
     return this.$__client.getUri()
+  }
+
+  /**
+   * Retrieves the endpoint URI for this session
+   *
+   * @deprecated Please use getUri() instead
+   * @returns {string}
+   */
+  uri () {
+    return this.getUri()
   }
 
   /**
@@ -2154,7 +2164,7 @@ export default class KnishIOClient {
     }
 
     // Save auth token object to global list
-    this.$__authTokenObjects[this.uri()] = authToken
+    this.$__authTokenObjects[this.getUri()] = authToken
 
     // Set auth data to apollo client
     this.client().setAuthData(authToken.getAuthData())

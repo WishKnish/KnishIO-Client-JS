@@ -241,7 +241,7 @@ senderWallet.decryptMessage(encryptedData).then(decryptedMessage => {
     uri: 'https://eteplitsky.testnet.knish.io/graphql',
     cellSlug: 'TESTCELL'
   })
-  handleResponse({ uri: client.uri() })
+  handleResponse({ uri: client.getUri() })
 
   handleResponse('Generating fingerprint...')
   const fingerprint = client.getFingerprint().then(fingerprint => {
