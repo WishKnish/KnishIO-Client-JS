@@ -15,15 +15,13 @@ export default defineConfig( async ( {
 
 	return {
 		define: {
-
-
 			'process.env.NODE_ENV': true,
 		},
 		build: {
-			//minify: false,
+			minify: true,
 			sourcemap: true,
 			outDir: path( __dirname, '..', 'dist' ),
-			target: 'es2015',
+			target: 'es2020',
 			lib: {
 				formats: [ 'iife', 'es', 'cjs' ],
 				entry: path( __dirname, '..', 'src', 'index.js' ),
@@ -34,7 +32,16 @@ export default defineConfig( async ( {
 					}
 					return `client.${ format }.mjs`;
 				}
+			},
+			rollupOptions: {
+				external: [ 'vue' ],
+				output: {
+					manualChunks: undefined
+				}
 			}
+		},
+		esbuild: {
+			target: 'es2020'
 		},
 		plugins: [
 			nodePolyfills( {

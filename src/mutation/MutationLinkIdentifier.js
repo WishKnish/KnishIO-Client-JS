@@ -54,12 +54,12 @@ import { gql } from '@apollo/client/core'
  */
 export default class MutationLinkIdentifier extends Mutation {
   /**
-   * Class constructor
-   *
-   * @param apolloClient
+   * @param {ApolloClientWrapper} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
+
     this.$__query = gql`mutation( $bundle: String!, $type: String!, $content: String! ) {
       LinkIdentifier( bundle: $bundle, type: $type, content: $content ) {
         type,

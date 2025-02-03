@@ -51,12 +51,12 @@ import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthor
 
 export default class MutationRequestAuthorizationGuest extends Mutation {
   /**
-   * Class constructor
-   *
-   * @param apolloClient
+   * @param {ApolloClientWrapper} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
+
     this.$__query = gql`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
       AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {
         token,

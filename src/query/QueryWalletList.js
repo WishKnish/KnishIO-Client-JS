@@ -53,8 +53,13 @@ import { gql } from '@apollo/client/core'
  * Query for getting a list of Wallets
  */
 export default class QueryWalletList extends Query {
-  constructor (apolloClient) {
-    super(apolloClient)
+  /**
+   * @param {ApolloClientWrapper} apolloClient
+   * @param {KnishIOClient} knishIOClient
+   */
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
+
     this.$__query = gql`query( $bundleHash: String, $tokenSlug: String ) {
       Wallet( bundleHash: $bundleHash, tokenSlug: $tokenSlug ) {
         address,

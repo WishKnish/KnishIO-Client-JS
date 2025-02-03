@@ -89,6 +89,9 @@ export default class Molecule {
     cellSlug = null,
     version = null
   }) {
+    this.status = null
+    this.molecularHash = null
+    this.createdAt = String(+new Date())
     this.cellSlugOrigin = this.cellSlug = cellSlug
     this.secret = secret
     this.bundle = bundle
@@ -108,8 +111,6 @@ export default class Molecule {
         characters: sourceWallet.characters
       })
     }
-
-    this.clear()
   }
 
   /**
@@ -731,16 +732,15 @@ export default class Molecule {
       atomMeta = new AtomMeta()
     }
     atomMeta.setMetaWallet(wallet)
-
-    this.addAtom(Atom.create({
+    const creationAtom = Atom.create({
       isotope: 'C',
       wallet: this.sourceWallet,
       metaType: 'wallet',
       metaId: wallet.address,
       meta: atomMeta,
       batchId: wallet.batchId
-    }))
-
+    })
+    this.addAtom(creationAtom)
     this.addContinuIdAtom()
 
     return this
@@ -881,21 +881,6 @@ export default class Molecule {
 
     // User remainder atom
     this.addContinuIdAtom()
-
-    return this
-  }
-
-  /**
-   * Clears the instance of the data, leads the instance to a state equivalent to that after new Molecule()
-   *
-   * @return {Molecule}
-   */
-  clear () {
-    this.molecularHash = null
-    this.bundle = null
-    this.status = null
-    this.createdAt = String(+new Date())
-    this.atoms = []
 
     return this
   }

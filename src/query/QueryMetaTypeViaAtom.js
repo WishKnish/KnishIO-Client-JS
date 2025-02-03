@@ -51,12 +51,11 @@ import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom'
 
 export default class QueryMetaTypeViaAtom extends Query {
   /**
-   * Class constructor
-   *
-   * @param apolloClient
+   * @param {ApolloClientWrapper} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
 
     this.$__query = gql`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!] ) {
       MetaTypeViaAtom(
@@ -104,7 +103,6 @@ export default class QueryMetaTypeViaAtom extends Query {
    * @param {array|null} keys
    * @param {array|null} atomValues
    * @param {boolean|null} latest
-   * @param {boolean|null} latestMetas
    * @param {array|null} filter
    * @param {object|null} queryArgs
    * @param {string|null} countBy
@@ -119,7 +117,6 @@ export default class QueryMetaTypeViaAtom extends Query {
     values = null,
     atomValues = null,
     latest = null,
-    latestMetas = true,
     filter = null,
     queryArgs = null,
     countBy = null
@@ -163,10 +160,7 @@ export default class QueryMetaTypeViaAtom extends Query {
       })
     }
 
-    if (latest) {
-      variables.latest = !!latest
-      variables.latest = !!latestMetas
-    }
+    variables.latest = latest === true
 
     if (queryArgs) {
       if (typeof queryArgs.limit === 'undefined' || queryArgs.limit === 0) {

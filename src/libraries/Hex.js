@@ -1,6 +1,11 @@
 /**
  * Create Uint8Array buffers from hexadecimal strings, and vice versa.
  */
+
+if (typeof self === 'undefined') {
+  global.self = global
+}
+
 export default class Hex {
   /**
    * Converts the given buffer to a string containing its hexadecimal representation.

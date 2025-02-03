@@ -50,11 +50,12 @@ import Response from '../response/Response'
 
 export default class Query {
   /**
-   *
-   * @param {ApolloClient} apolloClient
+   * @param {ApolloClientWrapper} apolloClient
+   * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient) {
+  constructor (apolloClient, knishIOClient) {
     this.client = apolloClient
+    this.knishIOClient = knishIOClient
     this.$__variables = null
     this.$__query = null
     this.$__response = null
@@ -145,7 +146,7 @@ export default class Query {
       return this.$__response
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log('Query was cancelled')
+        this.knishIOClient.log('warn', 'Query was cancelled')
         // You might want to create a custom response for cancelled queries
         return new Response({
           query: this,

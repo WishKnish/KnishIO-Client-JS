@@ -53,12 +53,12 @@ import {
 } from './libraries/strings'
 import {
   generateBatchId,
-  generateBundleHash
+  generateBundleHash,
+  generateSecret
 } from './libraries/crypto'
-import BaseX from './libraries/BaseX'
 import TokenUnit from './TokenUnit'
-import Soda from './libraries/Soda'
 import WalletCredentialException from './exception/WalletCredentialException'
+import { ml_kem768 as MlKEM768 } from '@noble/post-quantum/ml-kem'
 
 /**
  * Wallet class represents the set of public and private
@@ -117,15 +117,11 @@ export default class Wallet {
       })
       this.address = this.address || Wallet.generateAddress(this.key)
 
-      // Soda object initialization
-      this.soda = new Soda(characters)
-
-      // Private & pubkey initialization
-      this.privkey = this.soda.generatePrivateKey(this.key)
-      this.pubkey = this.soda.generatePublicKey(this.privkey)
-
       // Set characters
       this.characters = this.characters || 'BASE64'
+
+      // Initialize ML-KEM keys
+      this.initializeMLKEM()
     }
   }
 
@@ -271,6 +267,33 @@ export default class Wallet {
   }
 
   /**
+   * Initializes the ML-KEM key pair
+   */
+  initializeMLKEM () {
+    // Generate a 64-byte (512-bit) seed from the Knish.IO private key
+    const seedHex = generateSecret(this.key, 64)
+
+    // Convert the hex string to a Uint8Array
+    const seed = new Uint8Array(64)
+    for (let i = 0; i < 64; i++) {
+      seed[i] = parseInt(seedHex.substr(i * 2, 2), 16)
+    }
+
+    const { publicKey, secretKey } = MlKEM768.keygen(seed)
+    this.pubkey = this.serializeKey(publicKey)
+    this.privkey = secretKey // Note: We're keeping privkey as UInt8Array for security
+  }
+
+  serializeKey (key) {
+    return btoa(String.fromCharCode.apply(null, key))
+  }
+
+  deserializeKey (serializedKey) {
+    const binaryString = atob(serializedKey)
+    return new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i))
+  }
+
+  /**
    *
    * @returns {*[]}
    */
@@ -338,25 +361,6 @@ export default class Wallet {
     return remainderWallet
   }
 
-
-  /**
-   * Create a remainder wallet from the source one
-   *
-   * @param secret
-   */
-  createRemainder( secret ) {
-    let remainderWallet = Wallet.create( {
-      secretOrBundle: secret,
-      token: this.token,
-      characters: this.characters
-    } );
-    remainderWallet.initBatchId( {
-      sourceWallet: this,
-      isRemainder: true
-    } );
-    return remainderWallet;
-  }
-
   /**
    * @return boolean
    */
@@ -382,109 +386,83 @@ export default class Wallet {
     }
   }
 
-  /**
-   * Encrypts a message for this wallet instance
-   *
-   * @param {object|array} message
-   * @return {object}
-   */
-  encryptMessage (message) {
-    const encrypt = {}
-
-    for (let index = 1, length = arguments.length; index < length; index++) {
-      encrypt[this.soda.shortHash(arguments[index])] = this.soda.encrypt(message, arguments[index])
+  async encryptMessage (message, recipientPubkey) {
+    const messageString = JSON.stringify(message)
+    const messageUint8 = new TextEncoder().encode(messageString)
+    const deserializedPubkey = this.deserializeKey(recipientPubkey)
+    const { cipherText, sharedSecret } = MlKEM768.encapsulate(deserializedPubkey)
+    const encryptedMessage = await this.encryptWithSharedSecret(messageUint8, sharedSecret)
+    return {
+      cipherText: this.serializeKey(cipherText),
+      encryptedMessage: this.serializeKey(encryptedMessage)
     }
+  }
 
-    return encrypt
+  async decryptMessage (encryptedData) {
+    const { cipherText, encryptedMessage } = encryptedData
+
+    const sharedSecret = MlKEM768.decapsulate(this.deserializeKey(cipherText), this.privkey)
+    const decryptedUint8 = await this.decryptWithSharedSecret(this.deserializeKey(encryptedMessage), sharedSecret)
+
+    const decryptedString = new TextDecoder().decode(decryptedUint8)
+    return JSON.parse(decryptedString)
+  }
+
+  async encryptWithSharedSecret (message, sharedSecret) {
+    const iv = crypto.getRandomValues(new Uint8Array(12))
+    const algorithm = { name: 'AES-GCM', iv }
+
+    // Convert the shared secret to a CryptoKey
+    const key = await crypto.subtle.importKey(
+      'raw',
+      sharedSecret,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt']
+    )
+
+    // Encrypt the message
+    const encryptedContent = await crypto.subtle.encrypt(
+      algorithm,
+      key,
+      message
+    )
+
+    // Combine IV and encrypted content
+    const result = new Uint8Array(iv.length + encryptedContent.byteLength)
+    result.set(iv)
+    result.set(new Uint8Array(encryptedContent), iv.length)
+
+    return result
   }
 
   /**
-   * Uses the current wallet's private key to decrypt the given message
-   *
-   * @param {string|object} message
-   * @return {null|any}
+   * Decrypts the given message using the shared secret
+   * @param encryptedMessage
+   * @param sharedSecret
+   * @returns {Promise<Uint8Array>}
    */
-  decryptMessage (message) {
-    const pubKey = this.pubkey
-    let encrypt = message
+  async decryptWithSharedSecret (encryptedMessage, sharedSecret) {
+    // Extract IV from the encrypted message
+    const iv = encryptedMessage.slice(0, 12)
+    const algorithm = { name: 'AES-GCM', iv }
 
-    if (message !== null &&
-      typeof message === 'object' &&
-      Object.prototype.toString.call(message) === '[object Object]') {
-      encrypt = message[this.soda.shortHash(pubKey)] || ''
-    }
+    // Convert the shared secret to a CryptoKey
+    const key = await crypto.subtle.importKey(
+      'raw',
+      sharedSecret,
+      { name: 'AES-GCM' },
+      false,
+      ['decrypt']
+    )
 
-    return this.soda.decrypt(encrypt, this.privkey, pubKey)
+    // Decrypt the message
+    const decryptedContent = await crypto.subtle.decrypt(
+      algorithm,
+      key,
+      encryptedMessage.slice(12)
+    )
+
+    return new Uint8Array(decryptedContent)
   }
-
-  /**
-   * @param {string|object} message
-   *
-   * @returns {Buffer|ArrayBuffer|Uint8Array}
-   */
-  decryptBinary (message) {
-    const decrypt = this.decryptMessage(message)
-    return (new BaseX({ characters: 'BASE64' })).decode(decrypt)
-  }
-
-  /**
-   * @param {Buffer|ArrayBuffer|Uint8Array} message
-   * @returns {{string}}
-   */
-  encryptBinary (message) {
-    const arg = Array.from(arguments).slice(1)
-
-    const messageBase64 = (new BaseX({ characters: 'BASE64' })).encode(message)
-
-    return this.encryptMessage(messageBase64, ...arg)
-  }
-
-  /**
-   * Encrypts a string for the given public keys
-   *
-   * @param {string} data
-   * @param {string|array} publicKeys
-   * @return {string}
-   */
-  encryptString ({
-    data,
-    publicKeys
-  }) {
-    if (data) {
-      // Retrieving sender's encryption public key
-      const publicKey = this.pubkey
-
-      // If the additional public keys is supplied as a string, convert to array
-      if (typeof publicKeys === 'string') {
-        publicKeys = [publicKeys]
-      }
-
-      // Encrypting message
-      const encryptedData = this.encryptMessage(data, publicKey, ...publicKeys)
-      return btoa(JSON.stringify(encryptedData))
-    }
-  };
-
-  /**
-   * Attempts to decrypt the given string
-   *
-   * @param {string} data
-   * @param {string|null} fallbackValue
-   * @return {array|object}
-   */
-  decryptString ({
-    data,
-    fallbackValue = null
-  }) {
-    if (data) {
-      try {
-        const decrypted = JSON.parse(atob(data))
-        return this.decryptMessage(decrypted) || fallbackValue
-      } catch (e) {
-        // Probably not actually encrypted
-        console.error(e)
-        return fallbackValue || data
-      }
-    }
-  };
 }

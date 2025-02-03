@@ -53,8 +53,13 @@ import { gql } from '@apollo/client/core'
  * Query for retrieving information about Wallet Bundles
  */
 export default class QueryWalletBundle extends Query {
-  constructor (apolloClient) {
-    super(apolloClient)
+  /**
+   * @param {ApolloClientWrapper} apolloClient
+   * @param {KnishIOClient} knishIOClient
+   */
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
+
     this.$__query = gql`query( $bundleHashes: [ String! ] ) {
       WalletBundle( bundleHashes: $bundleHashes ) {
         bundleHash,

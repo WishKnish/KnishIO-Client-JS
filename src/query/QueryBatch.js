@@ -53,8 +53,13 @@ import { gql } from '@apollo/client/core'
  * Query for retrieving Meta Asset information
  */
 export default class QueryBatch extends Query {
-  constructor (apolloClient) {
-    super(apolloClient)
+  /**
+   * @param {ApolloClientWrapper} apolloClient
+   * @param {KnishIOClient} knishIOClient
+   */
+  constructor (apolloClient, knishIOClient) {
+    super(apolloClient, knishIOClient)
+
     this.$__query = gql`query( $batchId: String ) {
       Batch( batchId: $batchId ) {
         ${ QueryBatch.getFields() },
