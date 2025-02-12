@@ -47,18 +47,18 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from './Query'
 import ResponseMetaType from '../response/ResponseMetaType'
-import { gql } from '@apollo/client/core'
+import { gql } from '@urql/core'
 
 /**
  * Query for retrieving Meta Asset information
  */
 export default class QueryMetaType extends Query {
   /**
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient, knishIOClient) {
-    super(apolloClient, knishIOClient)
+  constructor (graphQLClient, knishIOClient) {
+    super(graphQLClient, knishIOClient)
 
     this.$__query = gql`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $queryArgs: QueryArgs, $countBy: String ) {
       MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, queryArgs: $queryArgs, countBy: $countBy ) {

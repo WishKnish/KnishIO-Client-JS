@@ -50,11 +50,11 @@ import Response from '../response/Response'
 
 export default class Query {
   /**
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient, knishIOClient) {
-    this.client = apolloClient
+  constructor (graphQLClient, knishIOClient) {
+    this.client = graphQLClient
     this.knishIOClient = knishIOClient
     this.$__variables = null
     this.$__query = null

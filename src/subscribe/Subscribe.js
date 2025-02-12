@@ -3,10 +3,10 @@ import CodeException from '../exception/CodeException'
 export default class Subscribe {
   /**
    *
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    */
-  constructor (apolloClient) {
-    this.client = apolloClient
+  constructor (graphQLClient) {
+    this.client = graphQLClient
     this.$__variables = null
     this.$__subscribe = null
   }

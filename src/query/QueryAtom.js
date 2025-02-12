@@ -46,19 +46,19 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Query from './Query'
-import { gql } from '@apollo/client/core'
 import ResponseAtom from '../response/ResponseAtom'
+import { gql } from '@urql/core'
 
 /**
  * Query for getting the balance of a given wallet or token slug
  */
 export default class QueryAtom extends Query {
   /**
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient, knishIOClient) {
-    super(apolloClient, knishIOClient)
+  constructor (graphQLClient, knishIOClient) {
+    super(graphQLClient, knishIOClient)
 
     this.$__query = gql`query(
       $molecularHashes: [String!],

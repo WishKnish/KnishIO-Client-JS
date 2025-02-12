@@ -48,18 +48,18 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 import Query from './Query'
 import QueryBatch from './QueryBatch'
 import Response from '../response/Response'
-import { gql } from '@apollo/client/core'
+import { gql } from '@urql/core'
 
 /**
  * Query for retrieving Meta Asset information
  */
 export default class QueryBatchHistory extends Query {
   /**
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient, knishIOClient) {
-    super(apolloClient, knishIOClient)
+  constructor (graphQLClient, knishIOClient) {
+    super(graphQLClient, knishIOClient)
 
     this.$__query = gql`query( $batchId: String ) {
       BatchHistory( batchId: $batchId ) {

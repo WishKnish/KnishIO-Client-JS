@@ -47,16 +47,16 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
 import Query from './Query'
-import { gql } from '@apollo/client/core'
 import ResponsePolicy from '../response/ResponsePolicy'
+import { gql } from "@urql/core";
 
 export default class QueryPolicy extends Query {
   /**
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient, knishIOClient) {
-    super(apolloClient, knishIOClient)
+  constructor (graphQLClient, knishIOClient) {
+    super(graphQLClient, knishIOClient)
 
     this.$__query = gql`query( $metaType: String, $metaId: String, ) {
       Policy( metaType: $metaType, metaId: $metaId ) {

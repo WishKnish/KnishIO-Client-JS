@@ -45,17 +45,17 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import { gql } from '@apollo/client/core'
 import Mutation from '../mutation/Mutation'
 import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthorizationGuest'
+import { gql } from '@urql/core'
 
 export default class MutationRequestAuthorizationGuest extends Mutation {
   /**
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient, knishIOClient) {
-    super(apolloClient, knishIOClient)
+  constructor (graphQLClient, knishIOClient) {
+    super(graphQLClient, knishIOClient)
 
     this.$__query = gql`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
       AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {

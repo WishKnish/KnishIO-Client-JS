@@ -47,16 +47,16 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import ResponseProposeMolecule from '../response/ResponseProposeMolecule'
 import Mutation from './Mutation'
-import { gql } from '@apollo/client/core'
+import { gql } from '@urql/core'
 
 export default class MutationProposeMolecule extends Mutation {
   /**
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    * @param molecule
    */
-  constructor (apolloClient, knishIOClient, molecule) {
-    super(apolloClient, knishIOClient)
+  constructor (graphQLClient, knishIOClient, molecule) {
+    super(graphQLClient, knishIOClient)
 
     this.$__molecule = molecule
     this.$__remainderWallet = null
