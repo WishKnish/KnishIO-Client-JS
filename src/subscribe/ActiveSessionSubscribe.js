@@ -1,9 +1,9 @@
 import Subscribe from './Subscribe'
-import { gql } from '@apollo/client/core'
+import { gql } from '@urql/core'
 
 export default class ActiveSessionSubscribe extends Subscribe {
-  constructor (apolloClient) {
-    super(apolloClient)
+  constructor (graphQLClient) {
+    super(graphQLClient)
     this.$__subscribe = gql`
       subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
         ActiveUser( metaType: $metaType, metaId: $metaId ) {

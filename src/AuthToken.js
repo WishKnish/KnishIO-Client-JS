@@ -170,7 +170,7 @@ export default class AuthToken {
   }
 
   /**
-   * Get auth data for the final client (apollo)
+   * Get auth data for the final GraphQL client
    * @return {{wallet: Wallet, token: string, pubkey: string}}
    */
   getAuthData () {

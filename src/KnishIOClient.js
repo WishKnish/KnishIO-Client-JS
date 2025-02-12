@@ -98,7 +98,7 @@ import {
   getFingerprint,
   getFingerprintData
 } from '@thumbmarkjs/thumbmarkjs'
-import ApolloClientWrapper from './libraries/apollo/ApolloClientWrapper'
+import UrqlClientWrapper from "./libraries/urql/UrqlClientWrapper";
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -111,7 +111,7 @@ export default class KnishIOClient {
    * @param {string} uri
    * @param {string|null} cellSlug
    * @param {object|null} socket
-   * @param {ApolloClientWrapper|null} client
+   * @param {UrqlClientWrapper|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    */
@@ -139,7 +139,7 @@ export default class KnishIOClient {
    * @param {string|[]} uri
    * @param {string|null} cellSlug
    * @param {object|null} socket
-   * @param {ApolloClientWrapper|null} client
+   * @param {UrqlClientWrapper|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    */
@@ -171,7 +171,7 @@ export default class KnishIOClient {
 
     this.log('info', `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${ serverSdkVersion }...`)
 
-    this.$__client = client || new ApolloClientWrapper({
+    this.$__client = client || new UrqlClientWrapper({
       socket: {
         ...{
           socketUri: null,
@@ -223,7 +223,7 @@ export default class KnishIOClient {
   /**
    * Subscribes the client to the node's broadcast socket
    *
-   * @return {ApolloClientWrapper}
+   * @return {UrqlClientWrapper}
    */
   subscribe () {
     if (!this.client().getSocketUri()) {
@@ -302,9 +302,9 @@ export default class KnishIOClient {
   }
 
   /**
-   * Returns the Apollo client class session
+   * Returns the GraphQL client class session
    *
-   * @return {ApolloClientWrapper}
+   * @return {UrqlClientWrapper}
    */
   client () {
     if (!this.$__authInProcess) {
@@ -2166,7 +2166,7 @@ export default class KnishIOClient {
     // Save auth token object to global list
     this.$__authTokenObjects[this.getUri()] = authToken
 
-    // Set auth data to apollo client
+    // Set auth data to GraphQL client
     this.client().setAuthData(authToken.getAuthData())
 
     // Save a full auth token object with expireAt key

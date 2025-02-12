@@ -47,18 +47,18 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import Mutation from '../mutation/Mutation'
 import ResponseActiveSession from '../response/ResponseActiveSession'
-import { gql } from '@apollo/client/core'
+import { gql } from '@urql/core'
 
 /**
  * Mutation for declaring an active User Session with a given MetaAsset
  */
 export default class MutationActiveSession extends Mutation {
   /**
-   * @param {ApolloClientWrapper} apolloClient
+   * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
-  constructor (apolloClient, knishIOClient) {
-    super(apolloClient, knishIOClient)
+  constructor (graphQLClient, knishIOClient) {
+    super(graphQLClient, knishIOClient)
 
     this.$__query = gql`mutation(
       $bundleHash: String!,
