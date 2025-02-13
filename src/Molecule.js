@@ -58,7 +58,6 @@ import {
   generateBatchId,
   generateBundleHash
 } from './libraries/crypto'
-import { deepCloning } from './libraries/array'
 import Dot from './libraries/Dot'
 import Rule from './instance/Rules/Rule'
 import AtomsMissingException from './exception/AtomsMissingException'
@@ -990,7 +989,7 @@ export default class Molecule {
    * @return {object}
    */
   toJSON () {
-    const clone = deepCloning(this)
+    const clone = structuredClone(this)
     for (const key of ['remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin', 'version']) {
       if (Object.prototype.hasOwnProperty.call(clone, key)) {
         delete clone[key]

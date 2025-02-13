@@ -46,32 +46,28 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
+import { ITokenUnit } from "./types";
+
 /**
  * AuthToken class
  */
-export default class TokenUnit {
-  /**
-   *
-   * @param id
-   * @param name
-   * @param metas
-   */
-  constructor (id, name, metas) {
+export default class TokenUnit implements ITokenUnit {
+
+  id: string;
+  name: string;
+  metas: object;
+
+  constructor( id: string, name: string, metas: {} ) {
     this.id = id
     this.name = name
-    this.metas = metas || {}
+    this.metas = metas
   }
 
-  /**
-   *
-   * @param data
-   * @returns {*}
-   */
-  static createFromGraphQL (data) {
+  static createFromGraphQL( data: { id: string, name: string, metas: string | {} } ) {
     let metas = data.metas || {}
-    if (metas.length) {
-      metas = JSON.parse(metas)
-      if (!metas) { // set an empty object instead of an array
+    if ( typeof metas === 'string' && metas.length ) {
+      metas = JSON.parse( metas )
+      if ( !metas ) { // set an empty object instead of an array
         metas = {}
       }
     }
@@ -87,46 +83,31 @@ export default class TokenUnit {
    * @param data
    * @returns {TokenUnit}
    */
-  static createFromDB (data) {
+  static createFromDB( data: [string, string, {}] ): TokenUnit {
     return new TokenUnit(
-      data[0],
-      data[1],
-      data.length > 2 ? data[2] : {}
+      data[ 0 ],
+      data[ 1 ],
+      data.length > 2 ? data[ 2 ] : {}
     )
   }
 
-  /**
-   *
-   * @returns {*|null}
-   */
-  getFragmentZone () {
+  getFragmentZone(): string | null {
     return this.metas.fragmentZone || null
   }
 
-  /**
-   *
-   * @returns {*|null}
-   */
-  getFusedTokenUnits () {
+  getFusedTokenUnits() {
     return this.metas.fusedTokenUnits || null
   }
 
-  /**
-   * @return array
-   */
-  toData () {
-    return [this.id, this.name, this.metas]
+  toData(): [ string, string, {} ] {
+    return [ this.id, this.name, this.metas ]
   }
 
-  /**
-   *
-   * @returns {{metas: string, name: *, id: *}}
-   */
-  toGraphQLResponse () {
+  toGraphQLResponse(): { id: string, name: string, metas: string } {
     return {
       id: this.id,
       name: this.name,
-      metas: JSON.stringify(this.metas)
+      metas: JSON.stringify( this.metas )
     }
   }
 }

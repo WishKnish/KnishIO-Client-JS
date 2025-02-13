@@ -50,12 +50,8 @@ import JsSHA from 'jssha'
 
 /**
  * Generates a secret based on an optional seed
- *
- * @param seed
- * @param length
- * @return {string|*}
  */
-export function generateSecret (seed = null, length = 2048) {
+export function generateSecret (seed: string = null, length: number = 2048): string {
   // console.info(`Crypto::generateSecret() - Computing new secret${ seed ? ' from existing seed' : '' }...`)
   if (seed) {
     const sponge = new JsSHA('SHAKE256', 'TEXT')
@@ -68,12 +64,8 @@ export function generateSecret (seed = null, length = 2048) {
 
 /**
  * Hashes the user secret to produce a bundle hash
- *
- * @param {string} secret
- * @param {string|null} source
- * @return {string}
  */
-export function generateBundleHash (secret, source = null) {
+export function generateBundleHash (secret: string): string {
   const sponge = new JsSHA('SHAKE256', 'TEXT')
   sponge.update(secret)
   return sponge.getHash('HEX', { outputLen: 256 })
@@ -81,18 +73,13 @@ export function generateBundleHash (secret, source = null) {
 
 /**
  * Returns a new batch ID for stackable tokens
- *
- * @param {string|null} molecularHash
- * @param {number|null} index
- *
- * @return {string}
  */
 export function generateBatchId ({
-  molecularHash = null,
-  index = null
-}) {
+  molecularHash = null as string | null,
+  index = null as number | null
+}): string {
   if (molecularHash !== null && index !== null) {
-    return generateBundleHash(String(molecularHash) + String(index), 'generateBatchId')
+    return generateBundleHash(String(molecularHash) + String(index))
   }
 
   return randomString(64)

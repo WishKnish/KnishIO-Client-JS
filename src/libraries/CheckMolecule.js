@@ -63,14 +63,14 @@ import WrongTokenTypeException from './../exception/WrongTokenTypeException'
 import BatchIdException from './../exception/BatchIdException'
 import Atom from './../Atom'
 import Meta from './../Meta'
-import Wallet from './../Wallet'
+import Wallet from '../Wallet'
 import Rule from '../instance/Rules/Rule'
 import {
   base64ToHex,
   chunkSubstr
 } from './strings'
 import JsSHA from 'jssha'
-import Dot from './../libraries/Dot'
+import Dot from './Dot'
 
 /**
  *

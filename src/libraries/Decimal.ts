@@ -1,26 +1,15 @@
 // Value determines by min sql decimal precision
-const multiplier = 10 ** 18
+const multiplier: number = 10 ** 18
 
 export default class Decimal {
-  /**
-   * @param {number} value
-   * @return {number}
-   */
-  static val (value) {
+  static val (value: number): number {
     if (Math.abs(value * multiplier) < 1) {
       return 0.0
     }
-
     return value
   }
 
-  /**
-   * @param {number} value1
-   * @param {number} value2
-   * @param {boolean} debug
-   * @return {number}
-   */
-  static cmp (value1, value2, debug = false) {
+  static cmp (value1: number, value2: number): number {
     const val1 = Decimal.val(value1) * multiplier
     const val2 = Decimal.val(value2) * multiplier
 
@@ -33,12 +22,7 @@ export default class Decimal {
     return (val1 > val2) ? 1 : -1
   }
 
-  /**
-   * @param {number} value1
-   * @param {number} value2
-   * @return {boolean}
-   */
-  static equal (value1, value2) {
+  static equal (value1: number, value2: number): boolean {
     return (Decimal.cmp(value1, value2) === 0)
   }
 }

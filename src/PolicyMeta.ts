@@ -83,7 +83,7 @@ export default class PolicyMeta {
   /**
    *
    */
-  fillDefault (metaKeys = {}) {
+  fillDefault (metaKeys = {}): void {
     const readPolicy = Array.from(this.policy).filter(item => item.action === 'read')
     const writePolicy = Array.from(this.policy).filter(item => item.action === 'write')
 
@@ -97,7 +97,9 @@ export default class PolicyMeta {
         this.policy[type] = {}
       }
 
-      for (const key of diff(metaKeys, policyKey)) {
+      const diff = metaKeys.filter(item => policyKey.indexOf(item) < 0)
+
+      for (const key of diff) {
         if (!this.policy[type][key]) {
           this.policy[type][key] = (type === 'write' && !['characters', 'pubkey'].includes(key)) ? ['self'] : ['all']
         }

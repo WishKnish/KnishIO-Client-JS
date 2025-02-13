@@ -1,9 +1,13 @@
 module.exports = {
   root: true,
 
+  parser: '@typescript-eslint/parser',
+
   parserOptions: {
     ecmaVersion: 'latest',
-    sourceType: 'module'
+    sourceType: 'module',
+    project: './tsconfig.json',
+    tsconfigRootDir: __dirname
   },
 
   env: {
@@ -13,13 +17,15 @@ module.exports = {
   },
 
   extends: [
-    'standard',
-    'plugin:vue/vue3-essential'
+    'standard-with-typescript',
+    'plugin:vue/vue3-essential',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking'
   ],
 
-  // required to lint *.vue files
   plugins: [
-    'vue'
+    'vue',
+    '@typescript-eslint'
   ],
 
   globals: {
@@ -29,7 +35,6 @@ module.exports = {
     process: true
   },
 
-  // add your custom rules here
   rules: {
     'no-param-reassign': 'off',
     'no-underscore-dangle': 'off',
@@ -40,15 +45,29 @@ module.exports = {
     quotes: ['error', 'single'],
     'prefer-template': ['error'],
     'no-multi-spaces': 'error',
-
-    // allow console.log during development only
     'no-console': 'off',
-    // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-
-    // TODO: Remove when is https://github.com/babel/babel-eslint/issues/530 fixed
     'template-curly-spacing': 'off',
-    // 'template-curly-spacing': [ "error", "always" ],
-    indent: 'off'
+    indent: 'off',
+
+    // TypeScript specific rules
+    '@typescript-eslint/explicit-function-return-type': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-unused-vars': ['error', {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_'
+    }],
+    '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+    '@typescript-eslint/strict-boolean-expressions': 'off',
+    '@typescript-eslint/no-floating-promises': 'warn',
+    '@typescript-eslint/no-misused-promises': 'warn',
+    '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+    '@typescript-eslint/no-non-null-assertion': 'warn'
+  },
+
+  settings: {
+    'import/resolver': {
+      typescript: {} // this loads <rootdir>/tsconfig.json to eslint
+    }
   }
-}
+};

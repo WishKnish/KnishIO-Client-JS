@@ -2,13 +2,19 @@
  * Utility class for accessing nested object properties using dot notation
  */
 export default class Dot {
+
+  static arr: string[]
+  static key: string|number
+  static __nextKey: number
+  static __next: boolean
+
   /**
    * Initialize the Dot utility with the given object and key path
    * @param {object|array} obj - The object or array to traverse
    * @param {string} keys - The dot-notated string of keys
    * @private
    */
-  static __init (obj, keys) {
+  static __init (obj: object|any[], keys: string) {
     this.arr = String(keys).split('.')
     this.key = this.arr.shift()
 
@@ -28,7 +34,7 @@ export default class Dot {
    * @return {boolean} - Whether the key exists
    * @private
    */
-  static __tic (obj) {
+  static __tic (obj: object|any[]): boolean {
     if (!Array.isArray(obj) && !(obj instanceof Object)) {
       return false
     }
@@ -42,7 +48,7 @@ export default class Dot {
    * @param {string} keys - The path to the property, using dot notation
    * @return {boolean} - True if the property exists, false otherwise
    */
-  static has (obj, keys) {
+  static has (obj: object|any[], keys: string): boolean {
     this.__init(obj, keys)
 
     if (!this.__next) {
@@ -62,7 +68,7 @@ export default class Dot {
    * @param {*} [def=null] - The default value to return if the property is not found
    * @return {*} - The value of the property, or the default value if not found
    */
-  static get (obj, keys, def = null) {
+  static get (obj: object|any[], keys: string, def: any = null): any {
     this.__init(obj, keys)
 
     if (!this.__next) {
@@ -82,7 +88,7 @@ export default class Dot {
    * @param {*} value - The value to set
    * @return {object|array} - The modified object or array
    */
-  static set (obj, keys, value) {
+  static set (obj: object|any[], keys: string, value: any): object|any[] {
     const parts = keys.split('.')
     let current = obj
     const lastIndex = parts.length - 1

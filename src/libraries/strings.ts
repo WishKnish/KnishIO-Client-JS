@@ -8,24 +8,20 @@ if (!String.prototype.trim) {
 
 if (!String.prototype.toCamelCase) {
   String.prototype.toCamelCase = function () {
-    return this.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+    return this.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m: any, chr: string) => chr.toUpperCase())
   }
 }
 
 if (!String.prototype.toSnakeCase) {
   String.prototype.toSnakeCase = function () {
-    return this.replace(/[A-Z]/g, letter => `_${ letter.toLowerCase() }`)
+    return this.replace(/[A-Z]/g, ( letter: string) => `_${ letter.toLowerCase() }`)
   }
 }
 
 /**
  * Chunks a string into array segments of equal size
- *
- * @param str
- * @param size
- * @return {any[]}
  */
-export function chunkSubstr (str, size) {
+export function chunkSubstr (str: string, size: number): string[] {
   const numChunks = Math.ceil(str.length / size)
   const chunks = []
 
@@ -38,12 +34,8 @@ export function chunkSubstr (str, size) {
 
 /**
  * Generates a cryptographically-secure pseudo-random string of the given length out of the given alphabet
- *
- * @param length
- * @param alphabet
- * @return {string}
  */
-export function randomString (length = 256, alphabet = 'abcdef0123456789') {
+export function randomString (length: number = 256, alphabet: string = 'abcdef0123456789'): string {
   let array = new Uint8Array(length)
 
   array = crypto.getRandomValues(array)
@@ -55,15 +47,8 @@ export function randomString (length = 256, alphabet = 'abcdef0123456789') {
 
 /**
  * Convert charset between bases and alphabets
- *
- * @param src
- * @param {int} fromBase
- * @param {int} toBase
- * @param { string} srcSymbolTable
- * @param {string} destSymbolTable
- * @return {boolean|string|number}
  */
-export function charsetBaseConvert (src, fromBase, toBase, srcSymbolTable, destSymbolTable) {
+export function charsetBaseConvert (src: string, fromBase: number, toBase: number, srcSymbolTable: string, destSymbolTable: string): string | boolean {
   const baseSymbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:\'",<.>/?¿¡'
   srcSymbolTable = srcSymbolTable || baseSymbols
   destSymbolTable = destSymbolTable || srcSymbolTable
@@ -93,56 +78,42 @@ export function charsetBaseConvert (src, fromBase, toBase, srcSymbolTable, destS
 
 /**
  * Converts a buffer into a hexadecimal string
- *
- * @param byteArray
- * @return {string}
  */
-export function bufferToHexString (byteArray) {
+export function bufferToHexString (byteArray: Uint8Array): string {
   return Hex.toHex(byteArray, {})
 }
 
 /**
  * Converts a hexadecimal string into a buffer
- *
- * @param hexString
- * @return {Uint8Array}
  */
-export function hexStringToBuffer (hexString) {
+export function hexStringToBuffer (hexString: string): Uint8Array {
   return Hex.toUint8Array(hexString)
 }
 
 /**
  * Compresses a given string for web sharing
- *
- * @param string
- * @return {string}
  */
-export function hexToBase64 (string) {
-  return Buffer.from(string, 'hex').toString('base64')
+export function hexToBase64 (str: string): string {
+  return Buffer.from(str, 'hex').toString('base64')
 }
 
 /**
  * Decompresses a compressed string
- *
- * @param {string} string
- * @return {string}
  */
-export function base64ToHex (string) {
-  return Buffer.from(string, 'base64').toString('hex')
+export function base64ToHex (str: string): string {
+  return Buffer.from(str, 'base64').toString('hex')
 }
 
 /**
- * @param {string} str
- * @return {boolean}
+ * Checks if a string is a hexadecimal string
  */
-export function isHex (str) {
+export function isHex (str: string): boolean {
   return /^[A-F0-9]+$/i.test(str)
 }
 
 /**
- * @param {string} str
- * @return {boolean}
+ * Checks if a string is a numeric string
  */
-export function isNumeric (str) {
-  return (typeof (str) === 'number' || (typeof (str) === 'string' && str.trim() !== '')) && !isNaN(str)
+export function isNumeric (str: unknown): boolean {
+  return (typeof (str) === 'number' || (typeof (str) === 'string' && str.trim() !== '')) && !isNaN(str as number)
 }
