@@ -401,10 +401,48 @@ export default class Wallet {
   async decryptMessage (encryptedData) {
     const { cipherText, encryptedMessage } = encryptedData
 
-    const sharedSecret = MlKEM768.decapsulate(this.deserializeKey(cipherText), this.privkey)
-    const decryptedUint8 = await this.decryptWithSharedSecret(this.deserializeKey(encryptedMessage), sharedSecret)
+    let sharedSecret
+    try {
+      sharedSecret = MlKEM768.decapsulate(this.deserializeKey(cipherText), this.privkey)
+    } catch (e) {
+      console.error('Wallet::decryptMessage() - Decapsulation failed', e)
+      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      return null
+    }
 
-    const decryptedString = new TextDecoder().decode(decryptedUint8)
+    let deserializedEncryptedMessage
+    try {
+      deserializedEncryptedMessage = this.deserializeKey(encryptedMessage)
+    } catch (e) {
+      console.warn('Wallet::decryptMessage() - Deserialization failed', e)
+      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
+      return null
+    }
+
+    let decryptedUint8
+    try {
+      decryptedUint8 = await this.decryptWithSharedSecret(deserializedEncryptedMessage, sharedSecret)
+    } catch (e) {
+      console.warn('Wallet::decryptMessage() - Decryption failed', e)
+      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
+      console.info('Wallet::decryptMessage() - deserialized encrypted message', deserializedEncryptedMessage)
+      return null
+    }
+
+    let decryptedString
+    try {
+      decryptedString = new TextDecoder().decode(decryptedUint8)
+    } catch (e) {
+      console.warn('Wallet::decryptMessage() - Decoding failed', e)
+      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
+      console.info('Wallet::decryptMessage() - deserialized encrypted message', deserializedEncryptedMessage)
+      console.info('Wallet::decryptMessage() - decrypted Uint8Array', decryptedUint8)
+      return null
+    }
+
     return JSON.parse(decryptedString)
   }
 
