@@ -5,7 +5,6 @@ import {
 import { resolve as path } from 'node:path';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig( async ( {
 	command,
@@ -44,11 +43,6 @@ export default defineConfig( async ( {
 			target: 'es2020'
 		},
 		plugins: [
-			nodePolyfills( {
-				globals: {
-					Buffer: true
-				}
-			} ),
 			resolve( { browser: true } ),
 			commonjs()
 		]

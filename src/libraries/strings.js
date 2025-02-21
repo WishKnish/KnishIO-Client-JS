@@ -118,7 +118,8 @@ export function hexStringToBuffer (hexString) {
  * @return {string}
  */
 export function hexToBase64 (string) {
-  return Buffer.from(string, 'hex').toString('base64')
+  const bytes = hexStringToBuffer(string)
+  return btoa(String.fromCharCode.apply(null, bytes))
 }
 
 /**
@@ -128,7 +129,8 @@ export function hexToBase64 (string) {
  * @return {string}
  */
 export function base64ToHex (string) {
-  return Buffer.from(string, 'base64').toString('hex')
+  const bytes = new Uint8Array(atob(string).split('').map(char => char.charCodeAt(0)))
+  return bufferToHexString(bytes)
 }
 
 /**
