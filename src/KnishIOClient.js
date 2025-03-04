@@ -98,7 +98,7 @@ import {
   getFingerprint,
   getFingerprintData
 } from '@thumbmarkjs/thumbmarkjs'
-import UrqlClientWrapper from "./libraries/urql/UrqlClientWrapper";
+import UrqlClientWrapper from './libraries/urql/UrqlClientWrapper'
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -1236,8 +1236,8 @@ export default class KnishIOClient {
    *
    * @param {string} metaType - The type of the metadata entry.
    * @param {string} metaId - The ID of the metadata entry.
-   * @param {Object} [meta=null] - The metadata object.
-   * @param {Object} [policy={}] - The policy object.
+   * @param {object|array} meta - The metadata object.
+   * @param {object} [policy={}] - The policy object.
    * @returns {Promise<ResponseCreateMeta>} - A Promise that resolves with the created metadata entry.
    */
   async createMeta ({
