@@ -272,14 +272,25 @@ export default class KnishIOClient {
   /**
    * Sets the Cell identifier for this session
    *
-   * @param cellSlug
+   * @param {string} cellSlug
    */
   setCellSlug (cellSlug) {
     this.$__cellSlug = cellSlug
   }
 
+  /**
+   * Sets the endpoint URI for this session
+   *
+   * @param {string|object} uri
+   */
   setUri (uri) {
     this.$__uris = typeof uri === 'object' ? uri : [uri]
+
+    // If client exists, update its URI with a random one from the new array
+    if (this.$__client) {
+      const randomUri = this.getRandomUri()
+      this.$__client.setUri(randomUri)
+    }
   }
 
   /**
