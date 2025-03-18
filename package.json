@@ -1,6 +1,6 @@
 {
   "name": "@wishknish/knishio-client-js",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "productName": "Knish.IO Javascript SDK Client",
   "description": "JavaScript implementation of the Knish.IO SDK to consume Knish.IO GraphQL APIs.",
   "license": "GPL-3.0-or-later",
@@ -42,7 +42,7 @@
   "dependencies": {
     "@noble/post-quantum": "^0.4.0",
     "@thumbmarkjs/thumbmarkjs": "^0.19.1",
-    "@urql/core": "^5.1.0",
+    "@urql/core": "^5.1.1",
     "graphql": "^16.10.0",
     "graphql-ws": "^6.0.4",
     "isomorphic-fetch": "^3.0.0",
@@ -52,8 +52,8 @@
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^28.0.2",
-    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "buffer": "^6.0.3",
     "esbuild-jest": "^0.5.0",
     "eslint": "^8.57.1",

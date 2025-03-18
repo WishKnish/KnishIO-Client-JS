@@ -1017,7 +1017,7 @@ class C {
    * @param {string|null} batchId
    * @param {string|null} metaType
    * @param {string|null} metaId
-   * @param {array|null} meta
+   * @param {array|object|null} meta
    * @param {string|null} otsFragment
    * @param {number|null} index
    * @param {string|null} version
@@ -8814,13 +8814,21 @@ class al {
   /**
    * Sets the Cell identifier for this session
    *
-   * @param cellSlug
+   * @param {string} cellSlug
    */
   setCellSlug(e) {
     this.$__cellSlug = e;
   }
+  /**
+   * Sets the endpoint URI for this session
+   *
+   * @param {string|object} uri
+   */
   setUri(e) {
-    this.$__uris = typeof e == "object" ? e : [e];
+    if (this.$__uris = typeof e == "object" ? e : [e], this.$__client) {
+      const t = this.getRandomUri();
+      this.$__client.setUri(t);
+    }
   }
   /**
    * Retrieves the endpoint URI for this session
