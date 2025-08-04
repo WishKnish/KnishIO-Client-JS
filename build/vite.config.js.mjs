@@ -1,0 +1,51 @@
+import {
+	defineConfig,
+	loadEnv
+} from 'vite';
+import { resolve as path } from 'node:path';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+
+export default defineConfig( async ( {
+	command,
+	mode
+} ) => {
+	const env = loadEnv( mode, process.cwd(), '' );
+
+	return {
+		define: {
+			'process.env.NODE_ENV': true,
+		},
+		build: {
+			minify: true,
+			sourcemap: true,
+			outDir: path( __dirname, '..', 'dist', 'js' ),
+			target: 'es2020',
+			lib: {
+				formats: [ 'iife', 'es', 'cjs' ],
+				entry: path( __dirname, '..', 'src', 'index.js' ),
+				name: 'KnishIO',
+				fileName: ( format ) => {
+					if ( [ 'iife', 'cjs' ].includes( format ) ) {
+						return `client.js.${ format }.js`;
+					}
+					return `client.js.${ format }.mjs`;
+				}
+			},
+			rollupOptions: {
+				external: [ 'vue' ],
+				output: {
+					manualChunks: undefined,
+					exports: 'named'
+				}
+			}
+		},
+		esbuild: {
+			target: 'es2020'
+		},
+		plugins: [
+			resolve( { browser: true } ),
+			commonjs()
+		]
+	};
+} );

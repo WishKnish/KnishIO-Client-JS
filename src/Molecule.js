@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Atom from './Atom'
+import Atom from './Atom.js'
 import AtomMeta from './AtomMeta'
 import Wallet from './Wallet'
 import JsSHA from 'jssha'
@@ -61,10 +61,10 @@ import {
 import { deepCloning } from './libraries/array'
 import Dot from './libraries/Dot'
 import Rule from './instance/Rules/Rule'
-import AtomsMissingException from './exception/AtomsMissingException'
-import BalanceInsufficientException from './exception/BalanceInsufficientException'
-import NegativeAmountException from './exception/NegativeAmountException'
-import SignatureMalformedException from './exception/SignatureMalformedException'
+import AtomsMissingException from './exception/AtomsMissingException.js'
+import BalanceInsufficientException from './exception/BalanceInsufficientException.js'
+import NegativeAmountException from './exception/NegativeAmountException.js'
+import SignatureMalformedException from './exception/SignatureMalformedException.js'
 import versions from './versions/index'
 
 /**

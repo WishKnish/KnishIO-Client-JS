@@ -1,0 +1,38 @@
+{
+  "displayName": "TypeScript Tests",
+  "preset": "ts-jest",
+  "collectCoverage": true,
+  "coverageDirectory": "coverage/ts",
+  "coverageReporters": ["json", "lcov", "text", "clover"],
+  "testEnvironment": "node",
+  "transform": {
+    "^.+\\.ts$": "ts-jest"
+  },
+  "transformIgnorePatterns": [
+    "/node_modules/(?!esmock)"
+  ],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+  "testMatch": [
+    "**/__tests__/**/*.ts",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "testPathIgnorePatterns": [
+    ".*\\.js$",
+    ".*\\.jsx$"
+  ],
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1"
+  },
+  "coveragePathIgnorePatterns": [
+    "/node_modules/",
+    "\\.js$",
+    "\\.jsx$"
+  ],
+  "collectCoverageFrom": [
+    "src/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts",
+    "!src/**/*.d.ts"
+  ]
+}

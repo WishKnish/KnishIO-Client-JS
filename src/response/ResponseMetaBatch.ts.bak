@@ -1,0 +1,75 @@
+/*
+                               (
+                              (/(
+                              (//(
+                              (///(
+                             (/////(
+                             (//////(                          )
+                            (////////(                        (/)
+                            (////////(                       (///)
+                           (//////////(                      (////)
+                           (//////////(                     (//////)
+                          (////////////(                    (///////)
+                         (/////////////(                   (/////////)
+                        (//////////////(                  (///////////)
+                        (///////////////(                (/////////////)
+                       (////////////////(               (//////////////)
+                      (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((              ((((((((((((((
+                     (((((((((((((((((((            ((((((((((((((
+                    ((((((((((((((((((((           (((((((((((((
+                    ((((((((((((((((((((          ((((((((((((
+                    (((((((((((((((((((         ((((((((((((
+                    (((((((((((((((((((        ((((((((((
+                    ((((((((((((((((((/      (((((((((
+                    ((((((((((((((((((     ((((((((
+                    (((((((((((((((((    (((((((
+                   ((((((((((((((((((  (((((
+                   #################  ##
+                   ################  #
+                  ################# ##
+                 %################  ###
+                 ###############(   ####
+                ###############      ####
+               ###############       ######
+              %#############(        (#######
+             %#############           #########
+            ############(              ##########
+           ###########                  #############
+          #########                      ##############
+        %######
+
+        Powered by Knish.IO: Connecting a Decentralized World
+
+Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
+
+License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
+
+import Query from '../query/Query'
+import Response from './Response'
+import type { ResponseOptions } from '../types/response/interfaces'
+
+/**
+ * Response handler for MetaBatch queries
+ * 
+ * This class processes responses from MetaBatch queries, which retrieve
+ * batched metadata information from the Knish.IO network. MetaBatch queries
+ * allow for efficient retrieval of multiple metadata entries in a single request.
+ */
+export default class ResponseMetaBatch extends Response {
+  /**
+   * Creates a new ResponseMetaBatch instance
+   * 
+   * @param options - Response configuration options
+   * @param options.query - The originating query instance
+   * @param options.json - The raw JSON response from the GraphQL endpoint
+   */
+  constructor({ query, json }: ResponseOptions) {
+    super({
+      query,
+      json,
+      dataKey: 'data.MetaBatch'
+    })
+  }
+}

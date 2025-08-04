@@ -59,6 +59,7 @@ import {
 import TokenUnit from './TokenUnit'
 import WalletCredentialException from './exception/WalletCredentialException'
 import { ml_kem768 as MlKEM768 } from '@noble/post-quantum/ml-kem'
+import { createScopedLogger } from './libraries/Logger'
 
 /**
  * Wallet class represents the set of public and private
@@ -88,6 +89,9 @@ export default class Wallet {
     this.token = token
     this.balance = 0
     this.molecules = {}
+
+    // Initialize scoped logger
+    this.logger = createScopedLogger('Wallet')
 
     // Empty values
     this.key = null
@@ -405,8 +409,8 @@ export default class Wallet {
     try {
       sharedSecret = MlKEM768.decapsulate(this.deserializeKey(cipherText), this.privkey)
     } catch (e) {
-      console.error('Wallet::decryptMessage() - Decapsulation failed', e)
-      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      this.logger.error('decryptMessage() - Decapsulation failed', e.message)
+      this.logger.debug('decryptMessage() - Debug info available in development mode')
       return null
     }
 
@@ -414,9 +418,8 @@ export default class Wallet {
     try {
       deserializedEncryptedMessage = this.deserializeKey(encryptedMessage)
     } catch (e) {
-      console.warn('Wallet::decryptMessage() - Deserialization failed', e)
-      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
-      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
+      this.logger.warn('decryptMessage() - Deserialization failed', e.message)
+      this.logger.debug('decryptMessage() - Debug info available in development mode')
       return null
     }
 
@@ -424,10 +427,8 @@ export default class Wallet {
     try {
       decryptedUint8 = await this.decryptWithSharedSecret(deserializedEncryptedMessage, sharedSecret)
     } catch (e) {
-      console.warn('Wallet::decryptMessage() - Decryption failed', e)
-      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
-      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
-      console.info('Wallet::decryptMessage() - deserialized encrypted message', deserializedEncryptedMessage)
+      this.logger.warn('decryptMessage() - Decryption failed', e.message)
+      this.logger.debug('decryptMessage() - Debug info available in development mode')
       return null
     }
 
@@ -435,11 +436,8 @@ export default class Wallet {
     try {
       decryptedString = new TextDecoder().decode(decryptedUint8)
     } catch (e) {
-      console.warn('Wallet::decryptMessage() - Decoding failed', e)
-      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
-      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
-      console.info('Wallet::decryptMessage() - deserialized encrypted message', deserializedEncryptedMessage)
-      console.info('Wallet::decryptMessage() - decrypted Uint8Array', decryptedUint8)
+      this.logger.warn('decryptMessage() - Decoding failed', e.message)
+      this.logger.debug('decryptMessage() - Debug info available in development mode')
       return null
     }
 

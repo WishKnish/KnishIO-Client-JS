@@ -52,8 +52,9 @@ import {
   generateBundleHash,
   generateSecret
 } from './libraries/crypto'
-import Molecule from './Molecule'
-import Wallet from './Wallet'
+import { configureLogger } from './libraries/Logger'
+import Molecule from './Molecule.js'
+import Wallet from './Wallet.js'
 import AuthToken from './AuthToken'
 import QueryContinuId from './query/QueryContinuId'
 import QueryWalletBundle from './query/QueryWalletBundle'
@@ -62,16 +63,16 @@ import QueryBalance from './query/QueryBalance'
 import QueryMetaType from './query/QueryMetaType'
 import QueryBatch from './query/QueryBatch'
 import QueryBatchHistory from './query/QueryBatchHistory'
-import MutationRequestAuthorization from './mutation/MutationRequestAuthorization'
-import MutationCreateToken from './mutation/MutationCreateToken'
-import MutationRequestTokens from './mutation/MutationRequestTokens'
-import MutationTransferTokens from './mutation/MutationTransferTokens'
-import MutationProposeMolecule from './mutation/MutationProposeMolecule'
-import MutationCreateIdentifier from './mutation/MutationCreateIdentifier'
-import MutationClaimShadowWallet from './mutation/MutationClaimShadowWallet'
-import MutationCreateMeta from './mutation/MutationCreateMeta'
-import MutationCreateWallet from './mutation/MutationCreateWallet'
-import MutationRequestAuthorizationGuest from './mutation/MutationRequestAuthorizationGuest'
+import MutationRequestAuthorization from './mutation/MutationRequestAuthorization.js'
+import MutationCreateToken from './mutation/MutationCreateToken.js'
+import MutationRequestTokens from './mutation/MutationRequestTokens.js'
+import MutationTransferTokens from './mutation/MutationTransferTokens.js'
+import MutationProposeMolecule from './mutation/MutationProposeMolecule.js'
+import MutationCreateIdentifier from './mutation/MutationCreateIdentifier.js'
+import MutationClaimShadowWallet from './mutation/MutationClaimShadowWallet.js'
+import MutationCreateMeta from './mutation/MutationCreateMeta.js'
+import MutationCreateWallet from './mutation/MutationCreateWallet.js'
+import MutationRequestAuthorizationGuest from './mutation/MutationRequestAuthorizationGuest.js'
 import TransferBalanceException from './exception/TransferBalanceException'
 import CodeException from './exception/CodeException'
 import UnauthenticatedException from './exception/UnauthenticatedException'
@@ -82,7 +83,7 @@ import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe'
 import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe'
 import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe'
 import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe'
-import MutationActiveSession from './mutation/MutationActiveSession'
+import MutationActiveSession from './mutation/MutationActiveSession.js'
 import QueryActiveSession from './query/QueryActiveSession'
 import QueryUserActivity from './query/QueryUserActivity'
 import QueryToken from './query/QueryToken'
@@ -91,9 +92,9 @@ import AuthorizationRejectedException from './exception/AuthorizationRejectedExc
 import QueryAtom from './query/QueryAtom'
 import QueryPolicy from './query/QueryPolicy'
 import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom'
-import MutationCreateRule from './mutation/MutationCreateRule'
-import MutationDepositBufferToken from './mutation/MutationDepositBufferToken'
-import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken'
+import MutationCreateRule from './mutation/MutationCreateRule.js'
+import MutationDepositBufferToken from './mutation/MutationDepositBufferToken.js'
+import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken.js'
 import {
   getFingerprint,
   getFingerprintData
@@ -157,6 +158,9 @@ export default class KnishIOClient {
     this.$__authTokenObjects = {}
     this.$__authInProcess = false
     this.abortControllers = new Map()
+
+    // Configure global logger to match client logging setting
+    configureLogger({ enabled: logging, logLevel: 'info' })
 
     this.setUri(uri)
 
