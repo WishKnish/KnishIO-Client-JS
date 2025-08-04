@@ -3,9 +3,9 @@ import {
   test,
   expect
 } from '@jest/globals'
-import Molecule from '../src/Molecule'
-import Wallet from '../src/Wallet'
-import Atom from '../src/Atom'
+import Molecule from '../src/Molecule.js'
+import Wallet from '../src/Wallet.js'
+import Atom from '../src/Atom.js'
 import {
   generateSecret,
   generateBundleHash

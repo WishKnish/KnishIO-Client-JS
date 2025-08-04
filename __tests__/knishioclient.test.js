@@ -5,18 +5,18 @@ import {
   beforeEach,
   jest
 } from '@jest/globals'
-import KnishIOClient from '../src/KnishIOClient'
-import Wallet from '../src/Wallet'
-import Molecule from '../src/Molecule'
+import KnishIOClient from '../src/KnishIOClient.js'
+import Wallet from '../src/Wallet.js'
+import Molecule from '../src/Molecule.js'
 import {
   generateSecret
 } from '../src'
-import MutationTransferTokens from '../src/mutation/MutationTransferTokens'
-import MutationCreateToken from '../src/mutation/MutationCreateToken'
-import MutationCreateMeta from '../src/mutation/MutationCreateMeta'
-import MutationCreateWallet from '../src/mutation/MutationCreateWallet'
-import MutationClaimShadowWallet from '../src/mutation/MutationClaimShadowWallet'
-import QueryAtom from '../src/query/QueryAtom'
+import MutationTransferTokens from '../src/mutation/MutationTransferTokens.js'
+import MutationCreateToken from '../src/mutation/MutationCreateToken.js'
+import MutationCreateMeta from '../src/mutation/MutationCreateMeta.js'
+import MutationCreateWallet from '../src/mutation/MutationCreateWallet.js'
+import MutationClaimShadowWallet from '../src/mutation/MutationClaimShadowWallet.js'
+import QueryAtom from '../src/query/QueryAtom.js'
 
 describe('KnishIOClient', () => {
   const testUri = 'https://eteplitsky.testnet.knish.io:443/graphql'

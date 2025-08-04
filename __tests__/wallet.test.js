@@ -3,7 +3,7 @@ import {
   test,
   expect
 } from '@jest/globals'
-import Wallet from '../src/Wallet'
+import Wallet from '../src/Wallet.js'
 import {
   generateSecret,
   generateBundleHash
