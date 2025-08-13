@@ -60,7 +60,8 @@ export function generateSecret (seed = null, length = 2048) {
   if (seed) {
     const sponge = new JsSHA('SHAKE256', 'TEXT')
     sponge.update(seed)
-    return sponge.getHash('HEX', { outputLen: length * 2 })
+    // Fix: outputLen is in BITS, so for 'length' hex chars (length/2 bytes), we need length*4 bits
+    return sponge.getHash('HEX', { outputLen: length * 4 })
   } else {
     return randomString(length)
   }
@@ -77,6 +78,19 @@ export function generateBundleHash (secret, source = null) {
   const sponge = new JsSHA('SHAKE256', 'TEXT')
   sponge.update(secret)
   return sponge.getHash('HEX', { outputLen: 256 })
+}
+
+/**
+ * SHAKE256 hash function
+ * 
+ * @param {string} input - The input string to hash
+ * @param {number} outputLength - The desired output length in bits
+ * @return {string} The hex-encoded hash
+ */
+export function shake256 (input, outputLength) {
+  const sponge = new JsSHA('SHAKE256', 'TEXT')
+  sponge.update(input)
+  return sponge.getHash('HEX', { outputLen: outputLength })
 }
 
 /**
