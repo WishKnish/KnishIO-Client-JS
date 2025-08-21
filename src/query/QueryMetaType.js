@@ -60,8 +60,8 @@ export default class QueryMetaType extends Query {
   constructor (graphQLClient, knishIOClient) {
     super(graphQLClient, knishIOClient)
 
-    this.$__query = gql`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $queryArgs: QueryArgs, $countBy: String ) {
-      MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, queryArgs: $queryArgs, countBy: $countBy ) {
+    this.$__query = gql`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $queryArgs: QueryArgs, $countBy: String, $cellSlug: String ) {
+      MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, queryArgs: $queryArgs, countBy: $countBy, cellSlug: $cellSlug ) {
         metaType,
         instanceCount {
           key,
@@ -99,6 +99,7 @@ export default class QueryMetaType extends Query {
    * @param {object|null} queryArgs
    * @param {string|null} count
    * @param {string|null} countBy
+   * @param {string|null} cellSlug
    * @return {{}}
    */
   static createVariables ({
@@ -110,7 +111,8 @@ export default class QueryMetaType extends Query {
     filter = null,
     queryArgs = null,
     count = null,
-    countBy = null
+    countBy = null,
+    cellSlug = null
   }) {
     const variables = {}
 
@@ -150,6 +152,10 @@ export default class QueryMetaType extends Query {
 
     if (countBy) {
       variables.countBy = countBy
+    }
+
+    if (cellSlug) {
+      variables.cellSlug = cellSlug
     }
 
     return variables

@@ -836,7 +836,8 @@ export default class KnishIOClient {
         countBy,
         values,
         keys,
-        atomValues
+        atomValues,
+        cellSlug: this.getCellSlug()
       })
     } else {
       /**
@@ -852,7 +853,8 @@ export default class KnishIOClient {
         filter,
         queryArgs,
         count,
-        countBy
+        countBy,
+        cellSlug: this.getCellSlug()
       })
     }
 
