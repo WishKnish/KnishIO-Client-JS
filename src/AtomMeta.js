@@ -94,10 +94,7 @@ export default class AtomMeta {
    * @returns {AtomMeta}
    */
   setAtomWallet (wallet) {
-    const walletMeta = {
-      pubkey: wallet.pubkey,
-      characters: wallet.characters
-    }
+    const walletMeta = {}
 
     // Add token units meta key
     if (wallet.tokenUnits && wallet.tokenUnits.length) {
@@ -108,8 +105,10 @@ export default class AtomMeta {
       walletMeta.tradeRates = JSON.stringify(wallet.tradeRates)
     }
 
-    // Merge all wallet's metas
-    this.merge(walletMeta)
+    // Merge all wallet's metas (if any)
+    if (Object.keys(walletMeta).length > 0) {
+      this.merge(walletMeta)
+    }
     return this
   }
 
