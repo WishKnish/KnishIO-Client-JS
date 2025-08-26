@@ -812,12 +812,15 @@ export default class Molecule {
       meta: new AtomMeta(meta)
     }))
 
-    this.addPolicyAtom({
-      metaType,
-      metaId,
-      meta,
-      policy
-    })
+    // Only add policy atom if policy is provided and not empty
+    if (policy && Object.keys(policy).length > 0) {
+      this.addPolicyAtom({
+        metaType,
+        metaId,
+        meta,
+        policy
+      })
+    }
 
     // User remainder atom
     this.addContinuIdAtom()
