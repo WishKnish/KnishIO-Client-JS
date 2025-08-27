@@ -512,11 +512,11 @@ export default class Molecule {
       throw new BalanceInsufficientException()
     }
 
-    // Initializing a new Atom to remove tokens from source
+    // Initializing a new Atom to remove tokens from source (debit full balance)
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount
+      value: -this.sourceWallet.balance
     }))
     // Initializing a new Atom to add tokens to recipient
     this.addAtom(Atom.create({
@@ -526,7 +526,7 @@ export default class Molecule {
       metaType: 'walletBundle',
       metaId: recipientWallet.bundle
     }))
-    // Ininitlizing a remainder atom
+    // Initializing a remainder atom
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
@@ -1008,7 +1008,7 @@ export default class Molecule {
    * @param senderWallet
    */
   check (senderWallet = null) {
-    (new CheckMolecule(this)).verify(senderWallet)
+    return (new CheckMolecule(this)).verify(senderWallet)
   }
 
   /**
