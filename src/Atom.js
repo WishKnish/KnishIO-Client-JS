@@ -209,6 +209,126 @@ export default class Atom {
   }
 
   /**
+   * Returns JSON-ready object for cross-SDK compatibility (2025 JS best practices)
+   * 
+   * Provides clean serialization of atomic operations with optional OTS fragments.
+   * Follows 2025 JavaScript best practices with proper type safety and validation.
+   *
+   * @param {Object} options - Serialization options
+   * @param {boolean} options.includeOtsFragments - Include OTS signature fragments (default: true)
+   * @param {boolean} options.validateFields - Validate required fields (default: false)
+   * @return {Object} JSON-serializable object
+   * @throws {Error} If atom is in invalid state for serialization
+   */
+  toJSON (options = {}) {
+    const {
+      includeOtsFragments = true,
+      validateFields = false
+    } = options;
+
+    try {
+      // Validate required fields if requested
+      if (validateFields) {
+        const requiredFields = ['position', 'walletAddress', 'isotope', 'token'];
+        for (const field of requiredFields) {
+          if (!this[field]) {
+            throw new Error(`Required field '${field}' is missing or empty`);
+          }
+        }
+      }
+
+      // Core atom properties (always included)
+      const serialized = {
+        position: this.position,
+        walletAddress: this.walletAddress,
+        isotope: this.isotope,
+        token: this.token,
+        value: this.value,
+        batchId: this.batchId,
+        metaType: this.metaType,
+        metaId: this.metaId,
+        meta: this.meta || [],
+        index: this.index,
+        createdAt: this.createdAt,
+        version: this.version
+      };
+
+      // Optional OTS fragments (can be large, so optional)
+      if (includeOtsFragments && this.otsFragment) {
+        serialized.otsFragment = this.otsFragment;
+      }
+
+      return serialized;
+
+    } catch (error) {
+      throw new Error(`Atom serialization failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Creates an Atom instance from JSON data (2025 JS best practices)
+   * 
+   * Handles cross-SDK atom deserialization with robust error handling.
+   * Essential for reconstructing atoms from other SDK implementations.
+   *
+   * @param {string|Object} json - JSON string or object to deserialize
+   * @param {Object} options - Deserialization options
+   * @param {boolean} options.validateStructure - Validate required fields (default: true)
+   * @param {boolean} options.strictMode - Strict validation mode (default: false)
+   * @return {Atom} Reconstructed atom instance
+   * @throws {Error} If JSON is invalid or required fields are missing
+   */
+  static fromJSON (json, options = {}) {
+    const {
+      validateStructure = true,
+      strictMode = false
+    } = options;
+
+    try {
+      // Parse JSON safely
+      const data = typeof json === 'string' ? JSON.parse(json) : json;
+
+      // Validate required fields in strict mode
+      if (strictMode || validateStructure) {
+        const requiredFields = ['position', 'walletAddress', 'isotope', 'token'];
+        for (const field of requiredFields) {
+          if (!data[field]) {
+            throw new Error(`Required field '${field}' is missing or empty`);
+          }
+        }
+      }
+
+      // Create atom instance with required fields
+      const atom = new Atom({
+        position: data.position,
+        walletAddress: data.walletAddress,
+        isotope: data.isotope,
+        token: data.token,
+        value: data.value,
+        batchId: data.batchId,
+        metaType: data.metaType,
+        metaId: data.metaId,
+        meta: data.meta,
+        index: data.index,
+        version: data.version
+      });
+
+      // Set additional properties that may not be in constructor
+      if (data.otsFragment) {
+        atom.otsFragment = data.otsFragment;
+      }
+      if (data.createdAt) {
+        atom.createdAt = data.createdAt;
+      }
+
+      return atom;
+
+    } catch (error) {
+      throw new Error(`Atom deserialization failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Produces a hash of the atoms inside a molecule.
    * Used to generate the molecularHash field for Molecules.
    *
