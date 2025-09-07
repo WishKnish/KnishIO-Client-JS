@@ -47,7 +47,9 @@ class UrqlClientWrapper {
       fetchOptions: () => ({
         headers: {
           'X-Auth-Token': this.$__authToken
-        }
+        },
+        // Add 60 second timeout for debugging
+        signal: AbortSignal.timeout(60000)
       })
     })
   }

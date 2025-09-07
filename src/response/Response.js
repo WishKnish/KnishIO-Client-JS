@@ -138,4 +138,152 @@ export default class Response {
   status () {
     return null
   }
+
+  /**
+   * Check if response was successful
+   * @return {boolean}
+   */
+  success () {
+    // Default implementation - can be overridden by subclasses
+    return !this.$__response?.errors?.length
+  }
+
+  /**
+   * Get error message if any
+   *
+   * @return {string|null}
+   */
+  error () {
+    return this.$__response?.errors?.length ? this.$__response.errors[0].message || 'Unknown error' : null
+  }
+
+  /**
+   * Enhanced interface methods for standardized response handling
+   */
+  
+  /**
+   * Get error reason (alias for error() to match standardized interface)
+   * @return {string|null}
+   */
+  reason () {
+    return this.error()
+  }
+
+  /**
+   * Convert to ValidationResult for enhanced error handling
+   * @return {object}
+   */
+  toValidationResult () {
+    if (this.success() && this.payload() !== null) {
+      return {
+        success: true,
+        data: this.payload(),
+        warnings: []
+      }
+    } else {
+      return {
+        success: false,
+        error: {
+          message: this.reason() || 'Unknown error',
+          context: this.constructor.name,
+          details: this.$__response?.errors || []
+        }
+      }
+    }
+  }
+
+  /**
+   * Enhanced error handling with callbacks
+   * @param {function} callback
+   * @return {Response}
+   */
+  onSuccess (callback) {
+    if (this.success() && this.payload() !== null) {
+      try {
+        callback(this.payload())
+      } catch (error) {
+        console.warn('Response.onSuccess callback failed:', error)
+      }
+    }
+    return this
+  }
+
+  /**
+   * Enhanced failure handling with callbacks
+   * @param {function} callback
+   * @return {Response}
+   */
+  onFailure (callback) {
+    if (!this.success()) {
+      try {
+        callback(this.reason() || 'Unknown error')
+      } catch (error) {
+        console.warn('Response.onFailure callback failed:', error)
+      }
+    }
+    return this
+  }
+
+  /**
+   * Debug logging with enhanced context
+   * @param {string|null} label
+   * @return {Response}
+   */
+  debug (label = null) {
+    const debugPrefix = label ? `[${label}]` : `[${this.constructor.name}]`
+    
+    if (this.success()) {
+      console.debug(`${debugPrefix} Success:`, {
+        payload: this.payload(),
+        query: this.$__query?.constructor?.name,
+        dataKey: this.dataKey
+      })
+    } else {
+      console.debug(`${debugPrefix} Failure:`, {
+        error: this.reason(),
+        errors: this.$__response?.errors,
+        rawData: this.$__response
+      })
+    }
+    
+    return this
+  }
+
+  /**
+   * Promise conversion for enhanced async patterns
+   * @return {Promise}
+   */
+  toPromise () {
+    if (this.success() && this.payload() !== null) {
+      return Promise.resolve(this.payload())
+    } else {
+      return Promise.reject(new Error(this.reason() || 'Unknown error'))
+    }
+  }
+
+  /**
+   * Functional programming map operation
+   * @param {function} mapper
+   * @return {Response}
+   */
+  map (mapper) {
+    if (this.success() && this.payload() !== null) {
+      try {
+        const mappedPayload = mapper(this.payload())
+        // Create new response with mapped payload
+        const newResponse = Object.create(Object.getPrototypeOf(this))
+        Object.assign(newResponse, this)
+        newResponse.$__payload = mappedPayload
+        return newResponse
+      } catch (error) {
+        // Create error response
+        const errorResponse = Object.create(Object.getPrototypeOf(this))
+        Object.assign(errorResponse, this)
+        errorResponse.$__response = { errors: [{ message: `Mapping failed: ${error.message}` }] }
+        return errorResponse
+      }
+    } else {
+      return this
+    }
+  }
 }
