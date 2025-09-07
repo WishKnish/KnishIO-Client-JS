@@ -1,0 +1,60 @@
+{
+  "server": {
+    "graphqlUrl": "https://testnet.knish.io/graphql",
+    "cellSlug": "INTEGRATION_TEST",
+    "timeout": 30000,
+    "retries": 3,
+    "retryDelay": 1000
+  },
+  "tests": {
+    "authentication": {
+      "guestMode": false,
+      "comment": "Set guestMode to true to test guest authentication instead of profile auth"
+    },
+    "metadata": {
+      "metaType": "IntegrationTest",
+      "metadata": {
+        "test_name": "Custom Integration Test",
+        "environment": "testnet",
+        "custom_field": "custom_value",
+        "description": "Customized integration test configuration"
+      },
+      "comment": "metaId will be auto-generated with timestamp to ensure uniqueness"
+    },
+    "tokens": {
+      "initialSupply": 50000,
+      "tokenMeta": {
+        "name": "Custom Integration Token",
+        "symbol": "CIT",
+        "fungibility": "fungible",
+        "supply": "limited",
+        "decimals": "4",
+        "description": "Custom token for integration testing"
+      },
+      "comment": "testTokenSlug will be auto-generated to ensure uniqueness"
+    },
+    "transfers": {
+      "transferAmount": 250,
+      "comment": "Amount to transfer in token transfer test"
+    }
+  },
+  "cleanup": {
+    "enabled": true,
+    "preserveResults": true,
+    "comment": "Set enabled to false to disable cleanup operations"
+  },
+  "_documentation": {
+    "usage": "Use this file to customize integration test configuration",
+    "examples": [
+      "node integration-test.js --config integration-config.json",
+      "node integration-test.js --url https://mainnet.knish.io/graphql --config custom-config.json"
+    ],
+    "notes": [
+      "CLI arguments (--url, --cell, --timeout) will override values in this config file",
+      "Environment variables KNISHIO_API_URL and KNISHIO_CELL_SLUG will also override config values",
+      "Auto-generated fields (metaId, testTokenSlug, secrets) cannot be overridden in config",
+      "Server timeout should be set based on network conditions and server response times",
+      "Higher retry counts improve reliability but increase test execution time"
+    ]
+  }
+}
