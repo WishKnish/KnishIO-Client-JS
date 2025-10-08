@@ -22,6 +22,27 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Fixed timestamp for deterministic testing (preserves timestamp in hash while ensuring consistency)
+const FIXED_TEST_TIMESTAMP_BASE = 1700000000000; // Fixed base timestamp for deterministic testing
+
+// Helper function to set fixed timestamps for deterministic testing
+function setFixedTimestamps(molecule) {
+  for (let i = 0; i < molecule.atoms.length; i++) {
+    // Set deterministic timestamp: base + (index * 1000) to ensure unique but predictable timestamps
+    molecule.atoms[i].createdAt = String(FIXED_TEST_TIMESTAMP_BASE + (i * 1000));
+  }
+}
+
+// Helper function to create fixed remainder wallets for deterministic testing
+function createFixedRemainderWallet(secret, token) {
+  return new Wallet({
+    secret: secret,
+    token: token,
+    position: 'bbbb000000000000cccc111111111111dddd222222222222eeee333333333333', // Fixed deterministic position
+    bundle: generateBundleHash(secret, 'Test::createFixedRemainderWallet')
+  });
+}
+
 // Embedded test configuration for SDK self-containment (2025 best practices)
 const DEFAULT_CONFIG = {
   "tests": {
@@ -65,6 +86,12 @@ const DEFAULT_CONFIG = {
       "recipient1Position": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
       "recipient2Position": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
       "expectedMolecularHash": "034f6f8d01c9f20c8a9a64a5742ca755b53a917461c8e870de8622ca4a2b37ge"
+    },
+    "mlkem768": {
+      "seed": "TESTSEED",
+      "token": "ENCRYPT",
+      "position": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      "plaintext": "Hello ML-KEM768 cross-platform test message!"
     }
   }
 };
@@ -240,11 +267,15 @@ async function testMetaCreation() {
 
     logTest('Source wallet creation', true);
 
-    // Create molecule instance
+    // Create fixed remainder wallet for deterministic testing
+    const remainderWallet = createFixedRemainderWallet(secret, testConfig.token);
+
+    // Create molecule instance with fixed remainder wallet
     const molecule = new Molecule({
       secret: secret,
       bundle: bundle,
-      sourceWallet: sourceWallet
+      sourceWallet: sourceWallet,
+      remainderWallet: remainderWallet
     });
 
     // Convert metadata object to array format, then to metaObject
@@ -264,6 +295,9 @@ async function testMetaCreation() {
     });
 
     logTest('Metadata molecule initialization', true);
+
+    // Set fixed timestamps for deterministic testing (before signing)
+    setFixedTimestamps(molecule);
 
     // Sign the molecule
     molecule.sign({});
@@ -346,11 +380,15 @@ async function testSimpleTransfer() {
 
     logTest('Recipient wallet creation', true);
 
-    // Create molecule for value transfer
+    // Create fixed remainder wallet for deterministic testing  
+    const remainderWallet = createFixedRemainderWallet(sourceSecret, testConfig.token);
+
+    // Create molecule for value transfer with fixed remainder wallet
     const molecule = new Molecule({
       secret: sourceSecret,
       bundle: sourceBundle,
-      sourceWallet: sourceWallet
+      sourceWallet: sourceWallet,
+      remainderWallet: remainderWallet
     });
 
     // Initialize value transfer
@@ -361,6 +399,9 @@ async function testSimpleTransfer() {
     });
 
     logTest('Value transfer initialization', true);
+
+    // Set fixed timestamps for deterministic testing (before signing)
+    setFixedTimestamps(molecule);
 
     // Sign the molecule
     molecule.sign({});
@@ -429,12 +470,8 @@ async function testComplexTransfer() {
 
     logTest('Source wallet creation', true);
 
-    // Create remainder wallet with generated position
-    const remainderWallet = new Wallet({
-      secret: sourceSecret,
-      token: testConfig.token,
-      position: 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789'
-    });
+    // Create fixed remainder wallet for deterministic testing
+    const remainderWallet = createFixedRemainderWallet(sourceSecret, testConfig.token);
 
     logTest('Remainder wallet creation', true);
 
@@ -465,6 +502,9 @@ async function testComplexTransfer() {
     });
 
     logTest('Value transfer with remainder initialization', true);
+
+    // Set fixed timestamps for deterministic testing (before signing)
+    setFixedTimestamps(molecule);
 
     // Sign the molecule
     molecule.sign({});
@@ -514,11 +554,250 @@ async function testComplexTransfer() {
 }
 
 /**
+ * Test 5: ML-KEM768 Encryption Test
+ * Tests post-quantum encryption/decryption compatibility
+ */
+async function testMLKEM768() {
+  log('\n5. ML-KEM768 Encryption Test', 'blue');
+  const testConfig = config.tests.mlkem768;
+
+  try {
+    // Create encryption wallet from seed
+    const secret = generateSecret(testConfig.seed);
+    const bundle = generateBundleHash(secret);
+
+    const encryptionWallet = new Wallet({
+      secret: secret,
+      token: testConfig.token,
+      position: testConfig.position
+    });
+    
+    logTest('Encryption wallet creation', true);
+    
+    // 🔬 DETERMINISM TEST: Create second identical wallet and verify keys match
+    log('\n  🔬 Testing ML-KEM768 determinism...', 'cyan');
+    const identicalWallet = new Wallet({
+      secret: secret,
+      token: testConfig.token,
+      position: testConfig.position
+    });
+    
+    const keysIdentical = encryptionWallet.pubkey === identicalWallet.pubkey;
+    log(`  🔑 ML-KEM768 keys identical: ${keysIdentical ? '✅ YES' : '❌ NO'}`, keysIdentical ? 'green' : 'red');
+    
+    if (!keysIdentical) {
+      log(`  📊 Wallet 1 pubkey: ${encryptionWallet.pubkey?.substring(0, 50)}...`, 'yellow');
+      log(`  📊 Wallet 2 pubkey: ${identicalWallet.pubkey?.substring(0, 50)}...`, 'yellow');
+      log(`  🚨 CRITICAL: JavaScript ML-KEM768 is NOT deterministic!`, 'red');
+      log(`  💡 This explains cross-platform compatibility failures!`, 'yellow');
+    } else {
+      log(`  ✅ JavaScript ML-KEM768 is deterministic`, 'green');
+    }
+    
+    // Get ML-KEM768 public key (should be deterministic)
+    const publicKey = encryptionWallet.pubkey;
+    logTest('ML-KEM768 public key generation', !!publicKey);
+    logTest('ML-KEM768 determinism check', keysIdentical);
+
+    // Encrypt plaintext message for ourselves (non-deterministic)
+    const encryptedData = await encryptionWallet.encryptMessage(
+      testConfig.plaintext, 
+      publicKey
+    );
+
+    const encryptionSuccess = !!(encryptedData && encryptedData.cipherText && encryptedData.encryptedMessage);
+    logTest('Message encryption (self-encryption)', encryptionSuccess);
+
+    // Decrypt the encrypted message
+    const decryptedMessage = await encryptionWallet.decryptMessage(encryptedData);
+    
+    const decryptionSuccess = decryptedMessage === testConfig.plaintext;
+    logTest('Message decryption and verification', decryptionSuccess);
+
+    const testPassed = encryptionSuccess && decryptionSuccess && keysIdentical;
+
+    // Store ML-KEM768 data for cross-SDK verification (non-deterministic outputs)
+    results.molecules.mlkem768 = JSON.stringify({
+      publicKey: publicKey,
+      encryptedData: encryptedData,
+      originalPlaintext: testConfig.plaintext,
+      sdk: 'JavaScript'
+    });
+
+    results.tests.mlkem768 = {
+      passed: testPassed,
+      publicKeyGenerated: !!publicKey,
+      encryptionSuccess: encryptionSuccess,
+      decryptionSuccess: decryptionSuccess,
+      plaintextLength: testConfig.plaintext.length
+    };
+
+    return testPassed;
+  } catch (error) {
+    log(`  ❌ ERROR: ${error.message}`, 'red');
+    results.tests.mlkem768 = {
+      passed: false,
+      error: error.message
+    };
+    return false;
+  }
+}
+
+/**
+ * Negative Test Cases - Anti-Cheating Validation
+ * Tests that validation properly fails for invalid molecules
+ */
+async function testNegativeCases() {
+  log('\n6. Negative Test Cases (Anti-Cheating)', 'blue');
+  
+  const testConfig = config.tests.crypto;
+  let allNegativeTestsPassed = true;
+  
+  try {
+    const secret = generateSecret(testConfig.seed);
+    const bundle = generateBundleHash(secret);
+    
+    const sourceWallet = new Wallet({
+      secret: secret,
+      token: 'TEST',
+      position: '0123456789abcdeffedcba9876543210fedcba9876543210fedcba9876543210'
+    });
+    sourceWallet.balance = 1000;
+    
+    // Test 1: Missing Molecular Hash (should fail)
+    try {
+      const invalidMolecule = new Molecule({
+        secret: secret,
+        bundle: bundle,
+        sourceWallet: sourceWallet
+      });
+      
+      // Add a valid atom but don't sign (no molecular hash)
+      invalidMolecule.addAtom(new Atom({
+        isotope: 'V',
+        wallet: sourceWallet,
+        value: -100
+      }));
+
+      // Set fixed timestamps for deterministic testing
+      setFixedTimestamps(invalidMolecule);
+      
+      // This should fail because there's no molecular hash
+      const shouldFail = invalidMolecule.check(sourceWallet);
+      if (shouldFail) {
+        logTest('Missing molecular hash validation (should FAIL)', false, 'Invalid molecule passed validation');
+        allNegativeTestsPassed = false;
+      } else {
+        logTest('Missing molecular hash validation (should FAIL)', true);
+      }
+    } catch (error) {
+      // Exception is expected for missing molecular hash
+      logTest('Missing molecular hash validation (should FAIL)', true);
+    }
+    
+    // Test 2: Invalid Molecular Hash (should fail)
+    try {
+      const invalidMolecule = new Molecule({
+        secret: secret,
+        bundle: bundle,
+        sourceWallet: sourceWallet
+      });
+      
+      invalidMolecule.addAtom(new Atom({
+        isotope: 'V',
+        wallet: sourceWallet,
+        value: -100
+      }));
+      
+      // Set fixed timestamps for deterministic testing (before signing)
+      setFixedTimestamps(invalidMolecule);
+      
+      // Sign normally
+      invalidMolecule.sign({});
+      
+      // Then corrupt the molecular hash
+      invalidMolecule.molecularHash = 'invalid_hash_that_should_fail_validation_check_12345678';
+      
+      const shouldFail = invalidMolecule.check(sourceWallet);
+      if (shouldFail) {
+        logTest('Invalid molecular hash validation (should FAIL)', false, 'Corrupted molecule passed validation');
+        allNegativeTestsPassed = false;
+      } else {
+        logTest('Invalid molecular hash validation (should FAIL)', true);
+      }
+    } catch (error) {
+      // Exception is expected for invalid molecular hash
+      logTest('Invalid molecular hash validation (should FAIL)', true);
+    }
+    
+    // Test 3: Unbalanced Transfer (should fail)
+    try {
+      const invalidMolecule = new Molecule({
+        secret: secret,
+        bundle: bundle,
+        sourceWallet: sourceWallet
+      });
+      
+      // Create unbalanced atoms (doesn't sum to zero)
+      invalidMolecule.addAtom(new Atom({
+        isotope: 'V',
+        wallet: sourceWallet,
+        value: -1000 // Debit full balance
+      }));
+      
+      invalidMolecule.addAtom(new Atom({
+        isotope: 'V',
+        wallet: sourceWallet,
+        value: 500  // Credit only half - unbalanced!
+      }));
+      
+      // Set fixed timestamps for deterministic testing (before signing)
+      setFixedTimestamps(invalidMolecule);
+      
+      invalidMolecule.sign({});
+      
+      const shouldFail = invalidMolecule.check(sourceWallet);
+      if (shouldFail) {
+        logTest('Unbalanced transfer validation (should FAIL)', false, 'Unbalanced molecule passed validation');
+        allNegativeTestsPassed = false;
+      } else {
+        logTest('Unbalanced transfer validation (should FAIL)', true);
+      }
+    } catch (error) {
+      // Exception is expected for unbalanced transfers
+      logTest('Unbalanced transfer validation (should FAIL)', true);
+    }
+    
+    results.tests.negativeCases = {
+      passed: allNegativeTestsPassed,
+      description: 'Anti-cheating validation tests',
+      testCount: 3
+    };
+    
+    return allNegativeTestsPassed;
+    
+  } catch (error) {
+    log(`  ❌ ERROR: ${error.message}`, 'red');
+    results.tests.negativeCases = {
+      passed: false,
+      error: error.message
+    };
+    return false;
+  }
+}
+
+/**
  * Cross-SDK Validation
  * Loads and validates molecules from other SDKs (if available)
  */
 async function testCrossSdkValidation() {
-  log('\n5. Cross-SDK Validation', 'blue');
+  log('\n7. Cross-SDK Validation', 'blue');
+
+  // Check if cross-validation is disabled (Round 1 molecule generation only)
+  if (process.env.KNISHIO_DISABLE_CROSS_VALIDATION === 'true') {
+    log('  ⏭️  Cross-validation disabled for Round 1 (molecule generation only)', 'yellow');
+    return true;
+  }
 
   const resultsDir = sharedResultsDir;
 
@@ -543,31 +822,88 @@ async function testCrossSdkValidation() {
     // Validate molecules from other SDK
     for (const [moleculeType, moleculeData] of Object.entries(otherResults.molecules || {})) {
       try {
-        // Use centralized fromJSON() method for clean deserialization
-        const molecule = Molecule.fromJSON(moleculeData, {
-          includeValidationContext: true,
-          validateStructure: true,
-          strictMode: false // Allow some flexibility for cross-SDK compatibility
-        });
+        if (moleculeType === 'mlkem768') {
+          // Special handling for ML-KEM768 cross-SDK compatibility
+          const mlkemData = JSON.parse(moleculeData);
+          
+          // Create our own encryption wallet using the same configuration
+          const testConfig = config.tests.mlkem768;
+          const secret = generateSecret(testConfig.seed);
+          const ourWallet = new Wallet({
+            secret: secret,
+            token: testConfig.token,
+            position: testConfig.position
+          });
+          
+          // Cross-SDK ML-KEM768 Decryption Test
+          // Step 5 already verified encryption works, Step 6 tests interoperability
+          let decryptionCompatible = false;
+          
+          try {
+            // Test: Can we decrypt their encrypted message and recover original plaintext?
+            const decryptedFromThem = await ourWallet.decryptMessage(mlkemData.encryptedData);
+            decryptionCompatible = decryptedFromThem === mlkemData.originalPlaintext;
+            
+            if (decryptionCompatible) {
+              log(`    ✅ Can decrypt ${sdkName} encrypted message`, 'green');
+            } else {
+              log(`    ❌ Cannot decrypt ${sdkName} message (expected: "${mlkemData.originalPlaintext}", got: "${decryptedFromThem}")`, 'red');
+            }
+          } catch (error) {
+            log(`    ❌ ${sdkName} decryption failed: ${error.message}`, 'red');
+            
+            // Enhanced diagnostic information for ML-KEM768 failures
+            try {
+              if (mlkemData.encryptedData && mlkemData.encryptedData.cipherText) {
+                log(`    📊 Their cipherText length: ${mlkemData.encryptedData.cipherText.length} chars`, 'yellow');
+                log(`    📊 Expected cipherText length: ~1453 chars (JavaScript baseline)`, 'yellow');
+              }
+              if (mlkemData.publicKey) {
+                log(`    📊 Their publicKey length: ${mlkemData.publicKey.length} chars`, 'yellow');
+                log(`    📊 Expected publicKey length: ~1576 chars (JavaScript baseline)`, 'yellow');
+              }
+              if (mlkemData.sdk) {
+                log(`    📊 Source SDK: ${mlkemData.sdk}`, 'yellow');
+              }
+            } catch (diagError) {
+              log(`    📊 Diagnostic error: ${diagError.message}`, 'yellow');
+            }
+            
+            decryptionCompatible = false;
+          }
 
-        // Source wallet is now automatically reconstructed by fromJSON()
-        const sourceWallet = molecule.sourceWallet;
+          logTest(`${sdkName} ${moleculeType} decryption compatibility`, decryptionCompatible);
 
-        // Use the molecule's check() method for full validation
-        let isValid = false;
-        try {
-          isValid = await molecule.check(sourceWallet);
-        } catch (error) {
-          log(`    Validation error: ${error.message}`, 'red');
-          isValid = false;
-        }
-        logTest(`${sdkName} ${moleculeType} molecule validation`, isValid);
+          if (!decryptionCompatible) {
+            allValid = false;
+          }
+        } else {
+          // Standard molecule validation for non-ML-KEM768 types
+          const molecule = Molecule.fromJSON(moleculeData, {
+            includeValidationContext: true,
+            validateStructure: true,
+            strictMode: false // Allow some flexibility for cross-SDK compatibility
+          });
 
-        if (!isValid) {
-          allValid = false;
+          // Source wallet is now automatically reconstructed by fromJSON()
+          const sourceWallet = molecule.sourceWallet;
+
+          // Use the molecule's check() method for full validation
+          let isValid = false;
+          try {
+            isValid = await molecule.check(sourceWallet);
+          } catch (error) {
+            log(`    Validation error: ${error.message}`, 'red');
+            isValid = false;
+          }
+          logTest(`${sdkName} ${moleculeType} molecule validation`, isValid);
+
+          if (!isValid) {
+            allValid = false;
+          }
         }
       } catch (error) {
-        logTest(`${sdkName} ${moleculeType} molecule validation`, false);
+        logTest(`${sdkName} ${moleculeType} validation`, false);
         log(`    Error: ${error.message}`, 'red');
         allValid = false;
       }
@@ -631,6 +967,48 @@ function printSummary() {
  * Main test runner
  */
 async function runTests() {
+  // Check for cross-validation-only mode (Round 2)
+  if (process.env.KNISHIO_CROSS_VALIDATION_ONLY === 'true') {
+    log('═══════════════════════════════════════════', 'blue');
+    log('    Knish.IO JavaScript SDK Cross-Validation Only', 'blue');
+    log('═══════════════════════════════════════════', 'blue');
+
+    // CRITICAL FIX: Load existing Round 1 results to preserve molecules
+    const existingResultsPath = path.join(sharedResultsDir, 'javascript-results.json');
+    if (fs.existsSync(existingResultsPath)) {
+      try {
+        const existingData = JSON.parse(fs.readFileSync(existingResultsPath, 'utf8'));
+
+        // Preserve Round 1 test results and molecules
+        if (existingData.tests) {
+          results.tests = { ...results.tests, ...existingData.tests };
+        }
+        if (existingData.molecules) {
+          results.molecules = { ...results.molecules, ...existingData.molecules };
+        }
+
+        log('✅ Preserved Round 1 molecules for cross-validation', 'green');
+      } catch (error) {
+        log(`⚠️  Could not load existing results: ${error.message}`, 'yellow');
+      }
+    }
+
+    // Only run cross-SDK validation
+    await testCrossSdkValidation();
+
+    // Save results and print summary (cross-validation only)
+    saveResults();
+    log('\n═══════════════════════════════════════════', 'blue');
+    log('            CROSS-VALIDATION SUMMARY', 'blue');
+    log('═══════════════════════════════════════════', 'blue');
+    log(`Cross-SDK Compatible: ${results.crossSdkCompatible ? '✅ YES' : '❌ NO'}`, results.crossSdkCompatible ? 'green' : 'red');
+    log('═══════════════════════════════════════════', 'blue');
+
+    // Exit based on cross-validation results only
+    process.exit(results.crossSdkCompatible ? 0 : 1);
+  }
+
+  // Normal mode: Run all tests (Round 1 or standalone)
   log('═══════════════════════════════════════════', 'blue');
   log('    Knish.IO JavaScript SDK Self-Test', 'blue');
   log('═══════════════════════════════════════════', 'blue');
@@ -640,6 +1018,8 @@ async function runTests() {
   await testMetaCreation();
   await testSimpleTransfer();
   await testComplexTransfer();
+  await testMLKEM768();
+  await testNegativeCases();
   await testCrossSdkValidation();
 
   // Save results and print summary
