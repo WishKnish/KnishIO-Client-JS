@@ -270,16 +270,18 @@ export default class Wallet {
    * Initializes the ML-KEM key pair
    */
   initializeMLKEM () {
-    // Generate a 64-byte (512-bit) seed from the Knish.IO private key
-    const seedHex = generateSecret(this.key, 64)
+    // Generate a 64-byte (512-bit) seed from the Knish.IO private key  
+    // Use deterministic approach: generateSecret(key, 128) → 128 hex chars = 64 bytes
+    const seedHex = generateSecret(this.key, 128)  // 128 hex chars = 64 bytes
 
-    // Convert the hex string to a Uint8Array
+    // Convert the hex string to a Uint8Array  
     const seed = new Uint8Array(64)
     for (let i = 0; i < 64; i++) {
       seed[i] = parseInt(seedHex.substr(i * 2, 2), 16)
     }
 
     const { publicKey, secretKey } = MlKEM768.keygen(seed)
+
     this.pubkey = this.serializeKey(publicKey)
     this.privkey = secretKey // Note: We're keeping privkey as UInt8Array for security
   }
