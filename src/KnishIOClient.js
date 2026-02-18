@@ -45,60 +45,62 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
-import Dot from './libraries/Dot'
-import Decimal from './libraries/Decimal'
+import Dot from './libraries/Dot.js'
+import Decimal from './libraries/Decimal.js'
 import {
   generateBatchId,
   generateBundleHash,
   generateSecret
-} from './libraries/crypto'
-import Molecule from './Molecule'
-import Wallet from './Wallet'
-import AuthToken from './AuthToken'
-import QueryContinuId from './query/QueryContinuId'
-import QueryWalletBundle from './query/QueryWalletBundle'
-import QueryWalletList from './query/QueryWalletList'
-import QueryBalance from './query/QueryBalance'
-import QueryMetaType from './query/QueryMetaType'
-import QueryBatch from './query/QueryBatch'
-import QueryBatchHistory from './query/QueryBatchHistory'
-import MutationRequestAuthorization from './mutation/MutationRequestAuthorization'
-import MutationCreateToken from './mutation/MutationCreateToken'
-import MutationRequestTokens from './mutation/MutationRequestTokens'
-import MutationTransferTokens from './mutation/MutationTransferTokens'
-import MutationProposeMolecule from './mutation/MutationProposeMolecule'
-import MutationCreateIdentifier from './mutation/MutationCreateIdentifier'
-import MutationClaimShadowWallet from './mutation/MutationClaimShadowWallet'
-import MutationCreateMeta from './mutation/MutationCreateMeta'
-import MutationCreateWallet from './mutation/MutationCreateWallet'
-import MutationRequestAuthorizationGuest from './mutation/MutationRequestAuthorizationGuest'
-import TransferBalanceException from './exception/TransferBalanceException'
-import CodeException from './exception/CodeException'
-import UnauthenticatedException from './exception/UnauthenticatedException'
-import WalletShadowException from './exception/WalletShadowException'
-import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException'
-import StackableUnitAmountException from './exception/StackableUnitAmountException'
-import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe'
-import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe'
-import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe'
-import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe'
-import MutationActiveSession from './mutation/MutationActiveSession'
-import QueryActiveSession from './query/QueryActiveSession'
-import QueryUserActivity from './query/QueryUserActivity'
-import QueryToken from './query/QueryToken'
-import BatchIdException from './exception/BatchIdException'
-import AuthorizationRejectedException from './exception/AuthorizationRejectedException'
-import QueryAtom from './query/QueryAtom'
-import QueryPolicy from './query/QueryPolicy'
-import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom'
-import MutationCreateRule from './mutation/MutationCreateRule'
-import MutationDepositBufferToken from './mutation/MutationDepositBufferToken'
-import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken'
+} from './libraries/crypto.js'
+import Molecule from './Molecule.js'
+import Wallet from './Wallet.js'
+import AuthToken from './AuthToken.js'
+import QueryContinuId from './query/QueryContinuId.js'
+import QueryWalletBundle from './query/QueryWalletBundle.js'
+import QueryWalletList from './query/QueryWalletList.js'
+import QueryBalance from './query/QueryBalance.js'
+import QueryMetaType from './query/QueryMetaType.js'
+import QueryBatch from './query/QueryBatch.js'
+import QueryBatchHistory from './query/QueryBatchHistory.js'
+import MutationRequestAuthorization from './mutation/MutationRequestAuthorization.js'
+import MutationCreateToken from './mutation/MutationCreateToken.js'
+import MutationRequestTokens from './mutation/MutationRequestTokens.js'
+import MutationTransferTokens from './mutation/MutationTransferTokens.js'
+import MutationProposeMolecule from './mutation/MutationProposeMolecule.js'
+import MutationCreateIdentifier from './mutation/MutationCreateIdentifier.js'
+import MutationClaimShadowWallet from './mutation/MutationClaimShadowWallet.js'
+import MutationCreateMeta from './mutation/MutationCreateMeta.js'
+import MutationPeering from './mutation/MutationPeering.js'
+import MutationAppendRequest from './mutation/MutationAppendRequest.js'
+import MutationCreateWallet from './mutation/MutationCreateWallet.js'
+import MutationRequestAuthorizationGuest from './mutation/MutationRequestAuthorizationGuest.js'
+import TransferBalanceException from './exception/TransferBalanceException.js'
+import CodeException from './exception/CodeException.js'
+import UnauthenticatedException from './exception/UnauthenticatedException.js'
+import WalletShadowException from './exception/WalletShadowException.js'
+import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException.js'
+import StackableUnitAmountException from './exception/StackableUnitAmountException.js'
+import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe.js'
+import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe.js'
+import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe.js'
+import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe.js'
+import MutationActiveSession from './mutation/MutationActiveSession.js'
+import QueryActiveSession from './query/QueryActiveSession.js'
+import QueryUserActivity from './query/QueryUserActivity.js'
+import QueryToken from './query/QueryToken.js'
+import BatchIdException from './exception/BatchIdException.js'
+import AuthorizationRejectedException from './exception/AuthorizationRejectedException.js'
+import QueryAtom from './query/QueryAtom.js'
+import QueryPolicy from './query/QueryPolicy.js'
+import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom.js'
+import MutationCreateRule from './mutation/MutationCreateRule.js'
+import MutationDepositBufferToken from './mutation/MutationDepositBufferToken.js'
+import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken.js'
 import {
   getFingerprint,
   getFingerprintData
 } from '@thumbmarkjs/thumbmarkjs'
-import UrqlClientWrapper from './libraries/urql/UrqlClientWrapper'
+import UrqlClientWrapper from './libraries/urql/UrqlClientWrapper.js'
 
 /**
  * Base client class providing a powerful but user-friendly wrapper
@@ -559,7 +561,8 @@ export default class KnishIOClient {
    */
   async executeQuery (query, variables = null) {
     // Check and refresh authorization token if needed
-    if (this.$__authToken && this.$__authToken.isExpired()) {
+    // Guard with $__authInProcess to prevent concurrent auth requests
+    if (this.$__authToken && this.$__authToken.isExpired() && !this.$__authInProcess) {
       this.log('info', 'KnishIOClient::executeQuery() - Access token is expired. Getting new one...')
       await this.requestAuthToken({
         secret: this.$__secret,
@@ -859,9 +862,6 @@ export default class KnishIOClient {
     }
 
     return this.executeQuery(query, variables)
-      .then((response) => {
-        return response.payload()
-      })
   }
 
   /**
@@ -1278,6 +1278,69 @@ export default class KnishIOClient {
       metaId,
       meta: metas,
       policy
+    })
+
+    return await this.executeQuery(query)
+  }
+
+  /**
+   * Builds and executes a molecule to register a peer node via P-isotope
+   *
+   * @param {string} host - The peer host URL to register
+   * @returns {Promise<ResponsePeering>} - A Promise that resolves with the peering response.
+   */
+  async registerPeer ({
+    host
+  }) {
+    /**
+     * @type {MutationPeering}
+     */
+    const query = await this.createMoleculeMutation({
+      mutationClass: MutationPeering,
+      molecule: await this.createMolecule({
+        secret: this.getSecret(),
+        sourceWallet: await this.getSourceWallet()
+      })
+    })
+
+    query.fillMolecule({
+      host
+    })
+
+    return await this.executeQuery(query)
+  }
+
+  /**
+   * Builds and executes a molecule to submit an append request via A-isotope
+   *
+   * @param {string} metaType - The target MetaType to append to
+   * @param {string} metaId - The target MetaId to append to
+   * @param {string} action - The action to perform
+   * @param {object} [meta={}] - Additional metadata
+   * @returns {Promise<ResponseAppendRequest>} - A Promise that resolves with the append request response.
+   */
+  async appendRequest ({
+    metaType,
+    metaId,
+    action,
+    meta = {}
+  }) {
+    /**
+     * @type {MutationAppendRequest}
+     */
+    const query = await this.createMoleculeMutation({
+      mutationClass: MutationAppendRequest,
+      molecule: await this.createMolecule({
+        secret: this.getSecret(),
+        sourceWallet: await this.getSourceWallet()
+      })
+    })
+
+    query.fillMolecule({
+      metaType,
+      metaId,
+      action,
+      meta
     })
 
     return await this.executeQuery(query)
@@ -2040,7 +2103,13 @@ export default class KnishIOClient {
     // Did the authorization molecule get accepted?
     if (response.success()) {
       // Create & set an auth token from the response data
-      const authToken = AuthToken.create(response.payload(), wallet)
+      // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
+      const authToken = AuthToken.create({
+        token: response.token(),
+        expiresAt: response.time(),
+        pubkey: response.pubKey(),
+        encrypt: response.encrypt()
+      }, wallet)
       this.setAuthToken(authToken)
     } else {
       throw new AuthorizationRejectedException(`KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }`)
@@ -2091,7 +2160,13 @@ export default class KnishIOClient {
     // Did the authorization molecule get accepted?
     if (response.success()) {
       // Create & set an auth token from the response data
-      const authToken = AuthToken.create(response.payload(), wallet)
+      // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
+      const authToken = AuthToken.create({
+        token: response.token(),
+        expiresAt: response.time(),
+        pubkey: response.pubKey(),
+        encrypt: response.encrypt()
+      }, wallet)
       this.setAuthToken(authToken)
     } else {
       throw new AuthorizationRejectedException(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }`)

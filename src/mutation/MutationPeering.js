@@ -44,60 +44,39 @@
 Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
+*/
+import MutationProposeMolecule from './MutationProposeMolecule.js'
+import ResponsePeering from '../response/ResponsePeering.js'
+
+/**
+ * Mutation for registering a peer node via the P-isotope
  */
+export default class MutationPeering extends MutationProposeMolecule {
+  /**
+   * Fills a molecule with a P-isotope peering atom
+   *
+   * @param {string} host
+   */
+  fillMolecule ({
+    host
+  }) {
+    this.$__molecule.initPeering({
+      host
+    })
+    this.$__molecule.sign({})
+    this.$__molecule.check()
+  }
 
-import Atom from './Atom.js'
-import Molecule from './Molecule.js'
-import Wallet from './Wallet.js'
-import Meta from './Meta.js'
-import KnishIOClient from './KnishIOClient.js'
-import MutationPeering from './mutation/MutationPeering.js'
-import MutationAppendRequest from './mutation/MutationAppendRequest.js'
-import ResponsePeering from './response/ResponsePeering.js'
-import ResponseAppendRequest from './response/ResponseAppendRequest.js'
-import {
-  base64ToHex,
-  bufferToHexString,
-  charsetBaseConvert,
-  chunkSubstr,
-  hexStringToBuffer,
-  hexToBase64,
-  isHex,
-  randomString
-} from './libraries/strings.js'
-import {
-  generateBundleHash,
-  generateSecret,
-  shake256
-} from './libraries/crypto.js'
-
-export {
-  Atom,
-  Molecule,
-  Wallet,
-  Meta,
-  KnishIOClient,
-
-  // mutations
-  MutationPeering,
-  MutationAppendRequest,
-
-  // responses
-  ResponsePeering,
-  ResponseAppendRequest,
-
-  // strings
-  chunkSubstr,
-  base64ToHex,
-  bufferToHexString,
-  charsetBaseConvert,
-  hexStringToBuffer,
-  hexToBase64,
-  isHex,
-  randomString,
-
-  // crypto
-  generateSecret,
-  generateBundleHash,
-  shake256
+  /**
+   * Builds a new Response object from a JSON string
+   *
+   * @param {object} json
+   * @return {ResponsePeering}
+   */
+  createResponse (json) {
+    return new ResponsePeering({
+      query: this,
+      json
+    })
+  }
 }

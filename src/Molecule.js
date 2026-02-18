@@ -45,27 +45,26 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Atom from './Atom'
-import AtomMeta from './AtomMeta'
-import Wallet from './Wallet'
+import Atom from './Atom.js'
+import AtomMeta from './AtomMeta.js'
+import Wallet from './Wallet.js'
 import JsSHA from 'jssha'
 import {
   chunkSubstr,
   hexToBase64
-} from './libraries/strings'
-import CheckMolecule from './libraries/CheckMolecule'
+} from './libraries/strings.js'
+import CheckMolecule from './libraries/CheckMolecule.js'
 import {
   generateBatchId,
   generateBundleHash
-} from './libraries/crypto'
-import { deepCloning } from './libraries/array'
-import Dot from './libraries/Dot'
-import Rule from './instance/Rules/Rule'
-import AtomsMissingException from './exception/AtomsMissingException'
-import BalanceInsufficientException from './exception/BalanceInsufficientException'
-import NegativeAmountException from './exception/NegativeAmountException'
-import SignatureMalformedException from './exception/SignatureMalformedException'
-import versions from './versions/index'
+} from './libraries/crypto.js'
+import Dot from './libraries/Dot.js'
+import Rule from './instance/Rules/Rule.js'
+import AtomsMissingException from './exception/AtomsMissingException.js'
+import BalanceInsufficientException from './exception/BalanceInsufficientException.js'
+import NegativeAmountException from './exception/NegativeAmountException.js'
+import SignatureMalformedException from './exception/SignatureMalformedException.js'
+import versions from './versions/index.js'
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -320,6 +319,14 @@ export default class Molecule {
    * @return {Molecule}
    */
   addContinuIdAtom () {
+    // If remainder wallet is not USER token, create a new USER remainder wallet
+    if (!this.remainderWallet || this.remainderWallet.token !== 'USER') {
+      this.remainderWallet = Wallet.create({
+        secret: this.secret,
+        bundle: this.bundle
+      })
+    }
+
     this.addAtom(Atom.create({
       isotope: 'I',
       wallet: this.remainderWallet,
@@ -560,11 +567,11 @@ export default class Molecule {
     })
     bufferWallet.tradeRates = tradeRates
 
-    // Initializing a new Atom to remove tokens from source
+    // Initializing a new Atom to remove tokens from source (debit full balance)
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount
+      value: -this.sourceWallet.balance
     }))
 
     // Initializing a new Atom to add tokens to recipient
@@ -612,11 +619,11 @@ export default class Molecule {
       firstAtomMeta.setSigningWallet(signingWallet)
     }
 
-    // Initializing a new Atom to remove tokens from source
+    // Initializing a new Atom to remove tokens from source (debit full balance)
     this.addAtom(Atom.create({
       isotope: 'B',
       wallet: this.sourceWallet,
-      value: -amount,
+      value: -this.sourceWallet.balance,
       meta: firstAtomMeta,
       metaType: 'walletBundle',
       metaId: this.sourceWallet.bundle
@@ -829,6 +836,56 @@ export default class Molecule {
   }
 
   /**
+   * Initialize a P-type molecule for peer registration
+   *
+   * @param {string} host - The peer host URL to register
+   * @return {Molecule}
+   */
+  initPeering ({
+    host
+  }) {
+    this.addAtom(Atom.create({
+      isotope: 'P',
+      wallet: this.sourceWallet,
+      metaType: 'walletBundle',
+      metaId: this.bundle,
+      meta: new AtomMeta({ peerHost: host })
+    }))
+
+    this.addContinuIdAtom()
+
+    return this
+  }
+
+  /**
+   * Initialize an A-type molecule for an append request
+   *
+   * @param {string} metaType - The target MetaType to append to
+   * @param {string} metaId - The target MetaId to append to
+   * @param {string} action - The action to perform
+   * @param {object} meta - Additional metadata
+   * @return {Molecule}
+   */
+  initAppendRequest ({
+    metaType,
+    metaId,
+    action,
+    meta = {}
+  }) {
+    this.addAtom(Atom.create({
+      isotope: 'A',
+      wallet: this.sourceWallet,
+      metaType,
+      metaId,
+      meta: new AtomMeta({ action, ...meta })
+    }))
+
+    this.addContinuIdAtom()
+
+    return this
+  }
+
+  /**
    * Arranges atoms to request tokens from the node itself
    *
    * @param {string} token
@@ -849,6 +906,7 @@ export default class Molecule {
     batchId = null
   }) {
     meta.token = token
+    meta.amount = String(amount)
 
     this.local = 1
 
