@@ -255,16 +255,6 @@ export default class KnishIOClient {
   /**
    * Returns the currently defined Cell identifier for this session
    *
-   * @deprecated Please use getCellSlug() instead
-   * @return {string|null}
-   */
-  cellSlug () {
-    return this.getCellSlug()
-  }
-
-  /**
-   * Returns the currently defined Cell identifier for this session
-   *
    * @return {string|null}
    */
   getCellSlug () {
@@ -305,16 +295,6 @@ export default class KnishIOClient {
   }
 
   /**
-   * Retrieves the endpoint URI for this session
-   *
-   * @deprecated Please use getUri() instead
-   * @returns {string}
-   */
-  uri () {
-    return this.getUri()
-  }
-
-  /**
    * Returns the GraphQL client class session
    *
    * @return {UrqlClientWrapper}
@@ -333,8 +313,8 @@ export default class KnishIOClient {
           secret: this.$__secret,
           cellSlug: this.$__cellSlug,
           encrypt: this.$__encrypt
-        }).then(() => {
-          // Success
+        }).catch(err => {
+          this.log('warn', `KnishIOClient::client() - Background authorization failed: ${ err.message }`)
         })
       } else {
         // Use stored authorization data

@@ -1,4 +1,5 @@
 module.exports = {
+  roots: ['<rootDir>/tests'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageReporters: ['json', 'lcov', 'text', 'clover'],
@@ -7,6 +8,6 @@ module.exports = {
     '^.+\\.js$': 'esbuild-jest'
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!esmock)'
+    '/node_modules/(?!(esmock|@noble))'
   ]
 }

@@ -17,7 +17,7 @@ import {
   Wallet,
   Molecule,
   Atom
-} from './dist/client.es.mjs';
+} from '../../dist/client.es.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -104,12 +104,12 @@ const config = configPath && fs.existsSync(configPath)
 
 // Configurable shared results directory for cross-platform testing
 const sharedResultsDir = process.env.KNISHIO_SHARED_RESULTS ||
-                        path.resolve(__dirname, '../shared-test-results');
+                        path.resolve(__dirname, '../../../shared-test-results');
 
 // Test results storage
 const results = {
   sdk: 'JavaScript',
-  version: JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8')).version,
+  version: JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8')).version,
   timestamp: new Date().toISOString(),
   tests: {},
   molecules: {},

@@ -20,7 +20,7 @@ import { parseArgs } from 'util';
 import { setTimeout } from 'timers/promises';
 
 // Import KnishIO SDK - using built distribution for consistency
-import { KnishIOClient, generateSecret } from './dist/client.es.mjs';
+import { KnishIOClient, generateSecret } from '../../dist/client.es.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,14 +79,14 @@ if (!graphqlUrl) {
 const DEFAULT_CONFIG = {
   "server": {
     "graphqlUrl": graphqlUrl,
-    "cellSlug": args.values.cell || process.env.KNISHIO_CELL_SLUG || 'INTEGRATION_TEST',
+    "cellSlug": args.values.cell || process.env.KNISHIO_CELL_SLUG || 'TESTCELL',
     "timeout": parseInt(args.values.timeout, 10),
     "retries": 3,
     "retryDelay": 1000
   },
   "tests": {
     "authentication": {
-      "testSecret": generateSecret('INTEGRATION_TEST_AUTH'),
+      "testSecret": generateSecret(),
       "guestMode": false
     },
     "metadata": {
@@ -112,7 +112,7 @@ const DEFAULT_CONFIG = {
     },
     "transfers": {
       "transferAmount": 100,
-      "recipientSecret": generateSecret('INTEGRATION_TEST_RECIPIENT')
+      "recipientSecret": generateSecret()
     }
   },
   "cleanup": {
@@ -135,7 +135,7 @@ if (args.values.timeout) config.server.timeout = parseInt(args.values.timeout, 1
 // Results tracking with comprehensive metrics
 const results = {
   sdk: 'JavaScript',
-  version: JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8')).version,
+  version: JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8')).version,
   timestamp: new Date().toISOString(),
   server: {
     url: config.server.graphqlUrl,
@@ -236,33 +236,41 @@ async function testClientConnectivity() {
   logSection('1. Client Connectivity and Authentication Test');
   
   try {
-    // Initialize client
+    // Initialize client with secret for molecule signing
+    const testSecret = config.tests.authentication.testSecret;
     const client = new KnishIOClient({
       uri: config.server.graphqlUrl,
       cellSlug: config.server.cellSlug,
       logging: false
     });
-    
+    client.setSecret(testSecret);
+
     logTest('Client initialization', true);
-    
-    // Test authentication - use molecule-based approach for this server
+
+    // Authenticate with secret (required for molecule signing in tests 2-4)
     const { result: authResponse, responseTime } = await executeWithRetry(
       async () => {
-        // This server uses molecule-based authentication via ProposeMolecule
-        // For now, let's test basic connectivity with a simpler approach
-        return await client.queryBalance({
-          token: 'USER',
-          bundle: client.getBundle()
+        return await client.requestAuthToken({
+          secret: testSecret,
+          cellSlug: config.server.cellSlug,
+          encrypt: false
         });
       },
       'Basic Server Connectivity'
     );
-    
+
     const authSuccess = authResponse?.success?.() || false;
-    logTest('Server authentication', authSuccess, 
-      authSuccess ? null : `Auth failed: ${authResponse?.reason?.() || 'Unknown error'}`, 
+    logTest('Server authentication', authSuccess,
+      authSuccess ? null : `Auth failed: ${authResponse?.reason?.() || 'Unknown error'}`,
       responseTime
     );
+
+    // Prevent re-auth that causes duplicate wallet bundle on PHP server
+    // (PHP does plain INSERT, not UPSERT, for wallet bundles)
+    const authToken = client.getAuthToken();
+    if (authToken) {
+      authToken.$__expiresAt = Math.floor(Date.now() / 1000) + 86400;
+    }
     
     // Test basic connectivity with a simple query
     if (authSuccess) {
@@ -366,33 +374,40 @@ async function testMetadataOperations(client) {
       'Query metadata'
     );
     
-    const querySuccess = Array.isArray(queryResponse) && queryResponse.length > 0;
-    const retrievedMeta = querySuccess ? queryResponse[0] : null;
-    
+    const payload = queryResponse?.payload?.();
+    const instances = payload?.instances || [];
+    const querySuccess = Array.isArray(instances) && instances.length > 0;
+    const retrievedMeta = querySuccess ? instances[0] : null;
+
+    if (!querySuccess) {
+      log(`  Debug: response type = ${queryResponse?.constructor?.name}`, 'yellow', 2);
+      log(`  Debug: payload = ${JSON.stringify(payload)?.substring(0, 300)}`, 'yellow', 2);
+    }
+
     logTest('Query metadata via client', querySuccess,
       querySuccess ? null : 'No metadata retrieved',
       queryTime
     );
-    
+
     // Validate metadata content
     let contentValid = false;
     if (querySuccess && retrievedMeta) {
       const originalKeys = Object.keys(testConfig.metadata);
-      contentValid = originalKeys.every(key => 
-        retrievedMeta.meta?.some?.(m => m.key === key && m.value === testConfig.metadata[key])
+      contentValid = originalKeys.every(key =>
+        retrievedMeta.metas?.some?.(m => m.key === key && m.value === testConfig.metadata[key])
       );
     }
-    
+
     logTest('Metadata content validation', contentValid,
       contentValid ? null : 'Retrieved metadata does not match created metadata'
     );
-    
+
     results.tests.metadata = {
       passed: createSuccess && querySuccess && contentValid,
       molecularHash,
       createTime,
       queryTime,
-      metaCount: queryResponse?.length || 0,
+      metaCount: instances?.length || 0,
       contentMatched: contentValid
     };
     
@@ -525,27 +540,35 @@ async function testWalletAndTransferOperations(client, tokenSlug) {
   try {
     const testConfig = config.tests.transfers;
     
-    // Create recipient wallet
+    // Create recipient client with secret
+    const recipientSecret = testConfig.recipientSecret;
     const recipientClient = new KnishIOClient({
       uri: config.server.graphqlUrl,
       cellSlug: config.server.cellSlug,
       logging: false
     });
-    
+    recipientClient.setSecret(recipientSecret);
+
     // Authenticate recipient
     const { result: recipientAuth } = await executeWithRetry(
       async () => {
         return await recipientClient.requestAuthToken({
-          secret: testConfig.recipientSecret,
+          secret: recipientSecret,
           cellSlug: config.server.cellSlug,
           encrypt: false
         });
       },
       'Recipient authentication'
     );
-    
+
     const recipientAuthSuccess = recipientAuth?.success?.() || false;
     logTest('Recipient authentication', recipientAuthSuccess);
+
+    // Prevent re-auth on PHP server
+    const recipientAuthToken = recipientClient.getAuthToken();
+    if (recipientAuthToken) {
+      recipientAuthToken.$__expiresAt = Math.floor(Date.now() / 1000) + 86400;
+    }
     
     if (!recipientAuthSuccess) {
       results.tests.transfers = {
@@ -685,7 +708,7 @@ function calculateNetworkStats() {
  */
 function saveResults() {
   const resultsDir = process.env.KNISHIO_SHARED_RESULTS || 
-                    path.resolve(__dirname, '../shared-test-results');
+                    path.resolve(__dirname, '../../../shared-test-results');
   
   if (!fs.existsSync(resultsDir)) {
     fs.mkdirSync(resultsDir, { recursive: true });

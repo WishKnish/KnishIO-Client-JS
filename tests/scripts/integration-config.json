@@ -1,6 +1,6 @@
 {
   "server": {
-    "graphqlUrl": "https://testnet.knish.io/graphql",
+    "graphqlUrl": "https://eteplitsky.testnet.knish.io/graphql",
     "cellSlug": "INTEGRATION_TEST",
     "timeout": 30000,
     "retries": 3,
@@ -47,7 +47,7 @@
     "usage": "Use this file to customize integration test configuration",
     "examples": [
       "node integration-test.js --config integration-config.json",
-      "node integration-test.js --url https://mainnet.knish.io/graphql --config custom-config.json"
+      "node integration-test.js --url https://custom.mainnet.your.domain/graphql --config custom-config.json"
     ],
     "notes": [
       "CLI arguments (--url, --cell, --timeout) will override values in this config file",

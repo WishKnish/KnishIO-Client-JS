@@ -29,8 +29,7 @@ export default defineConfig({
         'graphql-ws',
         'isomorphic-fetch',
         'jssha',
-        'wonka',
-        '@thumbmarkjs/thumbmarkjs'
+        'wonka'
       ],
       output: {
         globals: {
@@ -41,8 +40,7 @@ export default defineConfig({
           'graphql-ws': 'GraphQLWS',
           'isomorphic-fetch': 'fetch',
           'jssha': 'jsSHA',
-          'wonka': 'wonka',
-          '@thumbmarkjs/thumbmarkjs': 'ThumbmarkJS'
+          'wonka': 'wonka'
         }
       }
     },

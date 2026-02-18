@@ -327,11 +327,30 @@ export default class Molecule {
       })
     }
 
+    // Build ContinuID chain metadata (matches Rust SDK GAP-07-002)
+    const continuIdMeta = {}
+
+    // previousPosition: source wallet position being consumed
+    if (this.sourceWallet && this.sourceWallet.position) {
+      continuIdMeta.previousPosition = this.sourceWallet.position
+    }
+
+    // pubkey: remainder wallet's public key for chain verification
+    if (this.remainderWallet.pubkey) {
+      continuIdMeta.pubkey = this.remainderWallet.pubkey
+    }
+
+    // characters: encoding format
+    if (this.remainderWallet.characters) {
+      continuIdMeta.characters = this.remainderWallet.characters
+    }
+
     this.addAtom(Atom.create({
       isotope: 'I',
       wallet: this.remainderWallet,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle
+      metaId: this.remainderWallet.bundle,
+      meta: new AtomMeta(continuIdMeta)
     }))
     return this
   }
@@ -908,8 +927,6 @@ export default class Molecule {
     meta.token = token
     meta.amount = String(amount)
 
-    this.local = 1
-
     this.addAtom(Atom.create({
       isotope: 'T',
       wallet: this.sourceWallet,
@@ -1052,7 +1069,7 @@ export default class Molecule {
    * Follows 2025 JavaScript best practices with proper error handling and type safety.
    *
    * @param {Object} options - Serialization options
-   * @param {boolean} options.includeValidationContext - Include sourceWallet/remainderWallet for validation (default: true)
+   * @param {boolean} options.includeValidationContext - Include sourceWallet/remainderWallet for validation (default: false)
    * @param {boolean} options.includeOtsFragments - Include OTS signature fragments (default: true)
    * @param {boolean} options.secureMode - Extra security checks (default: false)
    * @return {Object} JSON-serializable object
@@ -1060,19 +1077,17 @@ export default class Molecule {
    */
   toJSON (options = {}) {
     const {
-      includeValidationContext = true,
+      includeValidationContext = false,
       includeOtsFragments = true
     } = options;
 
     try {
-      // Core molecule properties (always included)
+      // Core molecule properties (server-compatible fields only)
       const serialized = {
         status: this.status,
         molecularHash: this.molecularHash,
         createdAt: this.createdAt,
         cellSlug: this.cellSlug,
-        cellSlugOrigin: this.cellSlugOrigin,
-        version: this.version,
         bundle: this.bundle,
 
         // Serialized atoms array with optional OTS fragments
@@ -1081,8 +1096,11 @@ export default class Molecule {
         }))
       };
 
-      // Validation context (essential for cross-SDK validation)
+      // Extended context for Rust validator and local validation
       if (includeValidationContext) {
+        serialized.cellSlugOrigin = this.cellSlugOrigin
+        serialized.version = this.version
+
         if (this.sourceWallet) {
           serialized.sourceWallet = {
             address: this.sourceWallet.address,
@@ -1092,7 +1110,6 @@ export default class Molecule {
             bundle: this.sourceWallet.bundle,
             batchId: this.sourceWallet.batchId || null,
             characters: this.sourceWallet.characters || 'BASE64',
-            // Exclude sensitive fields like secret, key, privkey
             pubkey: this.sourceWallet.pubkey || null,
             tokenUnits: this.sourceWallet.tokenUnits || [],
             tradeRates: this.sourceWallet.tradeRates || {},
@@ -1109,7 +1126,6 @@ export default class Molecule {
             bundle: this.remainderWallet.bundle,
             batchId: this.remainderWallet.batchId || null,
             characters: this.remainderWallet.characters || 'BASE64',
-            // Exclude sensitive fields
             pubkey: this.remainderWallet.pubkey || null,
             tokenUnits: this.remainderWallet.tokenUnits || [],
             tradeRates: this.remainderWallet.tradeRates || {},
@@ -1133,14 +1149,14 @@ export default class Molecule {
    *
    * @param {string|Object} json - JSON string or object to deserialize
    * @param {Object} options - Deserialization options
-   * @param {boolean} options.includeValidationContext - Reconstruct sourceWallet/remainderWallet (default: true)
+   * @param {boolean} options.includeValidationContext - Reconstruct sourceWallet/remainderWallet (default: false)
    * @param {boolean} options.validateStructure - Validate required fields (default: true)
    * @return {Molecule} Reconstructed molecule instance
    * @throws {Error} If JSON is invalid or required fields are missing
    */
   static fromJSON (json, options = {}) {
     const {
-      includeValidationContext = true,
+      includeValidationContext = false,
       validateStructure = true
     } = options;
 
