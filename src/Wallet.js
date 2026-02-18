@@ -50,15 +50,16 @@ import {
   chunkSubstr,
   isHex,
   randomString
-} from './libraries/strings'
+} from './libraries/strings.js'
 import {
   generateBatchId,
   generateBundleHash,
-  generateSecret
-} from './libraries/crypto'
-import TokenUnit from './TokenUnit'
-import WalletCredentialException from './exception/WalletCredentialException'
-import { ml_kem768 as MlKEM768 } from '@noble/post-quantum/ml-kem'
+  generateSecret,
+  shake256
+} from './libraries/crypto.js'
+import TokenUnit from './TokenUnit.js'
+import WalletCredentialException from './exception/WalletCredentialException.js'
+import { ml_kem768 as MlKEM768 } from '@noble/post-quantum/ml-kem.js'
 
 /**
  * Wallet class represents the set of public and private
@@ -207,11 +208,16 @@ export default class Wallet {
     token,
     position
   }) {
+    // Normalize non-hex secret via SHAKE256 (matching Rust/Kotlin behavior)
+    const secretHex = isHex(secret) ? secret : shake256(secret, 1024)
+    // Normalize non-hex position via SHAKE256
+    const positionHex = isHex(position) ? position : shake256(position, 256)
+
     // Converting secret to bigInt
-    const bigIntSecret = BigInt(`0x${ secret }`)
+    const bigIntSecret = BigInt(`0x${ secretHex }`)
 
     // Adding new position to the user secret to produce the indexed key
-    const indexedKey = bigIntSecret + BigInt(`0x${ position }`)
+    const indexedKey = bigIntSecret + BigInt(`0x${ positionHex }`)
 
     // Hashing the indexed key to produce the intermediate key
     const intermediateKeySponge = new JsSHA('SHAKE256', 'TEXT')

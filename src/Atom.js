@@ -46,11 +46,11 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 import JsSHA from 'jssha'
-import { charsetBaseConvert } from './libraries/strings'
-import Meta from './Meta'
-import AtomMeta from './AtomMeta'
-import AtomsMissingException from './exception/AtomsMissingException'
-import versions from './versions/index'
+import { charsetBaseConvert } from './libraries/strings.js'
+import Meta from './Meta.js'
+import AtomMeta from './AtomMeta.js'
+import AtomsMissingException from './exception/AtomsMissingException.js'
+import versions from './versions/index.js'
 
 /**
  * Atom class used to form microtransactions within a Molecule
@@ -176,6 +176,8 @@ export default class Atom {
     }
 
     // Create the final atom's object
+    // walletAddress is null for atoms without a pre-existing wallet (e.g., recipient V-atoms).
+    // toJSON() serializes null as '' for GraphQL compatibility; hash computation treats both identically.
     return new Atom({
       position: wallet ? wallet.position : null,
       walletAddress: wallet ? wallet.address : null,
@@ -238,11 +240,16 @@ export default class Atom {
       }
 
       // Core atom properties (always included)
+      // Coerce null position/walletAddress/token to empty string for GraphQL compatibility.
+      // The molecular hash computation (getHashableValues) already treats null as '' (line 448),
+      // so this coercion does NOT change the hash. Required because the Rust validator's
+      // GraphQL schema uses String! (non-null) with #[graphql(default)] for these fields,
+      // which accepts omitted values but rejects explicit null.
       const serialized = {
-        position: this.position,
-        walletAddress: this.walletAddress,
+        position: this.position ?? '',
+        walletAddress: this.walletAddress ?? '',
         isotope: this.isotope,
-        token: this.token,
+        token: this.token ?? '',
         value: this.value,
         batchId: this.batchId,
         metaType: this.metaType,

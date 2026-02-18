@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import InvalidResponseException from '../exception/InvalidResponseException'
-import UnauthenticatedException from '../exception/UnauthenticatedException'
-import Dot from '../libraries/Dot'
+import InvalidResponseException from '../exception/InvalidResponseException.js'
+import UnauthenticatedException from '../exception/UnauthenticatedException.js'
+import Dot from '../libraries/Dot.js'
 
 /**
  * Base Response class for processing node responses
@@ -86,6 +86,17 @@ export default class Response {
       throw new InvalidResponseException()
     }
 
+    // Check for GraphQL errors array
+    if (this.$__response.errors && Array.isArray(this.$__response.errors) && this.$__response.errors.length > 0) {
+      const errorMessage = this.$__response.errors[0].message || 'Unknown GraphQL error'
+
+      if (errorMessage.includes('Unauthenticated')) {
+        throw new UnauthenticatedException()
+      }
+
+      throw new InvalidResponseException(`GraphQL Error: ${errorMessage}`)
+    }
+
     this.init()
   }
 
@@ -103,9 +114,14 @@ export default class Response {
       return this.response()
     }
 
+    // Check if response has data field
+    if (!this.response().data) {
+      throw new InvalidResponseException('Response has no data field')
+    }
+
     // Check key & return custom data from the response
     if (!Dot.has(this.response(), this.dataKey)) {
-      throw new InvalidResponseException()
+      throw new InvalidResponseException(`Missing expected field: ${this.dataKey}`)
     }
 
     return Dot.get(this.response(), this.dataKey)

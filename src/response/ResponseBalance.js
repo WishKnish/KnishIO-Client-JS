@@ -45,9 +45,9 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from '../query/Query'
-import Response from './Response'
-import ResponseWalletList from './ResponseWalletList'
+import Query from '../query/Query.js'
+import Response from './Response.js'
+import ResponseWalletList from './ResponseWalletList.js'
 
 /**
  * Response for balance query
@@ -76,7 +76,12 @@ export default class ResponseBalance extends Response {
    * @return {null|Wallet}
    */
   payload () {
-    const walletData = this.data()
+    let walletData = this.data()
+
+    // Handle array response (e.g. from Rust validator which returns Vec<Wallet>)
+    if (Array.isArray(walletData)) {
+      walletData = walletData.length > 0 ? walletData[0] : null
+    }
 
     if (!walletData || !walletData.bundleHash || !walletData.tokenSlug) {
       return null
