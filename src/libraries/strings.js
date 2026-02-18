@@ -1,4 +1,4 @@
-import Hex from './Hex'
+import Hex from './Hex.js'
 
 if (!String.prototype.trim) {
   String.prototype.trim = function () {

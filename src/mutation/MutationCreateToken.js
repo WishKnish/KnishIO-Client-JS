@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule'
-import ResponseCreateToken from '../response/ResponseCreateToken'
+import MutationProposeMolecule from './MutationProposeMolecule.js'
+import ResponseCreateToken from '../response/ResponseCreateToken.js'
 
 /**
  * Query for creating new Tokens

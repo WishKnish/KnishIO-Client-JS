@@ -46,7 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import RuleArgumentException from './exception/RuleArgumentException'
+import RuleArgumentException from './exception/RuleArgumentException.js'
 
 export default class Condition {
   /**

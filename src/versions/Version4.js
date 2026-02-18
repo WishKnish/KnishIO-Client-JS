@@ -1,4 +1,4 @@
-import HashAtom from './HashAtom'
+import HashAtom from './HashAtom.js'
 
 export default class Version4 extends HashAtom {
   constructor ({

@@ -1,4 +1,4 @@
-import CodeException from '../exception/CodeException'
+import CodeException from '../exception/CodeException.js'
 
 export default class Subscribe {
   /**

@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
-import { randomString } from './strings'
+import { randomString } from './strings.js'
 import JsSHA from 'jssha'
 
 /**

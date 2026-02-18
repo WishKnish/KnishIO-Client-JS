@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query'
-import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom'
+import Query from './Query.js'
+import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom.js'
 import { gql } from '@urql/core'
 
 export default class QueryMetaTypeViaAtom extends Query {

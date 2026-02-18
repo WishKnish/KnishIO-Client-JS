@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule'
-import ResponseCreateWallet from '../response/ResponseCreateWallet'
+import MutationProposeMolecule from './MutationProposeMolecule.js'
+import ResponseCreateWallet from '../response/ResponseCreateWallet.js'
 
 /**
  * Query for creating new Wallets

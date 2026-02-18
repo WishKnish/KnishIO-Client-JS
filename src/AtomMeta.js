@@ -46,8 +46,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import PolicyMeta from './PolicyMeta'
-import Meta from './Meta'
+import PolicyMeta from './PolicyMeta.js'
+import Meta from './Meta.js'
 
 const USE_META_CONTEXT = false
 const DEFAULT_META_CONTEXT = 'https://www.schema.org'

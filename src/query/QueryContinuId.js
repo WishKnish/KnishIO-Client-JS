@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query'
-import ResponseContinuId from '../response/ResponseContinuId'
+import Query from './Query.js'
+import ResponseContinuId from '../response/ResponseContinuId.js'
 import { gql } from '@urql/core'
 
 /**

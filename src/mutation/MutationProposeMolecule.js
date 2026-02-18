@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import ResponseProposeMolecule from '../response/ResponseProposeMolecule'
-import Mutation from './Mutation'
+import ResponseProposeMolecule from '../response/ResponseProposeMolecule.js'
+import Mutation from './Mutation.js'
 import { gql } from '@urql/core'
 
 export default class MutationProposeMolecule extends Mutation {

@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query'
-import ResponseWalletList from '../response/ResponseWalletList'
+import Query from './Query.js'
+import ResponseWalletList from '../response/ResponseWalletList.js'
 import { gql } from '@urql/core'
 
 /**

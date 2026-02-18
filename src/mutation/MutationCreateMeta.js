@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule'
-import ResponseCreateMeta from '../response/ResponseCreateMeta'
+import MutationProposeMolecule from './MutationProposeMolecule.js'
+import ResponseCreateMeta from '../response/ResponseCreateMeta.js'
 
 /**
  * Query for creating new Meta attached to some MetaType

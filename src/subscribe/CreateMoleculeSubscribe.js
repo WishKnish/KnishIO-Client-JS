@@ -1,4 +1,4 @@
-import Subscribe from './Subscribe'
+import Subscribe from './Subscribe.js'
 import { gql } from '@urql/core'
 
 export default class CreateMoleculeSubscribe extends Subscribe {
