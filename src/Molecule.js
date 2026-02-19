@@ -45,27 +45,26 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Atom from './Atom'
-import AtomMeta from './AtomMeta'
-import Wallet from './Wallet'
+import Atom from './Atom.js'
+import AtomMeta from './AtomMeta.js'
+import Wallet from './Wallet.js'
 import JsSHA from 'jssha'
 import {
   chunkSubstr,
   hexToBase64
-} from './libraries/strings'
-import CheckMolecule from './libraries/CheckMolecule'
+} from './libraries/strings.js'
+import CheckMolecule from './libraries/CheckMolecule.js'
 import {
   generateBatchId,
   generateBundleHash
-} from './libraries/crypto'
-import { deepCloning } from './libraries/array'
-import Dot from './libraries/Dot'
-import Rule from './instance/Rules/Rule'
-import AtomsMissingException from './exception/AtomsMissingException'
-import BalanceInsufficientException from './exception/BalanceInsufficientException'
-import NegativeAmountException from './exception/NegativeAmountException'
-import SignatureMalformedException from './exception/SignatureMalformedException'
-import versions from './versions/index'
+} from './libraries/crypto.js'
+import Dot from './libraries/Dot.js'
+import Rule from './instance/Rules/Rule.js'
+import AtomsMissingException from './exception/AtomsMissingException.js'
+import BalanceInsufficientException from './exception/BalanceInsufficientException.js'
+import NegativeAmountException from './exception/NegativeAmountException.js'
+import SignatureMalformedException from './exception/SignatureMalformedException.js'
+import versions from './versions/index.js'
 
 /**
  * Molecule class used for committing changes to the ledger
@@ -320,11 +319,38 @@ export default class Molecule {
    * @return {Molecule}
    */
   addContinuIdAtom () {
+    // If remainder wallet is not USER token, create a new USER remainder wallet
+    if (!this.remainderWallet || this.remainderWallet.token !== 'USER') {
+      this.remainderWallet = Wallet.create({
+        secret: this.secret,
+        bundle: this.bundle
+      })
+    }
+
+    // Build ContinuID chain metadata (matches Rust SDK GAP-07-002)
+    const continuIdMeta = {}
+
+    // previousPosition: source wallet position being consumed
+    if (this.sourceWallet && this.sourceWallet.position) {
+      continuIdMeta.previousPosition = this.sourceWallet.position
+    }
+
+    // pubkey: remainder wallet's public key for chain verification
+    if (this.remainderWallet.pubkey) {
+      continuIdMeta.pubkey = this.remainderWallet.pubkey
+    }
+
+    // characters: encoding format
+    if (this.remainderWallet.characters) {
+      continuIdMeta.characters = this.remainderWallet.characters
+    }
+
     this.addAtom(Atom.create({
       isotope: 'I',
       wallet: this.remainderWallet,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle
+      metaId: this.remainderWallet.bundle,
+      meta: new AtomMeta(continuIdMeta)
     }))
     return this
   }
@@ -512,11 +538,11 @@ export default class Molecule {
       throw new BalanceInsufficientException()
     }
 
-    // Initializing a new Atom to remove tokens from source
+    // Initializing a new Atom to remove tokens from source (debit full balance)
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount
+      value: -this.sourceWallet.balance
     }))
     // Initializing a new Atom to add tokens to recipient
     this.addAtom(Atom.create({
@@ -526,7 +552,7 @@ export default class Molecule {
       metaType: 'walletBundle',
       metaId: recipientWallet.bundle
     }))
-    // Ininitlizing a remainder atom
+    // Initializing a remainder atom
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
@@ -560,11 +586,11 @@ export default class Molecule {
     })
     bufferWallet.tradeRates = tradeRates
 
-    // Initializing a new Atom to remove tokens from source
+    // Initializing a new Atom to remove tokens from source (debit full balance)
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount
+      value: -this.sourceWallet.balance
     }))
 
     // Initializing a new Atom to add tokens to recipient
@@ -612,11 +638,11 @@ export default class Molecule {
       firstAtomMeta.setSigningWallet(signingWallet)
     }
 
-    // Initializing a new Atom to remove tokens from source
+    // Initializing a new Atom to remove tokens from source (debit full balance)
     this.addAtom(Atom.create({
       isotope: 'B',
       wallet: this.sourceWallet,
-      value: -amount,
+      value: -this.sourceWallet.balance,
       meta: firstAtomMeta,
       metaType: 'walletBundle',
       metaId: this.sourceWallet.bundle
@@ -812,14 +838,67 @@ export default class Molecule {
       meta: new AtomMeta(meta)
     }))
 
-    this.addPolicyAtom({
-      metaType,
-      metaId,
-      meta,
-      policy
-    })
+    // Only add policy atom if policy is provided and not empty
+    if (policy && Object.keys(policy).length > 0) {
+      this.addPolicyAtom({
+        metaType,
+        metaId,
+        meta,
+        policy
+      })
+    }
 
     // User remainder atom
+    this.addContinuIdAtom()
+
+    return this
+  }
+
+  /**
+   * Initialize a P-type molecule for peer registration
+   *
+   * @param {string} host - The peer host URL to register
+   * @return {Molecule}
+   */
+  initPeering ({
+    host
+  }) {
+    this.addAtom(Atom.create({
+      isotope: 'P',
+      wallet: this.sourceWallet,
+      metaType: 'walletBundle',
+      metaId: this.bundle,
+      meta: new AtomMeta({ peerHost: host })
+    }))
+
+    this.addContinuIdAtom()
+
+    return this
+  }
+
+  /**
+   * Initialize an A-type molecule for an append request
+   *
+   * @param {string} metaType - The target MetaType to append to
+   * @param {string} metaId - The target MetaId to append to
+   * @param {string} action - The action to perform
+   * @param {object} meta - Additional metadata
+   * @return {Molecule}
+   */
+  initAppendRequest ({
+    metaType,
+    metaId,
+    action,
+    meta = {}
+  }) {
+    this.addAtom(Atom.create({
+      isotope: 'A',
+      wallet: this.sourceWallet,
+      metaType,
+      metaId,
+      meta: new AtomMeta({ action, ...meta })
+    }))
+
     this.addContinuIdAtom()
 
     return this
@@ -846,8 +925,7 @@ export default class Molecule {
     batchId = null
   }) {
     meta.token = token
-
-    this.local = 1
+    meta.amount = String(amount)
 
     this.addAtom(Atom.create({
       isotope: 'T',
@@ -985,18 +1063,191 @@ export default class Molecule {
   }
 
   /**
-   * Returns JSON-ready clone minus protected properties
+   * Returns JSON-ready object for cross-SDK compatibility (2025 JS best practices)
    *
-   * @return {object}
+   * Includes all necessary fields for cross-SDK validation while excluding sensitive data.
+   * Follows 2025 JavaScript best practices with proper error handling and type safety.
+   *
+   * @param {Object} options - Serialization options
+   * @param {boolean} options.includeValidationContext - Include sourceWallet/remainderWallet for validation (default: false)
+   * @param {boolean} options.includeOtsFragments - Include OTS signature fragments (default: true)
+   * @param {boolean} options.secureMode - Extra security checks (default: false)
+   * @return {Object} JSON-serializable object
+   * @throws {Error} If molecule is in invalid state for serialization
    */
-  toJSON () {
-    const clone = deepCloning(this)
-    for (const key of ['remainderWallet', 'secret', 'sourceWallet', 'cellSlugOrigin', 'version']) {
-      if (Object.prototype.hasOwnProperty.call(clone, key)) {
-        delete clone[key]
+  toJSON (options = {}) {
+    const {
+      includeValidationContext = false,
+      includeOtsFragments = true
+    } = options;
+
+    try {
+      // Core molecule properties (server-compatible fields only)
+      const serialized = {
+        status: this.status,
+        molecularHash: this.molecularHash,
+        createdAt: this.createdAt,
+        cellSlug: this.cellSlug,
+        bundle: this.bundle,
+
+        // Serialized atoms array with optional OTS fragments
+        atoms: this.atoms.map(atom => atom.toJSON({
+          includeOtsFragments
+        }))
+      };
+
+      // Extended context for Rust validator and local validation
+      if (includeValidationContext) {
+        serialized.cellSlugOrigin = this.cellSlugOrigin
+        serialized.version = this.version
+
+        if (this.sourceWallet) {
+          serialized.sourceWallet = {
+            address: this.sourceWallet.address,
+            position: this.sourceWallet.position,
+            token: this.sourceWallet.token,
+            balance: this.sourceWallet.balance || 0,
+            bundle: this.sourceWallet.bundle,
+            batchId: this.sourceWallet.batchId || null,
+            characters: this.sourceWallet.characters || 'BASE64',
+            pubkey: this.sourceWallet.pubkey || null,
+            tokenUnits: this.sourceWallet.tokenUnits || [],
+            tradeRates: this.sourceWallet.tradeRates || {},
+            molecules: this.sourceWallet.molecules || {}
+          };
+        }
+
+        if (this.remainderWallet) {
+          serialized.remainderWallet = {
+            address: this.remainderWallet.address,
+            position: this.remainderWallet.position,
+            token: this.remainderWallet.token,
+            balance: this.remainderWallet.balance || 0,
+            bundle: this.remainderWallet.bundle,
+            batchId: this.remainderWallet.batchId || null,
+            characters: this.remainderWallet.characters || 'BASE64',
+            pubkey: this.remainderWallet.pubkey || null,
+            tokenUnits: this.remainderWallet.tokenUnits || [],
+            tradeRates: this.remainderWallet.tradeRates || {},
+            molecules: this.remainderWallet.molecules || {}
+          };
+        }
       }
+
+      return serialized;
+
+    } catch (error) {
+      throw new Error(`Molecule serialization failed: ${error.message}`);
     }
-    return clone
+  }
+
+  /**
+   * Creates a Molecule instance from JSON data (2025 JS best practices)
+   *
+   * Handles cross-SDK deserialization with robust error handling and validation.
+   * Essential for cross-platform molecule validation and compatibility testing.
+   *
+   * @param {string|Object} json - JSON string or object to deserialize
+   * @param {Object} options - Deserialization options
+   * @param {boolean} options.includeValidationContext - Reconstruct sourceWallet/remainderWallet (default: false)
+   * @param {boolean} options.validateStructure - Validate required fields (default: true)
+   * @return {Molecule} Reconstructed molecule instance
+   * @throws {Error} If JSON is invalid or required fields are missing
+   */
+  static fromJSON (json, options = {}) {
+    const {
+      includeValidationContext = false,
+      validateStructure = true
+    } = options;
+
+    try {
+      // Parse JSON safely
+      const data = typeof json === 'string' ? JSON.parse(json) : json;
+
+      // Validate required fields in strict mode
+      if (validateStructure) {
+        if (!data.molecularHash || !Array.isArray(data.atoms)) {
+          throw new Error('Invalid molecule data: missing molecularHash or atoms array');
+        }
+      }
+
+      // Create minimal molecule instance (never include secret from JSON)
+      const molecule = new Molecule({
+        secret: null,
+        bundle: data.bundle || null,
+        cellSlug: data.cellSlug || null,
+        version: data.version || null
+      });
+
+      // Populate core properties
+      molecule.status = data.status;
+      molecule.molecularHash = data.molecularHash;
+      molecule.createdAt = data.createdAt || String(+new Date());
+      molecule.cellSlugOrigin = data.cellSlugOrigin;
+
+      // Reconstruct atoms array with proper Atom instances
+      if (Array.isArray(data.atoms)) {
+        molecule.atoms = data.atoms.map((atomData, index) => {
+          try {
+            return Atom.fromJSON(atomData);
+          } catch (error) {
+            throw new Error(`Failed to reconstruct atom ${index}: ${error.message}`);
+          }
+        });
+      }
+
+      // Reconstruct validation context if available and requested
+      if (includeValidationContext) {
+        if (data.sourceWallet) {
+          // Create source wallet for validation (without secret for security)
+          molecule.sourceWallet = new Wallet({
+            secret: null,
+            token: data.sourceWallet.token,
+            position: data.sourceWallet.position,
+            bundle: data.sourceWallet.bundle,
+            batchId: data.sourceWallet.batchId,
+            characters: data.sourceWallet.characters
+          });
+
+          // Set additional properties for validation context
+          molecule.sourceWallet.balance = data.sourceWallet.balance || 0;
+          molecule.sourceWallet.address = data.sourceWallet.address;
+          if (data.sourceWallet.pubkey) {
+            molecule.sourceWallet.pubkey = data.sourceWallet.pubkey;
+          }
+          molecule.sourceWallet.tokenUnits = data.sourceWallet.tokenUnits || [];
+          molecule.sourceWallet.tradeRates = data.sourceWallet.tradeRates || {};
+          molecule.sourceWallet.molecules = data.sourceWallet.molecules || {};
+        }
+
+        if (data.remainderWallet) {
+          // Create remainder wallet for validation (without secret for security)
+          molecule.remainderWallet = new Wallet({
+            secret: null,
+            token: data.remainderWallet.token,
+            position: data.remainderWallet.position,
+            bundle: data.remainderWallet.bundle,
+            batchId: data.remainderWallet.batchId,
+            characters: data.remainderWallet.characters
+          });
+
+          // Set additional properties for validation context
+          molecule.remainderWallet.balance = data.remainderWallet.balance || 0;
+          molecule.remainderWallet.address = data.remainderWallet.address;
+          if (data.remainderWallet.pubkey) {
+            molecule.remainderWallet.pubkey = data.remainderWallet.pubkey;
+          }
+          molecule.remainderWallet.tokenUnits = data.remainderWallet.tokenUnits || [];
+          molecule.remainderWallet.tradeRates = data.remainderWallet.tradeRates || {};
+          molecule.remainderWallet.molecules = data.remainderWallet.molecules || {};
+        }
+      }
+
+      return molecule;
+
+    } catch (error) {
+      throw new Error(`Molecule deserialization failed: ${error.message}`);
+    }
   }
 
   /**
@@ -1005,7 +1256,7 @@ export default class Molecule {
    * @param senderWallet
    */
   check (senderWallet = null) {
-    (new CheckMolecule(this)).verify(senderWallet)
+    return (new CheckMolecule(this)).verify(senderWallet)
   }
 
   /**

@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule'
-import ResponseTransferTokens from '../response/ResponseTransferTokens'
+import MutationProposeMolecule from './MutationProposeMolecule.js'
+import ResponseTransferTokens from '../response/ResponseTransferTokens.js'
 
 /**
  * Query for moving tokens between wallets

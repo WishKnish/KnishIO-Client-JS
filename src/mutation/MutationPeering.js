@@ -45,28 +45,38 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-
-import Query from '../query/Query'
-import Response from './Response'
+import MutationProposeMolecule from './MutationProposeMolecule.js'
+import ResponsePeering from '../response/ResponsePeering.js'
 
 /**
- * Response for MetaBatch Query
+ * Mutation for registering a peer node via the P-isotope
  */
-export default class ResponseMetaBatch extends Response {
+export default class MutationPeering extends MutationProposeMolecule {
   /**
-   * Class constructor
+   * Fills a molecule with a P-isotope peering atom
    *
-   * @param {Query} query
-   * @param {object} json
+   * @param {string} host
    */
-  constructor ({
-    query,
-    json
+  fillMolecule ({
+    host
   }) {
-    super({
-      query,
-      json,
-      dataKey: 'data.MetaBatch'
+    this.$__molecule.initPeering({
+      host
+    })
+    this.$__molecule.sign({})
+    this.$__molecule.check()
+  }
+
+  /**
+   * Builds a new Response object from a JSON string
+   *
+   * @param {object} json
+   * @return {ResponsePeering}
+   */
+  createResponse (json) {
+    return new ResponsePeering({
+      query: this,
+      json
     })
   }
 }

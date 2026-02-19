@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Mutation from '../mutation/Mutation'
-import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthorizationGuest'
+import Mutation from '../mutation/Mutation.js'
+import ResponseRequestAuthorizationGuest from '../response/ResponseRequestAuthorizationGuest.js'
 import { gql } from '@urql/core'
 
 export default class MutationRequestAuthorizationGuest extends Mutation {

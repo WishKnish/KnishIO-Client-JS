@@ -45,7 +45,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import BaseException from './BaseException'
+import BaseException from './BaseException.js'
 
 /**
  * Thrown when attempting to transfer tokens to yourself

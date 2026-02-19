@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import CodeException from '../exception/CodeException'
-import Response from '../response/Response'
+import CodeException from '../exception/CodeException.js'
+import Response from '../response/Response.js'
 
 export default class Query {
   /**

@@ -50,15 +50,16 @@ import {
   chunkSubstr,
   isHex,
   randomString
-} from './libraries/strings'
+} from './libraries/strings.js'
 import {
   generateBatchId,
   generateBundleHash,
-  generateSecret
-} from './libraries/crypto'
-import TokenUnit from './TokenUnit'
-import WalletCredentialException from './exception/WalletCredentialException'
-import { ml_kem768 as MlKEM768 } from '@noble/post-quantum/ml-kem'
+  generateSecret,
+  shake256
+} from './libraries/crypto.js'
+import TokenUnit from './TokenUnit.js'
+import WalletCredentialException from './exception/WalletCredentialException.js'
+import { ml_kem768 as MlKEM768 } from '@noble/post-quantum/ml-kem.js'
 
 /**
  * Wallet class represents the set of public and private
@@ -207,11 +208,16 @@ export default class Wallet {
     token,
     position
   }) {
+    // Normalize non-hex secret via SHAKE256 (matching Rust/Kotlin behavior)
+    const secretHex = isHex(secret) ? secret : shake256(secret, 1024)
+    // Normalize non-hex position via SHAKE256
+    const positionHex = isHex(position) ? position : shake256(position, 256)
+
     // Converting secret to bigInt
-    const bigIntSecret = BigInt(`0x${ secret }`)
+    const bigIntSecret = BigInt(`0x${ secretHex }`)
 
     // Adding new position to the user secret to produce the indexed key
-    const indexedKey = bigIntSecret + BigInt(`0x${ position }`)
+    const indexedKey = bigIntSecret + BigInt(`0x${ positionHex }`)
 
     // Hashing the indexed key to produce the intermediate key
     const intermediateKeySponge = new JsSHA('SHAKE256', 'TEXT')
@@ -270,16 +276,18 @@ export default class Wallet {
    * Initializes the ML-KEM key pair
    */
   initializeMLKEM () {
-    // Generate a 64-byte (512-bit) seed from the Knish.IO private key
-    const seedHex = generateSecret(this.key, 64)
+    // Generate a 64-byte (512-bit) seed from the Knish.IO private key  
+    // Use deterministic approach: generateSecret(key, 128) → 128 hex chars = 64 bytes
+    const seedHex = generateSecret(this.key, 128)  // 128 hex chars = 64 bytes
 
-    // Convert the hex string to a Uint8Array
+    // Convert the hex string to a Uint8Array  
     const seed = new Uint8Array(64)
     for (let i = 0; i < 64; i++) {
       seed[i] = parseInt(seedHex.substr(i * 2, 2), 16)
     }
 
     const { publicKey, secretKey } = MlKEM768.keygen(seed)
+
     this.pubkey = this.serializeKey(publicKey)
     this.privkey = secretKey // Note: We're keeping privkey as UInt8Array for security
   }
@@ -401,10 +409,48 @@ export default class Wallet {
   async decryptMessage (encryptedData) {
     const { cipherText, encryptedMessage } = encryptedData
 
-    const sharedSecret = MlKEM768.decapsulate(this.deserializeKey(cipherText), this.privkey)
-    const decryptedUint8 = await this.decryptWithSharedSecret(this.deserializeKey(encryptedMessage), sharedSecret)
+    let sharedSecret
+    try {
+      sharedSecret = MlKEM768.decapsulate(this.deserializeKey(cipherText), this.privkey)
+    } catch (e) {
+      console.error('Wallet::decryptMessage() - Decapsulation failed', e)
+      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      return null
+    }
 
-    const decryptedString = new TextDecoder().decode(decryptedUint8)
+    let deserializedEncryptedMessage
+    try {
+      deserializedEncryptedMessage = this.deserializeKey(encryptedMessage)
+    } catch (e) {
+      console.warn('Wallet::decryptMessage() - Deserialization failed', e)
+      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
+      return null
+    }
+
+    let decryptedUint8
+    try {
+      decryptedUint8 = await this.decryptWithSharedSecret(deserializedEncryptedMessage, sharedSecret)
+    } catch (e) {
+      console.warn('Wallet::decryptMessage() - Decryption failed', e)
+      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
+      console.info('Wallet::decryptMessage() - deserialized encrypted message', deserializedEncryptedMessage)
+      return null
+    }
+
+    let decryptedString
+    try {
+      decryptedString = new TextDecoder().decode(decryptedUint8)
+    } catch (e) {
+      console.warn('Wallet::decryptMessage() - Decoding failed', e)
+      console.info('Wallet::decryptMessage() - my public key', this.pubkey)
+      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
+      console.info('Wallet::decryptMessage() - deserialized encrypted message', deserializedEncryptedMessage)
+      console.info('Wallet::decryptMessage() - decrypted Uint8Array', decryptedUint8)
+      return null
+    }
+
     return JSON.parse(decryptedString)
   }
 

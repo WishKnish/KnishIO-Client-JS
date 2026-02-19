@@ -1,4 +1,4 @@
-import BaseException from '../../../exception/BaseException'
+import BaseException from '../../../exception/BaseException.js'
 
 export default class RuleArgumentException extends BaseException {
   /**

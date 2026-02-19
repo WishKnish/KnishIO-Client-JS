@@ -46,11 +46,15 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
 
-import Atom from './Atom'
-import Molecule from './Molecule'
-import Wallet from './Wallet'
-import Meta from './Meta'
-import KnishIOClient from './KnishIOClient'
+import Atom from './Atom.js'
+import Molecule from './Molecule.js'
+import Wallet from './Wallet.js'
+import Meta from './Meta.js'
+import KnishIOClient from './KnishIOClient.js'
+import MutationPeering from './mutation/MutationPeering.js'
+import MutationAppendRequest from './mutation/MutationAppendRequest.js'
+import ResponsePeering from './response/ResponsePeering.js'
+import ResponseAppendRequest from './response/ResponseAppendRequest.js'
 import {
   base64ToHex,
   bufferToHexString,
@@ -60,11 +64,12 @@ import {
   hexToBase64,
   isHex,
   randomString
-} from './libraries/strings'
+} from './libraries/strings.js'
 import {
   generateBundleHash,
-  generateSecret
-} from './libraries/crypto'
+  generateSecret,
+  shake256
+} from './libraries/crypto.js'
 
 export {
   Atom,
@@ -72,6 +77,14 @@ export {
   Wallet,
   Meta,
   KnishIOClient,
+
+  // mutations
+  MutationPeering,
+  MutationAppendRequest,
+
+  // responses
+  ResponsePeering,
+  ResponseAppendRequest,
 
   // strings
   chunkSubstr,
@@ -85,5 +98,6 @@ export {
 
   // crypto
   generateSecret,
-  generateBundleHash
+  generateBundleHash,
+  shake256
 }

@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import MutationProposeMolecule from './MutationProposeMolecule'
-import ResponseCreateIdentifier from '../response/ResponseCreateIdentifier'
+import MutationProposeMolecule from './MutationProposeMolecule.js'
+import ResponseCreateIdentifier from '../response/ResponseCreateIdentifier.js'
 
 /**
  * Query for creating a new Identifier

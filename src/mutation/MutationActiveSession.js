@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Mutation from '../mutation/Mutation'
-import ResponseActiveSession from '../response/ResponseActiveSession'
+import Mutation from '../mutation/Mutation.js'
+import ResponseActiveSession from '../response/ResponseActiveSession.js'
 import { gql } from '@urql/core'
 
 /**

@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query'
-import ResponseQueryUserActivity from '../response/ResponseQueryUserActivity'
+import Query from './Query.js'
+import ResponseQueryUserActivity from '../response/ResponseQueryUserActivity.js'
 import { gql } from '@urql/core'
 
 /**

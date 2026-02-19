@@ -46,10 +46,10 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import Callback from './Callback'
-import Condition from './Condition'
-import RuleArgumentException from './exception/RuleArgumentException'
-import MetaMissingException from '../../exception/MetaMissingException'
+import Callback from './Callback.js'
+import Condition from './Condition.js'
+import RuleArgumentException from './exception/RuleArgumentException.js'
+import MetaMissingException from '../../exception/MetaMissingException.js'
 
 export default class Rule {
   /**

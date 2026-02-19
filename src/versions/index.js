@@ -1,4 +1,4 @@
-import Version4 from './Version4'
+import Version4 from './Version4.js'
 
 export default {
   4: Version4

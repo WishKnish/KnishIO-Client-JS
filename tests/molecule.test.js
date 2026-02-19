@@ -71,19 +71,19 @@ describe('Molecule', () => {
       token: 'TEST'
     })
 
-    // Forcing a fake balance
-    sourceWallet.balance = '100'
     molecule.initValue({
       recipientWallet,
       amount: '100'
     })
 
+    // Whitepaper: first V atom debits full source balance, not just amount
     expect(molecule.atoms).toHaveLength(3)
     expect(molecule.atoms[0].isotope).toBe('V')
-    expect(molecule.atoms[0].value).toBe('-100')
+    expect(molecule.atoms[0].value).toBe('-1000')
     expect(molecule.atoms[1].isotope).toBe('V')
     expect(molecule.atoms[1].value).toBe('100')
     expect(molecule.atoms[2].isotope).toBe('V')
+    expect(molecule.atoms[2].value).toBe('900')
   })
 
   test('signs molecule correctly', () => {
@@ -137,12 +137,28 @@ describe('Molecule', () => {
       metaId: '123'
     })
 
-    expect(molecule.atoms).toHaveLength(3)
+    // Without policy, initMeta creates M + I atoms (no R atom)
+    expect(molecule.atoms).toHaveLength(2)
     expect(molecule.atoms[0].isotope).toBe('M')
     expect(molecule.atoms[0].metaType).toBe('test')
     expect(molecule.atoms[0].metaId).toBe('123')
-    expect(molecule.atoms[1].isotope).toBe('R')
-    expect(molecule.atoms[2].isotope).toBe('I')
+
+    // I-isotope atom carries ContinuID chain metadata
+    const iAtom = molecule.atoms[1]
+    expect(iAtom.isotope).toBe('I')
+    expect(iAtom.metaType).toBe('walletBundle')
+
+    // previousPosition from sourceWallet
+    const prevPos = iAtom.meta.find(m => m.key === 'previousPosition')
+    expect(prevPos).toBeDefined()
+    expect(prevPos.value).toBe(sourceWallet.position)
+
+    // pubkey and characters from remainder wallet
+    const pubkey = iAtom.meta.find(m => m.key === 'pubkey')
+    expect(pubkey).toBeDefined()
+    const characters = iAtom.meta.find(m => m.key === 'characters')
+    expect(characters).toBeDefined()
+    expect(characters.value).toBe('BASE64')
   })
 
   test('initializes token creation correctly', () => {
@@ -169,6 +185,12 @@ describe('Molecule', () => {
     expect(molecule.atoms[0].token).toBe('USER')
     expect(molecule.atoms[0].metaType).toBe('token')
     expect(molecule.atoms[0].metaId).toBe('TEST')
-    expect(molecule.atoms[1].isotope).toBe('I')
+
+    // I-isotope atom carries ContinuID chain metadata
+    const iAtom = molecule.atoms[1]
+    expect(iAtom.isotope).toBe('I')
+    const prevPos = iAtom.meta.find(m => m.key === 'previousPosition')
+    expect(prevPos).toBeDefined()
+    expect(prevPos.value).toBe(sourceWallet.position)
   })
 })

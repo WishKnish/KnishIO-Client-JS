@@ -1,6 +1,7 @@
 {
   "name": "@wishknish/knishio-client-js",
-  "version": "0.6.1",
+  "version": "0.7.4",
+  "type": "module",
   "productName": "Knish.IO Javascript SDK Client",
   "description": "JavaScript implementation of the Knish.IO SDK to consume Knish.IO GraphQL APIs.",
   "license": "GPL-3.0-or-later",
@@ -16,56 +17,70 @@
       "role": "developer"
     },
     {
-      "name": "Vladimir Makarov",
-      "email": "vladimir@wishknish.com",
-      "homepage": "https://wishknish.com",
-      "role": "developer"
-    },
-    {
       "name": "Yuri Kizilov",
       "email": "yuriy@wishknish.com",
       "homepage": "https://wishknish.com",
       "role": "developer"
     }
   ],
-  "main": "dist/client.iife.js",
-  "module": "dist/client.es.js",
-  "commonjs": "dist/client.cjs.js",
+  "main": "dist/client.cjs.js",
+  "module": "dist/client.es.mjs",
+  "browser": "dist/client.iife.js",
+  "exports": {
+    ".": {
+      "browser": "./dist/client.iife.js",
+      "import": "./dist/client.es.mjs",
+      "require": "./dist/client.cjs.js"
+    },
+    "./src": "./src/index.js",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
   "keywords": [
     "wishknish",
     "knishio",
     "blockchain",
     "dag",
     "client",
-    "graphql"
+    "graphql",
+    "xmss",
+    "post-quantum",
+    "quantum-safe",
+    "sdk",
+    "javascript",
+    "ml-kem768",
+    "cryptography",
+    "crystals-kyber",
+    "fips-202",
+    "fips-203"
   ],
   "dependencies": {
-    "@noble/post-quantum": "^0.4.0",
+    "@noble/post-quantum": "^0.5.4",
     "@thumbmarkjs/thumbmarkjs": "^0.19.1",
-    "@urql/core": "^5.1.0",
-    "graphql": "^16.10.0",
-    "graphql-ws": "^5.16.2",
+    "@urql/core": "^5.2.0",
+    "graphql": "^16.12.0",
+    "graphql-ws": "^6.0.7",
     "isomorphic-fetch": "^3.0.0",
     "jssha": "^3.3.1",
-    "wonka": "^6.3.4"
+    "wonka": "^6.3.5"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^25.0.8",
-    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@rollup/plugin-babel": "^6.1.0",
+    "@rollup/plugin-commonjs": "^28.0.9",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "buffer": "^6.0.3",
     "esbuild-jest": "^0.5.0",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.6.0",
-    "eslint-plugin-vue": "^9.32.0",
-    "esmock": "^2.7.0",
+    "eslint-plugin-vue": "^9.33.0",
+    "esmock": "^2.7.3",
     "jest": "^29.7.0",
-    "rollup": "^4.34.6",
-    "vite": "^5.4.14",
-    "vite-plugin-node-polyfills": "^0.23.0"
+    "rollup": "^4.57.1",
+    "vite": "^6.4.1"
   },
   "browserslist": [
     "> 1%",
@@ -76,9 +91,14 @@
     "build": "vite build --config build/vite.config.mjs",
     "lint": "eslint --ext .js src",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "selftest": "npm run build && node tests/scripts/self-test.js",
+    "integration-test": "npm run build && node tests/scripts/integration-test.js",
+    "prepublishOnly": "npm run build"
   },
   "files": [
-    "/src"
-  ]
+    "/src",
+    "/dist"
+  ],
+  "packageManager": "yarn@4.9.2"
 }

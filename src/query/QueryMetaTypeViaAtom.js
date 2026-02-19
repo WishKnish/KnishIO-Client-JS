@@ -45,8 +45,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from './Query'
-import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom'
+import Query from './Query.js'
+import ResponseMetaTypeViaAtom from '../response/ResponseMetaTypeViaAtom.js'
 import { gql } from '@urql/core'
 
 export default class QueryMetaTypeViaAtom extends Query {
@@ -57,11 +57,12 @@ export default class QueryMetaTypeViaAtom extends Query {
   constructor (graphQLClient, knishIOClient) {
     super(graphQLClient, knishIOClient)
 
-    this.$__query = gql`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!] ) {
+    this.$__query = gql`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
       MetaTypeViaAtom(
         metaTypes: $metaTypes
         metaIds: $metaIds
         atomValues: $atomValues
+        cellSlugs: $cellSlugs
         filter: $filter,
         latest: $latest,
         queryArgs: $queryArgs
@@ -106,6 +107,7 @@ export default class QueryMetaTypeViaAtom extends Query {
    * @param {array|null} filter
    * @param {object|null} queryArgs
    * @param {string|null} countBy
+   * @param {string|null} cellSlug
    * @return {{}}
    */
   static createVariables ({
@@ -119,7 +121,8 @@ export default class QueryMetaTypeViaAtom extends Query {
     latest = null,
     filter = null,
     queryArgs = null,
-    countBy = null
+    countBy = null,
+    cellSlug = null
   }) {
     const variables = {}
 
@@ -141,6 +144,10 @@ export default class QueryMetaTypeViaAtom extends Query {
 
     if (metaId) {
       variables.metaIds = typeof metaId === 'string' ? [metaId] : metaId
+    }
+
+    if (cellSlug) {
+      variables.cellSlugs = typeof cellSlug === 'string' ? [cellSlug] : cellSlug
     }
 
     if (countBy) {

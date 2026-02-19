@@ -57,14 +57,20 @@ export default class Meta {
    * @return {array}
    */
   static normalizeMeta (meta) {
-    const target = []
+    // Ensuring that only object-based meta gets normalized
+    if (Array.isArray(meta)) {
+      return meta.map(entry => ({
+        key: entry.key,
+        value: entry.value == null ? null : String(entry.value)
+      }))
+    }
 
+    // Converting object-based meta into array-based notation
+    const target = []
     for (const property in meta) {
-      if (Object.prototype.hasOwnProperty.call(meta, property) && meta[property] !== null) {
-        target.push({
-          key: property,
-          value: (meta[property]).toString()
-        })
+      if (Object.prototype.hasOwnProperty.call(meta, property)) {
+        const raw = meta[property]
+        target.push({ key: property, value: raw == null ? null : String(raw) })
       }
     }
 

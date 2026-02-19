@@ -45,32 +45,32 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
-import AtomIndexException from './../exception/AtomIndexException'
-import AtomsMissingException from './../exception/AtomsMissingException'
-import MolecularHashMismatchException from './../exception/MolecularHashMismatchException'
-import MolecularHashMissingException from './../exception/MolecularHashMissingException'
-import PolicyInvalidException from './../exception/PolicyInvalidException'
-import SignatureMalformedException from './../exception/SignatureMalformedException'
-import SignatureMismatchException from './../exception/SignatureMismatchException'
-import TransferBalanceException from './../exception/TransferBalanceException'
-import TransferMalformedException from './../exception/TransferMalformedException'
-import TransferMismatchedException from './../exception/TransferMismatchedException'
-import TransferRemainderException from './../exception/TransferRemainderException'
-import TransferToSelfException from './../exception/TransferToSelfException'
-import TransferUnbalancedException from './../exception/TransferUnbalancedException'
-import MetaMissingException from './../exception/MetaMissingException'
-import WrongTokenTypeException from './../exception/WrongTokenTypeException'
-import BatchIdException from './../exception/BatchIdException'
-import Atom from './../Atom'
-import Meta from './../Meta'
-import Wallet from './../Wallet'
-import Rule from '../instance/Rules/Rule'
+import AtomIndexException from './../exception/AtomIndexException.js'
+import AtomsMissingException from './../exception/AtomsMissingException.js'
+import MolecularHashMismatchException from './../exception/MolecularHashMismatchException.js'
+import MolecularHashMissingException from './../exception/MolecularHashMissingException.js'
+import PolicyInvalidException from './../exception/PolicyInvalidException.js'
+import SignatureMalformedException from './../exception/SignatureMalformedException.js'
+import SignatureMismatchException from './../exception/SignatureMismatchException.js'
+import TransferBalanceException from './../exception/TransferBalanceException.js'
+import TransferMalformedException from './../exception/TransferMalformedException.js'
+import TransferMismatchedException from './../exception/TransferMismatchedException.js'
+import TransferRemainderException from './../exception/TransferRemainderException.js'
+import TransferToSelfException from './../exception/TransferToSelfException.js'
+import TransferUnbalancedException from './../exception/TransferUnbalancedException.js'
+import MetaMissingException from './../exception/MetaMissingException.js'
+import WrongTokenTypeException from './../exception/WrongTokenTypeException.js'
+import BatchIdException from './../exception/BatchIdException.js'
+import Atom from './../Atom.js'
+import Meta from './../Meta.js'
+import Wallet from './../Wallet.js'
+import Rule from '../instance/Rules/Rule.js'
 import {
   base64ToHex,
   chunkSubstr
-} from './strings'
+} from './strings.js'
 import JsSHA from 'jssha'
-import Dot from './../libraries/Dot'
+import Dot from './../libraries/Dot.js'
 
 /**
  *
@@ -117,6 +117,8 @@ export default class CheckMolecule {
       this.isotopeU() &&
       this.isotopeI() &&
       this.isotopeR() &&
+      this.isotopeP() &&
+      this.isotopeA() &&
       this.isotopeV(senderWallet)
   }
 
@@ -333,6 +335,56 @@ export default class CheckMolecule {
   }
 
   /**
+   * Validates P-isotope (Peering) atoms
+   *
+   * @returns {boolean}
+   */
+  isotopeP () {
+    for (const atom of this.molecule.getIsotopes('P')) {
+      if (atom.token !== 'USER') {
+        throw new WrongTokenTypeException(`Check::isotopeP() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!`)
+      }
+
+      const metas = atom.aggregatedMeta()
+
+      if (!Object.prototype.hasOwnProperty.call(metas, 'peerHost') || !metas.peerHost) {
+        throw new MetaMissingException('Check::isotopeP() - Required meta field "peerHost" is missing!')
+      }
+    }
+
+    return true
+  }
+
+  /**
+   * Validates A-isotope (Append Request) atoms
+   *
+   * @returns {boolean}
+   */
+  isotopeA () {
+    for (const atom of this.molecule.getIsotopes('A')) {
+      if (atom.token !== 'USER') {
+        throw new WrongTokenTypeException(`Check::isotopeA() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!`)
+      }
+
+      if (!atom.metaType) {
+        throw new MetaMissingException('Check::isotopeA() - Required field "metaType" is missing!')
+      }
+
+      if (!atom.metaId) {
+        throw new MetaMissingException('Check::isotopeA() - Required field "metaId" is missing!')
+      }
+
+      const metas = atom.aggregatedMeta()
+
+      if (!Object.prototype.hasOwnProperty.call(metas, 'action') || !metas.action) {
+        throw new MetaMissingException('Check::isotopeA() - Required meta field "action" is missing!')
+      }
+    }
+
+    return true
+  }
+
+  /**
    *
    * @param senderWallet
    * @returns {boolean}
@@ -402,8 +454,8 @@ export default class CheckMolecule {
       }
     }
 
-    // Does the total sum of all atoms equal the remainder atom's value? (all other atoms must add up to zero)
-    if (sum !== value) {
+    // All atoms must sum to zero for a balanced transaction
+    if (sum !== 0) {
       throw new TransferUnbalancedException()
     }
 

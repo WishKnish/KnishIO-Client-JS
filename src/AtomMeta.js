@@ -46,7 +46,8 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import PolicyMeta from './PolicyMeta'
+import PolicyMeta from './PolicyMeta.js'
+import Meta from './Meta.js'
 
 const USE_META_CONTEXT = false
 const DEFAULT_META_CONTEXT = 'https://www.schema.org'
@@ -57,19 +58,19 @@ const DEFAULT_META_CONTEXT = 'https://www.schema.org'
 export default class AtomMeta {
   /**
    *
-   * @param meta
+   * @param {object|array} meta
    */
-  constructor (meta = {}) {
-    this.meta = meta
+  constructor (meta = []) {
+    this.meta = Meta.normalizeMeta(meta)
   }
 
   /**
    *
-   * @param meta
+   * @param {object|array} meta
    * @returns {AtomMeta}
    */
   merge (meta) {
-    this.meta = Object.assign(this.meta, meta)
+    this.meta = Array.from(new Set([...this.meta, ...Meta.normalizeMeta(meta)]))
     return this
   }
 
@@ -93,10 +94,7 @@ export default class AtomMeta {
    * @returns {AtomMeta}
    */
   setAtomWallet (wallet) {
-    const walletMeta = {
-      pubkey: wallet.pubkey,
-      characters: wallet.characters
-    }
+    const walletMeta = {}
 
     // Add token units meta key
     if (wallet.tokenUnits && wallet.tokenUnits.length) {
@@ -107,8 +105,10 @@ export default class AtomMeta {
       walletMeta.tradeRates = JSON.stringify(wallet.tradeRates)
     }
 
-    // Merge all wallet's metas
-    this.merge(walletMeta)
+    // Merge all wallet's metas (if any)
+    if (Object.keys(walletMeta).length > 0) {
+      this.merge(walletMeta)
+    }
     return this
   }
 
@@ -180,7 +180,7 @@ export default class AtomMeta {
 
   /**
    *
-   * @returns {*}
+   * @returns {array}
    */
   get () {
     return this.meta

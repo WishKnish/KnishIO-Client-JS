@@ -2,6 +2,7 @@ import {
   describe,
   test,
   expect,
+  beforeAll,
   beforeEach,
   jest
 } from '@jest/globals'
@@ -18,15 +19,18 @@ import MutationCreateWallet from '../src/mutation/MutationCreateWallet'
 import MutationClaimShadowWallet from '../src/mutation/MutationClaimShadowWallet'
 import QueryAtom from '../src/query/QueryAtom'
 
-describe('KnishIOClient', () => {
-  const testUri = 'https://eteplitsky.testnet.knish.io:443/graphql'
-  const testCell = 'TESTCELL'
-  const testSecret = generateSecret()
-  let knishIOClientInstance = new KnishIOClient({
-    uri: testUri,
-    cellSlug: testCell,
-    logging: false
-  })
+const testUri = process.env.KNISHIO_TEST_URI || 'https://eteplitsky.testnet.knish.io:443/graphql'
+const testCell = 'TESTCELL'
+const unitSecret = generateSecret()
+const integrationSecret = generateSecret()
+
+// Integration tests require a running Knish.IO server.
+// Set KNISHIO_TEST_URI env var to enable them.
+const runIntegration = !!process.env.KNISHIO_TEST_URI
+const describeIntegration = runIntegration ? describe : describe.skip
+
+describe('KnishIOClient - Unit', () => {
+  let knishIOClientInstance
 
   beforeEach(() => {
     knishIOClientInstance = new KnishIOClient({
@@ -34,27 +38,87 @@ describe('KnishIOClient', () => {
       cellSlug: testCell,
       logging: false
     })
-    knishIOClientInstance.setSecret(testSecret)
+    knishIOClientInstance.setSecret(unitSecret)
   })
 
   test('initializes client correctly', () => {
     expect(knishIOClientInstance.getUri()).toBe(testUri)
     expect(knishIOClientInstance.getCellSlug()).toBe(testCell)
-    expect(knishIOClientInstance.getSecret()).toBe(testSecret)
+    expect(knishIOClientInstance.getSecret()).toBe(unitSecret)
+  })
+
+  test('handles encryption toggle correctly', () => {
+    expect(knishIOClientInstance.switchEncryption(true)).toBe(true)
+    expect(knishIOClientInstance.switchEncryption(true)).toBe(false) // No change, already true
+    expect(knishIOClientInstance.switchEncryption(false)).toBe(true)
+    expect(knishIOClientInstance.switchEncryption(false)).toBe(false) // No change, already false
+  })
+
+  test('creates query correctly', () => {
+    const query = knishIOClientInstance.createQuery(QueryAtom)
+    expect(query).toBeInstanceOf(QueryAtom)
+
+    const variables = QueryAtom.createVariables({
+      metaTypes: ['foo', 'bar']
+    })
+    expect(variables).toBeInstanceOf(Object)
+
+    const queryObj = query.createQuery({ variables })
+    expect(queryObj).toBeInstanceOf(Object)
+    expect(queryObj.variables).toBe(variables)
+  })
+
+  test('handles auth token correctly', () => {
+    const mockAuthToken = {
+      getToken: jest.fn().mockReturnValue('testToken'),
+      getAuthData: jest.fn().mockReturnValue({
+        token: 'testToken',
+        pubkey: 'testPubkey'
+      })
+    }
+    knishIOClientInstance.setAuthToken(mockAuthToken)
+    expect(knishIOClientInstance.getAuthToken()).toBe(mockAuthToken)
+  })
+})
+
+describeIntegration('KnishIOClient - Integration (requires server)', () => {
+  let knishIOClientInstance
+
+  beforeAll(async () => {
+    knishIOClientInstance = new KnishIOClient({
+      uri: testUri,
+      cellSlug: testCell,
+      logging: false
+    })
+    knishIOClientInstance.setSecret(integrationSecret)
+    // Pre-authenticate so wallet bundle is created once
+    await knishIOClientInstance.requestAuthToken({
+      secret: integrationSecret
+    })
+    // Prevent re-authentication attempts during test suite.
+    // PHP server does plain INSERT for wallet bundles (not UPSERT),
+    // so a second requestAuthToken with the same secret causes a
+    // duplicate key error. Setting a far-future expiration ensures
+    // executeQuery() never triggers re-auth.
+    const authToken = knishIOClientInstance.getAuthToken()
+    if (authToken) {
+      authToken.$__expiresAt = Math.floor(Date.now() / 1000) + 86400
+    }
   })
 
   test('creates molecule correctly', async () => {
     const molecule = await knishIOClientInstance.createMolecule({})
     expect(molecule).toBeInstanceOf(Molecule)
-    expect(molecule.secret).toBe(testSecret)
+    expect(molecule.secret).toBe(integrationSecret)
     expect(molecule.cellSlug).toBe(testCell)
   })
 
   test('creates wallet correctly', async () => {
-    const wallet = await knishIOClientInstance.getSourceWallet()
-    expect(wallet).toBeInstanceOf(Wallet)
-    expect(wallet.token).toBe('USER')
-    expect(wallet.bundle).toBeTruthy()
+    // Use createMolecule to get the source wallet (avoids duplicate auth)
+    const molecule = await knishIOClientInstance.createMolecule({})
+    expect(molecule.sourceWallet).toBeInstanceOf(Wallet)
+    expect(molecule.sourceWallet.token).toBe('USER')
+    expect(molecule.sourceWallet.bundle).toBeTruthy()
   })
 
   test('ensures insufficient balance is triggered', async () => {
@@ -110,7 +174,7 @@ describe('KnishIOClient', () => {
     })
 
     const recipientWallet = new Wallet({
-      secret: testSecret,
+      secret: integrationSecret,
       token: 'NEWTOKEN',
       position: '1234567890abcdef',
       characters: 'BASE64'
@@ -133,7 +197,12 @@ describe('KnishIOClient', () => {
     expect(molecule.atoms[0].token).toBe('USER')
     expect(molecule.atoms[0].metaType).toBe('token')
     expect(molecule.atoms[0].metaId).toBe('NEWTOKEN')
-    expect(molecule.atoms[1].isotope).toBe('I')
+
+    // I-isotope atom carries ContinuID chain metadata
+    const iAtom = molecule.atoms[1]
+    expect(iAtom.isotope).toBe('I')
+    expect(iAtom.meta.find(m => m.key === 'characters')).toBeDefined()
+    expect(iAtom.meta.find(m => m.key === 'pubkey')).toBeDefined()
   })
 
   test('prepares meta creation correctly', async () => {
@@ -150,13 +219,17 @@ describe('KnishIOClient', () => {
       }
     })
 
+    // Without policy, initMeta creates M + I atoms (no R atom)
     const molecule = mutation.molecule()
-    expect(molecule.atoms).toHaveLength(3)
+    expect(molecule.atoms).toHaveLength(2)
     expect(molecule.atoms[0].isotope).toBe('M')
     expect(molecule.atoms[0].metaType).toBe('TestMeta')
     expect(molecule.atoms[0].metaId).toBe('test123')
-    expect(molecule.atoms[1].isotope).toBe('R')
-    expect(molecule.atoms[2].isotope).toBe('I')
+
+    // I-isotope atom carries ContinuID chain metadata
+    const iAtom = molecule.atoms[1]
+    expect(iAtom.isotope).toBe('I')
+    expect(iAtom.meta.find(m => m.key === 'characters')).toBeDefined()
   })
 
   test('prepares wallet creation correctly', async () => {
@@ -165,7 +238,7 @@ describe('KnishIOClient', () => {
     })
 
     const wallet = new Wallet({
-      secret: testSecret,
+      secret: integrationSecret,
       token: 'NEWTOKEN'
     })
 
@@ -200,43 +273,10 @@ describe('KnishIOClient', () => {
     expect(molecule.atoms[1].isotope).toBe('I')
   })
 
-  test('handles encryption toggle correctly', () => {
-    expect(knishIOClientInstance.switchEncryption(true)).toBe(true)
-    expect(knishIOClientInstance.switchEncryption(true)).toBe(false) // No change, already true
-    expect(knishIOClientInstance.switchEncryption(false)).toBe(true)
-    expect(knishIOClientInstance.switchEncryption(false)).toBe(false) // No change, already false
-  })
-
-  test('creates query correctly', () => {
-    const query = knishIOClientInstance.createQuery(QueryAtom)
-    expect(query).toBeInstanceOf(QueryAtom)
-
-    const variables = QueryAtom.createVariables({
-      metaTypes: ['foo', 'bar']
-    })
-    expect(variables).toBeInstanceOf(Object)
-
-    const queryObj = query.createQuery({ variables })
-    expect(queryObj).toBeInstanceOf(Object)
-    expect(queryObj.variables).toBe(variables)
-  })
-
   test('creates molecule mutation correctly', async () => {
     const mutation = await knishIOClientInstance.createMoleculeMutation({
       mutationClass: MutationCreateMeta
     })
     expect(mutation.molecule()).toBeInstanceOf(Molecule)
-  })
-
-  test('handles auth token correctly', () => {
-    const mockAuthToken = {
-      getToken: jest.fn().mockReturnValue('testToken'),
-      getAuthData: jest.fn().mockReturnValue({
-        token: 'testToken',
-        pubkey: 'testPubkey'
-      })
-    }
-    knishIOClientInstance.setAuthToken(mockAuthToken)
-    expect(knishIOClientInstance.getAuthToken()).toBe(mockAuthToken)
   })
 })

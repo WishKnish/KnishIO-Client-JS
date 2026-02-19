@@ -45,10 +45,10 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
-import Query from '../query/Query'
-import Response from './Response'
-import Wallet from '../Wallet'
-import TokenUnit from '../TokenUnit'
+import Query from '../query/Query.js'
+import Response from './Response.js'
+import Wallet from '../Wallet.js'
+import TokenUnit from '../TokenUnit.js'
 
 /**
  * Response for Wallet List query
