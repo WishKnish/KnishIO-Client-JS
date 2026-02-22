@@ -53,8 +53,10 @@ import Meta from './Meta.js'
 import KnishIOClient from './KnishIOClient.js'
 import MutationPeering from './mutation/MutationPeering.js'
 import MutationAppendRequest from './mutation/MutationAppendRequest.js'
+import QueryMetaTypeViaMolecule from './query/QueryMetaTypeViaMolecule.js'
 import ResponsePeering from './response/ResponsePeering.js'
 import ResponseAppendRequest from './response/ResponseAppendRequest.js'
+import ResponseMetaTypeViaMolecule from './response/ResponseMetaTypeViaMolecule.js'
 import {
   base64ToHex,
   bufferToHexString,
@@ -78,6 +80,9 @@ export {
   Meta,
   KnishIOClient,
 
+  // queries
+  QueryMetaTypeViaMolecule,
+
   // mutations
   MutationPeering,
   MutationAppendRequest,
@@ -85,6 +90,7 @@ export {
   // responses
   ResponsePeering,
   ResponseAppendRequest,
+  ResponseMetaTypeViaMolecule,
 
   // strings
   chunkSubstr,

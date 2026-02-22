@@ -87,7 +87,7 @@ export default class Wallet {
     characters = null
   }) {
     this.token = token
-    this.balance = 0
+    this.balance = '0'
     this.molecules = {}
 
     // Empty values
@@ -208,6 +208,13 @@ export default class Wallet {
     token,
     position
   }) {
+    if (!secret) {
+      throw new WalletCredentialException('Wallet::generateKey() - Secret is required!')
+    }
+    if (!position) {
+      throw new WalletCredentialException('Wallet::generateKey() - Position is required!')
+    }
+
     // Normalize non-hex secret via SHAKE256 (matching Rust/Kotlin behavior)
     const secretHex = isHex(secret) ? secret : shake256(secret, 1024)
     // Normalize non-hex position via SHAKE256
@@ -299,6 +306,46 @@ export default class Wallet {
   deserializeKey (serializedKey) {
     const binaryString = atob(serializedKey)
     return new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i))
+  }
+
+  /**
+   * Returns balance as a Number for arithmetic operations.
+   * WARNING: Precision loss for values > 2^53.
+   *
+   * @return {number}
+   */
+  balanceAsNumber () {
+    return Number(this.balance)
+  }
+
+  /**
+   * Returns balance as a BigInt for precision-safe integer arithmetic.
+   * Truncates any fractional component.
+   *
+   * @return {bigint}
+   */
+  balanceAsBigInt () {
+    const str = String(this.balance)
+    const intPart = str.includes('.') ? str.split('.')[0] : str
+    return BigInt(intPart || '0')
+  }
+
+  /**
+   * Sets balance from a BigInt value
+   *
+   * @param {bigint} value
+   */
+  setBalanceBigInt (value) {
+    this.balance = value.toString()
+  }
+
+  /**
+   * Sets balance from a Number value, storing as String
+   *
+   * @param {number} value
+   */
+  setBalanceNumber (value) {
+    this.balance = String(value)
   }
 
   /**

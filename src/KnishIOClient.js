@@ -54,6 +54,7 @@ import {
 } from './libraries/crypto.js'
 import Molecule from './Molecule.js'
 import Wallet from './Wallet.js'
+import TokenUnit from './TokenUnit.js'
 import AuthToken from './AuthToken.js'
 import QueryContinuId from './query/QueryContinuId.js'
 import QueryWalletBundle from './query/QueryWalletBundle.js'
@@ -93,6 +94,7 @@ import AuthorizationRejectedException from './exception/AuthorizationRejectedExc
 import QueryAtom from './query/QueryAtom.js'
 import QueryPolicy from './query/QueryPolicy.js'
 import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom.js'
+import QueryMetaTypeViaMolecule from './query/QueryMetaTypeViaMolecule.js'
 import MutationCreateRule from './mutation/MutationCreateRule.js'
 import MutationDepositBufferToken from './mutation/MutationDepositBufferToken.js'
 import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken.js'
@@ -777,10 +779,11 @@ export default class KnishIOClient {
    * @param {string|null} count
    * @param {string|null} countBy
    * @param {boolean} throughAtom
+   * @param {boolean} throughMolecule
    * @param {array|null} values
    * @param {array|null} keys
    * @param {array|null} atomValues
-   * @return {Promise<ResponseMetaType>}
+   * @return {Promise<ResponseMetaType|ResponseMetaTypeViaAtom|ResponseMetaTypeViaMolecule>}
    */
   queryMeta ({
     metaType,
@@ -794,6 +797,7 @@ export default class KnishIOClient {
     count = null,
     countBy = null,
     throughAtom = true,
+    throughMolecule = false,
     values = null,
     keys = null,
     atomValues = null
@@ -803,7 +807,26 @@ export default class KnishIOClient {
     let query
     let variables
 
-    if (throughAtom) {
+    if (throughMolecule) {
+      /**
+       * @type {QueryMetaTypeViaMolecule}
+       */
+      query = this.createQuery(QueryMetaTypeViaMolecule)
+      variables = QueryMetaTypeViaMolecule.createVariables({
+        metaType,
+        metaId,
+        key,
+        value,
+        latest,
+        filter,
+        queryArgs,
+        countBy,
+        values,
+        keys,
+        atomValues,
+        cellSlug: this.getCellSlug()
+      })
+    } else if (throughAtom) {
       /**
        * @type {QueryMetaTypeViaAtom}
        */
@@ -842,6 +865,23 @@ export default class KnishIOClient {
     }
 
     return this.executeQuery(query, variables)
+  }
+
+  /**
+   * Queries meta assets and verifies cryptographic integrity of associated molecules.
+   * Returns the same response as queryMeta(), with an additional `integrity` field on the payload
+   * containing verification results for each molecule.
+   *
+   * @param {object} params - Same parameters as queryMeta()
+   * @return {Promise<ResponseMetaType|ResponseMetaTypeViaAtom|ResponseMetaTypeViaMolecule>}
+   */
+  async queryMetaVerified (params) {
+    const response = await this.queryMeta(params)
+    const payload = response.payload()
+    if (payload) {
+      payload.integrity = response.verifyIntegrity()
+    }
+    return response
   }
 
   /**
@@ -2021,6 +2061,11 @@ export default class KnishIOClient {
 
     // Split token units (fused)
     sourceWallet.splitUnits(fusedTokenUnitIds, remainderWallet)
+
+    // Coerce string newTokenUnit to TokenUnit object
+    if (typeof newTokenUnit === 'string') {
+      newTokenUnit = new TokenUnit(newTokenUnit, newTokenUnit, {})
+    }
 
     // Set recipient new fused token unit
     newTokenUnit.metas.fusedTokenUnits = sourceWallet.getTokenUnitsData()
