@@ -96,6 +96,7 @@ export default class Molecule {
     this.bundle = bundle
     this.sourceWallet = sourceWallet
     this.atoms = []
+    this.parentHashes = []
     if (version !== null && Object.prototype.hasOwnProperty.call(versions, version)) {
       this.version = String(version)
     }
@@ -110,6 +111,17 @@ export default class Molecule {
         characters: sourceWallet.characters
       })
     }
+  }
+
+  /**
+   * Sets parent molecular hashes for DAG linkage
+   *
+   * @param {string[]} hashes - Array of parent molecular hash strings
+   * @return {Molecule} this instance for chaining
+   */
+  withParentHashes (hashes) {
+    this.parentHashes = Array.isArray(hashes) ? [...hashes] : []
+    return this
   }
 
   /**
@@ -327,20 +339,21 @@ export default class Molecule {
       })
     }
 
-    // Build ContinuID chain metadata (matches Rust SDK GAP-07-002)
+    // ContinuID metadata for chain integrity validation (matching Rust SDK GAP-07-002).
+    // These are atom meta fields (not core fields), so they don't affect molecular hash.
     const continuIdMeta = {}
 
-    // previousPosition: source wallet position being consumed
+    // previousPosition: the source wallet's position being consumed
     if (this.sourceWallet && this.sourceWallet.position) {
       continuIdMeta.previousPosition = this.sourceWallet.position
     }
 
-    // pubkey: remainder wallet's public key for chain verification
+    // pubkey: ML-KEM public key for encrypted communication
     if (this.remainderWallet.pubkey) {
       continuIdMeta.pubkey = this.remainderWallet.pubkey
     }
 
-    // characters: encoding format
+    // characters: encoding format for the wallet
     if (this.remainderWallet.characters) {
       continuIdMeta.characters = this.remainderWallet.characters
     }
@@ -493,28 +506,28 @@ export default class Molecule {
       for (const unit of units) {
         this.remainderWallet.tokenUnits.push(unit)
       }
-      this.remainderWallet.balance = this.remainderWallet.tokenUnits.length
+      this.remainderWallet.balance = String(this.remainderWallet.tokenUnits.length)
 
       // Override first atom's token units to replenish values
       this.sourceWallet.tokenUnits = units
-      this.sourceWallet.balance = this.sourceWallet.tokenUnits.length
+      this.sourceWallet.balance = String(this.sourceWallet.tokenUnits.length)
     } else {
       // Update wallet's balances
-      this.remainderWallet.balance = this.sourceWallet.balance + amount
-      this.sourceWallet.balance = amount
+      this.remainderWallet.balance = String(Number(this.sourceWallet.balance) + amount)
+      this.sourceWallet.balance = String(amount)
     }
 
     // Initializing a new Atom to remove tokens from source
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: this.sourceWallet.balance
+      value: Number(this.sourceWallet.balance)
     }))
 
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
-      value: this.remainderWallet.balance,
+      value: Number(this.remainderWallet.balance),
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
     }))
@@ -559,6 +572,60 @@ export default class Molecule {
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
+    }))
+
+    return this
+  }
+
+  /**
+   * Creates a stackable V-isotope transfer with 3 atoms:
+   * source debit, recipient credit, remainder.
+   * Propagates batchId from source wallet.
+   *
+   * @param {Wallet} recipientWallet - wallet receiving the tokens
+   * @param {number} amount - amount to transfer
+   * @return {Molecule}
+   */
+  addStackableTransfer ({
+    recipientWallet,
+    amount
+  }) {
+    if (amount <= 0) {
+      throw new NegativeAmountException('Molecule::addStackableTransfer() - Amount must be positive!')
+    }
+
+    if (this.sourceWallet.balance - amount < 0) {
+      throw new BalanceInsufficientException()
+    }
+
+    const batchId = this.sourceWallet.batchId || generateBatchId({})
+
+    // Source debit atom
+    this.addAtom(Atom.create({
+      isotope: 'V',
+      wallet: this.sourceWallet,
+      value: -amount,
+      batchId
+    }))
+
+    // Recipient credit atom
+    this.addAtom(Atom.create({
+      isotope: 'V',
+      wallet: recipientWallet,
+      value: amount,
+      metaType: 'walletBundle',
+      metaId: recipientWallet.bundle,
+      batchId: generateBatchId({})
+    }))
+
+    // Remainder atom
+    this.addAtom(Atom.create({
+      isotope: 'V',
+      wallet: this.remainderWallet,
+      value: this.sourceWallet.balance - amount,
+      metaType: 'walletBundle',
+      metaId: this.remainderWallet.bundle,
+      batchId
     }))
 
     return this
@@ -1054,6 +1121,20 @@ export default class Molecule {
   }
 
   /**
+   * Synchronous signing — identical to sign() since all operations are CPU-bound.
+   * Provided for API parity with Rust SDK's sign_sync().
+   *
+   * @param {object} options
+   * @param {string|null} options.bundle
+   * @param {boolean} options.anonymous
+   * @param {boolean} options.compressed
+   * @return {string|null}
+   */
+  signSync (options = {}) {
+    return this.sign(options)
+  }
+
+  /**
    * Returns the base cell slug portion
    *
    * @return {string}
@@ -1096,6 +1177,12 @@ export default class Molecule {
         }))
       };
 
+      // Parent molecular hashes for DAG linkage (only include when non-empty
+      // to maintain backward compatibility with servers that don't support it)
+      if (this.parentHashes && this.parentHashes.length > 0) {
+        serialized.parentHashes = this.parentHashes
+      }
+
       // Extended context for Rust validator and local validation
       if (includeValidationContext) {
         serialized.cellSlugOrigin = this.cellSlugOrigin
@@ -1106,7 +1193,7 @@ export default class Molecule {
             address: this.sourceWallet.address,
             position: this.sourceWallet.position,
             token: this.sourceWallet.token,
-            balance: this.sourceWallet.balance || 0,
+            balance: this.sourceWallet.balance || '0',
             bundle: this.sourceWallet.bundle,
             batchId: this.sourceWallet.batchId || null,
             characters: this.sourceWallet.characters || 'BASE64',
@@ -1122,7 +1209,7 @@ export default class Molecule {
             address: this.remainderWallet.address,
             position: this.remainderWallet.position,
             token: this.remainderWallet.token,
-            balance: this.remainderWallet.balance || 0,
+            balance: this.remainderWallet.balance || '0',
             bundle: this.remainderWallet.bundle,
             batchId: this.remainderWallet.batchId || null,
             characters: this.remainderWallet.characters || 'BASE64',
@@ -1184,6 +1271,7 @@ export default class Molecule {
       molecule.molecularHash = data.molecularHash;
       molecule.createdAt = data.createdAt || String(+new Date());
       molecule.cellSlugOrigin = data.cellSlugOrigin;
+      molecule.parentHashes = Array.isArray(data.parentHashes) ? [...data.parentHashes] : [];
 
       // Reconstruct atoms array with proper Atom instances
       if (Array.isArray(data.atoms)) {
@@ -1210,7 +1298,7 @@ export default class Molecule {
           });
 
           // Set additional properties for validation context
-          molecule.sourceWallet.balance = data.sourceWallet.balance || 0;
+          molecule.sourceWallet.balance = String(data.sourceWallet.balance != null ? data.sourceWallet.balance : 0);
           molecule.sourceWallet.address = data.sourceWallet.address;
           if (data.sourceWallet.pubkey) {
             molecule.sourceWallet.pubkey = data.sourceWallet.pubkey;
@@ -1232,7 +1320,7 @@ export default class Molecule {
           });
 
           // Set additional properties for validation context
-          molecule.remainderWallet.balance = data.remainderWallet.balance || 0;
+          molecule.remainderWallet.balance = String(data.remainderWallet.balance != null ? data.remainderWallet.balance : 0);
           molecule.remainderWallet.address = data.remainderWallet.address;
           if (data.remainderWallet.pubkey) {
             molecule.remainderWallet.pubkey = data.remainderWallet.pubkey;

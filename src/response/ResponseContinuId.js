@@ -91,7 +91,7 @@ export default class ResponseContinuId extends Response {
       wallet.batchId = continuId.batchId
       wallet.characters = continuId.characters
       wallet.pubkey = continuId.pubkey
-      wallet.balance = continuId.amount * 1.0
+      wallet.balance = String(continuId.amount != null ? continuId.amount : 0)
     }
 
     return wallet

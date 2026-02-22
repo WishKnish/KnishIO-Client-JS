@@ -63,6 +63,7 @@ import WrongTokenTypeException from './../exception/WrongTokenTypeException.js'
 import BatchIdException from './../exception/BatchIdException.js'
 import Atom from './../Atom.js'
 import Meta from './../Meta.js'
+import Molecule from './../Molecule.js'
 import Wallet from './../Wallet.js'
 import Rule from '../instance/Rules/Rule.js'
 import {
@@ -119,6 +120,8 @@ export default class CheckMolecule {
       this.isotopeR() &&
       this.isotopeP() &&
       this.isotopeA() &&
+      this.isotopeB() &&
+      this.isotopeF() &&
       this.isotopeV(senderWallet)
   }
 
@@ -385,6 +388,104 @@ export default class CheckMolecule {
   }
 
   /**
+   * Validates B-isotope (Buffer/Exchange) atoms
+   *
+   * @returns {boolean}
+   */
+  isotopeB () {
+    const isotopeB = this.molecule.getIsotopes('B')
+
+    if (isotopeB.length === 0) {
+      return true
+    }
+
+    for (const atom of isotopeB) {
+      // B atoms must reference a wallet bundle
+      if (!atom.metaType || atom.metaType !== 'walletBundle') {
+        throw new MetaMissingException('Check::isotopeB() - B-isotope atoms must have metaType "walletBundle"!')
+      }
+
+      if (!atom.metaId) {
+        throw new MetaMissingException('Check::isotopeB() - B-isotope atoms must have a metaId!')
+      }
+
+      // Value must be parseable as a number
+      const value = Number(atom.value)
+      if (Number.isNaN(value)) {
+        throw new TransferMalformedException('Check::isotopeB() - B-isotope atom value is not a valid number!')
+      }
+    }
+
+    // V+B balance conservation: sum of all V and B atom values must equal zero
+    const vAtoms = this.molecule.getIsotopes('V')
+    if (vAtoms.length > 0) {
+      let sum = 0
+      for (const atom of [...vAtoms, ...isotopeB]) {
+        const value = Number(atom.value)
+        if (!Number.isNaN(value)) {
+          sum += value
+        }
+      }
+      if (sum !== 0) {
+        throw new TransferUnbalancedException('Check::isotopeB() - V+B atom values do not balance to zero!')
+      }
+    }
+
+    return true
+  }
+
+  /**
+   * Validates F-isotope (Fusion/NFT) atoms
+   *
+   * @returns {boolean}
+   */
+  isotopeF () {
+    const isotopeF = this.molecule.getIsotopes('F')
+
+    if (isotopeF.length === 0) {
+      return true
+    }
+
+    for (const atom of isotopeF) {
+      // F atoms must reference a wallet bundle
+      if (!atom.metaType || atom.metaType !== 'walletBundle') {
+        throw new MetaMissingException('Check::isotopeF() - F-isotope atoms must have metaType "walletBundle"!')
+      }
+
+      if (!atom.metaId) {
+        throw new MetaMissingException('Check::isotopeF() - F-isotope atoms must have a metaId!')
+      }
+
+      // Value must be parseable
+      const value = Number(atom.value)
+      if (Number.isNaN(value)) {
+        throw new TransferMalformedException('Check::isotopeF() - F-isotope atom value is not a valid number!')
+      }
+
+      if (value < 0) {
+        throw new TransferMalformedException('Check::isotopeF() - F-isotope atom value must not be negative!')
+      }
+    }
+
+    // V+F balance conservation: sum of all V and F atom values must equal zero
+    const vAtoms = this.molecule.getIsotopes('V')
+    if (vAtoms.length > 0) {
+      let sum = 0
+      for (const atom of [...vAtoms, ...isotopeF]) {
+        const value = Number(atom.value)
+        if (!Number.isNaN(value)) {
+          sum += value
+        }
+      }
+      if (sum !== 0) {
+        throw new TransferUnbalancedException('Check::isotopeF() - V+F atom values do not balance to zero!')
+      }
+    }
+
+    return true
+  }
+
+  /**
    *
    * @param senderWallet
    * @returns {boolean}
@@ -396,9 +497,14 @@ export default class CheckMolecule {
       return true
     }
 
+    // When B or F atoms are present, cross-isotope conservation is validated
+    // by isotopeB()/isotopeF() — skip V-only conservation check
+    const hasCrossIsotope = this.molecule.getIsotopes('B').length > 0 ||
+      this.molecule.getIsotopes('F').length > 0
+
     const firstAtom = this.molecule.atoms[0]
 
-    if (firstAtom.isotope === 'V' && isotopeV.length === 2) {
+    if (!hasCrossIsotope && firstAtom.isotope === 'V' && isotopeV.length === 2) {
       const endAtom = isotopeV[isotopeV.length - 1]
 
       if (firstAtom.token !== endAtom.token) {
@@ -407,6 +513,11 @@ export default class CheckMolecule {
 
       if (endAtom.value < 0) {
         throw new TransferMalformedException()
+      }
+
+      // Conservation check for 2-atom transfers
+      if ((Number(firstAtom.value) + Number(endAtom.value)) !== 0) {
+        throw new TransferUnbalancedException()
       }
 
       return true
@@ -454,8 +565,8 @@ export default class CheckMolecule {
       }
     }
 
-    // All atoms must sum to zero for a balanced transaction
-    if (sum !== 0) {
+    // V-only conservation: all V atoms must sum to zero (skip for B/F cross-isotope)
+    if (!hasCrossIsotope && sum !== 0) {
       throw new TransferUnbalancedException()
     }
 
@@ -467,7 +578,7 @@ export default class CheckMolecule {
         throw new TypeError('Invalid isotope "V" values')
       }
 
-      const remainder = senderWallet.balance + value
+      const remainder = Number(senderWallet.balance) + value
 
       // Is there enough balance to send?
       if (remainder < 0) {
@@ -475,7 +586,8 @@ export default class CheckMolecule {
       }
 
       // Does the remainder match what should be there in the source wallet, if provided?
-      if (remainder !== sum) {
+      // Skip for cross-isotope (B/F) — conservation is validated by isotopeB()/isotopeF()
+      if (!hasCrossIsotope && remainder !== sum) {
         throw new TransferRemainderException()
       }
     } else if (value !== 0) {
@@ -577,5 +689,99 @@ export default class CheckMolecule {
 
     // Looks like we passed all the tests!
     return true
+  }
+
+  /**
+   * Converts server-side molecule data (from GraphQL meta query responses)
+   * into a Molecule instance suitable for verification via CheckMolecule.
+   *
+   * Handles field mapping differences between server and client:
+   * - tokenSlug → token
+   * - metasJson (JSON string) → meta (array of {key, value})
+   * - bundleHash → bundle
+   *
+   * @param {object} serverData - Molecule data from GraphQL response
+   * @param {string} serverData.molecularHash
+   * @param {string} serverData.bundleHash
+   * @param {string|null} serverData.cellSlug
+   * @param {string|null} serverData.status
+   * @param {string|null} serverData.createdAt
+   * @param {array} serverData.atoms - Array of server-format atom objects
+   * @return {Molecule}
+   */
+  static fromServerData ({
+    molecularHash,
+    bundleHash,
+    cellSlug = null,
+    status = null,
+    createdAt = null,
+    atoms = []
+  }) {
+    const mappedAtoms = atoms.map(serverAtom => {
+      let meta = []
+      if (serverAtom.metasJson) {
+        try {
+          const parsed = JSON.parse(serverAtom.metasJson)
+          if (Array.isArray(parsed)) {
+            // Already in [{key, value}] format
+            meta = parsed
+          } else if (parsed && typeof parsed === 'object') {
+            // Object format {key1: val1, key2: val2} — convert to [{key, value}] pairs
+            meta = Object.entries(parsed).map(([key, value]) => ({ key, value }))
+          }
+        } catch (e) {
+          meta = []
+        }
+      }
+
+      return {
+        position: serverAtom.position || null,
+        walletAddress: serverAtom.walletAddress || null,
+        isotope: serverAtom.isotope || null,
+        token: serverAtom.tokenSlug || serverAtom.token || null,
+        value: serverAtom.value != null ? String(serverAtom.value) : null,
+        batchId: serverAtom.batchId || null,
+        metaType: serverAtom.metaType || null,
+        metaId: serverAtom.metaId || null,
+        meta,
+        index: serverAtom.index != null ? serverAtom.index : null,
+        otsFragment: serverAtom.otsFragment || null,
+        createdAt: serverAtom.createdAt || null
+      }
+    })
+
+    return Molecule.fromJSON({
+      molecularHash,
+      bundle: bundleHash,
+      cellSlug,
+      status,
+      createdAt,
+      atoms: mappedAtoms
+    })
+  }
+
+  /**
+   * Verifies a molecule reconstructed from server-side GraphQL data.
+   * Returns an object with verification result and any error details.
+   *
+   * @param {object} moleculeData - Server molecule data (same format as fromServerData)
+   * @return {{ molecularHash: string, verified: boolean, error: string|null }}
+   */
+  static verifyFromServerData (moleculeData) {
+    try {
+      const molecule = CheckMolecule.fromServerData(moleculeData)
+      new CheckMolecule(molecule).verify()
+      return {
+        molecularHash: moleculeData.molecularHash,
+        verified: true,
+        error: null
+      }
+    } catch (error) {
+      return {
+        molecularHash: moleculeData.molecularHash || null,
+        verified: false,
+        error: error.message || String(error)
+      }
+    }
   }
 }
