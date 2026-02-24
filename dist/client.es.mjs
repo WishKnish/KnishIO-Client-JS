@@ -2,11 +2,11 @@ var Yt = Object.defineProperty;
 var en = (o, e, t) => e in o ? Yt(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
 var j = (o, e, t) => en(o, typeof e != "symbol" ? e + "" : e, t);
 import L from "jssha";
-import { gql as E, cacheExchange as tn, fetchExchange as nn, subscriptionExchange as sn, createClient as rn } from "@urql/core";
+import { gql as O, cacheExchange as tn, fetchExchange as nn, subscriptionExchange as sn, createClient as rn } from "@urql/core";
 import { createClient as on } from "graphql-ws";
 import { pipe as an, map as ln } from "wonka";
 typeof self > "u" && (global.self = global);
-class Wt {
+class Rt {
   /**
    * Converts the given buffer to a string containing its hexadecimal representation.
    *
@@ -81,7 +81,7 @@ function He(o, e) {
     n[s] = o.substr(r, e);
   return n;
 }
-function nt(o = 256, e = "abcdef0123456789") {
+function st(o = 256, e = "abcdef0123456789") {
   let t = new Uint8Array(o);
   return t = crypto.getRandomValues(t), t = t.map((n) => e.charCodeAt(n % e.length)), String.fromCharCode.apply(null, t);
 }
@@ -99,10 +99,10 @@ function cn(o, e, t, n, s) {
   return a || "0";
 }
 function un(o) {
-  return Wt.toHex(o, {});
+  return Rt.toHex(o, {});
 }
 function hn(o) {
-  return Wt.toUint8Array(o);
+  return Rt.toUint8Array(o);
 }
 function dn(o) {
   const e = hn(o);
@@ -112,13 +112,13 @@ function pn(o) {
   const e = new Uint8Array(atob(o).split("").map((t) => t.charCodeAt(0)));
   return un(e);
 }
-function De(o) {
+function Ve(o) {
   return /^[A-F0-9]+$/i.test(o);
 }
 function fn(o) {
   return (typeof o == "number" || typeof o == "string" && o.trim() !== "") && !isNaN(o);
 }
-let fe = class {
+let pe = class {
   /**
    * Normalizes the meta array into the standard {key: ..., value: ...} format
    *
@@ -155,7 +155,24 @@ let fe = class {
     return t;
   }
 };
-function mn(...o) {
+function mn(o, e) {
+  return o.length ? [o.slice(0, e)].concat(mn(o.slice(e), e)) : [];
+}
+function yn(o, e) {
+  let t, n, s;
+  const r = [Array, Date, Number, String, Boolean], i = Object.prototype.toString;
+  for (e = e || [], t = 0; t < e.length; t += 2)
+    o === e[t] && (n = e[t + 1]);
+  if (!n && o && typeof o == "object") {
+    for (n = {}, t = 0; t < r.length; t++)
+      i.call(o) === i.call(s = new r[t](o)) && (n = t ? s : []);
+    e.push(o, n);
+    for (t in o)
+      e.hasOwnProperty.call(o, t) && (n[t] = yn(o[t], e));
+  }
+  return n || o;
+}
+function gn(...o) {
   return [].concat(...o.map((e, t) => {
     const n = o.slice(0);
     n.splice(t, 1);
@@ -163,17 +180,17 @@ function mn(...o) {
     return e.filter((r) => !s.includes(r));
   }));
 }
-function ge(...o) {
+function ye(...o) {
   return o.reduce((e, t) => e.filter((n) => t.includes(n)));
 }
-class st {
+class rt {
   /**
    *
    * @param policy
    * @param metaKeys
    */
   constructor(e = {}, t = {}) {
-    this.policy = st.normalizePolicy(e), this.fillDefault(t);
+    this.policy = rt.normalizePolicy(e), this.fillDefault(t);
   }
   /**
    *
@@ -201,7 +218,7 @@ class st {
     })) {
       const i = r.map((a) => a.key);
       this.policy[s] || (this.policy[s] = {});
-      for (const a of mn(e, i))
+      for (const a of gn(e, i))
         this.policy[s][a] || (this.policy[s][a] = s === "write" && !["characters", "pubkey"].includes(a) ? ["self"] : ["all"]);
     }
   }
@@ -226,7 +243,7 @@ class P {
    * @param {object|array} meta
    */
   constructor(e = []) {
-    this.meta = fe.normalizeMeta(e);
+    this.meta = pe.normalizeMeta(e);
   }
   /**
    *
@@ -234,7 +251,7 @@ class P {
    * @returns {AtomMeta}
    */
   merge(e) {
-    return this.meta = Array.from(/* @__PURE__ */ new Set([...this.meta, ...fe.normalizeMeta(e)])), this;
+    return this.meta = Array.from(/* @__PURE__ */ new Set([...this.meta, ...pe.normalizeMeta(e)])), this;
   }
   /**
    *
@@ -303,7 +320,7 @@ class P {
    * @returns {AtomMeta}
    */
   addPolicy(e) {
-    const t = new st(e, Object.keys(this.meta));
+    const t = new rt(e, Object.keys(this.meta));
     return this.merge({
       policy: t.toJson()
     }), this;
@@ -348,7 +365,7 @@ class ae extends x {
     super(e, t, n), this.name = "AtomsMissingException";
   }
 }
-class ie {
+class oe {
   /**
    *
    * @param {Atom} atom
@@ -369,7 +386,7 @@ class ie {
       case "[object Array]": {
         const t = [];
         for (const n in e)
-          t.push(ie.isStructure(e[n]) ? ie.structure(e[n]) : e[n]);
+          t.push(oe.isStructure(e[n]) ? oe.structure(e[n]) : e[n]);
         return t;
       }
       case "[object Object]": {
@@ -377,7 +394,7 @@ class ie {
         for (const s of n)
           if (Object.prototype.hasOwnProperty.call(e, s)) {
             const r = {};
-            r[s] = ie.isStructure(e[s]) ? ie.structure(e[s]) : e[s], t.push(r);
+            r[s] = oe.isStructure(e[s]) ? oe.structure(e[s]) : e[s], t.push(r);
           }
         if (t.length > 0)
           return t;
@@ -399,10 +416,10 @@ class ie {
    * @returns {Object[]}
    */
   view() {
-    return ie.structure(this);
+    return oe.structure(this);
   }
 }
-class yn extends ie {
+class wn extends oe {
   constructor({
     position: e = null,
     walletAddress: t = null,
@@ -421,7 +438,7 @@ class yn extends ie {
   }
 }
 const Ue = {
-  4: yn
+  4: wn
 };
 class g {
   /**
@@ -454,7 +471,7 @@ class g {
     index: h = null,
     version: p = null
   }) {
-    this.position = e, this.walletAddress = t, this.isotope = n, this.token = s, this.value = r !== null ? String(r) : null, this.batchId = i, this.metaType = a, this.metaId = c, this.meta = u ? fe.normalizeMeta(u) : [], this.index = h, this.otsFragment = l, this.createdAt = String(+/* @__PURE__ */ new Date()), p !== null && Object.prototype.hasOwnProperty.call(Ue, p) && (this.version = String(p));
+    this.position = e, this.walletAddress = t, this.isotope = n, this.token = s, this.value = r !== null ? String(r) : null, this.batchId = i, this.metaType = a, this.metaId = c, this.meta = u ? pe.normalizeMeta(u) : [], this.index = h, this.otsFragment = l, this.createdAt = String(+/* @__PURE__ */ new Date()), p !== null && Object.prototype.hasOwnProperty.call(Ue, p) && (this.version = String(p));
   }
   /**
    *
@@ -670,7 +687,7 @@ class g {
    * Get aggregated meta from stored normalized ones
    */
   aggregatedMeta() {
-    return fe.aggregateMeta(this.meta);
+    return pe.aggregateMeta(this.meta);
   }
   /**
    *
@@ -690,14 +707,14 @@ class g {
     return e;
   }
 }
-function tt(o = null, e = 2048) {
+function nt(o = null, e = 2048) {
   if (o) {
     const t = new L("SHAKE256", "TEXT");
     return t.update(o), t.getHash("HEX", { outputLen: e * 2 });
   } else
-    return nt(e);
+    return st(e);
 }
-function me(o, e = null) {
+function fe(o, e = null) {
   const t = new L("SHAKE256", "TEXT");
   return t.update(o), t.getHash("HEX", { outputLen: 256 });
 }
@@ -705,13 +722,13 @@ function lt(o, e) {
   const t = new L("SHAKE256", "TEXT");
   return t.update(o), t.getHash("HEX", { outputLen: e });
 }
-function de({
+function he({
   molecularHash: o = null,
   index: e = null
 }) {
-  return o !== null && e !== null ? me(String(o) + String(e), "generateBatchId") : nt(64);
+  return o !== null && e !== null ? fe(String(o) + String(e), "generateBatchId") : st(64);
 }
-class ye {
+class me {
   /**
    *
    * @param id
@@ -728,7 +745,7 @@ class ye {
    */
   static createFromGraphQL(e) {
     let t = e.metas || {};
-    return t.length && (t = JSON.parse(t), t || (t = {})), new ye(
+    return t.length && (t = JSON.parse(t), t || (t = {})), new me(
       e.id,
       e.name,
       t
@@ -740,7 +757,7 @@ class ye {
    * @returns {TokenUnit}
    */
   static createFromDB(e) {
-    return new ye(
+    return new me(
       e[0],
       e[1],
       e.length > 2 ? e[2] : {}
@@ -778,7 +795,7 @@ class ye {
     };
   }
 }
-class Ve extends x {
+class ze extends x {
   /**
    * Class constructor
    *
@@ -791,21 +808,21 @@ class Ve extends x {
   }
 }
 const Ce = /* @__PURE__ */ BigInt(2 ** 32 - 1), ct = /* @__PURE__ */ BigInt(32);
-function gn(o, e = !1) {
+function bn(o, e = !1) {
   return e ? { h: Number(o & Ce), l: Number(o >> ct & Ce) } : { h: Number(o >> ct & Ce) | 0, l: Number(o & Ce) | 0 };
 }
-function wn(o, e = !1) {
+function kn(o, e = !1) {
   const t = o.length;
   let n = new Uint32Array(t), s = new Uint32Array(t);
   for (let r = 0; r < t; r++) {
-    const { h: i, l: a } = gn(o[r], e);
+    const { h: i, l: a } = bn(o[r], e);
     [n[r], s[r]] = [i, a];
   }
   return [n, s];
 }
-const bn = (o, e, t) => o << t | e >>> 32 - t, kn = (o, e, t) => e << t | o >>> 32 - t, Sn = (o, e, t) => e << t - 32 | o >>> 64 - t, _n = (o, e, t) => o << t - 32 | e >>> 64 - t;
+const Sn = (o, e, t) => o << t | e >>> 32 - t, _n = (o, e, t) => e << t | o >>> 32 - t, $n = (o, e, t) => e << t - 32 | o >>> 64 - t, An = (o, e, t) => o << t - 32 | e >>> 64 - t;
 /*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
-function $n(o) {
+function vn(o) {
   return o instanceof Uint8Array || ArrayBuffer.isView(o) && o.constructor.name === "Uint8Array";
 }
 function ut(o, e = "") {
@@ -815,7 +832,7 @@ function ut(o, e = "") {
   }
 }
 function D(o, e, t = "") {
-  const n = $n(o), s = o == null ? void 0 : o.length, r = e !== void 0;
+  const n = vn(o), s = o == null ? void 0 : o.length, r = e !== void 0;
   if (!n || r && s !== e) {
     const i = t && `"${t}" `, a = r ? ` of length ${e}` : "", c = n ? `length=${s}` : `type=${typeof o}`;
     throw new Error(i + "expected Uint8Array" + a + ", got " + c);
@@ -828,34 +845,34 @@ function ht(o, e = !0) {
   if (e && o.finished)
     throw new Error("Hash#digest() has already been called");
 }
-function An(o, e) {
+function xn(o, e) {
   D(o, void 0, "digestInto() output");
   const t = e.outputLen;
   if (o.length < t)
     throw new Error('"digestInto() output" expected to be of length >=' + t);
 }
-function Rt(o) {
+function Wt(o) {
   return new Uint32Array(o.buffer, o.byteOffset, Math.floor(o.byteLength / 4));
 }
 function Ut(...o) {
   for (let e = 0; e < o.length; e++)
     o[e].fill(0);
 }
-const vn = new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68;
-function xn(o) {
+const In = new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68;
+function Tn(o) {
   return o << 24 & 4278190080 | o << 8 & 16711680 | o >>> 8 & 65280 | o >>> 24 & 255;
 }
-function In(o) {
+function Mn(o) {
   for (let e = 0; e < o.length; e++)
-    o[e] = xn(o[e]);
+    o[e] = Tn(o[e]);
   return o;
 }
-const dt = vn ? (o) => o : In;
+const dt = In ? (o) => o : Mn;
 function Bt(o, e = {}) {
   const t = (s, r) => o(r).update(s).digest(), n = o(void 0);
   return t.outputLen = n.outputLen, t.blockLen = n.blockLen, t.create = (s) => o(s), Object.assign(t, e), Object.freeze(t);
 }
-function Tn(o = 32) {
+function Cn(o = 32) {
   const e = typeof globalThis == "object" ? globalThis.crypto : null;
   if (typeof (e == null ? void 0 : e.getRandomValues) != "function")
     throw new Error("crypto.getRandomValues must be defined");
@@ -863,16 +880,16 @@ function Tn(o = 32) {
 }
 const Ne = (o) => ({
   oid: Uint8Array.from([6, 9, 96, 134, 72, 1, 101, 3, 4, 2, o])
-}), Mn = BigInt(0), we = BigInt(1), Cn = BigInt(2), En = BigInt(7), On = BigInt(256), Wn = BigInt(113), qt = [], Ht = [], Pt = [];
-for (let o = 0, e = we, t = 1, n = 0; o < 24; o++) {
+}), En = BigInt(0), ge = BigInt(1), On = BigInt(2), Rn = BigInt(7), Wn = BigInt(256), Un = BigInt(113), qt = [], Ht = [], Pt = [];
+for (let o = 0, e = ge, t = 1, n = 0; o < 24; o++) {
   [t, n] = [n, (2 * t + 3 * n) % 5], qt.push(2 * (5 * n + t)), Ht.push((o + 1) * (o + 2) / 2 % 64);
-  let s = Mn;
+  let s = En;
   for (let r = 0; r < 7; r++)
-    e = (e << we ^ (e >> En) * Wn) % On, e & Cn && (s ^= we << (we << BigInt(r)) - we);
+    e = (e << ge ^ (e >> Rn) * Un) % Wn, e & On && (s ^= ge << (ge << BigInt(r)) - ge);
   Pt.push(s);
 }
-const Kt = wn(Pt, !0), Rn = Kt[0], Un = Kt[1], pt = (o, e, t) => t > 32 ? Sn(o, e, t) : bn(o, e, t), ft = (o, e, t) => t > 32 ? _n(o, e, t) : kn(o, e, t);
-function Bn(o, e = 24) {
+const Kt = kn(Pt, !0), Bn = Kt[0], qn = Kt[1], pt = (o, e, t) => t > 32 ? $n(o, e, t) : Sn(o, e, t), ft = (o, e, t) => t > 32 ? An(o, e, t) : _n(o, e, t);
+function Hn(o, e = 24) {
   const t = new Uint32Array(10);
   for (let n = 24 - e; n < 24; n++) {
     for (let i = 0; i < 10; i++)
@@ -893,7 +910,7 @@ function Bn(o, e = 24) {
       for (let a = 0; a < 10; a++)
         o[i + a] ^= ~t[(a + 2) % 10] & t[(a + 4) % 10];
     }
-    o[0] ^= Rn[n], o[1] ^= Un[n];
+    o[0] ^= Bn[n], o[1] ^= qn[n];
   }
   Ut(t);
 }
@@ -913,13 +930,13 @@ class Fe {
     j(this, "rounds");
     if (this.blockLen = e, this.suffix = t, this.outputLen = n, this.enableXOF = s, this.rounds = r, ut(n, "outputLen"), !(0 < e && e < 200))
       throw new Error("only keccak-f1600 function is supported");
-    this.state = new Uint8Array(200), this.state32 = Rt(this.state);
+    this.state = new Uint8Array(200), this.state32 = Wt(this.state);
   }
   clone() {
     return this._cloneInto();
   }
   keccak() {
-    dt(this.state32), Bn(this.state32, this.rounds), dt(this.state32), this.posOut = 0, this.pos = 0;
+    dt(this.state32), Hn(this.state32, this.rounds), dt(this.state32), this.posOut = 0, this.pos = 0;
   }
   update(e) {
     ht(this), D(e);
@@ -958,7 +975,7 @@ class Fe {
     return ut(e), this.xofInto(new Uint8Array(e));
   }
   digestInto(e) {
-    if (An(e, this), this.finished)
+    if (xn(e, this), this.finished)
       throw new Error("digest() was already called");
     return this.writeInto(e), this.destroy(), e;
   }
@@ -973,34 +990,34 @@ class Fe {
     return e || (e = new Fe(t, n, s, i, r)), e.state32.set(this.state32), e.pos = this.pos, e.posOut = this.posOut, e.finished = this.finished, e.rounds = r, e.suffix = n, e.outputLen = s, e.enableXOF = i, e.destroyed = this.destroyed, e;
   }
 }
-const Nt = (o, e, t, n = {}) => Bt(() => new Fe(e, o, t), n), qn = /* @__PURE__ */ Nt(
+const Nt = (o, e, t, n = {}) => Bt(() => new Fe(e, o, t), n), Pn = /* @__PURE__ */ Nt(
   6,
   136,
   32,
   /* @__PURE__ */ Ne(8)
-), Hn = /* @__PURE__ */ Nt(
+), Kn = /* @__PURE__ */ Nt(
   6,
   72,
   64,
   /* @__PURE__ */ Ne(10)
-), Ft = (o, e, t, n = {}) => Bt((s = {}) => new Fe(e, o, s.dkLen === void 0 ? t : s.dkLen, !0), n), Pn = /* @__PURE__ */ Ft(31, 168, 16, /* @__PURE__ */ Ne(11)), Lt = /* @__PURE__ */ Ft(31, 136, 32, /* @__PURE__ */ Ne(12));
-function rt(o) {
+), Ft = (o, e, t, n = {}) => Bt((s = {}) => new Fe(e, o, s.dkLen === void 0 ? t : s.dkLen, !0), n), Nn = /* @__PURE__ */ Ft(31, 168, 16, /* @__PURE__ */ Ne(11)), Lt = /* @__PURE__ */ Ft(31, 136, 32, /* @__PURE__ */ Ne(12));
+function it(o) {
   if (!Number.isSafeInteger(o) || o < 0 || o > 4294967295)
     throw new Error("wrong u32 integer:" + o);
   return o;
 }
 function jt(o) {
-  return rt(o), (o & o - 1) === 0 && o !== 0;
+  return it(o), (o & o - 1) === 0 && o !== 0;
 }
 function Qt(o, e) {
-  rt(o);
+  it(o);
   let t = 0;
   for (let n = 0; n < e; n++, o >>>= 1)
     t = t << 1 | o & 1;
   return t;
 }
 function Dt(o) {
-  return rt(o), 31 - Math.clz32(o);
+  return it(o), 31 - Math.clz32(o);
 }
 function mt(o) {
   const e = o.length;
@@ -1026,10 +1043,10 @@ const yt = (o, e) => {
       throw new Error("FFT: wrong Polynomial length");
     s && a && mt(l);
     for (let h = 0, p = 1; h < c - i; h++) {
-      const d = s ? h + 1 + i : c - h, w = 1 << d, A = w >> 1, T = t >> d;
+      const d = s ? h + 1 + i : c - h, w = 1 << d, A = w >> 1, M = t >> d;
       for (let f = 0; f < t; f += w)
         for (let y = 0, b = p++; y < A; y++) {
-          const M = r ? s ? t - b : b : y * T, k = f + y, $ = f + y + A, v = n[M], I = l[$], S = l[k];
+          const C = r ? s ? t - b : b : y * M, k = f + y, $ = f + y + A, v = n[C], I = l[$], S = l[k];
           if (u) {
             const B = o.mul(I, v);
             l[k] = o.add(S, B), l[$] = o.sub(S, B);
@@ -1040,8 +1057,8 @@ const yt = (o, e) => {
   };
 };
 /*! noble-post-quantum - MIT License (c) 2024 Paul Miller (paulmillr.com) */
-const gt = Tn;
-function ze(o, e) {
+const gt = Cn;
+function Je(o, e) {
   if (o.length !== e.length)
     return !1;
   let t = 0;
@@ -1049,7 +1066,7 @@ function ze(o, e) {
     t |= o[n] ^ e[n];
   return t === 0;
 }
-function Kn(o) {
+function Fn(o) {
   return Uint8Array.from(o);
 }
 function Be(o, ...e) {
@@ -1075,7 +1092,7 @@ function Be(o, ...e) {
     }
   };
 }
-function Je(o, e) {
+function Ge(o, e) {
   const t = e * o.bytesLen;
   return {
     bytesLen: t,
@@ -1110,7 +1127,7 @@ function wt(o) {
   return (1 << o) - 1;
 }
 /*! noble-post-quantum - MIT License (c) 2024 Paul Miller (paulmillr.com) */
-const Nn = (o) => {
+const Ln = (o) => {
   const { newPoly: e, N: t, Q: n, F: s, ROOT_OF_UNITY: r, brvBits: i } = o, a = (f, y = n) => {
     const b = f % y | 0;
     return (b >= 0 ? b | 0 : y + b | 0) | 0;
@@ -1121,8 +1138,8 @@ const Nn = (o) => {
   function u() {
     const f = e(t);
     for (let y = 0; y < t; y++) {
-      const b = Qt(y, i), M = BigInt(r) ** BigInt(b) % BigInt(n);
-      f[y] = Number(M) | 0;
+      const b = Qt(y, i), C = BigInt(r) ** BigInt(b) % BigInt(n);
+      f[y] = Number(C) | 0;
     }
     return f;
   }
@@ -1149,11 +1166,11 @@ const Nn = (o) => {
       return f;
     }
   }, bitsCoder: (f, y) => {
-    const b = wt(f), M = f * (t / 8);
+    const b = wt(f), C = f * (t / 8);
     return {
-      bytesLen: M,
+      bytesLen: C,
       encode: (k) => {
-        const $ = new Uint8Array(M);
+        const $ = new Uint8Array(C);
         for (let v = 0, I = 0, S = 0, B = 0; v < k.length; v++)
           for (I |= (y.encode(k[v]) & b) << S, S += f; S >= 8; S -= 8, I >>= 8)
             $[B++] = I & wt(S);
@@ -1168,7 +1185,7 @@ const Nn = (o) => {
       }
     };
   } };
-}, Fn = (o) => (e, t) => {
+}, jn = (o) => (e, t) => {
   t || (t = o.blockLen);
   const n = new Uint8Array(e.length + 2);
   n.set(e);
@@ -1181,18 +1198,18 @@ const Nn = (o) => {
       i.destroy(), G(r, n);
     }
   };
-}, Ln = /* @__PURE__ */ Fn(Pn);
+}, Qn = /* @__PURE__ */ jn(Nn);
 /*! noble-post-quantum - MIT License (c) 2024 Paul Miller (paulmillr.com) */
-const F = 256, le = 3329, jn = 3303, Qn = 17, { mod: Ae, nttZetas: Dn, NTT: te, bitsCoder: Vn } = Nn({
+const F = 256, le = 3329, Dn = 3303, Vn = 17, { mod: $e, nttZetas: zn, NTT: ne, bitsCoder: Jn } = Ln({
   N: F,
   Q: le,
-  F: jn,
-  ROOT_OF_UNITY: Qn,
+  F: Dn,
+  ROOT_OF_UNITY: Vn,
   newPoly: (o) => new Uint16Array(o),
   brvBits: 7
-}), zn = {
+}), Gn = {
   768: { N: F, Q: le, K: 3, ETA1: 2, ETA2: 2, du: 10, dv: 4, RBGstrength: 192 }
-}, Jn = (o) => {
+}, Xn = (o) => {
   if (o >= 12)
     return { encode: (t) => t, decode: (t) => t };
   const e = 2 ** (o - 1);
@@ -1202,24 +1219,24 @@ const F = 256, le = 3329, jn = 3303, Qn = 17, { mod: Ae, nttZetas: Dn, NTT: te, 
     // const decompress = (i: number) => round((Q / 2 ** d) * i);
     decode: (t) => t * le + e >>> o
   };
-}, be = (o) => Vn(o, Jn(o));
-function ne(o, e) {
+}, we = (o) => Jn(o, Xn(o));
+function se(o, e) {
   for (let t = 0; t < F; t++)
-    o[t] = Ae(o[t] + e[t]);
+    o[t] = $e(o[t] + e[t]);
 }
-function Gn(o, e) {
+function Zn(o, e) {
   for (let t = 0; t < F; t++)
-    o[t] = Ae(o[t] - e[t]);
+    o[t] = $e(o[t] - e[t]);
 }
-function Xn(o, e, t, n, s) {
-  const r = Ae(e * n * s + o * t), i = Ae(o * n + e * t);
+function Yn(o, e, t, n, s) {
+  const r = $e(e * n * s + o * t), i = $e(o * n + e * t);
   return { c0: r, c1: i };
 }
 function Ee(o, e) {
   for (let t = 0; t < F / 2; t++) {
-    let n = Dn[64 + (t >> 1)];
+    let n = zn[64 + (t >> 1)];
     t & 1 && (n = -n);
-    const { c0: s, c1: r } = Xn(o[2 * t + 0], o[2 * t + 1], e[2 * t + 0], e[2 * t + 1], n);
+    const { c0: s, c1: r } = Yn(o[2 * t + 0], o[2 * t + 1], e[2 * t + 0], e[2 * t + 1], n);
     o[2 * t + 0] = s, o[2 * t + 1] = r;
   }
   return o;
@@ -1237,20 +1254,20 @@ function bt(o) {
   }
   return e;
 }
-function ke(o, e, t, n) {
-  const s = o(n * F / 4, e, t), r = new Uint16Array(F), i = Rt(s);
+function be(o, e, t, n) {
+  const s = o(n * F / 4, e, t), r = new Uint16Array(F), i = Wt(s);
   let a = 0;
   for (let c = 0, u = 0, l = 0, h = 0; c < i.length; c++) {
     let p = i[c];
     for (let d = 0; d < 32; d++)
-      l += p & 1, p >>= 1, a += 1, a === n ? (h = l, l = 0) : a === 2 * n && (r[u++] = Ae(h - l), l = 0, a = 0);
+      l += p & 1, p >>= 1, a += 1, a === n ? (h = l, l = 0) : a === 2 * n && (r[u++] = $e(h - l), l = 0, a = 0);
   }
   if (a)
     throw new Error(`sampleCBD: leftover bits: ${a}`);
   return r;
 }
-const Zn = (o) => {
-  const { K: e, PRF: t, XOF: n, HASH512: s, ETA1: r, ETA2: i, du: a, dv: c } = o, u = be(1), l = be(c), h = be(a), p = Be("publicKey", Je(be(12), e), 32), d = Je(be(12), e), w = Be("ciphertext", Je(h, e), l), A = Be("seed", 32, 32);
+const es = (o) => {
+  const { K: e, PRF: t, XOF: n, HASH512: s, ETA1: r, ETA2: i, du: a, dv: c } = o, u = we(1), l = we(c), h = we(a), p = Be("publicKey", Ge(we(12), e), 32), d = Ge(we(12), e), w = Be("ciphertext", Ge(h, e), l), A = Be("seed", 32, 32);
   return {
     secretCoder: d,
     lengths: {
@@ -1258,19 +1275,19 @@ const Zn = (o) => {
       publicKey: p.bytesLen,
       cipherText: w.bytesLen
     },
-    keygen: (T) => {
-      D(T, 32, "seed");
+    keygen: (M) => {
+      D(M, 32, "seed");
       const f = new Uint8Array(33);
-      f.set(T), f[32] = e;
-      const y = s(f), [b, M] = A.decode(y), k = [], $ = [];
+      f.set(M), f[32] = e;
+      const y = s(f), [b, C] = A.decode(y), k = [], $ = [];
       for (let S = 0; S < e; S++)
-        k.push(te.encode(ke(t, M, S, r)));
+        k.push(ne.encode(be(t, C, S, r)));
       const v = n(b);
       for (let S = 0; S < e; S++) {
-        const B = te.encode(ke(t, M, e + S, r));
-        for (let W = 0; W < e; W++) {
-          const ue = bt(v.get(W, S));
-          ne(B, Ee(ue, k[W]));
+        const B = ne.encode(be(t, C, e + S, r));
+        for (let R = 0; R < e; R++) {
+          const ce = bt(v.get(R, S));
+          se(B, Ee(ce, k[R]));
         }
         $.push(B);
       }
@@ -1279,37 +1296,37 @@ const Zn = (o) => {
         publicKey: p.encode([$, b]),
         secretKey: d.encode(k)
       };
-      return G(b, M, k, $, f, y), I;
+      return G(b, C, k, $, f, y), I;
     },
-    encrypt: (T, f, y) => {
-      const [b, M] = p.decode(T), k = [];
-      for (let W = 0; W < e; W++)
-        k.push(te.encode(ke(t, y, W, r)));
-      const $ = n(M), v = new Uint16Array(F), I = [];
-      for (let W = 0; W < e; W++) {
-        const ue = ke(t, y, e + W, i), Qe = new Uint16Array(F);
+    encrypt: (M, f, y) => {
+      const [b, C] = p.decode(M), k = [];
+      for (let R = 0; R < e; R++)
+        k.push(ne.encode(be(t, y, R, r)));
+      const $ = n(C), v = new Uint16Array(F), I = [];
+      for (let R = 0; R < e; R++) {
+        const ce = be(t, y, e + R, i), De = new Uint16Array(F);
         for (let Me = 0; Me < e; Me++) {
-          const Zt = bt($.get(W, Me));
-          ne(Qe, Ee(Zt, k[Me]));
+          const Zt = bt($.get(R, Me));
+          se(De, Ee(Zt, k[Me]));
         }
-        ne(ue, te.decode(Qe)), I.push(ue), ne(v, Ee(b[W], k[W])), G(Qe);
+        se(ce, ne.decode(De)), I.push(ce), se(v, Ee(b[R], k[R])), G(De);
       }
       $.clean();
-      const S = ke(t, y, 2 * e, i);
-      ne(S, te.decode(v));
+      const S = be(t, y, 2 * e, i);
+      se(S, ne.decode(v));
       const B = u.decode(f);
-      return ne(B, S), G(b, k, v, S), w.encode([I, B]);
+      return se(B, S), G(b, k, v, S), w.encode([I, B]);
     },
-    decrypt: (T, f) => {
-      const [y, b] = w.decode(T), M = d.decode(f), k = new Uint16Array(F);
+    decrypt: (M, f) => {
+      const [y, b] = w.decode(M), C = d.decode(f), k = new Uint16Array(F);
       for (let $ = 0; $ < e; $++)
-        ne(k, Ee(M[$], te.encode(y[$])));
-      return Gn(b, te.decode(k)), G(k, M, y), u.encode(b);
+        se(k, Ee(C[$], ne.encode(y[$])));
+      return Zn(b, ne.decode(k)), G(k, C, y), u.encode(b);
     }
   };
 };
-function Yn(o) {
-  const e = Zn(o), { HASH256: t, HASH512: n, KDF: s } = o, { secretCoder: r, lengths: i } = e, a = Be("secretKey", i.secretKey, i.publicKey, 32, 32), c = 32, u = 64;
+function ts(o) {
+  const e = es(o), { HASH256: t, HASH512: n, KDF: s } = o, { secretCoder: r, lengths: i } = e, a = Be("secretKey", i.secretKey, i.publicKey, 32, 32), c = 32, u = 64;
   return {
     info: { type: "ml-kem" },
     lengths: {
@@ -1330,8 +1347,8 @@ function Yn(o) {
     },
     encapsulate: (l, h = gt(c)) => {
       D(l, i.publicKey, "publicKey"), D(h, c, "message");
-      const p = l.subarray(0, 384 * o.K), d = r.encode(r.decode(Kn(p)));
-      if (!ze(d, p))
+      const p = l.subarray(0, 384 * o.K), d = r.encode(r.decode(Fn(p)));
+      if (!Je(d, p))
         throw G(d), new Error("ML-KEM.encapsulate: wrong publicKey modulus");
       G(d);
       const w = n.create().update(h).update(t(l)).digest(), A = e.encrypt(l, h, w.subarray(32, 64));
@@ -1340,25 +1357,25 @@ function Yn(o) {
     decapsulate: (l, h) => {
       D(h, a.bytesLen, "secretKey"), D(l, i.cipherText, "cipherText");
       const p = a.bytesLen - 96, d = p + 32, w = t(h.subarray(p / 2, d));
-      if (!ze(w, h.subarray(d, d + 32)))
+      if (!Je(w, h.subarray(d, d + 32)))
         throw new Error("invalid secretKey: hash check failed");
-      const [A, T, f, y] = a.decode(h), b = e.decrypt(l, A), M = n.create().update(b).update(f).digest(), k = M.subarray(0, 32), $ = e.encrypt(T, b, M.subarray(32, 64)), v = ze(l, $), I = s.create({ dkLen: 32 }).update(y).update(l).digest();
+      const [A, M, f, y] = a.decode(h), b = e.decrypt(l, A), C = n.create().update(b).update(f).digest(), k = C.subarray(0, 32), $ = e.encrypt(M, b, C.subarray(32, 64)), v = Je(l, $), I = s.create({ dkLen: 32 }).update(y).update(l).digest();
       return G(b, $, v ? I : k), v ? k : I;
     }
   };
 }
-function es(o, e, t) {
+function ns(o, e, t) {
   return Lt.create({ dkLen: o }).update(e).update(new Uint8Array([t])).digest();
 }
-const ts = {
-  HASH256: qn,
-  HASH512: Hn,
+const ss = {
+  HASH256: Pn,
+  HASH512: Kn,
   KDF: Lt,
-  XOF: Ln,
-  PRF: es
-}, Ge = /* @__PURE__ */ Yn({
-  ...ts,
-  ...zn[768]
+  XOF: Qn,
+  PRF: ns
+}, Xe = /* @__PURE__ */ ts({
+  ...ss,
+  ...Gn[768]
 });
 class _ {
   /**
@@ -1381,7 +1398,7 @@ class _ {
     batchId: i = null,
     characters: a = null
   }) {
-    this.token = n, this.balance = "0", this.molecules = {}, this.key = null, this.privkey = null, this.pubkey = null, this.tokenUnits = [], this.tradeRates = {}, this.address = s, this.position = r, this.bundle = t, this.batchId = i, this.characters = a, e && (this.bundle = this.bundle || me(e, "Wallet::constructor"), this.position = this.position || _.generatePosition(), this.key = _.generateKey({
+    this.token = n, this.balance = "0", this.molecules = {}, this.key = null, this.privkey = null, this.pubkey = null, this.tokenUnits = [], this.tradeRates = {}, this.address = s, this.position = r, this.bundle = t, this.batchId = i, this.characters = a, e && (this.bundle = this.bundle || fe(e, "Wallet::constructor"), this.position = this.position || _.generatePosition(), this.key = _.generateKey({
       secret: e,
       token: this.token,
       position: this.position
@@ -1406,8 +1423,8 @@ class _ {
   }) {
     let i = null;
     if (!e && !t)
-      throw new Ve();
-    return e && !t && (i = _.generatePosition(), t = me(e, "Wallet::create")), new _({
+      throw new ze();
+    return e && !t && (i = _.generatePosition(), t = fe(e, "Wallet::create")), new _({
       secret: e,
       bundle: t,
       token: n,
@@ -1423,7 +1440,7 @@ class _ {
    * @return {boolean}
    */
   static isBundleHash(e) {
-    return typeof e != "string" ? !1 : e.length === 64 && De(e);
+    return typeof e != "string" ? !1 : e.length === 64 && Ve(e);
   }
   /**
    * Get formatted token units from the raw data
@@ -1434,7 +1451,7 @@ class _ {
   static getTokenUnits(e) {
     const t = [];
     return e.forEach((n) => {
-      t.push(ye.createFromDB(n));
+      t.push(me.createFromDB(n));
     }), t;
   }
   /**
@@ -1451,10 +1468,10 @@ class _ {
     position: n
   }) {
     if (!e)
-      throw new Ve("Wallet::generateKey() - Secret is required!");
+      throw new ze("Wallet::generateKey() - Secret is required!");
     if (!n)
-      throw new Ve("Wallet::generateKey() - Position is required!");
-    const s = De(e) ? e : lt(e, 1024), r = De(n) ? n : lt(n, 256), a = BigInt(`0x${s}`) + BigInt(`0x${r}`), c = new L("SHAKE256", "TEXT");
+      throw new ze("Wallet::generateKey() - Position is required!");
+    const s = Ve(e) ? e : lt(e, 1024), r = Ve(n) ? n : lt(n, 256), a = BigInt(`0x${s}`) + BigInt(`0x${r}`), c = new L("SHAKE256", "TEXT");
     c.update(a.toString(16)), t && c.update(t);
     const u = new L("SHAKE256", "TEXT");
     return u.update(c.getHash("HEX", { outputLen: 8192 })), u.getHash("HEX", { outputLen: 8192 });
@@ -1484,16 +1501,16 @@ class _ {
    * @returns {string}
    */
   static generatePosition(e = 64) {
-    return nt(e, "abcdef0123456789");
+    return st(e, "abcdef0123456789");
   }
   /**
    * Initializes the ML-KEM key pair
    */
   initializeMLKEM() {
-    const e = tt(this.key, 128), t = new Uint8Array(64);
+    const e = nt(this.key, 128), t = new Uint8Array(64);
     for (let r = 0; r < 64; r++)
       t[r] = parseInt(e.substr(r * 2, 2), 16);
-    const { publicKey: n, secretKey: s } = Ge.keygen(t);
+    const { publicKey: n, secretKey: s } = Xe.keygen(t);
     this.pubkey = this.serializeKey(n), this.privkey = s;
   }
   serializeKey(e) {
@@ -1595,10 +1612,10 @@ class _ {
     sourceWallet: e,
     isRemainder: t = !1
   }) {
-    e.batchId && (this.batchId = t ? e.batchId : de({}));
+    e.batchId && (this.batchId = t ? e.batchId : he({}));
   }
   async encryptMessage(e, t) {
-    const n = JSON.stringify(e), s = new TextEncoder().encode(n), r = this.deserializeKey(t), { cipherText: i, sharedSecret: a } = Ge.encapsulate(r), c = await this.encryptWithSharedSecret(s, a);
+    const n = JSON.stringify(e), s = new TextEncoder().encode(n), r = this.deserializeKey(t), { cipherText: i, sharedSecret: a } = Xe.encapsulate(r), c = await this.encryptWithSharedSecret(s, a);
     return {
       cipherText: this.serializeKey(i),
       encryptedMessage: this.serializeKey(c)
@@ -1608,7 +1625,7 @@ class _ {
     const { cipherText: t, encryptedMessage: n } = e;
     let s;
     try {
-      s = Ge.decapsulate(this.deserializeKey(t), this.privkey);
+      s = Xe.decapsulate(this.deserializeKey(t), this.privkey);
     } catch (c) {
       return console.error("Wallet::decryptMessage() - Decapsulation failed", c), console.info("Wallet::decryptMessage() - my public key", this.pubkey), null;
     }
@@ -1667,7 +1684,7 @@ class _ {
     return new Uint8Array(i);
   }
 }
-class Se extends x {
+class ke extends x {
   /**
    * Class constructor
    *
@@ -1679,7 +1696,7 @@ class Se extends x {
     super(e, t, n), this.name = "AtomIndexException";
   }
 }
-class ns extends x {
+class rs extends x {
   /**
    * Class constructor
    *
@@ -1691,7 +1708,7 @@ class ns extends x {
     super(e, t, n), this.name = "MolecularHashMismatchException";
   }
 }
-class ss extends x {
+class is extends x {
   /**
    * Class constructor
    *
@@ -1727,7 +1744,7 @@ class Vt extends x {
     super(e, t, n), this.name = "SignatureMalformedException";
   }
 }
-class rs extends x {
+class os extends x {
   /**
    * Class constructor
    *
@@ -1751,7 +1768,7 @@ class Y extends x {
     super(e, t, n), this.name = "TransferBalanceException";
   }
 }
-class _e extends x {
+class Se extends x {
   /**
    * Class constructor
    *
@@ -1785,7 +1802,7 @@ class _t extends x {
     super(e, t, n), this.name = "TransferRemainderException";
   }
 }
-class is extends x {
+class as extends x {
   /**
    * Class constructor
    *
@@ -1821,7 +1838,7 @@ class H extends x {
     super(e, t, n), this.name = "MetaMissingException";
   }
 }
-class se extends x {
+class re extends x {
   /**
    * Class constructor
    *
@@ -1885,7 +1902,7 @@ class ee extends x {
     super(e, t, n), this.name = "CodeException";
   }
 }
-class $e {
+class _e {
   /**
    *
    * @param {string} action
@@ -1969,7 +1986,7 @@ class $e {
    * @return Callback
    */
   static toObject(e) {
-    const t = new $e({
+    const t = new _e({
       action: e.action
     });
     return e.metaType && (t.metaType = e.metaType), e.metaId && (t.metaId = e.metaId), e.meta && (t.meta = e.meta), e.address && (t.address = e.address), e.token && (t.token = e.token), e.amount && (t.amount = e.amount), e.comparison && (t.comparison = e.comparison), t;
@@ -1994,31 +2011,31 @@ class $e {
    * @return {boolean}
    */
   isMeta() {
-    return ge(Object.keys(this.toJSON()), ["action", "metaId", "metaType", "meta"]).length === 4 && this._is("meta");
+    return ye(Object.keys(this.toJSON()), ["action", "metaId", "metaType", "meta"]).length === 4 && this._is("meta");
   }
   /**
    * @return {boolean}
    */
   isCollect() {
-    return ge(Object.keys(this.toJSON()), ["action", "address", "token", "amount", "comparison"]).length === 5 && this._is("collect");
+    return ye(Object.keys(this.toJSON()), ["action", "address", "token", "amount", "comparison"]).length === 5 && this._is("collect");
   }
   /**
    * @return {boolean}
    */
   isBuffer() {
-    return ge(Object.keys(this.toJSON()), ["action", "address", "token", "amount", "comparison"]).length === 5 && this._is("buffer");
+    return ye(Object.keys(this.toJSON()), ["action", "address", "token", "amount", "comparison"]).length === 5 && this._is("buffer");
   }
   /**
    * @return {boolean}
    */
   isRemit() {
-    return ge(Object.keys(this.toJSON()), ["action", "token", "amount"]).length === 3 && this._is("remit");
+    return ye(Object.keys(this.toJSON()), ["action", "token", "amount"]).length === 3 && this._is("remit");
   }
   /**
    * @return {boolean}
    */
   isBurn() {
-    return ge(Object.keys(this.toJSON()), ["action", "token", "amount", "comparison"]).length === 4 && this._is("burn");
+    return ye(Object.keys(this.toJSON()), ["action", "token", "amount", "comparison"]).length === 4 && this._is("burn");
   }
   /**
    * @param {string} type
@@ -2030,7 +2047,7 @@ class $e {
     return this.__action.toLowerCase() === e.toLowerCase();
   }
 }
-class Xe {
+class Ze {
   /**
    *
    * @param key
@@ -2068,7 +2085,7 @@ class Xe {
     };
   }
 }
-class ve {
+class Ae {
   /**
    *
    * @param {Condition[]} condition
@@ -2079,10 +2096,10 @@ class ve {
     callback: t = []
   }) {
     for (const n of e)
-      if (!(n instanceof Xe))
+      if (!(n instanceof Ze))
         throw new Pe();
     for (const n of t)
-      if (!(n instanceof $e))
+      if (!(n instanceof _e))
         throw new Pe();
     this.__condition = e, this.__callback = t;
   }
@@ -2091,13 +2108,13 @@ class ve {
    * @param {Condition[]|{}} condition
    */
   set comparison(e) {
-    this.__condition.push(e instanceof Xe ? e : Xe.toObject(e));
+    this.__condition.push(e instanceof Ze ? e : Ze.toObject(e));
   }
   /**
    * @param {Callback[]|{}} callback
    */
   set callback(e) {
-    this.__callback.push(e instanceof $e ? e : $e.toObject(e));
+    this.__callback.push(e instanceof _e ? e : _e.toObject(e));
   }
   /**
    *
@@ -2110,7 +2127,7 @@ class ve {
       throw new H("Rule::toObject() - Incorrect rule format! There is no condition field.");
     if (!e.callback)
       throw new H("Rule::toObject() - Incorrect rule format! There is no callback field.");
-    const t = new ve({});
+    const t = new Ae({});
     for (const n of e.condition)
       t.comparison = n;
     for (const n of e.callback)
@@ -2127,7 +2144,7 @@ class ve {
     };
   }
 }
-class C {
+class T {
   /**
    * Initialize the Dot utility with the given object and key path
    * @param {object|array} obj - The object or array to traverse
@@ -2186,19 +2203,19 @@ class C {
     return r[Number.isInteger(c) ? c : a] = n, e;
   }
 }
-class ce {
+class ve {
   /**
    *
    * @param molecule
    */
   constructor(e) {
     if (e.molecularHash === null)
-      throw new ss();
+      throw new is();
     if (!e.atoms.length)
       throw new ae();
     for (const t of e.atoms)
       if (t.index === null)
-        throw new Se();
+        throw new ke();
     this.molecule = e;
   }
   /**
@@ -2244,9 +2261,9 @@ class ce {
   isotopeI() {
     for (const e of this.molecule.getIsotopes("I")) {
       if (e.token !== "USER")
-        throw new se(`Check::isotopeI() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+        throw new re(`Check::isotopeI() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
       if (e.index === 0)
-        throw new Se(`Check::isotopeI() - Isotope "${e.isotope}" Atoms must have a non-zero index!`);
+        throw new ke(`Check::isotopeI() - Isotope "${e.isotope}" Atoms must have a non-zero index!`);
     }
     return !0;
   }
@@ -2257,9 +2274,9 @@ class ce {
   isotopeU() {
     for (const e of this.molecule.getIsotopes("U")) {
       if (e.token !== "AUTH")
-        throw new se(`Check::isotopeU() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+        throw new re(`Check::isotopeU() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
       if (e.index !== 0)
-        throw new Se(`Check::isotopeU() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
+        throw new ke(`Check::isotopeU() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
     }
     return !0;
   }
@@ -2273,8 +2290,8 @@ class ce {
       if (t.meta.length < 1)
         throw new H();
       if (t.token !== "USER")
-        throw new se(`Check::isotopeM() - "${t.token}" is not a valid Token slug for "${t.isotope}" isotope Atoms!`);
-      const n = fe.aggregateMeta(t.meta);
+        throw new re(`Check::isotopeM() - "${t.token}" is not a valid Token slug for "${t.isotope}" isotope Atoms!`);
+      const n = pe.aggregateMeta(t.meta);
       for (const s of e) {
         let r = n[s];
         if (r) {
@@ -2299,9 +2316,9 @@ class ce {
   isotopeC() {
     for (const e of this.molecule.getIsotopes("C")) {
       if (e.token !== "USER")
-        throw new se(`Check::isotopeC() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+        throw new re(`Check::isotopeC() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
       if (e.index !== 0)
-        throw new Se(`Check::isotopeC() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
+        throw new ke(`Check::isotopeC() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
     }
     return !0;
   }
@@ -2321,9 +2338,9 @@ class ce {
         if (!Object.prototype.hasOwnProperty.call(t, s) || !t[s])
           throw new H(`Check::isotopeT() - Required meta field "${s}" is missing!`);
       if (e.token !== "USER")
-        throw new se(`Check::isotopeT() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+        throw new re(`Check::isotopeT() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
       if (e.index !== 0)
-        throw new Se(`Check::isotopeT() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
+        throw new ke(`Check::isotopeT() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
     }
     return !0;
   }
@@ -2344,7 +2361,7 @@ class ce {
         if (!Array.isArray(n))
           throw new H("Check::isotopeR() - Incorrect rule format!");
         for (const s of n)
-          ve.toObject(s);
+          Ae.toObject(s);
         if (n.length < 1)
           throw new H("Check::isotopeR() - No rules!");
       }
@@ -2359,7 +2376,7 @@ class ce {
   isotopeP() {
     for (const e of this.molecule.getIsotopes("P")) {
       if (e.token !== "USER")
-        throw new se(`Check::isotopeP() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+        throw new re(`Check::isotopeP() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
       const t = e.aggregatedMeta();
       if (!Object.prototype.hasOwnProperty.call(t, "peerHost") || !t.peerHost)
         throw new H('Check::isotopeP() - Required meta field "peerHost" is missing!');
@@ -2374,7 +2391,7 @@ class ce {
   isotopeA() {
     for (const e of this.molecule.getIsotopes("A")) {
       if (e.token !== "USER")
-        throw new se(`Check::isotopeA() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+        throw new re(`Check::isotopeA() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
       if (!e.metaType)
         throw new H('Check::isotopeA() - Required field "metaType" is missing!');
       if (!e.metaId)
@@ -2401,7 +2418,7 @@ class ce {
         throw new H("Check::isotopeB() - B-isotope atoms must have a metaId!");
       const s = Number(n.value);
       if (Number.isNaN(s))
-        throw new _e("Check::isotopeB() - B-isotope atom value is not a valid number!");
+        throw new Se("Check::isotopeB() - B-isotope atom value is not a valid number!");
     }
     const t = this.molecule.getIsotopes("V");
     if (t.length > 0) {
@@ -2431,9 +2448,9 @@ class ce {
         throw new H("Check::isotopeF() - F-isotope atoms must have a metaId!");
       const s = Number(n.value);
       if (Number.isNaN(s))
-        throw new _e("Check::isotopeF() - F-isotope atom value is not a valid number!");
+        throw new Se("Check::isotopeF() - F-isotope atom value is not a valid number!");
       if (s < 0)
-        throw new _e("Check::isotopeF() - F-isotope atom value must not be negative!");
+        throw new Se("Check::isotopeF() - F-isotope atom value must not be negative!");
     }
     const t = this.molecule.getIsotopes("V");
     if (t.length > 0) {
@@ -2462,7 +2479,7 @@ class ce {
       if (s.token !== a.token)
         throw new St();
       if (a.value < 0)
-        throw new _e();
+        throw new Se();
       if (Number(s.value) + Number(a.value) !== 0)
         throw new Oe();
       return !0;
@@ -2479,9 +2496,9 @@ class ce {
           throw new St();
         if (a > 0) {
           if (i < 0)
-            throw new _e();
+            throw new Se();
           if (c.walletAddress === s.walletAddress)
-            throw new is();
+            throw new as();
         }
         r += i;
       }
@@ -2508,7 +2525,7 @@ class ce {
     if (this.molecule.molecularHash !== g.hashAtoms({
       atoms: this.molecule.atoms
     }))
-      throw new ns();
+      throw new rs();
     return !0;
   }
   /**
@@ -2541,9 +2558,9 @@ class ce {
     a.update(i);
     const c = a.getHash("HEX", { outputLen: 256 }), u = this.molecule.atoms[0];
     let l = u.walletAddress;
-    const h = C.get(u.aggregatedMeta(), "signingWallet");
-    if (h && (l = C.get(JSON.parse(h), "address")), c !== l)
-      throw new rs();
+    const h = T.get(u.aggregatedMeta(), "signingWallet");
+    if (h && (l = T.get(JSON.parse(h), "address")), c !== l)
+      throw new os();
     return !0;
   }
   /**
@@ -2614,8 +2631,8 @@ class ce {
    */
   static verifyFromServerData(e) {
     try {
-      const t = ce.fromServerData(e);
-      return new ce(t).verify(), {
+      const t = ve.fromServerData(e);
+      return new ve(t).verify(), {
         molecularHash: e.molecularHash,
         verified: !0,
         error: null
@@ -2629,7 +2646,7 @@ class ce {
     }
   }
 }
-class he extends x {
+class ue extends x {
   /**
    * Class constructor
    *
@@ -2641,7 +2658,7 @@ class he extends x {
     super(e, t, n), this.name = "BalanceInsufficientException";
   }
 }
-class Ze extends x {
+class Ye extends x {
   /**
    * Class constructor
    *
@@ -2888,7 +2905,7 @@ class z {
   fuseToken(e, t) {
     const n = e.length;
     if (this.sourceWallet.balance - n < 0)
-      throw new he();
+      throw new ue();
     return this.addAtom(g.create({
       isotope: "V",
       wallet: this.sourceWallet,
@@ -2919,9 +2936,9 @@ class z {
     walletBundle: t = null
   }) {
     if (e < 0)
-      throw new Ze("Molecule::burnToken() - Amount to burn must be positive!");
+      throw new Ye("Molecule::burnToken() - Amount to burn must be positive!");
     if (this.sourceWallet.balance - e < 0)
-      throw new he();
+      throw new ue();
     return this.addAtom(g.create({
       isotope: "V",
       wallet: this.sourceWallet,
@@ -2947,7 +2964,7 @@ class z {
     units: t = []
   }) {
     if (e < 0)
-      throw new Ze("Molecule::replenishToken() - Amount to replenish must be positive!");
+      throw new Ye("Molecule::replenishToken() - Amount to replenish must be positive!");
     if (t.length) {
       t = _.getTokenUnits(t), this.remainderWallet.tokenUnits = this.sourceWallet.tokenUnits;
       for (const n of t)
@@ -2980,7 +2997,7 @@ class z {
     amount: t
   }) {
     if (this.sourceWallet.balance - t < 0)
-      throw new he();
+      throw new ue();
     return this.addAtom(g.create({
       isotope: "V",
       wallet: this.sourceWallet,
@@ -3013,10 +3030,10 @@ class z {
     amount: t
   }) {
     if (t <= 0)
-      throw new Ze("Molecule::addStackableTransfer() - Amount must be positive!");
+      throw new Ye("Molecule::addStackableTransfer() - Amount must be positive!");
     if (this.sourceWallet.balance - t < 0)
-      throw new he();
-    const n = this.sourceWallet.batchId || de({});
+      throw new ue();
+    const n = this.sourceWallet.batchId || he({});
     return this.addAtom(g.create({
       isotope: "V",
       wallet: this.sourceWallet,
@@ -3028,7 +3045,7 @@ class z {
       value: t,
       metaType: "walletBundle",
       metaId: e.bundle,
-      batchId: de({})
+      batchId: he({})
     })), this.addAtom(g.create({
       isotope: "V",
       wallet: this.remainderWallet,
@@ -3048,7 +3065,7 @@ class z {
     tradeRates: t
   }) {
     if (this.sourceWallet.balance - e < 0)
-      throw new he();
+      throw new ue();
     const n = _.create({
       secret: this.secret,
       bundle: this.bundle,
@@ -3087,7 +3104,7 @@ class z {
     for (const [r, i] of Object.entries(e || {}))
       n += i;
     if (this.sourceWallet.balance - n < 0)
-      throw new he();
+      throw new ue();
     const s = new P();
     t && s.setSigningWallet(t), this.addAtom(g.create({
       isotope: "B",
@@ -3102,7 +3119,7 @@ class z {
         isotope: "V",
         token: this.sourceWallet.token,
         value: i,
-        batchId: this.sourceWallet.batchId ? de({}) : null,
+        batchId: this.sourceWallet.batchId ? he({}) : null,
         metaType: "walletBundle",
         metaId: r
       }));
@@ -3154,7 +3171,7 @@ class z {
   }) {
     const r = [];
     for (const a of n)
-      r.push(a instanceof ve ? a : ve.toObject(a));
+      r.push(a instanceof Ae ? a : Ae.toObject(a));
     const i = new P({
       rule: JSON.stringify(r)
     });
@@ -3210,7 +3227,7 @@ class z {
   }) {
     const s = {
       code: n,
-      hash: me(t.trim(), "Molecule::initIdentifierCreation")
+      hash: fe(t.trim(), "Molecule::initIdentifierCreation")
     };
     return this.addAtom(g.create({
       isotope: "C",
@@ -3349,13 +3366,13 @@ class z {
   }) {
     if (this.atoms.length === 0 || this.atoms.filter((d) => !(d instanceof g)).length !== 0)
       throw new ae();
-    !t && !this.bundle && (this.bundle = e || me(this.secret, "Molecule::sign")), this.molecularHash = g.hashAtoms({
+    !t && !this.bundle && (this.bundle = e || fe(this.secret, "Molecule::sign")), this.molecularHash = g.hashAtoms({
       atoms: this.atoms
     });
     const s = this.atoms[0];
     let r = s.position;
-    const i = C.get(s.aggregatedMeta(), "signingWallet");
-    if (i && (r = C.get(JSON.parse(i), "position")), !r)
+    const i = T.get(s.aggregatedMeta(), "signingWallet");
+    if (i && (r = T.get(JSON.parse(i), "position")), !r)
       throw new Vt("Signing wallet must have a position!");
     const a = _.generateKey({
       secret: this.secret,
@@ -3365,7 +3382,7 @@ class z {
     let l = "";
     for (const d in c) {
       let w = c[d];
-      for (let A = 0, T = 8 - u[d]; A < T; A++)
+      for (let A = 0, M = 8 - u[d]; A < M; A++)
         w = new L("SHAKE256", "TEXT").update(w).getHash("HEX", { outputLen: 512 });
       l += w;
     }
@@ -3515,7 +3532,7 @@ class z {
    * @param senderWallet
    */
   check(e = null) {
-    return new ce(this).verify(e);
+    return new ve(this).verify(e);
   }
   /**
    * Convert Hm to numeric notation via EnumerateMolecule(Hm)
@@ -3524,34 +3541,6 @@ class z {
    */
   normalizedHash() {
     return z.normalize(z.enumerate(this.molecularHash));
-  }
-}
-const Ye = 10 ** 18;
-class pe {
-  /**
-   * @param {number} value
-   * @return {number}
-   */
-  static val(e) {
-    return Math.abs(e * Ye) < 1 ? 0 : e;
-  }
-  /**
-   * @param {number} value1
-   * @param {number} value2
-   * @param {boolean} debug
-   * @return {number}
-   */
-  static cmp(e, t, n = !1) {
-    const s = pe.val(e) * Ye, r = pe.val(t) * Ye;
-    return Math.abs(s - r) < 1 ? 0 : s > r ? 1 : -1;
-  }
-  /**
-   * @param {number} value1
-   * @param {number} value2
-   * @return {boolean}
-   */
-  static equal(e, t) {
-    return pe.cmp(e, t) === 0;
   }
 }
 class xe {
@@ -3670,7 +3659,35 @@ class xe {
     };
   }
 }
-class oe extends x {
+const et = 10 ** 18;
+class de {
+  /**
+   * @param {number} value
+   * @return {number}
+   */
+  static val(e) {
+    return Math.abs(e * et) < 1 ? 0 : e;
+  }
+  /**
+   * @param {number} value1
+   * @param {number} value2
+   * @param {boolean} debug
+   * @return {number}
+   */
+  static cmp(e, t, n = !1) {
+    const s = de.val(e) * et, r = de.val(t) * et;
+    return Math.abs(s - r) < 1 ? 0 : s > r ? 1 : -1;
+  }
+  /**
+   * @param {number} value1
+   * @param {number} value2
+   * @return {boolean}
+   */
+  static equal(e, t) {
+    return de.cmp(e, t) === 0;
+  }
+}
+class te extends x {
   /**
    * Class constructor
    *
@@ -3694,7 +3711,7 @@ class Ke extends x {
     super(e, t, n), this.name = "UnauthenticatedException";
   }
 }
-class O {
+class E {
   /**
    * Class constructor
    *
@@ -3708,14 +3725,14 @@ class O {
     dataKey: n = null
   }) {
     if (this.dataKey = n, this.errorKey = "exception", this.$__payload = null, this.$__query = e, this.$__originResponse = t, this.$__response = t, typeof this.$__response > "u" || this.$__response === null)
-      throw new oe();
-    if (C.has(this.$__response, this.errorKey)) {
-      const s = C.get(this.$__response, this.errorKey);
-      throw String(s).includes("Unauthenticated") ? new Ke() : new oe();
+      throw new te();
+    if (T.has(this.$__response, this.errorKey)) {
+      const s = T.get(this.$__response, this.errorKey);
+      throw String(s).includes("Unauthenticated") ? new Ke() : new te();
     }
     if (this.$__response.errors && Array.isArray(this.$__response.errors) && this.$__response.errors.length > 0) {
       const s = this.$__response.errors[0].message || "Unknown GraphQL error";
-      throw s.includes("Unauthenticated") ? new Ke() : new oe(`GraphQL Error: ${s}`);
+      throw s.includes("Unauthenticated") ? new Ke() : new te(`GraphQL Error: ${s}`);
     }
     this.init();
   }
@@ -3731,10 +3748,10 @@ class O {
     if (!this.dataKey)
       return this.response();
     if (!this.response().data)
-      throw new oe("Response has no data field");
-    if (!C.has(this.response(), this.dataKey))
-      throw new oe(`Missing expected field: ${this.dataKey}`);
-    return C.get(this.response(), this.dataKey);
+      throw new te("Response has no data field");
+    if (!T.has(this.response(), this.dataKey))
+      throw new te(`Missing expected field: ${this.dataKey}`);
+    return T.get(this.response(), this.dataKey);
   }
   /**
    * @return {object}
@@ -3909,7 +3926,7 @@ class N {
    * @return {Response}
    */
   createResponse(e) {
-    return new O({
+    return new E({
       query: this,
       json: e
     });
@@ -3951,7 +3968,7 @@ class N {
       return this.$__response = await this.createResponseRaw(s), this.$__response;
     } catch (s) {
       if (s.name === "AbortError")
-        return this.knishIOClient.log("warn", "Query was cancelled"), new O({
+        return this.knishIOClient.log("warn", "Query was cancelled"), new E({
           query: this,
           json: { data: null, errors: [{ message: "Query was cancelled" }] }
         });
@@ -3987,7 +4004,7 @@ class N {
     return {};
   }
 }
-class os extends O {
+class ls extends E {
   /**
    * Class constructor
    *
@@ -4018,13 +4035,13 @@ class os extends O {
     }), e.address = t.address, e.position = t.position, e.bundle = t.bundleHash, e.batchId = t.batchId, e.characters = t.characters, e.pubkey = t.pubkey, e.balance = String(t.amount != null ? t.amount : 0)), e;
   }
 }
-class as extends N {
+class cs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query ($bundle: String!) {
+    super(e, t), this.$__query = O`query ($bundle: String!) {
       ContinuId(bundle: $bundle) {
         address,
         bundleHash,
@@ -4045,13 +4062,13 @@ class as extends N {
    * @return {ResponseContinuId}
    */
   createResponse(e) {
-    return new os({
+    return new ls({
       query: this,
       json: e
     });
   }
 }
-class ls extends O {
+class us extends E {
   /**
    * Class constructor
    *
@@ -4079,17 +4096,17 @@ class ls extends O {
       return null;
     const t = {};
     return e.forEach((n) => {
-      n.metas = fe.aggregateMeta(n.metas), t[n.bundleHash] = n;
+      n.metas = pe.aggregateMeta(n.metas), t[n.bundleHash] = n;
     }), t;
   }
 }
-class cs extends N {
+class hs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query( $bundleHashes: [ String! ] ) {
+    super(e, t), this.$__query = O`query( $bundleHashes: [ String! ] ) {
       WalletBundle( bundleHashes: $bundleHashes ) {
         bundleHash,
         metas {
@@ -4110,13 +4127,13 @@ class cs extends N {
    * @return {ResponseWalletBundle}
    */
   createResponse(e) {
-    return new ls({
+    return new us({
       query: this,
       json: e
     });
   }
 }
-class Le extends O {
+class Le extends E {
   /**
    * Class constructor
    *
@@ -4158,7 +4175,7 @@ class Le extends O {
       characters: e.characters
     }), n.address = e.address, n.bundle = e.bundleHash), e.token && (n.tokenName = e.token.name, n.tokenAmount = e.token.amount, n.tokenSupply = e.token.supply, n.tokenFungibility = e.token.fungibility), e.tokenUnits.length)
       for (const s of e.tokenUnits)
-        n.tokenUnits.push(ye.createFromGraphQL(s));
+        n.tokenUnits.push(me.createFromGraphQL(s));
     if (e.tradeRates.length)
       for (const s of e.tradeRates)
         n.tradeRates[s.tokenSlug] = s.amount;
@@ -4191,14 +4208,14 @@ class Le extends O {
     return this.getWallets();
   }
 }
-class us extends N {
+class ds extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query( $bundleHash: String, $tokenSlug: String ) {
-      Wallet( bundleHash: $bundleHash, tokenSlug: $tokenSlug ) {
+    super(e, t), this.$__query = O`query( $bundleHash: String, $token: String ) {
+      Wallet( bundleHash: $bundleHash, token: $token ) {
         address,
         bundleHash,
         token {
@@ -4239,7 +4256,7 @@ class us extends N {
     });
   }
 }
-class hs extends O {
+class ps extends E {
   /**
    * Class constructor
    *
@@ -4268,13 +4285,13 @@ class hs extends O {
     });
   }
 }
-class ds extends N {
+class fs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query( $address: String, $bundleHash: String, $type: String, $token: String, $position: String ) {
+    super(e, t), this.$__query = O`query( $address: String, $bundleHash: String, $type: String, $token: String, $position: String ) {
       Balance( address: $address, bundleHash: $bundleHash, type: $type, token: $token, position: $position ) {
         address,
         bundleHash,
@@ -4303,13 +4320,13 @@ class ds extends N {
    * @return {ResponseBalance}
    */
   createResponse(e) {
-    return new hs({
+    return new ps({
       query: this,
       json: e
     });
   }
 }
-class ps extends O {
+class ms extends E {
   /**
    * Class constructor
    *
@@ -4342,30 +4359,6 @@ class ps extends O {
     }, n = e.pop();
     return n.instances && (t.instances = n.instances), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
   }
-  /**
-   * Verifies the cryptographic integrity of all molecules associated
-   * with meta instances in this response. For each molecule, reconstructs
-   * it from server data and runs CheckMolecule.verify() to validate
-   * the molecular hash and OTS signature.
-   *
-   * @return {{ verified: boolean, molecules: Array<{ molecularHash: string, verified: boolean, error: string|null }> }}
-   */
-  verifyIntegrity() {
-    var s;
-    const e = [], t = this.data();
-    if (!t || t.length === 0)
-      return { verified: !0, molecules: e };
-    const n = ((s = t[t.length - 1]) == null ? void 0 : s.instances) || [];
-    for (const r of n) {
-      const i = r.molecules || [];
-      for (const a of i)
-        e.push(ce.verifyFromServerData(a));
-    }
-    return {
-      verified: e.length === 0 || e.every((r) => r.verified),
-      molecules: e
-    };
-  }
 }
 class At extends N {
   /**
@@ -4373,7 +4366,7 @@ class At extends N {
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $queryArgs: QueryArgs, $countBy: String, $cellSlug: String ) {
+    super(e, t), this.$__query = O`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $queryArgs: QueryArgs, $countBy: String, $cellSlug: String ) {
       MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, queryArgs: $queryArgs, countBy: $countBy, cellSlug: $cellSlug ) {
         metaType,
         instanceCount {
@@ -4436,7 +4429,7 @@ class At extends N {
    * @return {ResponseMetaType}
    */
   createResponse(e) {
-    return new ps({
+    return new ms({
       query: this,
       json: e
     });
@@ -4448,7 +4441,7 @@ class Ie extends N {
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query( $batchId: String ) {
+    super(e, t), this.$__query = O`query( $batchId: String ) {
       Batch( batchId: $batchId ) {
         ${Ie.getFields()},
         children {
@@ -4516,20 +4509,20 @@ class Ie extends N {
    * @return {Response}
    */
   createResponse(e) {
-    const t = new O({
+    const t = new E({
       query: this,
       json: e
     });
     return t.dataKey = "data.Batch", t;
   }
 }
-class fs extends N {
+class ys extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query( $batchId: String ) {
+    super(e, t), this.$__query = O`query( $batchId: String ) {
       BatchHistory( batchId: $batchId ) {
         ${Ie.getFields()}
       }
@@ -4542,14 +4535,14 @@ class fs extends N {
    * @return {Response}
    */
   createResponse(e) {
-    const t = new O({
+    const t = new E({
       query: this,
       json: e
     });
     return t.dataKey = "data.BatchHistory", t;
   }
 }
-class V extends O {
+class V extends E {
   /**
    * Class constructor
    *
@@ -4570,7 +4563,7 @@ class V extends O {
    * Initialize response object with payload data
    */
   init() {
-    const e = C.get(this.data(), "payload");
+    const e = T.get(this.data(), "payload");
     try {
       this.$__payload = Object.prototype.toString.call(e) === "[object String]" ? JSON.parse(e) : e;
     } catch {
@@ -4593,7 +4586,7 @@ class V extends O {
     if (!e)
       return null;
     const t = new z({});
-    return t.molecularHash = C.get(e, "molecularHash"), t.status = C.get(e, "status"), t.createdAt = C.get(e, "createdAt"), t;
+    return t.molecularHash = T.get(e, "molecularHash"), t.status = T.get(e, "status"), t.createdAt = T.get(e, "createdAt"), t;
   }
   /**
    * Returns whether molecule was accepted or not
@@ -4609,7 +4602,7 @@ class V extends O {
    * @return {string}
    */
   status() {
-    return C.get(this.data(), "status", "rejected");
+    return T.get(this.data(), "status", "rejected");
   }
   /**
    * Returns the reason for rejection
@@ -4617,7 +4610,7 @@ class V extends O {
    * @return {string}
    */
   reason() {
-    return C.get(this.data(), "reason", "Invalid response from server");
+    return T.get(this.data(), "reason", "Invalid response from server");
   }
   /**
    * Returns payload object
@@ -4628,7 +4621,7 @@ class V extends O {
     return this.$__payload;
   }
 }
-class it extends N {
+class je extends N {
   /**
    * Creates a new Request for the given parameters
    *
@@ -4661,7 +4654,7 @@ class it extends N {
       return this.$__response = await this.createResponseRaw(r), this.$__response;
     } catch (s) {
       if (s.name === "AbortError")
-        return this.knishIOClient.log("warn", "Mutation was cancelled"), new O({
+        return this.knishIOClient.log("warn", "Mutation was cancelled"), new E({
           query: this,
           json: { data: null, errors: [{ message: "Mutation was cancelled" }] }
         });
@@ -4672,14 +4665,14 @@ class it extends N {
     return {};
   }
 }
-class U extends it {
+class U extends je {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    * @param molecule
    */
   constructor(e, t, n) {
-    super(e, t), this.$__molecule = n, this.$__remainderWallet = null, this.$__query = E`mutation( $molecule: MoleculeInput! ) {
+    super(e, t), this.$__molecule = n, this.$__remainderWallet = null, this.$__query = O`mutation( $molecule: MoleculeInput! ) {
       ProposeMolecule( molecule: $molecule ) {
         molecularHash,
         height,
@@ -4743,7 +4736,7 @@ class U extends it {
     return this.$__molecule;
   }
 }
-class ms extends V {
+class gs extends V {
   /**
    * return the authorization key
    *
@@ -4751,9 +4744,9 @@ class ms extends V {
    * @return {*}
    */
   payloadKey(e) {
-    if (!C.has(this.payload(), e))
-      throw new oe(`ResponseRequestAuthorization::payloadKey() - '${e}' key was not found in the payload!`);
-    return C.get(this.payload(), e);
+    if (!T.has(this.payload(), e))
+      throw new te(`ResponseRequestAuthorization::payloadKey() - '${e}' key was not found in the payload!`);
+    return T.get(this.payload(), e);
   }
   /**
    * Returns the auth token
@@ -4786,7 +4779,7 @@ class ms extends V {
     return this.payloadKey("key");
   }
 }
-class ys extends U {
+class ws extends U {
   /**
    *
    * @param {object} meta
@@ -4801,15 +4794,15 @@ class ys extends U {
    * @return {ResponseRequestAuthorization}
    */
   createResponse(e) {
-    return new ms({
+    return new gs({
       query: this,
       json: e
     });
   }
 }
-class gs extends V {
+class bs extends V {
 }
-class ws extends U {
+class ks extends U {
   /**
    * @param {Wallet|null} recipientWallet
    * @param {number|null} amount
@@ -4835,15 +4828,15 @@ class ws extends U {
    * @return {ResponseCreateToken}
    */
   createResponse(e) {
-    return new gs({
+    return new bs({
       query: this,
       json: e
     });
   }
 }
-class bs extends V {
+class Ss extends V {
 }
-class ks extends U {
+class _s extends U {
   /**
    * Fills a Molecule with the appropriate atoms and prepares for broadcast
    *
@@ -4878,13 +4871,13 @@ class ks extends U {
    * @return {ResponseRequestTokens}
    */
   createResponse(e) {
-    return new bs({
+    return new Ss({
       query: this,
       json: e
     });
   }
 }
-class Ss extends V {
+class $s extends V {
   /**
    * Returns result of the transfer
    *
@@ -4898,7 +4891,7 @@ class Ss extends V {
     return e.reason = typeof t.reason > "u" ? "Invalid response from server" : t.reason, e.status = typeof t.status > "u" ? "rejected" : t.status, e;
   }
 }
-class _s extends U {
+class As extends U {
   /**
    * Fills the Molecule with provided wallet and amount data
    *
@@ -4921,15 +4914,15 @@ class _s extends U {
    * @return {ResponseTransferTokens}
    */
   createResponse(e) {
-    return new Ss({
+    return new $s({
       query: this,
       json: e
     });
   }
 }
-class $s extends V {
+class vs extends V {
 }
-class As extends U {
+class xs extends U {
   fillMolecule({
     type: e,
     contact: t,
@@ -4948,15 +4941,15 @@ class As extends U {
    * @return {ResponseCreateIdentifier}
    */
   createResponse(e) {
-    return new $s({
+    return new vs({
       query: this,
       json: e
     });
   }
 }
-class vs extends V {
+class Is extends V {
 }
-class xs extends U {
+class Ts extends U {
   /**
    * Class constructor
    *
@@ -4982,15 +4975,15 @@ class xs extends U {
    * @return {ResponseClaimShadowWallet}
    */
   createResponse(e) {
-    return new vs({
+    return new Is({
       query: this,
       json: e
     });
   }
 }
-class Is extends V {
+class Ms extends V {
 }
-class Ts extends U {
+class Cs extends U {
   /**
    * Fills a molecule with an appropriate metadata atom
    *
@@ -5019,15 +5012,15 @@ class Ts extends U {
    * @return {ResponseCreateMeta}
    */
   createResponse(e) {
-    return new Is({
+    return new Ms({
       query: this,
       json: e
     });
   }
 }
-class Ms extends V {
+class Es extends V {
 }
-class Cs extends U {
+class Os extends U {
   /**
    * Fills a molecule with a P-isotope peering atom
    *
@@ -5047,15 +5040,15 @@ class Cs extends U {
    * @return {ResponsePeering}
    */
   createResponse(e) {
-    return new Ms({
+    return new Es({
       query: this,
       json: e
     });
   }
 }
-class Es extends V {
+class Rs extends V {
 }
-class Os extends U {
+class Ws extends U {
   /**
    * Fills a molecule with an A-isotope append request atom
    *
@@ -5084,15 +5077,78 @@ class Os extends U {
    * @return {ResponseAppendRequest}
    */
   createResponse(e) {
-    return new Es({
+    return new Rs({
       query: this,
       json: e
     });
   }
 }
-class Ws extends V {
+class Us extends E {
+  /**
+   * Class constructor
+   *
+   * @param {Query} query
+   * @param {object} json
+   */
+  constructor({
+    query: e,
+    json: t
+  }) {
+    super({
+      query: e,
+      json: t,
+      dataKey: "data.LinkIdentifier"
+    });
+  }
+  /**
+   * Returns success status
+   *
+   * @return {*}
+   */
+  success() {
+    return T.get(this.data(), "set");
+  }
+  /**
+   * Returns message
+   *
+   * @return {*}
+   */
+  message() {
+    return T.get(this.data(), "message");
+  }
 }
-class Rs extends U {
+class Bs extends je {
+  /**
+   * @param {UrqlClientWrapper} graphQLClient
+   * @param {KnishIOClient} knishIOClient
+   */
+  constructor(e, t) {
+    super(e, t), this.$__query = O`mutation( $bundle: String!, $type: String!, $content: String! ) {
+      LinkIdentifier( bundle: $bundle, type: $type, content: $content ) {
+        type,
+        bundle,
+        content,
+        set,
+        message
+      }
+    }`;
+  }
+  /**
+   * Returns a Response object
+   *
+   * @param {object} json
+   * @return {ResponseLinkIdentifier}
+   */
+  createResponse(e) {
+    return new Us({
+      query: this,
+      json: e
+    });
+  }
+}
+class qs extends V {
+}
+class Hs extends U {
   fillMolecule(e) {
     this.$__molecule.initWalletCreation(e), this.$__molecule.sign({}), this.$__molecule.check();
   }
@@ -5103,13 +5159,13 @@ class Rs extends U {
    * @return {ResponseCreateWallet}
    */
   createResponse(e) {
-    return new Ws({
+    return new qs({
       query: this,
       json: e
     });
   }
 }
-class Us extends O {
+class Ps extends E {
   /**
    * Class constructor
    *
@@ -5157,9 +5213,9 @@ class Us extends O {
    * @return {*}
    */
   payloadKey(e) {
-    if (!C.has(this.payload(), e))
-      throw new oe(`ResponseAuthorizationGuest::payloadKey() - '${e}' key is not found in the payload!`);
-    return C.get(this.payload(), e);
+    if (!T.has(this.payload(), e))
+      throw new te(`ResponseAuthorizationGuest::payloadKey() - '${e}' key is not found in the payload!`);
+    return T.get(this.payload(), e);
   }
   /**
    * Returns the auth token
@@ -5193,13 +5249,13 @@ class Us extends O {
     return this.payloadKey("encrypt");
   }
 }
-class Bs extends it {
+class Ks extends je {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
+    super(e, t), this.$__query = O`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
       AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {
         token,
         pubkey,
@@ -5214,7 +5270,7 @@ class Bs extends it {
    * @return {ResponseRequestAuthorizationGuest}
    */
   createResponse(e) {
-    return new Us({
+    return new Ps({
       query: this,
       json: e
     });
@@ -5232,7 +5288,7 @@ class vt extends x {
     super(e, t, n), this.name = "WalletShadowException";
   }
 }
-class qs extends x {
+class Ns extends x {
   /**
    * Class constructor
    *
@@ -5244,7 +5300,7 @@ class qs extends x {
     super(e, t, n), this.name = "StackableUnitDecimalsException";
   }
 }
-class We extends x {
+class Re extends x {
   /**
    * Class constructor
    *
@@ -5256,7 +5312,7 @@ class We extends x {
     super(e, t, n), this.name = "StackableUnitAmountException";
   }
 }
-class je {
+class Qe {
   /**
    *
    * @param {UrqlClientWrapper} graphQLClient
@@ -5326,9 +5382,9 @@ class je {
     return this.$__variables;
   }
 }
-class Hs extends je {
+class Fs extends Qe {
   constructor(e) {
-    super(e), this.$__subscribe = E`
+    super(e), this.$__subscribe = O`
       subscription onCreateMolecule ( $bundle: String! ) {
         CreateMolecule( bundle: $bundle ) {
           molecularHash,
@@ -5376,9 +5432,9 @@ class Hs extends je {
     `;
   }
 }
-class Ps extends je {
+class Ls extends Qe {
   constructor(e) {
-    super(e), this.$__subscribe = E`
+    super(e), this.$__subscribe = O`
       subscription onWalletStatus ( $bundle: String!, $token: String! ) {
         WalletStatus( bundle: $bundle, token: $token ) {
           bundle,
@@ -5390,9 +5446,9 @@ class Ps extends je {
     `;
   }
 }
-class Ks extends je {
+class js extends Qe {
   constructor(e) {
-    super(e), this.$__subscribe = E`
+    super(e), this.$__subscribe = O`
       subscription onActiveWallet ( $bundle: String! ) {
         ActiveWallet( bundle: $bundle ) {
           address,
@@ -5433,9 +5489,9 @@ class Ks extends je {
     `;
   }
 }
-class Ns extends je {
+class Qs extends Qe {
   constructor(e) {
-    super(e), this.$__subscribe = E`
+    super(e), this.$__subscribe = O`
       subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
         ActiveUser( metaType: $metaType, metaId: $metaId ) {
           bundleHash,
@@ -5448,7 +5504,7 @@ class Ns extends je {
       }`;
   }
 }
-class Fs extends O {
+class Ds extends E {
   /**
    * Class constructor
    *
@@ -5466,13 +5522,13 @@ class Fs extends O {
     });
   }
 }
-class Ls extends it {
+class Vs extends je {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`mutation(
+    super(e, t), this.$__query = O`mutation(
       $bundleHash: String!,
       $metaType: String!,
       $metaId: String!,
@@ -5509,13 +5565,13 @@ class Ls extends it {
    * @return {ResponseActiveSession}
    */
   createResponse(e) {
-    return new Fs({
+    return new Ds({
       query: this,
       json: e
     });
   }
 }
-class js extends O {
+class zs extends E {
   /**
    * Class constructor
    *
@@ -5544,13 +5600,13 @@ class js extends O {
     return t;
   }
 }
-class Qs extends N {
+class Js extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
+    super(e, t), this.$__query = O`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
       ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {
         bundleHash,
         metaType,
@@ -5566,13 +5622,13 @@ class Qs extends N {
    * @return {ResponseQueryActiveSession}
    */
   createResponse(e) {
-    return new js({
+    return new zs({
       query: this,
       json: e
     });
   }
 }
-class Ds extends O {
+class Gs extends E {
   /**
    * Class constructor
    *
@@ -5597,13 +5653,13 @@ class Ds extends O {
     return e;
   }
 }
-class Vs extends N {
+class Xs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query UserActivity (
+    super(e, t), this.$__query = O`query UserActivity (
       $bundleHash:String,
       $metaType: String,
       $metaId: String,
@@ -5685,19 +5741,19 @@ class Vs extends N {
    * @return {ResponseQueryUserActivity}
    */
   createResponse(e) {
-    return new Ds({
+    return new Gs({
       query: this,
       json: e
     });
   }
 }
-class zs extends N {
+class Zs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query( $slug: String, $slugs: [ String! ], $limit: Int, $order: String ) {
+    super(e, t), this.$__query = O`query( $slug: String, $slugs: [ String! ], $limit: Int, $order: String ) {
       Token( slug: $slug, slugs: $slugs, limit: $limit, order: $order ) {
         slug,
         name,
@@ -5715,7 +5771,7 @@ class zs extends N {
    * @returns {Response}
    */
   createResponse(e) {
-    return new O({
+    return new E({
       query: this,
       json: e,
       dataKey: "data.Token"
@@ -5734,7 +5790,7 @@ class xt extends x {
     super(e, t, n), this.name = "AuthorizationRejectedException";
   }
 }
-class Js extends O {
+class Ys extends E {
   /**
    * Class constructor
    *
@@ -5788,7 +5844,7 @@ class It extends N {
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query(
+    super(e, t), this.$__query = O`query(
       $molecularHashes: [String!],
       $bundleHashes: [String!],
       $positions:[String!],
@@ -5894,20 +5950,20 @@ class It extends N {
     cellSlugs: d,
     cellSlug: w,
     batchIds: A,
-    batchId: T,
+    batchId: M,
     values: f,
     value: y,
     metaTypes: b,
-    metaType: M,
+    metaType: C,
     metaIds: k,
     metaId: $,
     indexes: v,
     index: I,
     filter: S,
     latest: B,
-    queryArgs: W
+    queryArgs: R
   }) {
-    return t && (e = e || [], e.push(t)), s && (n = n || [], n.push(s)), i && (r = r || [], r.push(i)), c && (a = a || [], a.push(c)), l && (u = u || [], u.push(l)), p && (h = h || [], h.push(p)), w && (d = d || [], d.push(w)), T && (A = A || [], A.push(T)), y && (f = f || [], f.push(y)), M && (b = b || [], b.push(M)), $ && (k = k || [], k.push($)), I && (v = v || [], v.push(I)), {
+    return t && (e = e || [], e.push(t)), s && (n = n || [], n.push(s)), i && (r = r || [], r.push(i)), c && (a = a || [], a.push(c)), l && (u = u || [], u.push(l)), p && (h = h || [], h.push(p)), w && (d = d || [], d.push(w)), M && (A = A || [], A.push(M)), y && (f = f || [], f.push(y)), C && (b = b || [], b.push(C)), $ && (k = k || [], k.push($)), I && (v = v || [], v.push(I)), {
       molecularHashes: e,
       bundleHashes: n,
       positions: r,
@@ -5922,7 +5978,7 @@ class It extends N {
       indexes: v,
       filter: S,
       latest: B,
-      queryArgs: W
+      queryArgs: R
     };
   }
   /**
@@ -5932,13 +5988,13 @@ class It extends N {
    * @return {ResponseAtom}
    */
   createResponse(e) {
-    return new Js({
+    return new Ys({
       query: this,
       json: e
     });
   }
 }
-class Gs extends O {
+class er extends E {
   /**
    * Class constructor
    *
@@ -5963,13 +6019,13 @@ class Gs extends O {
     return e && e.callback ? JSON.parse(e.callback) : null;
   }
 }
-class Xs extends N {
+class tr extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query( $metaType: String, $metaId: String, ) {
+    super(e, t), this.$__query = O`query( $metaType: String, $metaId: String, ) {
       Policy( metaType: $metaType, metaId: $metaId ) {
         molecularHash,
         position,
@@ -5989,13 +6045,13 @@ class Xs extends N {
    * @return {ResponsePolicy}
    */
   createResponse(e) {
-    return new Gs({
+    return new er({
       query: this,
       json: e
     });
   }
 }
-class Zs extends O {
+class nr extends E {
   /**
    * Class constructor
    *
@@ -6023,27 +6079,6 @@ class Zs extends O {
     }, n = e.pop();
     return n.instances && (t.instances = n.instances), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
   }
-  /**
-   * Verifies the cryptographic integrity of all molecules associated
-   * with meta instances in this response. For each instance, reconstructs
-   * the molecule from server data and runs CheckMolecule.verify() to validate
-   * the molecular hash and OTS signature.
-   *
-   * @return {{ verified: boolean, molecules: Array<{ molecularHash: string, verified: boolean, error: string|null }> }}
-   */
-  verifyIntegrity() {
-    var s;
-    const e = [], t = this.data();
-    if (!t || t.length === 0)
-      return { verified: !0, molecules: e };
-    const n = ((s = t[t.length - 1]) == null ? void 0 : s.instances) || [];
-    for (const r of n)
-      r.molecule && e.push(ce.verifyFromServerData(r.molecule));
-    return {
-      verified: e.length === 0 || e.every((r) => r.verified),
-      molecules: e
-    };
-  }
 }
 class Tt extends N {
   /**
@@ -6051,7 +6086,7 @@ class Tt extends N {
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
+    super(e, t), this.$__query = O`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
       MetaTypeViaAtom(
         metaTypes: $metaTypes
         metaIds: $metaIds
@@ -6131,13 +6166,13 @@ class Tt extends N {
    * @return {ResponseMetaTypeViaAtom}
    */
   createResponse(e) {
-    return new Zs({
+    return new nr({
       query: this,
       json: e
     });
   }
 }
-class ot extends O {
+class ot extends E {
   /**
    * Class constructor
    *
@@ -6231,7 +6266,7 @@ class ot extends O {
       return { verified: !0, molecules: e };
     const n = ((s = t[t.length - 1]) == null ? void 0 : s.instances) || [];
     for (const r of n)
-      r.molecule && e.push(ce.verifyFromServerData(r.molecule));
+      r.molecule && e.push(ve.verifyFromServerData(r.molecule));
     return {
       verified: e.length === 0 || e.every((r) => r.verified),
       molecules: e
@@ -6244,7 +6279,7 @@ class Mt extends N {
    * @param {KnishIOClient} knishIOClient
    */
   constructor(e, t) {
-    super(e, t), this.$__query = E`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
+    super(e, t), this.$__query = O`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
       MetaTypeViaAtom(
         metaTypes: $metaTypes
         metaIds: $metaIds
@@ -6351,9 +6386,9 @@ class Mt extends N {
     });
   }
 }
-class Ys extends V {
+class sr extends V {
 }
-class er extends U {
+class rr extends U {
   /**
    *
    * @param {string} metaType
@@ -6381,13 +6416,13 @@ class er extends U {
    * @return {ResponseCreateRule}
    */
   createResponse(e) {
-    return new Ys({
+    return new sr({
       query: this,
       json: e
     });
   }
 }
-class tr extends U {
+class ir extends U {
   /**
    * Fills the Molecule with provided wallet and amount data
    *
@@ -6404,7 +6439,7 @@ class tr extends U {
     }), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
   }
 }
-class nr extends U {
+class or extends U {
   /**
    *
    * @param recipients
@@ -6504,24 +6539,24 @@ function Z(o, e) {
     };
   }
 }
-var R = { exclude: [], include: [], logging: !0 }, zt = {}, sr = { timeout: "true" }, J = function(o, e) {
+var W = { exclude: [], include: [], logging: !0 }, zt = {}, ar = { timeout: "true" }, J = function(o, e) {
   typeof window < "u" && (zt[o] = e);
-}, rr = function() {
+}, lr = function() {
   return Object.fromEntries(Object.entries(zt).filter((function(o) {
     var e, t = o[0];
-    return !(!((e = R == null ? void 0 : R.exclude) === null || e === void 0) && e.includes(t));
+    return !(!((e = W == null ? void 0 : W.exclude) === null || e === void 0) && e.includes(t));
   })).filter((function(o) {
     var e, t, n, s, r = o[0];
-    return !((e = R == null ? void 0 : R.include) === null || e === void 0) && e.some((function(i) {
+    return !((e = W == null ? void 0 : W.include) === null || e === void 0) && e.some((function(i) {
       return i.includes(".");
-    })) ? (t = R == null ? void 0 : R.include) === null || t === void 0 ? void 0 : t.some((function(i) {
+    })) ? (t = W == null ? void 0 : W.include) === null || t === void 0 ? void 0 : t.some((function(i) {
       return i.startsWith(r);
-    })) : ((n = R == null ? void 0 : R.include) === null || n === void 0 ? void 0 : n.length) === 0 || ((s = R == null ? void 0 : R.include) === null || s === void 0 ? void 0 : s.includes(r));
+    })) : ((n = W == null ? void 0 : W.include) === null || n === void 0 ? void 0 : n.length) === 0 || ((s = W == null ? void 0 : W.include) === null || s === void 0 ? void 0 : s.includes(r));
   })).map((function(o) {
     return [o[0], (0, o[1])()];
   })));
 };
-function Re(o) {
+function We(o) {
   return o ^= o >>> 16, o = Math.imul(o, 2246822507), o ^= o >>> 13, o = Math.imul(o, 3266489909), (o ^= o >>> 16) >>> 0;
 }
 var q = new Uint32Array([597399067, 2869860233, 951274213, 2716044179]);
@@ -6572,28 +6607,28 @@ function at(o, e) {
         u[0] = u[0] ^ l[0] << 0, u[0] = Math.imul(u[0], q[0]), u[0] = Q(u[0], 15), u[0] = Math.imul(u[0], q[1]), i[0] = i[0] ^ u[0];
     }
   })(o, n), (function(r, i) {
-    i[0] = i[0] ^ r.byteLength, i[1] = i[1] ^ r.byteLength, i[2] = i[2] ^ r.byteLength, i[3] = i[3] ^ r.byteLength, i[0] = i[0] + i[1] | 0, i[0] = i[0] + i[2] | 0, i[0] = i[0] + i[3] | 0, i[1] = i[1] + i[0] | 0, i[2] = i[2] + i[0] | 0, i[3] = i[3] + i[0] | 0, i[0] = Re(i[0]), i[1] = Re(i[1]), i[2] = Re(i[2]), i[3] = Re(i[3]), i[0] = i[0] + i[1] | 0, i[0] = i[0] + i[2] | 0, i[0] = i[0] + i[3] | 0, i[1] = i[1] + i[0] | 0, i[2] = i[2] + i[0] | 0, i[3] = i[3] + i[0] | 0;
+    i[0] = i[0] ^ r.byteLength, i[1] = i[1] ^ r.byteLength, i[2] = i[2] ^ r.byteLength, i[3] = i[3] ^ r.byteLength, i[0] = i[0] + i[1] | 0, i[0] = i[0] + i[2] | 0, i[0] = i[0] + i[3] | 0, i[1] = i[1] + i[0] | 0, i[2] = i[2] + i[0] | 0, i[3] = i[3] + i[0] | 0, i[0] = We(i[0]), i[1] = We(i[1]), i[2] = We(i[2]), i[3] = We(i[3]), i[0] = i[0] + i[1] | 0, i[0] = i[0] + i[2] | 0, i[0] = i[0] + i[3] | 0, i[1] = i[1] + i[0] | 0, i[2] = i[2] + i[0] | 0, i[3] = i[3] + i[0] | 0;
   })(o, n);
   var s = new Uint8Array(n.buffer);
   return Array.from(s).map((function(r) {
     return r.toString(16).padStart(2, "0");
   })).join("");
 }
-function ir(o, e) {
+function cr(o, e) {
   return new Promise((function(t) {
     setTimeout((function() {
       return t(e);
     }), o);
   }));
 }
-function or(o, e, t) {
+function ur(o, e, t) {
   return Promise.all(o.map((function(n) {
-    return Promise.race([n, ir(e, t)]);
+    return Promise.race([n, cr(e, t)]);
   })));
 }
-var ar = "0.19.1";
-function lr() {
-  return ar;
+var hr = "0.19.1";
+function dr() {
+  return hr;
 }
 function Jt() {
   return X(this, void 0, void 0, (function() {
@@ -6601,13 +6636,13 @@ function Jt() {
     return Z(this, (function(r) {
       switch (r.label) {
         case 0:
-          return r.trys.push([0, 2, , 3]), o = rr(), e = Object.keys(o), [4, or(Object.values(o), (R == null ? void 0 : R.timeout) || 1e3, sr)];
+          return r.trys.push([0, 2, , 3]), o = lr(), e = Object.keys(o), [4, ur(Object.values(o), (W == null ? void 0 : W.timeout) || 1e3, ar)];
         case 1:
           return t = r.sent(), n = t.filter((function(i) {
             return i !== void 0;
           })), s = {}, n.forEach((function(i, a) {
             s[e[a]] = i;
-          })), [2, Gt(s, R.exclude || [], R.include || [], "")];
+          })), [2, Gt(s, W.exclude || [], W.include || [], "")];
         case 2:
           throw r.sent();
         case 3:
@@ -6637,7 +6672,7 @@ function Gt(o, e, t, n) {
   }
   return s;
 }
-function cr(o) {
+function pr(o) {
   return X(this, void 0, void 0, (function() {
     var e, t;
     return Z(this, (function(n) {
@@ -6645,13 +6680,13 @@ function cr(o) {
         case 0:
           return n.trys.push([0, 2, , 3]), [4, Jt()];
         case 1:
-          return e = n.sent(), t = at(JSON.stringify(e)), Math.random() < 1e-3 && R.logging && (function(s, r) {
+          return e = n.sent(), t = at(JSON.stringify(e)), Math.random() < 1e-3 && W.logging && (function(s, r) {
             X(this, void 0, void 0, (function() {
               var i, a;
               return Z(this, (function(c) {
                 switch (c.label) {
                   case 0:
-                    if (i = "https://logging.thumbmarkjs.com/v1/log", a = { thumbmark: s, components: r, version: lr() }, sessionStorage.getItem("_tmjs_l")) return [3, 4];
+                    if (i = "https://logging.thumbmarkjs.com/v1/log", a = { thumbmark: s, components: r, version: dr() }, sessionStorage.getItem("_tmjs_l")) return [3, 4];
                     sessionStorage.setItem("_tmjs_l", "1"), c.label = 1;
                   case 1:
                     return c.trys.push([1, 3, , 4]), [4, fetch(i, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) })];
@@ -6672,19 +6707,19 @@ function cr(o) {
     }));
   }));
 }
-function ur(o) {
+function fr(o) {
   for (var e = 0, t = 0; t < o.length; ++t) e += Math.abs(o[t]);
   return e;
 }
 function Xt(o, e, t) {
   for (var n = [], s = 0; s < o[0].data.length; s++) {
     for (var r = [], i = 0; i < o.length; i++) r.push(o[i].data[s]);
-    n.push(hr(r));
+    n.push(mr(r));
   }
   var a = new Uint8ClampedArray(n);
   return new ImageData(a, e, t);
 }
-function hr(o) {
+function mr(o) {
   if (o.length === 0) return 0;
   for (var e = {}, t = 0, n = o; t < n.length; t++)
     e[r = n[t]] = (e[r] || 0) + 1;
@@ -6709,7 +6744,7 @@ J("audio", (function() {
           r.frequency.value = 1e3;
           var i, a = n.createDynamicsCompressor();
           a.threshold.value = -50, a.knee.value = 40, a.ratio.value = 12, a.attack.value = 0, a.release.value = 0.2, r.connect(a), a.connect(n.destination), r.start(), n.oncomplete = function(c) {
-            i = c.renderedBuffer.getChannelData(0), e({ sampleHash: ur(i), oscillator: r.type, maxChannels: n.destination.maxChannelCount, channelCountMode: s.channelCountMode });
+            i = c.renderedBuffer.getChannelData(0), e({ sampleHash: fr(i), oscillator: r.type, maxChannels: n.destination.maxChannelCount, channelCountMode: s.channelCountMode });
           }, n.startRendering();
         } catch (c) {
           console.error("Error creating audio fingerprint:", c), t(c);
@@ -6718,10 +6753,10 @@ J("audio", (function() {
     }));
   }));
 }));
-var dr = Te().name !== "SamsungBrowser" ? 1 : 3, Ct = 280, Et = 20;
+var yr = Te().name !== "SamsungBrowser" ? 1 : 3, Ct = 280, Et = 20;
 Te().name != "Firefox" && J("canvas", (function() {
   return document.createElement("canvas").getContext("2d"), new Promise((function(o) {
-    var e = Array.from({ length: dr }, (function() {
+    var e = Array.from({ length: yr }, (function() {
       return (function() {
         var t = document.createElement("canvas"), n = t.getContext("2d");
         if (!n) return new ImageData(1, 1);
@@ -6737,12 +6772,12 @@ Te().name != "Firefox" && J("canvas", (function() {
     o({ commonImageDataHash: at(Xt(e, Ct, Et).data.toString()).toString() });
   }));
 }));
-var et, pr = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], fr = ["monospace", "sans-serif", "serif"];
+var tt, gr = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], wr = ["monospace", "sans-serif", "serif"];
 function Ot(o, e) {
   if (!o) throw new Error("Canvas context not supported");
   return o.font, o.font = "72px ".concat(e), o.measureText("WwMmLli0Oo").width;
 }
-function mr() {
+function br() {
   var o, e = document.createElement("canvas"), t = (o = e.getContext("webgl")) !== null && o !== void 0 ? o : e.getContext("experimental-webgl");
   if (t && "getParameter" in t) try {
     var n = (t.getParameter(t.VENDOR) || "").toString(), s = (t.getParameter(t.RENDERER) || "").toString(), r = { vendor: n, renderer: s, version: (t.getParameter(t.VERSION) || "").toString(), shadingLanguageVersion: (t.getParameter(t.SHADING_LANGUAGE_VERSION) || "").toString() };
@@ -6758,11 +6793,11 @@ function mr() {
   }
   return "undefined";
 }
-function yr() {
+function kr() {
   var o = new Float32Array(1), e = new Uint8Array(o.buffer);
   return o[0] = 1 / 0, o[0] = o[0] - o[0], e[3];
 }
-function gr(o, e) {
+function Sr(o, e) {
   var t = {};
   return e.forEach((function(n) {
     var s = (function(r) {
@@ -6784,7 +6819,7 @@ function gr(o, e) {
     s && (t[n] = s);
   })), t;
 }
-function wr() {
+function _r() {
   var o = [], e = { "prefers-contrast": ["high", "more", "low", "less", "forced", "no-preference"], "any-hover": ["hover", "none"], "any-pointer": ["none", "coarse", "fine"], pointer: ["none", "coarse", "fine"], hover: ["hover", "none"], update: ["fast", "slow"], "inverted-colors": ["inverted", "none"], "prefers-reduced-motion": ["reduce", "no-preference"], "prefers-reduced-transparency": ["reduce", "no-preference"], scripting: ["none", "initial-only", "enabled"], "forced-colors": ["active", "none"] };
   return Object.keys(e).forEach((function(t) {
     e[t].forEach((function(n) {
@@ -6792,7 +6827,7 @@ function wr() {
     }));
   })), o;
 }
-function br() {
+function $r() {
   if (window.location.protocol === "https:" && typeof window.ApplePaySession == "function") try {
     for (var o = window.ApplePaySession.supportsVersion, e = 15; e > 0; e--) if (o(e)) return e;
   } catch {
@@ -6830,9 +6865,9 @@ Te().name != "Firefox" && J("fonts", (function() {
         return X(o, void 0, void 0, (function() {
           var r, i, a, c;
           return Z(this, (function(u) {
-            return r = s.createElement("canvas"), i = r.getContext("2d"), a = fr.map((function(l) {
+            return r = s.createElement("canvas"), i = r.getContext("2d"), a = wr.map((function(l) {
               return Ot(i, l);
-            })), c = {}, pr.forEach((function(l) {
+            })), c = {}, gr.forEach((function(l) {
               var h = Ot(i, l);
               a.includes(h) || (c[l] = h);
             })), e(c), [2];
@@ -6846,7 +6881,7 @@ Te().name != "Firefox" && J("fonts", (function() {
 })), J("hardware", (function() {
   return new Promise((function(o, e) {
     var t = navigator.deviceMemory !== void 0 ? navigator.deviceMemory : 0, n = window.performance && window.performance.memory ? window.performance.memory : 0;
-    o({ videocard: mr(), architecture: yr(), deviceMemory: t.toString() || "undefined", jsHeapSizeLimit: n.jsHeapSizeLimit || 0 });
+    o({ videocard: br(), architecture: kr(), deviceMemory: t.toString() || "undefined", jsHeapSizeLimit: n.jsHeapSizeLimit || 0 });
   }));
 })), J("locales", (function() {
   return new Promise((function(o) {
@@ -6856,14 +6891,14 @@ Te().name != "Firefox" && J("fonts", (function() {
   return X(this, void 0, void 0, (function() {
     var o;
     return Z(this, (function(e) {
-      return et = (R == null ? void 0 : R.permissions_to_check) || ["accelerometer", "accessibility", "accessibility-events", "ambient-light-sensor", "background-fetch", "background-sync", "bluetooth", "camera", "clipboard-read", "clipboard-write", "device-info", "display-capture", "gyroscope", "geolocation", "local-fonts", "magnetometer", "microphone", "midi", "nfc", "notifications", "payment-handler", "persistent-storage", "push", "speaker", "storage-access", "top-level-storage-access", "window-management", "query"], o = Array.from({ length: (R == null ? void 0 : R.retries) || 3 }, (function() {
+      return tt = (W == null ? void 0 : W.permissions_to_check) || ["accelerometer", "accessibility", "accessibility-events", "ambient-light-sensor", "background-fetch", "background-sync", "bluetooth", "camera", "clipboard-read", "clipboard-write", "device-info", "display-capture", "gyroscope", "geolocation", "local-fonts", "magnetometer", "microphone", "midi", "nfc", "notifications", "payment-handler", "persistent-storage", "push", "speaker", "storage-access", "top-level-storage-access", "window-management", "query"], o = Array.from({ length: (W == null ? void 0 : W.retries) || 3 }, (function() {
         return (function() {
           return X(this, void 0, void 0, (function() {
             var t, n, s, r, i;
             return Z(this, (function(a) {
               switch (a.label) {
                 case 0:
-                  t = {}, n = 0, s = et, a.label = 1;
+                  t = {}, n = 0, s = tt, a.label = 1;
                 case 1:
                   if (!(n < s.length)) return [3, 6];
                   r = s[n], a.label = 2;
@@ -6882,7 +6917,7 @@ Te().name != "Firefox" && J("fonts", (function() {
           }));
         })();
       })), [2, Promise.all(o).then((function(t) {
-        return gr(t, et);
+        return Sr(t, tt);
       }))];
     }));
   }));
@@ -6897,15 +6932,15 @@ Te().name != "Firefox" && J("fonts", (function() {
   }));
 })), J("screen", (function() {
   return new Promise((function(o) {
-    o({ is_touchscreen: navigator.maxTouchPoints > 0, maxTouchPoints: navigator.maxTouchPoints, colorDepth: screen.colorDepth, mediaMatches: wr() });
+    o({ is_touchscreen: navigator.maxTouchPoints > 0, maxTouchPoints: navigator.maxTouchPoints, colorDepth: screen.colorDepth, mediaMatches: _r() });
   }));
 })), J("system", (function() {
   return new Promise((function(o) {
     var e = Te();
-    o({ platform: window.navigator.platform, cookieEnabled: window.navigator.cookieEnabled, productSub: navigator.productSub, product: navigator.product, useragent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency, browser: { name: e.name, version: e.version }, applePayVersion: br() });
+    o({ platform: window.navigator.platform, cookieEnabled: window.navigator.cookieEnabled, productSub: navigator.productSub, product: navigator.product, useragent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency, browser: { name: e.name, version: e.version }, applePayVersion: $r() });
   }));
 }));
-var K, kr = Te().name !== "SamsungBrowser" ? 1 : 3, m = null;
+var K, Ar = Te().name !== "SamsungBrowser" ? 1 : 3, m = null;
 J("webgl", (function() {
   return X(this, void 0, void 0, (function() {
     var o;
@@ -6913,7 +6948,7 @@ J("webgl", (function() {
       typeof document < "u" && ((K = document.createElement("canvas")).width = 200, K.height = 100, m = K.getContext("webgl"));
       try {
         if (!m) throw new Error("WebGL not supported");
-        return o = Array.from({ length: kr }, (function() {
+        return o = Array.from({ length: Ar }, (function() {
           return (function() {
             try {
               if (!m) throw new Error("WebGL not supported");
@@ -6959,7 +6994,7 @@ J("webgl", (function() {
     }));
   }));
 }));
-var re = function(o, e, t, n) {
+var ie = function(o, e, t, n) {
   for (var s = (t - e) / n, r = 0, i = 0; i < n; i++)
     r += o(e + (i + 0.5) * s);
   return r * s;
@@ -6967,11 +7002,11 @@ var re = function(o, e, t, n) {
 J("math", (function() {
   return X(void 0, void 0, void 0, (function() {
     return Z(this, (function(o) {
-      return [2, { acos: Math.acos(0.5), asin: re(Math.asin, -1, 1, 97), atan: re(Math.atan, -1, 1, 97), cos: re(Math.cos, 0, Math.PI, 97), cosh: Math.cosh(9 / 7), e: Math.E, largeCos: Math.cos(1e20), largeSin: Math.sin(1e20), largeTan: Math.tan(1e20), log: Math.log(1e3), pi: Math.PI, sin: re(Math.sin, -Math.PI, Math.PI, 97), sinh: re(Math.sinh, -9 / 7, 7 / 9, 97), sqrt: Math.sqrt(2), tan: re(Math.tan, 0, 2 * Math.PI, 97), tanh: re(Math.tanh, -9 / 7, 7 / 9, 97) }];
+      return [2, { acos: Math.acos(0.5), asin: ie(Math.asin, -1, 1, 97), atan: ie(Math.atan, -1, 1, 97), cos: ie(Math.cos, 0, Math.PI, 97), cosh: Math.cosh(9 / 7), e: Math.E, largeCos: Math.cos(1e20), largeSin: Math.sin(1e20), largeTan: Math.tan(1e20), log: Math.log(1e3), pi: Math.PI, sin: ie(Math.sin, -Math.PI, Math.PI, 97), sinh: ie(Math.sinh, -9 / 7, 7 / 9, 97), sqrt: Math.sqrt(2), tan: ie(Math.tan, 0, 2 * Math.PI, 97), tanh: ie(Math.tanh, -9 / 7, 7 / 9, 97) }];
     }));
   }));
 }));
-class Sr {
+class vr {
   constructor({ serverUri: e, socket: t = null, encrypt: n = !1 }) {
     this.$__client = this.createUrqlClient({ serverUri: e, socket: t, encrypt: n }), this.$__authToken = "", this.$__pubkey = null, this.$__wallet = null, this.serverUri = e, this.soketi = t, this.cipherLink = !!n, this.$__subscriptionManager = /* @__PURE__ */ new Map();
   }
@@ -7090,7 +7125,7 @@ class Sr {
     });
   }
 }
-class Tr {
+class Or {
   /**
    * Class constructor
    *
@@ -7141,7 +7176,7 @@ class Tr {
       const c = this.$__uris[a];
       this.$__authTokenObjects[c] = null;
     }
-    this.log("info", `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${r}...`), this.$__client = s || new Sr({
+    this.log("info", `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${r}...`), this.$__client = s || new vr({
       socket: {
         socketUri: null,
         appKey: "knishio",
@@ -7275,7 +7310,7 @@ class Tr {
    * @returns {string}
    */
   hashSecret(e, t = null) {
-    return this.log("info", `KnishIOClient::hashSecret(${t ? `source: ${t}` : ""}) - Computing wallet bundle from secret...`), me(e);
+    return this.log("info", `KnishIOClient::hashSecret(${t ? `source: ${t}` : ""}) - Computing wallet bundle from secret...`), fe(e);
   }
   /**
    * Retrieves the stored secret for this session
@@ -7311,7 +7346,7 @@ class Tr {
    * @returns {Promise<string>} A promise that resolves to the device fingerprint as a string.
    */
   getFingerprint() {
-    return cr();
+    return pr();
   }
   getFingerprintData() {
     return Jt();
@@ -7463,7 +7498,7 @@ class Tr {
     bundle: t = null,
     type: n = "regular"
   }) {
-    const s = this.createQuery(ds);
+    const s = this.createQuery(fs);
     return this.executeQuery(s, {
       bundleHash: t || this.getBundle(),
       token: e,
@@ -7486,7 +7521,7 @@ class Tr {
       token: e,
       type: n
     })).payload();
-    if (s === null || pe.cmp(s.balance, t) < 0)
+    if (s === null || de.cmp(s.balance, t) < 0)
       throw new Y();
     if (!s.position || !s.address)
       throw new Y("Source wallet can not be a shadow wallet.");
@@ -7501,7 +7536,7 @@ class Tr {
     bundle: e,
     closure: t
   }) {
-    return await this.createSubscribe(Hs).execute({
+    return await this.createSubscribe(Fs).execute({
       variables: {
         bundle: e || this.getBundle()
       },
@@ -7523,7 +7558,7 @@ class Tr {
   }) {
     if (!t)
       throw new ee(`${this.constructor.name}::subscribeWalletStatus() - Token parameter is required!`);
-    return this.createSubscribe(Ps).execute({
+    return this.createSubscribe(Ls).execute({
       variables: {
         bundle: e || this.getBundle(),
         token: t
@@ -7542,7 +7577,7 @@ class Tr {
     bundle: e,
     closure: t
   }) {
-    return this.createSubscribe(Ks).execute({
+    return this.createSubscribe(js).execute({
       variables: {
         bundle: e || this.getBundle()
       },
@@ -7562,7 +7597,7 @@ class Tr {
     metaId: t,
     closure: n
   }) {
-    return this.createSubscribe(Ns).execute({
+    return this.createSubscribe(Qs).execute({
       variables: {
         metaType: e,
         metaId: t
@@ -7619,8 +7654,8 @@ class Tr {
     atomValues: A = null
   }) {
     this.log("info", `KnishIOClient::queryMeta() - Querying metaType: ${e}, metaId: ${t}...`);
-    let T, f;
-    return p ? (T = this.createQuery(Mt), f = Mt.createVariables({
+    let M, f;
+    return p ? (M = this.createQuery(Mt), f = Mt.createVariables({
       metaType: e,
       metaId: t,
       key: n,
@@ -7633,7 +7668,7 @@ class Tr {
       keys: w,
       atomValues: A,
       cellSlug: this.getCellSlug()
-    })) : h ? (T = this.createQuery(Tt), f = Tt.createVariables({
+    })) : h ? (M = this.createQuery(Tt), f = Tt.createVariables({
       metaType: e,
       metaId: t,
       key: n,
@@ -7646,7 +7681,7 @@ class Tr {
       keys: w,
       atomValues: A,
       cellSlug: this.getCellSlug()
-    })) : (T = this.createQuery(At), f = At.createVariables({
+    })) : (M = this.createQuery(At), f = At.createVariables({
       metaType: e,
       metaId: t,
       key: n,
@@ -7657,7 +7692,7 @@ class Tr {
       count: u,
       countBy: l,
       cellSlug: this.getCellSlug()
-    })), this.executeQuery(T, f);
+    })), this.executeQuery(M, f);
   }
   /**
    * Queries meta assets and verifies cryptographic integrity of associated molecules.
@@ -7696,7 +7731,7 @@ class Tr {
     batchId: e
   }) {
     this.log("info", `KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${e}...`);
-    const t = this.createQuery(fs);
+    const t = this.createQuery(ys);
     return await this.executeQuery(t, {
       batchId: e
     });
@@ -7752,25 +7787,25 @@ class Tr {
     cellSlugs: d,
     cellSlug: w,
     batchIds: A,
-    batchId: T,
+    batchId: M,
     values: f,
     value: y,
     metaTypes: b,
-    metaType: M,
+    metaType: C,
     metaIds: k,
     metaId: $,
     indexes: v,
     index: I,
     filter: S,
     latest: B,
-    queryArgs: W = {
+    queryArgs: R = {
       limit: 15,
       offset: 1
     }
   }) {
     this.log("info", "KnishIOClient::queryAtom() - Querying atom instances");
-    const ue = this.createQuery(It);
-    return await this.executeQuery(ue, It.createVariables({
+    const ce = this.createQuery(It);
+    return await this.executeQuery(ce, It.createVariables({
       molecularHashes: e,
       molecularHash: t,
       bundleHashes: n,
@@ -7786,18 +7821,18 @@ class Tr {
       cellSlugs: d,
       cellSlug: w,
       batchIds: A,
-      batchId: T,
+      batchId: M,
       values: f,
       value: y,
       metaTypes: b,
-      metaType: M,
+      metaType: C,
       metaIds: k,
       metaId: $,
       indexes: v,
       index: I,
       filter: S,
       latest: B,
-      queryArgs: W
+      queryArgs: R
     }));
   }
   /**
@@ -7813,7 +7848,7 @@ class Tr {
       secret: this.getSecret(),
       token: e
     }), n = await this.createMoleculeMutation({
-      mutationClass: Rs
+      mutationClass: Hs
     });
     return n.fillMolecule(t), await this.executeQuery(n);
   }
@@ -7830,7 +7865,7 @@ class Tr {
     metaType: t,
     metaId: n
   }) {
-    const s = this.createQuery(Qs);
+    const s = this.createQuery(Js);
     return await this.executeQuery(s, {
       bundleHash: e,
       metaType: t,
@@ -7865,7 +7900,7 @@ class Tr {
     countBy: u,
     interval: l
   }) {
-    const h = this.createQuery(Vs);
+    const h = this.createQuery(Xs);
     return await this.executeQuery(h, {
       bundleHash: e,
       metaType: t,
@@ -7905,7 +7940,7 @@ class Tr {
     timeZone: c,
     json: u = {}
   }) {
-    const l = this.createQuery(Ls);
+    const l = this.createQuery(Vs);
     return await this.executeQuery(l, {
       bundleHash: e,
       metaType: t,
@@ -7940,12 +7975,12 @@ class Tr {
     batchId: s = null,
     units: r = []
   }) {
-    const i = C.get(n || {}, "fungibility");
-    if (i === "stackable" && (n.batchId = s || de({})), ["nonfungible", "stackable"].includes(i) && r.length > 0) {
-      if (C.get(n || {}, "decimals") > 0)
-        throw new qs();
+    const i = T.get(n || {}, "fungibility");
+    if (i === "stackable" && (n.batchId = s || he({})), ["nonfungible", "stackable"].includes(i) && r.length > 0) {
+      if (T.get(n || {}, "decimals") > 0)
+        throw new Ns();
       if (t > 0)
-        throw new We();
+        throw new Re();
       t = r.length, n.splittable = 1, n.decimals = 0, n.tokenUnits = JSON.stringify(r);
     }
     const a = new _({
@@ -7954,7 +7989,7 @@ class Tr {
       token: e,
       batchId: s
     }), c = await this.createMoleculeMutation({
-      mutationClass: ws
+      mutationClass: ks
     });
     return c.fillMolecule({
       recipientWallet: a,
@@ -7979,7 +8014,7 @@ class Tr {
   }) {
     const r = await this.createMoleculeMutation(
       {
-        mutationClass: er,
+        mutationClass: rr,
         molecule: await this.createMolecule({
           secret: this.getSecret(),
           sourceWallet: await this.getSourceWallet()
@@ -8010,7 +8045,7 @@ class Tr {
   }) {
     const r = await this.createMoleculeMutation(
       {
-        mutationClass: Ts,
+        mutationClass: Cs,
         molecule: await this.createMolecule({
           secret: this.getSecret(),
           sourceWallet: await this.getSourceWallet()
@@ -8034,7 +8069,7 @@ class Tr {
     host: e
   }) {
     const t = await this.createMoleculeMutation({
-      mutationClass: Cs,
+      mutationClass: Os,
       molecule: await this.createMolecule({
         secret: this.getSecret(),
         sourceWallet: await this.getSourceWallet()
@@ -8060,7 +8095,7 @@ class Tr {
     meta: s = {}
   }) {
     const r = await this.createMoleculeMutation({
-      mutationClass: Os,
+      mutationClass: Ws,
       molecule: await this.createMolecule({
         secret: this.getSecret(),
         sourceWallet: await this.getSourceWallet()
@@ -8087,13 +8122,31 @@ class Tr {
     code: n
   }) {
     const s = await this.createMoleculeMutation({
-      mutationClass: As
+      mutationClass: xs
     });
     return s.fillMolecule({
       type: e,
       contact: t,
       code: n
     }), await this.executeQuery(s);
+  }
+  /**
+   * Links an identifier to the current wallet bundle
+   *
+   * @param {string} type - The type of the identifier.
+   * @param {string} contact - The contact associated with the identifier.
+   * @returns {Promise<ResponseLinkIdentifier>} - A promise that resolves to the link result.
+   */
+  async linkIdentifier({
+    type: e,
+    contact: t
+  }) {
+    const n = this.createQuery(Bs);
+    return await this.executeQuery(n, {
+      bundle: this.getBundle(),
+      type: e,
+      content: t
+    });
   }
   /**
    * Creates a policy for a given metaType and metaId.
@@ -8135,7 +8188,7 @@ class Tr {
     metaType: e,
     metaId: t
   }) {
-    const n = this.createQuery(Xs);
+    const n = this.createQuery(tr);
     return await this.executeQuery(n, {
       metaType: e,
       metaId: t
@@ -8157,10 +8210,10 @@ class Tr {
     unspent: n = !0
   }) {
     this.log("info", `KnishIOClient::queryWallets() - Querying wallets${e ? ` for ${e}` : ""}...`);
-    const s = this.createQuery(us);
+    const s = this.createQuery(ds);
     return this.executeQuery(s, {
       bundleHash: e || this.getBundle(),
-      tokenSlug: t,
+      token: t,
       unspent: n
     }).then((r) => r.payload());
   }
@@ -8179,7 +8232,7 @@ class Tr {
     raw: n = !1
   }) {
     this.log("info", `KnishIOClient::queryBundle() - Querying wallet bundle metadata${e ? ` for ${e}` : ""}...`), e || (e = this.getBundle()), typeof e == "string" && (e = [e]);
-    const s = this.createQuery(cs);
+    const s = this.createQuery(hs);
     return this.executeQuery(s, { bundleHashes: e }).then((r) => n ? r : r.payload());
   }
   /**
@@ -8191,7 +8244,7 @@ class Tr {
   async queryContinuId({
     bundle: e
   }) {
-    const t = this.createQuery(as);
+    const t = this.createQuery(cs);
     return this.executeQuery(t, {
       bundle: e
     });
@@ -8223,14 +8276,14 @@ class Tr {
   }) {
     let a, c;
     r = r || {};
-    const u = this.createQuery(zs), l = await this.executeQuery(u, {
+    const u = this.createQuery(Zs), l = await this.executeQuery(u, {
       slug: e
-    }), h = C.get(l.data(), "0.fungibility") === "stackable";
+    }), h = T.get(l.data(), "0.fungibility") === "stackable";
     if (!h && i !== null)
       throw new qe("Expected Batch ID = null for non-stackable tokens.");
-    if (h && i === null && (i = de({})), s.length > 0) {
+    if (h && i === null && (i = he({})), s.length > 0) {
       if (n > 0)
-        throw new We();
+        throw new Re();
       n = s.length, r.tokenUnits = JSON.stringify(s);
     }
     t ? (Object.prototype.toString.call(t) === "[object String]" && (_.isBundleHash(t) ? (a = "walletBundle", c = t) : t = _.create({
@@ -8238,7 +8291,7 @@ class Tr {
       token: e
     })), t instanceof _ && (a = "wallet", r.position = t.position, r.bundle = t.bundle, c = t.address)) : (a = "walletBundle", c = this.getBundle());
     const p = await this.createMoleculeMutation({
-      mutationClass: ks
+      mutationClass: _s
     });
     return p.fillMolecule({
       token: e,
@@ -8264,7 +8317,7 @@ class Tr {
     molecule: n = null
   }) {
     const s = await this.createMoleculeMutation({
-      mutationClass: xs,
+      mutationClass: Ts,
       molecule: n
     });
     return s.fillMolecule({
@@ -8324,13 +8377,13 @@ class Tr {
   }) {
     if (s.length > 0) {
       if (n > 0)
-        throw new We();
+        throw new Re();
       n = s.length;
     }
     if (i === null && (i = await this.querySourceWallet({
       token: t,
       amount: n
-    })), i === null || pe.cmp(i.balance, n) < 0)
+    })), i === null || de.cmp(i.balance, n) < 0)
       throw new Y();
     const a = _.create({
       bundle: e,
@@ -8349,7 +8402,7 @@ class Tr {
       sourceWallet: i,
       remainderWallet: c
     }), l = await this.createMoleculeMutation({
-      mutationClass: _s,
+      mutationClass: As,
       molecule: u
     });
     return l.fillMolecule({
@@ -8382,7 +8435,7 @@ class Tr {
       sourceWallet: s,
       remainderWallet: r
     }), a = await this.createMoleculeMutation({
-      mutationClass: tr,
+      mutationClass: ir,
       molecule: i
     });
     return a.fillMolecule({
@@ -8415,7 +8468,7 @@ class Tr {
       sourceWallet: n,
       remainderWallet: r
     }), a = await this.createMoleculeMutation({
-      mutationClass: nr,
+      mutationClass: or,
       molecule: i
     }), c = {};
     return c[this.getBundle()] = t, a.fillMolecule({
@@ -8445,7 +8498,7 @@ class Tr {
     const r = s.createRemainder(this.getSecret());
     if (n.length > 0) {
       if (t > 0)
-        throw new We();
+        throw new Re();
       t = n.length, s.splitUnits(
         n,
         r
@@ -8532,7 +8585,7 @@ class Tr {
     });
     a.initBatchId({ sourceWallet: r });
     const c = r.createRemainder(this.getSecret());
-    r.splitUnits(s, c), typeof n == "string" && (n = new ye(n, n, {})), n.metas.fusedTokenUnits = r.getTokenUnitsData(), a.tokenUnits = [n];
+    r.splitUnits(s, c), typeof n == "string" && (n = new me(n, n, {})), n.metas.fusedTokenUnits = r.getTokenUnitsData(), a.tokenUnits = [n];
     const u = await this.createMolecule({
       sourceWallet: r,
       remainderWallet: c
@@ -8559,9 +8612,9 @@ class Tr {
   }) {
     this.setCellSlug(e);
     const n = new _({
-      secret: tt(await this.getFingerprint()),
+      secret: nt(await this.getFingerprint()),
       token: "AUTH"
-    }), s = await this.createQuery(Bs), r = {
+    }), s = await this.createQuery(Ks), r = {
       cellSlug: e,
       pubkey: n.pubkey,
       encrypt: t
@@ -8597,7 +8650,7 @@ class Tr {
       secret: e,
       sourceWallet: n
     }), r = await this.createMoleculeMutation({
-      mutationClass: ys,
+      mutationClass: ws,
       molecule: s
     });
     r.fillMolecule({ meta: { encrypt: t ? "true" : "false" } });
@@ -8631,7 +8684,7 @@ class Tr {
   }) {
     if (this.$__serverSdkVersion < 3)
       return this.log("warn", "KnishIOClient::authorize() - Server SDK version does not require an authorization..."), null;
-    e === null && t && (e = tt(t)), n && this.setCellSlug(n), this.$__authInProcess = !0;
+    e === null && t && (e = nt(t)), n && this.setCellSlug(n), this.$__authInProcess = !0;
     let r;
     return e ? r = await this.requestProfileAuthToken({
       secret: e,
@@ -8683,28 +8736,190 @@ class Tr {
       }
   }
 }
+class Rr extends E {
+  /**
+   * Class constructor
+   *
+   * @param {Query} query
+   * @param {object} json
+   */
+  constructor({
+    query: e,
+    json: t
+  }) {
+    super({
+      query: e,
+      json: t,
+      dataKey: "data.AccessToken"
+    });
+  }
+  /**
+   * Returns the reason for rejection
+   *
+   * @return {string}
+   */
+  reason() {
+    return "Invalid response from server";
+  }
+  /**
+   * Returns whether molecule was accepted or not
+   *
+   * @return {boolean}
+   */
+  success() {
+    return this.payload() !== null;
+  }
+  /**
+   * Returns a wallet with balance
+   *
+   * @return {null|Wallet}
+   */
+  payload() {
+    return this.data();
+  }
+  /**
+   * Returns the authorization key
+   *
+   * @param key
+   * @return {*}
+   */
+  payloadKey(e) {
+    if (!T.has(this.payload(), e))
+      throw new te(`ResponseAuthorizationGuest::payloadKey() - '${e}' key is not found in the payload!`);
+    return T.get(this.payload(), e);
+  }
+  /**
+   * Returns the auth token
+   *
+   * @return {*}
+   */
+  token() {
+    return this.payloadKey("token");
+  }
+  /**
+   * Returns timestamp
+   *
+   * @return {*}
+   */
+  time() {
+    return this.payloadKey("time");
+  }
+}
 export {
   g as Atom,
-  Tr as KnishIOClient,
-  fe as Meta,
+  ke as AtomIndexException,
+  P as AtomMeta,
+  ae as AtomsMissingException,
+  xe as AuthToken,
+  xt as AuthorizationRejectedException,
+  ue as BalanceInsufficientException,
+  qe as BatchIdException,
+  ve as CheckMolecule,
+  ee as CodeException,
+  de as Decimal,
+  T as Dot,
+  te as InvalidResponseException,
+  Or as KnishIOClient,
+  pe as Meta,
+  H as MetaMissingException,
+  rs as MolecularHashMismatchException,
+  is as MolecularHashMissingException,
   z as Molecule,
-  Os as MutationAppendRequest,
-  Cs as MutationPeering,
+  je as Mutation,
+  Vs as MutationActiveSession,
+  Ws as MutationAppendRequest,
+  Ts as MutationClaimShadowWallet,
+  xs as MutationCreateIdentifier,
+  Cs as MutationCreateMeta,
+  rr as MutationCreateRule,
+  ks as MutationCreateToken,
+  Hs as MutationCreateWallet,
+  ir as MutationDepositBufferToken,
+  Bs as MutationLinkIdentifier,
+  Os as MutationPeering,
+  U as MutationProposeMolecule,
+  ws as MutationRequestAuthorization,
+  Ks as MutationRequestAuthorizationGuest,
+  _s as MutationRequestTokens,
+  As as MutationTransferTokens,
+  or as MutationWithdrawBufferToken,
+  Ye as NegativeAmountException,
+  kt as PolicyInvalidException,
+  rt as PolicyMeta,
+  N as Query,
+  Js as QueryActiveSession,
+  It as QueryAtom,
+  fs as QueryBalance,
+  Ie as QueryBatch,
+  ys as QueryBatchHistory,
+  cs as QueryContinuId,
+  At as QueryMetaType,
+  Tt as QueryMetaTypeViaAtom,
   Mt as QueryMetaTypeViaMolecule,
-  Es as ResponseAppendRequest,
+  tr as QueryPolicy,
+  Zs as QueryToken,
+  Xs as QueryUserActivity,
+  hs as QueryWalletBundle,
+  ds as QueryWalletList,
+  E as Response,
+  Ds as ResponseActiveSession,
+  Rs as ResponseAppendRequest,
+  Ys as ResponseAtom,
+  Rr as ResponseAuthorizationGuest,
+  ps as ResponseBalance,
+  Is as ResponseClaimShadowWallet,
+  ls as ResponseContinuId,
+  vs as ResponseCreateIdentifier,
+  Ms as ResponseCreateMeta,
+  sr as ResponseCreateRule,
+  bs as ResponseCreateToken,
+  qs as ResponseCreateWallet,
+  Us as ResponseLinkIdentifier,
+  ms as ResponseMetaType,
+  nr as ResponseMetaTypeViaAtom,
   ot as ResponseMetaTypeViaMolecule,
-  Ms as ResponsePeering,
+  Es as ResponsePeering,
+  er as ResponsePolicy,
+  V as ResponseProposeMolecule,
+  zs as ResponseQueryActiveSession,
+  Gs as ResponseQueryUserActivity,
+  gs as ResponseRequestAuthorization,
+  Ps as ResponseRequestAuthorizationGuest,
+  Ss as ResponseRequestTokens,
+  $s as ResponseTransferTokens,
+  us as ResponseWalletBundle,
+  Le as ResponseWalletList,
+  Vt as SignatureMalformedException,
+  os as SignatureMismatchException,
+  Re as StackableUnitAmountException,
+  Ns as StackableUnitDecimalsException,
+  me as TokenUnit,
+  Y as TransferBalanceException,
+  Se as TransferMalformedException,
+  St as TransferMismatchedException,
+  _t as TransferRemainderException,
+  as as TransferToSelfException,
+  Oe as TransferUnbalancedException,
+  Ke as UnauthenticatedException,
   _ as Wallet,
+  vt as WalletShadowException,
+  re as WrongTokenTypeException,
   pn as base64ToHex,
   un as bufferToHexString,
   cn as charsetBaseConvert,
+  mn as chunkArray,
   He as chunkSubstr,
-  me as generateBundleHash,
-  tt as generateSecret,
+  yn as deepCloning,
+  gn as diff,
+  he as generateBatchId,
+  fe as generateBundleHash,
+  nt as generateSecret,
   hn as hexStringToBuffer,
   dn as hexToBase64,
-  De as isHex,
-  nt as randomString,
+  ye as intersect,
+  Ve as isHex,
+  fn as isNumeric,
+  st as randomString,
   lt as shake256
 };
 //# sourceMappingURL=client.es.mjs.map
