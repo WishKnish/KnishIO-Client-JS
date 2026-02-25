@@ -73,6 +73,7 @@ import MutationClaimShadowWallet from './mutation/MutationClaimShadowWallet.js'
 import MutationCreateMeta from './mutation/MutationCreateMeta.js'
 import MutationPeering from './mutation/MutationPeering.js'
 import MutationAppendRequest from './mutation/MutationAppendRequest.js'
+import MutationLinkIdentifier from './mutation/MutationLinkIdentifier.js'
 import MutationCreateWallet from './mutation/MutationCreateWallet.js'
 import MutationRequestAuthorizationGuest from './mutation/MutationRequestAuthorizationGuest.js'
 import TransferBalanceException from './exception/TransferBalanceException.js'
@@ -1396,6 +1397,25 @@ export default class KnishIOClient {
   }
 
   /**
+   * Links an identifier to the current wallet bundle
+   *
+   * @param {string} type - The type of the identifier.
+   * @param {string} contact - The contact associated with the identifier.
+   * @returns {Promise<ResponseLinkIdentifier>} - A promise that resolves to the link result.
+   */
+  async linkIdentifier ({
+    type,
+    contact
+  }) {
+    const query = this.createQuery(MutationLinkIdentifier)
+    return await this.executeQuery(query, {
+      bundle: this.getBundle(),
+      type,
+      content: contact
+    })
+  }
+
+  /**
    * Creates a policy for a given metaType and metaId.
    *
    * @param {Object} options - The options for creating the policy.
@@ -1473,7 +1493,7 @@ export default class KnishIOClient {
 
     return this.executeQuery(walletQuery, {
       bundleHash: bundle || this.getBundle(),
-      tokenSlug: token,
+      token,
       unspent
     })
       .then((response) => {
