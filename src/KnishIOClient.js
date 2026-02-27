@@ -2151,7 +2151,7 @@ export default class KnishIOClient {
       // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
       const authToken = AuthToken.create({
         token: response.token(),
-        expiresAt: response.time(),
+        expiresAt: response.expiresAt(),
         pubkey: response.pubKey(),
         encrypt: response.encrypt()
       }, wallet)
@@ -2208,7 +2208,7 @@ export default class KnishIOClient {
       // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
       const authToken = AuthToken.create({
         token: response.token(),
-        expiresAt: response.time(),
+        expiresAt: response.expiresAt(),
         pubkey: response.pubKey(),
         encrypt: response.encrypt()
       }, wallet)
