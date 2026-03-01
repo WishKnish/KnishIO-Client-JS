@@ -76,6 +76,14 @@ export default class QueryContinuId extends Query {
   }
 
   /**
+   * Force network-only for ContinuID queries to prevent URQL cache from
+   * returning stale wallet positions after mutations advance the ContinuID chain
+   */
+  createQueryContext () {
+    return { requestPolicy: 'network-only' }
+  }
+
+  /**
    * Returns a Response object
    *
    * @param {object} json

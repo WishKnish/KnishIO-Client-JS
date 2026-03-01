@@ -1249,8 +1249,7 @@ export default class KnishIOClient {
     const query = await this.createMoleculeMutation({
         mutationClass: MutationCreateRule,
         molecule: await this.createMolecule({
-          secret: this.getSecret(),
-          sourceWallet: await this.getSourceWallet()
+          secret: this.getSecret()
         })
       }
     )
@@ -1286,8 +1285,7 @@ export default class KnishIOClient {
     const query = await this.createMoleculeMutation({
         mutationClass: MutationCreateMeta,
         molecule: await this.createMolecule({
-          secret: this.getSecret(),
-          sourceWallet: await this.getSourceWallet()
+          secret: this.getSecret()
         })
       }
     )
@@ -1319,8 +1317,7 @@ export default class KnishIOClient {
     const query = await this.createMoleculeMutation({
       mutationClass: MutationPeering,
       molecule: await this.createMolecule({
-        secret: this.getSecret(),
-        sourceWallet: await this.getSourceWallet()
+        secret: this.getSecret()
       })
     })
 
@@ -1352,8 +1349,7 @@ export default class KnishIOClient {
     const query = await this.createMoleculeMutation({
       mutationClass: MutationAppendRequest,
       molecule: await this.createMolecule({
-        secret: this.getSecret(),
-        sourceWallet: await this.getSourceWallet()
+        secret: this.getSecret()
       })
     })
 
