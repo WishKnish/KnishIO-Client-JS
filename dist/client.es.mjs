@@ -828,7 +828,7 @@ function vn(o) {
 function ut(o, e = "") {
   if (!Number.isSafeInteger(o) || o < 0) {
     const t = e && `"${e}" `;
-    throw new Error(`${t}expected integer >0, got ${o}`);
+    throw new Error(`${t}expected integer >= 0, got ${o}`);
   }
 }
 function D(o, e, t = "") {
