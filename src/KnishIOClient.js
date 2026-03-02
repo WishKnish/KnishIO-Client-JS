@@ -457,6 +457,26 @@ export default class KnishIOClient {
     secret = secret || this.getSecret()
     bundle = bundle || this.getBundle()
 
+    // For non-USER source wallets (V/B isotopes), capture the current USER
+    // ContinuID position BEFORE overwriting the client's remainder wallet.
+    // This position is needed by addContinuIdAtom() for previousPosition metadata.
+    let continuIdPosition = null
+    if (sourceWallet && sourceWallet.token !== 'USER') {
+      if (this.lastMoleculeQuery &&
+        this.getRemainderWallet() &&
+        this.getRemainderWallet().token === 'USER' &&
+        this.lastMoleculeQuery.response() &&
+        this.lastMoleculeQuery.response().success()
+      ) {
+        // Carry-forward: use last successful USER remainder wallet position
+        continuIdPosition = this.getRemainderWallet().position
+      } else {
+        // Query server for current ContinuID position
+        const userWallet = await this.getSourceWallet()
+        continuIdPosition = userWallet ? userWallet.position : null
+      }
+    }
+
     // Sets the source wallet as the last remainder wallet (to maintain ContinuID)
     if (!sourceWallet &&
       this.lastMoleculeQuery &&
@@ -486,7 +506,8 @@ export default class KnishIOClient {
       sourceWallet,
       remainderWallet: this.getRemainderWallet(),
       cellSlug: this.getCellSlug(),
-      version: this.getServerSdkVersion()
+      version: this.getServerSdkVersion(),
+      continuIdPosition
     })
   }
 
@@ -1964,7 +1985,7 @@ export default class KnishIOClient {
     molecule.sign({
       bundle: this.getBundle()
     })
-    molecule.check()
+    molecule.check(sourceWallet)
 
     // Create & execute a mutation
     const query = await this.createMoleculeMutation({
