@@ -86,7 +86,8 @@ export default class Molecule {
     sourceWallet = null,
     remainderWallet = null,
     cellSlug = null,
-    version = null
+    version = null,
+    continuIdPosition = null
   }) {
     this.status = null
     this.molecularHash = null
@@ -95,6 +96,7 @@ export default class Molecule {
     this.secret = secret
     this.bundle = bundle
     this.sourceWallet = sourceWallet
+    this.continuIdPosition = continuIdPosition
     this.atoms = []
     this.parentHashes = []
     if (version !== null && Object.prototype.hasOwnProperty.call(versions, version)) {
@@ -343,8 +345,12 @@ export default class Molecule {
     // These are atom meta fields (not core fields), so they don't affect molecular hash.
     const continuIdMeta = {}
 
-    // previousPosition: the source wallet's position being consumed
-    if (this.sourceWallet && this.sourceWallet.position) {
+    // previousPosition: the current USER ContinuID position being consumed.
+    // For non-USER source wallets (V/B isotopes), use the explicitly passed
+    // continuIdPosition from createMolecule() instead of the TOKEN wallet position.
+    if (this.continuIdPosition) {
+      continuIdMeta.previousPosition = this.continuIdPosition
+    } else if (this.sourceWallet && this.sourceWallet.position) {
       continuIdMeta.previousPosition = this.sourceWallet.position
     }
 
@@ -464,11 +470,29 @@ export default class Molecule {
       throw new BalanceInsufficientException()
     }
 
+    // Create burn address wallet (null bundle = token destruction)
+    const burnWallet = new Wallet({
+      bundle: '0000000000000000000000000000000000000000000000000000000000000000',
+      token: this.sourceWallet.token
+    })
+
+    // V-atom 1: Debit full balance from source
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount
+      value: -this.sourceWallet.balance
     }))
+
+    // V-atom 2: Credit burn amount to burn address
+    this.addAtom(Atom.create({
+      isotope: 'V',
+      wallet: burnWallet,
+      value: amount,
+      metaType: 'walletBundle',
+      metaId: burnWallet.bundle
+    }))
+
+    // V-atom 3: Remainder back to source identity
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,

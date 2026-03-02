@@ -1,6 +1,6 @@
 var Yt = Object.defineProperty;
 var en = (o, e, t) => e in o ? Yt(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
-var j = (o, e, t) => en(o, typeof e != "symbol" ? e + "" : e, t);
+var Q = (o, e, t) => en(o, typeof e != "symbol" ? e + "" : e, t);
 import L from "jssha";
 import { gql as O, cacheExchange as tn, fetchExchange as nn, subscriptionExchange as sn, createClient as rn } from "@urql/core";
 import { createClient as on } from "graphql-ws";
@@ -419,7 +419,7 @@ class oe {
     return oe.structure(this);
   }
 }
-class wn extends oe {
+class bn extends oe {
   constructor({
     position: e = null,
     walletAddress: t = null,
@@ -438,7 +438,7 @@ class wn extends oe {
   }
 }
 const Ue = {
-  4: wn
+  4: bn
 };
 class g {
   /**
@@ -808,14 +808,14 @@ class ze extends x {
   }
 }
 const Ce = /* @__PURE__ */ BigInt(2 ** 32 - 1), ct = /* @__PURE__ */ BigInt(32);
-function bn(o, e = !1) {
+function wn(o, e = !1) {
   return e ? { h: Number(o & Ce), l: Number(o >> ct & Ce) } : { h: Number(o >> ct & Ce) | 0, l: Number(o & Ce) | 0 };
 }
 function kn(o, e = !1) {
   const t = o.length;
   let n = new Uint32Array(t), s = new Uint32Array(t);
   for (let r = 0; r < t; r++) {
-    const { h: i, l: a } = bn(o[r], e);
+    const { h: i, l: a } = wn(o[r], e);
     [n[r], s[r]] = [i, a];
   }
   return [n, s];
@@ -828,7 +828,7 @@ function vn(o) {
 function ut(o, e = "") {
   if (!Number.isSafeInteger(o) || o < 0) {
     const t = e && `"${e}" `;
-    throw new Error(`${t}expected integer >0, got ${o}`);
+    throw new Error(`${t}expected integer >= 0, got ${o}`);
   }
 }
 function D(o, e, t = "") {
@@ -917,17 +917,17 @@ function Hn(o, e = 24) {
 class Fe {
   // NOTE: we accept arguments in bytes instead of bits here.
   constructor(e, t, n, s = !1, r = 24) {
-    j(this, "state");
-    j(this, "pos", 0);
-    j(this, "posOut", 0);
-    j(this, "finished", !1);
-    j(this, "state32");
-    j(this, "destroyed", !1);
-    j(this, "blockLen");
-    j(this, "suffix");
-    j(this, "outputLen");
-    j(this, "enableXOF", !1);
-    j(this, "rounds");
+    Q(this, "state");
+    Q(this, "pos", 0);
+    Q(this, "posOut", 0);
+    Q(this, "finished", !1);
+    Q(this, "state32");
+    Q(this, "destroyed", !1);
+    Q(this, "blockLen");
+    Q(this, "suffix");
+    Q(this, "outputLen");
+    Q(this, "enableXOF", !1);
+    Q(this, "rounds");
     if (this.blockLen = e, this.suffix = t, this.outputLen = n, this.enableXOF = s, this.rounds = r, ut(n, "outputLen"), !(0 < e && e < 200))
       throw new Error("only keccak-f1600 function is supported");
     this.state = new Uint8Array(200), this.state32 = Wt(this.state);
@@ -1006,10 +1006,10 @@ function it(o) {
     throw new Error("wrong u32 integer:" + o);
   return o;
 }
-function jt(o) {
+function Qt(o) {
   return it(o), (o & o - 1) === 0 && o !== 0;
 }
-function Qt(o, e) {
+function jt(o, e) {
   it(o);
   let t = 0;
   for (let n = 0; n < e; n++, o >>>= 1)
@@ -1021,11 +1021,11 @@ function Dt(o) {
 }
 function mt(o) {
   const e = o.length;
-  if (e < 2 || !jt(e))
+  if (e < 2 || !Qt(e))
     throw new Error("n must be a power of 2 and greater than 1. Got " + e);
   const t = Dt(e);
   for (let n = 0; n < e; n++) {
-    const s = Qt(n, t);
+    const s = jt(n, t);
     if (n < s) {
       const r = o[n];
       o[n] = o[s], o[s] = r;
@@ -1035,7 +1035,7 @@ function mt(o) {
 }
 const yt = (o, e) => {
   const { N: t, roots: n, dit: s, invertButterflies: r = !1, skipStages: i = 0, brp: a = !0 } = e, c = Dt(t);
-  if (!jt(t))
+  if (!Qt(t))
     throw new Error("FFT: Polynomial size should be power of two");
   const u = s !== r;
   return (l) => {
@@ -1043,10 +1043,10 @@ const yt = (o, e) => {
       throw new Error("FFT: wrong Polynomial length");
     s && a && mt(l);
     for (let h = 0, p = 1; h < c - i; h++) {
-      const d = s ? h + 1 + i : c - h, w = 1 << d, A = w >> 1, M = t >> d;
-      for (let f = 0; f < t; f += w)
-        for (let y = 0, b = p++; y < A; y++) {
-          const C = r ? s ? t - b : b : y * M, k = f + y, $ = f + y + A, v = n[C], I = l[$], S = l[k];
+      const d = s ? h + 1 + i : c - h, b = 1 << d, A = b >> 1, M = t >> d;
+      for (let f = 0; f < t; f += b)
+        for (let y = 0, w = p++; y < A; y++) {
+          const C = r ? s ? t - w : w : y * M, k = f + y, $ = f + y + A, v = n[C], I = l[$], S = l[k];
           if (u) {
             const B = o.mul(I, v);
             l[k] = o.add(S, B), l[$] = o.sub(S, B);
@@ -1123,22 +1123,22 @@ function G(...o) {
     else
       e.fill(0);
 }
-function wt(o) {
+function bt(o) {
   return (1 << o) - 1;
 }
 /*! noble-post-quantum - MIT License (c) 2024 Paul Miller (paulmillr.com) */
 const Ln = (o) => {
   const { newPoly: e, N: t, Q: n, F: s, ROOT_OF_UNITY: r, brvBits: i } = o, a = (f, y = n) => {
-    const b = f % y | 0;
-    return (b >= 0 ? b | 0 : y + b | 0) | 0;
+    const w = f % y | 0;
+    return (w >= 0 ? w | 0 : y + w | 0) | 0;
   }, c = (f, y = n) => {
-    const b = a(f, y) | 0;
-    return (b > y >> 1 ? b - y | 0 : b) | 0;
+    const w = a(f, y) | 0;
+    return (w > y >> 1 ? w - y | 0 : w) | 0;
   };
   function u() {
     const f = e(t);
     for (let y = 0; y < t; y++) {
-      const b = Qt(y, i), C = BigInt(r) ** BigInt(b) % BigInt(n);
+      const w = jt(y, i), C = BigInt(r) ** BigInt(w) % BigInt(n);
       f[y] = Number(C) | 0;
     }
     return f;
@@ -1156,36 +1156,36 @@ const Ln = (o) => {
     invertButterflies: !0,
     skipStages: 1,
     brp: !1
-  }, d = yt(h, { dit: !1, ...p }), w = yt(h, { dit: !0, ...p });
+  }, d = yt(h, { dit: !1, ...p }), b = yt(h, { dit: !0, ...p });
   return { mod: a, smod: c, nttZetas: l, NTT: {
     encode: (f) => d(f),
     decode: (f) => {
-      w(f);
+      b(f);
       for (let y = 0; y < f.length; y++)
         f[y] = a(s * f[y]);
       return f;
     }
   }, bitsCoder: (f, y) => {
-    const b = wt(f), C = f * (t / 8);
+    const w = bt(f), C = f * (t / 8);
     return {
       bytesLen: C,
       encode: (k) => {
         const $ = new Uint8Array(C);
         for (let v = 0, I = 0, S = 0, B = 0; v < k.length; v++)
-          for (I |= (y.encode(k[v]) & b) << S, S += f; S >= 8; S -= 8, I >>= 8)
-            $[B++] = I & wt(S);
+          for (I |= (y.encode(k[v]) & w) << S, S += f; S >= 8; S -= 8, I >>= 8)
+            $[B++] = I & bt(S);
         return $;
       },
       decode: (k) => {
         const $ = e(t);
         for (let v = 0, I = 0, S = 0, B = 0; v < k.length; v++)
           for (I |= k[v] << S, S += 8; S >= f; S -= f, I >>= f)
-            $[B++] = y.decode(I & b);
+            $[B++] = y.decode(I & w);
         return $;
       }
     };
   } };
-}, jn = (o) => (e, t) => {
+}, Qn = (o) => (e, t) => {
   t || (t = o.blockLen);
   const n = new Uint8Array(e.length + 2);
   n.set(e);
@@ -1198,7 +1198,7 @@ const Ln = (o) => {
       i.destroy(), G(r, n);
     }
   };
-}, Qn = /* @__PURE__ */ jn(Nn);
+}, jn = /* @__PURE__ */ Qn(Nn);
 /*! noble-post-quantum - MIT License (c) 2024 Paul Miller (paulmillr.com) */
 const F = 256, le = 3329, Dn = 3303, Vn = 17, { mod: $e, nttZetas: zn, NTT: ne, bitsCoder: Jn } = Ln({
   N: F,
@@ -1219,7 +1219,7 @@ const F = 256, le = 3329, Dn = 3303, Vn = 17, { mod: $e, nttZetas: zn, NTT: ne, 
     // const decompress = (i: number) => round((Q / 2 ** d) * i);
     decode: (t) => t * le + e >>> o
   };
-}, we = (o) => Jn(o, Xn(o));
+}, be = (o) => Jn(o, Xn(o));
 function se(o, e) {
   for (let t = 0; t < F; t++)
     o[t] = $e(o[t] + e[t]);
@@ -1241,7 +1241,7 @@ function Ee(o, e) {
   }
   return o;
 }
-function bt(o) {
+function wt(o) {
   const e = new Uint16Array(F);
   for (let t = 0; t < F; ) {
     const n = o();
@@ -1254,7 +1254,7 @@ function bt(o) {
   }
   return e;
 }
-function be(o, e, t, n) {
+function we(o, e, t, n) {
   const s = o(n * F / 4, e, t), r = new Uint16Array(F), i = Wt(s);
   let a = 0;
   for (let c = 0, u = 0, l = 0, h = 0; c < i.length; c++) {
@@ -1267,61 +1267,61 @@ function be(o, e, t, n) {
   return r;
 }
 const es = (o) => {
-  const { K: e, PRF: t, XOF: n, HASH512: s, ETA1: r, ETA2: i, du: a, dv: c } = o, u = we(1), l = we(c), h = we(a), p = Be("publicKey", Ge(we(12), e), 32), d = Ge(we(12), e), w = Be("ciphertext", Ge(h, e), l), A = Be("seed", 32, 32);
+  const { K: e, PRF: t, XOF: n, HASH512: s, ETA1: r, ETA2: i, du: a, dv: c } = o, u = be(1), l = be(c), h = be(a), p = Be("publicKey", Ge(be(12), e), 32), d = Ge(be(12), e), b = Be("ciphertext", Ge(h, e), l), A = Be("seed", 32, 32);
   return {
     secretCoder: d,
     lengths: {
       secretKey: d.bytesLen,
       publicKey: p.bytesLen,
-      cipherText: w.bytesLen
+      cipherText: b.bytesLen
     },
     keygen: (M) => {
       D(M, 32, "seed");
       const f = new Uint8Array(33);
       f.set(M), f[32] = e;
-      const y = s(f), [b, C] = A.decode(y), k = [], $ = [];
+      const y = s(f), [w, C] = A.decode(y), k = [], $ = [];
       for (let S = 0; S < e; S++)
-        k.push(ne.encode(be(t, C, S, r)));
-      const v = n(b);
+        k.push(ne.encode(we(t, C, S, r)));
+      const v = n(w);
       for (let S = 0; S < e; S++) {
-        const B = ne.encode(be(t, C, e + S, r));
+        const B = ne.encode(we(t, C, e + S, r));
         for (let R = 0; R < e; R++) {
-          const ce = bt(v.get(R, S));
+          const ce = wt(v.get(R, S));
           se(B, Ee(ce, k[R]));
         }
         $.push(B);
       }
       v.clean();
       const I = {
-        publicKey: p.encode([$, b]),
+        publicKey: p.encode([$, w]),
         secretKey: d.encode(k)
       };
-      return G(b, C, k, $, f, y), I;
+      return G(w, C, k, $, f, y), I;
     },
     encrypt: (M, f, y) => {
-      const [b, C] = p.decode(M), k = [];
+      const [w, C] = p.decode(M), k = [];
       for (let R = 0; R < e; R++)
-        k.push(ne.encode(be(t, y, R, r)));
+        k.push(ne.encode(we(t, y, R, r)));
       const $ = n(C), v = new Uint16Array(F), I = [];
       for (let R = 0; R < e; R++) {
-        const ce = be(t, y, e + R, i), De = new Uint16Array(F);
+        const ce = we(t, y, e + R, i), De = new Uint16Array(F);
         for (let Me = 0; Me < e; Me++) {
-          const Zt = bt($.get(R, Me));
+          const Zt = wt($.get(R, Me));
           se(De, Ee(Zt, k[Me]));
         }
-        se(ce, ne.decode(De)), I.push(ce), se(v, Ee(b[R], k[R])), G(De);
+        se(ce, ne.decode(De)), I.push(ce), se(v, Ee(w[R], k[R])), G(De);
       }
       $.clean();
-      const S = be(t, y, 2 * e, i);
+      const S = we(t, y, 2 * e, i);
       se(S, ne.decode(v));
       const B = u.decode(f);
-      return se(B, S), G(b, k, v, S), w.encode([I, B]);
+      return se(B, S), G(w, k, v, S), b.encode([I, B]);
     },
     decrypt: (M, f) => {
-      const [y, b] = w.decode(M), C = d.decode(f), k = new Uint16Array(F);
+      const [y, w] = b.decode(M), C = d.decode(f), k = new Uint16Array(F);
       for (let $ = 0; $ < e; $++)
         se(k, Ee(C[$], ne.encode(y[$])));
-      return Zn(b, ne.decode(k)), G(k, C, y), u.encode(b);
+      return Zn(w, ne.decode(k)), G(k, C, y), u.encode(w);
     }
   };
 };
@@ -1338,8 +1338,8 @@ function ts(o) {
     },
     keygen: (l = gt(u)) => {
       D(l, u, "seed");
-      const { publicKey: h, secretKey: p } = e.keygen(l.subarray(0, 32)), d = t(h), w = a.encode([p, h, d, l.subarray(32)]);
-      return G(p, d), { publicKey: h, secretKey: w };
+      const { publicKey: h, secretKey: p } = e.keygen(l.subarray(0, 32)), d = t(h), b = a.encode([p, h, d, l.subarray(32)]);
+      return G(p, d), { publicKey: h, secretKey: b };
     },
     getPublicKey: (l) => {
       const [h, p] = a.decode(l);
@@ -1351,16 +1351,16 @@ function ts(o) {
       if (!Je(d, p))
         throw G(d), new Error("ML-KEM.encapsulate: wrong publicKey modulus");
       G(d);
-      const w = n.create().update(h).update(t(l)).digest(), A = e.encrypt(l, h, w.subarray(32, 64));
-      return G(w.subarray(32)), { cipherText: A, sharedSecret: w.subarray(0, 32) };
+      const b = n.create().update(h).update(t(l)).digest(), A = e.encrypt(l, h, b.subarray(32, 64));
+      return G(b.subarray(32)), { cipherText: A, sharedSecret: b.subarray(0, 32) };
     },
     decapsulate: (l, h) => {
       D(h, a.bytesLen, "secretKey"), D(l, i.cipherText, "cipherText");
-      const p = a.bytesLen - 96, d = p + 32, w = t(h.subarray(p / 2, d));
-      if (!Je(w, h.subarray(d, d + 32)))
+      const p = a.bytesLen - 96, d = p + 32, b = t(h.subarray(p / 2, d));
+      if (!Je(b, h.subarray(d, d + 32)))
         throw new Error("invalid secretKey: hash check failed");
-      const [A, M, f, y] = a.decode(h), b = e.decrypt(l, A), C = n.create().update(b).update(f).digest(), k = C.subarray(0, 32), $ = e.encrypt(M, b, C.subarray(32, 64)), v = Je(l, $), I = s.create({ dkLen: 32 }).update(y).update(l).digest();
-      return G(b, $, v ? I : k), v ? k : I;
+      const [A, M, f, y] = a.decode(h), w = e.decrypt(l, A), C = n.create().update(w).update(f).digest(), k = C.subarray(0, 32), $ = e.encrypt(M, w, C.subarray(32, 64)), v = Je(l, $), I = s.create({ dkLen: 32 }).update(y).update(l).digest();
+      return G(w, $, v ? I : k), v ? k : I;
     }
   };
 }
@@ -1371,7 +1371,7 @@ const ss = {
   HASH256: Pn,
   HASH512: Kn,
   KDF: Lt,
-  XOF: Qn,
+  XOF: jn,
   PRF: ns
 }, Xe = /* @__PURE__ */ ts({
   ...ss,
@@ -2548,7 +2548,7 @@ class ve {
     let s = "";
     for (const p in n) {
       let d = n[p];
-      for (let w = 0, A = 8 + e[p]; w < A; w++)
+      for (let b = 0, A = 8 + e[p]; b < A; b++)
         d = new L("SHAKE256", "TEXT").update(d).getHash("HEX", { outputLen: 512 });
       s += d;
     }
@@ -2687,9 +2687,10 @@ class z {
     sourceWallet: n = null,
     remainderWallet: s = null,
     cellSlug: r = null,
-    version: i = null
+    version: i = null,
+    continuIdPosition: a = null
   }) {
-    this.status = null, this.molecularHash = null, this.createdAt = String(+/* @__PURE__ */ new Date()), this.cellSlugOrigin = this.cellSlug = r, this.secret = e, this.bundle = t, this.sourceWallet = n, this.atoms = [], this.parentHashes = [], i !== null && Object.prototype.hasOwnProperty.call(Ue, i) && (this.version = String(i)), (s || n) && (this.remainderWallet = s || _.create({
+    this.status = null, this.molecularHash = null, this.createdAt = String(+/* @__PURE__ */ new Date()), this.cellSlugOrigin = this.cellSlug = r, this.secret = e, this.bundle = t, this.sourceWallet = n, this.continuIdPosition = a, this.atoms = [], this.parentHashes = [], i !== null && Object.prototype.hasOwnProperty.call(Ue, i) && (this.version = String(i)), (s || n) && (this.remainderWallet = s || _.create({
       secret: e,
       bundle: t,
       token: n.token,
@@ -2858,7 +2859,7 @@ class z {
       bundle: this.bundle
     }));
     const e = {};
-    return this.sourceWallet && this.sourceWallet.position && (e.previousPosition = this.sourceWallet.position), this.remainderWallet.pubkey && (e.pubkey = this.remainderWallet.pubkey), this.remainderWallet.characters && (e.characters = this.remainderWallet.characters), this.addAtom(g.create({
+    return this.continuIdPosition ? e.previousPosition = this.continuIdPosition : this.sourceWallet && this.sourceWallet.position && (e.previousPosition = this.sourceWallet.position), this.remainderWallet.pubkey && (e.pubkey = this.remainderWallet.pubkey), this.remainderWallet.characters && (e.characters = this.remainderWallet.characters), this.addAtom(g.create({
       isotope: "I",
       wallet: this.remainderWallet,
       metaType: "walletBundle",
@@ -2939,10 +2940,20 @@ class z {
       throw new Ye("Molecule::burnToken() - Amount to burn must be positive!");
     if (this.sourceWallet.balance - e < 0)
       throw new ue();
+    const n = new _({
+      bundle: "0000000000000000000000000000000000000000000000000000000000000000",
+      token: this.sourceWallet.token
+    });
     return this.addAtom(g.create({
       isotope: "V",
       wallet: this.sourceWallet,
-      value: -e
+      value: -this.sourceWallet.balance
+    })), this.addAtom(g.create({
+      isotope: "V",
+      wallet: n,
+      value: e,
+      metaType: "walletBundle",
+      metaId: n.bundle
     })), this.addAtom(g.create({
       isotope: "V",
       wallet: this.remainderWallet,
@@ -3381,15 +3392,15 @@ class z {
     }), c = He(a, 128), u = this.normalizedHash();
     let l = "";
     for (const d in c) {
-      let w = c[d];
+      let b = c[d];
       for (let A = 0, M = 8 - u[d]; A < M; A++)
-        w = new L("SHAKE256", "TEXT").update(w).getHash("HEX", { outputLen: 512 });
-      l += w;
+        b = new L("SHAKE256", "TEXT").update(b).getHash("HEX", { outputLen: 512 });
+      l += b;
     }
     n && (l = dn(l));
     const h = He(l, Math.ceil(l.length / this.atoms.length));
     let p = null;
-    for (let d = 0, w = h.length; d < w; d++)
+    for (let d = 0, b = h.length; d < b; d++)
       this.atoms[d].otsFragment = h[d], p = this.atoms[d].position;
     return p;
   }
@@ -4056,6 +4067,13 @@ class cs extends N {
     }`;
   }
   /**
+   * Force network-only for ContinuID queries to prevent URQL cache from
+   * returning stale wallet positions after mutations advance the ContinuID chain
+   */
+  createQueryContext() {
+    return { requestPolicy: "network-only" };
+  }
+  /**
    * Returns a Response object
    *
    * @param {object} json
@@ -4621,7 +4639,7 @@ class V extends E {
     return this.$__payload;
   }
 }
-class je extends N {
+class Qe extends N {
   /**
    * Creates a new Request for the given parameters
    *
@@ -4665,7 +4683,7 @@ class je extends N {
     return {};
   }
 }
-class U extends je {
+class U extends Qe {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4757,12 +4775,30 @@ class gs extends V {
     return this.payloadKey("token");
   }
   /**
-   * Returns timestamp
+   * Returns raw time value from payload
    *
    * @return {string}
    */
   time() {
     return this.payloadKey("time");
+  }
+  /**
+   * Returns the expiration timestamp as Unix seconds.
+   * Handles both server formats:
+   * - PHP server: time = lifetime in ms, expiresAt = Unix timestamp in payload
+   * - Rust server: time = Unix timestamp in seconds
+   *
+   * @return {number}
+   */
+  expiresAt() {
+    try {
+      const t = this.payloadKey("expiresAt");
+      if (t)
+        return Number(t);
+    } catch {
+    }
+    const e = Number(this.time());
+    return e >= 1577836800 ? e : Math.floor(Date.now() / 1e3) + Math.floor(e / 1e3);
   }
   /**
    *
@@ -4779,7 +4815,7 @@ class gs extends V {
     return this.payloadKey("key");
   }
 }
-class ws extends U {
+class bs extends U {
   /**
    *
    * @param {object} meta
@@ -4800,7 +4836,7 @@ class ws extends U {
     });
   }
 }
-class bs extends V {
+class ws extends V {
 }
 class ks extends U {
   /**
@@ -4828,7 +4864,7 @@ class ks extends U {
    * @return {ResponseCreateToken}
    */
   createResponse(e) {
-    return new bs({
+    return new ws({
       query: this,
       json: e
     });
@@ -5117,7 +5153,7 @@ class Us extends E {
     return T.get(this.data(), "message");
   }
 }
-class Bs extends je {
+class Bs extends Qe {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -5226,12 +5262,30 @@ class Ps extends E {
     return this.payloadKey("token");
   }
   /**
-   * Returns timestamp
+   * Returns raw time value from payload
    *
    * @return {*}
    */
   time() {
     return this.payloadKey("time");
+  }
+  /**
+   * Returns the expiration timestamp as Unix seconds.
+   * Handles both server formats:
+   * - PHP server: time = lifetime in ms, expiresAt = Unix timestamp in payload
+   * - Rust server: time = Unix timestamp in seconds
+   *
+   * @return {number}
+   */
+  expiresAt() {
+    try {
+      const t = this.payloadKey("expiresAt");
+      if (t)
+        return Number(t);
+    } catch {
+    }
+    const e = Number(this.time());
+    return e >= 1577836800 ? e : Math.floor(Date.now() / 1e3) + Math.floor(e / 1e3);
   }
   /**
    * Returns timestamp
@@ -5249,7 +5303,7 @@ class Ps extends E {
     return this.payloadKey("encrypt");
   }
 }
-class Ks extends je {
+class Ks extends Qe {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -5312,7 +5366,7 @@ class Re extends x {
     super(e, t, n), this.name = "StackableUnitAmountException";
   }
 }
-class Qe {
+class je {
   /**
    *
    * @param {UrqlClientWrapper} graphQLClient
@@ -5382,7 +5436,7 @@ class Qe {
     return this.$__variables;
   }
 }
-class Fs extends Qe {
+class Fs extends je {
   constructor(e) {
     super(e), this.$__subscribe = O`
       subscription onCreateMolecule ( $bundle: String! ) {
@@ -5432,7 +5486,7 @@ class Fs extends Qe {
     `;
   }
 }
-class Ls extends Qe {
+class Ls extends je {
   constructor(e) {
     super(e), this.$__subscribe = O`
       subscription onWalletStatus ( $bundle: String!, $token: String! ) {
@@ -5446,7 +5500,7 @@ class Ls extends Qe {
     `;
   }
 }
-class js extends Qe {
+class Qs extends je {
   constructor(e) {
     super(e), this.$__subscribe = O`
       subscription onActiveWallet ( $bundle: String! ) {
@@ -5489,7 +5543,7 @@ class js extends Qe {
     `;
   }
 }
-class Qs extends Qe {
+class js extends je {
   constructor(e) {
     super(e), this.$__subscribe = O`
       subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
@@ -5522,7 +5576,7 @@ class Ds extends E {
     });
   }
 }
-class Vs extends je {
+class Vs extends Qe {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -5948,12 +6002,12 @@ class It extends N {
     tokenSlugs: h,
     tokenSlug: p,
     cellSlugs: d,
-    cellSlug: w,
+    cellSlug: b,
     batchIds: A,
     batchId: M,
     values: f,
     value: y,
-    metaTypes: b,
+    metaTypes: w,
     metaType: C,
     metaIds: k,
     metaId: $,
@@ -5963,7 +6017,7 @@ class It extends N {
     latest: B,
     queryArgs: R
   }) {
-    return t && (e = e || [], e.push(t)), s && (n = n || [], n.push(s)), i && (r = r || [], r.push(i)), c && (a = a || [], a.push(c)), l && (u = u || [], u.push(l)), p && (h = h || [], h.push(p)), w && (d = d || [], d.push(w)), M && (A = A || [], A.push(M)), y && (f = f || [], f.push(y)), C && (b = b || [], b.push(C)), $ && (k = k || [], k.push($)), I && (v = v || [], v.push(I)), {
+    return t && (e = e || [], e.push(t)), s && (n = n || [], n.push(s)), i && (r = r || [], r.push(i)), c && (a = a || [], a.push(c)), l && (u = u || [], u.push(l)), p && (h = h || [], h.push(p)), b && (d = d || [], d.push(b)), M && (A = A || [], A.push(M)), y && (f = f || [], f.push(y)), C && (w = w || [], w.push(C)), $ && (k = k || [], k.push($)), I && (v = v || [], v.push(I)), {
       molecularHashes: e,
       bundleHashes: n,
       positions: r,
@@ -5973,7 +6027,7 @@ class It extends N {
       cellSlugs: d,
       batchIds: A,
       values: f,
-      metaTypes: b,
+      metaTypes: w,
       metaIds: k,
       indexes: v,
       filter: S,
@@ -6560,7 +6614,7 @@ function We(o) {
   return o ^= o >>> 16, o = Math.imul(o, 2246822507), o ^= o >>> 13, o = Math.imul(o, 3266489909), (o ^= o >>> 16) >>> 0;
 }
 var q = new Uint32Array([597399067, 2869860233, 951274213, 2716044179]);
-function Q(o, e) {
+function j(o, e) {
   return o << e | o >>> 32 - e;
 }
 function at(o, e) {
@@ -6570,7 +6624,7 @@ function at(o, e) {
   (function(r, i) {
     for (var a = r.byteLength / 16 | 0, c = new Uint32Array(r, 0, 4 * a), u = 0; u < a; u++) {
       var l = c.subarray(4 * u, 4 * (u + 1));
-      l[0] = Math.imul(l[0], q[0]), l[0] = Q(l[0], 15), l[0] = Math.imul(l[0], q[1]), i[0] = i[0] ^ l[0], i[0] = Q(i[0], 19), i[0] = i[0] + i[1], i[0] = Math.imul(i[0], 5) + 1444728091, l[1] = Math.imul(l[1], q[1]), l[1] = Q(l[1], 16), l[1] = Math.imul(l[1], q[2]), i[1] = i[1] ^ l[1], i[1] = Q(i[1], 17), i[1] = i[1] + i[2], i[1] = Math.imul(i[1], 5) + 197830471, l[2] = Math.imul(l[2], q[2]), l[2] = Q(l[2], 17), l[2] = Math.imul(l[2], q[3]), i[2] = i[2] ^ l[2], i[2] = Q(i[2], 15), i[2] = i[2] + i[3], i[2] = Math.imul(i[2], 5) + 2530024501, l[3] = Math.imul(l[3], q[3]), l[3] = Q(l[3], 18), l[3] = Math.imul(l[3], q[0]), i[3] = i[3] ^ l[3], i[3] = Q(i[3], 13), i[3] = i[3] + i[0], i[3] = Math.imul(i[3], 5) + 850148119;
+      l[0] = Math.imul(l[0], q[0]), l[0] = j(l[0], 15), l[0] = Math.imul(l[0], q[1]), i[0] = i[0] ^ l[0], i[0] = j(i[0], 19), i[0] = i[0] + i[1], i[0] = Math.imul(i[0], 5) + 1444728091, l[1] = Math.imul(l[1], q[1]), l[1] = j(l[1], 16), l[1] = Math.imul(l[1], q[2]), i[1] = i[1] ^ l[1], i[1] = j(i[1], 17), i[1] = i[1] + i[2], i[1] = Math.imul(i[1], 5) + 197830471, l[2] = Math.imul(l[2], q[2]), l[2] = j(l[2], 17), l[2] = Math.imul(l[2], q[3]), i[2] = i[2] ^ l[2], i[2] = j(i[2], 15), i[2] = i[2] + i[3], i[2] = Math.imul(i[2], 5) + 2530024501, l[3] = Math.imul(l[3], q[3]), l[3] = j(l[3], 18), l[3] = Math.imul(l[3], q[0]), i[3] = i[3] ^ l[3], i[3] = j(i[3], 13), i[3] = i[3] + i[0], i[3] = Math.imul(i[3], 5) + 850148119;
     }
   })(o, n), (function(r, i) {
     var a = r.byteLength / 16 | 0, c = r.byteLength % 16, u = new Uint32Array(4), l = new Uint8Array(r, 16 * a, c);
@@ -6580,7 +6634,7 @@ function at(o, e) {
       case 14:
         u[3] = u[3] ^ l[13] << 8;
       case 13:
-        u[3] = u[3] ^ l[12] << 0, u[3] = Math.imul(u[3], q[3]), u[3] = Q(u[3], 18), u[3] = Math.imul(u[3], q[0]), i[3] = i[3] ^ u[3];
+        u[3] = u[3] ^ l[12] << 0, u[3] = Math.imul(u[3], q[3]), u[3] = j(u[3], 18), u[3] = Math.imul(u[3], q[0]), i[3] = i[3] ^ u[3];
       case 12:
         u[2] = u[2] ^ l[11] << 24;
       case 11:
@@ -6588,7 +6642,7 @@ function at(o, e) {
       case 10:
         u[2] = u[2] ^ l[9] << 8;
       case 9:
-        u[2] = u[2] ^ l[8] << 0, u[2] = Math.imul(u[2], q[2]), u[2] = Q(u[2], 17), u[2] = Math.imul(u[2], q[3]), i[2] = i[2] ^ u[2];
+        u[2] = u[2] ^ l[8] << 0, u[2] = Math.imul(u[2], q[2]), u[2] = j(u[2], 17), u[2] = Math.imul(u[2], q[3]), i[2] = i[2] ^ u[2];
       case 8:
         u[1] = u[1] ^ l[7] << 24;
       case 7:
@@ -6596,7 +6650,7 @@ function at(o, e) {
       case 6:
         u[1] = u[1] ^ l[5] << 8;
       case 5:
-        u[1] = u[1] ^ l[4] << 0, u[1] = Math.imul(u[1], q[1]), u[1] = Q(u[1], 16), u[1] = Math.imul(u[1], q[2]), i[1] = i[1] ^ u[1];
+        u[1] = u[1] ^ l[4] << 0, u[1] = Math.imul(u[1], q[1]), u[1] = j(u[1], 16), u[1] = Math.imul(u[1], q[2]), i[1] = i[1] ^ u[1];
       case 4:
         u[0] = u[0] ^ l[3] << 24;
       case 3:
@@ -6604,7 +6658,7 @@ function at(o, e) {
       case 2:
         u[0] = u[0] ^ l[1] << 8;
       case 1:
-        u[0] = u[0] ^ l[0] << 0, u[0] = Math.imul(u[0], q[0]), u[0] = Q(u[0], 15), u[0] = Math.imul(u[0], q[1]), i[0] = i[0] ^ u[0];
+        u[0] = u[0] ^ l[0] << 0, u[0] = Math.imul(u[0], q[0]), u[0] = j(u[0], 15), u[0] = Math.imul(u[0], q[1]), i[0] = i[0] ^ u[0];
     }
   })(o, n), (function(r, i) {
     i[0] = i[0] ^ r.byteLength, i[1] = i[1] ^ r.byteLength, i[2] = i[2] ^ r.byteLength, i[3] = i[3] ^ r.byteLength, i[0] = i[0] + i[1] | 0, i[0] = i[0] + i[2] | 0, i[0] = i[0] + i[3] | 0, i[1] = i[1] + i[0] | 0, i[2] = i[2] + i[0] | 0, i[3] = i[3] + i[0] | 0, i[0] = We(i[0]), i[1] = We(i[1]), i[2] = We(i[2]), i[3] = We(i[3]), i[0] = i[0] + i[1] | 0, i[0] = i[0] + i[2] | 0, i[0] = i[0] + i[3] | 0, i[1] = i[1] + i[0] | 0, i[2] = i[2] + i[0] | 0, i[3] = i[3] + i[0] | 0;
@@ -6663,8 +6717,8 @@ function Gt(o, e, t, n) {
       }));
       p && !d || (s[u] = l);
     } else {
-      var w = Gt(l, e, t, h);
-      Object.keys(w).length > 0 && (s[u] = w);
+      var b = Gt(l, e, t, h);
+      Object.keys(b).length > 0 && (s[u] = b);
     }
   }, i = 0, a = Object.entries(o); i < a.length; i++) {
     var c = a[i];
@@ -6772,12 +6826,12 @@ Te().name != "Firefox" && J("canvas", (function() {
     o({ commonImageDataHash: at(Xt(e, Ct, Et).data.toString()).toString() });
   }));
 }));
-var tt, gr = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], wr = ["monospace", "sans-serif", "serif"];
+var tt, gr = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], br = ["monospace", "sans-serif", "serif"];
 function Ot(o, e) {
   if (!o) throw new Error("Canvas context not supported");
   return o.font, o.font = "72px ".concat(e), o.measureText("WwMmLli0Oo").width;
 }
-function br() {
+function wr() {
   var o, e = document.createElement("canvas"), t = (o = e.getContext("webgl")) !== null && o !== void 0 ? o : e.getContext("experimental-webgl");
   if (t && "getParameter" in t) try {
     var n = (t.getParameter(t.VENDOR) || "").toString(), s = (t.getParameter(t.RENDERER) || "").toString(), r = { vendor: n, renderer: s, version: (t.getParameter(t.VERSION) || "").toString(), shadingLanguageVersion: (t.getParameter(t.SHADING_LANGUAGE_VERSION) || "").toString() };
@@ -6865,7 +6919,7 @@ Te().name != "Firefox" && J("fonts", (function() {
         return X(o, void 0, void 0, (function() {
           var r, i, a, c;
           return Z(this, (function(u) {
-            return r = s.createElement("canvas"), i = r.getContext("2d"), a = wr.map((function(l) {
+            return r = s.createElement("canvas"), i = r.getContext("2d"), a = br.map((function(l) {
               return Ot(i, l);
             })), c = {}, gr.forEach((function(l) {
               var h = Ot(i, l);
@@ -6881,7 +6935,7 @@ Te().name != "Firefox" && J("fonts", (function() {
 })), J("hardware", (function() {
   return new Promise((function(o, e) {
     var t = navigator.deviceMemory !== void 0 ? navigator.deviceMemory : 0, n = window.performance && window.performance.memory ? window.performance.memory : 0;
-    o({ videocard: br(), architecture: kr(), deviceMemory: t.toString() || "undefined", jsHeapSizeLimit: n.jsHeapSizeLimit || 0 });
+    o({ videocard: wr(), architecture: kr(), deviceMemory: t.toString() || "undefined", jsHeapSizeLimit: n.jsHeapSizeLimit || 0 });
   }));
 })), J("locales", (function() {
   return new Promise((function(o) {
@@ -6978,8 +7032,8 @@ J("webgl", (function() {
               m.bindBuffer(m.ARRAY_BUFFER, p), m.bufferData(m.ARRAY_BUFFER, c, m.STATIC_DRAW);
               var d = m.getAttribLocation(i, "position");
               m.enableVertexAttribArray(d), m.vertexAttribPointer(d, 2, m.FLOAT, !1, 0, 0), m.viewport(0, 0, K.width, K.height), m.clearColor(0, 0, 0, 1), m.clear(m.COLOR_BUFFER_BIT), m.drawArrays(m.LINES, 0, 2 * a);
-              var w = new Uint8ClampedArray(K.width * K.height * 4);
-              return m.readPixels(0, 0, K.width, K.height, m.RGBA, m.UNSIGNED_BYTE, w), new ImageData(w, K.width, K.height);
+              var b = new Uint8ClampedArray(K.width * K.height * 4);
+              return m.readPixels(0, 0, K.width, K.height, m.RGBA, m.UNSIGNED_BYTE, b), new ImageData(b, K.width, K.height);
             } catch {
               return new ImageData(1, 1);
             } finally {
@@ -7391,7 +7445,16 @@ class Or {
     sourceWallet: n = null,
     remainderWallet: s = null
   }) {
-    return this.log("info", "KnishIOClient::createMolecule() - Creating a new molecule..."), e = e || this.getSecret(), t = t || this.getBundle(), !n && this.lastMoleculeQuery && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() && (n = this.getRemainderWallet()), n === null && (n = await this.getSourceWallet()), this.remainderWallet = s || _.create({
+    this.log("info", "KnishIOClient::createMolecule() - Creating a new molecule..."), e = e || this.getSecret(), t = t || this.getBundle();
+    let r = null;
+    if (n && n.token !== "USER")
+      if (this.lastMoleculeQuery && this.getRemainderWallet() && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success())
+        r = this.getRemainderWallet().position;
+      else {
+        const i = await this.getSourceWallet();
+        r = i ? i.position : null;
+      }
+    return !n && this.lastMoleculeQuery && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() && (n = this.getRemainderWallet()), n === null && (n = await this.getSourceWallet()), this.remainderWallet = s || _.create({
       secret: e,
       bundle: t,
       token: "USER",
@@ -7402,7 +7465,8 @@ class Or {
       sourceWallet: n,
       remainderWallet: this.getRemainderWallet(),
       cellSlug: this.getCellSlug(),
-      version: this.getServerSdkVersion()
+      version: this.getServerSdkVersion(),
+      continuIdPosition: r
     });
   }
   /**
@@ -7577,7 +7641,7 @@ class Or {
     bundle: e,
     closure: t
   }) {
-    return this.createSubscribe(js).execute({
+    return this.createSubscribe(Qs).execute({
       variables: {
         bundle: e || this.getBundle()
       },
@@ -7597,7 +7661,7 @@ class Or {
     metaId: t,
     closure: n
   }) {
-    return this.createSubscribe(Qs).execute({
+    return this.createSubscribe(js).execute({
       variables: {
         metaType: e,
         metaId: t
@@ -7650,7 +7714,7 @@ class Or {
     throughAtom: h = !0,
     throughMolecule: p = !1,
     values: d = null,
-    keys: w = null,
+    keys: b = null,
     atomValues: A = null
   }) {
     this.log("info", `KnishIOClient::queryMeta() - Querying metaType: ${e}, metaId: ${t}...`);
@@ -7665,7 +7729,7 @@ class Or {
       queryArgs: c,
       countBy: l,
       values: d,
-      keys: w,
+      keys: b,
       atomValues: A,
       cellSlug: this.getCellSlug()
     })) : h ? (M = this.createQuery(Tt), f = Tt.createVariables({
@@ -7678,7 +7742,7 @@ class Or {
       queryArgs: c,
       countBy: l,
       values: d,
-      keys: w,
+      keys: b,
       atomValues: A,
       cellSlug: this.getCellSlug()
     })) : (M = this.createQuery(At), f = At.createVariables({
@@ -7785,12 +7849,12 @@ class Or {
     tokenSlugs: h,
     tokenSlug: p,
     cellSlugs: d,
-    cellSlug: w,
+    cellSlug: b,
     batchIds: A,
     batchId: M,
     values: f,
     value: y,
-    metaTypes: b,
+    metaTypes: w,
     metaType: C,
     metaIds: k,
     metaId: $,
@@ -7819,12 +7883,12 @@ class Or {
       tokenSlugs: h,
       tokenSlug: p,
       cellSlugs: d,
-      cellSlug: w,
+      cellSlug: b,
       batchIds: A,
       batchId: M,
       values: f,
       value: y,
-      metaTypes: b,
+      metaTypes: w,
       metaType: C,
       metaIds: k,
       metaId: $,
@@ -8016,8 +8080,7 @@ class Or {
       {
         mutationClass: rr,
         molecule: await this.createMolecule({
-          secret: this.getSecret(),
-          sourceWallet: await this.getSourceWallet()
+          secret: this.getSecret()
         })
       }
     );
@@ -8047,8 +8110,7 @@ class Or {
       {
         mutationClass: Cs,
         molecule: await this.createMolecule({
-          secret: this.getSecret(),
-          sourceWallet: await this.getSourceWallet()
+          secret: this.getSecret()
         })
       }
     ), i = n || {};
@@ -8071,8 +8133,7 @@ class Or {
     const t = await this.createMoleculeMutation({
       mutationClass: Os,
       molecule: await this.createMolecule({
-        secret: this.getSecret(),
-        sourceWallet: await this.getSourceWallet()
+        secret: this.getSecret()
       })
     });
     return t.fillMolecule({
@@ -8097,8 +8158,7 @@ class Or {
     const r = await this.createMoleculeMutation({
       mutationClass: Ws,
       molecule: await this.createMolecule({
-        secret: this.getSecret(),
-        sourceWallet: await this.getSourceWallet()
+        secret: this.getSecret()
       })
     });
     return r.fillMolecule({
@@ -8510,7 +8570,7 @@ class Or {
     });
     i.burnToken({ amount: t }), i.sign({
       bundle: this.getBundle()
-    }), i.check();
+    }), i.check(s);
     const a = await this.createMoleculeMutation({
       mutationClass: U,
       molecule: i
@@ -8622,7 +8682,7 @@ class Or {
     if (i.success()) {
       const a = xe.create({
         token: i.token(),
-        expiresAt: i.time(),
+        expiresAt: i.expiresAt(),
         pubkey: i.pubKey(),
         encrypt: i.encrypt()
       }, n);
@@ -8650,7 +8710,7 @@ class Or {
       secret: e,
       sourceWallet: n
     }), r = await this.createMoleculeMutation({
-      mutationClass: ws,
+      mutationClass: bs,
       molecule: s
     });
     r.fillMolecule({ meta: { encrypt: t ? "true" : "false" } });
@@ -8658,7 +8718,7 @@ class Or {
     if (i.success()) {
       const a = xe.create({
         token: i.token(),
-        expiresAt: i.time(),
+        expiresAt: i.expiresAt(),
         pubkey: i.pubKey(),
         encrypt: i.encrypt()
       }, n);
@@ -8825,7 +8885,7 @@ export {
   rs as MolecularHashMismatchException,
   is as MolecularHashMissingException,
   z as Molecule,
-  je as Mutation,
+  Qe as Mutation,
   Vs as MutationActiveSession,
   Ws as MutationAppendRequest,
   Ts as MutationClaimShadowWallet,
@@ -8838,7 +8898,7 @@ export {
   Bs as MutationLinkIdentifier,
   Os as MutationPeering,
   U as MutationProposeMolecule,
-  ws as MutationRequestAuthorization,
+  bs as MutationRequestAuthorization,
   Ks as MutationRequestAuthorizationGuest,
   _s as MutationRequestTokens,
   As as MutationTransferTokens,
@@ -8872,7 +8932,7 @@ export {
   vs as ResponseCreateIdentifier,
   Ms as ResponseCreateMeta,
   sr as ResponseCreateRule,
-  bs as ResponseCreateToken,
+  ws as ResponseCreateToken,
   qs as ResponseCreateWallet,
   Us as ResponseLinkIdentifier,
   ms as ResponseMetaType,
