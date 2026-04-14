@@ -251,6 +251,71 @@ This document will explain both ways.
   console.log(fingerprintData);
   ```
 
+### DataBraid: Embedding Status (Observability)
+
+When the validator has DataBraid embeddings enabled (`EMBEDDING_ENABLED=true`), the SDK can query the embedding state of meta assets. This allows apps to render UI indicators such as spinner badges for in-progress embeddings or completion checkmarks.
+
+The SDK automatically detects whether the connected server supports this feature. If it does not, `queryEmbeddingStatus()` returns `null` instead of throwing an error.
+
+- Query embedding status for a **single Meta Asset**:
+
+  ```javascript
+  const response = await client.queryEmbeddingStatus({
+    metaType: 'Vehicle',
+    metaId: 'VIN-12345'
+  });
+
+  if (response) {
+    const items = response.payload();
+    // items[0] = {
+    //   metaType: 'Vehicle',
+    //   metaId: 'VIN-12345',
+    //   state: 'COMPLETE',     // 'PENDING' | 'STALE' | 'COMPLETE'
+    //   totalMetas: 5,         // Total meta rows for this instance
+    //   embeddedCount: 5,      // Rows with embeddings
+    //   embeddedAt: 1713100800, // Unix timestamp of last embedding
+    //   model: 'nomic-embed-text-v1.5'
+    // }
+  } else {
+    // Server does not support embedding status
+  }
+  ```
+
+- **Bulk** embedding status for multiple assets in a single request:
+
+  ```javascript
+  const response = await client.queryEmbeddingStatus({
+    instances: [
+      { metaType: 'Vehicle', metaId: 'VIN-12345' },
+      { metaType: 'Vehicle', metaId: 'VIN-67890' },
+      { metaType: 'Profile', metaId: 'user_42' }
+    ]
+  });
+
+  if (response) {
+    const items = response.payload();
+    // items.length === 3, one per input, in the same order
+    for (const item of items) {
+      console.log(`${item.metaType}:${item.metaId} → ${item.state}`);
+    }
+  }
+  ```
+
+- **Capability detection** — check if the server supports a query field before calling it:
+
+  ```javascript
+  const supported = await client.hasQueryField('embeddingStatus');
+  // true if the server's GraphQL schema includes the field, false otherwise
+  // Result is cached per URI — no repeated network round-trips
+  ```
+
+  **Embedding States:**
+  | State | Meaning | Suggested UI |
+  |-------|---------|-------------|
+  | `PENDING` | No embeddings generated yet | Spinner / gray badge |
+  | `STALE` | Embeddings exist but model has changed | Refresh indicator |
+  | `COMPLETE` | All meta rows have current-model embeddings | Green checkmark |
+
 ## Advanced Usage: Working with Molecules
 
 For more granular control, you can work directly with Molecules:
@@ -417,6 +482,7 @@ This method involves individually building Atoms and Molecules, triggering the s
     1. `QueryBalance` and `QueryContinuId` -> returns a `Wallet` instance
     2. `QueryWalletList` -> returns a list of `Wallet` instances
     3. `MutationProposeMolecule`, `MutationRequestAuthorization`, `MutationCreateIdentifier`, `MutationLinkIdentifier`, `MutationClaimShadowWallet`, `MutationCreateToken`, `MutationRequestTokens`, and `MutationTransferTokens` -> returns molecule metadata
+    4. `QueryEmbeddingStatus` -> returns an array of `{ metaType, metaId, state, totalMetas, embeddedCount, embeddedAt, model }` objects
 
 ## Getting Help
 
