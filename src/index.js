@@ -85,6 +85,7 @@ import QueryBalance from './query/QueryBalance.js'
 import QueryBatch from './query/QueryBatch.js'
 import QueryBatchHistory from './query/QueryBatchHistory.js'
 import QueryContinuId from './query/QueryContinuId.js'
+import QueryEmbeddingStatus from './query/QueryEmbeddingStatus.js'
 import QueryMetaType from './query/QueryMetaType.js'
 import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom.js'
 import QueryMetaTypeViaMolecule from './query/QueryMetaTypeViaMolecule.js'
@@ -132,6 +133,7 @@ import ResponseCreateMeta from './response/ResponseCreateMeta.js'
 import ResponseCreateRule from './response/ResponseCreateRule.js'
 import ResponseCreateToken from './response/ResponseCreateToken.js'
 import ResponseCreateWallet from './response/ResponseCreateWallet.js'
+import ResponseEmbeddingStatus from './response/ResponseEmbeddingStatus.js'
 import ResponseLinkIdentifier from './response/ResponseLinkIdentifier.js'
 import ResponseMetaType from './response/ResponseMetaType.js'
 import ResponseMetaTypeViaAtom from './response/ResponseMetaTypeViaAtom.js'
@@ -245,6 +247,7 @@ export {
   QueryBatch,
   QueryBatchHistory,
   QueryContinuId,
+  QueryEmbeddingStatus,
   QueryMetaType,
   QueryMetaTypeViaAtom,
   QueryMetaTypeViaMolecule,
@@ -286,6 +289,7 @@ export {
   ResponseCreateRule,
   ResponseCreateToken,
   ResponseCreateWallet,
+  ResponseEmbeddingStatus,
   ResponseLinkIdentifier,
   ResponseMetaType,
   ResponseMetaTypeViaAtom,

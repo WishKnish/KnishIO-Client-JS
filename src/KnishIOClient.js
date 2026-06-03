@@ -96,6 +96,7 @@ import QueryAtom from './query/QueryAtom.js'
 import QueryPolicy from './query/QueryPolicy.js'
 import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom.js'
 import QueryMetaTypeViaMolecule from './query/QueryMetaTypeViaMolecule.js'
+import QueryEmbeddingStatus from './query/QueryEmbeddingStatus.js'
 import MutationCreateRule from './mutation/MutationCreateRule.js'
 import MutationDepositBufferToken from './mutation/MutationDepositBufferToken.js'
 import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken.js'
@@ -253,6 +254,7 @@ export default class KnishIOClient {
     this.$__secret = ''
     this.$__bundle = ''
     this.remainderWallet = null
+    this.$__capabilityCache = {}
   }
 
   /**
@@ -285,6 +287,21 @@ export default class KnishIOClient {
     if (this.$__client) {
       const randomUri = this.getRandomUri()
       this.$__client.setUri(randomUri)
+    }
+  }
+
+  /**
+   * Sets the WebSocket (subscription) endpoint for this session.
+   *
+   * `setUri()` only updates the HTTP endpoint; the subscription socket is built once
+   * at construction from the `socket.socketUri` passed in. This lets a caller re-point
+   * the socket when the endpoint changes (F-8a, E2E gauntlet 2026-06-02).
+   *
+   * @param {string} socketUri
+   */
+  setSocketUri (socketUri) {
+    if (this.$__client && typeof this.$__client.setSocketUri === 'function') {
+      this.$__client.setSocketUri({ socketUri, appKey: 'knishio' })
     }
   }
 
@@ -907,6 +924,74 @@ export default class KnishIOClient {
   }
 
   /**
+   * Probes the connected server to check whether it supports a named root query field.
+   * Result is cached per URI so the network round-trip happens at most once per URI.
+   *
+   * Uses GraphQL introspection which is universally supported by spec-compliant servers.
+   *
+   * @param {string} fieldName - The root Query field name to check (e.g. 'embeddingStatus')
+   * @return {Promise<boolean>}
+   */
+  async hasQueryField (fieldName) {
+    const uri = this.getUri()
+    const cacheKey = `${ uri }::${ fieldName }`
+
+    if (typeof this.$__capabilityCache[cacheKey] === 'boolean') {
+      return this.$__capabilityCache[cacheKey]
+    }
+
+    try {
+      const result = await this.$__client.query({
+        query: '{ __schema { queryType { fields { name } } } }',
+        variables: {}
+      })
+
+      const fields = result?.data?.__schema?.queryType?.fields || []
+      const supported = fields.some(f => f.name === fieldName)
+      this.$__capabilityCache[cacheKey] = supported
+      return supported
+    } catch (err) {
+      this.log('warn', `KnishIOClient::hasQueryField() - Capability probe for '${ fieldName }' failed: ${ err.message }`)
+      this.$__capabilityCache[cacheKey] = false
+      return false
+    }
+  }
+
+  /**
+   * Queries embedding status for one or more meta instances (DataBraid observability).
+   *
+   * If the connected server does not support the embeddingStatus query,
+   * returns null without throwing an error (graceful degradation).
+   *
+   * Single mode: queryEmbeddingStatus({ metaType: 'product', metaId: 'SKU-001' })
+   * Bulk mode:   queryEmbeddingStatus({ instances: [{ metaType: 'product', metaId: 'SKU-001' }, ...] })
+   *
+   * @param {string|null} metaType - Metadata type (single-instance mode)
+   * @param {string|null} metaId - Instance identifier (single-instance mode)
+   * @param {Array<{metaType: string, metaId: string}>|null} instances - Bulk mode input
+   * @return {Promise<ResponseEmbeddingStatus|null>} Response with payload(), or null if unsupported
+   */
+  async queryEmbeddingStatus ({
+    metaType = null,
+    metaId = null,
+    instances = null
+  }) {
+    this.log('info', `KnishIOClient::queryEmbeddingStatus() - Checking embedding status for metaType: ${ metaType || '(bulk)' }...`)
+
+    const supported = await this.hasQueryField('embeddingStatus')
+
+    if (!supported) {
+      this.log('warn', 'KnishIOClient::queryEmbeddingStatus() - Server does not support embeddingStatus query. Returning null.')
+      return null
+    }
+
+    const query = this.createQuery(QueryEmbeddingStatus)
+    const variables = QueryEmbeddingStatus.createVariables({ metaType, metaId, instances })
+
+    return this.executeQuery(query, variables)
+  }
+
+  /**
    * Query batch to get cascading meta instances by batchID
    *
    * @param batchId
@@ -1446,7 +1531,12 @@ export default class KnishIOClient {
     metaId,
     policy = {}
   }) {
-    // Create a molecule
+    // Create a molecule. F-3 (E2E gauntlet 2026-06-02): the ContinuID-rejection bug
+    // here was NOT this construction — it was molecule.addPolicyAtom() signing the
+    // R-isotope atom from a fresh random wallet (now fixed in Molecule.addPolicyAtom
+    // to use this.sourceWallet). A policy is a policy-only R-atom (no rules), so this
+    // path is kept as-is: routing through createRule with an empty rule list would
+    // fail the SDK's own `Check::isotopeR() - No rules!` validation.
     const molecule = await this.createMolecule({})
     molecule.addPolicyAtom({
       metaType,
