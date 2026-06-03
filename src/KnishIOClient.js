@@ -291,6 +291,21 @@ export default class KnishIOClient {
   }
 
   /**
+   * Sets the WebSocket (subscription) endpoint for this session.
+   *
+   * `setUri()` only updates the HTTP endpoint; the subscription socket is built once
+   * at construction from the `socket.socketUri` passed in. This lets a caller re-point
+   * the socket when the endpoint changes (F-8a, E2E gauntlet 2026-06-02).
+   *
+   * @param {string} socketUri
+   */
+  setSocketUri (socketUri) {
+    if (this.$__client && typeof this.$__client.setSocketUri === 'function') {
+      this.$__client.setSocketUri({ socketUri, appKey: 'knishio' })
+    }
+  }
+
+  /**
    * Retrieves the endpoint URI for this session
    *
    * @return {string}
@@ -1516,7 +1531,12 @@ export default class KnishIOClient {
     metaId,
     policy = {}
   }) {
-    // Create a molecule
+    // Create a molecule. F-3 (E2E gauntlet 2026-06-02): the ContinuID-rejection bug
+    // here was NOT this construction — it was molecule.addPolicyAtom() signing the
+    // R-isotope atom from a fresh random wallet (now fixed in Molecule.addPolicyAtom
+    // to use this.sourceWallet). A policy is a policy-only R-atom (no rules), so this
+    // path is kept as-is: routing through createRule with an empty rule list would
+    // fail the SDK's own `Check::isotopeR() - No rules!` validation.
     const molecule = await this.createMolecule({})
     molecule.addPolicyAtom({
       metaType,
