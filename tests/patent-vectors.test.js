@@ -5,6 +5,7 @@ import {
 } from '@jest/globals'
 import Wallet from '../src/Wallet'
 import Molecule from '../src/Molecule'
+import Atom from '../src/Atom'
 import JsSHA from 'jssha'
 import {
   generateBundleHash,
@@ -38,6 +39,20 @@ describe('Patent Vector Validation', () => {
       const secret = generateSecret(vector.seed)
       expect(secret).toBe(vector.expectedSecret)
       expect(secret.length).toBe(vector.length)
+    })
+  })
+
+  // -----------------------------------------------------------------
+  // 0b. Atom value formatting cross-SDK parity (Batch AQ) — JS is the reference
+  //     anchor (String(n) drops a whole number's ".0"); the validator parses
+  //     V/B/F values as i128, so the value must be an integer string.
+  // -----------------------------------------------------------------
+  describe('Atom value formatting', () => {
+    const valueTests = vectors.vectors.atom_value_format.tests
+
+    test.each(valueTests)('$name: value serializes as integer string', (vector) => {
+      const atom = new Atom({ position: 'pos', walletAddress: 'addr', isotope: 'V', token: 'TOKEN', value: vector.value })
+      expect(atom.value).toBe(vector.expected)
     })
   })
 
