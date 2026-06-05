@@ -60,8 +60,9 @@ export function generateSecret (seed = null, length = 2048) {
   if (seed) {
     const sponge = new JsSHA('SHAKE256', 'TEXT')
     sponge.update(seed)
-    // Fix: outputLen is in BITS, so for 'length' hex chars (length/2 bytes), we need length*2 bits
-    return sponge.getHash('HEX', { outputLen: length * 2 })
+    // outputLen is in BITS. For `length` hex chars = length/2 bytes = length*4 bits.
+    // (length=2048 → 8192 bits → 1024 bytes → 2048 hex chars, matching all SDKs.)
+    return sponge.getHash('HEX', { outputLen: length * 4 })
   } else {
     return randomString(length)
   }

@@ -8,6 +8,7 @@ import Molecule from '../src/Molecule'
 import JsSHA from 'jssha'
 import {
   generateBundleHash,
+  generateSecret,
   shake256,
   charsetBaseConvert,
   chunkSubstr
@@ -27,6 +28,19 @@ import vectors from '../../shared-test-results/canonical-patent-vectors.json'
  *   - Claim 21: Multi-isotope dispatch
  */
 describe('Patent Vector Validation', () => {
+  // -----------------------------------------------------------------
+  // 0. generateSecret cross-SDK parity (Batch AO) — seed → 2048 hex secret
+  // -----------------------------------------------------------------
+  describe('generateSecret', () => {
+    const secretTests = vectors.vectors.generate_secret.tests
+
+    test.each(secretTests)('$name: secret matches canonical (2048 hex)', (vector) => {
+      const secret = generateSecret(vector.seed)
+      expect(secret).toBe(vector.expectedSecret)
+      expect(secret.length).toBe(vector.length)
+    })
+  })
+
   // -----------------------------------------------------------------
   // 1. ContinuID Chain Relay (Patent Claims 5, 12-14)
   // -----------------------------------------------------------------
