@@ -710,7 +710,7 @@ class g {
 function nt(o = null, e = 2048) {
   if (o) {
     const t = new L("SHAKE256", "TEXT");
-    return t.update(o), t.getHash("HEX", { outputLen: e * 2 });
+    return t.update(o), t.getHash("HEX", { outputLen: e * 4 });
   } else
     return st(e);
 }
