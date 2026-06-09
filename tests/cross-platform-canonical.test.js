@@ -17,8 +17,8 @@ import {
  * this test validates against the canonical vectors shared across ALL SDKs.
  */
 
-// Path relative to project root — Jest runs from project root
-import vectors from '../../KnishIO-Client-Rust/tests/fixtures/cross-platform-test-vectors.json'
+// Shared cross-SDK master (same convention as patent-vectors.test.js → ../../shared-test-results/)
+import vectors from '../../shared-test-results/cross-platform-test-vectors.json'
 
 describe('Canonical Cross-Platform SHAKE256 Vectors', () => {
   const shake256Tests = vectors.vectors.shake256.tests

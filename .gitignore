@@ -14,3 +14,7 @@ dist/subKnishIOClientJSDev.js
 dist/subKnishIOClientJSDev.js.map
 node.js
 .claude/
+.DS_Store
+
+# Local agent instructions
+CLAUDE.md
