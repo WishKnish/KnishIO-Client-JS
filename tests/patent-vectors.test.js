@@ -43,6 +43,34 @@ describe('Patent Vector Validation', () => {
   })
 
   // -----------------------------------------------------------------
+  // 0a. Buffer deposit conservation cross-SDK parity (Batch BF) — JS is the
+  //     reference: initDepositBuffer debits the FULL source balance so a partial
+  //     deposit still conserves (sum V+B = 0). Rust+Python were fixed to match.
+  // -----------------------------------------------------------------
+  describe('buffer_deposit_conservation', () => {
+    const BUF_SECRET = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
+    const bufferTests = vectors.vectors.buffer_deposit_conservation.tests
+
+    test.each(bufferTests)('$name: full-balance debit conserves (sum V+B = 0)', (vector) => {
+      const sourceWallet = Wallet.create({ secret: BUF_SECRET, token: 'BUFTOK' })
+      sourceWallet.balance = vector.sourceBalance
+      const mol = new Molecule({ secret: BUF_SECRET, bundle: sourceWallet.bundle, sourceWallet, cellSlug: 'buftest' })
+      mol.initDepositBuffer({ amount: vector.amount, tradeRates: {} })
+
+      const vb = mol.atoms.filter(a => a.isotope === 'V' || a.isotope === 'B')
+      const sum = vb.reduce((s, a) => s + BigInt(a.value), 0n)
+      expect(sum.toString()).toBe(vector.expectedSum)
+
+      // Emit order: source V (full-balance debit), buffer B (+amount), remainder V (+change).
+      const vAtoms = mol.atoms.filter(a => a.isotope === 'V')
+      const bAtom = mol.atoms.find(a => a.isotope === 'B')
+      expect(vAtoms[0].value).toBe(vector.expectedSourceValue)
+      expect(bAtom.value).toBe(vector.expectedBufferValue)
+      expect(vAtoms[1].value).toBe(vector.expectedRemainderValue)
+    })
+  })
+
+  // -----------------------------------------------------------------
   // 0b. Atom value formatting cross-SDK parity (Batch AQ) — JS is the reference
   //     anchor (String(n) drops a whole number's ".0"); the validator parses
   //     V/B/F values as i128, so the value must be an integer string.
