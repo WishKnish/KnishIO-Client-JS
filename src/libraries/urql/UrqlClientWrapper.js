@@ -5,7 +5,7 @@ import {
   fetchExchange
 } from '@urql/core'
 import { createClient as createWSClient } from 'graphql-ws'
-import { pipe, map } from 'wonka'
+import { pipe, map, subscribe } from 'wonka'
 
 class UrqlClientWrapper {
   constructor ({ serverUri, socket = null, encrypt = false }) {
@@ -82,15 +82,19 @@ class UrqlClientWrapper {
   subscribe (request, closure) {
     const { query, variables, operationName } = request
 
-    const { unsubscribe } = pipe(
+    // F-22 fix: wonka v3 — `subscribe` is a function applied via pipe, not a
+    // method on the result. The pipe-with-subscribe expression returns the
+    // subscription object directly (already shaped as `{ unsubscribe }`).
+    const subscription = pipe(
       this.$__client.subscription(query, variables),
       map(result => {
         closure(this.formatResponse(result))
-      })
-    ).subscribe(() => {})
+      }),
+      subscribe(() => {})
+    )
 
     // Store subscription for later cleanup
-    this.$__subscriptionManager.set(operationName, { unsubscribe })
+    this.$__subscriptionManager.set(operationName, subscription)
 
     return {
       unsubscribe: () => this.unsubscribe(operationName)
