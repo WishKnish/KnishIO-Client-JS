@@ -68,14 +68,24 @@ class UrqlClientWrapper {
   }
 
   async query (request) {
-    const { query, variables } = request
-    const result = await this.$__client.query(query, variables).toPromise()
+    const { query, variables, context } = request
+    // Forward ONLY urql's requestPolicy (e.g. 'network-only') so a long-lived
+    // client does not serve stale cache-first reads. We deliberately do NOT
+    // forward the whole context: urql REPLACES (not merges) the client-level
+    // fetchOptions with any context.fetchOptions (createRequestOperation builds
+    // the op context as {...baseOpts, ...opts}), which would drop the
+    // X-Auth-Token header set in createUrqlClient and break authentication.
+    const opts = (context && context.requestPolicy) ? { requestPolicy: context.requestPolicy } : undefined
+    const result = await this.$__client.query(query, variables || {}, opts).toPromise()
     return this.formatResponse(result)
   }
 
   async mutate (request) {
-    const { mutation, variables } = request
-    const result = await this.$__client.mutation(mutation, variables).toPromise()
+    const { mutation, variables, context } = request
+    // Forward requestPolicy only (see query() — never the whole context, which
+    // would clobber the auth-bearing client-level fetchOptions).
+    const opts = (context && context.requestPolicy) ? { requestPolicy: context.requestPolicy } : undefined
+    const result = await this.$__client.mutation(mutation, variables || {}, opts).toPromise()
     return this.formatResponse(result)
   }
 
