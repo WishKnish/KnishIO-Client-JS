@@ -484,6 +484,29 @@ This method involves individually building Atoms and Molecules, triggering the s
     3. `MutationProposeMolecule`, `MutationRequestAuthorization`, `MutationCreateIdentifier`, `MutationLinkIdentifier`, `MutationClaimShadowWallet`, `MutationCreateToken`, `MutationRequestTokens`, and `MutationTransferTokens` -> returns molecule metadata
     4. `QueryEmbeddingStatus` -> returns an array of `{ metaType, metaId, state, totalMetas, embeddedCount, embeddedAt, model }` objects
 
+## Network Freshness
+
+`KnishIOClient` runs on [urql](https://urql.dev), which caches GraphQL responses
+(`cache-first` by default). For a **long-lived server/sync client**, pass
+`defaultRequestPolicy: 'network-only'` so reads always reflect current ledger
+state (e.g. a meta created *after* the client started). Browser/SPA clients
+should keep the default `cache-first`.
+
+```js
+const client = new KnishIOClient({
+  uri: 'https://your-node/graphql',
+  cellSlug: 'YOURCELL',
+  defaultRequestPolicy: 'network-only' // server/long-lived: always-fresh reads
+})
+
+// Per call:  client.queryMeta({ metaType: 'Foo', requestPolicy: 'network-only' })
+// Toggle:    client.setDefaultRequestPolicy('network-only')
+// Inspect:   client.getDefaultRequestPolicy()
+```
+
+Precedence: a query's own context (e.g. ContinuID's `network-only`, which always
+wins) > per-call `requestPolicy` > client `defaultRequestPolicy` > urql default.
+
 ## Getting Help
 
 Knish.IO is under active development, and our team is ready to assist with integration questions. The best way to seek help is to stop by our [Telegram Support Channel](https://t.me/wishknish). You can also [send us a contact request](https://knish.io/contact) via our website.

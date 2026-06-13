@@ -127,7 +127,8 @@ export default class KnishIOClient {
     client = null,
     socket = null,
     serverSdkVersion = 3,
-    logging = false
+    logging = false,
+    defaultRequestPolicy = null
   }) {
     this.initialize({
       uri,
@@ -135,7 +136,8 @@ export default class KnishIOClient {
       socket,
       client,
       serverSdkVersion,
-      logging
+      logging,
+      defaultRequestPolicy
     })
   }
 
@@ -155,11 +157,16 @@ export default class KnishIOClient {
     socket = null,
     client = null,
     serverSdkVersion = 3,
-    logging = false
+    logging = false,
+    defaultRequestPolicy = null
   }) {
     this.reset()
 
     this.$__logging = logging
+    // Client-level urql request policy applied to reads that omit a per-call
+    // policy. A long-lived server/sync client set to 'network-only' never serves
+    // a stale cache-first read; browser/SPA consumers leave this null (cache-first).
+    this.$__defaultRequestPolicy = defaultRequestPolicy
     this.$__authTokenObjects = {}
     this.$__authInProcess = false
     this.abortControllers = new Map()
@@ -248,6 +255,25 @@ export default class KnishIOClient {
   }
 
   /**
+   * Returns the client-level default urql request policy (or null)
+   *
+   * @return {string|null}
+   */
+  getDefaultRequestPolicy () {
+    return this.$__defaultRequestPolicy || null
+  }
+
+  /**
+   * Sets the client-level default urql request policy applied to reads that
+   * omit a per-call policy (e.g. 'network-only' for a long-lived server client)
+   *
+   * @param {string|null} policy - 'cache-first'|'cache-only'|'network-only'|'cache-and-network'|null
+   */
+  setDefaultRequestPolicy (policy) {
+    this.$__defaultRequestPolicy = policy
+  }
+
+  /**
    * Reset common properties
    */
   reset () {
@@ -255,6 +281,7 @@ export default class KnishIOClient {
     this.$__bundle = ''
     this.remainderWallet = null
     this.$__capabilityCache = {}
+    this.$__defaultRequestPolicy = null
   }
 
   /**
@@ -580,7 +607,7 @@ export default class KnishIOClient {
    * @param variables
    * @returns {Promise<*>}
    */
-  async executeQuery (query, variables = null) {
+  async executeQuery (query, variables = null, context = {}) {
     // Check and refresh authorization token if needed
     // Guard with $__authInProcess to prevent concurrent auth requests
     if (this.$__authToken && this.$__authToken.isExpired() && !this.$__authInProcess) {
@@ -601,13 +628,25 @@ export default class KnishIOClient {
     this.abortControllers.set(queryKey, abortController)
 
     try {
+      // Apply the client-level default request policy when neither the caller
+      // nor the query's own createQueryContext specifies one, so a long-lived
+      // server/sync client (defaultRequestPolicy:'network-only') never serves a
+      // stale cache-first read. Precedence: a query's own createQueryContext
+      // (e.g. ContinuId's network-only, applied in Query.execute's merge) >
+      // per-call context.requestPolicy > this client default > urql default.
+      const requestContext = { ...context }
+      if (this.$__defaultRequestPolicy && !requestContext.requestPolicy) {
+        requestContext.requestPolicy = this.$__defaultRequestPolicy
+      }
+
       // Use the existing query execution method, but add the abort signal
       const result = await query.execute({
         variables,
         context: {
           fetchOptions: {
             signal: abortController.signal
-          }
+          },
+          ...requestContext
         }
       })
 
@@ -839,7 +878,8 @@ export default class KnishIOClient {
     throughMolecule = false,
     values = null,
     keys = null,
-    atomValues = null
+    atomValues = null,
+    requestPolicy = null
   }) {
     this.log('info', `KnishIOClient::queryMeta() - Querying metaType: ${ metaType }, metaId: ${ metaId }...`)
 
@@ -903,7 +943,7 @@ export default class KnishIOClient {
       })
     }
 
-    return this.executeQuery(query, variables)
+    return this.executeQuery(query, variables, requestPolicy ? { requestPolicy } : {})
   }
 
   /**
