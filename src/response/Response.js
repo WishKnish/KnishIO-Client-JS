@@ -176,7 +176,7 @@ export default class Response {
   /**
    * Enhanced interface methods for standardized response handling
    */
-  
+
   /**
    * Get error reason (alias for error() to match standardized interface)
    * @return {string|null}
@@ -247,7 +247,7 @@ export default class Response {
    */
   debug (label = null) {
     const debugPrefix = label ? `[${label}]` : `[${this.constructor.name}]`
-    
+
     if (this.success()) {
       console.debug(`${debugPrefix} Success:`, {
         payload: this.payload(),
@@ -261,7 +261,7 @@ export default class Response {
         rawData: this.$__response
       })
     }
-    
+
     return this
   }
 

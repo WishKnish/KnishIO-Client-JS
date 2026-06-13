@@ -264,7 +264,13 @@ export default class Molecule {
         const condition = totalCondition ? mappedHashArray[index] < 8 : mappedHashArray[index] > -8
 
         if (condition) {
-          const process = totalCondition ? [++mappedHashArray[index], ++total] : [--mappedHashArray[index], --total]
+          if (totalCondition) {
+            ++mappedHashArray[index]
+            ++total
+          } else {
+            --mappedHashArray[index]
+            --total
+          }
 
           if (total === 0) {
             break
@@ -716,7 +722,7 @@ export default class Molecule {
   }) {
     // Calculate final amount from all recipients
     let amount = 0
-    for (const [recipientBundle, recipientAmount] of Object.entries(recipients || {})) {
+    for (const recipientAmount of Object.values(recipients || {})) {
       amount += recipientAmount
     }
     if (this.sourceWallet.balance - amount < 0) {
@@ -1184,7 +1190,7 @@ export default class Molecule {
     const {
       includeValidationContext = false,
       includeOtsFragments = true
-    } = options;
+    } = options
 
     try {
       // Core molecule properties (server-compatible fields only)
@@ -1199,7 +1205,7 @@ export default class Molecule {
         atoms: this.atoms.map(atom => atom.toJSON({
           includeOtsFragments
         }))
-      };
+      }
 
       // Parent molecular hashes for DAG linkage (only include when non-empty
       // to maintain backward compatibility with servers that don't support it)
@@ -1225,7 +1231,7 @@ export default class Molecule {
             tokenUnits: this.sourceWallet.tokenUnits || [],
             tradeRates: this.sourceWallet.tradeRates || {},
             molecules: this.sourceWallet.molecules || {}
-          };
+          }
         }
 
         if (this.remainderWallet) {
@@ -1241,14 +1247,13 @@ export default class Molecule {
             tokenUnits: this.remainderWallet.tokenUnits || [],
             tradeRates: this.remainderWallet.tradeRates || {},
             molecules: this.remainderWallet.molecules || {}
-          };
+          }
         }
       }
 
-      return serialized;
-
+      return serialized
     } catch (error) {
-      throw new Error(`Molecule serialization failed: ${error.message}`);
+      throw new Error(`Molecule serialization failed: ${error.message}`)
     }
   }
 
@@ -1269,16 +1274,16 @@ export default class Molecule {
     const {
       includeValidationContext = false,
       validateStructure = true
-    } = options;
+    } = options
 
     try {
       // Parse JSON safely
-      const data = typeof json === 'string' ? JSON.parse(json) : json;
+      const data = typeof json === 'string' ? JSON.parse(json) : json
 
       // Validate required fields in strict mode
       if (validateStructure) {
         if (!data.molecularHash || !Array.isArray(data.atoms)) {
-          throw new Error('Invalid molecule data: missing molecularHash or atoms array');
+          throw new Error('Invalid molecule data: missing molecularHash or atoms array')
         }
       }
 
@@ -1288,24 +1293,24 @@ export default class Molecule {
         bundle: data.bundle || null,
         cellSlug: data.cellSlug || null,
         version: data.version || null
-      });
+      })
 
       // Populate core properties
-      molecule.status = data.status;
-      molecule.molecularHash = data.molecularHash;
-      molecule.createdAt = data.createdAt || String(+new Date());
-      molecule.cellSlugOrigin = data.cellSlugOrigin;
-      molecule.parentHashes = Array.isArray(data.parentHashes) ? [...data.parentHashes] : [];
+      molecule.status = data.status
+      molecule.molecularHash = data.molecularHash
+      molecule.createdAt = data.createdAt || String(+new Date())
+      molecule.cellSlugOrigin = data.cellSlugOrigin
+      molecule.parentHashes = Array.isArray(data.parentHashes) ? [...data.parentHashes] : []
 
       // Reconstruct atoms array with proper Atom instances
       if (Array.isArray(data.atoms)) {
         molecule.atoms = data.atoms.map((atomData, index) => {
           try {
-            return Atom.fromJSON(atomData);
+            return Atom.fromJSON(atomData)
           } catch (error) {
-            throw new Error(`Failed to reconstruct atom ${index}: ${error.message}`);
+            throw new Error(`Failed to reconstruct atom ${index}: ${error.message}`)
           }
-        });
+        })
       }
 
       // Reconstruct validation context if available and requested
@@ -1319,17 +1324,17 @@ export default class Molecule {
             bundle: data.sourceWallet.bundle,
             batchId: data.sourceWallet.batchId,
             characters: data.sourceWallet.characters
-          });
+          })
 
           // Set additional properties for validation context
-          molecule.sourceWallet.balance = String(data.sourceWallet.balance != null ? data.sourceWallet.balance : 0);
-          molecule.sourceWallet.address = data.sourceWallet.address;
+          molecule.sourceWallet.balance = String(data.sourceWallet.balance != null ? data.sourceWallet.balance : 0)
+          molecule.sourceWallet.address = data.sourceWallet.address
           if (data.sourceWallet.pubkey) {
-            molecule.sourceWallet.pubkey = data.sourceWallet.pubkey;
+            molecule.sourceWallet.pubkey = data.sourceWallet.pubkey
           }
-          molecule.sourceWallet.tokenUnits = data.sourceWallet.tokenUnits || [];
-          molecule.sourceWallet.tradeRates = data.sourceWallet.tradeRates || {};
-          molecule.sourceWallet.molecules = data.sourceWallet.molecules || {};
+          molecule.sourceWallet.tokenUnits = data.sourceWallet.tokenUnits || []
+          molecule.sourceWallet.tradeRates = data.sourceWallet.tradeRates || {}
+          molecule.sourceWallet.molecules = data.sourceWallet.molecules || {}
         }
 
         if (data.remainderWallet) {
@@ -1341,24 +1346,23 @@ export default class Molecule {
             bundle: data.remainderWallet.bundle,
             batchId: data.remainderWallet.batchId,
             characters: data.remainderWallet.characters
-          });
+          })
 
           // Set additional properties for validation context
-          molecule.remainderWallet.balance = String(data.remainderWallet.balance != null ? data.remainderWallet.balance : 0);
-          molecule.remainderWallet.address = data.remainderWallet.address;
+          molecule.remainderWallet.balance = String(data.remainderWallet.balance != null ? data.remainderWallet.balance : 0)
+          molecule.remainderWallet.address = data.remainderWallet.address
           if (data.remainderWallet.pubkey) {
-            molecule.remainderWallet.pubkey = data.remainderWallet.pubkey;
+            molecule.remainderWallet.pubkey = data.remainderWallet.pubkey
           }
-          molecule.remainderWallet.tokenUnits = data.remainderWallet.tokenUnits || [];
-          molecule.remainderWallet.tradeRates = data.remainderWallet.tradeRates || {};
-          molecule.remainderWallet.molecules = data.remainderWallet.molecules || {};
+          molecule.remainderWallet.tokenUnits = data.remainderWallet.tokenUnits || []
+          molecule.remainderWallet.tradeRates = data.remainderWallet.tradeRates || {}
+          molecule.remainderWallet.molecules = data.remainderWallet.molecules || {}
         }
       }
 
-      return molecule;
-
+      return molecule
     } catch (error) {
-      throw new Error(`Molecule deserialization failed: ${error.message}`);
+      throw new Error(`Molecule deserialization failed: ${error.message}`)
     }
   }
 

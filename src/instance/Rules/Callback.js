@@ -52,6 +52,7 @@ import { isNumeric } from '../../libraries/strings.js'
 import { intersect } from '../../libraries/array.js'
 import CodeException from '../../exception/CodeException.js'
 
+/* eslint-disable accessor-pairs -- intentional setter-only fluent rule builder; values are read directly via __field, no getter needed */
 export default class Callback {
   /**
    *

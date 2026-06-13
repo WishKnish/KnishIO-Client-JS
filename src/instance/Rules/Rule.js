@@ -51,6 +51,7 @@ import Condition from './Condition.js'
 import RuleArgumentException from './exception/RuleArgumentException.js'
 import MetaMissingException from '../../exception/MetaMissingException.js'
 
+/* eslint-disable accessor-pairs -- intentional setter-only fluent rule builder; values are read directly via __field, no getter needed */
 export default class Rule {
   /**
    *

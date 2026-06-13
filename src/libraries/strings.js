@@ -1,5 +1,6 @@
 import Hex from './Hex.js'
 
+/* eslint-disable no-extend-native -- intentional guarded String.prototype polyfill (trim) + SDK camel/snake-case helpers relied on across the codebase */
 if (!String.prototype.trim) {
   String.prototype.trim = function () {
     return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '')

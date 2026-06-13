@@ -582,15 +582,15 @@ export default class KnishIOClient {
    * @param molecule
    */
   async createMoleculeMutation ({
-    mutationClass,
+    mutationClass: MutationClass,
     molecule = null
   }) {
-    this.log('info', `KnishIOClient::createMoleculeQuery() - Creating a new ${ mutationClass.name } query...`)
+    this.log('info', `KnishIOClient::createMoleculeQuery() - Creating a new ${ MutationClass.name } query...`)
 
     // If you don't supply the molecule, we'll generate one for you
     const _molecule = molecule || await this.createMolecule({})
 
-    const mutation = new mutationClass(this.client(), this, _molecule)
+    const mutation = new MutationClass(this.client(), this, _molecule)
 
     if (!(mutation instanceof MutationProposeMolecule)) {
       throw new CodeException(`${ this.constructor.name }::createMoleculeMutation() - This method only accepts MutationProposeMolecule!`)

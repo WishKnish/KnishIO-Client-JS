@@ -69,35 +69,86 @@ describe('KnishIOClient defaultRequestPolicy', () => {
   })
 })
 
-describe('UrqlClientWrapper context forwarding (auth-safety)', () => {
+describe('UrqlClientWrapper context forwarding (auth-safety + abort wiring)', () => {
   function wrapperWithSpy () {
     const wrapper = new UrqlClientWrapper({ serverUri: testUri })
+    wrapper.$__authToken = 'tok-123'
     const query = jest.fn(() => ({ toPromise: async () => ({ data: { ok: true }, error: null }) }))
     const mutation = jest.fn(() => ({ toPromise: async () => ({ data: { ok: true }, error: null }) }))
     wrapper.$__client = { query, mutation }
     return { wrapper, query, mutation }
   }
 
-  test('forwards ONLY requestPolicy to urql (never fetchOptions — would clobber X-Auth-Token)', async () => {
+  test('with a per-query signal: forwards requestPolicy + RE-SUPPLIES X-Auth-Token + an AbortSignal', async () => {
     const { wrapper, query } = wrapperWithSpy()
+    const ac = new AbortController()
     await wrapper.query({
       query: 'gqlA',
       variables: { x: 1 },
-      context: { fetchOptions: { signal: {} }, requestPolicy: 'network-only' }
+      context: { fetchOptions: { signal: ac.signal }, requestPolicy: 'network-only' }
     })
-    expect(query).toHaveBeenCalledWith('gqlA', { x: 1 }, { requestPolicy: 'network-only' })
+    const [, , opts] = query.mock.calls[0]
+    expect(opts.requestPolicy).toBe('network-only')
+    // auth-safety invariant: whenever fetchOptions IS forwarded, it MUST carry
+    // the auth header (urql replaces, not merges — forwarding without it 401s).
+    expect(opts.fetchOptions.headers['X-Auth-Token']).toBe('tok-123')
+    expect(opts.fetchOptions.signal).toBeInstanceOf(AbortSignal)
   })
 
-  test('forwards undefined opts when no requestPolicy present (client-level fetchOptions used)', async () => {
+  test('the forwarded signal aborts when the per-query signal aborts', async () => {
     const { wrapper, query } = wrapperWithSpy()
-    await wrapper.query({ query: 'gqlB', variables: { y: 2 }, context: { fetchOptions: { signal: {} } } })
-    expect(query).toHaveBeenCalledWith('gqlB', { y: 2 }, undefined)
+    const ac = new AbortController()
+    await wrapper.query({ query: 'gqlB', variables: {}, context: { fetchOptions: { signal: ac.signal } } })
+    const [, , opts] = query.mock.calls[0]
+    expect(opts.fetchOptions.signal.aborted).toBe(false)
+    ac.abort()
+    expect(opts.fetchOptions.signal.aborted).toBe(true)
   })
 
-  test('mutate forwards requestPolicy the same way', async () => {
+  test('no signal, requestPolicy set: forwards {requestPolicy} only (client-level fetchOptions used)', async () => {
+    const { wrapper, query } = wrapperWithSpy()
+    await wrapper.query({ query: 'gqlC', variables: { y: 2 }, context: { requestPolicy: 'network-only' } })
+    expect(query).toHaveBeenCalledWith('gqlC', { y: 2 }, { requestPolicy: 'network-only' })
+  })
+
+  test('no context: forwards undefined opts', async () => {
+    const { wrapper, query } = wrapperWithSpy()
+    await wrapper.query({ query: 'gqlD', variables: {} })
+    expect(query).toHaveBeenCalledWith('gqlD', {}, undefined)
+  })
+
+  test('mutate also re-supplies X-Auth-Token when a signal is present', async () => {
     const { wrapper, mutation } = wrapperWithSpy()
-    await wrapper.mutate({ mutation: 'mutA', variables: {}, context: { requestPolicy: 'network-only' } })
-    expect(mutation).toHaveBeenCalledWith('mutA', {}, { requestPolicy: 'network-only' })
+    const ac = new AbortController()
+    await wrapper.mutate({ mutation: 'mutA', variables: {}, context: { fetchOptions: { signal: ac.signal }, requestPolicy: 'network-only' } })
+    const [, , opts] = mutation.mock.calls[0]
+    expect(opts.requestPolicy).toBe('network-only')
+    expect(opts.fetchOptions.headers['X-Auth-Token']).toBe('tok-123')
+  })
+})
+
+describe('KnishIOClient query cancellation (abort wiring)', () => {
+  test('cancelQuery aborts the stored AbortController', () => {
+    const client = new KnishIOClient({ uri: testUri })
+    const query = { $__query: 'q1' }
+    const variables = { a: 1 }
+    const ac = new AbortController()
+    const queryKey = JSON.stringify({ query: query.$__query, variables })
+    client.abortControllers.set(queryKey, ac)
+    expect(ac.signal.aborted).toBe(false)
+    client.cancelQuery(query, variables)
+    expect(ac.signal.aborted).toBe(true)
+  })
+
+  test('cancelAllQueries aborts every stored controller', () => {
+    const client = new KnishIOClient({ uri: testUri })
+    const a1 = new AbortController()
+    const a2 = new AbortController()
+    client.abortControllers.set('k1', a1)
+    client.abortControllers.set('k2', a2)
+    client.cancelAllQueries()
+    expect(a1.signal.aborted).toBe(true)
+    expect(a2.signal.aborted).toBe(true)
   })
 })
 
