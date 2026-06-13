@@ -48,8 +48,8 @@ const DEFAULT_CONFIG = {
   "tests": {
     "crypto": {
       "seed": "TESTSEED",
-      "secret": "e8ffc86d60fc6a73234a834166e7436e21df6c3209dfacc8d0bd6595707872c3799abbf7deee0f9c4b58de1fd89b9abb67a207558208d5ccf550c227d197c24e9fcc3707aeb53c4031d38392020ff72bcaa0f728aa8bc3d47d95ff0afc04d8fcdb69bff638ce56646c154fc92aa517d3c40f550d2ccacbd921724e1d94b82aed2c8e172a8a7ed5a6963f5890157fe77222b97af3787741f9d3cec0b40aec6f07ae4b2b24614f0a20e035aee0df04e176175dc100eb1b00dd7ea95c28cdec47958336945333c3bef24719ed949fa56d1541f24c725d4f374a533bf255cf22f4596147bcd1ba05abcecbe9b12095e1fdddb094616894c366498be0b5785c180100efb3c5b689fc1c01131633fe1775df52a970e9472ab7bc0c19f5742b9e9436753cd16024b2d326b763eca68c414755a0d2fdbb927f007e9413f1190578b2033a03d29387f5aea71b07a5ce80fbfd45be4a15440faadeac50e41846022894fc683a52328b470bc1860c8b038d7258f504178918502b93d84d8b0fbef3e02f89f83cb1ff033a2bdbdf2a2ba78d80c12aa8b2d6c10d76c468186bd4a4e9eacc758546bb50ed7b1ee241cc5b93ff924c7bbee6778b27789e1f9104c917fc93f735eee5b25c07a883788f3d2e0771e751c4f59b76f8426027ac2b07a2ca84534433d0a1b86cef3288e7d79e8b175a3955848cfd1dfbdcd6b5bafcf6789e56e8ef40af",
-      "bundle": "fee9c2b9a964d060eb4645c4001db805c3c4b0cc9bba12841036eba4bf44b831",
+      "secret": "e8ffc86d60fc6a73234a834166e7436e21df6c3209dfacc8d0bd6595707872c3799abbf7deee0f9c4b58de1fd89b9abb67a207558208d5ccf550c227d197c24e9fcc3707aeb53c4031d38392020ff72bcaa0f728aa8bc3d47d95ff0afc04d8fcdb69bff638ce56646c154fc92aa517d3c40f550d2ccacbd921724e1d94b82aed2c8e172a8a7ed5a6963f5890157fe77222b97af3787741f9d3cec0b40aec6f07ae4b2b24614f0a20e035aee0df04e176175dc100eb1b00dd7ea95c28cdec47958336945333c3bef24719ed949fa56d1541f24c725d4f374a533bf255cf22f4596147bcd1ba05abcecbe9b12095e1fdddb094616894c366498be0b5785c180100efb3c5b689fc1c01131633fe1775df52a970e9472ab7bc0c19f5742b9e9436753cd16024b2d326b763eca68c414755a0d2fdbb927f007e9413f1190578b2033a03d29387f5aea71b07a5ce80fbfd45be4a15440faadeac50e41846022894fc683a52328b470bc1860c8b038d7258f504178918502b93d84d8b0fbef3e02f89f83cb1ff033a2bdbdf2a2ba78d80c12aa8b2d6c10d76c468186bd4a4e9eacc758546bb50ed7b1ee241cc5b93ff924c7bbee6778b27789e1f9104c917fc93f735eee5b25c07a883788f3d2e0771e751c4f59b76f8426027ac2b07a2ca84534433d0a1b86cef3288e7d79e8b175a3955848cfd1dfbdcd6b5bafcf6789e56e8ef40af09a764147640eb10b426349f6ffc8e299cdcebffc3a9d6be362ba33fbf648bf06ea4c35890c705df479030fd1d0669d289dcbabaaf78f945c37fc69f3823dbfa99bdf3cf7bb7be8f810a7eab5167e26691642c3982aa203687d0e674154c970cfc1822f9917f2100ae8950cf0fcab074bfb578f4f6e78df490f0fd9becdba7151f2a5733cc2a3df845aa17bdc49765163d635de5c3a1c376683e622fe3e0a6092a35dfedc4bc5bc9c120d2ed06d899775bcd16417318f4b5c7ba27fdc0a442884a69e71543a13cb26762a0df4f47807924a15da7895b6c96accb09394fdf0232d922a99f4a9f95d46da7b9050eb661f3329fe98372175a82d5e5296e4a31c040da6407194251b5baa7338071d1edfc51f55ca409ffd885045e47412f97a4bbe2e73794d8b276ccb446843bbc38c7e580dc4dc2ba94556de0d80681f60d1b2953021e08a60e26685adf61eff91d9ca7daa04a72de9dc2822655648f3c0f5016967b0e8104d70add65b9b9ce98b3aaa10106f5f32133775a71ab9b006307e390b697c77bb828c3ad07bfdcc3ecf3149ac98dc8a230c281365719d67fd2450c717ad1391880d9c17cb8ba96b6254ac783aeae04f84f14829e4efc6ee73b77670cb9ea96dc73e5464bc4cf46cdd2ebe75009d9c4ce6097eab2858ef2899b3dcd147c579939f45c4ad2aa283b6e9c8ca2539abd5e2332cff851f4fa8c4767732d7977",
+      "bundle": "2b77ff69a6d2f8108250389377faa6cbd42caaefa2f966e1b68a4b3fc022c83e",
       "walletAddress": "Kk4xBpejTujcDQxuuUNVEcvvRNwRGMfLFm28p1aqv2wQ52u5X"
     },
     "metaCreation": {
@@ -62,7 +62,7 @@ const DEFAULT_CONFIG = {
         "name": "Test Metadata",
         "description": "This is a test metadata for SDK testing."
       },
-      "expectedMolecularHash": "046778a3g7d26de4145d33de70b48d70a2e3e1b0f2gadg398a0711g3263761a2"
+      "expectedMolecularHash": "043756dd48d32902314gc35650f2ec236fa333b3a7c3fca9adb5d1b6417118a7"
     },
     "simpleTransfer": {
       "sourceSeed": "TESTSEED",
@@ -72,7 +72,7 @@ const DEFAULT_CONFIG = {
       "token": "TEST",
       "sourcePosition": "0123456789abcdeffedcba9876543210fedcba9876543210fedcba9876543210",
       "recipientPosition": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
-      "expectedMolecularHash": "00bd586e56gbg38737c4gd463e3fb39cdbb013fg8a851baa962c66g0d1cadce5"
+      "expectedMolecularHash": "0099cf84b9928324c9ff5gfe9240b37dcd162700e444846c05975f9538a8d930"
     },
     "complexTransfer": {
       "sourceSeed": "TESTSEED",
@@ -85,7 +85,7 @@ const DEFAULT_CONFIG = {
       "sourcePosition": "0123456789abcdeffedcba9876543210fedcba9876543210fedcba9876543210",
       "recipient1Position": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
       "recipient2Position": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
-      "expectedMolecularHash": "034f6f8d01c9f20c8a9a64a5742ca755b53a917461c8e870de8622ca4a2b37ge"
+      "expectedMolecularHash": "03762208e545fa3e5b3fee1fd09131c9f61fg63ffdac9458gac3c8e8a1daa3d3"
     },
     "mlkem768": {
       "seed": "TESTSEED",
@@ -325,7 +325,7 @@ async function testMetaCreation() {
     logTest('Molecule validation', isValid, validationError);
 
     // Store serialized molecule for cross-SDK verification
-    results.molecules.metadata = JSON.stringify(molecule.toJSON());
+    results.molecules.metadata = JSON.stringify(molecule.toJSON({ includeValidationContext: true }));
 
     results.tests.metaCreation = {
       passed: isValid,
@@ -426,7 +426,7 @@ async function testSimpleTransfer() {
     logTest('Molecule validation', isValid, validationError);
 
     // Store serialized molecule for cross-SDK verification
-    results.molecules.simpleTransfer = JSON.stringify(molecule.toJSON());
+    results.molecules.simpleTransfer = JSON.stringify(molecule.toJSON({ includeValidationContext: true }));
 
     results.tests.simpleTransfer = {
       passed: isValid,
@@ -532,7 +532,7 @@ async function testComplexTransfer() {
     logTest('Molecule validation', isValid, validationError);
 
     // Store serialized molecule for cross-SDK verification
-    results.molecules.complexTransfer = JSON.stringify(molecule.toJSON());
+    results.molecules.complexTransfer = JSON.stringify(molecule.toJSON({ includeValidationContext: true }));
 
     results.tests.complexTransfer = {
       passed: isValid,
