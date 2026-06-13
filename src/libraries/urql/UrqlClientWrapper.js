@@ -67,24 +67,55 @@ class UrqlClientWrapper {
     })
   }
 
+  /**
+   * Builds the urql operation options forwarded with a query/mutation.
+   *
+   * Forwards the requestPolicy (so a long-lived client does not serve stale
+   * cache-first reads) and, when the caller supplied a per-query abort signal,
+   * the signal too — while re-supplying the X-Auth-Token header. urql REPLACES
+   * (not merges) the client-level fetchOptions with any operation-context
+   * fetchOptions (createRequestOperation builds the op context as
+   * {...baseOpts, ...opts}), so forwarding fetchOptions WITHOUT the header would
+   * drop X-Auth-Token and break auth. The header here is byte-identical to the
+   * client-level one set in createUrqlClient.
+   *
+   * @param {object} context
+   * @returns {object|undefined}
+   */
+  buildRequestOptions (context) {
+    if (!context) {
+      return undefined
+    }
+    const opts = {}
+    if (context.requestPolicy) {
+      opts.requestPolicy = context.requestPolicy
+    }
+    const callerSignal = context.fetchOptions && context.fetchOptions.signal
+    if (callerSignal) {
+      // Combine the per-query abort signal with the 60s timeout so either can
+      // cancel the request; fall back to the caller signal where AbortSignal.any
+      // is unavailable.
+      const signal = (typeof AbortSignal !== 'undefined' && typeof AbortSignal.any === 'function')
+        ? AbortSignal.any([callerSignal, AbortSignal.timeout(60000)])
+        : callerSignal
+      opts.fetchOptions = {
+        headers: { 'X-Auth-Token': this.$__authToken },
+        signal
+      }
+    }
+    return Object.keys(opts).length ? opts : undefined
+  }
+
   async query (request) {
     const { query, variables, context } = request
-    // Forward ONLY urql's requestPolicy (e.g. 'network-only') so a long-lived
-    // client does not serve stale cache-first reads. We deliberately do NOT
-    // forward the whole context: urql REPLACES (not merges) the client-level
-    // fetchOptions with any context.fetchOptions (createRequestOperation builds
-    // the op context as {...baseOpts, ...opts}), which would drop the
-    // X-Auth-Token header set in createUrqlClient and break authentication.
-    const opts = (context && context.requestPolicy) ? { requestPolicy: context.requestPolicy } : undefined
+    const opts = this.buildRequestOptions(context)
     const result = await this.$__client.query(query, variables || {}, opts).toPromise()
     return this.formatResponse(result)
   }
 
   async mutate (request) {
     const { mutation, variables, context } = request
-    // Forward requestPolicy only (see query() — never the whole context, which
-    // would clobber the auth-bearing client-level fetchOptions).
-    const opts = (context && context.requestPolicy) ? { requestPolicy: context.requestPolicy } : undefined
+    const opts = this.buildRequestOptions(context)
     const result = await this.$__client.mutation(mutation, variables || {}, opts).toPromise()
     return this.formatResponse(result)
   }

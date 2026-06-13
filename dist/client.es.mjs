@@ -546,7 +546,7 @@ class g {
   }
   /**
    * Returns JSON-ready object for cross-SDK compatibility (2025 JS best practices)
-   * 
+   *
    * Provides clean serialization of atomic operations with optional OTS fragments.
    * Follows 2025 JavaScript best practices with proper type safety and validation.
    *
@@ -589,7 +589,7 @@ class g {
   }
   /**
    * Creates an Atom instance from JSON data (2025 JS best practices)
-   * 
+   *
    * Handles cross-SDK atom deserialization with robust error handling.
    * Essential for reconstructing atoms from other SDK implementations.
    *
@@ -1861,8 +1861,7 @@ class Be extends x {
   }
 }
 class $t {
-  constructor({}) {
-    const e = arguments[0];
+  constructor(e = {}) {
     for (const t in e)
       this[`__${t}`] = e[t];
   }
@@ -3106,8 +3105,8 @@ class z {
     signingWallet: t = null
   }) {
     let n = 0;
-    for (const [r, i] of Object.entries(e || {}))
-      n += i;
+    for (const r of Object.values(e || {}))
+      n += r;
     if (this.sourceWallet.balance - n < 0)
       throw new ue();
     const s = new P();
@@ -7178,12 +7177,42 @@ class Tr {
       encrypt: !!this.cipherLink
     });
   }
+  /**
+   * Builds the urql operation options forwarded with a query/mutation.
+   *
+   * Forwards the requestPolicy (so a long-lived client does not serve stale
+   * cache-first reads) and, when the caller supplied a per-query abort signal,
+   * the signal too — while re-supplying the X-Auth-Token header. urql REPLACES
+   * (not merges) the client-level fetchOptions with any operation-context
+   * fetchOptions (createRequestOperation builds the op context as
+   * {...baseOpts, ...opts}), so forwarding fetchOptions WITHOUT the header would
+   * drop X-Auth-Token and break auth. The header here is byte-identical to the
+   * client-level one set in createUrqlClient.
+   *
+   * @param {object} context
+   * @returns {object|undefined}
+   */
+  buildRequestOptions(e) {
+    if (!e)
+      return;
+    const t = {};
+    e.requestPolicy && (t.requestPolicy = e.requestPolicy);
+    const n = e.fetchOptions && e.fetchOptions.signal;
+    if (n) {
+      const s = typeof AbortSignal < "u" && typeof AbortSignal.any == "function" ? AbortSignal.any([n, AbortSignal.timeout(6e4)]) : n;
+      t.fetchOptions = {
+        headers: { "X-Auth-Token": this.$__authToken },
+        signal: s
+      };
+    }
+    return Object.keys(t).length ? t : void 0;
+  }
   async query(e) {
-    const { query: t, variables: n, context: s } = e, r = s && s.requestPolicy ? { requestPolicy: s.requestPolicy } : void 0, i = await this.$__client.query(t, n || {}, r).toPromise();
+    const { query: t, variables: n, context: s } = e, r = this.buildRequestOptions(s), i = await this.$__client.query(t, n || {}, r).toPromise();
     return this.formatResponse(i);
   }
   async mutate(e) {
-    const { mutation: t, variables: n, context: s } = e, r = s && s.requestPolicy ? { requestPolicy: s.requestPolicy } : void 0, i = await this.$__client.mutation(t, n || {}, r).toPromise();
+    const { mutation: t, variables: n, context: s } = e, r = this.buildRequestOptions(s), i = await this.$__client.mutation(t, n || {}, r).toPromise();
     return this.formatResponse(i);
   }
   subscribe(e, t) {

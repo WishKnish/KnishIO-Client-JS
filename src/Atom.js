@@ -212,7 +212,7 @@ export default class Atom {
 
   /**
    * Returns JSON-ready object for cross-SDK compatibility (2025 JS best practices)
-   * 
+   *
    * Provides clean serialization of atomic operations with optional OTS fragments.
    * Follows 2025 JavaScript best practices with proper type safety and validation.
    *
@@ -226,15 +226,15 @@ export default class Atom {
     const {
       includeOtsFragments = true,
       validateFields = false
-    } = options;
+    } = options
 
     try {
       // Validate required fields if requested
       if (validateFields) {
-        const requiredFields = ['position', 'walletAddress', 'isotope', 'token'];
+        const requiredFields = ['position', 'walletAddress', 'isotope', 'token']
         for (const field of requiredFields) {
           if (!this[field]) {
-            throw new Error(`Required field '${field}' is missing or empty`);
+            throw new Error(`Required field '${field}' is missing or empty`)
           }
         }
       }
@@ -258,23 +258,22 @@ export default class Atom {
         index: this.index,
         createdAt: this.createdAt,
         version: this.version
-      };
+      }
 
       // Optional OTS fragments (can be large, so optional)
       if (includeOtsFragments && this.otsFragment) {
-        serialized.otsFragment = this.otsFragment;
+        serialized.otsFragment = this.otsFragment
       }
 
-      return serialized;
-
+      return serialized
     } catch (error) {
-      throw new Error(`Atom serialization failed: ${error.message}`);
+      throw new Error(`Atom serialization failed: ${error.message}`)
     }
   }
 
   /**
    * Creates an Atom instance from JSON data (2025 JS best practices)
-   * 
+   *
    * Handles cross-SDK atom deserialization with robust error handling.
    * Essential for reconstructing atoms from other SDK implementations.
    *
@@ -289,18 +288,18 @@ export default class Atom {
     const {
       validateStructure = true,
       strictMode = false
-    } = options;
+    } = options
 
     try {
       // Parse JSON safely
-      const data = typeof json === 'string' ? JSON.parse(json) : json;
+      const data = typeof json === 'string' ? JSON.parse(json) : json
 
       // Validate required fields in strict mode
       if (strictMode || validateStructure) {
-        const requiredFields = ['position', 'walletAddress', 'isotope', 'token'];
+        const requiredFields = ['position', 'walletAddress', 'isotope', 'token']
         for (const field of requiredFields) {
           if (!data[field]) {
-            throw new Error(`Required field '${field}' is missing or empty`);
+            throw new Error(`Required field '${field}' is missing or empty`)
           }
         }
       }
@@ -318,20 +317,19 @@ export default class Atom {
         meta: data.meta,
         index: data.index,
         version: data.version
-      });
+      })
 
       // Set additional properties that may not be in constructor
       if (data.otsFragment) {
-        atom.otsFragment = data.otsFragment;
+        atom.otsFragment = data.otsFragment
       }
       if (data.createdAt) {
-        atom.createdAt = data.createdAt;
+        atom.createdAt = data.createdAt
       }
 
-      return atom;
-
+      return atom
     } catch (error) {
-      throw new Error(`Atom deserialization failed: ${error.message}`);
+      throw new Error(`Atom deserialization failed: ${error.message}`)
     }
   }
 

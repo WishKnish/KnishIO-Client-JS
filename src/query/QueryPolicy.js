@@ -48,7 +48,7 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 
 import Query from './Query.js'
 import ResponsePolicy from '../response/ResponsePolicy.js'
-import { gql } from "@urql/core";
+import { gql } from '@urql/core'
 
 export default class QueryPolicy extends Query {
   /**
