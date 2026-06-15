@@ -92,6 +92,16 @@ const DEFAULT_CONFIG = {
       "token": "ENCRYPT",
       "position": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "plaintext": "Hello ML-KEM768 cross-platform test message!"
+    },
+    "tokenCreation": {
+      "sourceSeed": "TESTSEED",
+      "recipientSeed": "RECIPIENTSEED",
+      "amount": 1000000,
+      "sourceToken": "USER",
+      "newToken": "TESTTOKEN",
+      "sourcePosition": "0123456789abcdeffedcba9876543210fedcba9876543210fedcba9876543210",
+      "recipientPosition": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+      "meta": { "name": "Test Token", "fungibility": "fungible", "supply": "limited", "decimals": "0" }
     }
   }
 };
@@ -557,6 +567,38 @@ async function testComplexTransfer() {
  * Test 5: ML-KEM768 Encryption Test
  * Tests post-quantum encryption/decryption compatibility
  */
+async function testTokenCreation() {
+  log('\nC1. Token Creation Test', 'blue');
+  const testConfig = config.tests.tokenCreation;
+  try {
+    const sourceSecret = generateSecret(testConfig.sourceSeed);
+    const sourceBundle = generateBundleHash(sourceSecret);
+    const sourceWallet = new Wallet({ secret: sourceSecret, token: testConfig.sourceToken, position: testConfig.sourcePosition });
+    const recipientSecret = generateSecret(testConfig.recipientSeed);
+    const recipientWallet = new Wallet({ secret: recipientSecret, token: testConfig.newToken, position: testConfig.recipientPosition });
+    // USER-token remainder so addContinuIdAtom's guard keeps the canonical bbbb... wallet
+    const remainderWallet = createFixedRemainderWallet(sourceSecret, testConfig.sourceToken);
+    const molecule = new Molecule({ secret: sourceSecret, bundle: sourceBundle, sourceWallet: sourceWallet, remainderWallet: remainderWallet });
+    molecule.initTokenCreation({ recipientWallet: recipientWallet, amount: testConfig.amount, meta: testConfig.meta });
+    logTest('Token creation initialization', true);
+    setFixedTimestamps(molecule);
+    molecule.sign({});
+    logTest('Molecule signing', true);
+    inspectMolecule(molecule, 'token creation molecule');
+    let isValid = false, validationError = null;
+    try { isValid = molecule.check(sourceWallet); if (!isValid) validationError = 'Validation returned false (no exception thrown)'; }
+    catch (error) { isValid = false; validationError = error.message; }
+    logTest('Molecule validation', isValid, validationError);
+    results.molecules.tokenCreation = JSON.stringify(molecule.toJSON({ includeValidationContext: true }));
+    results.tests.tokenCreation = { passed: isValid, molecularHash: molecule.molecularHash, atomCount: molecule.atoms.length, validationError: validationError };
+    return isValid;
+  } catch (error) {
+    log(`  ❌ ERROR: ${error.message}`, 'red');
+    results.tests.tokenCreation = { passed: false, error: error.message };
+    return false;
+  }
+}
+
 async function testMLKEM768() {
   log('\n5. ML-KEM768 Encryption Test', 'blue');
   const testConfig = config.tests.mlkem768;
@@ -1018,6 +1060,7 @@ async function runTests() {
   await testMetaCreation();
   await testSimpleTransfer();
   await testComplexTransfer();
+  await testTokenCreation();
   await testMLKEM768();
   await testNegativeCases();
   await testCrossSdkValidation();
