@@ -577,6 +577,11 @@ export default class Molecule {
     recipientWallet,
     amount
   }) {
+    // Canonical token transfer (incl. stackable): a UTXO-style FULL-balance debit + remainder.
+    // The source wallet is fully drained (-balance) and the change returns via the remainder atom,
+    // so the 3 V-atoms conserve (sum == 0) and the validator's stackable full-drain guard accepts.
+    // Per-unit (stackable) movement is layered by calling Wallet.splitUnits(units, remainder,
+    // recipient) BEFORE this — there is no separate partial-debit transfer mode.
     if (this.sourceWallet.balance - amount < 0) {
       throw new BalanceInsufficientException()
     }
@@ -602,60 +607,6 @@ export default class Molecule {
       value: this.sourceWallet.balance - amount,
       metaType: 'walletBundle',
       metaId: this.remainderWallet.bundle
-    }))
-
-    return this
-  }
-
-  /**
-   * Creates a stackable V-isotope transfer with 3 atoms:
-   * source debit, recipient credit, remainder.
-   * Propagates batchId from source wallet.
-   *
-   * @param {Wallet} recipientWallet - wallet receiving the tokens
-   * @param {number} amount - amount to transfer
-   * @return {Molecule}
-   */
-  addStackableTransfer ({
-    recipientWallet,
-    amount
-  }) {
-    if (amount <= 0) {
-      throw new NegativeAmountException('Molecule::addStackableTransfer() - Amount must be positive!')
-    }
-
-    if (this.sourceWallet.balance - amount < 0) {
-      throw new BalanceInsufficientException()
-    }
-
-    const batchId = this.sourceWallet.batchId || generateBatchId({})
-
-    // Source debit atom
-    this.addAtom(Atom.create({
-      isotope: 'V',
-      wallet: this.sourceWallet,
-      value: -amount,
-      batchId
-    }))
-
-    // Recipient credit atom
-    this.addAtom(Atom.create({
-      isotope: 'V',
-      wallet: recipientWallet,
-      value: amount,
-      metaType: 'walletBundle',
-      metaId: recipientWallet.bundle,
-      batchId: generateBatchId({})
-    }))
-
-    // Remainder atom
-    this.addAtom(Atom.create({
-      isotope: 'V',
-      wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - amount,
-      metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle,
-      batchId
     }))
 
     return this
