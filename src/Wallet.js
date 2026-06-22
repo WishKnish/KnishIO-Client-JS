@@ -399,6 +399,47 @@ export default class Wallet {
   }
 
   /**
+   * Split token units across MULTIPLE recipients (WP line 544).
+   *
+   * The source retains the SENT union (all units leaving), each recipient gets its own subset,
+   * and the remainder gets the KEPT units (those not assigned to any recipient). Mirrors
+   * splitUnits() but N-way: the source's tokenUnits become the union (not a single recipient's
+   * subset) so the source atom carries the full SENT set the validator reads as the authority.
+   *
+   * @param {array[]} recipientUnitLists - array of unit-id arrays, parallel to recipientWallets
+   * @param {Wallet[]} recipientWallets
+   * @param {Wallet} remainderWallet
+   */
+  splitUnitsMulti (
+    recipientUnitLists,
+    recipientWallets,
+    remainderWallet
+  ) {
+    // The union of all unit ids leaving the source
+    const sentIds = new Set()
+    recipientUnitLists.forEach(unitList => {
+      unitList.forEach(id => sentIds.add(id))
+    })
+
+    // Nothing to split (fungible transfer) — leave token units untouched
+    if (sentIds.size === 0) {
+      return
+    }
+
+    // Each recipient gets its own subset of the source's token units
+    recipientWallets.forEach((recipientWallet, index) => {
+      const ids = recipientUnitLists[index]
+      recipientWallet.tokenUnits = this.tokenUnits.filter(tokenUnit => ids.includes(tokenUnit.id))
+    })
+
+    // The remainder keeps everything not sent to any recipient
+    remainderWallet.tokenUnits = this.tokenUnits.filter(tokenUnit => !sentIds.has(tokenUnit.id))
+
+    // The source carries the SENT union (the ownership authority the validator reads)
+    this.tokenUnits = this.tokenUnits.filter(tokenUnit => sentIds.has(tokenUnit.id))
+  }
+
+  /**
    * Create a remainder wallet from the source one
    *
    * @param secret

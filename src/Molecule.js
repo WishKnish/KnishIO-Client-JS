@@ -613,6 +613,61 @@ export default class Molecule {
   }
 
   /**
+   * Multi-recipient value transfer (WP line 544: one molecule funds N recipients).
+   *
+   * Builds 1 source atom (full-balance debit, carrying the SENT union of all units) + one atom
+   * per recipient (its amount + its own units, walletBundle-bonded) + 1 remainder atom (the KEPT
+   * change). Conservation: -balance + Σ amounts + (balance - Σ amounts) == 0.
+   *
+   * Per-unit (stackable) routing is layered by calling Wallet.splitUnitsMulti(...) BEFORE this —
+   * it sets the source's tokenUnits to the union, each recipient's to its subset, and the
+   * remainder's to the kept units. The single-recipient initValue() is the N=1 special case.
+   *
+   * @param {Wallet[]} recipientWallets
+   * @param {number[]} amounts - parallel to recipientWallets
+   * @return {Molecule}
+   */
+  initValues ({
+    recipientWallets,
+    amounts
+  }) {
+    const total = amounts.reduce((sum, value) => sum + Number(value), 0)
+
+    if (this.sourceWallet.balance - total < 0) {
+      throw new BalanceInsufficientException()
+    }
+
+    // Source atom: debit the full balance (UTXO); carries the SENT union of all units
+    this.addAtom(Atom.create({
+      isotope: 'V',
+      wallet: this.sourceWallet,
+      value: -this.sourceWallet.balance
+    }))
+
+    // One atom per recipient: its amount + its own units, bonded to the recipient bundle
+    recipientWallets.forEach((recipientWallet, index) => {
+      this.addAtom(Atom.create({
+        isotope: 'V',
+        wallet: recipientWallet,
+        value: amounts[index],
+        metaType: 'walletBundle',
+        metaId: recipientWallet.bundle
+      }))
+    })
+
+    // Remainder atom: the change back to the sender; carries the KEPT units
+    this.addAtom(Atom.create({
+      isotope: 'V',
+      wallet: this.remainderWallet,
+      value: this.sourceWallet.balance - total,
+      metaType: 'walletBundle',
+      metaId: this.remainderWallet.bundle
+    }))
+
+    return this
+  }
+
+  /**
    *
    * @param amount
    * @param tradeRates
