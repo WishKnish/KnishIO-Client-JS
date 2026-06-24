@@ -1,0 +1,31 @@
+# JS SDK CI — enforces the ESLint gate (restored cycle 11) + the jest suite.
+# Born-enforced: the repo had no CI, so the lint gate was local-only/bypassable until now.
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  gate:
+    name: lint + test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # package-lock.json and yarn.lock coexist (yarn-managed, nodeLinker: node-modules);
+      # npm install is tolerant of lockfile drift, where npm ci would hard-fail.
+      - name: Install dependencies
+        run: npm install
+
+      # The enforced lint gate (.eslintrc.cjs, cycle 11): 0 errors (warnings allowed).
+      - name: ESLint (lint gate)
+        run: npm run lint
+
+      # jest unit suite (incl. the cross-SDK canonical-vector parity tests). The
+      # live-validator integration suite auto-skips without KNISHIO_TEST_URI.
+      - name: Jest
+        run: npm test
