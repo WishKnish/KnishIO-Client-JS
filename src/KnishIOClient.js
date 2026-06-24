@@ -88,7 +88,6 @@ import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe.js'
 import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe.js'
 import MutationActiveSession from './mutation/MutationActiveSession.js'
 import QueryActiveSession from './query/QueryActiveSession.js'
-import QueryUserActivity from './query/QueryUserActivity.js'
 import QueryToken from './query/QueryToken.js'
 import BatchIdException from './exception/BatchIdException.js'
 import AuthorizationRejectedException from './exception/AuthorizationRejectedException.js'
@@ -1213,50 +1212,6 @@ export default class KnishIOClient {
       bundleHash,
       metaType,
       metaId
-    })
-  }
-
-  /**
-   * Queries user activity based on the provided parameters.
-   *
-   * @param {string} bundleHash - The bundle hash.
-   * @param {string} metaType - The meta type.
-   * @param {string} metaId - The meta ID.
-   * @param {string} ipAddress - The IP address.
-   * @param {string} browser - The browser.
-   * @param {string} osCpu - The operating system and CPU.
-   * @param {string} resolution - The screen resolution.
-   * @param {string} timeZone - The time zone.
-   * @param {string} countBy - The count by parameter.
-   * @param {string} interval - The interval parameter.
-   *
-   * @returns {Promise<ResponseQueryUserActivity>} The result of the query.
-   */
-  async queryUserActivity ({
-    bundleHash,
-    metaType,
-    metaId,
-    ipAddress,
-    browser,
-    osCpu,
-    resolution,
-    timeZone,
-    countBy,
-    interval
-  }) {
-    const query = this.createQuery(QueryUserActivity)
-
-    return await this.executeQuery(query, {
-      bundleHash,
-      metaType,
-      metaId,
-      ipAddress,
-      browser,
-      osCpu,
-      resolution,
-      timeZone,
-      countBy,
-      interval
     })
   }
 

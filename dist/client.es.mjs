@@ -3922,7 +3922,7 @@ class C {
       return this;
   }
 }
-class K {
+class N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4063,7 +4063,7 @@ class hs extends C {
     }), e.address = t.address, e.position = t.position, e.bundle = t.bundleHash, e.batchId = t.batchId, e.characters = t.characters, e.pubkey = t.pubkey, e.balance = String(t.amount != null ? t.amount : 0)), e;
   }
 }
-class ds extends K {
+class ds extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4135,7 +4135,7 @@ class ps extends C {
     }), t;
   }
 }
-class fs extends K {
+class fs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4243,7 +4243,7 @@ class Le extends C {
     return this.getWallets();
   }
 }
-class ms extends K {
+class ms extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4320,7 +4320,7 @@ class ys extends C {
     });
   }
 }
-class gs extends K {
+class gs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4395,7 +4395,7 @@ class bs extends C {
     return n.instances && (t.instances = n.instances), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
   }
 }
-class At extends K {
+class At extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4470,7 +4470,7 @@ class At extends K {
     });
   }
 }
-class Ie extends K {
+class Ie extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4551,7 +4551,7 @@ class Ie extends K {
     return t.dataKey = "data.Batch", t;
   }
 }
-class ws extends K {
+class ws extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -4656,7 +4656,7 @@ class V extends C {
     return this.$__payload;
   }
 }
-class Qe extends K {
+class Qe extends N {
   /**
    * Creates a new Request for the given parameters
    *
@@ -5686,7 +5686,7 @@ class Gs extends C {
     return t;
   }
 }
-class Xs extends K {
+class Xs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -5714,126 +5714,7 @@ class Xs extends K {
     });
   }
 }
-class Zs extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.UserActivity"
-    });
-  }
-  payload() {
-    const e = JSON.parse(JSON.stringify(this.data()));
-    if (e.instances)
-      for (const t of e.instances)
-        t.jsonData = JSON.parse(t.jsonData);
-    return e;
-  }
-}
-class Ys extends K {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query UserActivity (
-      $bundleHash:String,
-      $metaType: String,
-      $metaId: String,
-      $ipAddress: String,
-      $browser: String,
-      $osCpu: String,
-      $resolution: String,
-      $timeZone: String,
-      $countBy: [CountByUserActivity],
-      $interval: span
-    ) {
-      UserActivity (
-        bundleHash: $bundleHash,
-        metaType: $metaType,
-        metaId: $metaId,
-        ipAddress: $ipAddress,
-        browser: $browser,
-        osCpu: $osCpu,
-        resolution: $resolution,
-        timeZone: $timeZone,
-        countBy: $countBy,
-        interval: $interval
-      ) {
-        createdAt,
-        bundleHash,
-        metaType,
-        metaId,
-        instances {
-          bundleHash,
-          metaType,
-          metaId,
-          jsonData,
-          createdAt,
-          updatedAt
-        },
-        instanceCount {
-          ...SubFields,
-          ...Recursive
-        }
-      }
-    }
-
-    fragment SubFields on InstanceCountType {
-      id,
-      count
-    }
-
-    fragment Recursive on InstanceCountType {
-      instances {
-        ...SubFields
-        instances {
-          ...SubFields,
-          instances {
-            ...SubFields
-            instances {
-              ...SubFields
-              instances {
-                ...SubFields
-                instances {
-                  ...SubFields
-                  instances {
-                    ...SubFields
-                    instances {
-                      ...SubFields
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }`;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseQueryUserActivity}
-   */
-  createResponse(e) {
-    return new Zs({
-      query: this,
-      json: e
-    });
-  }
-}
-class er extends K {
+class Zs extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -5876,7 +5757,7 @@ class It extends x {
     super(e, t, n), this.name = "AuthorizationRejectedException";
   }
 }
-class tr extends C {
+class Ys extends C {
   /**
    * Class constructor
    *
@@ -5924,7 +5805,7 @@ class tr extends C {
     return t;
   }
 }
-class Mt extends K {
+class Mt extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -6074,13 +5955,13 @@ class Mt extends K {
    * @return {ResponseAtom}
    */
   createResponse(e) {
-    return new tr({
+    return new Ys({
       query: this,
       json: e
     });
   }
 }
-class nr extends C {
+class er extends C {
   /**
    * Class constructor
    *
@@ -6105,7 +5986,7 @@ class nr extends C {
     return e && e.callback ? JSON.parse(e.callback) : null;
   }
 }
-class sr extends K {
+class tr extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -6131,13 +6012,13 @@ class sr extends K {
    * @return {ResponsePolicy}
    */
   createResponse(e) {
-    return new nr({
+    return new er({
       query: this,
       json: e
     });
   }
 }
-class rr extends C {
+class nr extends C {
   /**
    * Class constructor
    *
@@ -6166,7 +6047,7 @@ class rr extends C {
     return n.instances && (t.instances = n.instances), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
   }
 }
-class Tt extends K {
+class Tt extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -6252,7 +6133,7 @@ class Tt extends K {
    * @return {ResponseMetaTypeViaAtom}
    */
   createResponse(e) {
-    return new rr({
+    return new nr({
       query: this,
       json: e
     });
@@ -6359,7 +6240,7 @@ class it extends C {
     };
   }
 }
-class Ct extends K {
+class Ct extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -6472,7 +6353,7 @@ class Ct extends K {
     });
   }
 }
-class ir extends C {
+class sr extends C {
   /**
    * Class constructor
    *
@@ -6508,7 +6389,7 @@ class ir extends C {
     return !e || !Array.isArray(e) || e.length === 0 ? null : e;
   }
 }
-class Et extends K {
+class Et extends N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -6552,15 +6433,15 @@ class Et extends K {
    * @return {ResponseEmbeddingStatus}
    */
   createResponse(e) {
-    return new ir({
+    return new sr({
       query: this,
       json: e
     });
   }
 }
-class or extends V {
+class rr extends V {
 }
-class ar extends W {
+class ir extends W {
   /**
    *
    * @param {string} metaType
@@ -6588,13 +6469,13 @@ class ar extends W {
    * @return {ResponseCreateRule}
    */
   createResponse(e) {
-    return new or({
+    return new rr({
       query: this,
       json: e
     });
   }
 }
-class lr extends W {
+class or extends W {
   /**
    * Fills the Molecule with provided wallet and amount data
    *
@@ -6611,7 +6492,7 @@ class lr extends W {
     }), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
   }
 }
-class cr extends W {
+class ar extends W {
   /**
    *
    * @param recipients
@@ -6711,9 +6592,9 @@ function Y(o, e) {
     };
   }
 }
-var q = { exclude: [], include: [], logging: !0 }, Gt = {}, ur = { timeout: "true" }, J = function(o, e) {
+var q = { exclude: [], include: [], logging: !0 }, Gt = {}, lr = { timeout: "true" }, J = function(o, e) {
   typeof window < "u" && (Gt[o] = e);
-}, hr = function() {
+}, cr = function() {
   return Object.fromEntries(Object.entries(Gt).filter((function(o) {
     var e, t = o[0];
     return !(!((e = q == null ? void 0 : q.exclude) === null || e === void 0) && e.includes(t));
@@ -6786,21 +6667,21 @@ function ot(o, e) {
     return r.toString(16).padStart(2, "0");
   })).join("");
 }
-function dr(o, e) {
+function ur(o, e) {
   return new Promise((function(t) {
     setTimeout((function() {
       return t(e);
     }), o);
   }));
 }
-function pr(o, e, t) {
+function hr(o, e, t) {
   return Promise.all(o.map((function(n) {
-    return Promise.race([n, dr(e, t)]);
+    return Promise.race([n, ur(e, t)]);
   })));
 }
-var fr = "0.19.1";
-function mr() {
-  return fr;
+var dr = "0.19.1";
+function pr() {
+  return dr;
 }
 function Xt() {
   return Z(this, void 0, void 0, (function() {
@@ -6808,7 +6689,7 @@ function Xt() {
     return Y(this, (function(r) {
       switch (r.label) {
         case 0:
-          return r.trys.push([0, 2, , 3]), o = hr(), e = Object.keys(o), [4, pr(Object.values(o), (q == null ? void 0 : q.timeout) || 1e3, ur)];
+          return r.trys.push([0, 2, , 3]), o = cr(), e = Object.keys(o), [4, hr(Object.values(o), (q == null ? void 0 : q.timeout) || 1e3, lr)];
         case 1:
           return t = r.sent(), n = t.filter((function(i) {
             return i !== void 0;
@@ -6844,7 +6725,7 @@ function Zt(o, e, t, n) {
   }
   return s;
 }
-function yr(o) {
+function fr(o) {
   return Z(this, void 0, void 0, (function() {
     var e, t;
     return Y(this, (function(n) {
@@ -6858,7 +6739,7 @@ function yr(o) {
               return Y(this, (function(c) {
                 switch (c.label) {
                   case 0:
-                    if (i = "https://logging.thumbmarkjs.com/v1/log", a = { thumbmark: s, components: r, version: mr() }, sessionStorage.getItem("_tmjs_l")) return [3, 4];
+                    if (i = "https://logging.thumbmarkjs.com/v1/log", a = { thumbmark: s, components: r, version: pr() }, sessionStorage.getItem("_tmjs_l")) return [3, 4];
                     sessionStorage.setItem("_tmjs_l", "1"), c.label = 1;
                   case 1:
                     return c.trys.push([1, 3, , 4]), [4, fetch(i, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) })];
@@ -6879,19 +6760,19 @@ function yr(o) {
     }));
   }));
 }
-function gr(o) {
+function mr(o) {
   for (var e = 0, t = 0; t < o.length; ++t) e += Math.abs(o[t]);
   return e;
 }
 function Yt(o, e, t) {
   for (var n = [], s = 0; s < o[0].data.length; s++) {
     for (var r = [], i = 0; i < o.length; i++) r.push(o[i].data[s]);
-    n.push(br(r));
+    n.push(yr(r));
   }
   var a = new Uint8ClampedArray(n);
   return new ImageData(a, e, t);
 }
-function br(o) {
+function yr(o) {
   if (o.length === 0) return 0;
   for (var e = {}, t = 0, n = o; t < n.length; t++)
     e[r = n[t]] = (e[r] || 0) + 1;
@@ -6916,7 +6797,7 @@ J("audio", (function() {
           r.frequency.value = 1e3;
           var i, a = n.createDynamicsCompressor();
           a.threshold.value = -50, a.knee.value = 40, a.ratio.value = 12, a.attack.value = 0, a.release.value = 0.2, r.connect(a), a.connect(n.destination), r.start(), n.oncomplete = function(c) {
-            i = c.renderedBuffer.getChannelData(0), e({ sampleHash: gr(i), oscillator: r.type, maxChannels: n.destination.maxChannelCount, channelCountMode: s.channelCountMode });
+            i = c.renderedBuffer.getChannelData(0), e({ sampleHash: mr(i), oscillator: r.type, maxChannels: n.destination.maxChannelCount, channelCountMode: s.channelCountMode });
           }, n.startRendering();
         } catch (c) {
           console.error("Error creating audio fingerprint:", c), t(c);
@@ -6925,10 +6806,10 @@ J("audio", (function() {
     }));
   }));
 }));
-var wr = Me().name !== "SamsungBrowser" ? 1 : 3, Ot = 280, Rt = 20;
+var gr = Me().name !== "SamsungBrowser" ? 1 : 3, Ot = 280, Rt = 20;
 Me().name != "Firefox" && J("canvas", (function() {
   return document.createElement("canvas").getContext("2d"), new Promise((function(o) {
-    var e = Array.from({ length: wr }, (function() {
+    var e = Array.from({ length: gr }, (function() {
       return (function() {
         var t = document.createElement("canvas"), n = t.getContext("2d");
         if (!n) return new ImageData(1, 1);
@@ -6944,12 +6825,12 @@ Me().name != "Firefox" && J("canvas", (function() {
     o({ commonImageDataHash: ot(Yt(e, Ot, Rt).data.toString()).toString() });
   }));
 }));
-var et, kr = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], _r = ["monospace", "sans-serif", "serif"];
+var et, br = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], wr = ["monospace", "sans-serif", "serif"];
 function qt(o, e) {
   if (!o) throw new Error("Canvas context not supported");
   return o.font, o.font = "72px ".concat(e), o.measureText("WwMmLli0Oo").width;
 }
-function Sr() {
+function kr() {
   var o, e = document.createElement("canvas"), t = (o = e.getContext("webgl")) !== null && o !== void 0 ? o : e.getContext("experimental-webgl");
   if (t && "getParameter" in t) try {
     var n = (t.getParameter(t.VENDOR) || "").toString(), s = (t.getParameter(t.RENDERER) || "").toString(), r = { vendor: n, renderer: s, version: (t.getParameter(t.VERSION) || "").toString(), shadingLanguageVersion: (t.getParameter(t.SHADING_LANGUAGE_VERSION) || "").toString() };
@@ -6965,11 +6846,11 @@ function Sr() {
   }
   return "undefined";
 }
-function $r() {
+function _r() {
   var o = new Float32Array(1), e = new Uint8Array(o.buffer);
   return o[0] = 1 / 0, o[0] = o[0] - o[0], e[3];
 }
-function Ar(o, e) {
+function Sr(o, e) {
   var t = {};
   return e.forEach((function(n) {
     var s = (function(r) {
@@ -6991,7 +6872,7 @@ function Ar(o, e) {
     s && (t[n] = s);
   })), t;
 }
-function vr() {
+function $r() {
   var o = [], e = { "prefers-contrast": ["high", "more", "low", "less", "forced", "no-preference"], "any-hover": ["hover", "none"], "any-pointer": ["none", "coarse", "fine"], pointer: ["none", "coarse", "fine"], hover: ["hover", "none"], update: ["fast", "slow"], "inverted-colors": ["inverted", "none"], "prefers-reduced-motion": ["reduce", "no-preference"], "prefers-reduced-transparency": ["reduce", "no-preference"], scripting: ["none", "initial-only", "enabled"], "forced-colors": ["active", "none"] };
   return Object.keys(e).forEach((function(t) {
     e[t].forEach((function(n) {
@@ -6999,7 +6880,7 @@ function vr() {
     }));
   })), o;
 }
-function xr() {
+function Ar() {
   if (window.location.protocol === "https:" && typeof window.ApplePaySession == "function") try {
     for (var o = window.ApplePaySession.supportsVersion, e = 15; e > 0; e--) if (o(e)) return e;
   } catch {
@@ -7037,9 +6918,9 @@ Me().name != "Firefox" && J("fonts", (function() {
         return Z(o, void 0, void 0, (function() {
           var r, i, a, c;
           return Y(this, (function(u) {
-            return r = s.createElement("canvas"), i = r.getContext("2d"), a = _r.map((function(l) {
+            return r = s.createElement("canvas"), i = r.getContext("2d"), a = wr.map((function(l) {
               return qt(i, l);
-            })), c = {}, kr.forEach((function(l) {
+            })), c = {}, br.forEach((function(l) {
               var h = qt(i, l);
               a.includes(h) || (c[l] = h);
             })), e(c), [2];
@@ -7053,7 +6934,7 @@ Me().name != "Firefox" && J("fonts", (function() {
 })), J("hardware", (function() {
   return new Promise((function(o, e) {
     var t = navigator.deviceMemory !== void 0 ? navigator.deviceMemory : 0, n = window.performance && window.performance.memory ? window.performance.memory : 0;
-    o({ videocard: Sr(), architecture: $r(), deviceMemory: t.toString() || "undefined", jsHeapSizeLimit: n.jsHeapSizeLimit || 0 });
+    o({ videocard: kr(), architecture: _r(), deviceMemory: t.toString() || "undefined", jsHeapSizeLimit: n.jsHeapSizeLimit || 0 });
   }));
 })), J("locales", (function() {
   return new Promise((function(o) {
@@ -7089,7 +6970,7 @@ Me().name != "Firefox" && J("fonts", (function() {
           }));
         })();
       })), [2, Promise.all(o).then((function(t) {
-        return Ar(t, et);
+        return Sr(t, et);
       }))];
     }));
   }));
@@ -7104,23 +6985,23 @@ Me().name != "Firefox" && J("fonts", (function() {
   }));
 })), J("screen", (function() {
   return new Promise((function(o) {
-    o({ is_touchscreen: navigator.maxTouchPoints > 0, maxTouchPoints: navigator.maxTouchPoints, colorDepth: screen.colorDepth, mediaMatches: vr() });
+    o({ is_touchscreen: navigator.maxTouchPoints > 0, maxTouchPoints: navigator.maxTouchPoints, colorDepth: screen.colorDepth, mediaMatches: $r() });
   }));
 })), J("system", (function() {
   return new Promise((function(o) {
     var e = Me();
-    o({ platform: window.navigator.platform, cookieEnabled: window.navigator.cookieEnabled, productSub: navigator.productSub, product: navigator.product, useragent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency, browser: { name: e.name, version: e.version }, applePayVersion: xr() });
+    o({ platform: window.navigator.platform, cookieEnabled: window.navigator.cookieEnabled, productSub: navigator.productSub, product: navigator.product, useragent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency, browser: { name: e.name, version: e.version }, applePayVersion: Ar() });
   }));
 }));
-var N, Ir = Me().name !== "SamsungBrowser" ? 1 : 3, y = null;
+var K, vr = Me().name !== "SamsungBrowser" ? 1 : 3, y = null;
 J("webgl", (function() {
   return Z(this, void 0, void 0, (function() {
     var o;
     return Y(this, (function(e) {
-      typeof document < "u" && ((N = document.createElement("canvas")).width = 200, N.height = 100, y = N.getContext("webgl"));
+      typeof document < "u" && ((K = document.createElement("canvas")).width = 200, K.height = 100, y = K.getContext("webgl"));
       try {
         if (!y) throw new Error("WebGL not supported");
-        return o = Array.from({ length: Ir }, (function() {
+        return o = Array.from({ length: vr }, (function() {
           return (function() {
             try {
               if (!y) throw new Error("WebGL not supported");
@@ -7144,21 +7025,21 @@ J("webgl", (function() {
               y.useProgram(i);
               for (var a = 137, c = new Float32Array(4 * a), u = 2 * Math.PI / a, l = 0; l < a; l++) {
                 var h = l * u;
-                c[4 * l] = 0, c[4 * l + 1] = 0, c[4 * l + 2] = Math.cos(h) * (N.width / 2), c[4 * l + 3] = Math.sin(h) * (N.height / 2);
+                c[4 * l] = 0, c[4 * l + 1] = 0, c[4 * l + 2] = Math.cos(h) * (K.width / 2), c[4 * l + 3] = Math.sin(h) * (K.height / 2);
               }
               var p = y.createBuffer();
               y.bindBuffer(y.ARRAY_BUFFER, p), y.bufferData(y.ARRAY_BUFFER, c, y.STATIC_DRAW);
               var d = y.getAttribLocation(i, "position");
-              y.enableVertexAttribArray(d), y.vertexAttribPointer(d, 2, y.FLOAT, !1, 0, 0), y.viewport(0, 0, N.width, N.height), y.clearColor(0, 0, 0, 1), y.clear(y.COLOR_BUFFER_BIT), y.drawArrays(y.LINES, 0, 2 * a);
-              var b = new Uint8ClampedArray(N.width * N.height * 4);
-              return y.readPixels(0, 0, N.width, N.height, y.RGBA, y.UNSIGNED_BYTE, b), new ImageData(b, N.width, N.height);
+              y.enableVertexAttribArray(d), y.vertexAttribPointer(d, 2, y.FLOAT, !1, 0, 0), y.viewport(0, 0, K.width, K.height), y.clearColor(0, 0, 0, 1), y.clear(y.COLOR_BUFFER_BIT), y.drawArrays(y.LINES, 0, 2 * a);
+              var b = new Uint8ClampedArray(K.width * K.height * 4);
+              return y.readPixels(0, 0, K.width, K.height, y.RGBA, y.UNSIGNED_BYTE, b), new ImageData(b, K.width, K.height);
             } catch {
               return new ImageData(1, 1);
             } finally {
               y && (y.bindBuffer(y.ARRAY_BUFFER, null), y.useProgram(null), y.viewport(0, 0, y.drawingBufferWidth, y.drawingBufferHeight), y.clearColor(0, 0, 0, 0));
             }
           })();
-        })), [2, { commonImageHash: ot(Yt(o, N.width, N.height).data.toString()).toString() }];
+        })), [2, { commonImageHash: ot(Yt(o, K.width, K.height).data.toString()).toString() }];
       } catch {
         return [2, { webgl: "unsupported" }];
       }
@@ -7178,7 +7059,7 @@ J("math", (function() {
     }));
   }));
 }));
-class Mr {
+class xr {
   constructor({ serverUri: e, socket: t = null, encrypt: n = !1 }) {
     this.$__client = this.createUrqlClient({ serverUri: e, socket: t, encrypt: n }), this.$__authToken = "", this.$__pubkey = null, this.$__wallet = null, this.serverUri = e, this.soketi = t, this.cipherLink = !!n, this.$__subscriptionManager = /* @__PURE__ */ new Map();
   }
@@ -7328,7 +7209,7 @@ class Mr {
     });
   }
 }
-class Wr {
+class Rr {
   /**
    * Class constructor
    *
@@ -7382,7 +7263,7 @@ class Wr {
       const u = this.$__uris[c];
       this.$__authTokenObjects[u] = null;
     }
-    this.log("info", `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${r}...`), this.$__client = s || new Mr({
+    this.log("info", `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${r}...`), this.$__client = s || new xr({
       socket: {
         socketUri: null,
         appKey: "knishio",
@@ -7581,7 +7462,7 @@ class Wr {
    * @returns {Promise<string>} A promise that resolves to the device fingerprint as a string.
    */
   getFingerprint() {
-    return yr();
+    return fr();
   }
   getFingerprintData() {
     return Xt();
@@ -8170,48 +8051,6 @@ class Wr {
     });
   }
   /**
-   * Queries user activity based on the provided parameters.
-   *
-   * @param {string} bundleHash - The bundle hash.
-   * @param {string} metaType - The meta type.
-   * @param {string} metaId - The meta ID.
-   * @param {string} ipAddress - The IP address.
-   * @param {string} browser - The browser.
-   * @param {string} osCpu - The operating system and CPU.
-   * @param {string} resolution - The screen resolution.
-   * @param {string} timeZone - The time zone.
-   * @param {string} countBy - The count by parameter.
-   * @param {string} interval - The interval parameter.
-   *
-   * @returns {Promise<ResponseQueryUserActivity>} The result of the query.
-   */
-  async queryUserActivity({
-    bundleHash: e,
-    metaType: t,
-    metaId: n,
-    ipAddress: s,
-    browser: r,
-    osCpu: i,
-    resolution: a,
-    timeZone: c,
-    countBy: u,
-    interval: l
-  }) {
-    const h = this.createQuery(Ys);
-    return await this.executeQuery(h, {
-      bundleHash: e,
-      metaType: t,
-      metaId: n,
-      ipAddress: s,
-      browser: r,
-      osCpu: i,
-      resolution: a,
-      timeZone: c,
-      countBy: u,
-      interval: l
-    });
-  }
-  /**
    * Builds and executes a molecule to declare an active session for the given MetaType
    *
    * @param {Object} options - The options for activating a session.
@@ -8311,7 +8150,7 @@ class Wr {
   }) {
     const r = await this.createMoleculeMutation(
       {
-        mutationClass: ar,
+        mutationClass: ir,
         molecule: await this.createMolecule({
           secret: this.getSecret()
         })
@@ -8481,7 +8320,7 @@ class Wr {
     metaType: e,
     metaId: t
   }) {
-    const n = this.createQuery(sr);
+    const n = this.createQuery(tr);
     return await this.executeQuery(n, {
       metaType: e,
       metaId: t
@@ -8569,7 +8408,7 @@ class Wr {
   }) {
     let a, c;
     r = r || {};
-    const u = this.createQuery(er), l = await this.executeQuery(u, {
+    const u = this.createQuery(Zs), l = await this.executeQuery(u, {
       slug: e
     }), h = M.get(l.data(), "0.fungibility") === "stackable";
     if (!h && i !== null)
@@ -8792,7 +8631,7 @@ class Wr {
       sourceWallet: s,
       remainderWallet: r
     }), a = await this.createMoleculeMutation({
-      mutationClass: lr,
+      mutationClass: or,
       molecule: i
     });
     return a.fillMolecule({
@@ -8825,7 +8664,7 @@ class Wr {
       sourceWallet: n,
       remainderWallet: r
     }), a = await this.createMoleculeMutation({
-      mutationClass: cr,
+      mutationClass: ar,
       molecule: i
     }), c = {};
     return c[this.getBundle()] = t, a.fillMolecule({
@@ -9093,7 +8932,7 @@ class Wr {
       }
   }
 }
-class Ur extends C {
+class qr extends C {
   /**
    * Class constructor
    *
@@ -9176,7 +9015,7 @@ export {
   ce as Decimal,
   M as Dot,
   te as InvalidResponseException,
-  Wr as KnishIOClient,
+  Rr as KnishIOClient,
   de as Meta,
   H as MetaMissingException,
   as as MolecularHashMismatchException,
@@ -9188,10 +9027,10 @@ export {
   Cs as MutationClaimShadowWallet,
   Ms as MutationCreateIdentifier,
   Os as MutationCreateMeta,
-  ar as MutationCreateRule,
+  ir as MutationCreateRule,
   $s as MutationCreateToken,
   Ks as MutationCreateWallet,
-  lr as MutationDepositBufferToken,
+  or as MutationDepositBufferToken,
   Hs as MutationLinkIdentifier,
   qs as MutationPeering,
   W as MutationProposeMolecule,
@@ -9199,11 +9038,11 @@ export {
   Fs as MutationRequestAuthorizationGuest,
   vs as MutationRequestTokens,
   vt as MutationTransferTokens,
-  cr as MutationWithdrawBufferToken,
+  ar as MutationWithdrawBufferToken,
   $t as NegativeAmountException,
   wt as PolicyInvalidException,
   st as PolicyMeta,
-  K as Query,
+  N as Query,
   Xs as QueryActiveSession,
   Mt as QueryAtom,
   gs as QueryBalance,
@@ -9214,34 +9053,32 @@ export {
   At as QueryMetaType,
   Tt as QueryMetaTypeViaAtom,
   Ct as QueryMetaTypeViaMolecule,
-  sr as QueryPolicy,
-  er as QueryToken,
-  Ys as QueryUserActivity,
+  tr as QueryPolicy,
+  Zs as QueryToken,
   fs as QueryWalletBundle,
   ms as QueryWalletList,
   C as Response,
   zs as ResponseActiveSession,
   Ws as ResponseAppendRequest,
-  tr as ResponseAtom,
-  Ur as ResponseAuthorizationGuest,
+  Ys as ResponseAtom,
+  qr as ResponseAuthorizationGuest,
   ys as ResponseBalance,
   Ts as ResponseClaimShadowWallet,
   hs as ResponseContinuId,
   Is as ResponseCreateIdentifier,
   Es as ResponseCreateMeta,
-  or as ResponseCreateRule,
+  rr as ResponseCreateRule,
   Ss as ResponseCreateToken,
   Ps as ResponseCreateWallet,
-  ir as ResponseEmbeddingStatus,
+  sr as ResponseEmbeddingStatus,
   Bs as ResponseLinkIdentifier,
   bs as ResponseMetaType,
-  rr as ResponseMetaTypeViaAtom,
+  nr as ResponseMetaTypeViaAtom,
   it as ResponseMetaTypeViaMolecule,
   Rs as ResponsePeering,
-  nr as ResponsePolicy,
+  er as ResponsePolicy,
   V as ResponseProposeMolecule,
   Gs as ResponseQueryActiveSession,
-  Zs as ResponseQueryUserActivity,
   ks as ResponseRequestAuthorization,
   Ns as ResponseRequestAuthorizationGuest,
   As as ResponseRequestTokens,
