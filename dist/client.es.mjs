@@ -81,7 +81,7 @@ function Be(o, e) {
     n[s] = o.substr(r, e);
   return n;
 }
-function nt(o = 256, e = "abcdef0123456789") {
+function st(o = 256, e = "abcdef0123456789") {
   let t = new Uint8Array(o);
   return t = crypto.getRandomValues(t), t = t.map((n) => e.charCodeAt(n % e.length)), String.fromCharCode.apply(null, t);
 }
@@ -183,14 +183,14 @@ function kn(...o) {
 function me(...o) {
   return o.reduce((e, t) => e.filter((n) => t.includes(n)));
 }
-class st {
+class rt {
   /**
    *
    * @param policy
    * @param metaKeys
    */
   constructor(e = {}, t = {}) {
-    this.policy = st.normalizePolicy(e), this.fillDefault(t);
+    this.policy = rt.normalizePolicy(e), this.fillDefault(t);
   }
   /**
    *
@@ -320,7 +320,7 @@ class P {
    * @returns {AtomMeta}
    */
   addPolicy(e) {
-    const t = new st(e, Object.keys(this.meta));
+    const t = new rt(e, Object.keys(this.meta));
     return this.merge({
       policy: t.toJson()
     }), this;
@@ -707,18 +707,18 @@ class g {
     return e;
   }
 }
-function tt(o = null, e = 2048) {
+function nt(o = null, e = 2048) {
   if (o) {
     const t = new L("SHAKE256", "TEXT");
     return t.update(o), t.getHash("HEX", { outputLen: e * 4 });
   } else
-    return nt(e);
+    return st(e);
 }
 function pe(o, e = null) {
   const t = new L("SHAKE256", "TEXT");
   return t.update(o), t.getHash("HEX", { outputLen: 256 });
 }
-function at(o, e) {
+function ze(o, e) {
   const t = new L("SHAKE256", "TEXT");
   return t.update(o), t.getHash("HEX", { outputLen: e });
 }
@@ -726,7 +726,7 @@ function He({
   molecularHash: o = null,
   index: e = null
 }) {
-  return o !== null && e !== null ? pe(String(o) + String(e), "generateBatchId") : nt(64);
+  return o !== null && e !== null ? pe(String(o) + String(e), "generateBatchId") : st(64);
 }
 class fe {
   /**
@@ -795,7 +795,7 @@ class fe {
     };
   }
 }
-class ze extends x {
+class Je extends x {
   /**
    * Class constructor
    *
@@ -1001,23 +1001,23 @@ const Lt = (o, e, t, n = {}) => Ht(() => new Fe(e, o, t), n), Fn = /* @__PURE__ 
   64,
   /* @__PURE__ */ Ne(10)
 ), Qt = (o, e, t, n = {}) => Ht((s = {}) => new Fe(e, o, s.dkLen === void 0 ? t : s.dkLen, !0), n), Qn = /* @__PURE__ */ Qt(31, 168, 16, /* @__PURE__ */ Ne(11)), jt = /* @__PURE__ */ Qt(31, 136, 32, /* @__PURE__ */ Ne(12));
-function rt(o) {
+function it(o) {
   if (!Number.isSafeInteger(o) || o < 0 || o > 4294967295)
     throw new Error("wrong u32 integer:" + o);
   return o;
 }
 function Dt(o) {
-  return rt(o), (o & o - 1) === 0 && o !== 0;
+  return it(o), (o & o - 1) === 0 && o !== 0;
 }
 function Vt(o, e) {
-  rt(o);
+  it(o);
   let t = 0;
   for (let n = 0; n < e; n++, o >>>= 1)
     t = t << 1 | o & 1;
   return t;
 }
 function zt(o) {
-  return rt(o), 31 - Math.clz32(o);
+  return it(o), 31 - Math.clz32(o);
 }
 function ft(o) {
   const e = o.length;
@@ -1058,7 +1058,7 @@ const mt = (o, e) => {
 };
 /*! noble-post-quantum - MIT License (c) 2024 Paul Miller (paulmillr.com) */
 const yt = Rn;
-function Je(o, e) {
+function Ge(o, e) {
   if (o.length !== e.length)
     return !1;
   let t = 0;
@@ -1092,7 +1092,7 @@ function We(o, ...e) {
     }
   };
 }
-function Ge(o, e) {
+function Xe(o, e) {
   const t = e * o.bytesLen;
   return {
     bytesLen: t,
@@ -1267,7 +1267,7 @@ function be(o, e, t, n) {
   return r;
 }
 const ss = (o) => {
-  const { K: e, PRF: t, XOF: n, HASH512: s, ETA1: r, ETA2: i, du: a, dv: c } = o, u = ge(1), l = ge(c), h = ge(a), p = We("publicKey", Ge(ge(12), e), 32), d = Ge(ge(12), e), b = We("ciphertext", Ge(h, e), l), A = We("seed", 32, 32);
+  const { K: e, PRF: t, XOF: n, HASH512: s, ETA1: r, ETA2: i, du: a, dv: c } = o, u = ge(1), l = ge(c), h = ge(a), p = We("publicKey", Xe(ge(12), e), 32), d = Xe(ge(12), e), b = We("ciphertext", Xe(h, e), l), A = We("seed", 32, 32);
   return {
     secretCoder: d,
     lengths: {
@@ -1348,7 +1348,7 @@ function rs(o) {
     encapsulate: (l, h = yt(c)) => {
       D(l, i.publicKey, "publicKey"), D(h, c, "message");
       const p = l.subarray(0, 384 * o.K), d = r.encode(r.decode(jn(p)));
-      if (!Je(d, p))
+      if (!Ge(d, p))
         throw X(d), new Error("ML-KEM.encapsulate: wrong publicKey modulus");
       X(d);
       const b = n.create().update(h).update(t(l)).digest(), A = e.encrypt(l, h, b.subarray(32, 64));
@@ -1357,9 +1357,9 @@ function rs(o) {
     decapsulate: (l, h) => {
       D(h, a.bytesLen, "secretKey"), D(l, i.cipherText, "cipherText");
       const p = a.bytesLen - 96, d = p + 32, b = t(h.subarray(p / 2, d));
-      if (!Je(b, h.subarray(d, d + 32)))
+      if (!Ge(b, h.subarray(d, d + 32)))
         throw new Error("invalid secretKey: hash check failed");
-      const [A, O, f, m] = a.decode(h), w = e.decrypt(l, A), T = n.create().update(w).update(f).digest(), k = T.subarray(0, 32), $ = e.encrypt(O, w, T.subarray(32, 64)), v = Je(l, $), I = s.create({ dkLen: 32 }).update(m).update(l).digest();
+      const [A, O, f, m] = a.decode(h), w = e.decrypt(l, A), T = n.create().update(w).update(f).digest(), k = T.subarray(0, 32), $ = e.encrypt(O, w, T.subarray(32, 64)), v = Ge(l, $), I = s.create({ dkLen: 32 }).update(m).update(l).digest();
       return X(w, $, v ? I : k), v ? k : I;
     }
   };
@@ -1373,7 +1373,7 @@ const os = {
   KDF: jt,
   XOF: zn,
   PRF: is
-}, Xe = /* @__PURE__ */ rs({
+}, Ze = /* @__PURE__ */ rs({
   ...os,
   ...Yn[768]
 });
@@ -1423,7 +1423,7 @@ class S {
   }) {
     let i = null;
     if (!e && !t)
-      throw new ze();
+      throw new Je();
     return e && !t && (i = S.generatePosition(), t = pe(e, "Wallet::create")), new S({
       secret: e,
       bundle: t,
@@ -1468,10 +1468,10 @@ class S {
     position: n
   }) {
     if (!e)
-      throw new ze("Wallet::generateKey() - Secret is required!");
+      throw new Je("Wallet::generateKey() - Secret is required!");
     if (!n)
-      throw new ze("Wallet::generateKey() - Position is required!");
-    const s = Ve(e) ? e : at(e, 1024), r = Ve(n) ? n : at(n, 256), a = BigInt(`0x${s}`) + BigInt(`0x${r}`), c = new L("SHAKE256", "TEXT");
+      throw new Je("Wallet::generateKey() - Position is required!");
+    const s = Ve(e) ? e : ze(e, 1024), r = Ve(n) ? n : ze(n, 256), a = BigInt(`0x${s}`) + BigInt(`0x${r}`), c = new L("SHAKE256", "TEXT");
     c.update(a.toString(16)), t && c.update(t);
     const u = new L("SHAKE256", "TEXT");
     return u.update(c.getHash("HEX", { outputLen: 8192 })), u.getHash("HEX", { outputLen: 8192 });
@@ -1501,16 +1501,16 @@ class S {
    * @returns {string}
    */
   static generatePosition(e = 64) {
-    return nt(e, "abcdef0123456789");
+    return st(e, "abcdef0123456789");
   }
   /**
    * Initializes the ML-KEM key pair
    */
   initializeMLKEM() {
-    const e = tt(this.key, 128), t = new Uint8Array(64);
+    const e = nt(this.key, 128), t = new Uint8Array(64);
     for (let r = 0; r < 64; r++)
       t[r] = parseInt(e.substr(r * 2, 2), 16);
-    const { publicKey: n, secretKey: s } = Xe.keygen(t);
+    const { publicKey: n, secretKey: s } = Ze.keygen(t);
     this.pubkey = this.serializeKey(n), this.privkey = s;
   }
   serializeKey(e) {
@@ -1636,39 +1636,74 @@ class S {
     e.batchId && (this.batchId = t ? e.batchId : He({}));
   }
   async encryptMessage(e, t) {
-    const n = JSON.stringify(e), s = new TextEncoder().encode(n), r = this.deserializeKey(t), { cipherText: i, sharedSecret: a } = Xe.encapsulate(r), c = await this.encryptWithSharedSecret(s, a);
+    const n = JSON.stringify(e), s = new TextEncoder().encode(n), r = this.deserializeKey(t), { cipherText: i, sharedSecret: a } = Ze.encapsulate(r), c = await this.encryptWithSharedSecret(s, a);
     return {
       cipherText: this.serializeKey(i),
       encryptedMessage: this.serializeKey(c)
     };
   }
   async decryptMessage(e) {
+    const t = await this._mlkemDecryptToString(e);
+    return t === null ? null : JSON.parse(t);
+  }
+  /**
+   * ML-KEM768 decapsulate + AES-256-GCM decrypt → the RAW decrypted UTF-8 string
+   * (no JSON.parse). Shared by {@link decryptMessage} (which JSON.parses the result)
+   * and the PQ CipherHash transport ({@link decryptMyMessageML768}, which needs the raw
+   * response JSON text). PQ-transport Phase E (cycle 163).
+   */
+  async _mlkemDecryptToString(e) {
     const { cipherText: t, encryptedMessage: n } = e;
     let s;
     try {
-      s = Xe.decapsulate(this.deserializeKey(t), this.privkey);
-    } catch (c) {
-      return console.error("Wallet::decryptMessage() - Decapsulation failed", c), console.info("Wallet::decryptMessage() - my public key", this.pubkey), null;
+      s = Ze.decapsulate(this.deserializeKey(t), this.privkey);
+    } catch (a) {
+      return console.error("Wallet::decryptMessage() - Decapsulation failed", a), console.info("Wallet::decryptMessage() - my public key", this.pubkey), null;
     }
     let r;
     try {
       r = this.deserializeKey(n);
-    } catch (c) {
-      return console.warn("Wallet::decryptMessage() - Deserialization failed", c), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), null;
+    } catch (a) {
+      return console.warn("Wallet::decryptMessage() - Deserialization failed", a), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), null;
     }
     let i;
     try {
       i = await this.decryptWithSharedSecret(r, s);
-    } catch (c) {
-      return console.warn("Wallet::decryptMessage() - Decryption failed", c), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), console.info("Wallet::decryptMessage() - deserialized encrypted message", r), null;
+    } catch (a) {
+      return console.warn("Wallet::decryptMessage() - Decryption failed", a), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), console.info("Wallet::decryptMessage() - deserialized encrypted message", r), null;
     }
-    let a;
     try {
-      a = new TextDecoder().decode(i);
-    } catch (c) {
-      return console.warn("Wallet::decryptMessage() - Decoding failed", c), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), console.info("Wallet::decryptMessage() - deserialized encrypted message", r), console.info("Wallet::decryptMessage() - decrypted Uint8Array", i), null;
+      return new TextDecoder().decode(i);
+    } catch (a) {
+      return console.warn("Wallet::decryptMessage() - Decoding failed", a), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), console.info("Wallet::decryptMessage() - deserialized encrypted message", r), console.info("Wallet::decryptMessage() - decrypted Uint8Array", i), null;
     }
-    return JSON.parse(a);
+  }
+  /**
+   * Multi-recipient map key for a public key: `Base64_standard(SHAKE256(pubkey_utf8, 8 bytes))`
+   * — matches the validator's `hash_share` and the other SDKs' `hashShare`/`shortHash`.
+   * `shake256(pubkey, 64)` = 64 bits = 8 bytes, hex; hex-decode → standard base64. PQ Phase E.
+   */
+  hashShare(e) {
+    const t = ze(e, 64), n = Uint8Array.from(t.match(/.{2}/g).map((s) => parseInt(s, 16)));
+    return this.serializeKey(n);
+  }
+  /**
+   * Post-quantum (ML-KEM768) `CipherHash` request envelope: a stringified single-recipient
+   * map `{ "<hashShare(recipientPubkey)>": {cipherText, encryptedMessage} }` (object-valued,
+   * via {@link encryptMessage}). Matches the Rust validator's CipherHash handler. PQ Phase E.
+   */
+  async encryptStringML768(e, t) {
+    const n = await this.encryptMessage(e, t);
+    return JSON.stringify({ [this.hashShare(t)]: n });
+  }
+  /**
+   * Decrypt a `CipherHash` response map addressed to THIS wallet's ML-KEM pubkey
+   * (`hashShare(this.pubkey)`) → the RAW decrypted GraphQL response JSON text (NOT JSON.parsed;
+   * it replaces the HTTP response body for the normal parser). `null` if no entry / decrypt fails.
+   */
+  async decryptMyMessageML768(e) {
+    const t = e[this.hashShare(this.pubkey)];
+    return t ? this._mlkemDecryptToString(t) : null;
   }
   async encryptWithSharedSecret(e, t) {
     const n = crypto.getRandomValues(new Uint8Array(12)), s = { name: "AES-GCM", iv: n }, r = await crypto.subtle.importKey(
@@ -2067,7 +2102,7 @@ class Se {
     return this.__action.toLowerCase() === e.toLowerCase();
   }
 }
-class Ze {
+class Ye {
   /**
    *
    * @param key
@@ -2116,7 +2151,7 @@ class Ae {
     callback: t = []
   }) {
     for (const n of e)
-      if (!(n instanceof Ze))
+      if (!(n instanceof Ye))
         throw new Pe();
     for (const n of t)
       if (!(n instanceof Se))
@@ -2128,7 +2163,7 @@ class Ae {
    * @param {Condition[]|{}} condition
    */
   set comparison(e) {
-    this.__condition.push(e instanceof Ze ? e : Ze.toObject(e));
+    this.__condition.push(e instanceof Ye ? e : Ye.toObject(e));
   }
   /**
    * @param {Callback[]|{}} callback
@@ -3687,14 +3722,14 @@ class xe {
     };
   }
 }
-const Ye = 10 ** 18;
+const et = 10 ** 18;
 class ce {
   /**
    * @param {number} value
    * @return {number}
    */
   static val(e) {
-    return Math.abs(e * Ye) < 1 ? 0 : e;
+    return Math.abs(e * et) < 1 ? 0 : e;
   }
   /**
    * @param {number} value1
@@ -3703,7 +3738,7 @@ class ce {
    * @return {number}
    */
   static cmp(e, t, n = !1) {
-    const s = ce.val(e) * Ye, r = ce.val(t) * Ye;
+    const s = ce.val(e) * et, r = ce.val(t) * et;
     return Math.abs(s - r) < 1 ? 0 : s > r ? 1 : -1;
   }
   /**
@@ -3739,7 +3774,7 @@ class Ke extends x {
     super(e, t, n), this.name = "UnauthenticatedException";
   }
 }
-class C {
+let C = class {
   /**
    * Class constructor
    *
@@ -3921,7 +3956,7 @@ class C {
     else
       return this;
   }
-}
+};
 class N {
   /**
    * @param {UrqlClientWrapper} graphQLClient
@@ -6139,7 +6174,7 @@ class Tt extends N {
     });
   }
 }
-class it extends C {
+class ot extends C {
   /**
    * Class constructor
    *
@@ -6208,7 +6243,7 @@ class it extends C {
     }, n = e.pop();
     return n.instances && (t.instances = n.instances.map((s) => {
       let r = s.metas;
-      return (!r || r.length === 0) && (r = it.extractMetasFromMolecule(
+      return (!r || r.length === 0) && (r = ot.extractMetasFromMolecule(
         s.molecule,
         s.metaType,
         s.metaId
@@ -6347,7 +6382,7 @@ class Ct extends N {
    * @return {ResponseMetaTypeViaMolecule}
    */
   createResponse(e) {
-    return new it({
+    return new ot({
       query: this,
       json: e
     });
@@ -6616,7 +6651,7 @@ var B = new Uint32Array([597399067, 2869860233, 951274213, 2716044179]);
 function j(o, e) {
   return o << e | o >>> 32 - e;
 }
-function ot(o, e) {
+function at(o, e) {
   var t;
   if (e === void 0 && (e = 0), e = e ? 0 | e : 0, typeof o == "string" && (t = o, o = new TextEncoder().encode(t).buffer), !(o instanceof ArrayBuffer)) throw new TypeError("Expected key to be ArrayBuffer or string");
   var n = new Uint32Array([e, e, e, e]);
@@ -6733,7 +6768,7 @@ function fr(o) {
         case 0:
           return n.trys.push([0, 2, , 3]), [4, Xt()];
         case 1:
-          return e = n.sent(), t = ot(JSON.stringify(e)), Math.random() < 1e-3 && q.logging && (function(s, r) {
+          return e = n.sent(), t = at(JSON.stringify(e)), Math.random() < 1e-3 && q.logging && (function(s, r) {
             Z(this, void 0, void 0, (function() {
               var i, a;
               return Y(this, (function(c) {
@@ -6822,10 +6857,10 @@ Me().name != "Firefox" && J("canvas", (function() {
         return i;
       })();
     }));
-    o({ commonImageDataHash: ot(Yt(e, Ot, Rt).data.toString()).toString() });
+    o({ commonImageDataHash: at(Yt(e, Ot, Rt).data.toString()).toString() });
   }));
 }));
-var et, br = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], wr = ["monospace", "sans-serif", "serif"];
+var tt, br = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], wr = ["monospace", "sans-serif", "serif"];
 function qt(o, e) {
   if (!o) throw new Error("Canvas context not supported");
   return o.font, o.font = "72px ".concat(e), o.measureText("WwMmLli0Oo").width;
@@ -6944,14 +6979,14 @@ Me().name != "Firefox" && J("fonts", (function() {
   return Z(this, void 0, void 0, (function() {
     var o;
     return Y(this, (function(e) {
-      return et = (q == null ? void 0 : q.permissions_to_check) || ["accelerometer", "accessibility", "accessibility-events", "ambient-light-sensor", "background-fetch", "background-sync", "bluetooth", "camera", "clipboard-read", "clipboard-write", "device-info", "display-capture", "gyroscope", "geolocation", "local-fonts", "magnetometer", "microphone", "midi", "nfc", "notifications", "payment-handler", "persistent-storage", "push", "speaker", "storage-access", "top-level-storage-access", "window-management", "query"], o = Array.from({ length: (q == null ? void 0 : q.retries) || 3 }, (function() {
+      return tt = (q == null ? void 0 : q.permissions_to_check) || ["accelerometer", "accessibility", "accessibility-events", "ambient-light-sensor", "background-fetch", "background-sync", "bluetooth", "camera", "clipboard-read", "clipboard-write", "device-info", "display-capture", "gyroscope", "geolocation", "local-fonts", "magnetometer", "microphone", "midi", "nfc", "notifications", "payment-handler", "persistent-storage", "push", "speaker", "storage-access", "top-level-storage-access", "window-management", "query"], o = Array.from({ length: (q == null ? void 0 : q.retries) || 3 }, (function() {
         return (function() {
           return Z(this, void 0, void 0, (function() {
             var t, n, s, r, i;
             return Y(this, (function(a) {
               switch (a.label) {
                 case 0:
-                  t = {}, n = 0, s = et, a.label = 1;
+                  t = {}, n = 0, s = tt, a.label = 1;
                 case 1:
                   if (!(n < s.length)) return [3, 6];
                   r = s[n], a.label = 2;
@@ -6970,7 +7005,7 @@ Me().name != "Firefox" && J("fonts", (function() {
           }));
         })();
       })), [2, Promise.all(o).then((function(t) {
-        return Sr(t, et);
+        return Sr(t, tt);
       }))];
     }));
   }));
@@ -7039,7 +7074,7 @@ J("webgl", (function() {
               y && (y.bindBuffer(y.ARRAY_BUFFER, null), y.useProgram(null), y.viewport(0, 0, y.drawingBufferWidth, y.drawingBufferHeight), y.clearColor(0, 0, 0, 0));
             }
           })();
-        })), [2, { commonImageHash: ot(Yt(o, K.width, K.height).data.toString()).toString() }];
+        })), [2, { commonImageHash: at(Yt(o, K.width, K.height).data.toString()).toString() }];
       } catch {
         return [2, { webgl: "unsupported" }];
       }
@@ -7059,7 +7094,12 @@ J("math", (function() {
     }));
   }));
 }));
-class xr {
+const xr = "query ( $Hash: String! ) { CipherHash ( Hash: $Hash ) { hash } }";
+function Ir(o) {
+  const e = (o || "").match(/\b(query|mutation|subscription)\b/i), t = e ? e[1].toLowerCase() : "query", n = (o || "").indexOf("{"), s = n >= 0 ? o.slice(n + 1).match(/[A-Za-z_][A-Za-z0-9_]*/) : null;
+  return { type: t, name: s ? s[0] : "" };
+}
+class Mr {
   constructor({ serverUri: e, socket: t = null, encrypt: n = !1 }) {
     this.$__client = this.createUrqlClient({ serverUri: e, socket: t, encrypt: n }), this.$__authToken = "", this.$__pubkey = null, this.$__wallet = null, this.serverUri = e, this.soketi = t, this.cipherLink = !!n, this.$__subscriptionManager = /* @__PURE__ */ new Map();
   }
@@ -7081,6 +7121,10 @@ class xr {
     return an({
       url: e,
       exchanges: s,
+      // PQ-transport Phase E: when encryption is on, route fetch through the CipherHash
+      // wrapper (encrypt the request body to the validator's ML-KEM pubkey, decrypt the
+      // response). Undefined → urql uses the global fetch (plaintext).
+      ...n ? { fetch: (r, i) => this.cipherFetch(r, i) } : {},
       fetchOptions: () => ({
         headers: {
           "X-Auth-Token": this.$__authToken
@@ -7089,6 +7133,50 @@ class xr {
         signal: AbortSignal.timeout(6e4)
       })
     });
+  }
+  /**
+   * Whether an outgoing GraphQL request body should be wrapped in CipherHash. Bypass (plaintext):
+   * introspection `__schema`, `ContinuId`, the `AccessToken` mutation, and the U-isotope
+   * `ProposeMolecule` (auth bootstrap — the key exchange itself can't be encrypted). Mirrors the
+   * Kotlin/validator bypass set.
+   */
+  shouldEncrypt(e) {
+    let t;
+    try {
+      t = JSON.parse(e);
+    } catch {
+      return !1;
+    }
+    const { type: n, name: s } = Ir(t.query);
+    return !(n === "query" && (s === "__schema" || s === "ContinuId") || n === "mutation" && s === "AccessToken" || n === "mutation" && s === "ProposeMolecule" && (t.variables && t.variables.molecule && t.variables.molecule.atoms && t.variables.molecule.atoms[0] && t.variables.molecule.atoms[0].isotope) === "U");
+  }
+  /**
+   * Custom `fetch` that wraps a GraphQL request in the ML-KEM CipherHash envelope and decrypts the
+   * response (PQ-transport Phase E). Operates on the raw POST body (mirrors Kotlin's
+   * encryptBody/decryptBody). Reads the CURRENT client wallet + validator pubkey from auth.
+   */
+  async cipherFetch(e, t) {
+    const n = this.getWallet(), s = this.getPubKey();
+    let r = !1, i = t;
+    if (n && s && t && typeof t.body == "string" && this.shouldEncrypt(t.body)) {
+      const d = await n.encryptStringML768(t.body, s);
+      i = { ...t, body: JSON.stringify({ query: xr, variables: { Hash: d } }) }, r = !0;
+    }
+    const a = await fetch(e, i);
+    if (!r)
+      return a;
+    const c = await a.text(), u = { status: a.status, statusText: a.statusText, headers: a.headers };
+    let l;
+    try {
+      l = JSON.parse(c);
+    } catch {
+      return new Response(c, u);
+    }
+    const h = l && l.data && l.data.CipherHash && l.data.CipherHash.hash;
+    if (typeof h != "string")
+      return new Response(c, u);
+    const p = await n.decryptMyMessageML768(JSON.parse(h));
+    return new Response(p ?? c, u);
   }
   setAuthData({ token: e, pubkey: t, wallet: n }) {
     this.$__authToken = e, this.$__pubkey = t, this.$__wallet = n, this.$__client = this.createUrqlClient({
@@ -7209,7 +7297,7 @@ class xr {
     });
   }
 }
-class Rr {
+class Ur {
   /**
    * Class constructor
    *
@@ -7263,7 +7351,7 @@ class Rr {
       const u = this.$__uris[c];
       this.$__authTokenObjects[u] = null;
     }
-    this.log("info", `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${r}...`), this.$__client = s || new xr({
+    this.log("info", `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${r}...`), this.$__client = s || new Mr({
       socket: {
         socketUri: null,
         appKey: "knishio",
@@ -8808,7 +8896,7 @@ class Rr {
   }) {
     this.setCellSlug(e);
     const n = new S({
-      secret: tt(await this.getFingerprint()),
+      secret: nt(await this.getFingerprint()),
       token: "AUTH"
     }), s = await this.createQuery(Fs), r = {
       cellSlug: e,
@@ -8848,20 +8936,20 @@ class Rr {
     }), r = await this.createMoleculeMutation({
       mutationClass: _s,
       molecule: s
-    });
-    r.fillMolecule({ meta: { encrypt: t ? "true" : "false" } });
-    const i = await r.execute({});
-    if (i.success()) {
-      const a = xe.create({
-        token: i.token(),
-        expiresAt: i.expiresAt(),
-        pubkey: i.pubKey(),
-        encrypt: i.encrypt()
+    }), i = { encrypt: t ? "true" : "false" };
+    n.pubkey && (i.walletPubkey = n.pubkey), r.fillMolecule({ meta: i });
+    const a = await r.execute({});
+    if (a.success()) {
+      const c = xe.create({
+        token: a.token(),
+        expiresAt: a.expiresAt(),
+        pubkey: a.pubKey(),
+        encrypt: a.encrypt()
       }, n);
-      this.setAuthToken(a);
+      this.setAuthToken(c);
     } else
-      throw new It(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${i.reason()}`);
-    return i;
+      throw new It(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${a.reason()}`);
+    return a;
   }
   /**
    * Request an auth token (guest or profile)
@@ -8880,7 +8968,7 @@ class Rr {
   }) {
     if (this.$__serverSdkVersion < 3)
       return this.log("warn", "KnishIOClient::authorize() - Server SDK version does not require an authorization..."), null;
-    e === null && t && (e = tt(t)), n && this.setCellSlug(n), this.$__authInProcess = !0;
+    e === null && t && (e = nt(t)), n && this.setCellSlug(n), this.$__authInProcess = !0;
     let r;
     return e ? r = await this.requestProfileAuthToken({
       secret: e,
@@ -8932,7 +9020,7 @@ class Rr {
       }
   }
 }
-class qr extends C {
+class Br extends C {
   /**
    * Class constructor
    *
@@ -9015,7 +9103,7 @@ export {
   ce as Decimal,
   M as Dot,
   te as InvalidResponseException,
-  Rr as KnishIOClient,
+  Ur as KnishIOClient,
   de as Meta,
   H as MetaMissingException,
   as as MolecularHashMismatchException,
@@ -9041,7 +9129,7 @@ export {
   ar as MutationWithdrawBufferToken,
   $t as NegativeAmountException,
   wt as PolicyInvalidException,
-  st as PolicyMeta,
+  rt as PolicyMeta,
   N as Query,
   Xs as QueryActiveSession,
   Mt as QueryAtom,
@@ -9061,7 +9149,7 @@ export {
   zs as ResponseActiveSession,
   Ws as ResponseAppendRequest,
   Ys as ResponseAtom,
-  qr as ResponseAuthorizationGuest,
+  Br as ResponseAuthorizationGuest,
   ys as ResponseBalance,
   Ts as ResponseClaimShadowWallet,
   hs as ResponseContinuId,
@@ -9074,7 +9162,7 @@ export {
   Bs as ResponseLinkIdentifier,
   bs as ResponseMetaType,
   nr as ResponseMetaTypeViaAtom,
-  it as ResponseMetaTypeViaMolecule,
+  ot as ResponseMetaTypeViaMolecule,
   Rs as ResponsePeering,
   er as ResponsePolicy,
   V as ResponseProposeMolecule,
@@ -9109,13 +9197,13 @@ export {
   kn as diff,
   He as generateBatchId,
   pe as generateBundleHash,
-  tt as generateSecret,
+  nt as generateSecret,
   fn as hexStringToBuffer,
   mn as hexToBase64,
   me as intersect,
   Ve as isHex,
   gn as isNumeric,
-  nt as randomString,
-  at as shake256
+  st as randomString,
+  ze as shake256
 };
 //# sourceMappingURL=client.es.mjs.map
