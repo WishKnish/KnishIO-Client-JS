@@ -71,6 +71,37 @@ describe('Patent Vector Validation', () => {
   })
 
   // -----------------------------------------------------------------
+  // 0a-withdraw. buffer_withdraw_conservation (cross-SDK lock, cycle 149)
+  //     initWithdrawBuffer debits the FULL source balance so a partial
+  //     withdraw still conserves (sum B+V = 0). The withdraw analog of the
+  //     deposit lock above; emits TWO B atoms (source, remainder) + ONE V
+  //     atom (recipient). JS was already correct — this regression-locks it.
+  // -----------------------------------------------------------------
+  describe('buffer_withdraw_conservation', () => {
+    const BUF_SECRET = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
+    const bufferTests = vectors.vectors.buffer_withdraw_conservation.tests
+
+    test.each(bufferTests)('$name: full-balance debit conserves (sum B+V = 0)', (vector) => {
+      const sourceWallet = Wallet.create({ secret: BUF_SECRET, token: 'BUFTOK' })
+      sourceWallet.balance = vector.sourceBalance
+      const mol = new Molecule({ secret: BUF_SECRET, bundle: sourceWallet.bundle, sourceWallet, cellSlug: 'buftest' })
+      // Withdraw `amount` to the caller's own bundle (single recipient), mirroring the client wrapper.
+      mol.initWithdrawBuffer({ recipients: { [sourceWallet.bundle]: vector.amount } })
+
+      const vb = mol.atoms.filter(a => a.isotope === 'V' || a.isotope === 'B')
+      const sum = vb.reduce((s, a) => s + BigInt(a.value), 0n)
+      expect(sum.toString()).toBe(vector.expectedSum)
+
+      // Emit order: source B (full-balance debit), recipient V (+amount), remainder B (+change).
+      const bAtoms = mol.atoms.filter(a => a.isotope === 'B')
+      const vAtom = mol.atoms.find(a => a.isotope === 'V')
+      expect(bAtoms[0].value).toBe(vector.expectedSourceValue)
+      expect(vAtom.value).toBe(vector.expectedRecipientValue)
+      expect(bAtoms[1].value).toBe(vector.expectedRemainderValue)
+    })
+  })
+
+  // -----------------------------------------------------------------
   // 0b. Atom value formatting cross-SDK parity (Batch AQ) — JS is the reference
   //     anchor (String(n) drops a whole number's ".0"); the validator parses
   //     V/B/F values as i128, so the value must be an integer string.

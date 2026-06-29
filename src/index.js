@@ -91,7 +91,6 @@ import QueryMetaTypeViaAtom from './query/QueryMetaTypeViaAtom.js'
 import QueryMetaTypeViaMolecule from './query/QueryMetaTypeViaMolecule.js'
 import QueryPolicy from './query/QueryPolicy.js'
 import QueryToken from './query/QueryToken.js'
-import QueryUserActivity from './query/QueryUserActivity.js'
 import QueryWalletBundle from './query/QueryWalletBundle.js'
 import QueryWalletList from './query/QueryWalletList.js'
 
@@ -142,7 +141,6 @@ import ResponsePeering from './response/ResponsePeering.js'
 import ResponsePolicy from './response/ResponsePolicy.js'
 import ResponseProposeMolecule from './response/ResponseProposeMolecule.js'
 import ResponseQueryActiveSession from './response/ResponseQueryActiveSession.js'
-import ResponseQueryUserActivity from './response/ResponseQueryUserActivity.js'
 import ResponseRequestAuthorization from './response/ResponseRequestAuthorization.js'
 import ResponseRequestAuthorizationGuest from './response/ResponseRequestAuthorizationGuest.js'
 import ResponseRequestTokens from './response/ResponseRequestTokens.js'
@@ -253,7 +251,6 @@ export {
   QueryMetaTypeViaMolecule,
   QueryPolicy,
   QueryToken,
-  QueryUserActivity,
   QueryWalletBundle,
   QueryWalletList,
 
@@ -298,7 +295,6 @@ export {
   ResponsePolicy,
   ResponseProposeMolecule,
   ResponseQueryActiveSession,
-  ResponseQueryUserActivity,
   ResponseRequestAuthorization,
   ResponseRequestAuthorizationGuest,
   ResponseRequestTokens,

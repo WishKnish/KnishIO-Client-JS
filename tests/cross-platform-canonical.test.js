@@ -77,3 +77,23 @@ describe('Canonical Cross-Platform Wallet Address Vectors', () => {
     expect(wallet.address).toBe(vector.expectedAddress)
   })
 })
+
+describe('Canonical Cross-Platform ML-KEM768 Vectors', () => {
+  const mlkem = vectors.vectors.mlkem768
+
+  // Keygen-from-seed is deterministic (FIPS-203) → byte-frozen pubkey, like a SHAKE vector.
+  test('ML-KEM768 keygen: deterministic pubkey matches canonical', () => {
+    const { secret, token, position, expectedPubkey } = mlkem.keygen
+    const wallet = new Wallet({ secret, token, position })
+    expect(wallet.pubkey).toBe(expectedPubkey)
+  })
+
+  // Encapsulation is non-deterministic, but decapsulation + AES-256-GCM decrypt is deterministic →
+  // one frozen {cipherText, encryptedMessage} sample must decrypt to the canonical plaintext in every SDK.
+  test('ML-KEM768 decrypt: frozen sample decrypts to canonical plaintext', async () => {
+    const { secret, token, position, cipherText, encryptedMessage, expectedPlaintext } = mlkem.decrypt
+    const wallet = new Wallet({ secret, token, position })
+    const plaintext = await wallet.decryptMessage({ cipherText, encryptedMessage })
+    expect(plaintext).toBe(expectedPlaintext)
+  })
+})

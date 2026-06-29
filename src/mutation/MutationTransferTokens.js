@@ -71,6 +71,24 @@ export default class MutationTransferTokens extends MutationProposeMolecule {
   }
 
   /**
+   * Fills the Molecule for a MULTI-recipient transfer (WP line 544)
+   *
+   * @param {Wallet[]} recipientWallets
+   * @param {number[]} amounts - parallel to recipientWallets
+   */
+  fillMoleculeMulti ({
+    recipientWallets,
+    amounts
+  }) {
+    this.$__molecule.initValues({
+      recipientWallets,
+      amounts
+    })
+    this.$__molecule.sign({})
+    this.$__molecule.check(this.$__molecule.sourceWallet)
+  }
+
+  /**
    * Builds a Response object out of a JSON string
    *
    * @param {object} json

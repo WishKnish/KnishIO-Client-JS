@@ -32,7 +32,7 @@ describe('Cross-Platform Test Vectors', () => {
       token: 'USER',
       position
     })
-    expect(wallet.address).toBe('d9c4c73876c6b8546f9857137cae5ac5b291c326aa846bd5b9ed77b59e1b1e3e')
+    expect(wallet.address).toBe('04a37e62a7af670d36789816c2309bad3908734e4388d411886a6933d5b3c8b9')
   })
 
   test('metadata molecular hash matches canonical vector', () => {

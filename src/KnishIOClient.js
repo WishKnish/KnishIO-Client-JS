@@ -88,7 +88,6 @@ import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe.js'
 import ActiveSessionSubscribe from './subscribe/ActiveSessionSubscribe.js'
 import MutationActiveSession from './mutation/MutationActiveSession.js'
 import QueryActiveSession from './query/QueryActiveSession.js'
-import QueryUserActivity from './query/QueryUserActivity.js'
 import QueryToken from './query/QueryToken.js'
 import BatchIdException from './exception/BatchIdException.js'
 import AuthorizationRejectedException from './exception/AuthorizationRejectedException.js'
@@ -1217,50 +1216,6 @@ export default class KnishIOClient {
   }
 
   /**
-   * Queries user activity based on the provided parameters.
-   *
-   * @param {string} bundleHash - The bundle hash.
-   * @param {string} metaType - The meta type.
-   * @param {string} metaId - The meta ID.
-   * @param {string} ipAddress - The IP address.
-   * @param {string} browser - The browser.
-   * @param {string} osCpu - The operating system and CPU.
-   * @param {string} resolution - The screen resolution.
-   * @param {string} timeZone - The time zone.
-   * @param {string} countBy - The count by parameter.
-   * @param {string} interval - The interval parameter.
-   *
-   * @returns {Promise<ResponseQueryUserActivity>} The result of the query.
-   */
-  async queryUserActivity ({
-    bundleHash,
-    metaType,
-    metaId,
-    ipAddress,
-    browser,
-    osCpu,
-    resolution,
-    timeZone,
-    countBy,
-    interval
-  }) {
-    const query = this.createQuery(QueryUserActivity)
-
-    return await this.executeQuery(query, {
-      bundleHash,
-      metaType,
-      metaId,
-      ipAddress,
-      browser,
-      osCpu,
-      resolution,
-      timeZone,
-      countBy,
-      interval
-    })
-  }
-
-  /**
    * Builds and executes a molecule to declare an active session for the given MetaType
    *
    * @param {Object} options - The options for activating a session.
@@ -1967,6 +1922,109 @@ export default class KnishIOClient {
   }
 
   /**
+   * Transfers tokens from one source wallet to MULTIPLE recipients in a single molecule.
+   *
+   * One molecule funds N recipients (WP line 544: "utilizing the sender's Wallet to fund multiple
+   * recipients with one transaction"). Each recipient receives its own amount and, for stackable
+   * tokens, its own subset of token units. The source is fully drained and the unsent change
+   * returns via the remainder atom (UTXO), so the V-atoms conserve. Single-recipient transfers
+   * should keep using transferToken(); this is its N-recipient generalization.
+   *
+   * @param {Object} options - The transfer options.
+   * @param {string} options.token - The token to transfer.
+   * @param {Array} options.recipients - [{ bundleHash, amount?, units?, batchId? }] per recipient.
+   * @param {Object} [options.sourceWallet=null] - The source wallet; queried if not provided.
+   *
+   * @returns {Promise} - A Promise that resolves to the transaction result.
+   *
+   * @throws {StackableUnitAmountException} - If a recipient provides both amount and units.
+   * @throws {TransferBalanceException} - If the source wallet does not have enough balance.
+   */
+  async transferTokens ({
+    token,
+    recipients,
+    sourceWallet = null
+  }) {
+    // Per-recipient amount: units.length for stackable, else the explicit amount
+    const amounts = recipients.map(recipient => {
+      const units = recipient.units || []
+      if (units.length > 0) {
+        // Can't move stackable units AND provide amount
+        if (recipient.amount > 0) {
+          throw new StackableUnitAmountException()
+        }
+        return units.length
+      }
+      return recipient.amount || 0
+    })
+    const total = amounts.reduce((sum, value) => sum + value, 0)
+
+    // Get a source wallet (loads its token units)
+    if (sourceWallet === null) {
+      sourceWallet = await this.querySourceWallet({
+        token,
+        amount: total
+      })
+    }
+
+    // Do you have enough tokens?
+    if (sourceWallet === null || Decimal.cmp(sourceWallet.balance, total) < 0) {
+      throw new TransferBalanceException()
+    }
+
+    // Build a shadow recipient wallet per recipient, each with its own batch ID
+    const recipientWallets = recipients.map(recipient => {
+      const recipientWallet = Wallet.create({
+        bundle: recipient.bundleHash,
+        token
+      })
+
+      // Compute the batch ID for the recipient (typically used by stackable tokens)
+      if (recipient.batchId !== undefined && recipient.batchId !== null) {
+        recipientWallet.batchId = recipient.batchId
+      } else {
+        recipientWallet.initBatchId({
+          sourceWallet
+        })
+      }
+
+      return recipientWallet
+    })
+
+    // Create a remainder from the source wallet
+    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
+
+    // --- Token units splitting (N-way): source keeps the union, each recipient its subset,
+    //     remainder the kept units
+    sourceWallet.splitUnitsMulti(
+      recipients.map(recipient => recipient.units || []),
+      recipientWallets,
+      remainderWallet
+    )
+    // ---
+
+    // Build the molecule itself
+    const molecule = await this.createMolecule({
+      sourceWallet,
+      remainderWallet
+    })
+    /**
+     * @type {MutationTransferTokens}
+     */
+    const query = await this.createMoleculeMutation({
+      mutationClass: MutationTransferTokens,
+      molecule
+    })
+
+    query.fillMoleculeMulti({
+      recipientWallets,
+      amounts
+    })
+
+    return await this.executeQuery(query)
+  }
+
+  /**
    * Deposits buffer token into the source wallet.
    *
    * @param {Object} options - The options for depositing buffer token.
@@ -2343,7 +2401,15 @@ export default class KnishIOClient {
       molecule
     })
 
-    query.fillMolecule({ meta: { encrypt: (encrypt ? 'true' : 'false') } })
+    // PQ-transport Phase E (cycle 163): convey the AUTH source wallet's ML-KEM768 public key as a
+    // SIGNED `walletPubkey` meta on the U-atom (fillMolecule → initAuthorization → sign), so the
+    // validator can encrypt CipherHash responses back to THIS wallet (the one that decrypts them).
+    // Signed → tamper-proof. Only when present (PQ-capable wallet).
+    const authMeta = { encrypt: (encrypt ? 'true' : 'false') }
+    if (wallet.pubkey) {
+      authMeta.walletPubkey = wallet.pubkey
+    }
+    query.fillMolecule({ meta: authMeta })
     /**
      * @type {ResponseRequestAuthorization}
      */

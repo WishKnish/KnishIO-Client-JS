@@ -577,6 +577,11 @@ export default class Molecule {
     recipientWallet,
     amount
   }) {
+    // Canonical token transfer (incl. stackable): a UTXO-style FULL-balance debit + remainder.
+    // The source wallet is fully drained (-balance) and the change returns via the remainder atom,
+    // so the 3 V-atoms conserve (sum == 0) and the validator's stackable full-drain guard accepts.
+    // Per-unit (stackable) movement is layered by calling Wallet.splitUnits(units, remainder,
+    // recipient) BEFORE this — there is no separate partial-debit transfer mode.
     if (this.sourceWallet.balance - amount < 0) {
       throw new BalanceInsufficientException()
     }
@@ -608,54 +613,55 @@ export default class Molecule {
   }
 
   /**
-   * Creates a stackable V-isotope transfer with 3 atoms:
-   * source debit, recipient credit, remainder.
-   * Propagates batchId from source wallet.
+   * Multi-recipient value transfer (WP line 544: one molecule funds N recipients).
    *
-   * @param {Wallet} recipientWallet - wallet receiving the tokens
-   * @param {number} amount - amount to transfer
+   * Builds 1 source atom (full-balance debit, carrying the SENT union of all units) + one atom
+   * per recipient (its amount + its own units, walletBundle-bonded) + 1 remainder atom (the KEPT
+   * change). Conservation: -balance + Σ amounts + (balance - Σ amounts) == 0.
+   *
+   * Per-unit (stackable) routing is layered by calling Wallet.splitUnitsMulti(...) BEFORE this —
+   * it sets the source's tokenUnits to the union, each recipient's to its subset, and the
+   * remainder's to the kept units. The single-recipient initValue() is the N=1 special case.
+   *
+   * @param {Wallet[]} recipientWallets
+   * @param {number[]} amounts - parallel to recipientWallets
    * @return {Molecule}
    */
-  addStackableTransfer ({
-    recipientWallet,
-    amount
+  initValues ({
+    recipientWallets,
+    amounts
   }) {
-    if (amount <= 0) {
-      throw new NegativeAmountException('Molecule::addStackableTransfer() - Amount must be positive!')
-    }
+    const total = amounts.reduce((sum, value) => sum + Number(value), 0)
 
-    if (this.sourceWallet.balance - amount < 0) {
+    if (this.sourceWallet.balance - total < 0) {
       throw new BalanceInsufficientException()
     }
 
-    const batchId = this.sourceWallet.batchId || generateBatchId({})
-
-    // Source debit atom
+    // Source atom: debit the full balance (UTXO); carries the SENT union of all units
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.sourceWallet,
-      value: -amount,
-      batchId
+      value: -this.sourceWallet.balance
     }))
 
-    // Recipient credit atom
-    this.addAtom(Atom.create({
-      isotope: 'V',
-      wallet: recipientWallet,
-      value: amount,
-      metaType: 'walletBundle',
-      metaId: recipientWallet.bundle,
-      batchId: generateBatchId({})
-    }))
+    // One atom per recipient: its amount + its own units, bonded to the recipient bundle
+    recipientWallets.forEach((recipientWallet, index) => {
+      this.addAtom(Atom.create({
+        isotope: 'V',
+        wallet: recipientWallet,
+        value: amounts[index],
+        metaType: 'walletBundle',
+        metaId: recipientWallet.bundle
+      }))
+    })
 
-    // Remainder atom
+    // Remainder atom: the change back to the sender; carries the KEPT units
     this.addAtom(Atom.create({
       isotope: 'V',
       wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - amount,
+      value: this.sourceWallet.balance - total,
       metaType: 'walletBundle',
-      metaId: this.remainderWallet.bundle,
-      batchId
+      metaId: this.remainderWallet.bundle
     }))
 
     return this
