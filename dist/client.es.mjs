@@ -1,7 +1,7 @@
 var tn = Object.defineProperty;
 var nn = (o, e, t) => e in o ? tn(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
 var Q = (o, e, t) => nn(o, typeof e != "symbol" ? e + "" : e, t);
-import L from "jssha";
+import F from "jssha";
 import { gql as E, cacheExchange as sn, fetchExchange as rn, subscriptionExchange as on, createClient as an } from "@urql/core";
 import { createClient as ln } from "graphql-ws";
 import { pipe as cn, map as un, subscribe as hn } from "wonka";
@@ -643,7 +643,7 @@ class g {
     atoms: e,
     output: t = "base17"
   }) {
-    const n = new L("SHAKE256", "TEXT"), s = g.sortAtoms(e);
+    const n = new F("SHAKE256", "TEXT"), s = g.sortAtoms(e);
     if (s.length === 0)
       throw new ae();
     if (s.map((r) => {
@@ -709,17 +709,17 @@ class g {
 }
 function nt(o = null, e = 2048) {
   if (o) {
-    const t = new L("SHAKE256", "TEXT");
+    const t = new F("SHAKE256", "TEXT");
     return t.update(o), t.getHash("HEX", { outputLen: e * 4 });
   } else
     return st(e);
 }
 function pe(o, e = null) {
-  const t = new L("SHAKE256", "TEXT");
+  const t = new F("SHAKE256", "TEXT");
   return t.update(o), t.getHash("HEX", { outputLen: 256 });
 }
 function ze(o, e) {
-  const t = new L("SHAKE256", "TEXT");
+  const t = new F("SHAKE256", "TEXT");
   return t.update(o), t.getHash("HEX", { outputLen: e });
 }
 function He({
@@ -888,7 +888,7 @@ for (let o = 0, e = ye, t = 1, n = 0; o < 24; o++) {
     e = (e << ye ^ (e >> Un) * Hn) % Bn, e & Wn && (s ^= ye << (ye << BigInt(r)) - ye);
   Nt.push(s);
 }
-const Ft = $n(Nt, !0), Pn = Ft[0], Kn = Ft[1], dt = (o, e, t) => t > 32 ? xn(o, e, t) : An(o, e, t), pt = (o, e, t) => t > 32 ? In(o, e, t) : vn(o, e, t);
+const Lt = $n(Nt, !0), Pn = Lt[0], Kn = Lt[1], dt = (o, e, t) => t > 32 ? xn(o, e, t) : An(o, e, t), pt = (o, e, t) => t > 32 ? In(o, e, t) : vn(o, e, t);
 function Nn(o, e = 24) {
   const t = new Uint32Array(10);
   for (let n = 24 - e; n < 24; n++) {
@@ -914,7 +914,7 @@ function Nn(o, e = 24) {
   }
   Bt(t);
 }
-class Fe {
+class Le {
   // NOTE: we accept arguments in bytes instead of bits here.
   constructor(e, t, n, s = !1, r = 24) {
     Q(this, "state");
@@ -987,20 +987,20 @@ class Fe {
   }
   _cloneInto(e) {
     const { blockLen: t, suffix: n, outputLen: s, rounds: r, enableXOF: i } = this;
-    return e || (e = new Fe(t, n, s, i, r)), e.state32.set(this.state32), e.pos = this.pos, e.posOut = this.posOut, e.finished = this.finished, e.rounds = r, e.suffix = n, e.outputLen = s, e.enableXOF = i, e.destroyed = this.destroyed, e;
+    return e || (e = new Le(t, n, s, i, r)), e.state32.set(this.state32), e.pos = this.pos, e.posOut = this.posOut, e.finished = this.finished, e.rounds = r, e.suffix = n, e.outputLen = s, e.enableXOF = i, e.destroyed = this.destroyed, e;
   }
 }
-const Lt = (o, e, t, n = {}) => Ht(() => new Fe(e, o, t), n), Fn = /* @__PURE__ */ Lt(
+const Ft = (o, e, t, n = {}) => Ht(() => new Le(e, o, t), n), Ln = /* @__PURE__ */ Ft(
   6,
   136,
   32,
   /* @__PURE__ */ Ne(8)
-), Ln = /* @__PURE__ */ Lt(
+), Fn = /* @__PURE__ */ Ft(
   6,
   72,
   64,
   /* @__PURE__ */ Ne(10)
-), Qt = (o, e, t, n = {}) => Ht((s = {}) => new Fe(e, o, s.dkLen === void 0 ? t : s.dkLen, !0), n), Qn = /* @__PURE__ */ Qt(31, 168, 16, /* @__PURE__ */ Ne(11)), jt = /* @__PURE__ */ Qt(31, 136, 32, /* @__PURE__ */ Ne(12));
+), Qt = (o, e, t, n = {}) => Ht((s = {}) => new Le(e, o, s.dkLen === void 0 ? t : s.dkLen, !0), n), Qn = /* @__PURE__ */ Qt(31, 168, 16, /* @__PURE__ */ Ne(11)), jt = /* @__PURE__ */ Qt(31, 136, 32, /* @__PURE__ */ Ne(12));
 function it(o) {
   if (!Number.isSafeInteger(o) || o < 0 || o > 4294967295)
     throw new Error("wrong u32 integer:" + o);
@@ -1200,15 +1200,15 @@ const Dn = (o) => {
   };
 }, zn = /* @__PURE__ */ Vn(Qn);
 /*! noble-post-quantum - MIT License (c) 2024 Paul Miller (paulmillr.com) */
-const F = 256, le = 3329, Jn = 3303, Gn = 17, { mod: $e, nttZetas: Xn, NTT: ne, bitsCoder: Zn } = Dn({
-  N: F,
+const L = 256, le = 3329, Jn = 3303, Gn = 17, { mod: $e, nttZetas: Xn, NTT: ne, bitsCoder: Zn } = Dn({
+  N: L,
   Q: le,
   F: Jn,
   ROOT_OF_UNITY: Gn,
   newPoly: (o) => new Uint16Array(o),
   brvBits: 7
 }), Yn = {
-  768: { N: F, Q: le, K: 3, ETA1: 2, ETA2: 2, du: 10, dv: 4, RBGstrength: 192 }
+  768: { N: L, Q: le, K: 3, ETA1: 2, ETA2: 2, du: 10, dv: 4, RBGstrength: 192 }
 }, es = (o) => {
   if (o >= 12)
     return { encode: (t) => t, decode: (t) => t };
@@ -1221,11 +1221,11 @@ const F = 256, le = 3329, Jn = 3303, Gn = 17, { mod: $e, nttZetas: Xn, NTT: ne, 
   };
 }, ge = (o) => Zn(o, es(o));
 function se(o, e) {
-  for (let t = 0; t < F; t++)
+  for (let t = 0; t < L; t++)
     o[t] = $e(o[t] + e[t]);
 }
 function ts(o, e) {
-  for (let t = 0; t < F; t++)
+  for (let t = 0; t < L; t++)
     o[t] = $e(o[t] - e[t]);
 }
 function ns(o, e, t, n, s) {
@@ -1233,7 +1233,7 @@ function ns(o, e, t, n, s) {
   return { c0: r, c1: i };
 }
 function Ee(o, e) {
-  for (let t = 0; t < F / 2; t++) {
+  for (let t = 0; t < L / 2; t++) {
     let n = Xn[64 + (t >> 1)];
     t & 1 && (n = -n);
     const { c0: s, c1: r } = ns(o[2 * t + 0], o[2 * t + 1], e[2 * t + 0], e[2 * t + 1], n);
@@ -1242,20 +1242,20 @@ function Ee(o, e) {
   return o;
 }
 function bt(o) {
-  const e = new Uint16Array(F);
-  for (let t = 0; t < F; ) {
+  const e = new Uint16Array(L);
+  for (let t = 0; t < L; ) {
     const n = o();
     if (n.length % 3)
       throw new Error("SampleNTT: unaligned block");
-    for (let s = 0; t < F && s + 3 <= n.length; s += 3) {
+    for (let s = 0; t < L && s + 3 <= n.length; s += 3) {
       const r = (n[s + 0] >> 0 | n[s + 1] << 8) & 4095, i = (n[s + 1] >> 4 | n[s + 2] << 4) & 4095;
-      r < le && (e[t++] = r), t < F && i < le && (e[t++] = i);
+      r < le && (e[t++] = r), t < L && i < le && (e[t++] = i);
     }
   }
   return e;
 }
 function be(o, e, t, n) {
-  const s = o(n * F / 4, e, t), r = new Uint16Array(F), i = Ut(s);
+  const s = o(n * L / 4, e, t), r = new Uint16Array(L), i = Ut(s);
   let a = 0;
   for (let c = 0, u = 0, l = 0, h = 0; c < i.length; c++) {
     let p = i[c];
@@ -1302,9 +1302,9 @@ const ss = (o) => {
       const [w, T] = p.decode(O), k = [];
       for (let R = 0; R < e; R++)
         k.push(ne.encode(be(t, m, R, r)));
-      const $ = n(T), v = new Uint16Array(F), I = [];
+      const $ = n(T), v = new Uint16Array(L), I = [];
       for (let R = 0; R < e; R++) {
-        const ue = be(t, m, e + R, i), De = new Uint16Array(F);
+        const ue = be(t, m, e + R, i), De = new Uint16Array(L);
         for (let Te = 0; Te < e; Te++) {
           const en = bt($.get(R, Te));
           se(De, Ee(en, k[Te]));
@@ -1318,7 +1318,7 @@ const ss = (o) => {
       return se(U, _), X(w, k, v, _), b.encode([I, U]);
     },
     decrypt: (O, f) => {
-      const [m, w] = b.decode(O), T = d.decode(f), k = new Uint16Array(F);
+      const [m, w] = b.decode(O), T = d.decode(f), k = new Uint16Array(L);
       for (let $ = 0; $ < e; $++)
         se(k, Ee(T[$], ne.encode(m[$])));
       return ts(w, ne.decode(k)), X(k, T, m), u.encode(w);
@@ -1368,8 +1368,8 @@ function is(o, e, t) {
   return jt.create({ dkLen: o }).update(e).update(new Uint8Array([t])).digest();
 }
 const os = {
-  HASH256: Fn,
-  HASH512: Ln,
+  HASH256: Ln,
+  HASH512: Fn,
   KDF: jt,
   XOF: zn,
   PRF: is
@@ -1471,9 +1471,9 @@ class S {
       throw new Je("Wallet::generateKey() - Secret is required!");
     if (!n)
       throw new Je("Wallet::generateKey() - Position is required!");
-    const s = Ve(e) ? e : ze(e, 1024), r = Ve(n) ? n : ze(n, 256), a = BigInt(`0x${s}`) + BigInt(`0x${r}`), c = new L("SHAKE256", "TEXT");
+    const s = Ve(e) ? e : ze(e, 1024), r = Ve(n) ? n : ze(n, 256), a = BigInt(`0x${s}`) + BigInt(`0x${r}`), c = new F("SHAKE256", "TEXT");
     c.update(a.toString(16)), t && c.update(t);
-    const u = new L("SHAKE256", "TEXT");
+    const u = new F("SHAKE256", "TEXT");
     return u.update(c.getHash("HEX", { outputLen: 8192 })), u.getHash("HEX", { outputLen: 8192 });
   }
   /**
@@ -1483,16 +1483,16 @@ class S {
    * @return {string}
    */
   static generateAddress(e) {
-    const t = Be(e, 128), n = new L("SHAKE256", "TEXT");
+    const t = Be(e, 128), n = new F("SHAKE256", "TEXT");
     for (const r in t) {
       let i = t[r];
       for (let a = 1; a <= 16; a++) {
-        const c = new L("SHAKE256", "TEXT");
+        const c = new F("SHAKE256", "TEXT");
         c.update(i), i = c.getHash("HEX", { outputLen: 512 });
       }
       n.update(i);
     }
-    const s = new L("SHAKE256", "TEXT");
+    const s = new F("SHAKE256", "TEXT");
     return s.update(n.getHash("HEX", { outputLen: 8192 })), s.getHash("HEX", { outputLen: 256 });
   }
   /**
@@ -1636,10 +1636,15 @@ class S {
     e.batchId && (this.batchId = t ? e.batchId : He({}));
   }
   async encryptMessage(e, t) {
-    const n = JSON.stringify(e), s = new TextEncoder().encode(n), r = this.deserializeKey(t), { cipherText: i, sharedSecret: a } = Ze.encapsulate(r), c = await this.encryptWithSharedSecret(s, a);
+    const n = JSON.stringify(e), s = new TextEncoder().encode(n), r = this.deserializeKey(t), i = 1184;
+    if (r.length !== i)
+      throw new Error(
+        `KnishIO: cannot ML-KEM-encrypt — recipient public key is ${r.length} bytes, expected ${i} (ML-KEM-768). The node likely did not advertise an ML-KEM public key (upgrade the validator to a PQ-transport build), or authenticate with { encrypt: false }.`
+      );
+    const { cipherText: a, sharedSecret: c } = Ze.encapsulate(r), u = await this.encryptWithSharedSecret(s, c);
     return {
-      cipherText: this.serializeKey(i),
-      encryptedMessage: this.serializeKey(c)
+      cipherText: this.serializeKey(a),
+      encryptedMessage: this.serializeKey(u)
     };
   }
   async decryptMessage(e) {
@@ -2604,12 +2609,12 @@ class ve {
     for (const p in n) {
       let d = n[p];
       for (let b = 0, A = 8 + e[p]; b < A; b++)
-        d = new L("SHAKE256", "TEXT").update(d).getHash("HEX", { outputLen: 512 });
+        d = new F("SHAKE256", "TEXT").update(d).getHash("HEX", { outputLen: 512 });
       s += d;
     }
-    const r = new L("SHAKE256", "TEXT");
+    const r = new F("SHAKE256", "TEXT");
     r.update(s);
-    const i = r.getHash("HEX", { outputLen: 8192 }), a = new L("SHAKE256", "TEXT");
+    const i = r.getHash("HEX", { outputLen: 8192 }), a = new F("SHAKE256", "TEXT");
     a.update(i);
     const c = a.getHash("HEX", { outputLen: 256 }), u = this.molecule.atoms[0];
     let l = u.walletAddress;
@@ -3446,7 +3451,7 @@ class z {
     for (const d in c) {
       let b = c[d];
       for (let A = 0, O = 8 - u[d]; A < O; A++)
-        b = new L("SHAKE256", "TEXT").update(b).getHash("HEX", { outputLen: 512 });
+        b = new F("SHAKE256", "TEXT").update(b).getHash("HEX", { outputLen: 512 });
       l += b;
     }
     n && (l = mn(l));
@@ -4203,7 +4208,7 @@ class fs extends N {
     });
   }
 }
-class Le extends C {
+class Fe extends C {
   /**
    * Class constructor
    *
@@ -4263,7 +4268,7 @@ class Le extends C {
       return null;
     const n = [];
     for (const s of t)
-      n.push(Le.toClientWallet({
+      n.push(Fe.toClientWallet({
         data: s,
         secret: e
       }));
@@ -4320,7 +4325,7 @@ class ms extends N {
    * @return {ResponseWalletList}
    */
   createResponse(e) {
-    return new Le({
+    return new Fe({
       query: this,
       json: e
     });
@@ -4350,7 +4355,7 @@ class ys extends C {
    */
   payload() {
     let e = this.data();
-    return Array.isArray(e) && (e = e.length > 0 ? e[0] : null), !e || !e.bundleHash || !e.tokenSlug ? null : Le.toClientWallet({
+    return Array.isArray(e) && (e = e.length > 0 ? e[0] : null), !e || !e.bundleHash || !e.tokenSlug ? null : Fe.toClientWallet({
       data: e
     });
   }
@@ -5370,7 +5375,7 @@ class Ns extends C {
     return this.payloadKey("encrypt");
   }
 }
-class Fs extends Qe {
+class Ls extends Qe {
   /**
    * @param {UrqlClientWrapper} graphQLClient
    * @param {KnishIOClient} knishIOClient
@@ -5409,7 +5414,7 @@ class xt extends x {
     super(e, t, n), this.name = "WalletShadowException";
   }
 }
-class Ls extends x {
+class Fs extends x {
   /**
    * Class constructor
    *
@@ -8202,7 +8207,7 @@ class Ur {
     const i = M.get(n || {}, "fungibility");
     if (i === "stackable" && (n.batchId = s || He({})), ["nonfungible", "stackable"].includes(i) && r.length > 0) {
       if (M.get(n || {}, "decimals") > 0)
-        throw new Ls();
+        throw new Fs();
       if (t > 0)
         throw new _e();
       t = r.length, n.splittable = 1, n.decimals = 0, n.tokenUnits = JSON.stringify(r);
@@ -8898,7 +8903,7 @@ class Ur {
     const n = new S({
       secret: nt(await this.getFingerprint()),
       token: "AUTH"
-    }), s = await this.createQuery(Fs), r = {
+    }), s = await this.createQuery(Ls), r = {
       cellSlug: e,
       pubkey: n.pubkey,
       encrypt: t
@@ -9123,7 +9128,7 @@ export {
   qs as MutationPeering,
   W as MutationProposeMolecule,
   _s as MutationRequestAuthorization,
-  Fs as MutationRequestAuthorizationGuest,
+  Ls as MutationRequestAuthorizationGuest,
   vs as MutationRequestTokens,
   vt as MutationTransferTokens,
   ar as MutationWithdrawBufferToken,
@@ -9172,11 +9177,11 @@ export {
   As as ResponseRequestTokens,
   xs as ResponseTransferTokens,
   ps as ResponseWalletBundle,
-  Le as ResponseWalletList,
+  Fe as ResponseWalletList,
   Jt as SignatureMalformedException,
   cs as SignatureMismatchException,
   _e as StackableUnitAmountException,
-  Ls as StackableUnitDecimalsException,
+  Fs as StackableUnitDecimalsException,
   fe as TokenUnit,
   G as TransferBalanceException,
   ke as TransferMalformedException,

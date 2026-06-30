@@ -486,6 +486,18 @@ export default class Wallet {
     const messageString = JSON.stringify(message)
     const messageUint8 = new TextEncoder().encode(messageString)
     const deserializedPubkey = this.deserializeKey(recipientPubkey)
+    // ML-KEM-768 public keys are exactly 1184 bytes. A wrong-length key here almost always means the
+    // node did not advertise an ML-KEM public key in its auth `key` field (e.g. a validator predating
+    // the PQ-transport build). Fail with an actionable message rather than the crypto lib's cryptic
+    // `"publicKey" expected Uint8Array of length 1184, got length=N` assertion.
+    const ML_KEM_768_PUBLIC_KEY_BYTES = 1184
+    if (deserializedPubkey.length !== ML_KEM_768_PUBLIC_KEY_BYTES) {
+      throw new Error(
+        `KnishIO: cannot ML-KEM-encrypt — recipient public key is ${deserializedPubkey.length} bytes, ` +
+        `expected ${ML_KEM_768_PUBLIC_KEY_BYTES} (ML-KEM-768). The node likely did not advertise an ML-KEM ` +
+        'public key (upgrade the validator to a PQ-transport build), or authenticate with { encrypt: false }.'
+      )
+    }
     const { cipherText, sharedSecret } = MlKEM768.encapsulate(deserializedPubkey)
     const encryptedMessage = await this.encryptWithSharedSecret(messageUint8, sharedSecret)
     return {
