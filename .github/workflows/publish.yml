@@ -1,0 +1,49 @@
+# JS SDK publish — tag-driven npm publish (cycle 177).
+# Push a version tag (JS uses the `v` prefix, e.g. `v0.9.1`) → build/test gate → `npm publish`.
+# PREREQUISITE: add the repo secret `NPM_TOKEN` (an npmjs.com automation/granular token with publish
+# rights on `@wishknish/knishio-client-js`). Without it the publish step fails.
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    name: build, test, publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Mirrors ci.yml: npm install (tolerant of the yarn/npm lockfile coexistence).
+      - name: Install dependencies
+        run: npm install
+
+      # Gate — never publish a tag that doesn't lint/test/build clean.
+      - name: ESLint (lint gate)
+        run: npm run lint
+
+      - name: Jest
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
