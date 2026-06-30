@@ -1,7 +1,12 @@
-# JS SDK publish — tag-driven npm publish (cycle 177).
+# JS SDK publish — tag-driven npm publish via Trusted Publishing / OIDC (cycle 177).
 # Push a version tag (JS uses the `v` prefix, e.g. `v0.9.1`) → build/test gate → `npm publish`.
-# PREREQUISITE: add the repo secret `NPM_TOKEN` (an npmjs.com automation/granular token with publish
-# rights on `@wishknish/knishio-client-js`). Without it the publish step fails.
+#
+# Auth = npm Trusted Publishing (OIDC) — NO long-lived NPM_TOKEN. One-time maintainer setup:
+#   npmjs.com → the `@wishknish/knishio-client-js` package → Settings → Trusted Publisher →
+#   GitHub Actions: organization `WishKnish`, repository `KnishIO-Client-JS`, workflow `publish.yml`.
+#   (All fields case-sensitive; npm validates them only at publish time.)
+# Requires npm >= 11.5.1 + Node >= 22.14 (we use Node 24 + `npm install -g npm@latest`). Provenance
+# attestations are generated automatically under trusted publishing.
 name: Publish
 
 on:
@@ -9,18 +14,26 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  id-token: write   # OIDC for npm Trusted Publishing
+  contents: write   # create the GitHub Release
+
 jobs:
   publish:
-    name: build, test, publish to npm
+    name: build, test, publish to npm (Trusted Publishing)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing needs npm >= 11.5.1 (newer than the bundled npm).
+      - name: Upgrade npm (>= 11.5.1 for trusted publishing)
+        run: npm install -g npm@latest
 
       # Mirrors ci.yml: npm install (tolerant of the yarn/npm lockfile coexistence).
       - name: Install dependencies
@@ -36,14 +49,12 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish to npm
+      # OIDC trusted publishing: no NODE_AUTH_TOKEN; npm authenticates via the id-token and
+      # auto-generates provenance. --access public keeps the scoped package public.
+      - name: Publish to npm (Trusted Publishing)
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
