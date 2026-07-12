@@ -16,12 +16,17 @@ jobs:
         with:
           node-version: '20'
 
-      # package-lock.json and yarn.lock coexist (yarn-managed, nodeLinker: node-modules);
-      # npm install is tolerant of lockfile drift, where npm ci would hard-fail.
+      # No lockfile is committed (both npm and yarn locks are gitignored); npm install
+      # resolves fresh and writes an ephemeral package-lock.json that npm audit reads.
       - name: Install dependencies
         run: npm install
 
-      # The enforced lint gate (.eslintrc.cjs, cycle 11): 0 errors (warnings allowed).
+      # Dependency audit gate: fail on high/critical advisories in the published
+      # dependency tree (dev tooling is reported by the full audit but not enforced).
+      - name: npm audit (prod deps, high+)
+        run: npm audit --omit=dev --audit-level=high
+
+      # The enforced lint gate (eslint.config.js, ESLint 9 flat config): 0 errors (warnings allowed).
       - name: ESLint (lint gate)
         run: npm run lint
 

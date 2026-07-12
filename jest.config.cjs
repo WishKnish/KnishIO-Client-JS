@@ -18,12 +18,18 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageReporters: ['json', 'lcov', 'text', 'clover'],
+  // v8 provider pairs with the swc transform (the default babel provider
+  // would re-instrument through babel for no reason).
+  coverageProvider: 'v8',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.js$': 'esbuild-jest'
+    '^.+\\.js$': ['@swc/jest', {
+      jsc: { target: 'es2022' },
+      module: { type: 'commonjs' }
+    }]
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!(esmock|@noble))'
+    '/node_modules/(?!(@noble))'
   ],
   testPathIgnorePatterns: sharedFixturesPresent
     ? ['/node_modules/']
