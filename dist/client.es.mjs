@@ -1507,9 +1507,17 @@ class S {
     this.pubkey = this.serializeKey(n), this.privkey = s;
   }
   serializeKey(e) {
-    return btoa(String.fromCharCode.apply(null, e));
+    if (typeof Buffer < "u")
+      return Buffer.from(e).toString("base64");
+    let t = "";
+    const n = 32768;
+    for (let s = 0; s < e.length; s += n)
+      t += String.fromCharCode(...e.subarray(s, s + n));
+    return btoa(t);
   }
   deserializeKey(e) {
+    if (typeof Buffer < "u")
+      return new Uint8Array(Buffer.from(e, "base64"));
     const t = atob(e);
     return new Uint8Array(t.length).map((n, s) => t.charCodeAt(s));
   }

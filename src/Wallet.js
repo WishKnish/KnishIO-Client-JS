@@ -300,10 +300,23 @@ export default class Wallet {
   }
 
   serializeKey (key) {
-    return btoa(String.fromCharCode.apply(null, key))
+    if (typeof Buffer !== 'undefined') {
+      return Buffer.from(key).toString('base64')
+    }
+    // String.fromCharCode.apply(null, key) overflows the call stack once the
+    // payload exceeds the engine's argument limit (~64K), so convert in chunks.
+    let binary = ''
+    const CHUNK_SIZE = 0x8000
+    for (let i = 0; i < key.length; i += CHUNK_SIZE) {
+      binary += String.fromCharCode(...key.subarray(i, i + CHUNK_SIZE))
+    }
+    return btoa(binary)
   }
 
   deserializeKey (serializedKey) {
+    if (typeof Buffer !== 'undefined') {
+      return new Uint8Array(Buffer.from(serializedKey, 'base64'))
+    }
     const binaryString = atob(serializedKey)
     return new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i))
   }
