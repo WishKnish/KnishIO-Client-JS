@@ -6,11 +6,13 @@
  * @return {array}
  */
 export function chunkArray (arr, size) {
-  if (!arr.length) {
-    return []
+  // Iterative: the previous recursive form (`concat` + `slice(size)` per level) blew
+  // the call stack and allocated O(n^2) once arr grew past a few thousand elements.
+  const chunks = []
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size))
   }
-
-  return [arr.slice(0, size)].concat(chunkArray(arr.slice(size), size))
+  return chunks
 }
 
 export function deepCloning (

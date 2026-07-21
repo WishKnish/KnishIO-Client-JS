@@ -45,13 +45,18 @@ export function chunkSubstr (str, size) {
  * @return {string}
  */
 export function randomString (length = 256, alphabet = 'abcdef0123456789') {
-  let array = new Uint8Array(length)
+  const array = new Uint8Array(length)
 
-  array = crypto.getRandomValues(array)
+  crypto.getRandomValues(array)
 
-  array = array.map(x => alphabet.charCodeAt(x % alphabet.length))
-
-  return String.fromCharCode.apply(null, array)
+  // Build in a loop: String.fromCharCode.apply(null, array) spread every byte as a
+  // function argument and overflowed the call stack for a large caller-supplied length.
+  // `alphabet.charAt(x % len)` is the same mapping as the old fromCharCode(charCodeAt).
+  let result = ''
+  for (let i = 0; i < length; i++) {
+    result += alphabet.charAt(array[i] % alphabet.length)
+  }
+  return result
 }
 
 /**
@@ -120,7 +125,19 @@ export function hexStringToBuffer (hexString) {
  */
 export function hexToBase64 (string) {
   const bytes = hexStringToBuffer(string)
-  return btoa(String.fromCharCode.apply(null, bytes))
+  // Buffer fast path (Node). Byte-identical to the btoa encoding below.
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(bytes).toString('base64')
+  }
+  // Browser fallback: String.fromCharCode.apply(null, bytes) spreads every byte as a
+  // function argument and overflows the call stack past the engine's argument limit
+  // (~64K), so convert in chunks.
+  let binary = ''
+  const CHUNK_SIZE = 0x8000
+  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK_SIZE))
+  }
+  return btoa(binary)
 }
 
 /**
@@ -130,7 +147,16 @@ export function hexToBase64 (string) {
  * @return {string}
  */
 export function base64ToHex (string) {
-  const bytes = new Uint8Array(atob(string).split('').map(char => char.charCodeAt(0)))
+  // Buffer fast path (Node); index loop otherwise. The old `atob(string).split('')`
+  // allocated one single-char string per byte — prohibitive for multi-MB payloads.
+  if (typeof Buffer !== 'undefined') {
+    return bufferToHexString(new Uint8Array(Buffer.from(string, 'base64')))
+  }
+  const binary = atob(string)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
   return bufferToHexString(bytes)
 }
 
