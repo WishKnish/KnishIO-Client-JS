@@ -60,6 +60,10 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+          # setup-node v5 enables package-manager caching by default (v4 did not) and hard
+          # fails when no lockfile is present. This repo gitignores both lockfiles and
+          # installs with `npm install`, so there is nothing to cache against.
+          package-manager-cache: false
 
       # Mirrors ci.yml: npm install (tolerant of the yarn/npm lockfile coexistence).
       - name: Install dependencies
@@ -89,6 +93,10 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+          # setup-node v5 enables package-manager caching by default (v4 did not) and hard
+          # fails when no lockfile is present. This repo gitignores both lockfiles and
+          # installs with `npm install`, so there is nothing to cache against.
+          package-manager-cache: false
 
       # Trusted publishing needs npm >= 11.5.1 (newer than the bundled npm).
       - name: Upgrade npm (>= 11.5.1 for trusted publishing)

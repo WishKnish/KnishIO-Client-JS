@@ -27,6 +27,12 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '20'
+          # setup-node v5 turns package-manager caching ON by default (v4 did not), and it
+          # HARD FAILS when it cannot find a lockfile: "Dependencies lock file is not found".
+          # This repo gitignores both lockfiles on purpose (see below) and installs with
+          # `npm install`, so there is nothing to cache against. Committing .yarnrc.yml for
+          # Yarn Berry is what makes v5 detect yarn and go looking for yarn.lock at all.
+          package-manager-cache: false
 
       # No lockfile is committed (both npm and yarn locks are gitignored); npm install
       # resolves fresh and writes an ephemeral package-lock.json that npm audit reads.
