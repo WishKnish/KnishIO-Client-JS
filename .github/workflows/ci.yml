@@ -34,3 +34,40 @@ jobs:
       # live-validator integration suite auto-skips without KNISHIO_TEST_URI.
       - name: Jest
         run: npm test
+
+  changelog:
+    name: changelog entry for version bump
+    runs-on: ubuntu-latest
+    steps:
+      # fetch-depth: 0 — the gate diffs against the base commit, which a shallow
+      # checkout would not have.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # If package.json's version changed relative to the base commit, CHANGELOG.md
+      # must carry a matching `## [<version>]` heading. No version change → no-op.
+      # Convention: docs/SDK-RELEASE-CONVENTIONS.md in the KnishIOClientSDK monorepo.
+      - name: CHANGELOG entry for the manifest version bump
+        # BASE arrives via env, never interpolated into the shell text (workflow-injection hygiene).
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -eu
+          BASE="${BASE:-}"
+          if [ -z "$BASE" ] || [ "$BASE" = '0000000000000000000000000000000000000000' ] \
+             || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "No comparable base commit — changelog gate skipped."; exit 0
+          fi
+          ver() { sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$1" | head -1; }
+          git show "$BASE:package.json" > /tmp/base-manifest 2>/dev/null || : > /tmp/base-manifest
+          NEW=$(ver package.json); OLD=$(ver /tmp/base-manifest)
+          if [ "$NEW" = "$OLD" ]; then echo "version unchanged ($NEW) — nothing to check."; exit 0; fi
+          echo "version bumped: ${OLD:-<none>} -> $NEW"
+          # index()==1 is a fixed-string match anchored at column 1: no regex escaping of the
+          # version, and a deeper `### [x]` heading does NOT satisfy `## [x]` (grep -F would match it).
+          if ! awk -v h="## [$NEW]" 'index($0, h) == 1 { f = 1 } END { exit !f }' CHANGELOG.md; then
+            echo "::error file=CHANGELOG.md::Version bumped to $NEW but CHANGELOG.md has no '## [$NEW]' entry."
+            exit 1
+          fi
+          echo "OK: CHANGELOG.md documents $NEW"

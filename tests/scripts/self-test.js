@@ -132,14 +132,45 @@ const config = configPath && fs.existsSync(configPath)
 const sharedResultsDir = process.env.KNISHIO_SHARED_RESULTS ||
                         path.resolve(__dirname, '../../../shared-test-results');
 
-// Test results storage
+/**
+ * Loads the shared canonical-patent-vectors.json fixture used by the buffer-family
+ * test below. Absence is NOT an error by itself — testBufferFamily() decides
+ * whether that's a skip or a hard failure based on KNISHIO_REQUIRE_VECTORS.
+ */
+function loadCanonicalVectors() {
+  const candidates = [];
+  if (process.env.KNISHIO_CANONICAL_VECTORS) {
+    candidates.push(process.env.KNISHIO_CANONICAL_VECTORS);
+  }
+  candidates.push(path.join(sharedResultsDir, 'canonical-patent-vectors.json'));
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return JSON.parse(fs.readFileSync(candidate, 'utf8'));
+    }
+  }
+  return null;
+}
+
+// Test results storage.
+//
+// crossSdkCompatible starts FALSE. It was initialised to `true`, which made the default
+// state of this SDK "fully cross-SDK compatible" before a single peer molecule had been
+// looked at — so every early return out of testCrossSdkValidation published a pass, and
+// the field only ever became false if something actively went wrong. A verdict must be
+// earned, not defaulted to; the safe default for a check that has not run is "failed".
+//
+// crossValidation records the COVERAGE behind the verdict. crossSdkCompatible alone
+// cannot distinguish "validated seven peers, all passed" from "validated nothing".
 const results = {
   sdk: 'JavaScript',
   version: JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8')).version,
   timestamp: new Date().toISOString(),
+  runId: process.env.KNISHIO_RUN_ID || null,
   tests: {},
   molecules: {},
-  crossSdkCompatible: true
+  crossSdkCompatible: false,
+  crossValidation: { ran: false, targetsExpected: 0, targetsValidated: 0 }
 };
 
 // Color output helpers
@@ -677,6 +708,209 @@ async function testShadowWalletClaim() {
   }
 }
 
+/**
+ * Test B1: Buffer Family Test (deposit + withdraw, vector-driven)
+ *
+ * The buffer family (B-isotope) builders were never exercised by the self-test
+ * gauntlet at all prior to this — a full isotope family with zero parity
+ * coverage. For each buffer_deposit_conservation / buffer_withdraw_conservation
+ * vector we build + sign the molecule and assert: atom shape/values match the
+ * vector, the V+B sum == expectedSum (full-balance debit conserves even for a
+ * PARTIAL op), AND molecule.check() accepts the molecule (the isotopeV/isotopeB
+ * cross-isotope bypass — V-only atoms would not sum to zero on their own).
+ * Molecular hashes are NOT frozen (random positions).
+ *
+ * Reads the shared fixture; SKIPS if absent (standalone CI). If
+ * KNISHIO_REQUIRE_VECTORS=true, an absent fixture is a hard FAILURE instead —
+ * an orchestrated cross-SDK run cannot silently drop parity coverage for an
+ * entire isotope family (this is exactly how bufferFamily disappeared from
+ * every SDK's results while the gauntlet still reported "ALL TESTS PASSED").
+ */
+async function testBufferFamily() {
+  log('\nB1. Buffer Family Test (deposit + withdraw, vector-driven)', 'blue');
+
+  const vectorsData = loadCanonicalVectors();
+  if (!vectorsData) {
+    const mustHave = process.env.KNISHIO_REQUIRE_VECTORS === 'true';
+    results.tests.bufferFamily = {
+      passed: false,
+      skipped: !mustHave,
+      molecularHash: null,
+      atomCount: 0,
+      validationError: 'canonical-patent-vectors.json absent'
+    };
+    if (mustHave) {
+      log('  FAILED: canonical-patent-vectors.json absent (KNISHIO_REQUIRE_VECTORS=true)', 'red');
+      return false;
+    }
+    log('  SKIPPED: canonical-patent-vectors.json absent (standalone CI)', 'yellow');
+    return true; // skip, not fail — recorded as skipped, never counted as a pass
+  }
+
+  try {
+    const v = vectorsData.vectors;
+    const secret = generateSecret('buffer-family-self-test-seed');
+    const bundle = generateBundleHash(secret);
+    const token = 'BUFTOK';
+
+    let allPass = true;
+    let lastHash = null;
+    let atomTotal = 0;
+
+    // ---- DEPOSIT: V(source -balance) -> B(buffer +amount) -> V(remainder +(balance-amount)) ----
+    for (const tv of v.buffer_deposit_conservation.tests) {
+      const sourceWallet = new Wallet({ secret, bundle, token }); // fresh position
+      sourceWallet.balance = tv.sourceBalance;
+
+      const molecule = new Molecule({ secret, bundle, sourceWallet });
+      molecule.initDepositBuffer({ amount: tv.amount });
+      setFixedTimestamps(molecule);
+      molecule.sign({});
+
+      const vb = molecule.atoms.filter(a => a.isotope === 'V' || a.isotope === 'B');
+      const sum = vb.reduce((s, a) => s + BigInt(a.value), 0n);
+
+      const shape = molecule.atoms.length === 3 &&
+        molecule.atoms[0].isotope === 'V' && molecule.atoms[0].value === tv.expectedSourceValue &&
+        molecule.atoms[1].isotope === 'B' && molecule.atoms[1].value === tv.expectedBufferValue &&
+        molecule.atoms[2].isotope === 'V' && molecule.atoms[2].value === tv.expectedRemainderValue;
+
+      let checkOk = false;
+      try {
+        checkOk = molecule.check(sourceWallet);
+      } catch (error) {
+        checkOk = false;
+      }
+
+      const ok = shape && sum.toString() === tv.expectedSum && checkOk;
+      logTest(`deposit ${tv.name} conserves (V+B sum 0; cross-isotope bypass)`, ok);
+      allPass = allPass && ok;
+      lastHash = molecule.molecularHash;
+      atomTotal += molecule.atoms.length;
+    }
+
+    // ---- WITHDRAW: B(source -balance) -> V(recipient +amount) -> B(remainder +(balance-amount)) ----
+    for (const tv of v.buffer_withdraw_conservation.tests) {
+      const sourceWallet = new Wallet({ secret, bundle, token }); // the buffer wallet: B-isotope source
+      sourceWallet.balance = tv.sourceBalance;
+
+      const molecule = new Molecule({ secret, bundle, sourceWallet });
+      // Withdraw to the caller's own bundle (single recipient), mirroring the client wrapper.
+      molecule.initWithdrawBuffer({ recipients: { [bundle]: tv.amount } });
+      setFixedTimestamps(molecule);
+      molecule.sign({});
+
+      const vb = molecule.atoms.filter(a => a.isotope === 'V' || a.isotope === 'B');
+      const sum = vb.reduce((s, a) => s + BigInt(a.value), 0n);
+
+      const shape = molecule.atoms.length === 3 &&
+        molecule.atoms[0].isotope === 'B' && molecule.atoms[0].value === tv.expectedSourceValue &&
+        molecule.atoms[1].isotope === 'V' && molecule.atoms[1].value === tv.expectedRecipientValue &&
+        molecule.atoms[2].isotope === 'B' && molecule.atoms[2].value === tv.expectedRemainderValue;
+
+      let checkOk = false;
+      try {
+        checkOk = molecule.check(sourceWallet);
+      } catch (error) {
+        checkOk = false;
+      }
+
+      const ok = shape && sum.toString() === tv.expectedSum && checkOk;
+      logTest(`withdraw ${tv.name} conserves (B+V sum 0; cross-isotope bypass)`, ok);
+      allPass = allPass && ok;
+      lastHash = molecule.molecularHash;
+      atomTotal += molecule.atoms.length;
+    }
+
+    // ---- NEGATIVE: buffer_conservation_negative (molecules the SDK MUST reject) ----
+    // The two loops above only prove valid molecules are accepted; they never prove
+    // an invalid one is refused. This is exactly the gap that let Kotlin's isotopeV()
+    // gate V-only conservation on B/F *presence* while having no isotopeB/isotopeF to
+    // own it for buffer molecules, so a value-destroying molecule verified clean.
+    // Each case is built with the SDK's own initDepositBuffer/initWithdrawBuffer (so
+    // it already clears atom-index/self-transfer checks on its own merits, unlike a
+    // hand-assembled molecule), then a single atom field is tampered per the vector's
+    // `tamper` recipe and the molecule is re-signed so the OTS/molecularHash match the
+    // tampered content — rejection must come from conservation/metaType validation,
+    // not an incidental signature mismatch.
+    if (v.buffer_conservation_negative) {
+      for (const tv of v.buffer_conservation_negative.tests) {
+        const sourceWallet = new Wallet({ secret, bundle, token }); // fresh position
+        sourceWallet.balance = tv.sourceBalance;
+
+        const molecule = new Molecule({ secret, bundle, sourceWallet });
+        if (tv.buildFrom === 'deposit') {
+          molecule.initDepositBuffer({ amount: tv.amount });
+        } else if (tv.buildFrom === 'withdraw') {
+          molecule.initWithdrawBuffer({ recipients: { [bundle]: tv.amount } });
+        } else {
+          throw new Error(`buffer_conservation_negative: unknown buildFrom "${tv.buildFrom}" for "${tv.name}"`);
+        }
+        setFixedTimestamps(molecule);
+        molecule.sign({});
+
+        // Locate the target atom: first/last atom of that isotope, in emission order
+        // (molecule.atoms is kept index-sorted by addAtom()).
+        const isotope = tv.tamper.target.slice(-1);
+        const wantFirst = tv.tamper.target.startsWith('first');
+        const isotopeAtoms = molecule.atoms.filter(a => a.isotope === isotope);
+        const targetAtom = wantFirst ? isotopeAtoms[0] : isotopeAtoms[isotopeAtoms.length - 1];
+        if (!targetAtom) {
+          throw new Error(`buffer_conservation_negative: no "${isotope}" atom found for tamper target "${tv.tamper.target}" in "${tv.name}"`);
+        }
+        targetAtom[tv.tamper.field] = tv.tamper.to;
+
+        // Re-sign so the signature matches the tampered atoms — otherwise CheckMolecule
+        // would fail on a signature mismatch instead of the conservation/metaType
+        // violation this vector exists to exercise.
+        molecule.sign({});
+
+        let rejected;
+        let rejectReason;
+        try {
+          const accepted = molecule.check(sourceWallet);
+          rejected = !accepted;
+          rejectReason = accepted
+            ? 'molecule.check() returned true (accepted; expected rejection)'
+            : 'molecule.check() returned false (no exception thrown)';
+        } catch (error) {
+          rejected = true;
+          rejectReason = error.message;
+        }
+
+        const ok = rejected === Boolean(tv.mustReject);
+        logTest(`${tv.name} is rejected (${tv.reason})`, ok);
+        log(`    ${rejected ? 'rejected because' : 'NOT rejected — expected rejection because'}: ${rejectReason}`, rejected ? 'yellow' : 'red');
+        allPass = allPass && ok;
+      }
+    } else {
+      const mustHave = process.env.KNISHIO_REQUIRE_VECTORS === 'true';
+      log('  SKIPPED: buffer_conservation_negative vectors absent (older canonical-patent-vectors.json)', 'yellow');
+      if (mustHave) {
+        allPass = false;
+      }
+    }
+
+    results.tests.bufferFamily = {
+      passed: allPass,
+      skipped: false,
+      molecularHash: lastHash,
+      atomCount: atomTotal,
+      validationError: allPass ? null : 'buffer family vector validation failed'
+    };
+
+    return allPass;
+  } catch (error) {
+    log(`  ❌ ERROR: ${error.message}`, 'red');
+    results.tests.bufferFamily = {
+      passed: false,
+      skipped: false,
+      error: error.message
+    };
+    return false;
+  }
+}
+
 async function testMLKEM768() {
   log('\n5. ML-KEM768 Encryption Test', 'blue');
   const testConfig = config.tests.mlkem768;
@@ -913,34 +1147,79 @@ async function testNegativeCases() {
 async function testCrossSdkValidation() {
   log('\n7. Cross-SDK Validation', 'blue');
 
-  // Check if cross-validation is disabled (Round 1 molecule generation only)
+  // Round 1 generates molecules and does not cross-validate, so it has no opinion here.
+  // It must not leave a verdict behind: crossSdkCompatible stays false and `ran` stays
+  // false, which is distinguishable from a genuine pass by anyone reading the file.
   if (process.env.KNISHIO_DISABLE_CROSS_VALIDATION === 'true') {
     log('  ⏭️  Cross-validation disabled for Round 1 (molecule generation only)', 'yellow');
+    results.crossValidation = { ran: false, targetsExpected: 0, targetsValidated: 0 };
     return true;
   }
 
   const resultsDir = sharedResultsDir;
+  results.crossValidation.ran = true;
 
+  // A missing shared directory in Round 2 is a HARD FAILURE, not a skip. This returned
+  // true — "compatible" — having found nothing to check. Absence of evidence must never
+  // be reported as evidence of compatibility.
   if (!fs.existsSync(resultsDir)) {
-    log('  ⏭️  No other SDK results found for cross-validation', 'yellow');
-    return true;
+    log('  ❌ Shared results directory not found — cross-validation CANNOT run', 'red');
+    results.crossSdkCompatible = false;
+    return false;
   }
 
-  const resultFiles = fs.readdirSync(resultsDir).filter(f => f.endsWith('.json') && !f.includes('javascript'));
+  // Scope to *-results.json.
+  //
+  // This was `.endsWith('.json')`, which also matched the canonical vector MASTERS that
+  // live in this same directory — canonical-patent-vectors.json and
+  // cross-platform-test-vectors.json — and fed them into the peer loop as though they
+  // were SDK results. They carry no `molecules` object, so they contributed silently to
+  // neither pass nor fail while inflating the apparent peer count. run-all-tests.sh
+  // already carries this exact warning for its `rm -f` glob; the read path needed it too.
+  const resultFiles = fs.readdirSync(resultsDir)
+    .filter(f => f.endsWith('-results.json') && !f.includes('javascript'));
 
+  // Zero peers in Round 2 means Round 2 did not happen. Fail.
   if (resultFiles.length === 0) {
-    log('  ⏭️  No other SDK results found for cross-validation', 'yellow');
-    return true;
+    log('  ❌ No peer SDK results found — nothing to cross-validate', 'red');
+    results.crossSdkCompatible = false;
+    return false;
   }
 
+  results.crossValidation.targetsExpected = resultFiles.length;
+  let peersValidated = 0;
   let allValid = true;
 
   for (const file of resultFiles) {
     const sdkName = file.replace('-results.json', '');
     const otherResults = JSON.parse(fs.readFileSync(path.join(resultsDir, file), 'utf8'));
 
+    // A peer must publish every molecule type before we can claim to have validated it.
+    //
+    // The loop below iterates Object.entries(otherResults.molecules) — the keys that are
+    // PRESENT. A peer that omits a molecule type therefore contributes nothing to either
+    // pass or fail for it, and an absent molecule is indistinguishable from a validated
+    // one. On 2026-07-27 Kotlin's Round 2 republished its results without tokenCreation,
+    // walletCreation or shadowWalletClaim, and every peer reported it fully compatible.
+    // Iterating what is there can only ever confirm what is there.
+    //
+    // Canonical list mirrors requiredMoleculeKeys in sdks/canonical-test-keys.json.
+    const REQUIRED_MOLECULE_TYPES = [
+      'metadata', 'simpleTransfer', 'complexTransfer', 'tokenCreation',
+      'walletCreation', 'shadowWalletClaim', 'mlkem768'
+    ];
+    const published = otherResults.molecules || {};
+    const absent = REQUIRED_MOLECULE_TYPES.filter(
+      t => published[t] === undefined || published[t] === null || published[t] === ''
+    );
+    if (absent.length > 0) {
+      log(`    ❌ ${sdkName} published no molecule for: ${absent.join(', ')}`, 'red');
+      logTest(`${sdkName} publishes all required molecules`, false);
+      allValid = false;
+    }
+
     // Validate molecules from other SDK
-    for (const [moleculeType, moleculeData] of Object.entries(otherResults.molecules || {})) {
+    for (const [moleculeType, moleculeData] of Object.entries(published)) {
       try {
         if (moleculeType === 'mlkem768') {
           // Special handling for ML-KEM768 cross-SDK compatibility
@@ -1028,10 +1307,27 @@ async function testCrossSdkValidation() {
         allValid = false;
       }
     }
+
+    peersValidated++;
   }
 
-  results.crossSdkCompatible = allValid;
-  return allValid;
+  // COVERAGE FLOOR.
+  //
+  // `allValid` starts true and only becomes false on a DETECTED failure, so it is a
+  // record of "nothing went wrong", not of "everything was checked". Those differ
+  // whenever the loop above examines fewer peers than it should. Require both: full peer
+  // coverage, and no failures among the checks that ran.
+  results.crossValidation.targetsValidated = peersValidated;
+
+  const fullCoverage = peersValidated === results.crossValidation.targetsExpected;
+  if (!fullCoverage) {
+    log(`  ❌ Incomplete coverage: validated ${peersValidated}/${results.crossValidation.targetsExpected} peer SDKs`, 'red');
+  }
+
+  log(`  📊 Cross-validation coverage: ${peersValidated}/${results.crossValidation.targetsExpected} peer SDKs`, 'blue');
+
+  results.crossSdkCompatible = allValid && fullCoverage;
+  return results.crossSdkCompatible;
 }
 
 /**
@@ -1058,19 +1354,33 @@ function printSummary() {
   log('            TEST SUMMARY REPORT', 'blue');
   log('═══════════════════════════════════════════', 'blue');
 
-  const totalTests = Object.keys(results.tests).length;
-  const passedTests = Object.values(results.tests).filter(t => t.passed).length;
-  const failedTests = totalTests - passedTests;
+  const testEntries = Object.entries(results.tests);
+  const totalTests = testEntries.length;
+  // Skipped tests are reported separately — counting a skip as either a pass or
+  // a failure is what let bufferFamily disappear from the results while the
+  // summary still read "ALL TESTS PASSED".
+  const skippedTests = testEntries.filter(([, t]) => t.skipped).length;
+  const passedTests = testEntries.filter(([, t]) => t.passed).length;
+  const failedTests = totalTests - passedTests - skippedTests;
 
   log(`\nSDK: ${results.sdk} v${results.version}`);
   log(`Timestamp: ${results.timestamp}`);
-  log(`\nTests Passed: ${passedTests}/${totalTests}`, passedTests === totalTests ? 'green' : 'red');
+  log(`\nTests Passed: ${passedTests}/${totalTests}`, failedTests === 0 ? 'green' : 'red');
+
+  if (skippedTests > 0) {
+    log(`Tests Skipped: ${skippedTests}/${totalTests}`, 'yellow');
+    for (const [testName, testResult] of testEntries) {
+      if (testResult.skipped) {
+        log(`  - ${testName}: ${testResult.validationError || testResult.error || 'skipped'}`, 'yellow');
+      }
+    }
+  }
 
   if (failedTests > 0) {
     log('\nFailed Tests:', 'red');
-    for (const [testName, testResult] of Object.entries(results.tests)) {
-      if (!testResult.passed) {
-        log(`  - ${testName}: ${testResult.error || 'Validation failed'}`, 'red');
+    for (const [testName, testResult] of testEntries) {
+      if (!testResult.passed && !testResult.skipped) {
+        log(`  - ${testName}: ${testResult.error || testResult.validationError || 'Validation failed'}`, 'red');
       }
     }
   }
@@ -1141,6 +1451,7 @@ async function runTests() {
   await testTokenCreation();
   await testWalletCreation();
   await testShadowWalletClaim();
+  await testBufferFamily();
   await testMLKEM768();
   await testNegativeCases();
   await testCrossSdkValidation();
@@ -1150,7 +1461,14 @@ async function runTests() {
   printSummary();
 
   // Exit with appropriate code
-  const allPassed = Object.values(results.tests).every(t => t.passed) && results.crossSdkCompatible;
+  // Round 1 generates molecules and deliberately does not cross-validate, so it has no
+  // crossSdkCompatible verdict to offer and must not be judged on one. Requiring it here
+  // fails every Round-1 run purely because the check was skipped by design — which is what
+  // happened the moment the field stopped defaulting to `true`. Only a run that actually
+  // performed cross-validation is accountable for its result.
+  const crossValidationApplies = process.env.KNISHIO_DISABLE_CROSS_VALIDATION !== 'true';
+  const testsPassed = Object.values(results.tests).every(t => t.passed || t.skipped);
+  const allPassed = testsPassed && (!crossValidationApplies || results.crossSdkCompatible);
   process.exit(allPassed ? 0 : 1);
 }
 
