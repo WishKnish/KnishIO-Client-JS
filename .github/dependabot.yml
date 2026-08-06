@@ -1,0 +1,34 @@
+# Dependabot — keeps GitHub Actions current, and keeps the SHA pins updatable.
+#
+# Two reasons this file exists, and the second is the important one:
+#
+#   1. Until 2026-08-05 nothing watched these actions. Every bump was a manual sweep triggered
+#      by a deprecation warning, which is how this fleet ended up running a node16 action
+#      (softprops/action-gh-release@v1) that actionlint refused outright. Drift accumulated
+#      invisibly until GitHub force-retired a runtime and 8 repos broke at once, on GitHub's
+#      schedule rather than ours.
+#
+#   2. Every `uses:` here is pinned to a 40-character commit SHA rather than a mutable tag,
+#      because these workflows hold `id-token: write` (OIDC trusted publishing) and
+#      `contents: write` — a repointed tag could mint a registry token and ship a backdoored
+#      SDK under legitimate provenance. But a SHA pin with no updater is a pin that FREEZES:
+#      it trades a mutable-ref risk for an unpatched-dependency risk. Dependabot understands
+#      SHA pins, bumps them, and rewrites the trailing version comment. The pinning and this
+#      file are only correct together.
+#
+# Grouped into a single PR per week so eight repos do not produce a wall of one-line PRs.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "github-actions"
