@@ -1080,7 +1080,7 @@ export default class Molecule {
     bundle = null,
     anonymous = false,
     compressed = true
-  }) {
+  } = {}) {
     // Do we have atoms?
     if (this.atoms.length === 0 || this.atoms.filter(atom => !(atom instanceof Atom)).length !== 0) {
       throw new AtomsMissingException()

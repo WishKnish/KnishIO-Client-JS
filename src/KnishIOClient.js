@@ -46,6 +46,7 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  */
 import Dot from './libraries/Dot.js'
+import MemorySecretStorageProvider from './storage/MemorySecretStorageProvider.js'
 import Decimal from './libraries/Decimal.js'
 import {
   generateBatchId,
@@ -127,7 +128,8 @@ export default class KnishIOClient {
     socket = null,
     serverSdkVersion = 3,
     logging = false,
-    defaultRequestPolicy = null
+    defaultRequestPolicy = null,
+    secretStorage = null
   }) {
     this.initialize({
       uri,
@@ -136,7 +138,8 @@ export default class KnishIOClient {
       client,
       serverSdkVersion,
       logging,
-      defaultRequestPolicy
+      defaultRequestPolicy,
+      secretStorage
     })
   }
 
@@ -157,10 +160,12 @@ export default class KnishIOClient {
     client = null,
     serverSdkVersion = 3,
     logging = false,
-    defaultRequestPolicy = null
+    defaultRequestPolicy = null,
+    secretStorage = null
   }) {
     this.reset()
 
+    this.$__secretStorage = secretStorage
     this.$__logging = logging
     // Client-level urql request policy applied to reads that omit a per-call
     // policy. A long-lived server/sync client set to 'network-only' never serves
@@ -278,6 +283,7 @@ export default class KnishIOClient {
   reset () {
     this.$__secret = ''
     this.$__bundle = ''
+    this.$__secretStorage = null
     this.remainderWallet = null
     this.$__capabilityCache = {}
     this.$__defaultRequestPolicy = null
@@ -376,7 +382,7 @@ export default class KnishIOClient {
    * @return {boolean}
    */
   hasSecret () {
-    return !!this.$__secret
+    return (!!this.$__secret && this.$__secret.length > 0) || (!!this.$__secretStorage && !!this.$__bundle && this.$__bundle.length > 0)
   }
 
   /**
@@ -387,6 +393,13 @@ export default class KnishIOClient {
   setSecret (secret) {
     this.$__secret = secret
     this.$__bundle = this.hashSecret(secret, 'setSecret')
+    if (!this.$__secretStorage) {
+      const memStorage = new MemorySecretStorageProvider()
+      memStorage.storeSecret(this.$__bundle, secret)
+      this.$__secretStorage = memStorage
+    } else {
+      this.$__secretStorage.storeSecret(this.$__bundle, secret)
+    }
   }
 
   /**
@@ -410,6 +423,44 @@ export default class KnishIOClient {
       throw new UnauthenticatedException('KnishIOClient::getSecret() - Unable to find a stored secret! Have you set a secret?')
     }
     return this.$__secret
+  }
+
+  /**
+   * Sets the secret storage provider and optionally sets the bundle hash
+   *
+   * @param {object} storage
+   * @param {string|null} [bundleHash]
+   */
+  setSecretStorage (storage, bundleHash = null) {
+    this.$__secretStorage = storage
+    if (bundleHash) {
+      this.$__bundle = bundleHash
+    }
+  }
+
+  /**
+   * Returns current secret storage provider
+   *
+   * @returns {object|null}
+   */
+  getSecretStorage () {
+    return this.$__secretStorage
+  }
+
+  /**
+   * Asynchronously retrieves the secret from storage or returns in-memory secret
+   *
+   * @param {object} [options]
+   * @returns {Promise<string|null>}
+   */
+  async retrieveSecret (options = {}) {
+    if (this.$__secret && this.$__secret.length > 0) {
+      return this.$__secret
+    }
+    if (this.$__secretStorage && this.$__bundle && this.$__bundle.length > 0) {
+      return await this.$__secretStorage.retrieveSecret(this.$__bundle, options)
+    }
+    return null
   }
 
   /**
@@ -496,10 +547,16 @@ export default class KnishIOClient {
     remainderWallet = null
   }) {
     this.log('info', 'KnishIOClient::createMolecule() - Creating a new molecule...')
+    if (!secret) {
+      if (this.$__secret && this.$__secret.length > 0) {
+        secret = this.getSecret()
+      } else if (this.$__secretStorage && this.$__bundle && this.$__bundle.length > 0) {
+        secret = await this.$__secretStorage.retrieveSecret(this.$__bundle)
+      }
+    }
 
     secret = secret || this.getSecret()
     bundle = bundle || this.getBundle()
-
     // For non-USER source wallets (V/B isotopes), capture the current USER
     // ContinuID position BEFORE overwriting the client's remainder wallet.
     // This position is needed by addContinuIdAtom() for previousPosition metadata.
@@ -546,6 +603,7 @@ export default class KnishIOClient {
 
     return new Molecule({
       secret,
+      bundle,
       sourceWallet,
       remainderWallet: this.getRemainderWallet(),
       cellSlug: this.getCellSlug(),
@@ -611,8 +669,9 @@ export default class KnishIOClient {
     // Guard with $__authInProcess to prevent concurrent auth requests
     if (this.$__authToken && this.$__authToken.isExpired() && !this.$__authInProcess) {
       this.log('info', 'KnishIOClient::executeQuery() - Access token is expired. Getting new one...')
+      const authSecret = this.$__secret || (await this.retrieveSecret()) || ''
       await this.requestAuthToken({
-        secret: this.$__secret,
+        secret: authSecret,
         cellSlug: this.$__cellSlug,
         encrypt: this.$__encrypt
       })
@@ -2462,6 +2521,11 @@ export default class KnishIOClient {
     // Set cell slug if it has been passed
     if (cellSlug) {
       this.setCellSlug(cellSlug)
+    }
+
+    // Retrieve secret from storage provider if available
+    if (secret === null && this.$__secretStorage && this.$__bundle) {
+      secret = await this.$__secretStorage.retrieveSecret(this.$__bundle)
     }
 
     // Auth in process...

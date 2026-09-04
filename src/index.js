@@ -207,6 +207,7 @@ export {
   TransferUnbalancedException,
   UnauthenticatedException,
   WalletShadowException,
+  SecretStorageException,
   WrongTokenTypeException
 } from './exception/index.js'
 
@@ -325,3 +326,17 @@ export {
   diff,
   intersect
 }
+
+export {
+  MemorySecretStorageProvider,
+  WebCryptoSecretStorageProvider,
+  MemoryStorageBackend,
+  createDefaultSecretStorage
+} from './storage/index.js'
+
+export {
+  zeroizeBytes,
+  withSecureBytes,
+  withSecureString,
+  constantTimeCompare
+} from './libraries/secureMemory.js'

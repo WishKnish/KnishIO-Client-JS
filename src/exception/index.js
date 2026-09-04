@@ -70,6 +70,7 @@ import TransferUnbalancedException from './TransferUnbalancedException.js'
 import UnauthenticatedException from './UnauthenticatedException.js'
 import WalletShadowException from './WalletShadowException.js'
 import WrongTokenTypeException from './WrongTokenTypeException.js'
+import SecretStorageException from './SecretStorageException.js'
 
 export {
   AtomIndexException,
@@ -96,5 +97,6 @@ export {
   TransferUnbalancedException,
   UnauthenticatedException,
   WalletShadowException,
+  SecretStorageException,
   WrongTokenTypeException
 }
