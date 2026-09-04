@@ -15,7 +15,25 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
-No library changes; `src/` is untouched, so this entry carries no version bump.
+## [0.9.4] — 2026-09-04
+
+### Added
+
+- **Hardware Envelope Encryption & Secure Memory Provider**: Introduced `SecretStorageException`
+  (`src/exception/SecretStorageException.js`).
+- **WebCrypto Envelope Encryption Provider** (`src/storage/WebCryptoSecretStorageProvider.js`): AES-GCM
+  (256-bit) envelope encryption with PBKDF2-HMAC-SHA256 (100,000 iterations) key derivation, pluggable
+  `MemoryStorageBackend`, and auto-zeroized intermediate buffers.
+- **In-Memory Storage Provider** (`src/storage/MemorySecretStorageProvider.js`): In-memory storage fallback
+  for headless environments and test harnesses.
+- **Memory Hygiene & Zeroization Utilities** (`src/libraries/secureMemory.js`): Explicit buffer clearing
+  (`zeroizeBytes`), scoped execution (`withSecureBytes`, `withSecureString`), and timing-safe comparison
+  (`constantTimeCompare`).
+- **KnishIOClient Secret Storage Integration**: `KnishIOClient` accepts `secretStorage` in constructor and
+  `initialize()`, provides `setSecretStorage()`, `getSecretStorage()`, and `retrieveSecret()`, and unwraps
+  the master secret just-in-time for molecule construction (`createMolecule()`) and auth token refresh
+  (`executeQuery()`) without permanently retaining cleartext secrets in client heap memory.
+- `Molecule.sign()` default parameter: defaults to `{}` so calling `sign()` without arguments does not throw.
 
 ### Changed — cross-SDK gauntlet reporting integrity
 
@@ -175,6 +193,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v0.9.4...HEAD
+[0.9.4]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v0.9.4
 [0.9.3]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v0.9.3
 [0.9.2]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v0.9.2
 [0.9.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v0.9.0
