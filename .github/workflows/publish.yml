@@ -108,6 +108,36 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Release body = this tag's CHANGELOG.md section, NOT generate_release_notes.
+      # generate_release_notes builds "What's Changed" from merged PULL REQUESTS in the tag
+      # range. Releases here land as direct pushes to master, so the only PR in v0.9.3..v0.9.4
+      # was a dependabot action bump — and the release page advertised that CI bump while
+      # saying nothing about the work the release actually shipped. The curated CHANGELOG
+      # entry is the source of truth; extract it and use it verbatim.
+      #
+      # This runs BEFORE `npm publish` on purpose. The empty-section guard below is only
+      # useful if it aborts ahead of the irreversible upload; after it, a missing CHANGELOG
+      # entry would leave a published package with no release page at all — the same
+      # half-state this step exists to prevent. Extraction needs nothing but the checkout.
+      - name: Extract this tag's CHANGELOG section
+        run: |
+          set -euo pipefail
+          # This repo tags with a `v` prefix (v0.9.4) while CHANGELOG headings are bare
+          # (## [0.9.4]), so strip it before matching.
+          TAG_VERSION="${GITHUB_REF#refs/tags/}"
+          TAG_VERSION="${TAG_VERSION#v}"
+          awk -v ver="## [$TAG_VERSION]" '
+            index($0, ver) == 1 { inside = 1; print; next }
+            inside && /^## / { exit }
+            inside { print }
+          ' CHANGELOG.md > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "::error file=CHANGELOG.md::No '## [$TAG_VERSION]' section found — refusing to publish with empty release notes."
+            exit 1
+          fi
+          echo "Release notes for $TAG_VERSION:"
+          cat /tmp/release-notes.md
+
       # OIDC trusted publishing: no NODE_AUTH_TOKEN; npm authenticates via the id-token and
       # auto-generates provenance. --access public keeps the scoped package public.
       - name: Publish to npm (Trusted Publishing)
@@ -116,4 +146,12 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228  # v3
         with:
-          generate_release_notes: true
+          # `generate_release_notes` stays OFF, deliberately — do not "helpfully" restore it.
+          # The action appends the WHOLE generated block (`<body>\n\n<notes>`, see
+          # src/github.ts prepareReleaseMutation), which would put a
+          # "What's Changed: bump actions/checkout (dependabot)" bullet back on the page:
+          # the exact misleading content this step removes, merely demoted below the fold.
+          # The one part worth keeping was the "Full Changelog" compare link, and
+          # synthesizing that needs the previous tag — i.e. fetch-depth: 0 on a publish
+          # job — which is not worth a full-history clone for a cosmetic link.
+          body_path: /tmp/release-notes.md
