@@ -29,3 +29,25 @@ updates:
           - "*"
     commit-message:
       prefix: "ci"
+
+  # The LIBRARY ecosystem, separate from github-actions above so the two arrive as two
+  # distinguishable PRs a week rather than one mixed pile ("ci" vs "build" prefixes).
+  #
+  # cooldown: a release younger than 7 days is not proposed AT ALL. The ChainDrop class of
+  # attack is a malicious version that is live for hours before anyone notices it, so the
+  # defence is refusing to be the first consumer of anything. It delays legitimate fixes by
+  # the same week — that is the trade, made knowingly.
+  # This is the Dependabot-side twin of the CI resolver's --before=7d window in ci.yml; the
+  # two must move together, or one path silently accepts what the other refuses.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      npm:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "build"

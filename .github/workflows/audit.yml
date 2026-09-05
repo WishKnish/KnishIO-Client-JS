@@ -1,0 +1,90 @@
+# JS SDK scheduled dependency audit — the deep scan the push/PR gate deliberately does not run.
+#
+# Why a SCHEDULE and not another step in ci.yml: an advisory is published against code that
+# has NOT changed. That is the 2026-07 → 2026-08 lesson — a repo sits green for weeks while a
+# dependency it already ships acquires a CVE, because nothing ever re-examines a tree nobody
+# pushed to. ci.yml answers "did this change break anything"; this file answers "did the world
+# change underneath us". Only the second question has a clock.
+#
+# Scope differs from the ci.yml gate ON PURPOSE:
+#   ci.yml     npm audit --omit=dev --audit-level=high   — blocks a merge; published deps only
+#   this file  npm audit --audit-level=low               — full tree, devDependencies included
+# The dev toolchain is exactly where a build-time supply-chain attack lands, so the scheduled
+# scan refuses to ignore it. It lives in its own workflow precisely so that a low-severity
+# advisory in a linter can never block an unrelated PR.
+#
+# Resolution is the same script-free, cooldown-gated path as ci.yml: nothing from npm executes
+# here, and no version published in the last 7 days is even selectable.
+#
+# NOTE: scheduled workflows only fire from the DEFAULT BRANCH. This file has no effect until
+# it is merged there — a branch-only copy runs never, silently.
+name: Scheduled audit
+
+on:
+  schedule:
+    # Mondays 06:17 UTC. Deliberately off the hour: GitHub sheds scheduled runs when the
+    # top-of-hour queue saturates, and a weekly job that quietly does not run is worse than
+    # no job at all, because it reads as green.
+    - cron: '17 6 * * 1'
+  # Manual trigger, plus a deliberate-failure switch. A gate nobody has watched FAIL is an
+  # unproven gate: set selftest_fail to make a run exit 1 on purpose and confirm the failure
+  # is actually visible wherever these notifications land.
+  workflow_dispatch:
+    inputs:
+      selftest_fail:
+        description: 'Fail this run on purpose, to prove the alert path works. Audits nothing.'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: npm audit (full tree, low+)
+    runs-on: ubuntu-latest
+    steps:
+      # `if: inputs.selftest_fail` reads the DECLARED BOOLEAN directly. Do not "fix" this to
+      # `== 'true'`: GitHub coerces mismatched types to number for loose equality, the string
+      # 'true' casts to NaN, and NaN equals nothing — so that form is always false and the
+      # probe would silently never fire. The input is used only inside this expression and is
+      # never interpolated into shell text.
+      - name: Selftest failure probe
+        if: inputs.selftest_fail
+        run: |
+          echo "::error::Selftest failure probe requested — failing this run deliberately."
+          exit 1
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Mirrors the ci.yml gate: with persist-credentials: false the extraheader must be
+      # absent. Re-proved weekly, so a regression in the checkout action is caught here even
+      # in a week where nobody pushed.
+      - name: Assert no persisted git credential
+        run: |
+          if git config --local --get http.https://github.com/.extraheader; then
+            echo "::error::checkout persisted a credential despite persist-credentials: false"
+            exit 1
+          fi
+          echo "OK: no credential in .git/config"
+
+      - name: Setup Node 20
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '20'
+          # Both lockfiles are gitignored here, so setup-node v5 (caching ON by default)
+          # would hard-fail with "Dependencies lock file is not found". Nothing to cache.
+          package-manager-cache: false
+
+      # Identical to the ci.yml resolve: writes an ephemeral package-lock.json WITHOUT running
+      # any lifecycle script, and refuses any version published in the last 7 days.
+      - name: Resolve dependencies (script-free, 7-day cooldown)
+        run: npm install --package-lock-only --ignore-scripts --before="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+
+      # The deep scan: every severity, whole tree, dev included. Reads the lockfile written
+      # above — no install, so still nothing from npm has executed in this job.
+      - name: npm audit (full tree, low and above)
+        run: npm audit --audit-level=low
