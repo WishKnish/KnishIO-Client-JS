@@ -55,10 +55,10 @@
     "fips-203"
   ],
   "dependencies": {
-    "@noble/post-quantum": "^0.5.4",
-    "@thumbmarkjs/thumbmarkjs": "^0.19.1",
-    "@urql/core": "^5.2.0",
-    "graphql": "^16.12.0",
+    "@noble/post-quantum": "^0.7.1",
+    "@thumbmarkjs/thumbmarkjs": "^1.11.0",
+    "@urql/core": "^6.0.3",
+    "graphql": "^17.0.2",
     "graphql-ws": "^6.0.7",
     "isomorphic-fetch": "^3.0.0",
     "jssha": "^3.3.1",
@@ -66,17 +66,17 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
-    "@rollup/plugin-babel": "^6.1.0",
-    "@rollup/plugin-commonjs": "^28.0.9",
+    "@rollup/plugin-babel": "^7.1.0",
+    "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@swc/core": "^1.15.43",
     "@swc/jest": "^0.2.39",
     "buffer": "^6.0.3",
-    "eslint": "^9.39.0",
+    "eslint": "^10.9.1",
     "jest": "^30.4.2",
     "neostandard": "^0.13.0",
     "rollup": "^4.57.1",
-    "vite": "^7.3.5"
+    "vite": "^8.2.2"
   },
   "browserslist": [
     "> 1%",
