@@ -51,3 +51,13 @@ updates:
           - "*"
     commit-message:
       prefix: "build"
+    # graphql 17 requires Node ^22 || ^24 || ^25 || >=26. graphql is a RUNTIME dependency here
+    # (graphql-ws peer) and CI runs Node 20, as does the PHP server's js-client-tests consumer
+    # of this package — same decision as the TS SDK. Minor/patch graphql updates still proposed.
+    # eslint 10: neostandard (the lint baseline in eslint.config.js) declares peer eslint ^9.0.0
+    # and has no eslint-10 release; npm install ERESOLVEs. Drop this entry when neostandard does.
+    ignore:
+      - dependency-name: "graphql"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]

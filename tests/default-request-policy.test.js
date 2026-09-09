@@ -174,3 +174,29 @@ describe('QueryContinuId fresh-read (end-to-end)', () => {
     expect(q.createQueryContext()).toEqual({ requestPolicy: 'network-only' })
   })
 })
+
+describe('UrqlClientWrapper request method (POST contract for CipherHash)', () => {
+  const originalFetch = globalThis.fetch
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+  })
+
+  test('sends short queries as POST with a string body', async () => {
+    let capturedInit = null
+    globalThis.fetch = jest.fn(async (input, init) => {
+      capturedInit = init
+      return new Response(JSON.stringify({ data: { ok: true } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    })
+
+    const wrapper = new UrqlClientWrapper({ serverUri: testUri })
+    await wrapper.query({ query: 'query { ok }', variables: {} })
+
+    expect(capturedInit).not.toBeNull()
+    expect(capturedInit.method).toBe('POST')
+    expect(typeof capturedInit.body).toBe('string')
+  })
+})

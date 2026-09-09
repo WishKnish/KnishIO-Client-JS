@@ -66,16 +66,12 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
-    "@rollup/plugin-babel": "^6.1.0",
-    "@rollup/plugin-commonjs": "^28.0.9",
-    "@rollup/plugin-node-resolve": "^16.0.3",
     "@swc/core": "^1.15.43",
     "@swc/jest": "^0.2.39",
     "buffer": "^6.0.3",
     "eslint": "^9.39.0",
     "jest": "^30.4.2",
     "neostandard": "^0.13.0",
-    "rollup": "^4.57.1",
     "vite": "^7.3.5"
   },
   "browserslist": [

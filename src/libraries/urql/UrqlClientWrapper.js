@@ -63,6 +63,11 @@ class UrqlClientWrapper {
     return createClient({
       url: serverUri,
       exchanges,
+      // urql 5 had no default and always POSTed; urql 6 defaults to 'within-url-limit', which
+      // URL-encodes short queries and sends NO body. That would silently disable the CipherHash
+      // envelope below — cipherFetch's `typeof init.body === 'string'` guard fails on a GET, so
+      // the query would leave as plaintext URL parameters with no error. Pin POST explicitly.
+      preferGetMethod: false,
       // PQ-transport Phase E: when encryption is on, route fetch through the CipherHash
       // wrapper (encrypt the request body to the validator's ML-KEM pubkey, decrypt the
       // response). Undefined → urql uses the global fetch (plaintext).
