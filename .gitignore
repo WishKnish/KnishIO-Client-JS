@@ -4,6 +4,7 @@ node_modules/
 yarn.lock
 package.lock
 package-lock.json
+/.yarn/install-state.gz
 /index.js
 /subscribe.js
 /subscribe.html
