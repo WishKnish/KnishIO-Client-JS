@@ -47,7 +47,9 @@ export default defineConfig({
     outDir: resolve(__dirname, '../dist'),
     emptyOutDir: true,
     sourcemap: true,
-    minify: 'esbuild'
+    // vite 8 stopped bundling esbuild, so 'esbuild' requires a separate install;
+    // `true` selects vite's native built-in minifier without adding extra dependencies.
+    minify: true
   },
   resolve: {
     alias: {
