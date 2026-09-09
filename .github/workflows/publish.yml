@@ -36,6 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
 
       # Refuse to publish a tag the manifest does not itself claim. This repo tags with a
       # leading `v`; check-version.sh strips it. Shared definition with ci.yml and with local
@@ -65,9 +67,15 @@ jobs:
           # installs with `npm install`, so there is nothing to cache against.
           package-manager-cache: false
 
-      # Mirrors ci.yml: npm install (tolerant of the yarn/npm lockfile coexistence).
-      - name: Install dependencies
-        run: npm install
+      # Mirrors ci.yml's hardened install (ChainDrop response, 2026-08): script-free
+      # cooldown resolve, then a locked install with lifecycle scripts disabled. If a
+      # needed fix is younger than the 7-day cooldown, review it manually — never drop
+      # the flag at publish time.
+      - name: Resolve dependencies (script-free, 7-day cooldown)
+        run: npm install --package-lock-only --ignore-scripts --before="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Install dependencies (locked, no lifecycle scripts)
+        run: npm ci --ignore-scripts
 
       # Gate — never publish a tag that doesn't lint/test/build clean.
       - name: ESLint (lint gate)
@@ -87,6 +95,8 @@ jobs:
     environment: release   # matches the npm trusted-publisher Environment + the repo's `release` env
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Node 24
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
@@ -102,8 +112,14 @@ jobs:
       - name: Upgrade npm (>= 11.5.1 for trusted publishing)
         run: npm install -g npm@latest
 
-      - name: Install dependencies
-        run: npm install
+      # This job holds `id-token: write` — the ChainDrop worm propagates through OIDC
+      # trusted publishing when a malicious dependency script executes in a job like this
+      # one. Scripts stay OFF and the resolve is cooldown-gated for exactly that reason.
+      - name: Resolve dependencies (script-free, 7-day cooldown)
+        run: npm install --package-lock-only --ignore-scripts --before="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Install dependencies (locked, no lifecycle scripts)
+        run: npm ci --ignore-scripts
 
       - name: Build
         run: npm run build
@@ -140,6 +156,8 @@ jobs:
 
       # OIDC trusted publishing: no NODE_AUTH_TOKEN; npm authenticates via the id-token and
       # auto-generates provenance. --access public keeps the scoped package public.
+      # (`npm publish` still runs this package's own prepublishOnly build — --ignore-scripts
+      # above disables DEPENDENCY lifecycle hooks, not our own publish pipeline.)
       - name: Publish to npm (Trusted Publishing)
         run: npm publish --access public
 
