@@ -129,7 +129,8 @@ export default class KnishIOClient {
     serverSdkVersion = 3,
     logging = false,
     defaultRequestPolicy = null,
-    secretStorage = null
+    secretStorage = null,
+    mlKemParameterSet = 1024
   }) {
     this.initialize({
       uri,
@@ -139,7 +140,8 @@ export default class KnishIOClient {
       serverSdkVersion,
       logging,
       defaultRequestPolicy,
-      secretStorage
+      secretStorage,
+      mlKemParameterSet
     })
   }
 
@@ -161,7 +163,8 @@ export default class KnishIOClient {
     serverSdkVersion = 3,
     logging = false,
     defaultRequestPolicy = null,
-    secretStorage = null
+    secretStorage = null,
+    mlKemParameterSet = 1024
   }) {
     this.reset()
 
@@ -171,6 +174,7 @@ export default class KnishIOClient {
     // policy. A long-lived server/sync client set to 'network-only' never serves
     // a stale cache-first read; browser/SPA consumers leave this null (cache-first).
     this.$__defaultRequestPolicy = defaultRequestPolicy
+    this.setMlKemParameterSet(mlKemParameterSet)
     this.$__authTokenObjects = {}
     this.$__authInProcess = false
     this.abortControllers = new Map()
@@ -201,6 +205,30 @@ export default class KnishIOClient {
 
     this.$__serverSdkVersion = serverSdkVersion
   }
+  /**
+   * Get active ML-KEM parameter set (1024 default or 768 step-back)
+   *
+   * @return {number}
+   */
+  getMlKemParameterSet () {
+    return this.$__mlKemParameterSet || 1024
+  }
+
+  /**
+   * Set active ML-KEM parameter set (1024 default or 768 step-back)
+   *
+   * @param {number|string} parameterSet
+   * @return {KnishIOClient}
+   */
+  setMlKemParameterSet (parameterSet) {
+    const paramNum = Number(parameterSet)
+    if (![1024, 768].includes(paramNum)) {
+      throw new Error(`KnishIO: unsupported ML-KEM parameter set ${parameterSet}; expected 1024 or 768.`)
+    }
+    this.$__mlKemParameterSet = paramNum
+    return this
+  }
+
 
   /**
    * Get random uri from specified this.$__uris
@@ -509,7 +537,8 @@ export default class KnishIOClient {
 
     if (!sourceWallet) {
       sourceWallet = new Wallet({
-        secret: this.getSecret()
+        secret: this.getSecret(),
+        mlKemParameterSet: this.getMlKemParameterSet()
       })
     } else {
       sourceWallet.key = Wallet.generateKey({
@@ -598,7 +627,8 @@ export default class KnishIOClient {
       bundle,
       token: 'USER',
       batchId: sourceWallet.batchId,
-      characters: sourceWallet.characters
+      characters: sourceWallet.characters,
+      mlKemParameterSet: this.getMlKemParameterSet()
     })
 
     return new Molecule({
@@ -608,7 +638,8 @@ export default class KnishIOClient {
       remainderWallet: this.getRemainderWallet(),
       cellSlug: this.getCellSlug(),
       version: this.getServerSdkVersion(),
-      continuIdPosition
+      continuIdPosition,
+      mlKemParameterSet: this.getMlKemParameterSet()
     })
   }
 
@@ -1237,7 +1268,8 @@ export default class KnishIOClient {
   }) {
     const newWallet = new Wallet({
       secret: this.getSecret(),
-      token
+      token,
+      mlKemParameterSet: this.getMlKemParameterSet()
     })
 
     /**
@@ -1369,7 +1401,8 @@ export default class KnishIOClient {
       secret: this.getSecret(),
       bundle: this.getBundle(),
       token,
-      batchId
+      batchId,
+      mlKemParameterSet: this.getMlKemParameterSet()
     })
 
     /**
@@ -1783,7 +1816,8 @@ export default class KnishIOClient {
         } else {
           to = Wallet.create({
             secret: to,
-            token
+            token,
+            mlKemParameterSet: this.getMlKemParameterSet()
           })
         }
       }
@@ -1935,7 +1969,8 @@ export default class KnishIOClient {
     // Attempt to get the recipient's wallet, if not provided
     const recipientWallet = Wallet.create({
       bundle: bundleHash,
-      token
+      token,
+      mlKemParameterSet: this.getMlKemParameterSet()
     })
 
     // Compute the batch ID for the recipient
@@ -2035,7 +2070,8 @@ export default class KnishIOClient {
     const recipientWallets = recipients.map(recipient => {
       const recipientWallet = Wallet.create({
         bundle: recipient.bundleHash,
-        token
+        token,
+        mlKemParameterSet: this.getMlKemParameterSet()
       })
 
       // Compute the batch ID for the recipient (typically used by stackable tokens)
@@ -2334,7 +2370,8 @@ export default class KnishIOClient {
     // Generate new recipient wallet if only recipient secret has been passed
     const recipientWallet = Wallet.create({
       bundle: bundleHash,
-      token: tokenSlug
+      token: tokenSlug,
+      mlKemParameterSet: this.getMlKemParameterSet()
     })
 
     // Set batch ID
@@ -2390,7 +2427,8 @@ export default class KnishIOClient {
     // Create a wallet for encryption
     const wallet = new Wallet({
       secret: generateSecret(await this.getFingerprint()),
-      token: 'AUTH'
+      token: 'AUTH',
+      mlKemParameterSet: this.getMlKemParameterSet()
     })
 
     /**
@@ -2443,7 +2481,8 @@ export default class KnishIOClient {
     // Generate a signing wallet
     const wallet = new Wallet({
       secret,
-      token: 'AUTH'
+      token: 'AUTH',
+      mlKemParameterSet: this.getMlKemParameterSet()
     })
 
     // Create a wallet with a signing wallet

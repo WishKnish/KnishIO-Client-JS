@@ -923,7 +923,8 @@ async function testMLKEM768() {
     const encryptionWallet = new Wallet({
       secret: secret,
       token: testConfig.token,
-      position: testConfig.position
+      position: testConfig.position,
+      mlKemParameterSet: 768
     });
     
     logTest('Encryption wallet creation', true);
@@ -933,7 +934,8 @@ async function testMLKEM768() {
     const identicalWallet = new Wallet({
       secret: secret,
       token: testConfig.token,
-      position: testConfig.position
+      position: testConfig.position,
+      mlKemParameterSet: 768
     });
     
     const keysIdentical = encryptionWallet.pubkey === identicalWallet.pubkey;
@@ -1231,7 +1233,8 @@ async function testCrossSdkValidation() {
           const ourWallet = new Wallet({
             secret: secret,
             token: testConfig.token,
-            position: testConfig.position
+            position: testConfig.position,
+            mlKemParameterSet: 768
           });
           
           // Cross-SDK ML-KEM768 Decryption Test

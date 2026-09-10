@@ -79,11 +79,20 @@ describe('Wallet', () => {
     expect(decrypted).toEqual(message)
   })
 
-  test('rejects a non-1184-byte recipient pubkey with a clear error', async () => {
+  test('rejects a non-1568-byte recipient pubkey with a clear error by default (ML-KEM-1024)', async () => {
     // PQ-transport hardening: a stale/non-PQ validator advertises a ~48-byte `key`; encryptMessage
     // must fail with an actionable error, not the crypto lib's cryptic length assertion.
     const alice = new Wallet({
       secret: testSecret
+    })
+    const shortKey = alice.serializeKey(new Uint8Array(48))
+    await expect(alice.encryptMessage({ foo: 'bar' }, shortKey)).rejects.toThrow(/expected 1568 \(ML-KEM-1024\)/)
+  })
+
+  test('rejects a mismatched recipient pubkey when stepped back to ML-KEM-768', async () => {
+    const alice = new Wallet({
+      secret: testSecret,
+      mlKemParameterSet: 768
     })
     const shortKey = alice.serializeKey(new Uint8Array(48))
     await expect(alice.encryptMessage({ foo: 'bar' }, shortKey)).rejects.toThrow(/expected 1184 \(ML-KEM-768\)/)

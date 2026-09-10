@@ -87,8 +87,10 @@ export default class Molecule {
     remainderWallet = null,
     cellSlug = null,
     version = null,
-    continuIdPosition = null
+    continuIdPosition = null,
+    mlKemParameterSet = null
   }) {
+    this.mlKemParameterSet = mlKemParameterSet || (sourceWallet && sourceWallet.mlKemParameterSet) || 1024
     this.status = null
     this.molecularHash = null
     this.createdAt = String(+new Date())
@@ -110,7 +112,8 @@ export default class Molecule {
         bundle,
         token: sourceWallet.token,
         batchId: sourceWallet.batchId,
-        characters: sourceWallet.characters
+        characters: sourceWallet.characters,
+        mlKemParameterSet: this.mlKemParameterSet
       })
     }
   }
@@ -343,7 +346,8 @@ export default class Molecule {
     if (!this.remainderWallet || this.remainderWallet.token !== 'USER') {
       this.remainderWallet = Wallet.create({
         secret: this.secret,
-        bundle: this.bundle
+        bundle: this.bundle,
+        mlKemParameterSet: this.mlKemParameterSet
       })
     }
 
@@ -479,7 +483,8 @@ export default class Molecule {
     // Create burn address wallet (null bundle = token destruction)
     const burnWallet = new Wallet({
       bundle: '0000000000000000000000000000000000000000000000000000000000000000',
-      token: this.sourceWallet.token
+      token: this.sourceWallet.token,
+      mlKemParameterSet: this.mlKemParameterSet
     })
 
     // V-atom 1: Debit full balance from source
@@ -685,7 +690,8 @@ export default class Molecule {
       secret: this.secret,
       bundle: this.bundle,
       token: this.sourceWallet.token,
-      batchId: this.sourceWallet.batchId
+      batchId: this.sourceWallet.batchId,
+      mlKemParameterSet: this.mlKemParameterSet
     })
     bufferWallet.tradeRates = tradeRates
 
@@ -1329,7 +1335,8 @@ export default class Molecule {
             position: data.sourceWallet.position,
             bundle: data.sourceWallet.bundle,
             batchId: data.sourceWallet.batchId,
-            characters: data.sourceWallet.characters
+            characters: data.sourceWallet.characters,
+            mlKemParameterSet: molecule.mlKemParameterSet
           })
 
           // Set additional properties for validation context
@@ -1351,7 +1358,8 @@ export default class Molecule {
             position: data.remainderWallet.position,
             bundle: data.remainderWallet.bundle,
             batchId: data.remainderWallet.batchId,
-            characters: data.remainderWallet.characters
+            characters: data.remainderWallet.characters,
+            mlKemParameterSet: molecule.mlKemParameterSet
           })
 
           // Set additional properties for validation context

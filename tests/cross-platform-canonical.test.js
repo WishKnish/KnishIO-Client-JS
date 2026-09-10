@@ -84,13 +84,33 @@ describe('Canonical Cross-Platform ML-KEM768 Vectors', () => {
   // Keygen-from-seed is deterministic (FIPS-203) → byte-frozen pubkey, like a SHAKE vector.
   test('ML-KEM768 keygen: deterministic pubkey matches canonical', () => {
     const { secret, token, position, expectedPubkey } = mlkem.keygen
-    const wallet = new Wallet({ secret, token, position })
+    const wallet = new Wallet({ secret, token, position, mlKemParameterSet: 768 })
     expect(wallet.pubkey).toBe(expectedPubkey)
   })
 
   // Encapsulation is non-deterministic, but decapsulation + AES-256-GCM decrypt is deterministic →
   // one frozen {cipherText, encryptedMessage} sample must decrypt to the canonical plaintext in every SDK.
   test('ML-KEM768 decrypt: frozen sample decrypts to canonical plaintext', async () => {
+    const { secret, token, position, cipherText, encryptedMessage, expectedPlaintext } = mlkem.decrypt
+    const wallet = new Wallet({ secret, token, position, mlKemParameterSet: 768 })
+    const plaintext = await wallet.decryptMessage({ cipherText, encryptedMessage })
+    expect(plaintext).toBe(expectedPlaintext)
+  })
+})
+
+describe('Canonical Cross-Platform ML-KEM1024 Vectors', () => {
+  const mlkem = vectors.vectors.mlkem1024
+
+  // Keygen-from-seed is deterministic (FIPS-203) → byte-frozen pubkey, like a SHAKE vector.
+  test('ML-KEM1024 keygen: deterministic pubkey matches canonical (default 1024)', () => {
+    const { secret, token, position, expectedPubkey } = mlkem.keygen
+    const wallet = new Wallet({ secret, token, position })
+    expect(wallet.pubkey).toBe(expectedPubkey)
+  })
+
+  // Encapsulation is non-deterministic, but decapsulation + AES-256-GCM decrypt is deterministic →
+  // one frozen {cipherText, encryptedMessage} sample must decrypt to the canonical plaintext in every SDK.
+  test('ML-KEM1024 decrypt: frozen sample decrypts to canonical plaintext', async () => {
     const { secret, token, position, cipherText, encryptedMessage, expectedPlaintext } = mlkem.decrypt
     const wallet = new Wallet({ secret, token, position })
     const plaintext = await wallet.decryptMessage({ cipherText, encryptedMessage })

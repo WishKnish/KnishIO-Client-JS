@@ -1,4297 +1,2771 @@
-import Q from "jssha";
-import { gql as E, cacheExchange as dn, fetchExchange as pn, subscriptionExchange as fn, createClient as yn } from "@urql/core";
-import { createClient as mn } from "graphql-ws";
-import { pipe as gn, map as wn, subscribe as bn } from "wonka";
+import e from "jssha";
+import { cacheExchange as t, createClient as n, fetchExchange as r, gql as i, subscriptionExchange as a } from "@urql/core";
+import { createClient as o } from "graphql-ws";
+import { map as s, pipe as c, subscribe as l } from "wonka";
+//#region src/libraries/Hex.js
 typeof self > "u" && (global.self = global);
-class Dt {
-  /**
-   * Converts the given buffer to a string containing its hexadecimal representation.
-   *
-   * arr a Uint8Array buffer to convert.
-   *
-   * options an optional object with the following members:
-   *     grouping this number of hex bytes are grouped together with spaces between groups. 0 means no grouping is applied. 0 if unspecified.
-   *     rowlength the number of groups which make up a row. When 0, no splitting into rows occurs. 0 if unspecified.
-   *     uppercase if true, the output will be in uppercase. true by default.
-   *
-   * return a hexadecimal string representing the buffer.
-   *
-   * @param {array|ArrayBuffer|Uint8Array} arr
-   * @param {object} options
-   * @return {string}
-   */
-  static toHex(e, t) {
-    const n = (c, u) => {
-      const l = u ? ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"] : ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"];
-      return l[Math.floor(c / 16)] + l[c % 16];
-    }, s = Object.assign(
-      {
-        grouping: 0,
-        rowlength: 0,
-        uppercase: !1
-      },
-      t || {}
-    );
-    let r = "", i = 0, a = 0;
-    for (let c = 0; c < e.length && (r += n(e[c], s.uppercase), c !== e.length - 1); ++c)
-      s.grouping > 0 && ++i === s.grouping && (i = 0, s.rowlength > 0 && ++a === s.rowlength ? (a = 0, r += `
-`) : r += " ");
-    return r;
-  }
-  /**
-   * Takes a string containing hexadecimal and returns the equivalent as a Uint8Array buffer.
-   *
-   * str The string to convert. Whitespace is ignored. If an odd number of characters are specified,
-   * it will act as if preceeded with a leading 0; that is, "FFF" is equivalent to "0FFF".
-   *
-   * return a Uint8Array array.
-   *
-   * @param {string} str
-   * @return {Uint8Array}
-   */
-  static toUint8Array(e) {
-    let t = e.toLowerCase().replace(/\s/g, "");
-    t.length % 2 === 1 && (t = `0${t}`);
-    const n = new Uint8Array(Math.floor(t.length / 2));
-    let s = -1;
-    for (let r = 0; r < t.length; ++r) {
-      const i = t[r], a = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"].indexOf(i);
-      if (a === -1)
-        throw Error("unexpected character");
-      s === -1 ? s = 16 * a : (n[Math.floor(r / 2)] = s + a, s = -1);
-    }
-    return n;
-  }
-}
+var u = class {
+	static toHex(e, t) {
+		let n = (e, t) => {
+			let n = t ? [
+				"0",
+				"1",
+				"2",
+				"3",
+				"4",
+				"5",
+				"6",
+				"7",
+				"8",
+				"9",
+				"A",
+				"B",
+				"C",
+				"D",
+				"E",
+				"F"
+			] : [
+				"0",
+				"1",
+				"2",
+				"3",
+				"4",
+				"5",
+				"6",
+				"7",
+				"8",
+				"9",
+				"a",
+				"b",
+				"c",
+				"d",
+				"e",
+				"f"
+			];
+			return n[Math.floor(e / 16)] + n[e % 16];
+		}, r = Object.assign({
+			grouping: 0,
+			rowlength: 0,
+			uppercase: !1
+		}, t || {}), i = "", a = 0, o = 0;
+		for (let t = 0; t < e.length && (i += n(e[t], r.uppercase), t !== e.length - 1); ++t) r.grouping > 0 && ++a === r.grouping && (a = 0, r.rowlength > 0 && ++o === r.rowlength ? (o = 0, i += "\n") : i += " ");
+		return i;
+	}
+	static toUint8Array(e) {
+		let t = e.toLowerCase().replace(/\s/g, "");
+		t.length % 2 == 1 && (t = `0${t}`);
+		let n = new Uint8Array(Math.floor(t.length / 2)), r = -1;
+		for (let e = 0; e < t.length; ++e) {
+			let i = t[e], a = [
+				"0",
+				"1",
+				"2",
+				"3",
+				"4",
+				"5",
+				"6",
+				"7",
+				"8",
+				"9",
+				"a",
+				"b",
+				"c",
+				"d",
+				"e",
+				"f"
+			].indexOf(i);
+			if (a === -1) throw Error("unexpected character");
+			r === -1 ? r = 16 * a : (n[Math.floor(e / 2)] = r + a, r = -1);
+		}
+		return n;
+	}
+};
 String.prototype.trim || (String.prototype.trim = function() {
-  return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
+	return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
+}), String.prototype.toCamelCase || (String.prototype.toCamelCase = function() {
+	return this.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (e, t) => t.toUpperCase());
+}), String.prototype.toSnakeCase || (String.prototype.toSnakeCase = function() {
+	return this.replace(/[A-Z]/g, (e) => `_${e.toLowerCase()}`);
 });
-String.prototype.toCamelCase || (String.prototype.toCamelCase = function() {
-  return this.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (o, e) => e.toUpperCase());
-});
-String.prototype.toSnakeCase || (String.prototype.toSnakeCase = function() {
-  return this.replace(/[A-Z]/g, (o) => `_${o.toLowerCase()}`);
-});
-function Ne(o, e) {
-  const t = Math.ceil(o.length / e), n = [];
-  for (let s = 0, r = 0; s < t; ++s, r += e)
-    n[s] = o.substr(r, e);
-  return n;
+function d(e, t) {
+	let n = Math.ceil(e.length / t), r = [];
+	for (let i = 0, a = 0; i < n; ++i, a += t) r[i] = e.substr(a, t);
+	return r;
 }
-function ut(o = 256, e = "abcdef0123456789") {
-  const t = new Uint8Array(o);
-  crypto.getRandomValues(t);
-  let n = "";
-  for (let s = 0; s < o; s++)
-    n += e.charAt(t[s] % e.length);
-  return n;
+function f(e = 256, t = "abcdef0123456789") {
+	let n = new Uint8Array(e);
+	crypto.getRandomValues(n);
+	let r = "";
+	for (let i = 0; i < e; i++) r += t.charAt(n[i] % t.length);
+	return r;
 }
-function kn(o, e, t, n, s) {
-  if (n = n || "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?¿¡", s = s || n, e > n.length || t > s.length)
-    return console.warn("Strings::charsetBaseConvert() - Can't convert", o, "to base", t, "greater than symbol table length. src-table:", n.length, "dest-table:", s.length), !1;
-  let i = BigInt(0);
-  for (let c = 0; c < o.length; c++)
-    i = i * BigInt(e) + BigInt(n.indexOf(o.charAt(c)));
-  let a = "";
-  for (; i > 0; ) {
-    const c = i % BigInt(t);
-    a = s.charAt(Number(c)) + a, i /= BigInt(t);
-  }
-  return a || "0";
+function p(e, t, n, r, i) {
+	if (r ||= "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?¿¡", i ||= r, t > r.length || n > i.length) return console.warn("Strings::charsetBaseConvert() - Can't convert", e, "to base", n, "greater than symbol table length. src-table:", r.length, "dest-table:", i.length), !1;
+	let a = BigInt(0);
+	for (let n = 0; n < e.length; n++) a = a * BigInt(t) + BigInt(r.indexOf(e.charAt(n)));
+	let o = "";
+	for (; a > 0;) {
+		let e = a % BigInt(n);
+		o = i.charAt(Number(e)) + o, a /= BigInt(n);
+	}
+	return o || "0";
 }
-function yt(o) {
-  return Dt.toHex(o, {});
+function m(e) {
+	return u.toHex(e, {});
 }
-function _n(o) {
-  return Dt.toUint8Array(o);
+function h(e) {
+	return u.toUint8Array(e);
 }
-function Sn(o) {
-  const e = _n(o);
-  if (typeof Buffer < "u")
-    return Buffer.from(e).toString("base64");
-  let t = "";
-  const n = 32768;
-  for (let s = 0; s < e.length; s += n)
-    t += String.fromCharCode(...e.subarray(s, s + n));
-  return btoa(t);
+function g(e) {
+	let t = h(e);
+	if (typeof Buffer < "u") return Buffer.from(t).toString("base64");
+	let n = "", r = 32768;
+	for (let e = 0; e < t.length; e += r) n += String.fromCharCode(...t.subarray(e, e + r));
+	return btoa(n);
 }
-function $n(o) {
-  if (typeof Buffer < "u")
-    return yt(new Uint8Array(Buffer.from(o, "base64")));
-  const e = atob(o), t = new Uint8Array(e.length);
-  for (let n = 0; n < e.length; n++)
-    t[n] = e.charCodeAt(n);
-  return yt(t);
+function _(e) {
+	if (typeof Buffer < "u") return m(new Uint8Array(Buffer.from(e, "base64")));
+	let t = atob(e), n = new Uint8Array(t.length);
+	for (let e = 0; e < t.length; e++) n[e] = t.charCodeAt(e);
+	return m(n);
 }
-function Xe(o) {
-  return /^[A-F0-9]+$/i.test(o);
+function v(e) {
+	return /^[A-F0-9]+$/i.test(e);
 }
-function An(o) {
-  return (typeof o == "number" || typeof o == "string" && o.trim() !== "") && !isNaN(o);
+function y(e) {
+	return (typeof e == "number" || typeof e == "string" && e.trim() !== "") && !isNaN(e);
 }
-let ye = class {
-  /**
-   * Normalizes the meta array into the standard {key: ..., value: ...} format
-   *
-   * @param {array|object} meta
-   * @return {array}
-   */
-  static normalizeMeta(e) {
-    if (Array.isArray(e))
-      return e.map((n) => ({
-        key: n.key,
-        value: n.value == null ? null : String(n.value)
-      }));
-    const t = [];
-    for (const n in e)
-      if (Object.prototype.hasOwnProperty.call(e, n)) {
-        const s = e[n];
-        t.push({ key: n, value: s == null ? null : String(s) });
-      }
-    return t;
-  }
-  /**
-   * Condenses metadata array into object-based key: value notation
-   *
-   * @param {array|object} meta
-   * @return {object}
-   */
-  static aggregateMeta(e) {
-    let t = {};
-    if (Array.isArray(e))
-      for (const n of e)
-        t[n.key] = n.value;
-    else
-      t = e;
-    return t;
-  }
+//#endregion
+//#region src/Meta.js
+var b = class {
+	static normalizeMeta(e) {
+		if (Array.isArray(e)) return e.map((e) => ({
+			key: e.key,
+			value: e.value == null ? null : String(e.value)
+		}));
+		let t = [];
+		for (let n in e) if (Object.prototype.hasOwnProperty.call(e, n)) {
+			let r = e[n];
+			t.push({
+				key: n,
+				value: r == null ? null : String(r)
+			});
+		}
+		return t;
+	}
+	static aggregateMeta(e) {
+		let t = {};
+		if (Array.isArray(e)) for (let n of e) t[n.key] = n.value;
+		else t = e;
+		return t;
+	}
 };
-function Qr(o, e) {
-  const t = [];
-  for (let n = 0; n < o.length; n += e)
-    t.push(o.slice(n, n + e));
-  return t;
+//#endregion
+//#region src/libraries/array.js
+function ee(e, t) {
+	let n = [];
+	for (let r = 0; r < e.length; r += t) n.push(e.slice(r, r + t));
+	return n;
 }
-function vn(o, e) {
-  let t, n, s;
-  const r = [Array, Date, Number, String, Boolean], i = Object.prototype.toString;
-  for (e = e || [], t = 0; t < e.length; t += 2)
-    o === e[t] && (n = e[t + 1]);
-  if (!n && o && typeof o == "object") {
-    for (n = {}, t = 0; t < r.length; t++)
-      i.call(o) === i.call(s = new r[t](o)) && (n = t ? s : []);
-    e.push(o, n);
-    for (t in o)
-      e.hasOwnProperty.call(o, t) && (n[t] = vn(o[t], e));
-  }
-  return n || o;
+function te(e, t) {
+	let n, r, i, a = [
+		Array,
+		Date,
+		Number,
+		String,
+		Boolean
+	], o = Object.prototype.toString;
+	for (t ||= [], n = 0; n < t.length; n += 2) e === t[n] && (r = t[n + 1]);
+	if (!r && e && typeof e == "object") {
+		for (r = {}, n = 0; n < a.length; n++) o.call(e) === o.call(i = new a[n](e)) && (r = n ? i : []);
+		for (n in t.push(e, r), e) t.hasOwnProperty.call(e, n) && (r[n] = te(e[n], t));
+	}
+	return r || e;
 }
-function xn(...o) {
-  return [].concat(...o.map((e, t) => {
-    const n = o.slice(0);
-    n.splice(t, 1);
-    const s = [...new Set([].concat(...n))];
-    return e.filter((r) => !s.includes(r));
-  }));
+function ne(...e) {
+	return [].concat(...e.map((t, n) => {
+		let r = e.slice(0);
+		r.splice(n, 1);
+		let i = [...new Set([].concat(...r))];
+		return t.filter((e) => !i.includes(e));
+	}));
 }
-function we(...o) {
-  return o.reduce((e, t) => e.filter((n) => t.includes(n)));
+function x(...e) {
+	return e.reduce((e, t) => e.filter((e) => t.includes(e)));
 }
-class ht {
-  /**
-   *
-   * @param policy
-   * @param metaKeys
-   */
-  constructor(e = {}, t = {}) {
-    this.policy = ht.normalizePolicy(e), this.fillDefault(t);
-  }
-  /**
-   *
-   * @param policy
-   * @returns {{}}
-   */
-  static normalizePolicy(e = {}) {
-    const t = {};
-    for (const [n, s] of Object.entries(e))
-      if (s !== null && ["read", "write"].includes(n)) {
-        t[n] = {};
-        for (const [r, i] of Object.entries(s))
-          t[n][r] = i;
-      }
-    return t;
-  }
-  /**
-   *
-   */
-  fillDefault(e = {}) {
-    const t = Array.from(this.policy).filter((s) => s.action === "read"), n = Array.from(this.policy).filter((s) => s.action === "write");
-    for (const [s, r] of Object.entries({
-      read: t,
-      write: n
-    })) {
-      const i = r.map((a) => a.key);
-      this.policy[s] || (this.policy[s] = {});
-      for (const a of xn(e, i))
-        this.policy[s][a] || (this.policy[s][a] = s === "write" && !["characters", "pubkey"].includes(a) ? ["self"] : ["all"]);
-    }
-  }
-  /**
-   *
-   * @returns {{}|*}
-   */
-  get() {
-    return this.policy;
-  }
-  /**
-   *
-   * @returns {string}
-   */
-  toJson() {
-    return JSON.stringify(this.get());
-  }
-}
-class K {
-  /**
-   *
-   * @param {object|array} meta
-   */
-  constructor(e = []) {
-    this.meta = ye.normalizeMeta(e);
-  }
-  /**
-   *
-   * @param {object|array} meta
-   * @returns {AtomMeta}
-   */
-  merge(e) {
-    return this.meta = Array.from(/* @__PURE__ */ new Set([...this.meta, ...ye.normalizeMeta(e)])), this;
-  }
-  /**
-   *
-   * @param context
-   * @returns {AtomMeta}
-   */
-  addContext(e = null) {
-    return this;
-  }
-  /**
-   *
-   * @param {Wallet} wallet
-   * @returns {AtomMeta}
-   */
-  setAtomWallet(e) {
-    const t = {};
-    return e.tokenUnits && e.tokenUnits.length && (t.tokenUnits = JSON.stringify(e.getTokenUnitsData())), e.tradeRates && e.tradeRates.length && (t.tradeRates = JSON.stringify(e.tradeRates)), Object.keys(t).length > 0 && this.merge(t), this;
-  }
-  /**
-   * Set full NEW wallet metadata
-   * Used for shadow wallet claim & wallet creation & token creation
-   *
-   * @param {Wallet} wallet
-   * @returns {AtomMeta}
-   */
-  setMetaWallet(e) {
-    return this.merge({
-      walletTokenSlug: e.token,
-      walletBundleHash: e.bundle,
-      walletAddress: e.address,
-      walletPosition: e.position,
-      walletBatchId: e.batchId,
-      walletPubkey: e.pubkey,
-      walletCharacters: e.characters
-    }), this;
-  }
-  /**
-   *
-   * @param shadowWalletClaim
-   * @returns {AtomMeta}
-   */
-  setShadowWalletClaim(e) {
-    return this.merge({ shadowWalletClaim: e * 1 }), this;
-  }
-  /**
-   *
-   * @param {Wallet} signingWallet
-   * @returns {AtomMeta}
-   */
-  setSigningWallet(e) {
-    return this.merge({
-      signingWallet: JSON.stringify({
-        tokenSlug: e.token,
-        bundleHash: e.bundle,
-        address: e.address,
-        position: e.position,
-        pubkey: e.pubkey,
-        characters: e.characters
-      })
-    }), this;
-  }
-  /**
-   *
-   * @param policy
-   * @todo move logic to the separated class
-   * @returns {AtomMeta}
-   */
-  addPolicy(e) {
-    const t = new ht(e, Object.keys(this.meta));
-    return this.merge({
-      policy: t.toJson()
-    }), this;
-  }
-  /**
-   *
-   * @returns {array}
-   */
-  get() {
-    return this.meta;
-  }
-}
-class x extends TypeError {
-  /**
-   * @param {string|null} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = null, t = null, n = null) {
-    if (super(e, t, n), e === null)
-      throw new this(`Unknown ${this.constructor.name}`);
-    this.name = "BaseException";
-  }
-  /**
-   * @return {string}
-   */
-  toString() {
-    return `${this.name}: ${this.message}.
-Stack:
-${this.stack}`;
-  }
-}
-class ae extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "The molecule does not contain atoms", t = null, n = null) {
-    super(e, t, n), this.name = "AtomsMissingException";
-  }
-}
-class oe {
-  /**
-   *
-   * @param {Atom} atom
-   */
-  static create(e) {
-    const t = {};
-    for (const n of Object.keys(e))
-      Object.prototype.hasOwnProperty.call(e, n) && (t[n] = e[n]);
-    return new this(t);
-  }
-  /**
-   *
-   * @param {Object|Array} object
-   * @returns {Object|Array[]}
-   */
-  static structure(e) {
-    switch (Object.prototype.toString.call(e)) {
-      case "[object Array]": {
-        const t = [];
-        for (const n in e)
-          t.push(oe.isStructure(e[n]) ? oe.structure(e[n]) : e[n]);
-        return t;
-      }
-      case "[object Object]": {
-        const t = [], n = Object.keys(e).sort((s, r) => s === r ? 0 : s < r ? -1 : 1);
-        for (const s of n)
-          if (Object.prototype.hasOwnProperty.call(e, s)) {
-            const r = {};
-            r[s] = oe.isStructure(e[s]) ? oe.structure(e[s]) : e[s], t.push(r);
-          }
-        if (t.length > 0)
-          return t;
-        break;
-      }
-    }
-    return e;
-  }
-  /**
-   *
-   * @param {*} structure
-   * @returns {boolean}
-   */
-  static isStructure(e) {
-    return ["[object Object]", "[object Array]"].includes(Object.prototype.toString.call(e));
-  }
-  /**
-   *
-   * @returns {Object[]}
-   */
-  view() {
-    return oe.structure(this);
-  }
-}
-class In extends oe {
-  constructor({
-    position: e = null,
-    walletAddress: t = null,
-    isotope: n = null,
-    token: s = null,
-    value: r = null,
-    batchId: i = null,
-    metaType: a = null,
-    metaId: c = null,
-    meta: u = null,
-    index: l = null,
-    createdAt: h = null,
-    version: p = null
-  }) {
-    super(), this.position = e, this.walletAddress = t, this.isotope = n, this.token = s, this.value = r, this.batchId = i, this.metaType = a, this.metaId = c, this.meta = u, this.index = l, this.createdAt = h, this.version = p;
-  }
-}
-const Pe = {
-  4: In
+//#endregion
+//#region src/PolicyMeta.js
+var re = class e {
+	constructor(t = {}, n = {}) {
+		this.policy = e.normalizePolicy(t), this.fillDefault(n);
+	}
+	static normalizePolicy(e = {}) {
+		let t = {};
+		for (let [n, r] of Object.entries(e)) if (r !== null && ["read", "write"].includes(n)) {
+			t[n] = {};
+			for (let [e, i] of Object.entries(r)) t[n][e] = i;
+		}
+		return t;
+	}
+	fillDefault(e = {}) {
+		let t = Array.from(this.policy).filter((e) => e.action === "read"), n = Array.from(this.policy).filter((e) => e.action === "write");
+		for (let [r, i] of Object.entries({
+			read: t,
+			write: n
+		})) {
+			let t = i.map((e) => e.key);
+			this.policy[r] || (this.policy[r] = {});
+			for (let n of ne(e, t)) this.policy[r][n] || (this.policy[r][n] = r === "write" && !["characters", "pubkey"].includes(n) ? ["self"] : ["all"]);
+		}
+	}
+	get() {
+		return this.policy;
+	}
+	toJson() {
+		return JSON.stringify(this.get());
+	}
+}, S = class {
+	constructor(e = []) {
+		this.meta = b.normalizeMeta(e);
+	}
+	merge(e) {
+		return this.meta = Array.from(/* @__PURE__ */ new Set([...this.meta, ...b.normalizeMeta(e)])), this;
+	}
+	addContext(e = null) {
+		return this;
+	}
+	setAtomWallet(e) {
+		let t = {};
+		return e.tokenUnits && e.tokenUnits.length && (t.tokenUnits = JSON.stringify(e.getTokenUnitsData())), e.tradeRates && e.tradeRates.length && (t.tradeRates = JSON.stringify(e.tradeRates)), Object.keys(t).length > 0 && this.merge(t), this;
+	}
+	setMetaWallet(e) {
+		return this.merge({
+			walletTokenSlug: e.token,
+			walletBundleHash: e.bundle,
+			walletAddress: e.address,
+			walletPosition: e.position,
+			walletBatchId: e.batchId,
+			walletPubkey: e.pubkey,
+			walletCharacters: e.characters
+		}), this;
+	}
+	setShadowWalletClaim(e) {
+		return this.merge({ shadowWalletClaim: e * 1 }), this;
+	}
+	setSigningWallet(e) {
+		return this.merge({ signingWallet: JSON.stringify({
+			tokenSlug: e.token,
+			bundleHash: e.bundle,
+			address: e.address,
+			position: e.position,
+			pubkey: e.pubkey,
+			characters: e.characters
+		}) }), this;
+	}
+	addPolicy(e) {
+		let t = new re(e, Object.keys(this.meta));
+		return this.merge({ policy: t.toJson() }), this;
+	}
+	get() {
+		return this.meta;
+	}
+}, C = class extends TypeError {
+	constructor(e = null, t = null, n = null) {
+		if (super(e, t, n), e === null) throw new this(`Unknown ${this.constructor.name}`);
+		this.name = "BaseException";
+	}
+	toString() {
+		return `${this.name}: ${this.message}.\nStack:\n${this.stack}`;
+	}
+}, w = class extends C {
+	constructor(e = "The molecule does not contain atoms", t = null, n = null) {
+		super(e, t, n), this.name = "AtomsMissingException";
+	}
+}, ie = class e {
+	static create(e) {
+		let t = {};
+		for (let n of Object.keys(e)) Object.prototype.hasOwnProperty.call(e, n) && (t[n] = e[n]);
+		return new this(t);
+	}
+	static structure(t) {
+		switch (Object.prototype.toString.call(t)) {
+			case "[object Array]": {
+				let n = [];
+				for (let r in t) n.push(e.isStructure(t[r]) ? e.structure(t[r]) : t[r]);
+				return n;
+			}
+			case "[object Object]": {
+				let n = [], r = Object.keys(t).sort((e, t) => e === t ? 0 : e < t ? -1 : 1);
+				for (let i of r) if (Object.prototype.hasOwnProperty.call(t, i)) {
+					let r = {};
+					r[i] = e.isStructure(t[i]) ? e.structure(t[i]) : t[i], n.push(r);
+				}
+				if (n.length > 0) return n;
+				break;
+			}
+		}
+		return t;
+	}
+	static isStructure(e) {
+		return ["[object Object]", "[object Array]"].includes(Object.prototype.toString.call(e));
+	}
+	view() {
+		return e.structure(this);
+	}
+}, ae = { 4: class extends ie {
+	constructor({ position: e = null, walletAddress: t = null, isotope: n = null, token: r = null, value: i = null, batchId: a = null, metaType: o = null, metaId: s = null, meta: c = null, index: l = null, createdAt: u = null, version: d = null }) {
+		super(), this.position = e, this.walletAddress = t, this.isotope = n, this.token = r, this.value = i, this.batchId = a, this.metaType = o, this.metaId = s, this.meta = c, this.index = l, this.createdAt = u, this.version = d;
+	}
+} }, T = class t {
+	constructor({ position: e = null, walletAddress: t = null, isotope: n = null, token: r = null, value: i = null, batchId: a = null, metaType: o = null, metaId: s = null, meta: c = null, otsFragment: l = null, index: u = null, version: d = null }) {
+		this.position = e, this.walletAddress = t, this.isotope = n, this.token = r, this.value = i === null ? null : String(i), this.batchId = a, this.metaType = o, this.metaId = s, this.meta = c ? b.normalizeMeta(c) : [], this.index = u, this.otsFragment = l, this.createdAt = String(+/* @__PURE__ */ new Date()), d !== null && Object.prototype.hasOwnProperty.call(ae, d) && (this.version = String(d));
+	}
+	static getHashableProps() {
+		return [
+			"position",
+			"walletAddress",
+			"isotope",
+			"token",
+			"value",
+			"batchId",
+			"metaType",
+			"metaId",
+			"meta",
+			"createdAt"
+		];
+	}
+	static getUnclaimedProps() {
+		return ["otsFragment"];
+	}
+	static create({ isotope: e, wallet: n = null, value: r = null, metaType: i = null, metaId: a = null, meta: o = null, batchId: s = null }) {
+		return o ||= new S(), o instanceof S || (o = new S(o)), n && (o.setAtomWallet(n), s ||= n.batchId), new t({
+			position: n ? n.position : null,
+			walletAddress: n ? n.address : null,
+			isotope: e,
+			token: n ? n.token : null,
+			value: r,
+			batchId: s,
+			metaType: i,
+			metaId: a,
+			meta: o.get()
+		});
+	}
+	static jsonToObject(e) {
+		let n = Object.assign(new t({}), JSON.parse(e)), r = Object.keys(new t({}));
+		for (let e in n) Object.prototype.hasOwnProperty.call(n, e) && !r.includes(e) && delete n[e];
+		return n;
+	}
+	toJSON(e = {}) {
+		let { includeOtsFragments: t = !0, validateFields: n = !1 } = e;
+		try {
+			if (n) {
+				for (let e of [
+					"position",
+					"walletAddress",
+					"isotope",
+					"token"
+				]) if (!this[e]) throw Error(`Required field '${e}' is missing or empty`);
+			}
+			let e = {
+				position: this.position ?? "",
+				walletAddress: this.walletAddress ?? "",
+				isotope: this.isotope,
+				token: this.token ?? "",
+				value: this.value,
+				batchId: this.batchId,
+				metaType: this.metaType,
+				metaId: this.metaId,
+				meta: this.meta || [],
+				index: this.index,
+				createdAt: this.createdAt,
+				version: this.version
+			};
+			return t && this.otsFragment && (e.otsFragment = this.otsFragment), e;
+		} catch (e) {
+			throw Error(`Atom serialization failed: ${e.message}`);
+		}
+	}
+	static fromJSON(e, n = {}) {
+		let { validateStructure: r = !0, strictMode: i = !1 } = n;
+		try {
+			let n = typeof e == "string" ? JSON.parse(e) : e;
+			if (i || r) {
+				for (let e of [
+					"position",
+					"walletAddress",
+					"isotope",
+					"token"
+				]) if (!n[e]) throw Error(`Required field '${e}' is missing or empty`);
+			}
+			let a = new t({
+				position: n.position,
+				walletAddress: n.walletAddress,
+				isotope: n.isotope,
+				token: n.token,
+				value: n.value,
+				batchId: n.batchId,
+				metaType: n.metaType,
+				metaId: n.metaId,
+				meta: n.meta,
+				index: n.index,
+				version: n.version
+			});
+			return n.otsFragment && (a.otsFragment = n.otsFragment), n.createdAt && (a.createdAt = n.createdAt), a;
+		} catch (e) {
+			throw Error(`Atom deserialization failed: ${e.message}`);
+		}
+	}
+	static hashAtoms({ atoms: n, output: r = "base17" }) {
+		let i = new e("SHAKE256", "TEXT"), a = t.sortAtoms(n);
+		if (a.length === 0) throw new w();
+		if (a.map((e) => {
+			if (!(e instanceof t)) throw new w();
+			return e;
+		}), a.every((e) => e.version && Object.prototype.hasOwnProperty.call(ae, e.version))) i.update(JSON.stringify(a.map((e) => ae[e.version].create(e).view())));
+		else {
+			let e = String(n.length), t = [];
+			for (let n of a) t.push(e), t = t.concat(n.getHashableValues());
+			for (let e of t) i.update(e);
+		}
+		switch (r) {
+			case "hex": return i.getHash("HEX", { outputLen: 256 });
+			case "array": return i.getHash("ARRAYBUFFER", { outputLen: 256 });
+			default: return p(i.getHash("HEX", { outputLen: 256 }), 16, 17, "0123456789abcdef", "0123456789abcdefg").padStart(64, "0");
+		}
+	}
+	static jsonSerialization(e, n) {
+		if (!t.getUnclaimedProps().includes(e)) return n;
+	}
+	static sortAtoms(e) {
+		let t = [...e];
+		return t.sort((e, t) => e.index < t.index ? -1 : 1), t;
+	}
+	aggregatedMeta() {
+		return b.aggregateMeta(this.meta);
+	}
+	getHashableValues() {
+		let e = [];
+		for (let n of t.getHashableProps()) {
+			let t = this[n];
+			if (!(t === null && !["position", "walletAddress"].includes(n))) {
+				if (n === "meta") for (let n of t) n.value !== void 0 && n.value !== null && (e.push(String(n.key)), e.push(String(n.value)));
+				else e.push(t === null ? "" : String(t));
+			}
+		}
+		return e;
+	}
 };
-class g {
-  /**
-   * Class constructor
-   *
-   * @param {string|null} position
-   * @param {string|null} walletAddress
-   * @param {string|null} isotope
-   * @param {string|null} token
-   * @param {string|number|null} value
-   * @param {string|null} batchId
-   * @param {string|null} metaType
-   * @param {string|null} metaId
-   * @param {array|object|null} meta
-   * @param {string|null} otsFragment
-   * @param {number|null} index
-   * @param {string|null} version
-   */
-  constructor({
-    position: e = null,
-    walletAddress: t = null,
-    isotope: n = null,
-    token: s = null,
-    value: r = null,
-    batchId: i = null,
-    metaType: a = null,
-    metaId: c = null,
-    meta: u = null,
-    otsFragment: l = null,
-    index: h = null,
-    version: p = null
-  }) {
-    this.position = e, this.walletAddress = t, this.isotope = n, this.token = s, this.value = r !== null ? String(r) : null, this.batchId = i, this.metaType = a, this.metaId = c, this.meta = u ? ye.normalizeMeta(u) : [], this.index = h, this.otsFragment = l, this.createdAt = String(+/* @__PURE__ */ new Date()), p !== null && Object.prototype.hasOwnProperty.call(Pe, p) && (this.version = String(p));
-  }
-  /**
-   *
-   * @returns {string[]}
-   */
-  static getHashableProps() {
-    return [
-      "position",
-      "walletAddress",
-      "isotope",
-      "token",
-      "value",
-      "batchId",
-      "metaType",
-      "metaId",
-      "meta",
-      "createdAt"
-    ];
-  }
-  /**
-   *
-   * @returns {string[]}
-   */
-  static getUnclaimedProps() {
-    return [
-      "otsFragment"
-    ];
-  }
-  /**
-   *
-   * @param {string} isotope
-   * @param {Wallet|null} wallet
-   * @param {int|null} value
-   * @param {string|null} metaType
-   * @param {string|null} metaId
-   * @param {AtomMeta|array|object|null} meta
-   * @param {string|null} batchId
-   * @returns {Atom}
-   */
-  static create({
-    isotope: e,
-    wallet: t = null,
-    value: n = null,
-    metaType: s = null,
-    metaId: r = null,
-    meta: i = null,
-    batchId: a = null
-  }) {
-    return i || (i = new K()), i instanceof K || (i = new K(i)), t && (i.setAtomWallet(t), a || (a = t.batchId)), new g({
-      position: t ? t.position : null,
-      walletAddress: t ? t.address : null,
-      isotope: e,
-      token: t ? t.token : null,
-      value: n,
-      batchId: a,
-      metaType: s,
-      metaId: r,
-      meta: i.get()
-    });
-  }
-  /**
-   * Converts a compliant JSON string into an Atom class instance
-   *
-   * @param {string} json
-   * @return {object}
-   */
-  static jsonToObject(e) {
-    const t = Object.assign(new g({}), JSON.parse(e)), n = Object.keys(new g({}));
-    for (const s in t)
-      Object.prototype.hasOwnProperty.call(t, s) && !n.includes(s) && delete t[s];
-    return t;
-  }
-  /**
-   * Returns JSON-ready object for cross-SDK compatibility (2025 JS best practices)
-   *
-   * Provides clean serialization of atomic operations with optional OTS fragments.
-   * Follows 2025 JavaScript best practices with proper type safety and validation.
-   *
-   * @param {Object} options - Serialization options
-   * @param {boolean} options.includeOtsFragments - Include OTS signature fragments (default: true)
-   * @param {boolean} options.validateFields - Validate required fields (default: false)
-   * @return {Object} JSON-serializable object
-   * @throws {Error} If atom is in invalid state for serialization
-   */
-  toJSON(e = {}) {
-    const {
-      includeOtsFragments: t = !0,
-      validateFields: n = !1
-    } = e;
-    try {
-      if (n) {
-        const r = ["position", "walletAddress", "isotope", "token"];
-        for (const i of r)
-          if (!this[i])
-            throw new Error(`Required field '${i}' is missing or empty`);
-      }
-      const s = {
-        position: this.position ?? "",
-        walletAddress: this.walletAddress ?? "",
-        isotope: this.isotope,
-        token: this.token ?? "",
-        value: this.value,
-        batchId: this.batchId,
-        metaType: this.metaType,
-        metaId: this.metaId,
-        meta: this.meta || [],
-        index: this.index,
-        createdAt: this.createdAt,
-        version: this.version
-      };
-      return t && this.otsFragment && (s.otsFragment = this.otsFragment), s;
-    } catch (s) {
-      throw new Error(`Atom serialization failed: ${s.message}`);
-    }
-  }
-  /**
-   * Creates an Atom instance from JSON data (2025 JS best practices)
-   *
-   * Handles cross-SDK atom deserialization with robust error handling.
-   * Essential for reconstructing atoms from other SDK implementations.
-   *
-   * @param {string|Object} json - JSON string or object to deserialize
-   * @param {Object} options - Deserialization options
-   * @param {boolean} options.validateStructure - Validate required fields (default: true)
-   * @param {boolean} options.strictMode - Strict validation mode (default: false)
-   * @return {Atom} Reconstructed atom instance
-   * @throws {Error} If JSON is invalid or required fields are missing
-   */
-  static fromJSON(e, t = {}) {
-    const {
-      validateStructure: n = !0,
-      strictMode: s = !1
-    } = t;
-    try {
-      const r = typeof e == "string" ? JSON.parse(e) : e;
-      if (s || n) {
-        const a = ["position", "walletAddress", "isotope", "token"];
-        for (const c of a)
-          if (!r[c])
-            throw new Error(`Required field '${c}' is missing or empty`);
-      }
-      const i = new g({
-        position: r.position,
-        walletAddress: r.walletAddress,
-        isotope: r.isotope,
-        token: r.token,
-        value: r.value,
-        batchId: r.batchId,
-        metaType: r.metaType,
-        metaId: r.metaId,
-        meta: r.meta,
-        index: r.index,
-        version: r.version
-      });
-      return r.otsFragment && (i.otsFragment = r.otsFragment), r.createdAt && (i.createdAt = r.createdAt), i;
-    } catch (r) {
-      throw new Error(`Atom deserialization failed: ${r.message}`);
-    }
-  }
-  /**
-   * Produces a hash of the atoms inside a molecule.
-   * Used to generate the molecularHash field for Molecules.
-   *
-   * @param {array} atoms
-   * @param {string} output
-   * @return {number[]|*}
-   */
-  static hashAtoms({
-    atoms: e,
-    output: t = "base17"
-  }) {
-    const n = new Q("SHAKE256", "TEXT"), s = g.sortAtoms(e);
-    if (s.length === 0)
-      throw new ae();
-    if (s.map((r) => {
-      if (!(r instanceof g))
-        throw new ae();
-      return r;
-    }), s.every((r) => r.version && Object.prototype.hasOwnProperty.call(Pe, r.version)))
-      n.update(JSON.stringify(s.map((r) => Pe[r.version].create(r).view())));
-    else {
-      const r = String(e.length);
-      let i = [];
-      for (const a of s)
-        i.push(r), i = i.concat(a.getHashableValues());
-      for (const a of i)
-        n.update(a);
-    }
-    switch (t) {
-      case "hex":
-        return n.getHash("HEX", { outputLen: 256 });
-      case "array":
-        return n.getHash("ARRAYBUFFER", { outputLen: 256 });
-      default:
-        return kn(n.getHash("HEX", { outputLen: 256 }), 16, 17, "0123456789abcdef", "0123456789abcdefg").padStart(64, "0");
-    }
-  }
-  static jsonSerialization(e, t) {
-    if (!g.getUnclaimedProps().includes(e))
-      return t;
-  }
-  /**
-   * Sort the atoms in a Molecule
-   *
-   * @param {array} atoms
-   * @return {array}
-   */
-  static sortAtoms(e) {
-    const t = [...e];
-    return t.sort((n, s) => n.index < s.index ? -1 : 1), t;
-  }
-  /**
-   * Get aggregated meta from stored normalized ones
-   */
-  aggregatedMeta() {
-    return ye.aggregateMeta(this.meta);
-  }
-  /**
-   *
-   * @returns {*[]}
-   */
-  getHashableValues() {
-    const e = [];
-    for (const t of g.getHashableProps()) {
-      const n = this[t];
-      if (!(n === null && !["position", "walletAddress"].includes(t)))
-        if (t === "meta")
-          for (const s of n)
-            typeof s.value < "u" && s.value !== null && (e.push(String(s.key)), e.push(String(s.value)));
-        else
-          e.push(n === null ? "" : String(n));
-    }
-    return e;
-  }
+//#endregion
+//#region src/libraries/crypto.js
+function oe(t = null, n = 2048) {
+	if (t) {
+		let r = new e("SHAKE256", "TEXT");
+		return r.update(t), r.getHash("HEX", { outputLen: n * 4 });
+	}
+	return f(n);
 }
-function at(o = null, e = 2048) {
-  if (o) {
-    const t = new Q("SHAKE256", "TEXT");
-    return t.update(o), t.getHash("HEX", { outputLen: e * 4 });
-  } else
-    return ut(e);
+function E(t, n = null) {
+	let r = new e("SHAKE256", "TEXT");
+	return r.update(t), r.getHash("HEX", { outputLen: 256 });
 }
-function me(o, e = null) {
-  const t = new Q("SHAKE256", "TEXT");
-  return t.update(o), t.getHash("HEX", { outputLen: 256 });
+function se(t, n) {
+	let r = new e("SHAKE256", "TEXT");
+	return r.update(t), r.getHash("HEX", { outputLen: n });
 }
-function Ze(o, e) {
-  const t = new Q("SHAKE256", "TEXT");
-  return t.update(o), t.getHash("HEX", { outputLen: e });
+function ce({ molecularHash: e = null, index: t = null }) {
+	return e !== null && t !== null ? E(String(e) + String(t), "generateBatchId") : f(64);
 }
-function Fe({
-  molecularHash: o = null,
-  index: e = null
-}) {
-  return o !== null && e !== null ? me(String(o) + String(e), "generateBatchId") : ut(64);
+//#endregion
+//#region src/TokenUnit.js
+var le = class e {
+	constructor(e, t, n) {
+		this.id = e, this.name = t, this.metas = n || {};
+	}
+	static createFromGraphQL(t) {
+		let n = t.metas || {};
+		return n.length && (n = JSON.parse(n), n ||= {}), new e(t.id, t.name, n);
+	}
+	static createFromDB(t) {
+		return new e(t[0], t[1], t.length > 2 ? t[2] : {});
+	}
+	getFragmentZone() {
+		return this.metas.fragmentZone || null;
+	}
+	getFusedTokenUnits() {
+		return this.metas.fusedTokenUnits || null;
+	}
+	toData() {
+		return [
+			this.id,
+			this.name,
+			this.metas
+		];
+	}
+	toGraphQLResponse() {
+		return {
+			id: this.id,
+			name: this.name,
+			metas: JSON.stringify(this.metas)
+		};
+	}
+}, ue = class extends C {
+	constructor(e = "Attempting to create a wallet with no credentials (secret or bundle hash)", t = null, n = null) {
+		super(e, t, n), this.name = "WalletCredentialException";
+	}
+}, de = /* @__PURE__ */ BigInt(2 ** 32 - 1), fe = /* @__PURE__ */ BigInt(32);
+function pe(e, t = !1) {
+	return t ? {
+		h: Number(e & de),
+		l: Number(e >> fe & de)
+	} : {
+		h: Number(e >> fe & de) | 0,
+		l: Number(e & de) | 0
+	};
 }
-class ge {
-  /**
-   *
-   * @param id
-   * @param name
-   * @param metas
-   */
-  constructor(e, t, n) {
-    this.id = e, this.name = t, this.metas = n || {};
-  }
-  /**
-   *
-   * @param data
-   * @returns {*}
-   */
-  static createFromGraphQL(e) {
-    let t = e.metas || {};
-    return t.length && (t = JSON.parse(t), t || (t = {})), new ge(
-      e.id,
-      e.name,
-      t
-    );
-  }
-  /**
-   *
-   * @param data
-   * @returns {TokenUnit}
-   */
-  static createFromDB(e) {
-    return new ge(
-      e[0],
-      e[1],
-      e.length > 2 ? e[2] : {}
-    );
-  }
-  /**
-   *
-   * @returns {*|null}
-   */
-  getFragmentZone() {
-    return this.metas.fragmentZone || null;
-  }
-  /**
-   *
-   * @returns {*|null}
-   */
-  getFusedTokenUnits() {
-    return this.metas.fusedTokenUnits || null;
-  }
-  /**
-   * @return array
-   */
-  toData() {
-    return [this.id, this.name, this.metas];
-  }
-  /**
-   *
-   * @returns {{metas: string, name: *, id: *}}
-   */
-  toGraphQLResponse() {
-    return {
-      id: this.id,
-      name: this.name,
-      metas: JSON.stringify(this.metas)
-    };
-  }
+function me(e, t = !1) {
+	let n = e.length, r = new Uint32Array(n), i = new Uint32Array(n);
+	for (let a = 0; a < n; a++) {
+		let { h: n, l: o } = pe(e[a], t);
+		[r[a], i[a]] = [n, o];
+	}
+	return [r, i];
 }
-class Ye extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Attempting to create a wallet with no credentials (secret or bundle hash)", t = null, n = null) {
-    super(e, t, n), this.name = "WalletCredentialException";
-  }
+//#endregion
+//#region node_modules/@noble/hashes/utils.js
+function he(e) {
+	return e instanceof Uint8Array || ArrayBuffer.isView(e) && e.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in e && e.BYTES_PER_ELEMENT === 1;
 }
-const qe = /* @__PURE__ */ BigInt(2 ** 32 - 1), mt = /* @__PURE__ */ BigInt(32);
-function Mn(o, e = !1) {
-  return e ? { h: Number(o & qe), l: Number(o >> mt & qe) } : { h: Number(o >> mt & qe) | 0, l: Number(o & qe) | 0 };
+var ge = (e) => e ? `"${e}" ` : "";
+function D(e, t = "") {
+	if (typeof e != "number") throw TypeError(ge(t) + "expected number, got " + typeof e);
+	if (!Number.isSafeInteger(e) || e < 0) throw RangeError(ge(t) + "expected integer >= 0, got " + e);
+	return e;
 }
-function Tn(o, e = !1) {
-  const t = o.length;
-  let n = new Uint32Array(t), s = new Uint32Array(t);
-  for (let r = 0; r < t; r++) {
-    const { h: i, l: a } = Mn(o[r], e);
-    [n[r], s[r]] = [i, a];
-  }
-  return [n, s];
+function _e(e, t = "") {
+	if (typeof e != "boolean") throw TypeError(ge(t) + "expected boolean, got type=" + typeof e);
+	return e;
 }
-const Cn = (o, e, t) => o << t | e >>> 32 - t, En = (o, e, t) => e << t | o >>> 32 - t, On = (o, e, t) => e << t - 32 | o >>> 64 - t, Rn = (o, e, t) => o << t - 32 | e >>> 64 - t;
-function qn(o) {
-  return o instanceof Uint8Array || ArrayBuffer.isView(o) && o.constructor.name === "Uint8Array";
+function O(e, t, n = "") {
+	if (he(e) && (t === void 0 || e.length === t)) return e;
+	t !== void 0 && D(t, "length");
+	let r = he(e), i = t === void 0 ? "" : ` of length ${t}`, a = r ? `length=${e.length}` : `type=${typeof e}`, o = ge(n) + "expected Uint8Array" + i + ", got " + a;
+	throw r ? RangeError(o) : TypeError(o);
 }
-function gt(o, e = "") {
-  if (!Number.isSafeInteger(o) || o < 0) {
-    const t = e && `"${e}" `;
-    throw new Error(`${t}expected integer >= 0, got ${o}`);
-  }
-}
-function j(o, e, t = "") {
-  const n = qn(o), s = o?.length, r = e !== void 0;
-  if (!n || r && s !== e) {
-    const i = t && `"${t}" `, a = r ? ` of length ${e}` : "", c = n ? `length=${s}` : `type=${typeof o}`;
-    throw new Error(i + "expected Uint8Array" + a + ", got " + c);
-  }
-  return o;
-}
-function wt(o, e = !0) {
-  if (o.destroyed)
-    throw new Error("Hash instance has been destroyed");
-  if (e && o.finished)
-    throw new Error("Hash#digest() has already been called");
-}
-function Bn(o, e) {
-  j(o, void 0, "digestInto() output");
-  const t = e.outputLen;
-  if (o.length < t)
-    throw new Error('"digestInto() output" expected to be of length >=' + t);
-}
-function jt(o) {
-  return new Uint32Array(o.buffer, o.byteOffset, Math.floor(o.byteLength / 4));
-}
-function Vt(...o) {
-  for (let e = 0; e < o.length; e++)
-    o[e].fill(0);
-}
-const Un = new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68;
-function Wn(o) {
-  return o << 24 & 4278190080 | o << 8 & 16711680 | o >>> 8 & 65280 | o >>> 24 & 255;
-}
-function Pn(o) {
-  for (let e = 0; e < o.length; e++)
-    o[e] = Wn(o[e]);
-  return o;
-}
-const bt = Un ? (o) => o : Pn;
-function zt(o, e = {}) {
-  const t = (s, r) => o(r).update(s).digest(), n = o(void 0);
-  return t.outputLen = n.outputLen, t.blockLen = n.blockLen, t.create = (s) => o(s), Object.assign(t, e), Object.freeze(t);
-}
-function Hn(o = 32) {
-  const e = typeof globalThis == "object" ? globalThis.crypto : null;
-  if (typeof e?.getRandomValues != "function")
-    throw new Error("crypto.getRandomValues must be defined");
-  return e.getRandomValues(new Uint8Array(o));
-}
-const De = (o) => ({
-  oid: Uint8Array.from([6, 9, 96, 134, 72, 1, 101, 3, 4, 2, o])
-}), Kn = BigInt(0), be = BigInt(1), Nn = BigInt(2), Fn = BigInt(7), Ln = BigInt(256), Qn = BigInt(113), Jt = [], Gt = [], Xt = [];
-for (let o = 0, e = be, t = 1, n = 0; o < 24; o++) {
-  [t, n] = [n, (2 * t + 3 * n) % 5], Jt.push(2 * (5 * n + t)), Gt.push((o + 1) * (o + 2) / 2 % 64);
-  let s = Kn;
-  for (let r = 0; r < 7; r++)
-    e = (e << be ^ (e >> Fn) * Qn) % Ln, e & Nn && (s ^= be << (be << BigInt(r)) - be);
-  Xt.push(s);
-}
-const Zt = Tn(Xt, !0), Dn = Zt[0], jn = Zt[1], kt = (o, e, t) => t > 32 ? On(o, e, t) : Cn(o, e, t), _t = (o, e, t) => t > 32 ? Rn(o, e, t) : En(o, e, t);
-function Vn(o, e = 24) {
-  const t = new Uint32Array(10);
-  for (let n = 24 - e; n < 24; n++) {
-    for (let i = 0; i < 10; i++)
-      t[i] = o[i] ^ o[i + 10] ^ o[i + 20] ^ o[i + 30] ^ o[i + 40];
-    for (let i = 0; i < 10; i += 2) {
-      const a = (i + 8) % 10, c = (i + 2) % 10, u = t[c], l = t[c + 1], h = kt(u, l, 1) ^ t[a], p = _t(u, l, 1) ^ t[a + 1];
-      for (let d = 0; d < 50; d += 10)
-        o[i + d] ^= h, o[i + d + 1] ^= p;
-    }
-    let s = o[2], r = o[3];
-    for (let i = 0; i < 24; i++) {
-      const a = Gt[i], c = kt(s, r, a), u = _t(s, r, a), l = Jt[i];
-      s = o[l], r = o[l + 1], o[l] = c, o[l + 1] = u;
-    }
-    for (let i = 0; i < 50; i += 10) {
-      for (let a = 0; a < 10; a++)
-        t[a] = o[i + a];
-      for (let a = 0; a < 10; a++)
-        o[i + a] ^= ~t[(a + 2) % 10] & t[(a + 4) % 10];
-    }
-    o[0] ^= Dn[n], o[1] ^= jn[n];
-  }
-  Vt(t);
-}
-class je {
-  state;
-  pos = 0;
-  posOut = 0;
-  finished = !1;
-  state32;
-  destroyed = !1;
-  blockLen;
-  suffix;
-  outputLen;
-  enableXOF = !1;
-  rounds;
-  // NOTE: we accept arguments in bytes instead of bits here.
-  constructor(e, t, n, s = !1, r = 24) {
-    if (this.blockLen = e, this.suffix = t, this.outputLen = n, this.enableXOF = s, this.rounds = r, gt(n, "outputLen"), !(0 < e && e < 200))
-      throw new Error("only keccak-f1600 function is supported");
-    this.state = new Uint8Array(200), this.state32 = jt(this.state);
-  }
-  clone() {
-    return this._cloneInto();
-  }
-  keccak() {
-    bt(this.state32), Vn(this.state32, this.rounds), bt(this.state32), this.posOut = 0, this.pos = 0;
-  }
-  update(e) {
-    wt(this), j(e);
-    const { blockLen: t, state: n } = this, s = e.length;
-    for (let r = 0; r < s; ) {
-      const i = Math.min(t - this.pos, s - r);
-      for (let a = 0; a < i; a++)
-        n[this.pos++] ^= e[r++];
-      this.pos === t && this.keccak();
-    }
-    return this;
-  }
-  finish() {
-    if (this.finished)
-      return;
-    this.finished = !0;
-    const { state: e, suffix: t, pos: n, blockLen: s } = this;
-    e[n] ^= t, (t & 128) !== 0 && n === s - 1 && this.keccak(), e[s - 1] ^= 128, this.keccak();
-  }
-  writeInto(e) {
-    wt(this, !1), j(e), this.finish();
-    const t = this.state, { blockLen: n } = this;
-    for (let s = 0, r = e.length; s < r; ) {
-      this.posOut >= n && this.keccak();
-      const i = Math.min(n - this.posOut, r - s);
-      e.set(t.subarray(this.posOut, this.posOut + i), s), this.posOut += i, s += i;
-    }
-    return e;
-  }
-  xofInto(e) {
-    if (!this.enableXOF)
-      throw new Error("XOF is not possible for this instance");
-    return this.writeInto(e);
-  }
-  xof(e) {
-    return gt(e), this.xofInto(new Uint8Array(e));
-  }
-  digestInto(e) {
-    if (Bn(e, this), this.finished)
-      throw new Error("digest() was already called");
-    return this.writeInto(e), this.destroy(), e;
-  }
-  digest() {
-    return this.digestInto(new Uint8Array(this.outputLen));
-  }
-  destroy() {
-    this.destroyed = !0, Vt(this.state);
-  }
-  _cloneInto(e) {
-    const { blockLen: t, suffix: n, outputLen: s, rounds: r, enableXOF: i } = this;
-    return e ||= new je(t, n, s, i, r), e.state32.set(this.state32), e.pos = this.pos, e.posOut = this.posOut, e.finished = this.finished, e.rounds = r, e.suffix = n, e.outputLen = s, e.enableXOF = i, e.destroyed = this.destroyed, e;
-  }
-}
-const Yt = (o, e, t, n = {}) => zt(() => new je(e, o, t), n), zn = /* @__PURE__ */ Yt(
-  6,
-  136,
-  32,
-  /* @__PURE__ */ De(8)
-), Jn = /* @__PURE__ */ Yt(
-  6,
-  72,
-  64,
-  /* @__PURE__ */ De(10)
-), en = (o, e, t, n = {}) => zt((s = {}) => new je(e, o, s.dkLen === void 0 ? t : s.dkLen, !0), n), Gn = /* @__PURE__ */ en(31, 168, 16, /* @__PURE__ */ De(11)), tn = /* @__PURE__ */ en(31, 136, 32, /* @__PURE__ */ De(12));
-function dt(o) {
-  if (!Number.isSafeInteger(o) || o < 0 || o > 4294967295)
-    throw new Error("wrong u32 integer:" + o);
-  return o;
-}
-function nn(o) {
-  return dt(o), (o & o - 1) === 0 && o !== 0;
-}
-function sn(o, e) {
-  dt(o);
-  let t = 0;
-  for (let n = 0; n < e; n++, o >>>= 1)
-    t = t << 1 | o & 1;
-  return t;
-}
-function rn(o) {
-  return dt(o), 31 - Math.clz32(o);
-}
-function St(o) {
-  const e = o.length;
-  if (e < 2 || !nn(e))
-    throw new Error("n must be a power of 2 and greater than 1. Got " + e);
-  const t = rn(e);
-  for (let n = 0; n < e; n++) {
-    const s = sn(n, t);
-    if (n < s) {
-      const r = o[n];
-      o[n] = o[s], o[s] = r;
-    }
-  }
-  return o;
-}
-const $t = (o, e) => {
-  const { N: t, roots: n, dit: s, invertButterflies: r = !1, skipStages: i = 0, brp: a = !0 } = e, c = rn(t);
-  if (!nn(t))
-    throw new Error("FFT: Polynomial size should be power of two");
-  const u = s !== r;
-  return (l) => {
-    if (l.length !== t)
-      throw new Error("FFT: wrong Polynomial length");
-    s && a && St(l);
-    for (let h = 0, p = 1; h < c - i; h++) {
-      const d = s ? h + 1 + i : c - h, w = 1 << d, A = w >> 1, O = t >> d;
-      for (let f = 0; f < t; f += w)
-        for (let y = 0, b = p++; y < A; y++) {
-          const T = r ? s ? t - b : b : y * O, k = f + y, $ = f + y + A, v = n[T], I = l[$], _ = l[k];
-          if (u) {
-            const W = o.mul(I, v);
-            l[k] = o.add(_, W), l[$] = o.sub(_, W);
-          } else r ? (l[k] = o.add(I, _), l[$] = o.mul(o.sub(I, _), v)) : (l[k] = o.add(_, I), l[$] = o.mul(o.sub(_, I), v));
-        }
-    }
-    return !s && a && St(l), l;
-  };
+var ve = (e, t) => {
+	if (typeof e != "object" || !e || Array.isArray(e)) throw TypeError((t === "object" ? "" : `"${t}" `) + "expected object, got type=" + typeof e);
+}, ye = (e, t) => {
+	ve(e, t);
+	let n = Object.getPrototypeOf(e);
+	if (n !== Object.prototype && n !== null) throw TypeError(`"${t}" expected plain object`);
+	if (Object.hasOwn(e, "__proto__")) throw TypeError(`"${t}.__proto__" is not allowed`);
 };
-const At = Hn;
-function et(o, e) {
-  if (o.length !== e.length)
-    return !1;
-  let t = 0;
-  for (let n = 0; n < o.length; n++)
-    t |= o[n] ^ e[n];
-  return t === 0;
+function be(e, t = !0) {
+	if (e.destroyed) throw Error("hash was destroyed");
+	if (t && e.finished) throw Error("digest() was already called");
 }
-function Xn(o) {
-  return Uint8Array.from(o);
+function xe(e, t) {
+	O(e, void 0, "output");
+	let n = t.outputLen;
+	if (!(e.length >= n)) throw RangeError("\"output\" expected length >= " + n);
 }
-function He(o, ...e) {
-  const t = (s) => typeof s == "number" ? s : s.bytesLen, n = e.reduce((s, r) => s + t(r), 0);
-  return {
-    bytesLen: n,
-    encode: (s) => {
-      const r = new Uint8Array(n);
-      for (let i = 0, a = 0; i < e.length; i++) {
-        const c = e[i], u = t(c), l = typeof c == "number" ? s[i] : c.encode(s[i]);
-        j(l, u, o), r.set(l, a), typeof c != "number" && l.fill(0), a += u;
-      }
-      return r;
-    },
-    decode: (s) => {
-      j(s, n, o);
-      const r = [];
-      for (const i of e) {
-        const a = t(i), c = s.subarray(0, a);
-        r.push(typeof i == "number" ? c : i.decode(c)), s = s.subarray(a);
-      }
-      return r;
-    }
-  };
+function Se(e) {
+	return new Uint32Array(e.buffer, e.byteOffset, Math.floor(e.byteLength / 4));
 }
-function tt(o, e) {
-  const t = e * o.bytesLen;
-  return {
-    bytesLen: t,
-    encode: (n) => {
-      if (n.length !== e)
-        throw new Error(`vecCoder.encode: wrong length=${n.length}. Expected: ${e}`);
-      const s = new Uint8Array(t);
-      for (let r = 0, i = 0; r < n.length; r++) {
-        const a = o.encode(n[r]);
-        s.set(a, i), a.fill(0), i += a.length;
-      }
-      return s;
-    },
-    decode: (n) => {
-      j(n, t);
-      const s = [];
-      for (let r = 0; r < n.length; r += o.bytesLen)
-        s.push(o.decode(n.subarray(r, r + o.bytesLen)));
-      return s;
-    }
-  };
+function Ce(...e) {
+	for (let t = 0; t < e.length; t++) e[t].fill(0);
 }
-function X(...o) {
-  for (const e of o)
-    if (Array.isArray(e))
-      for (const t of e)
-        t.fill(0);
-    else
-      e.fill(0);
+var we = new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68;
+function Te(e) {
+	return e << 24 & 4278190080 | e << 8 & 16711680 | e >>> 8 & 65280 | e >>> 24 & 255;
 }
-function vt(o) {
-  return (1 << o) - 1;
+function Ee(e) {
+	for (let t = 0; t < e.length; t++) e[t] = Te(e[t]);
+	return e;
 }
-const Zn = (o) => {
-  const { newPoly: e, N: t, Q: n, F: s, ROOT_OF_UNITY: r, brvBits: i } = o, a = (f, y = n) => {
-    const b = f % y | 0;
-    return (b >= 0 ? b | 0 : y + b | 0) | 0;
-  }, c = (f, y = n) => {
-    const b = a(f, y) | 0;
-    return (b > y >> 1 ? b - y | 0 : b) | 0;
-  };
-  function u() {
-    const f = e(t);
-    for (let y = 0; y < t; y++) {
-      const b = sn(y, i), T = BigInt(r) ** BigInt(b) % BigInt(n);
-      f[y] = Number(T) | 0;
-    }
-    return f;
-  }
-  const l = u(), h = {
-    add: (f, y) => a((f | 0) + (y | 0)) | 0,
-    sub: (f, y) => a((f | 0) - (y | 0)) | 0,
-    mul: (f, y) => a((f | 0) * (y | 0)) | 0,
-    inv: (f) => {
-      throw new Error("not implemented");
-    }
-  }, p = {
-    N: t,
-    roots: l,
-    invertButterflies: !0,
-    skipStages: 1,
-    brp: !1
-  }, d = $t(h, { dit: !1, ...p }), w = $t(h, { dit: !0, ...p });
-  return { mod: a, smod: c, nttZetas: l, NTT: {
-    encode: (f) => d(f),
-    decode: (f) => {
-      w(f);
-      for (let y = 0; y < f.length; y++)
-        f[y] = a(s * f[y]);
-      return f;
-    }
-  }, bitsCoder: (f, y) => {
-    const b = vt(f), T = f * (t / 8);
-    return {
-      bytesLen: T,
-      encode: (k) => {
-        const $ = new Uint8Array(T);
-        for (let v = 0, I = 0, _ = 0, W = 0; v < k.length; v++)
-          for (I |= (y.encode(k[v]) & b) << _, _ += f; _ >= 8; _ -= 8, I >>= 8)
-            $[W++] = I & vt(_);
-        return $;
-      },
-      decode: (k) => {
-        const $ = e(t);
-        for (let v = 0, I = 0, _ = 0, W = 0; v < k.length; v++)
-          for (I |= k[v] << _, _ += 8; _ >= f; _ -= f, I >>= f)
-            $[W++] = y.decode(I & b);
-        return $;
-      }
-    };
-  } };
-}, Yn = (o) => (e, t) => {
-  t || (t = o.blockLen);
-  const n = new Uint8Array(e.length + 2);
-  n.set(e);
-  const s = e.length, r = new Uint8Array(t);
-  let i = o.create({}), a = 0, c = 0;
-  return {
-    stats: () => ({ calls: a, xofs: c }),
-    get: (u, l) => (n[s + 0] = u, n[s + 1] = l, i.destroy(), i = o.create({}).update(n), a++, () => (c++, i.xofInto(r))),
-    clean: () => {
-      i.destroy(), X(r, n);
-    }
-  };
-}, es = /* @__PURE__ */ Yn(Gn);
-const L = 256, le = 3329, ts = 3303, ns = 17, { mod: Ie, nttZetas: ss, NTT: ne, bitsCoder: rs } = Zn({
-  N: L,
-  Q: le,
-  F: ts,
-  ROOT_OF_UNITY: ns,
-  newPoly: (o) => new Uint16Array(o),
-  brvBits: 7
-}), is = {
-  768: { N: L, Q: le, K: 3, ETA1: 2, ETA2: 2, du: 10, dv: 4, RBGstrength: 192 }
-}, os = (o) => {
-  if (o >= 12)
-    return { encode: (t) => t, decode: (t) => t };
-  const e = 2 ** (o - 1);
-  return {
-    // const compress = (i: number) => round((2 ** d / Q) * i) % 2 ** d;
-    encode: (t) => ((t << o) + le / 2) / le,
-    // const decompress = (i: number) => round((Q / 2 ** d) * i);
-    decode: (t) => t * le + e >>> o
-  };
-}, ke = (o) => rs(o, os(o));
-function se(o, e) {
-  for (let t = 0; t < L; t++)
-    o[t] = Ie(o[t] + e[t]);
+var De = we ? (e) => e : Ee;
+function Oe(e, t, n = "opts") {
+	return ye(e, "defaults"), t !== void 0 && ye(t, n), Object.assign(Object.create(null), e, t);
 }
-function as(o, e) {
-  for (let t = 0; t < L; t++)
-    o[t] = Ie(o[t] - e[t]);
+function ke(e, t = {}) {
+	if (typeof e != "function") throw TypeError("\"hashCons\" expected function, got type=" + typeof e);
+	t = Oe({}, t, "info");
+	let n = (t, n) => e(n).update(t).digest(), r = e(void 0);
+	return n.outputLen = r.outputLen, n.blockLen = r.blockLen, n.canXOF = r.canXOF, n.create = (t) => e(t), Object.assign(n, t), Object.freeze(n);
 }
-function ls(o, e, t, n, s) {
-  const r = Ie(e * n * s + o * t), i = Ie(o * n + e * t);
-  return { c0: r, c1: i };
+function Ae(e = 32) {
+	D(e, "bytesLength");
+	let t = typeof globalThis == "object" ? globalThis.crypto : null;
+	if (typeof t?.getRandomValues != "function") throw Error("crypto.getRandomValues must be defined");
+	if (e > 65536) throw RangeError(`"bytesLength" expected <= 65536, got ${e}`);
+	return t.getRandomValues(new Uint8Array(e));
 }
-function Be(o, e) {
-  for (let t = 0; t < L / 2; t++) {
-    let n = ss[64 + (t >> 1)];
-    t & 1 && (n = -n);
-    const { c0: s, c1: r } = ls(o[2 * t + 0], o[2 * t + 1], e[2 * t + 0], e[2 * t + 1], n);
-    o[2 * t + 0] = s, o[2 * t + 1] = r;
-  }
-  return o;
+var je = (e) => ({ oid: Uint8Array.from([
+	6,
+	9,
+	96,
+	134,
+	72,
+	1,
+	101,
+	3,
+	4,
+	2,
+	e
+]) }), Me = BigInt(0), Ne = BigInt(1), Pe = BigInt(2), Fe = BigInt(7), Ie = BigInt(256), Le = BigInt(113), Re = [], ze = [], Be = [];
+for (let e = 0, t = Ne, n = 1, r = 0; e < 24; e++) {
+	[n, r] = [r, (2 * n + 3 * r) % 5], Re.push(2 * (5 * r + n)), ze.push((e + 1) * (e + 2) / 2 % 64);
+	let i = Me;
+	for (let e = 0; e < 7; e++) t = (t << Ne ^ (t >> Fe) * Le) % Ie, t & Pe && (i ^= Ne << (Ne << BigInt(e)) - Ne);
+	Be.push(i);
 }
-function xt(o) {
-  const e = new Uint16Array(L);
-  for (let t = 0; t < L; ) {
-    const n = o();
-    if (n.length % 3)
-      throw new Error("SampleNTT: unaligned block");
-    for (let s = 0; t < L && s + 3 <= n.length; s += 3) {
-      const r = (n[s + 0] >> 0 | n[s + 1] << 8) & 4095, i = (n[s + 1] >> 4 | n[s + 2] << 4) & 4095;
-      r < le && (e[t++] = r), t < L && i < le && (e[t++] = i);
-    }
-  }
-  return e;
+var Ve = me(Be, !0), He = Ve[0], Ue = Ve[1], We = (e, t, n) => e << n | t >>> 32 - n, Ge = (e, t, n) => t << n | e >>> 32 - n, Ke = (e, t, n) => t << n - 32 | e >>> 64 - n, qe = (e, t, n) => e << n - 32 | t >>> 64 - n, Je = (e, t, n) => n > 32 ? Ke(e, t, n) : We(e, t, n), Ye = (e, t, n) => n > 32 ? qe(e, t, n) : Ge(e, t, n), Xe = /* @__PURE__ */ new Uint32Array(10);
+function Ze(e, t = 24) {
+	if (!(e instanceof Uint32Array)) throw TypeError("\"s\" expected Uint32Array(50), got type=" + typeof e);
+	if (e.length !== 50) throw RangeError("\"s\" expected Uint32Array(50), got length=" + e.length);
+	if (D(t, "rounds"), t < 1 || t > 24) throw Error("\"rounds\" expected integer 1..24");
+	for (let n = 24 - t; n < 24; n++) {
+		for (let t = 0; t < 10; t++) Xe[t] = e[t] ^ e[t + 10] ^ e[t + 20] ^ e[t + 30] ^ e[t + 40];
+		for (let t = 0; t < 10; t += 2) {
+			let n = (t + 8) % 10, r = (t + 2) % 10, i = Xe[r], a = Xe[r + 1], o = Je(i, a, 1) ^ Xe[n], s = Ye(i, a, 1) ^ Xe[n + 1];
+			for (let n = 0; n < 50; n += 10) e[t + n] ^= o, e[t + n + 1] ^= s;
+		}
+		let t = e[2], r = e[3];
+		for (let n = 0; n < 24; n++) {
+			let i = ze[n], a = Je(t, r, i), o = Ye(t, r, i), s = Re[n];
+			t = e[s], r = e[s + 1], e[s] = a, e[s + 1] = o;
+		}
+		for (let t = 0; t < 50; t += 10) {
+			let n = e[t], r = e[t + 1], i = e[t + 2], a = e[t + 3];
+			e[t] ^= ~e[t + 2] & e[t + 4], e[t + 1] ^= ~e[t + 3] & e[t + 5], e[t + 2] ^= ~e[t + 4] & e[t + 6], e[t + 3] ^= ~e[t + 5] & e[t + 7], e[t + 4] ^= ~e[t + 6] & e[t + 8], e[t + 5] ^= ~e[t + 7] & e[t + 9], e[t + 6] ^= ~e[t + 8] & n, e[t + 7] ^= ~e[t + 9] & r, e[t + 8] ^= ~n & i, e[t + 9] ^= ~r & a;
+		}
+		e[0] ^= He[n], e[1] ^= Ue[n];
+	}
+	Ce(Xe);
 }
-function _e(o, e, t, n) {
-  const s = o(n * L / 4, e, t), r = new Uint16Array(L), i = jt(s);
-  let a = 0;
-  for (let c = 0, u = 0, l = 0, h = 0; c < i.length; c++) {
-    let p = i[c];
-    for (let d = 0; d < 32; d++)
-      l += p & 1, p >>= 1, a += 1, a === n ? (h = l, l = 0) : a === 2 * n && (r[u++] = Ie(h - l), l = 0, a = 0);
-  }
-  if (a)
-    throw new Error(`sampleCBD: leftover bits: ${a}`);
-  return r;
+var Qe = class e {
+	state;
+	pos = 0;
+	posOut = 0;
+	finished = !1;
+	state32;
+	destroyed = !1;
+	blockLen;
+	suffix;
+	outputLen;
+	canXOF;
+	enableXOF = !1;
+	rounds;
+	constructor(e, t, n, r = !1, i = 24) {
+		if (D(e, "blockLen"), D(t, "suffix"), D(i, "rounds"), _e(r, "enableXOF"), this.blockLen = e, this.suffix = t, this.outputLen = n, this.enableXOF = r, this.canXOF = r, this.rounds = i, D(n, "outputLen"), !(0 < e && e < 200)) throw Error("\"blockLen\" must be 1..199");
+		this.state = /* @__PURE__ */ new Uint8Array(200), this.state32 = Se(this.state);
+	}
+	clone() {
+		return this._cloneInto();
+	}
+	keccak() {
+		De(this.state32), Ze(this.state32, this.rounds), De(this.state32), this.posOut = 0, this.pos = 0;
+	}
+	update(e) {
+		be(this), O(e);
+		let { blockLen: t, state: n, state32: r } = this, i = e.length, a = t % 4 == 0 && e.byteOffset % 4 == 0, o = t / 4, s = a && i >= t ? Se(e) : void 0;
+		for (let a = 0; a < i;) {
+			if (s !== void 0 && this.pos === 0 && a % 4 == 0 && i - a >= t) {
+				for (let e = 0, t = a / 4; e < o; e++) r[e] ^= s[t + e];
+				a += t, this.pos = t, this.keccak();
+				continue;
+			}
+			let c = Math.min(t - this.pos, i - a);
+			for (let t = 0; t < c; t++) n[this.pos++] ^= e[a++];
+			this.pos === t && this.keccak();
+		}
+		return this;
+	}
+	finish() {
+		if (this.finished) return;
+		this.finished = !0;
+		let { state: e, suffix: t, pos: n, blockLen: r } = this;
+		e[n] ^= t, t & 128 && n === r - 1 && this.keccak(), e[r - 1] ^= 128, this.keccak();
+	}
+	writeInto(e) {
+		be(this, !1), O(e), this.finish();
+		let t = this.state, { blockLen: n } = this;
+		for (let r = 0, i = e.length; r < i;) {
+			this.posOut >= n && this.keccak();
+			let a = Math.min(n - this.posOut, i - r);
+			e.set(t.subarray(this.posOut, this.posOut + a), r), this.posOut += a, r += a;
+		}
+		return e;
+	}
+	xofInto(e) {
+		if (!this.enableXOF) throw Error("XOF is not enabled");
+		return this.writeInto(e);
+	}
+	xof(e) {
+		return D(e), this.xofInto(new Uint8Array(e));
+	}
+	digestInto(e) {
+		if (xe(e, this), this.finished) throw Error("digest() was already called");
+		this.writeInto(e.length === this.outputLen ? e : e.subarray(0, this.outputLen)), this.destroy();
+	}
+	digest() {
+		let e = new Uint8Array(this.outputLen);
+		return this.digestInto(e), e;
+	}
+	destroy() {
+		this.destroyed = !0, Ce(this.state);
+	}
+	_cloneInto(t) {
+		let { blockLen: n, suffix: r, outputLen: i, rounds: a, enableXOF: o } = this;
+		return t ||= new e(n, r, i, o, a), t.blockLen = n, t.state32.set(this.state32), t.pos = this.pos, t.posOut = this.posOut, t.finished = this.finished, t.rounds = a, t.suffix = r, t.outputLen = i, t.enableXOF = o, t.canXOF = this.canXOF, t.destroyed = this.destroyed, t;
+	}
+}, $e = (e, t, n, r = {}) => ke(() => new Qe(t, e, n), r), et = /* @__PURE__ */ $e(6, 136, 32, /* @__PURE__ */ je(8)), tt = /* @__PURE__ */ $e(6, 72, 64, /* @__PURE__ */ je(10)), nt = (e, t, n, r = {}) => ke((r = {}) => (r = Oe({}, r), new Qe(t, e, r.dkLen === void 0 ? n : r.dkLen, !0)), r), rt = /* @__PURE__ */ nt(31, 168, 16, /* @__PURE__ */ je(11)), it = /* @__PURE__ */ nt(31, 136, 32, /* @__PURE__ */ je(12));
+//#endregion
+//#region node_modules/@noble/curves/utils.js
+function at(e, t = "object") {
+	if (typeof e != "object" || !e || Array.isArray(e)) throw TypeError(t === "object" ? "expected valid options object" : `"${t}" expected object, got type=${typeof e}`);
+	return e;
 }
-const cs = (o) => {
-  const { K: e, PRF: t, XOF: n, HASH512: s, ETA1: r, ETA2: i, du: a, dv: c } = o, u = ke(1), l = ke(c), h = ke(a), p = He("publicKey", tt(ke(12), e), 32), d = tt(ke(12), e), w = He("ciphertext", tt(h, e), l), A = He("seed", 32, 32);
-  return {
-    secretCoder: d,
-    lengths: {
-      secretKey: d.bytesLen,
-      publicKey: p.bytesLen,
-      cipherText: w.bytesLen
-    },
-    keygen: (O) => {
-      j(O, 32, "seed");
-      const f = new Uint8Array(33);
-      f.set(O), f[32] = e;
-      const y = s(f), [b, T] = A.decode(y), k = [], $ = [];
-      for (let _ = 0; _ < e; _++)
-        k.push(ne.encode(_e(t, T, _, r)));
-      const v = n(b);
-      for (let _ = 0; _ < e; _++) {
-        const W = ne.encode(_e(t, T, e + _, r));
-        for (let q = 0; q < e; q++) {
-          const he = xt(v.get(q, _));
-          se(W, Be(he, k[q]));
-        }
-        $.push(W);
-      }
-      v.clean();
-      const I = {
-        publicKey: p.encode([$, b]),
-        secretKey: d.encode(k)
-      };
-      return X(b, T, k, $, f, y), I;
-    },
-    encrypt: (O, f, y) => {
-      const [b, T] = p.decode(O), k = [];
-      for (let q = 0; q < e; q++)
-        k.push(ne.encode(_e(t, y, q, r)));
-      const $ = n(T), v = new Uint16Array(L), I = [];
-      for (let q = 0; q < e; q++) {
-        const he = _e(t, y, e + q, i), Ge = new Uint16Array(L);
-        for (let Re = 0; Re < e; Re++) {
-          const hn = xt($.get(q, Re));
-          se(Ge, Be(hn, k[Re]));
-        }
-        se(he, ne.decode(Ge)), I.push(he), se(v, Be(b[q], k[q])), X(Ge);
-      }
-      $.clean();
-      const _ = _e(t, y, 2 * e, i);
-      se(_, ne.decode(v));
-      const W = u.decode(f);
-      return se(W, _), X(b, k, v, _), w.encode([I, W]);
-    },
-    decrypt: (O, f) => {
-      const [y, b] = w.decode(O), T = d.decode(f), k = new Uint16Array(L);
-      for (let $ = 0; $ < e; $++)
-        se(k, Be(T[$], ne.encode(y[$])));
-      return as(b, ne.decode(k)), X(k, T, y), u.encode(b);
-    }
-  };
+function ot(e, t = {}, n = {}, r = "object") {
+	at(e, r), at(t, "fields"), at(n, "optFields");
+	function i(t, n, i) {
+		let a = r === "object" ? `param "${String(t)}"` : `"${r}.${String(t)}"`, o = e[t];
+		if (!Object.hasOwn(e, t) && (i ? o !== void 0 : n !== "function")) throw TypeError(`${a} is invalid: expected own property`);
+		if (i && o === void 0) return;
+		let s = typeof o;
+		if (s !== n || o === null) throw TypeError(`${a} is invalid: expected ${n}, got ${s}`);
+	}
+	let a = (e, t) => Object.entries(e).forEach(([e, n]) => i(e, n, t));
+	a(t, !1), a(n, !0);
+}
+//#endregion
+//#region node_modules/@noble/curves/abstract/fft.js
+function st(e, t = "n") {
+	if (typeof e != "number") throw TypeError(`wrong u32 integer "${t}": expected number, got type=${typeof e}`);
+	if (!Number.isSafeInteger(e) || e < 0 || e > 4294967295) throw RangeError(`wrong u32 integer "${t}": expected 0..4294967295, got ${e}`);
+	return e;
+}
+function ct(e) {
+	return st(e, "x"), !(e & e - 1) && e !== 0;
+}
+function lt(e, t) {
+	if (st(e), typeof t != "number") throw TypeError("\"bits\" expected number, got type=" + typeof t);
+	if (!Number.isSafeInteger(t) || t < 0 || t > 32) throw Error(`expected integer 0 <= bits <= 32, got ${t}`);
+	let n = 0;
+	for (let r = 0; r < t; r++, e >>>= 1) n = n << 1 | e & 1;
+	return n >>> 0;
+}
+function ut(e) {
+	return st(e), 31 - Math.clz32(e);
+}
+function dt(e) {
+	if (!e || typeof e != "object" || typeof e.length != "number") throw TypeError("\"values\" expected array-like, got type=" + typeof e);
+	let t = e.length;
+	if (!ct(t)) throw Error("expected positive power-of-two length, got " + t);
+	let n = ut(t);
+	for (let r = 0; r < t; r++) {
+		let t = lt(r, n);
+		if (r < t) {
+			let n = e[r];
+			e[r] = e[t], e[t] = n;
+		}
+	}
+	return e;
+}
+var ft = (e, t) => {
+	ot(t, {
+		N: "number",
+		roots: "object",
+		dit: "boolean"
+	}, {
+		invertButterflies: "boolean",
+		skipStages: "number",
+		brp: "boolean"
+	}, "coreOpts");
+	let { N: n, roots: r, dit: i, invertButterflies: a = !1, skipStages: o = 0, brp: s = !0 } = t;
+	st(n, "coreOpts.N");
+	let c = ut(n);
+	if (!ct(n)) throw Error("FFT: Polynomial size should be power of two");
+	st(o, "coreOpts.skipStages");
+	let l = c === 0 ? 0 : c - 1;
+	if (o > l) throw Error(`FFT: wrong skipStages: expected 0 <= skipStages <= ${l}`);
+	if (r.length !== n) throw Error(`FFT: wrong roots length: expected ${n}, got ${r.length}`);
+	let u = i !== a;
+	return (t) => {
+		if (t.length !== n) throw Error("FFT: wrong Polynomial length");
+		i && s && dt(t);
+		for (let s = 0, l = 1; s < c - o; s++) {
+			let d = i ? s + 1 + o : c - s, f = 1 << d, p = f >> 1, m = n >> d;
+			for (let o = 0; o < n; o += f) for (let s = 0, c = l++; s < p; s++) {
+				let l = a ? i ? n - c : c : s * m, d = o + s, f = o + s + p, h = r[l], g = t[f], _ = t[d];
+				if (u) {
+					let n = e.mul(g, h);
+					t[d] = e.add(_, n), t[f] = e.sub(_, n);
+				} else a ? (t[d] = e.add(g, _), t[f] = e.mul(e.sub(g, _), h)) : (t[d] = e.add(_, g), t[f] = e.mul(e.sub(_, g), h));
+			}
+		}
+		return !i && s && dt(t), t;
+	};
+}, k = O, pt = Ae;
+function mt(e, t, n = () => {}) {
+	if (!Array.isArray(e)) throw TypeError(`"${t}" expected array, got type=${typeof e}`);
+	for (let r = 0; r < e.length; r++) n(e[r], `${t}[${r}]`);
+	return e;
+}
+function ht(e, t) {
+	if (e = O(e), t = O(t), e.length !== t.length) return !1;
+	let n = 0;
+	for (let r = 0; r < e.length; r++) n |= e[r] ^ t[r];
+	return n === 0;
+}
+function gt(e) {
+	return new Uint8Array(O(e));
+}
+function _t(e, ...t) {
+	let n = (e) => typeof e == "number" ? e : e.bytesLen, r = t.reduce((e, t) => e + n(t), 0);
+	return {
+		bytesLen: r,
+		encode: (i) => {
+			let a = new Uint8Array(r);
+			for (let r = 0, o = 0; r < t.length; r++) {
+				let s = t[r], c = n(s), l = typeof s == "number" ? i[r] : s.encode(i[r]);
+				O(l, c, e), a.set(l, o), typeof s != "number" && l.fill(0), o += c;
+			}
+			return a;
+		},
+		decode: (i) => {
+			O(i, r, e);
+			let a = [];
+			for (let e of t) {
+				let t = n(e), r = i.subarray(0, t);
+				a.push(typeof e == "number" ? r : e.decode(r)), i = i.subarray(t);
+			}
+			return a;
+		}
+	};
+}
+function vt(e, t) {
+	let n = e, r = t * n.bytesLen;
+	return {
+		bytesLen: r,
+		encode: (e) => {
+			let i = mt(e, "u");
+			if (i.length !== t) throw RangeError(`vecCoder.encode: wrong length=${i.length}. Expected: ${t}`);
+			let a = new Uint8Array(r);
+			for (let e = 0, t = 0; e < i.length; e++) {
+				let r = n.encode(i[e]);
+				a.set(r, t), r.fill(0), t += r.length;
+			}
+			return a;
+		},
+		decode: (e) => {
+			O(e, r);
+			let t = [];
+			for (let r = 0; r < e.length; r += n.bytesLen) t.push(n.decode(e.subarray(r, r + n.bytesLen)));
+			return t;
+		}
+	};
+}
+function A(...e) {
+	for (let t of e) if (Array.isArray(t)) for (let e of t) e.fill(0);
+	else t.fill(0);
+}
+function yt(e) {
+	if (D(e, "bits"), e > 32) throw RangeError("\"bits\" expected <= 32, got " + e);
+	return e === 32 ? 4294967295 : ~(-1 << e) >>> 0;
+}
+//#endregion
+//#region node_modules/@noble/post-quantum/_crystals.js
+var bt = (e) => {
+	let { newPoly: t, N: n, Q: r, F: i, ROOT_OF_UNITY: a, brvBits: o, isKyber: s } = e, c = (e, t = r) => {
+		let n = e % t | 0;
+		return (n >= 0 ? n | 0 : t + n | 0) | 0;
+	}, l = (e, t = r) => {
+		let n = c(e, t) | 0;
+		return (n > t >> 1 ? n - t | 0 : n) | 0;
+	};
+	function u() {
+		let e = t(n);
+		for (let t = 0; t < n; t++) {
+			let n = lt(t, o), i = BigInt(a) ** BigInt(n) % BigInt(r);
+			e[t] = Number(i) | 0;
+		}
+		return e;
+	}
+	let d = u(), f = (e) => {
+		throw Error("not implemented");
+	}, p = s ? {
+		add: (e, t) => {
+			let n = e + t | 0;
+			return n >= r ? n - r | 0 : n;
+		},
+		sub: (e, t) => {
+			let n = e - t | 0;
+			return n < 0 ? n + r | 0 : n;
+		},
+		mul: (e, t) => c((e | 0) * (t | 0)) | 0,
+		inv: f
+	} : {
+		add: (e, t) => c((e | 0) + (t | 0)) | 0,
+		sub: (e, t) => c((e | 0) - (t | 0)) | 0,
+		mul: (e, t) => c((e | 0) * (t | 0)) | 0,
+		inv: f
+	}, m = {
+		N: n,
+		roots: d,
+		invertButterflies: !0,
+		skipStages: +!!s,
+		brp: !1
+	}, h = ft(p, {
+		dit: !1,
+		...m
+	}), g = ft(p, {
+		dit: !0,
+		...m
+	}), _ = {
+		encode: (e) => h(e),
+		decode: (e) => {
+			g(e);
+			for (let t = 0; t < e.length; t++) e[t] = c(i * e[t]);
+			return e;
+		}
+	};
+	return {
+		mod: c,
+		smod: l,
+		nttZetas: d,
+		NTT: {
+			encode: (e) => _.encode(e),
+			decode: (e) => _.decode(e)
+		},
+		bitsCoder: (e, r) => {
+			for (let t = 0, r = 0; t < n; t++) r += e, r > 32 && yt(r), r %= 8;
+			let i = yt(e), a = n / 8 * e;
+			return {
+				bytesLen: a,
+				encode: (t) => {
+					let n = t, o = new Uint8Array(a);
+					for (let t = 0, a = 0, s = 0, c = 0; t < n.length; t++) for (a |= (r.encode(n[t]) & i) << s, s += e; s >= 8; s -= 8, a >>= 8) o[c++] = a & 255;
+					return o;
+				},
+				decode: (a) => {
+					let o = t(n);
+					for (let t = 0, n = 0, s = 0, c = 0; t < a.length; t++) for (n |= a[t] << s, s += 8; s >= e; s -= e, n >>= e) o[c++] = r.decode(n & i);
+					return o;
+				}
+			};
+		}
+	};
+}, xt = /* @__PURE__ */ ((e) => (t, n) => {
+	n ||= e.blockLen;
+	let r = new Uint8Array(t.length + 2);
+	r.set(t);
+	let i = t.length, a = new Uint8Array(n), o = e.create({}), s = 0, c = 0;
+	return {
+		stats: () => ({
+			calls: s,
+			xofs: c
+		}),
+		get: (t, n) => (r[i + 0] = t, r[i + 1] = n, o.destroy(), o = e.create({}).update(r), s++, () => (c++, o.xofInto(a))),
+		clean: () => {
+			o.destroy(), A(a, r);
+		}
+	};
+})(rt), j = 256, M = 3329, N = /* @__PURE__ */ bt({
+	N: j,
+	Q: M,
+	F: 3303,
+	ROOT_OF_UNITY: 17,
+	newPoly: (e) => new Uint16Array(e),
+	brvBits: 7,
+	isKyber: !0
+}), St = /* @__PURE__ */ Object.freeze({
+	512: Object.freeze({
+		N: j,
+		Q: M,
+		K: 2,
+		ETA1: 3,
+		ETA2: 2,
+		du: 10,
+		dv: 4,
+		RBGstrength: 128
+	}),
+	768: Object.freeze({
+		N: j,
+		Q: M,
+		K: 3,
+		ETA1: 2,
+		ETA2: 2,
+		du: 10,
+		dv: 4,
+		RBGstrength: 192
+	}),
+	1024: Object.freeze({
+		N: j,
+		Q: M,
+		K: 4,
+		ETA1: 2,
+		ETA2: 2,
+		du: 11,
+		dv: 5,
+		RBGstrength: 256
+	})
+}), Ct = (e) => {
+	if (e >= 12) return {
+		encode: (e) => e,
+		decode: (e) => e >= M ? e - M : e
+	};
+	let t = 2 ** (e - 1);
+	return {
+		encode: (t) => ((t << e) + M / 2) / M,
+		decode: (n) => n * M + t >>> e
+	};
+}, wt = (e) => N.bitsCoder(e, e === 12 ? {
+	encode: (e) => e,
+	decode: (e) => e >= M ? e - M : e
+} : {
+	encode: (e) => e,
+	decode: (e) => e
+}), Tt = (e) => e === 12 ? wt(12) : N.bitsCoder(e, Ct(e));
+function P(e, t) {
+	let n = e, r = t;
+	for (let e = 0; e < j; e++) {
+		let t = n[e] + r[e];
+		n[e] = t >= M ? t - M : t;
+	}
+}
+function Et(e, t) {
+	let n = e, r = t;
+	for (let e = 0; e < j; e++) {
+		let t = n[e] - r[e];
+		n[e] = t < 0 ? t + M : t;
+	}
+}
+function Dt(e, t, n, r, i) {
+	return {
+		c0: N.mod(N.mod(t * r) * i + e * n),
+		c1: N.mod(e * r + t * n)
+	};
+}
+function Ot(e, t) {
+	let n = e, r = t;
+	for (let e = 0; e < j / 2; e++) {
+		let t = N.nttZetas[64 + (e >> 1)];
+		e & 1 && (t = -t);
+		let { c0: i, c1: a } = Dt(n[2 * e + 0], n[2 * e + 1], r[2 * e + 0], r[2 * e + 1], t);
+		n[2 * e + 0] = i, n[2 * e + 1] = a;
+	}
+	return n;
+}
+function kt(e) {
+	let t = e, n = new Uint16Array(j);
+	for (let e = 0; e < j;) {
+		let r = t();
+		if (r.length % 3) throw Error("SampleNTT: unaligned block");
+		for (let t = 0; e < j && t + 3 <= r.length; t += 3) {
+			let i = (r[t + 0] >> 0 | r[t + 1] << 8) & 4095, a = (r[t + 1] >> 4 | r[t + 2] << 4) & 4095;
+			i < M && (n[e++] = i), e < j && a < M && (n[e++] = a);
+		}
+	}
+	return n;
+}
+var At = (e, t) => {
+	let n = new Uint16Array(j), r = Se(e);
+	De(r);
+	let i = 0;
+	for (let e = 0, a = 0, o = 0, s = 0; e < r.length; e++) {
+		let c = r[e];
+		for (let e = 0; e < 32; e++) o += c & 1, c >>= 1, i += 1, i === t ? (s = o, o = 0) : i === 2 * t && (n[a++] = N.mod(s - o), o = 0, i = 0);
+	}
+	if (De(r), i) throw Error(`sampleCBD: leftover bits: ${i}`);
+	return n;
 };
-function us(o) {
-  const e = cs(o), { HASH256: t, HASH512: n, KDF: s } = o, { secretCoder: r, lengths: i } = e, a = He("secretKey", i.secretKey, i.publicKey, 32, 32), c = 32, u = 64;
-  return {
-    info: { type: "ml-kem" },
-    lengths: {
-      ...i,
-      seed: 64,
-      msg: c,
-      msgRand: c,
-      secretKey: a.bytesLen
-    },
-    keygen: (l = At(u)) => {
-      j(l, u, "seed");
-      const { publicKey: h, secretKey: p } = e.keygen(l.subarray(0, 32)), d = t(h), w = a.encode([p, h, d, l.subarray(32)]);
-      return X(p, d), { publicKey: h, secretKey: w };
-    },
-    getPublicKey: (l) => {
-      const [h, p] = a.decode(l);
-      return Uint8Array.from(p);
-    },
-    encapsulate: (l, h = At(c)) => {
-      j(l, i.publicKey, "publicKey"), j(h, c, "message");
-      const p = l.subarray(0, 384 * o.K), d = r.encode(r.decode(Xn(p)));
-      if (!et(d, p))
-        throw X(d), new Error("ML-KEM.encapsulate: wrong publicKey modulus");
-      X(d);
-      const w = n.create().update(h).update(t(l)).digest(), A = e.encrypt(l, h, w.subarray(32, 64));
-      return X(w.subarray(32)), { cipherText: A, sharedSecret: w.subarray(0, 32) };
-    },
-    decapsulate: (l, h) => {
-      j(h, a.bytesLen, "secretKey"), j(l, i.cipherText, "cipherText");
-      const p = a.bytesLen - 96, d = p + 32, w = t(h.subarray(p / 2, d));
-      if (!et(w, h.subarray(d, d + 32)))
-        throw new Error("invalid secretKey: hash check failed");
-      const [A, O, f, y] = a.decode(h), b = e.decrypt(l, A), T = n.create().update(b).update(f).digest(), k = T.subarray(0, 32), $ = e.encrypt(O, b, T.subarray(32, 64)), v = et(l, $), I = s.create({ dkLen: 32 }).update(y).update(l).digest();
-      return X(b, $, v ? I : k), v ? k : I;
-    }
-  };
+function jt(e, t, n, r) {
+	return At(e(r * j / 4, t, n), r);
 }
-function hs(o, e, t) {
-  return tn.create({ dkLen: o }).update(e).update(new Uint8Array([t])).digest();
-}
-const ds = {
-  HASH256: zn,
-  HASH512: Jn,
-  KDF: tn,
-  XOF: es,
-  PRF: hs
-}, nt = /* @__PURE__ */ us({
-  ...ds,
-  ...is[768]
-});
-class S {
-  /**
-   * Class constructor
-   *
-   * @param {string|null} secret - typically a 2048-character biometric hash
-   * @param {string|null} bundle - 64-character hexadecimal user identifier
-   * @param {string} token - slug for the token this wallet is intended for
-   * @param {string|null} address - hexadecimal public key for the signature of this wallet
-   * @param {string|null} position - hexadecimal string used to salt the secret and produce one-time signatures
-   * @param {string|null} batchId
-   * @param {string|null} characters
-   */
-  constructor({
-    secret: e = null,
-    bundle: t = null,
-    token: n = "USER",
-    address: s = null,
-    position: r = null,
-    batchId: i = null,
-    characters: a = null
-  }) {
-    this.token = n, this.balance = "0", this.molecules = {}, this.key = null, this.privkey = null, this.pubkey = null, this.tokenUnits = [], this.tradeRates = {}, this.address = s, this.position = r, this.bundle = t, this.batchId = i, this.characters = a, e && (this.bundle = this.bundle || me(e, "Wallet::constructor"), this.position = this.position || S.generatePosition(), this.key = S.generateKey({
-      secret: e,
-      token: this.token,
-      position: this.position
-    }), this.address = this.address || S.generateAddress(this.key), this.characters = this.characters || "BASE64", this.initializeMLKEM());
-  }
-  /**
-   * Creates a new Wallet instance
-   *
-   * @param {string|null} secret
-   * @param {string|null} bundle
-   * @param {string} token
-   * @param {string|null} batchId
-   * @param {string|null} characters
-   * @return {Wallet}
-   */
-  static create({
-    secret: e = null,
-    bundle: t = null,
-    token: n,
-    batchId: s = null,
-    characters: r = null
-  }) {
-    let i = null;
-    if (!e && !t)
-      throw new Ye();
-    return e && !t && (i = S.generatePosition(), t = me(e, "Wallet::create")), new S({
-      secret: e,
-      bundle: t,
-      token: n,
-      position: i,
-      batchId: s,
-      characters: r
-    });
-  }
-  /**
-   * Determines if the provided string is a bundle hash
-   *
-   * @param {string} maybeBundleHash
-   * @return {boolean}
-   */
-  static isBundleHash(e) {
-    return typeof e != "string" ? !1 : e.length === 64 && Xe(e);
-  }
-  /**
-   * Get formatted token units from the raw data
-   *
-   * @param unitsData
-   * @return {[]}
-   */
-  static getTokenUnits(e) {
-    const t = [];
-    return e.forEach((n) => {
-      t.push(ge.createFromDB(n));
-    }), t;
-  }
-  /**
-   * Generates a private key for the given parameters
-   *
-   * @param {string} secret
-   * @param {string} token
-   * @param {string} position
-   * @return {string}
-   */
-  static generateKey({
-    secret: e,
-    token: t,
-    position: n
-  }) {
-    if (!e)
-      throw new Ye("Wallet::generateKey() - Secret is required!");
-    if (!n)
-      throw new Ye("Wallet::generateKey() - Position is required!");
-    const s = Xe(e) ? e : Ze(e, 1024), r = Xe(n) ? n : Ze(n, 256), a = BigInt(`0x${s}`) + BigInt(`0x${r}`), c = new Q("SHAKE256", "TEXT");
-    c.update(a.toString(16)), t && c.update(t);
-    const u = new Q("SHAKE256", "TEXT");
-    return u.update(c.getHash("HEX", { outputLen: 8192 })), u.getHash("HEX", { outputLen: 8192 });
-  }
-  /**
-   * Generates a wallet address
-   *
-   * @param {string} key
-   * @return {string}
-   */
-  static generateAddress(e) {
-    const t = Ne(e, 128), n = new Q("SHAKE256", "TEXT");
-    for (const r in t) {
-      let i = t[r];
-      for (let a = 1; a <= 16; a++) {
-        const c = new Q("SHAKE256", "TEXT");
-        c.update(i), i = c.getHash("HEX", { outputLen: 512 });
-      }
-      n.update(i);
-    }
-    const s = new Q("SHAKE256", "TEXT");
-    return s.update(n.getHash("HEX", { outputLen: 8192 })), s.getHash("HEX", { outputLen: 256 });
-  }
-  /**
-   *
-   * @param saltLength
-   * @returns {string}
-   */
-  static generatePosition(e = 64) {
-    return ut(e, "abcdef0123456789");
-  }
-  /**
-   * Initializes the ML-KEM key pair
-   */
-  initializeMLKEM() {
-    const e = at(this.key, 128), t = new Uint8Array(64);
-    for (let r = 0; r < 64; r++)
-      t[r] = parseInt(e.substr(r * 2, 2), 16);
-    const { publicKey: n, secretKey: s } = nt.keygen(t);
-    this.pubkey = this.serializeKey(n), this.privkey = s;
-  }
-  serializeKey(e) {
-    if (typeof Buffer < "u")
-      return Buffer.from(e).toString("base64");
-    let t = "";
-    const n = 32768;
-    for (let s = 0; s < e.length; s += n)
-      t += String.fromCharCode(...e.subarray(s, s + n));
-    return btoa(t);
-  }
-  deserializeKey(e) {
-    if (typeof Buffer < "u")
-      return new Uint8Array(Buffer.from(e, "base64"));
-    const t = atob(e);
-    return new Uint8Array(t.length).map((n, s) => t.charCodeAt(s));
-  }
-  /**
-   * Returns balance as a Number for arithmetic operations.
-   * WARNING: Precision loss for values > 2^53.
-   *
-   * @return {number}
-   */
-  balanceAsNumber() {
-    return Number(this.balance);
-  }
-  /**
-   * Returns balance as a BigInt for precision-safe integer arithmetic.
-   * Truncates any fractional component.
-   *
-   * @return {bigint}
-   */
-  balanceAsBigInt() {
-    const e = String(this.balance), t = e.includes(".") ? e.split(".")[0] : e;
-    return BigInt(t || "0");
-  }
-  /**
-   * Sets balance from a BigInt value
-   *
-   * @param {bigint} value
-   */
-  setBalanceBigInt(e) {
-    this.balance = e.toString();
-  }
-  /**
-   * Sets balance from a Number value, storing as String
-   *
-   * @param {number} value
-   */
-  setBalanceNumber(e) {
-    this.balance = String(e);
-  }
-  /**
-   *
-   * @returns {*[]}
-   */
-  getTokenUnitsData() {
-    const e = [];
-    return this.tokenUnits.forEach((t) => {
-      e.push(t.toData());
-    }), e;
-  }
-  /**
-   * Split token units
-   *
-   * @param {array} units
-   * @param remainderWallet
-   * @param recipientWallet
-   */
-  splitUnits(e, t, n = null) {
-    if (e.length === 0)
-      return;
-    const s = [], r = [];
-    this.tokenUnits.forEach((i) => {
-      e.includes(i.id) ? s.push(i) : r.push(i);
-    }), this.tokenUnits = s, n !== null && (n.tokenUnits = s), t.tokenUnits = r;
-  }
-  /**
-   * Split token units across MULTIPLE recipients (WP line 544).
-   *
-   * The source retains the SENT union (all units leaving), each recipient gets its own subset,
-   * and the remainder gets the KEPT units (those not assigned to any recipient). Mirrors
-   * splitUnits() but N-way: the source's tokenUnits become the union (not a single recipient's
-   * subset) so the source atom carries the full SENT set the validator reads as the authority.
-   *
-   * @param {array[]} recipientUnitLists - array of unit-id arrays, parallel to recipientWallets
-   * @param {Wallet[]} recipientWallets
-   * @param {Wallet} remainderWallet
-   */
-  splitUnitsMulti(e, t, n) {
-    const s = /* @__PURE__ */ new Set();
-    e.forEach((r) => {
-      r.forEach((i) => s.add(i));
-    }), s.size !== 0 && (t.forEach((r, i) => {
-      const a = e[i];
-      r.tokenUnits = this.tokenUnits.filter((c) => a.includes(c.id));
-    }), n.tokenUnits = this.tokenUnits.filter((r) => !s.has(r.id)), this.tokenUnits = this.tokenUnits.filter((r) => s.has(r.id)));
-  }
-  /**
-   * Create a remainder wallet from the source one
-   *
-   * @param secret
-   */
-  createRemainder(e) {
-    const t = S.create({
-      secret: e,
-      token: this.token,
-      characters: this.characters
-    });
-    return t.initBatchId({
-      sourceWallet: this,
-      isRemainder: !0
-    }), t;
-  }
-  /**
-   * @return boolean
-   */
-  isShadow() {
-    return (typeof this.position > "u" || this.position === null) && (typeof this.address > "u" || this.address === null);
-  }
-  /**
-   * Sets up a batch ID - either using the sender's, or a new one
-   *
-   * @param {Wallet} sourceWallet
-   * @param {boolean} isRemainder
-   */
-  initBatchId({
-    sourceWallet: e,
-    isRemainder: t = !1
-  }) {
-    e.batchId && (this.batchId = t ? e.batchId : Fe({}));
-  }
-  async encryptMessage(e, t) {
-    const n = JSON.stringify(e), s = new TextEncoder().encode(n), r = this.deserializeKey(t), i = 1184;
-    if (r.length !== i)
-      throw new Error(
-        `KnishIO: cannot ML-KEM-encrypt — recipient public key is ${r.length} bytes, expected ${i} (ML-KEM-768). The node likely did not advertise an ML-KEM public key (upgrade the validator to a PQ-transport build), or authenticate with { encrypt: false }.`
-      );
-    const { cipherText: a, sharedSecret: c } = nt.encapsulate(r), u = await this.encryptWithSharedSecret(s, c);
-    return {
-      cipherText: this.serializeKey(a),
-      encryptedMessage: this.serializeKey(u)
-    };
-  }
-  async decryptMessage(e) {
-    const t = await this._mlkemDecryptToString(e);
-    return t === null ? null : JSON.parse(t);
-  }
-  /**
-   * ML-KEM768 decapsulate + AES-256-GCM decrypt → the RAW decrypted UTF-8 string
-   * (no JSON.parse). Shared by {@link decryptMessage} (which JSON.parses the result)
-   * and the PQ CipherHash transport ({@link decryptMyMessageML768}, which needs the raw
-   * response JSON text). PQ-transport Phase E (cycle 163).
-   */
-  async _mlkemDecryptToString(e) {
-    const { cipherText: t, encryptedMessage: n } = e;
-    let s;
-    try {
-      s = nt.decapsulate(this.deserializeKey(t), this.privkey);
-    } catch (a) {
-      return console.error("Wallet::decryptMessage() - Decapsulation failed", a), console.info("Wallet::decryptMessage() - my public key", this.pubkey), null;
-    }
-    let r;
-    try {
-      r = this.deserializeKey(n);
-    } catch (a) {
-      return console.warn("Wallet::decryptMessage() - Deserialization failed", a), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), null;
-    }
-    let i;
-    try {
-      i = await this.decryptWithSharedSecret(r, s);
-    } catch (a) {
-      return console.warn("Wallet::decryptMessage() - Decryption failed", a), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), console.info("Wallet::decryptMessage() - deserialized encrypted message", r), null;
-    }
-    try {
-      return new TextDecoder().decode(i);
-    } catch (a) {
-      return console.warn("Wallet::decryptMessage() - Decoding failed", a), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", s), console.info("Wallet::decryptMessage() - deserialized encrypted message", r), console.info("Wallet::decryptMessage() - decrypted Uint8Array", i), null;
-    }
-  }
-  /**
-   * Multi-recipient map key for a public key: `Base64_standard(SHAKE256(pubkey_utf8, 8 bytes))`
-   * — matches the validator's `hash_share` and the other SDKs' `hashShare`/`shortHash`.
-   * `shake256(pubkey, 64)` = 64 bits = 8 bytes, hex; hex-decode → standard base64. PQ Phase E.
-   */
-  hashShare(e) {
-    const t = Ze(e, 64), n = Uint8Array.from(t.match(/.{2}/g).map((s) => parseInt(s, 16)));
-    return this.serializeKey(n);
-  }
-  /**
-   * Post-quantum (ML-KEM768) `CipherHash` request envelope: a stringified single-recipient
-   * map `{ "<hashShare(recipientPubkey)>": {cipherText, encryptedMessage} }` (object-valued,
-   * via {@link encryptMessage}). Matches the Rust validator's CipherHash handler. PQ Phase E.
-   */
-  async encryptStringML768(e, t) {
-    const n = await this.encryptMessage(e, t);
-    return JSON.stringify({ [this.hashShare(t)]: n });
-  }
-  /**
-   * Decrypt a `CipherHash` response map addressed to THIS wallet's ML-KEM pubkey
-   * (`hashShare(this.pubkey)`) → the RAW decrypted GraphQL response JSON text (NOT JSON.parsed;
-   * it replaces the HTTP response body for the normal parser). `null` if no entry / decrypt fails.
-   */
-  async decryptMyMessageML768(e) {
-    const t = e[this.hashShare(this.pubkey)];
-    return t ? this._mlkemDecryptToString(t) : null;
-  }
-  async encryptWithSharedSecret(e, t) {
-    const n = crypto.getRandomValues(new Uint8Array(12)), s = { name: "AES-GCM", iv: n }, r = await crypto.subtle.importKey(
-      "raw",
-      t,
-      { name: "AES-GCM" },
-      !1,
-      ["encrypt"]
-    ), i = await crypto.subtle.encrypt(
-      s,
-      r,
-      e
-    ), a = new Uint8Array(n.length + i.byteLength);
-    return a.set(n), a.set(new Uint8Array(i), n.length), a;
-  }
-  /**
-   * Decrypts the given message using the shared secret
-   * @param encryptedMessage
-   * @param sharedSecret
-   * @returns {Promise<Uint8Array>}
-   */
-  async decryptWithSharedSecret(e, t) {
-    const s = { name: "AES-GCM", iv: e.slice(0, 12) }, r = await crypto.subtle.importKey(
-      "raw",
-      t,
-      { name: "AES-GCM" },
-      !1,
-      ["decrypt"]
-    ), i = await crypto.subtle.decrypt(
-      s,
-      r,
-      e.slice(12)
-    );
-    return new Uint8Array(i);
-  }
-}
-class Se extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "There is an atom without an index", t = null, n = null) {
-    super(e, t, n), this.name = "AtomIndexException";
-  }
-}
-class ps extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "The molecular hash does not match", t = null, n = null) {
-    super(e, t, n), this.name = "MolecularHashMismatchException";
-  }
-}
-class fs extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "The molecular hash is missing", t = null, n = null) {
-    super(e, t, n), this.name = "MolecularHashMissingException";
-  }
-}
-class It extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "", t = null, n = null) {
-    super(e, t, n), this.name = "PolicyInvalidException";
-  }
-}
-class on extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "OTS malformed", t = null, n = null) {
-    super(e, t, n), this.name = "SignatureMalformedException";
-  }
-}
-class ys extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "One-time signature (OTS) does not match!", t = null, n = null) {
-    super(e, t, n), this.name = "SignatureMismatchException";
-  }
-}
-class G extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Insufficient balance to make transfer", t = null, n = null) {
-    super(e, t, n), this.name = "TransferBalanceException";
-  }
-}
-class $e extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Token transfer atoms are malformed", t = null, n = null) {
-    super(e, t, n), this.name = "TransferMalformedException";
-  }
-}
-class Mt extends x {
-  /**
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Token slugs for wallets in transfer do not match!", t = null, n = null) {
-    super(e, t, n), this.name = "TransferMismatchedException";
-  }
-}
-class Tt extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Invalid remainder provided", t = null, n = null) {
-    super(e, t, n), this.name = "TransferRemainderException";
-  }
-}
-class ms extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Sender and recipient(s) cannot be the same", t = null, n = null) {
-    super(e, t, n), this.name = "TransferToSelfException";
-  }
-}
-class Ue extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Token transfer atoms are unbalanced", t = null, n = null) {
-    super(e, t, n), this.name = "TransferUnbalancedException";
-  }
-}
-class H extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Empty meta data.", t = null, n = null) {
-    super(e, t, n), this.name = "MetaMissingException";
-  }
-}
-class re extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Wrong type of token for this isotope", t = null, n = null) {
-    super(e, t, n), this.name = "WrongTokenTypeException";
-  }
-}
-class Ke extends x {
-  /**
-   * @param {string|null} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Incorrect BatchId", t = null, n = null) {
-    super(e, t, n), this.name = "BatchIdException";
-  }
-}
-class Ct {
-  constructor(e = {}) {
-    for (const t in e)
-      this[`__${t}`] = e[t];
-  }
-  static toObject(e) {
-    return new this(e);
-  }
-  /**
-   *
-   * @returns {{}}
-   */
-  toJSON() {
-    const e = {};
-    for (const t of Object.keys(this))
-      t.substring(0, 2) === "__" && (e[t.substring(2, t.length)] = this[t]);
-    return e;
-  }
-}
-class Le extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "An incorrect argument!", t = null, n = null) {
-    super(e, t, n), this.name = "RuleArgumentException";
-  }
-}
-class ee extends x {
-  /**
-   * @param {string|null} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Code exception", t = null, n = null) {
-    super(e, t, n), this.name = "CodeException";
-  }
-}
-class xe {
-  /**
-   *
-   * @param {string} action
-   * @param {string|null} metaType
-   * @param {string|null} metaId
-   * @param {Meta|null} meta
-   * @param {string|null} address
-   * @param {string|null} token
-   * @param {string|null} amount
-   * @param {string|null} comparison
-   */
-  constructor({
-    action: e,
-    metaType: t = null,
-    metaId: n = null,
-    meta: s = null,
-    address: r = null,
-    token: i = null,
-    amount: a = null,
-    comparison: c = null
-  }) {
-    if (s && (this.meta = s), !e)
-      throw new Le('Callback structure violated, missing mandatory "action" parameter.');
-    this.__metaId = n, this.__metaType = t, this.__action = e, this.__address = r, this.__token = i, this.__amount = a, this.__comparison = c;
-  }
-  /**
-   *
-   * @param {string} comparison
-   */
-  set comparison(e) {
-    this.__comparison = e;
-  }
-  /**
-   *
-   * @param {string} amount
-   */
-  set amount(e) {
-    if (!An(e))
-      throw new ee("Parameter amount should be a string containing numbers");
-    this.__amount = e;
-  }
-  /**
-   *
-   * @param {string} token
-   */
-  set token(e) {
-    this.__token = e;
-  }
-  /**
-   *
-   * @param {string} address
-   */
-  set address(e) {
-    this.__address = e;
-  }
-  /**
-   *
-   * @param {Meta|object} meta
-   */
-  set meta(e) {
-    this.__meta = e instanceof Ct ? e : Ct.toObject(e);
-  }
-  /**
-   *
-   * @param {string} metaType
-   */
-  set metaType(e) {
-    this.__metaType = e;
-  }
-  /**
-   *
-   * @param {string} metaId
-   */
-  set metaId(e) {
-    this.__metaId = e;
-  }
-  /**
-   *
-   * @param {object} object
-   *
-   * @return Callback
-   */
-  static toObject(e) {
-    const t = new xe({
-      action: e.action
-    });
-    return e.metaType && (t.metaType = e.metaType), e.metaId && (t.metaId = e.metaId), e.meta && (t.meta = e.meta), e.address && (t.address = e.address), e.token && (t.token = e.token), e.amount && (t.amount = e.amount), e.comparison && (t.comparison = e.comparison), t;
-  }
-  /**
-   *
-   * @return {{action: string}}
-   */
-  toJSON() {
-    const e = {
-      action: this.__action
-    };
-    return this.__metaType && (e.metaType = this.__metaType), this.__metaId && (e.metaId = this.__metaId), this.__meta && (e.meta = this.__meta), this.__address && (e.address = this.__address), this.__token && (e.token = this.__token), this.__amount && (e.amount = this.__amount), this.__comparison && (e.comparison = this.__comparison), e;
-  }
-  /**
-   * @return {boolean}
-   */
-  isReject() {
-    return this._is("reject");
-  }
-  /**
-   * @return {boolean}
-   */
-  isMeta() {
-    return we(Object.keys(this.toJSON()), ["action", "metaId", "metaType", "meta"]).length === 4 && this._is("meta");
-  }
-  /**
-   * @return {boolean}
-   */
-  isCollect() {
-    return we(Object.keys(this.toJSON()), ["action", "address", "token", "amount", "comparison"]).length === 5 && this._is("collect");
-  }
-  /**
-   * @return {boolean}
-   */
-  isBuffer() {
-    return we(Object.keys(this.toJSON()), ["action", "address", "token", "amount", "comparison"]).length === 5 && this._is("buffer");
-  }
-  /**
-   * @return {boolean}
-   */
-  isRemit() {
-    return we(Object.keys(this.toJSON()), ["action", "token", "amount"]).length === 3 && this._is("remit");
-  }
-  /**
-   * @return {boolean}
-   */
-  isBurn() {
-    return we(Object.keys(this.toJSON()), ["action", "token", "amount", "comparison"]).length === 4 && this._is("burn");
-  }
-  /**
-   * @param {string} type
-   *
-   * @return {boolean}
-   * @private
-   */
-  _is(e) {
-    return this.__action.toLowerCase() === e.toLowerCase();
-  }
-}
-class st {
-  /**
-   *
-   * @param key
-   * @param value
-   * @param comparison
-   */
-  constructor({
-    key: e,
-    value: t,
-    comparison: n
-  }) {
-    if ([e, t, n].some((s) => !s))
-      throw new Le("Condition::constructor( { key, value, comparison } ) - not all class parameters are initialised!");
-    this.__key = e, this.__value = t, this.__comparison = n;
-  }
-  /**
-   * @param object
-   * @return {Condition}
-   */
-  static toObject(e) {
-    return new this({
-      key: e.key,
-      value: e.value,
-      comparison: e.comparison
-    });
-  }
-  /**
-   * @return {{comparison, value, key}}
-   */
-  toJSON() {
-    return {
-      key: this.__key,
-      value: this.__value,
-      comparison: this.__comparison
-    };
-  }
-}
-class Me {
-  /**
-   *
-   * @param {Condition[]} condition
-   * @param  {Callback[]} callback
-   */
-  constructor({
-    condition: e = [],
-    callback: t = []
-  }) {
-    for (const n of e)
-      if (!(n instanceof st))
-        throw new Le();
-    for (const n of t)
-      if (!(n instanceof xe))
-        throw new Le();
-    this.__condition = e, this.__callback = t;
-  }
-  /**
-   *
-   * @param {Condition[]|{}} condition
-   */
-  set comparison(e) {
-    this.__condition.push(e instanceof st ? e : st.toObject(e));
-  }
-  /**
-   * @param {Callback[]|{}} callback
-   */
-  set callback(e) {
-    this.__callback.push(e instanceof xe ? e : xe.toObject(e));
-  }
-  /**
-   *
-   * @param {object} object
-   *
-   * @return {Rule}
-   */
-  static toObject(e) {
-    if (!e.condition)
-      throw new H("Rule::toObject() - Incorrect rule format! There is no condition field.");
-    if (!e.callback)
-      throw new H("Rule::toObject() - Incorrect rule format! There is no callback field.");
-    const t = new Me({});
-    for (const n of e.condition)
-      t.comparison = n;
-    for (const n of e.callback)
-      t.callback = n;
-    return t;
-  }
-  /**
-   * @returns {{condition: *, callback: Callback[]}}
-   */
-  toJSON() {
-    return {
-      condition: this.__condition,
-      callback: this.__callback
-    };
-  }
-}
-class M {
-  /**
-   * Initialize the Dot utility with the given object and key path
-   * @param {object|array} obj - The object or array to traverse
-   * @param {string} keys - The dot-notated string of keys
-   * @private
-   */
-  static __init(e, t) {
-    this.arr = String(t).split("."), this.key = this.arr.shift();
-    const n = Number(this.key);
-    Number.isInteger(n) && (this.key = n), this.__nextKey = this.arr.length, this.__next = this.__tic(e);
-  }
-  /**
-   * Check if the current key exists in the object
-   * @param {object|array} obj - The object or array to check
-   * @return {boolean} - Whether the key exists
-   * @private
-   */
-  static __tic(e) {
-    return !Array.isArray(e) && !(e instanceof Object) ? !1 : typeof e[this.key] < "u";
-  }
-  /**
-   * Check if a nested property exists in an object using dot notation
-   * @param {object|array} obj - The object or array to search
-   * @param {string} keys - The path to the property, using dot notation
-   * @return {boolean} - True if the property exists, false otherwise
-   */
-  static has(e, t) {
-    return this.__init(e, t), this.__next ? this.__nextKey === 0 ? !0 : this.has(e[this.key], this.arr.join(".")) : !1;
-  }
-  /**
-   * Get a nested property from an object using dot notation
-   * @param {object|array} obj - The object or array to search
-   * @param {string} keys - The path to the property, using dot notation
-   * @param {*} [def=null] - The default value to return if the property is not found
-   * @return {*} - The value of the property, or the default value if not found
-   */
-  static get(e, t, n = null) {
-    return this.__init(e, t), this.__next ? this.__nextKey === 0 ? e[this.key] : this.get(e[this.key], this.arr.join("."), n) : n;
-  }
-  /**
-   * Set a nested property in an object using dot notation
-   * @param {object|array} obj - The object or array to modify
-   * @param {string} keys - The path to the property, using dot notation
-   * @param {*} value - The value to set
-   * @return {object|array} - The modified object or array
-   */
-  static set(e, t, n) {
-    const s = t.split(".");
-    let r = e;
-    const i = s.length - 1;
-    for (let u = 0; u < i; u++) {
-      const l = s[u], h = Number(l), p = Number.isInteger(h);
-      (p ? h : l in r) || (r[p ? h : l] = s[u + 1].match(/^\d+$/) ? [] : {}), r = r[p ? h : l];
-    }
-    const a = s[i], c = Number(a);
-    return r[Number.isInteger(c) ? c : a] = n, e;
-  }
-}
-class Te {
-  /**
-   *
-   * @param molecule
-   */
-  constructor(e) {
-    if (e.molecularHash === null)
-      throw new fs();
-    if (!e.atoms.length)
-      throw new ae();
-    for (const t of e.atoms)
-      if (t.index === null)
-        throw new Se();
-    this.molecule = e;
-  }
-  /**
-   *
-   * @param senderWallet
-   * @returns {false|*|boolean}
-   */
-  verify(e) {
-    return this.molecularHash() && this.ots() && this.batchId() && this.continuId() && this.isotopeM() && this.isotopeT() && this.isotopeC() && this.isotopeU() && this.isotopeI() && this.isotopeR() && this.isotopeP() && this.isotopeA() && this.isotopeB() && this.isotopeF() && this.isotopeV(e);
-  }
-  /**
-   *
-   * @returns {boolean}
-   */
-  continuId() {
-    if (this.molecule.atoms[0].token === "USER" && this.molecule.getIsotopes("I").length < 1)
-      throw new ae("Check::continuId() - Molecule is missing required ContinuID Atom!");
-    return !0;
-  }
-  /**
-   *
-   * @returns {boolean}
-   */
-  batchId() {
-    if (this.molecule.atoms.length > 0) {
-      const e = this.molecule.atoms[0];
-      if (e.isotope === "V" && e.batchId !== null) {
-        const t = this.molecule.getIsotopes("V"), n = t[t.length - 1];
-        if (e.batchId !== n.batchId)
-          throw new Ke();
-        for (const s of t)
-          if (s.batchId === null)
-            throw new Ke();
-      }
-      return !0;
-    }
-    throw new Ke();
-  }
-  /**
-   *
-   * @returns {boolean}
-   */
-  isotopeI() {
-    for (const e of this.molecule.getIsotopes("I")) {
-      if (e.token !== "USER")
-        throw new re(`Check::isotopeI() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
-      if (e.index === 0)
-        throw new Se(`Check::isotopeI() - Isotope "${e.isotope}" Atoms must have a non-zero index!`);
-    }
-    return !0;
-  }
-  /**
-   *
-   * @returns {boolean}
-   */
-  isotopeU() {
-    for (const e of this.molecule.getIsotopes("U")) {
-      if (e.token !== "AUTH")
-        throw new re(`Check::isotopeU() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
-      if (e.index !== 0)
-        throw new Se(`Check::isotopeU() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
-    }
-    return !0;
-  }
-  /**
-   *
-   * @returns {boolean}
-   */
-  isotopeM() {
-    const e = ["readPolicy", "writePolicy"];
-    for (const t of this.molecule.getIsotopes("M")) {
-      if (t.meta.length < 1)
-        throw new H();
-      if (t.token !== "USER")
-        throw new re(`Check::isotopeM() - "${t.token}" is not a valid Token slug for "${t.isotope}" isotope Atoms!`);
-      const n = ye.aggregateMeta(t.meta);
-      for (const s of e) {
-        let r = n[s];
-        if (r) {
-          r = JSON.parse(r);
-          for (const [i, a] of Object.entries(r))
-            if (!e.includes(i)) {
-              if (!Object.keys(n).includes(i))
-                throw new It(`${i} is missing from the meta.`);
-              for (const c of a)
-                if (!S.isBundleHash(c) && !["all", "self"].includes(c))
-                  throw new It(`${c} does not correspond to the format of the policy.`);
-            }
-        }
-      }
-    }
-    return !0;
-  }
-  /**
-   *
-   * @returns {boolean}
-   */
-  isotopeC() {
-    for (const e of this.molecule.getIsotopes("C")) {
-      if (e.token !== "USER")
-        throw new re(`Check::isotopeC() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
-      if (e.index !== 0)
-        throw new Se(`Check::isotopeC() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
-    }
-    return !0;
-  }
-  /**
-   *
-   * @returns {boolean}
-   */
-  isotopeT() {
-    for (const e of this.molecule.getIsotopes("T")) {
-      const t = e.aggregatedMeta();
-      if (String(e.metaType).toLowerCase() === "wallet") {
-        for (const s of ["position", "bundle"])
-          if (!Object.prototype.hasOwnProperty.call(t, s) || !t[s])
-            throw new H(`Check::isotopeT() - Required meta field "${s}" is missing!`);
-      }
-      for (const s of ["token"])
-        if (!Object.prototype.hasOwnProperty.call(t, s) || !t[s])
-          throw new H(`Check::isotopeT() - Required meta field "${s}" is missing!`);
-      if (e.token !== "USER")
-        throw new re(`Check::isotopeT() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
-      if (e.index !== 0)
-        throw new Se(`Check::isotopeT() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
-    }
-    return !0;
-  }
-  /**
-   *
-   * @returns {boolean}
-   */
-  isotopeR() {
-    for (const e of this.molecule.getIsotopes("R")) {
-      const t = e.aggregatedMeta();
-      if (t.policy) {
-        const n = JSON.parse(t.policy);
-        if (!Object.keys(n).every((s) => ["read", "write"].includes(s)))
-          throw new H("Check::isotopeR() - Mixing rules with politics!");
-      }
-      if (t.rule) {
-        const n = JSON.parse(t.rule);
-        if (!Array.isArray(n))
-          throw new H("Check::isotopeR() - Incorrect rule format!");
-        for (const s of n)
-          Me.toObject(s);
-        if (n.length < 1)
-          throw new H("Check::isotopeR() - No rules!");
-      }
-    }
-    return !0;
-  }
-  /**
-   * Validates P-isotope (Peering) atoms
-   *
-   * @returns {boolean}
-   */
-  isotopeP() {
-    for (const e of this.molecule.getIsotopes("P")) {
-      if (e.token !== "USER")
-        throw new re(`Check::isotopeP() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
-      const t = e.aggregatedMeta();
-      if (!Object.prototype.hasOwnProperty.call(t, "peerHost") || !t.peerHost)
-        throw new H('Check::isotopeP() - Required meta field "peerHost" is missing!');
-    }
-    return !0;
-  }
-  /**
-   * Validates A-isotope (Append Request) atoms
-   *
-   * @returns {boolean}
-   */
-  isotopeA() {
-    for (const e of this.molecule.getIsotopes("A")) {
-      if (e.token !== "USER")
-        throw new re(`Check::isotopeA() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
-      if (!e.metaType)
-        throw new H('Check::isotopeA() - Required field "metaType" is missing!');
-      if (!e.metaId)
-        throw new H('Check::isotopeA() - Required field "metaId" is missing!');
-      const t = e.aggregatedMeta();
-      if (!Object.prototype.hasOwnProperty.call(t, "action") || !t.action)
-        throw new H('Check::isotopeA() - Required meta field "action" is missing!');
-    }
-    return !0;
-  }
-  /**
-   * Validates B-isotope (Buffer/Exchange) atoms
-   *
-   * @returns {boolean}
-   */
-  isotopeB() {
-    const e = this.molecule.getIsotopes("B");
-    if (e.length === 0)
-      return !0;
-    for (const n of e) {
-      if (!n.metaType || n.metaType !== "walletBundle")
-        throw new H('Check::isotopeB() - B-isotope atoms must have metaType "walletBundle"!');
-      if (!n.metaId)
-        throw new H("Check::isotopeB() - B-isotope atoms must have a metaId!");
-      const s = Number(n.value);
-      if (Number.isNaN(s))
-        throw new $e("Check::isotopeB() - B-isotope atom value is not a valid number!");
-    }
-    const t = this.molecule.getIsotopes("V");
-    if (t.length > 0) {
-      let n = 0;
-      for (const s of [...t, ...e]) {
-        const r = Number(s.value);
-        Number.isNaN(r) || (n += r);
-      }
-      if (n !== 0)
-        throw new Ue("Check::isotopeB() - V+B atom values do not balance to zero!");
-    }
-    return !0;
-  }
-  /**
-   * Validates F-isotope (Fusion/NFT) atoms
-   *
-   * @returns {boolean}
-   */
-  isotopeF() {
-    const e = this.molecule.getIsotopes("F");
-    if (e.length === 0)
-      return !0;
-    for (const n of e) {
-      if (!n.metaType || n.metaType !== "walletBundle")
-        throw new H('Check::isotopeF() - F-isotope atoms must have metaType "walletBundle"!');
-      if (!n.metaId)
-        throw new H("Check::isotopeF() - F-isotope atoms must have a metaId!");
-      const s = Number(n.value);
-      if (Number.isNaN(s))
-        throw new $e("Check::isotopeF() - F-isotope atom value is not a valid number!");
-      if (s < 0)
-        throw new $e("Check::isotopeF() - F-isotope atom value must not be negative!");
-    }
-    const t = this.molecule.getIsotopes("V");
-    if (t.length > 0) {
-      let n = 0;
-      for (const s of [...t, ...e]) {
-        const r = Number(s.value);
-        Number.isNaN(r) || (n += r);
-      }
-      if (n !== 0)
-        throw new Ue("Check::isotopeF() - V+F atom values do not balance to zero!");
-    }
-    return !0;
-  }
-  /**
-   *
-   * @param senderWallet
-   * @returns {boolean}
-   */
-  isotopeV(e = null) {
-    const t = this.molecule.getIsotopes("V");
-    if (t.length === 0)
-      return !0;
-    const n = this.molecule.getIsotopes("B").length > 0 || this.molecule.getIsotopes("F").length > 0, s = this.molecule.atoms[0];
-    if (!n && s.isotope === "V" && t.length === 2) {
-      const a = t[t.length - 1];
-      if (s.token !== a.token)
-        throw new Mt();
-      if (a.value < 0)
-        throw new $e();
-      if (Number(s.value) + Number(a.value) !== 0)
-        throw new Ue();
-      return !0;
-    }
-    let r = 0, i = 0;
-    for (const a in this.molecule.atoms)
-      if (Object.prototype.hasOwnProperty.call(this.molecule.atoms, a)) {
-        const c = this.molecule.atoms[a];
-        if (c.isotope !== "V")
-          continue;
-        if (i = c.value * 1, Number.isNaN(i))
-          throw new TypeError('Invalid isotope "V" values');
-        if (c.token !== s.token)
-          throw new Mt();
-        if (a > 0) {
-          if (i < 0)
-            throw new $e();
-          if (c.walletAddress === s.walletAddress)
-            throw new ms();
-        }
-        r += i;
-      }
-    if (!n && r !== 0)
-      throw new Ue();
-    if (e) {
-      if (i = s.value * 1, Number.isNaN(i))
-        throw new TypeError('Invalid isotope "V" values');
-      const a = Number(e.balance) + i;
-      if (a < 0)
-        throw new G();
-      if (!n && a !== r)
-        throw new Tt();
-    } else if (i !== 0)
-      throw new Tt();
-    return !0;
-  }
-  /**
-   * Verifies if the hash of all the atoms matches the molecular hash to ensure content has not been messed with
-   *
-   * @returns {boolean}
-   */
-  molecularHash() {
-    if (this.molecule.molecularHash !== g.hashAtoms({
-      atoms: this.molecule.atoms
-    }))
-      throw new ps();
-    return !0;
-  }
-  /**
-   * Checks if the provided molecule was signed properly by transforming a collection of signature
-   * fragments from its atoms and its molecular hash into a single-use wallet address to be matched
-   * against the sender’s address. If it matches, the molecule was correctly signed.
-   *
-   * @returns {boolean}
-   */
-  ots() {
-    const e = this.molecule.normalizedHash();
-    let t = this.molecule.atoms.map(
-      (p) => p.otsFragment
-    ).reduce(
-      (p, d) => p + d
-    );
-    if (t.length !== 2048 && (t = $n(t), t.length !== 2048))
-      throw new on();
-    const n = Ne(t, 128);
-    let s = "";
-    for (const p in n) {
-      let d = n[p];
-      for (let w = 0, A = 8 + e[p]; w < A; w++)
-        d = new Q("SHAKE256", "TEXT").update(d).getHash("HEX", { outputLen: 512 });
-      s += d;
-    }
-    const r = new Q("SHAKE256", "TEXT");
-    r.update(s);
-    const i = r.getHash("HEX", { outputLen: 8192 }), a = new Q("SHAKE256", "TEXT");
-    a.update(i);
-    const c = a.getHash("HEX", { outputLen: 256 }), u = this.molecule.atoms[0];
-    let l = u.walletAddress;
-    const h = M.get(u.aggregatedMeta(), "signingWallet");
-    if (h && (l = M.get(JSON.parse(h), "address")), c !== l)
-      throw new ys();
-    return !0;
-  }
-  /**
-   * Converts server-side molecule data (from GraphQL meta query responses)
-   * into a Molecule instance suitable for verification via CheckMolecule.
-   *
-   * Handles field mapping differences between server and client:
-   * - tokenSlug → token
-   * - metasJson (JSON string) → meta (array of {key, value})
-   * - bundleHash → bundle
-   *
-   * @param {object} serverData - Molecule data from GraphQL response
-   * @param {string} serverData.molecularHash
-   * @param {string} serverData.bundleHash
-   * @param {string|null} serverData.cellSlug
-   * @param {string|null} serverData.status
-   * @param {string|null} serverData.createdAt
-   * @param {array} serverData.atoms - Array of server-format atom objects
-   * @return {Molecule}
-   */
-  static fromServerData({
-    molecularHash: e,
-    bundleHash: t,
-    cellSlug: n = null,
-    status: s = null,
-    createdAt: r = null,
-    atoms: i = []
-  }) {
-    const a = i.map((c) => {
-      let u = [];
-      if (c.metasJson)
-        try {
-          const l = JSON.parse(c.metasJson);
-          Array.isArray(l) ? u = l : l && typeof l == "object" && (u = Object.entries(l).map(([h, p]) => ({ key: h, value: p })));
-        } catch {
-          u = [];
-        }
-      return {
-        position: c.position || null,
-        walletAddress: c.walletAddress || null,
-        isotope: c.isotope || null,
-        token: c.tokenSlug || c.token || null,
-        value: c.value != null ? String(c.value) : null,
-        batchId: c.batchId || null,
-        metaType: c.metaType || null,
-        metaId: c.metaId || null,
-        meta: u,
-        index: c.index != null ? c.index : null,
-        otsFragment: c.otsFragment || null,
-        createdAt: c.createdAt || null
-      };
-    });
-    return z.fromJSON({
-      molecularHash: e,
-      bundle: t,
-      cellSlug: n,
-      status: s,
-      createdAt: r,
-      atoms: a
-    });
-  }
-  /**
-   * Verifies a molecule reconstructed from server-side GraphQL data.
-   * Returns an object with verification result and any error details.
-   *
-   * @param {object} moleculeData - Server molecule data (same format as fromServerData)
-   * @return {{ molecularHash: string, verified: boolean, error: string|null }}
-   */
-  static verifyFromServerData(e) {
-    try {
-      const t = Te.fromServerData(e);
-      return new Te(t).verify(), {
-        molecularHash: e.molecularHash,
-        verified: !0,
-        error: null
-      };
-    } catch (t) {
-      return {
-        molecularHash: e.molecularHash || null,
-        verified: !1,
-        error: t.message || String(t)
-      };
-    }
-  }
-}
-class de extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Insufficient balance for requested transfer", t = null, n = null) {
-    super(e, t, n), this.name = "BalanceInsufficientException";
-  }
-}
-class Et extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Amount cannot be negative!", t = null, n = null) {
-    super(e, t, n), this.name = "NegativeAmountException";
-  }
-}
-class z {
-  /**
-   * Class constructor
-   *
-   * @param {string|null} secret
-   * @param {string|null} bundle
-   * @param {Wallet|null} sourceWallet
-   * @param {Wallet|null} remainderWallet
-   * @param {string|null} cellSlug
-   * @param {string|number|null} version
-   */
-  constructor({
-    secret: e = null,
-    bundle: t = null,
-    sourceWallet: n = null,
-    remainderWallet: s = null,
-    cellSlug: r = null,
-    version: i = null,
-    continuIdPosition: a = null
-  }) {
-    this.status = null, this.molecularHash = null, this.createdAt = String(+/* @__PURE__ */ new Date()), this.cellSlugOrigin = this.cellSlug = r, this.secret = e, this.bundle = t, this.sourceWallet = n, this.continuIdPosition = a, this.atoms = [], this.parentHashes = [], i !== null && Object.prototype.hasOwnProperty.call(Pe, i) && (this.version = String(i)), (s || n) && (this.remainderWallet = s || S.create({
-      secret: e,
-      bundle: t,
-      token: n.token,
-      batchId: n.batchId,
-      characters: n.characters
-    }));
-  }
-  /**
-   * Sets parent molecular hashes for DAG linkage
-   *
-   * @param {string[]} hashes - Array of parent molecular hash strings
-   * @return {Molecule} this instance for chaining
-   */
-  withParentHashes(e) {
-    return this.parentHashes = Array.isArray(e) ? [...e] : [], this;
-  }
-  /**
-   * Returns the cell slug delimiter
-   *
-   * @return {string}
-   */
-  get cellSlugDelimiter() {
-    return ".";
-  }
-  /**
-   * Filters the atoms array by the supplied isotope list
-   *
-   * @param {string|array} isotopes
-   * @param {array} atoms
-   * @returns {*[]}
-   */
-  static isotopeFilter(e, t) {
-    return Array.isArray(e) || (e = [e]), t.filter((n) => e.includes(n.isotope));
-  }
-  /**
-   * Generates the next atomic index
-   *
-   * @param {array} atoms
-   * @return {number}
-   */
-  static generateNextAtomIndex(e) {
-    return e.length;
-  }
-  /**
-   * Converts a JSON object into a Molecule Structure instance
-   *
-   * @param {string} json
-   * @return {object}
-   * @throws {AtomsMissingException}
-   */
-  static jsonToObject(e) {
-    const t = Object.assign(new z({}), JSON.parse(e)), n = Object.keys(new z({}));
-    if (!Array.isArray(t.atoms))
-      throw new ae();
-    for (const s in Object.keys(t.atoms)) {
-      t.atoms[s] = g.jsonToObject(JSON.stringify(t.atoms[s]));
-      for (const r of ["position", "walletAddress", "isotope"])
-        if (t.atoms[s].isotope.toLowerCase() !== "r" && (typeof t.atoms[s][r] > "u" || t.atoms[s][r] === null))
-          throw new ae("MolecularStructure::jsonToObject() - Required Atom properties are missing!");
-    }
-    for (const s in t)
-      Object.prototype.hasOwnProperty.call(t, s) && !n.includes(s) && delete t[s];
-    return t.atoms = g.sortAtoms(t.atoms), t;
-  }
-  /**
-   * Accept a string of letters and numbers, and outputs a collection of decimals representing each
-   * character according to a pre-defined dictionary. Input string would typically be 64-character
-   * hexadecimal string featuring numbers from 0 to 9 and characters from a to f - a total of 15
-   * unique symbols. To ensure that string has an even number of symbols, convert it to Base 17
-   * (adding G as a possible symbol). Map each symbol to integer values as follows:
-   *  0   1   2   3   4   5   6   7  8  9  a   b   c   d   e   f   g
-   * -8  -7  -6  -5  -4  -3  -2  -1  0  1  2   3   4   5   6   7   8
-   *
-   * @param {string} hash
-   * @return {array}
-   */
-  static enumerate(e) {
-    const t = {
-      0: -8,
-      1: -7,
-      2: -6,
-      3: -5,
-      4: -4,
-      5: -3,
-      6: -2,
-      7: -1,
-      8: 0,
-      9: 1,
-      a: 2,
-      b: 3,
-      c: 4,
-      d: 5,
-      e: 6,
-      f: 7,
-      g: 8
-    }, n = [], s = e.toLowerCase().split("");
-    for (let r = 0, i = s.length; r < i; ++r) {
-      const a = s[r];
-      typeof t[a] < "u" && (n[r] = t[a]);
-    }
-    return n;
-  }
-  /**
-   * Normalize enumerated string to ensure that the total sum of all symbols is exactly zero. This
-   * ensures that exactly 50% of the WOTS+ key is leaked with each usage, ensuring predictable key
-   * safety:
-   * The sum of each symbol within Hm shall be presented by m
-   *  While m0 iterate across that set’s integers as Im:
-   *    If m0 and Im>-8 , let Im=Im-1
-   *    If m<0 and Im<8 , let Im=Im+1
-   *    If m=0, stop the iteration
-   *
-   * @param {array} mappedHashArray
-   * @return {array}
-   */
-  static normalize(e) {
-    let t = e.reduce((s, r) => s + r);
-    const n = t < 0;
-    for (; t < 0 || t > 0; )
-      for (const s of Object.keys(e))
-        if ((n ? e[s] < 8 : e[s] > -8) && (n ? (++e[s], ++t) : (--e[s], --t), t === 0))
-          break;
-    return e;
-  }
-  /**
-   *
-   * @param isotopes
-   * @returns {*[]}
-   */
-  getIsotopes(e) {
-    return z.isotopeFilter(e, this.atoms);
-  }
-  /**
-   * Generates the next atomic index
-   *
-   * @return {number}
-   */
-  generateIndex() {
-    return z.generateNextAtomIndex(this.atoms);
-  }
-  /**
-   * Fills a Molecule's properties with the provided object
-   *
-   * @param {Molecule} molecule
-   */
-  fill(e) {
-    for (const t in Object.keys(e))
-      this[t] = e[t];
-  }
-  /**
-   *
-   * @param {Atom} atom
-   * @returns {Molecule}
-   */
-  addAtom(e) {
-    return this.molecularHash = null, e.index = this.generateIndex(), e.version = this.version, this.atoms.push(e), this.atoms = g.sortAtoms(this.atoms), this;
-  }
-  /**
-   * Add user remainder atom for ContinuID
-   *
-   * @return {Molecule}
-   */
-  addContinuIdAtom() {
-    (!this.remainderWallet || this.remainderWallet.token !== "USER") && (this.remainderWallet = S.create({
-      secret: this.secret,
-      bundle: this.bundle
-    }));
-    const e = {};
-    return this.continuIdPosition ? e.previousPosition = this.continuIdPosition : this.sourceWallet && this.sourceWallet.position && (e.previousPosition = this.sourceWallet.position), this.remainderWallet.pubkey && (e.pubkey = this.remainderWallet.pubkey), this.remainderWallet.characters && (e.characters = this.remainderWallet.characters), this.addAtom(g.create({
-      isotope: "I",
-      wallet: this.remainderWallet,
-      metaType: "walletBundle",
-      metaId: this.remainderWallet.bundle,
-      meta: new K(e)
-    })), this;
-  }
-  /**
-   *
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {object} meta
-   * @param {object} policy
-   *
-   * @return {Molecule}
-   */
-  addPolicyAtom({
-    metaType: e,
-    metaId: t,
-    meta: n = {},
-    policy: s = {}
-  }) {
-    const r = new K(n);
-    return r.addPolicy(s), this.addAtom(g.create({
-      wallet: this.sourceWallet,
-      isotope: "R",
-      metaType: e,
-      metaId: t,
-      meta: r
-    })), this;
-  }
-  /**
-   *
-   * @param tokenUnits
-   * @param recipientWallet
-   * @returns {Molecule}
-   */
-  fuseToken(e, t) {
-    const n = e.length;
-    if (this.sourceWallet.balance - n < 0)
-      throw new de();
-    return this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.sourceWallet,
-      value: -n
-    })), this.addAtom(g.create({
-      isotope: "F",
-      wallet: t,
-      value: 1,
-      metaType: "walletBundle",
-      metaId: t.bundle
-    })), this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - n,
-      metaType: "walletBundle",
-      metaId: this.remainderWallet.bundle
-    })), this;
-  }
-  /**
-   * Burns some amount of tokens from a wallet
-   *
-   * @param {number} amount
-   * @param {string|null} walletBundle
-   * @return {Molecule}
-   */
-  burnToken({
-    amount: e,
-    walletBundle: t = null
-  }) {
-    if (e < 0)
-      throw new Et("Molecule::burnToken() - Amount to burn must be positive!");
-    if (this.sourceWallet.balance - e < 0)
-      throw new de();
-    const n = new S({
-      bundle: "0000000000000000000000000000000000000000000000000000000000000000",
-      token: this.sourceWallet.token
-    });
-    return this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.sourceWallet,
-      value: -this.sourceWallet.balance
-    })), this.addAtom(g.create({
-      isotope: "V",
-      wallet: n,
-      value: e,
-      metaType: "walletBundle",
-      metaId: n.bundle
-    })), this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - e,
-      metaType: "walletBundle",
-      metaId: this.remainderWallet.bundle
-    })), this;
-  }
-  /*
-   * Replenishes non-finite token supplies
-   *
-   * @param {number} amount
-   * @param {string} token
-   * @param {array|object} metas
-   * @return {Molecule}
-   */
-  replenishToken({
-    amount: e,
-    units: t = []
-  }) {
-    if (e < 0)
-      throw new Et("Molecule::replenishToken() - Amount to replenish must be positive!");
-    if (t.length) {
-      t = S.getTokenUnits(t), this.remainderWallet.tokenUnits = this.sourceWallet.tokenUnits;
-      for (const n of t)
-        this.remainderWallet.tokenUnits.push(n);
-      this.remainderWallet.balance = String(this.remainderWallet.tokenUnits.length), this.sourceWallet.tokenUnits = t, this.sourceWallet.balance = String(this.sourceWallet.tokenUnits.length);
-    } else
-      this.remainderWallet.balance = String(Number(this.sourceWallet.balance) + e), this.sourceWallet.balance = String(e);
-    return this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.sourceWallet,
-      value: Number(this.sourceWallet.balance)
-    })), this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.remainderWallet,
-      value: Number(this.remainderWallet.balance),
-      metaType: "walletBundle",
-      metaId: this.remainderWallet.bundle
-    })), this;
-  }
-  /**
-   * Initialize a V-type molecule to transfer value from one wallet to another, with a third,
-   * regenerated wallet receiving the remainder
-   *
-   * @param {Wallet} recipientWallet
-   * @param {number} amount
-   * @return {Molecule}
-   */
-  initValue({
-    recipientWallet: e,
-    amount: t
-  }) {
-    if (this.sourceWallet.balance - t < 0)
-      throw new de();
-    return this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.sourceWallet,
-      value: -this.sourceWallet.balance
-    })), this.addAtom(g.create({
-      isotope: "V",
-      wallet: e,
-      value: t,
-      metaType: "walletBundle",
-      metaId: e.bundle
-    })), this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - t,
-      metaType: "walletBundle",
-      metaId: this.remainderWallet.bundle
-    })), this;
-  }
-  /**
-   * Multi-recipient value transfer (WP line 544: one molecule funds N recipients).
-   *
-   * Builds 1 source atom (full-balance debit, carrying the SENT union of all units) + one atom
-   * per recipient (its amount + its own units, walletBundle-bonded) + 1 remainder atom (the KEPT
-   * change). Conservation: -balance + Σ amounts + (balance - Σ amounts) == 0.
-   *
-   * Per-unit (stackable) routing is layered by calling Wallet.splitUnitsMulti(...) BEFORE this —
-   * it sets the source's tokenUnits to the union, each recipient's to its subset, and the
-   * remainder's to the kept units. The single-recipient initValue() is the N=1 special case.
-   *
-   * @param {Wallet[]} recipientWallets
-   * @param {number[]} amounts - parallel to recipientWallets
-   * @return {Molecule}
-   */
-  initValues({
-    recipientWallets: e,
-    amounts: t
-  }) {
-    const n = t.reduce((s, r) => s + Number(r), 0);
-    if (this.sourceWallet.balance - n < 0)
-      throw new de();
-    return this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.sourceWallet,
-      value: -this.sourceWallet.balance
-    })), e.forEach((s, r) => {
-      this.addAtom(g.create({
-        isotope: "V",
-        wallet: s,
-        value: t[r],
-        metaType: "walletBundle",
-        metaId: s.bundle
-      }));
-    }), this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - n,
-      metaType: "walletBundle",
-      metaId: this.remainderWallet.bundle
-    })), this;
-  }
-  /**
-   *
-   * @param amount
-   * @param tradeRates
-   */
-  initDepositBuffer({
-    amount: e,
-    tradeRates: t
-  }) {
-    if (this.sourceWallet.balance - e < 0)
-      throw new de();
-    const n = S.create({
-      secret: this.secret,
-      bundle: this.bundle,
-      token: this.sourceWallet.token,
-      batchId: this.sourceWallet.batchId
-    });
-    return n.tradeRates = t, this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.sourceWallet,
-      value: -this.sourceWallet.balance
-    })), this.addAtom(g.create({
-      isotope: "B",
-      wallet: n,
-      value: e,
-      metaType: "walletBundle",
-      metaId: this.sourceWallet.bundle
-    })), this.addAtom(g.create({
-      isotope: "V",
-      wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - e,
-      metaType: "walletBundle",
-      metaId: this.sourceWallet.bundle
-    })), this;
-  }
-  /**
-   *
-   * @param {{}} recipients
-   * @param {Wallet|{}} signingWallet
-   * @returns {Molecule}
-   */
-  initWithdrawBuffer({
-    recipients: e,
-    signingWallet: t = null
-  }) {
-    let n = 0;
-    for (const r of Object.values(e || {}))
-      n += r;
-    if (this.sourceWallet.balance - n < 0)
-      throw new de();
-    const s = new K();
-    t && s.setSigningWallet(t), this.addAtom(g.create({
-      isotope: "B",
-      wallet: this.sourceWallet,
-      value: -this.sourceWallet.balance,
-      meta: s,
-      metaType: "walletBundle",
-      metaId: this.sourceWallet.bundle
-    }));
-    for (const [r, i] of Object.entries(e || {}))
-      this.addAtom(new g({
-        isotope: "V",
-        token: this.sourceWallet.token,
-        value: i,
-        batchId: this.sourceWallet.batchId ? Fe({}) : null,
-        metaType: "walletBundle",
-        metaId: r
-      }));
-    return this.addAtom(g.create({
-      isotope: "B",
-      wallet: this.remainderWallet,
-      value: this.sourceWallet.balance - n,
-      metaType: "walletBundle",
-      metaId: this.remainderWallet.bundle
-    })), this;
-  }
-  /**
-   * Initialize a C-type molecule to issue a new type of token
-   *
-   * @param {Wallet} recipientWallet - wallet receiving the tokens. Needs to be initialized for the new token beforehand.
-   * @param {number} amount - how many of the token we are initially issuing (for fungible tokens only)
-   * @param {array|object} meta - additional fields to configure the token
-   * @return {Molecule}
-   */
-  initTokenCreation({
-    recipientWallet: e,
-    amount: t,
-    meta: n
-  }) {
-    const s = new K(n);
-    return s.setMetaWallet(e), this.addAtom(g.create({
-      isotope: "C",
-      wallet: this.sourceWallet,
-      value: t,
-      metaType: "token",
-      metaId: e.token,
-      meta: s,
-      batchId: e.batchId
-    })), this.addContinuIdAtom(), this;
-  }
-  /**
-   *
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {object[]} rule,
-   * @param {object} policy
-   * @return {Molecule}
-   */
-  createRule({
-    metaType: e,
-    metaId: t,
-    rule: n,
-    policy: s = {}
-  }) {
-    const r = [];
-    for (const a of n)
-      r.push(a instanceof Me ? a : Me.toObject(a));
-    const i = new K({
-      rule: JSON.stringify(r)
-    });
-    return i.addPolicy(s), this.addAtom(g.create({
-      isotope: "R",
-      wallet: this.sourceWallet,
-      metaType: e,
-      metaId: t,
-      meta: i
-    })), this.addContinuIdAtom(), this;
-  }
-  /**
-   * Builds Atoms to define a new wallet on the ledger
-   *
-   * @param {Wallet} wallet
-   * @param {AtomMeta|null} atomMeta
-   * @return {Molecule}
-   */
-  initWalletCreation(e, t = null) {
-    t || (t = new K()), t.setMetaWallet(e);
-    const n = g.create({
-      isotope: "C",
-      wallet: this.sourceWallet,
-      metaType: "wallet",
-      metaId: e.address,
-      meta: t,
-      batchId: e.batchId
-    });
-    return this.addAtom(n), this.addContinuIdAtom(), this;
-  }
-  /**
-   * Init shadow wallet claim
-   *
-   * @param wallet
-   */
-  initShadowWalletClaim(e) {
-    const t = new K().setShadowWalletClaim(!0);
-    return this.initWalletCreation(e, t);
-  }
-  /**
-   * Builds Atoms to define a new identifier on the ledger
-   *
-   * @param {string} type - phone or email
-   * @param {string} contact - phone number or email string
-   * @param {string} code -
-   *
-   * @return {Molecule}
-   */
-  initIdentifierCreation({
-    type: e,
-    contact: t,
-    code: n
-  }) {
-    const s = {
-      code: n,
-      hash: me(t.trim(), "Molecule::initIdentifierCreation")
-    };
-    return this.addAtom(g.create({
-      isotope: "C",
-      wallet: this.sourceWallet,
-      metaType: "identifier",
-      metaId: e,
-      meta: new K(s)
-    })), this.addContinuIdAtom(), this;
-  }
-  /**
-   * Initialize an M-type molecule with the given data
-   *
-   * @param {array|object} meta
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {object} policy
-   * @return {Molecule}
-   */
-  initMeta({
-    meta: e,
-    metaType: t,
-    metaId: n,
-    policy: s
-  }) {
-    return this.addAtom(g.create({
-      isotope: "M",
-      wallet: this.sourceWallet,
-      metaType: t,
-      metaId: n,
-      meta: new K(e)
-    })), s && Object.keys(s).length > 0 && this.addPolicyAtom({
-      metaType: t,
-      metaId: n,
-      meta: e,
-      policy: s
-    }), this.addContinuIdAtom(), this;
-  }
-  /**
-   * Initialize a P-type molecule for peer registration
-   *
-   * @param {string} host - The peer host URL to register
-   * @return {Molecule}
-   */
-  initPeering({
-    host: e
-  }) {
-    return this.addAtom(g.create({
-      isotope: "P",
-      wallet: this.sourceWallet,
-      metaType: "walletBundle",
-      metaId: this.bundle,
-      meta: new K({ peerHost: e })
-    })), this.addContinuIdAtom(), this;
-  }
-  /**
-   * Initialize an A-type molecule for an append request
-   *
-   * @param {string} metaType - The target MetaType to append to
-   * @param {string} metaId - The target MetaId to append to
-   * @param {string} action - The action to perform
-   * @param {object} meta - Additional metadata
-   * @return {Molecule}
-   */
-  initAppendRequest({
-    metaType: e,
-    metaId: t,
-    action: n,
-    meta: s = {}
-  }) {
-    return this.addAtom(g.create({
-      isotope: "A",
-      wallet: this.sourceWallet,
-      metaType: e,
-      metaId: t,
-      meta: new K({ action: n, ...s })
-    })), this.addContinuIdAtom(), this;
-  }
-  /**
-   * Arranges atoms to request tokens from the node itself
-   *
-   * @param {string} token
-   * @param {Number} amount
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {array|object} meta
-   * @param {string|null} batchId
-   *
-   * @return {Molecule}
-   */
-  initTokenRequest({
-    token: e,
-    amount: t,
-    metaType: n,
-    metaId: s,
-    meta: r = {},
-    batchId: i = null
-  }) {
-    return r.token = e, r.amount = String(t), this.addAtom(g.create({
-      isotope: "T",
-      wallet: this.sourceWallet,
-      value: t,
-      metaType: n,
-      metaId: s,
-      meta: new K(r),
-      batchId: i
-    })), this.addContinuIdAtom(), this;
-  }
-  /**
-   * Arranges atoms to request an authorization token from the node
-   *
-   * @param {object} meta
-   *
-   * @return {Molecule}
-   */
-  initAuthorization({ meta: e }) {
-    return this.addAtom(g.create({
-      isotope: "U",
-      wallet: this.sourceWallet,
-      meta: new K(e)
-    })), this.addContinuIdAtom(), this;
-  }
-  /**
-   * Creates a one-time signature for a molecule and breaks it up across multiple atoms within that
-   * molecule. Resulting 4096 byte (2048 character) string is the one-time signature, which is then compressed.
-   *
-   * @param {string|null} bundle
-   * @param {boolean} anonymous
-   * @param {boolean} compressed
-   * @return {string|null}
-   * @throws {AtomsMissingException}
-   */
-  sign({
-    bundle: e = null,
-    anonymous: t = !1,
-    compressed: n = !0
-  } = {}) {
-    if (this.atoms.length === 0 || this.atoms.filter((d) => !(d instanceof g)).length !== 0)
-      throw new ae();
-    !t && !this.bundle && (this.bundle = e || me(this.secret, "Molecule::sign")), this.molecularHash = g.hashAtoms({
-      atoms: this.atoms
-    });
-    const s = this.atoms[0];
-    let r = s.position;
-    const i = M.get(s.aggregatedMeta(), "signingWallet");
-    if (i && (r = M.get(JSON.parse(i), "position")), !r)
-      throw new on("Signing wallet must have a position!");
-    const a = S.generateKey({
-      secret: this.secret,
-      token: s.token,
-      position: s.position
-    }), c = Ne(a, 128), u = this.normalizedHash();
-    let l = "";
-    for (const d in c) {
-      let w = c[d];
-      for (let A = 0, O = 8 - u[d]; A < O; A++)
-        w = new Q("SHAKE256", "TEXT").update(w).getHash("HEX", { outputLen: 512 });
-      l += w;
-    }
-    n && (l = Sn(l));
-    const h = Ne(l, Math.ceil(l.length / this.atoms.length));
-    let p = null;
-    for (let d = 0, w = h.length; d < w; d++)
-      this.atoms[d].otsFragment = h[d], p = this.atoms[d].position;
-    return p;
-  }
-  /**
-   * Synchronous signing — identical to sign() since all operations are CPU-bound.
-   * Provided for API parity with Rust SDK's sign_sync().
-   *
-   * @param {object} options
-   * @param {string|null} options.bundle
-   * @param {boolean} options.anonymous
-   * @param {boolean} options.compressed
-   * @return {string|null}
-   */
-  signSync(e = {}) {
-    return this.sign(e);
-  }
-  /**
-   * Returns the base cell slug portion
-   *
-   * @return {string}
-   */
-  cellSlugBase() {
-    return (this.cellSlug || "").split(this.cellSlugDelimiter)[0];
-  }
-  /**
-   * Returns JSON-ready object for cross-SDK compatibility (2025 JS best practices)
-   *
-   * Includes all necessary fields for cross-SDK validation while excluding sensitive data.
-   * Follows 2025 JavaScript best practices with proper error handling and type safety.
-   *
-   * @param {Object} options - Serialization options
-   * @param {boolean} options.includeValidationContext - Include sourceWallet/remainderWallet for validation (default: false)
-   * @param {boolean} options.includeOtsFragments - Include OTS signature fragments (default: true)
-   * @param {boolean} options.secureMode - Extra security checks (default: false)
-   * @return {Object} JSON-serializable object
-   * @throws {Error} If molecule is in invalid state for serialization
-   */
-  toJSON(e = {}) {
-    const {
-      includeValidationContext: t = !1,
-      includeOtsFragments: n = !0
-    } = e;
-    try {
-      const s = {
-        status: this.status,
-        molecularHash: this.molecularHash,
-        createdAt: this.createdAt,
-        cellSlug: this.cellSlug,
-        bundle: this.bundle,
-        // Serialized atoms array with optional OTS fragments
-        atoms: this.atoms.map((r) => r.toJSON({
-          includeOtsFragments: n
-        }))
-      };
-      return this.parentHashes && this.parentHashes.length > 0 && (s.parentHashes = this.parentHashes), t && (s.cellSlugOrigin = this.cellSlugOrigin, s.version = this.version, this.sourceWallet && (s.sourceWallet = {
-        address: this.sourceWallet.address,
-        position: this.sourceWallet.position,
-        token: this.sourceWallet.token,
-        balance: this.sourceWallet.balance || "0",
-        bundle: this.sourceWallet.bundle,
-        batchId: this.sourceWallet.batchId || null,
-        characters: this.sourceWallet.characters || "BASE64",
-        pubkey: this.sourceWallet.pubkey || null,
-        tokenUnits: this.sourceWallet.tokenUnits || [],
-        tradeRates: this.sourceWallet.tradeRates || {},
-        molecules: this.sourceWallet.molecules || {}
-      }), this.remainderWallet && (s.remainderWallet = {
-        address: this.remainderWallet.address,
-        position: this.remainderWallet.position,
-        token: this.remainderWallet.token,
-        balance: this.remainderWallet.balance || "0",
-        bundle: this.remainderWallet.bundle,
-        batchId: this.remainderWallet.batchId || null,
-        characters: this.remainderWallet.characters || "BASE64",
-        pubkey: this.remainderWallet.pubkey || null,
-        tokenUnits: this.remainderWallet.tokenUnits || [],
-        tradeRates: this.remainderWallet.tradeRates || {},
-        molecules: this.remainderWallet.molecules || {}
-      })), s;
-    } catch (s) {
-      throw new Error(`Molecule serialization failed: ${s.message}`);
-    }
-  }
-  /**
-   * Creates a Molecule instance from JSON data (2025 JS best practices)
-   *
-   * Handles cross-SDK deserialization with robust error handling and validation.
-   * Essential for cross-platform molecule validation and compatibility testing.
-   *
-   * @param {string|Object} json - JSON string or object to deserialize
-   * @param {Object} options - Deserialization options
-   * @param {boolean} options.includeValidationContext - Reconstruct sourceWallet/remainderWallet (default: false)
-   * @param {boolean} options.validateStructure - Validate required fields (default: true)
-   * @return {Molecule} Reconstructed molecule instance
-   * @throws {Error} If JSON is invalid or required fields are missing
-   */
-  static fromJSON(e, t = {}) {
-    const {
-      includeValidationContext: n = !1,
-      validateStructure: s = !0
-    } = t;
-    try {
-      const r = typeof e == "string" ? JSON.parse(e) : e;
-      if (s && (!r.molecularHash || !Array.isArray(r.atoms)))
-        throw new Error("Invalid molecule data: missing molecularHash or atoms array");
-      const i = new z({
-        secret: null,
-        bundle: r.bundle || null,
-        cellSlug: r.cellSlug || null,
-        version: r.version || null
-      });
-      return i.status = r.status, i.molecularHash = r.molecularHash, i.createdAt = r.createdAt || String(+/* @__PURE__ */ new Date()), i.cellSlugOrigin = r.cellSlugOrigin, i.parentHashes = Array.isArray(r.parentHashes) ? [...r.parentHashes] : [], Array.isArray(r.atoms) && (i.atoms = r.atoms.map((a, c) => {
-        try {
-          return g.fromJSON(a);
-        } catch (u) {
-          throw new Error(`Failed to reconstruct atom ${c}: ${u.message}`);
-        }
-      })), n && (r.sourceWallet && (i.sourceWallet = new S({
-        secret: null,
-        token: r.sourceWallet.token,
-        position: r.sourceWallet.position,
-        bundle: r.sourceWallet.bundle,
-        batchId: r.sourceWallet.batchId,
-        characters: r.sourceWallet.characters
-      }), i.sourceWallet.balance = String(r.sourceWallet.balance != null ? r.sourceWallet.balance : 0), i.sourceWallet.address = r.sourceWallet.address, r.sourceWallet.pubkey && (i.sourceWallet.pubkey = r.sourceWallet.pubkey), i.sourceWallet.tokenUnits = r.sourceWallet.tokenUnits || [], i.sourceWallet.tradeRates = r.sourceWallet.tradeRates || {}, i.sourceWallet.molecules = r.sourceWallet.molecules || {}), r.remainderWallet && (i.remainderWallet = new S({
-        secret: null,
-        token: r.remainderWallet.token,
-        position: r.remainderWallet.position,
-        bundle: r.remainderWallet.bundle,
-        batchId: r.remainderWallet.batchId,
-        characters: r.remainderWallet.characters
-      }), i.remainderWallet.balance = String(r.remainderWallet.balance != null ? r.remainderWallet.balance : 0), i.remainderWallet.address = r.remainderWallet.address, r.remainderWallet.pubkey && (i.remainderWallet.pubkey = r.remainderWallet.pubkey), i.remainderWallet.tokenUnits = r.remainderWallet.tokenUnits || [], i.remainderWallet.tradeRates = r.remainderWallet.tradeRates || {}, i.remainderWallet.molecules = r.remainderWallet.molecules || {})), i;
-    } catch (r) {
-      throw new Error(`Molecule deserialization failed: ${r.message}`);
-    }
-  }
-  /**
-   * Validates the current molecular structure
-   *
-   * @param senderWallet
-   */
-  check(e = null) {
-    return new Te(this).verify(e);
-  }
-  /**
-   * Convert Hm to numeric notation via EnumerateMolecule(Hm)
-   *
-   * @returns {Array}
-   */
-  normalizedHash() {
-    return z.normalize(z.enumerate(this.molecularHash));
-  }
-}
-class Ce {
-  /**
-   *
-   * @param {string} token
-   * @param {number} expiresAt
-   * @param {boolean} encrypt
-   * @param {string} pubkey
-   */
-  constructor({
-    token: e,
-    expiresAt: t,
-    encrypt: n,
-    pubkey: s
-  }) {
-    this.$__token = e, this.$__expiresAt = t, this.$__pubkey = s, this.$__encrypt = n;
-  }
-  /**
-   *
-   * @param data
-   * @param wallet
-   * @returns {AuthToken}
-   */
-  static create(e, t) {
-    const n = new Ce(e);
-    return n.setWallet(t), n;
-  }
-  /**
-   *
-   * @param {object} snapshot
-   * @param {string} secret
-   * @return {AuthToken}
-   */
-  static restore(e, t) {
-    const n = new S({
-      secret: t,
-      token: "AUTH",
-      position: e.wallet.position,
-      characters: e.wallet.characters
-    });
-    return Ce.create({
-      token: e.token,
-      expiresAt: e.expiresAt,
-      pubkey: e.pubkey,
-      encrypt: e.encrypt
-    }, n);
-  }
-  /**
-   *
-   * @param {Wallet} wallet
-   */
-  setWallet(e) {
-    this.$__wallet = e;
-  }
-  /**
-   * Get a wallet
-   * @return {Wallet}
-   */
-  getWallet() {
-    return this.$__wallet;
-  }
-  /**
-   *
-   * @return {{wallet: {characters, position}, encrypt, expiresAt, token, pubkey}}
-   */
-  getSnapshot() {
-    return {
-      token: this.$__token,
-      expiresAt: this.$__expiresAt,
-      pubkey: this.$__pubkey,
-      encrypt: this.$__encrypt,
-      wallet: {
-        position: this.$__wallet.position,
-        characters: this.$__wallet.characters
-      }
-    };
-  }
-  /**
-   *
-   * @return {string}
-   */
-  getToken() {
-    return this.$__token;
-  }
-  /**
-   *
-   * @return {string}
-   */
-  getPubkey() {
-    return this.$__pubkey;
-  }
-  /**
-   *
-   * @return {number}
-   */
-  getExpireInterval() {
-    return this.$__expiresAt * 1e3 - Date.now();
-  }
-  /**
-   *
-   * @return {boolean}
-   */
-  isExpired() {
-    return !this.$__expiresAt || this.getExpireInterval() < 0;
-  }
-  /**
-   * Get auth data for the final GraphQL client
-   * @return {{wallet: Wallet, token: string, pubkey: string}}
-   */
-  getAuthData() {
-    return {
-      token: this.getToken(),
-      pubkey: this.getPubkey(),
-      wallet: this.getWallet()
-    };
-  }
-}
-class R extends x {
-  /**
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Secret storage operation failed", t = null, n = null) {
-    super(e, t, n), this.name = "SecretStorageException";
-  }
-  /**
-   * Factory method: secret not found for bundle
-   *
-   * @param {string} bundleHash
-   * @returns {SecretStorageException}
-   */
-  static notFound(e) {
-    return new R(`Secret not found for bundle: ${e}`);
-  }
-  /**
-   * Factory method: decryption failed
-   *
-   * @param {string} [reason]
-   * @returns {SecretStorageException}
-   */
-  static decryptionFailed(e = "Invalid passphrase or corrupted ciphertext") {
-    return new R(`Failed to decrypt master secret: ${e}`);
-  }
-  /**
-   * Factory method: provider unavailable
-   *
-   * @param {string} provider
-   * @param {string} [reason]
-   * @returns {SecretStorageException}
-   */
-  static unavailable(e, t = "Hardware or API not accessible") {
-    return new R(`Secret storage provider '${e}' is unavailable: ${t}`);
-  }
-}
-const lt = new TextEncoder();
-function ce(o) {
-  if (o instanceof Uint8Array)
-    o.fill(0);
-  else if (Array.isArray(o))
-    for (let e = 0; e < o.length; e++)
-      o[e] = 0;
-}
-async function gs(o, e) {
-  try {
-    return await e(o);
-  } finally {
-    ce(o);
-  }
-}
-async function ws(o, e) {
-  const t = lt.encode(o);
-  try {
-    return await e(o);
-  } finally {
-    ce(t);
-  }
-}
-function Dr(o, e) {
-  const t = typeof o == "string" ? lt.encode(o) : o, n = typeof e == "string" ? lt.encode(e) : e;
-  let s = t.length === n.length ? 0 : 1;
-  const r = Math.min(t.length, n.length);
-  for (let i = 0; i < r; i++)
-    s |= (t[i] ?? 0) ^ (n[i] ?? 0);
-  return typeof o == "string" && ce(t), typeof e == "string" && ce(n), s === 0;
-}
-class ct {
-  constructor() {
-    this.providerType = "memory", this.secrets = /* @__PURE__ */ new Map();
-  }
-  /**
-   * Memory storage is not hardware backed
-   *
-   * @returns {boolean}
-   */
-  isHardwareBacked() {
-    return !1;
-  }
-  /**
-   * Memory storage is always available
-   *
-   * @returns {Promise<boolean>}
-   */
-  async isAvailable() {
-    return !0;
-  }
-  /**
-   * Store a secret in memory
-   *
-   * @param {string} bundleHash
-   * @param {string} secret
-   * @param {{ label?: string }} [options]
-   * @returns {Promise<void>}
-   */
-  async storeSecret(e, t, n = {}) {
-    if (!e)
-      throw new R("Bundle hash cannot be empty");
-    if (!t)
-      throw new R("Secret cannot be empty");
-    const s = {
-      bundleHash: e,
-      label: n.label,
-      createdAt: Date.now(),
-      hardwareBacked: !1,
-      providerType: this.providerType
-    };
-    this.secrets.set(e, { secret: t, metadata: s });
-  }
-  /**
-   * Retrieve a secret from memory
-   *
-   * @param {string} bundleHash
-   * @returns {Promise<string|null>}
-   */
-  async retrieveSecret(e) {
-    const t = this.secrets.get(e);
-    return t ? t.secret : null;
-  }
-  /**
-   * Delete a stored secret
-   *
-   * @param {string} bundleHash
-   * @returns {Promise<boolean>}
-   */
-  async deleteSecret(e) {
-    return this.secrets.delete(e);
-  }
-  /**
-   * Check if a secret exists
-   *
-   * @param {string} bundleHash
-   * @returns {Promise<boolean>}
-   */
-  async hasSecret(e) {
-    return this.secrets.has(e);
-  }
-  /**
-   * List all stored secret metadata
-   *
-   * @returns {Promise<Array<{ bundleHash: string, label?: string, createdAt: number, hardwareBacked: boolean, providerType: string }>>}
-   */
-  async listSecrets() {
-    return Array.from(this.secrets.values()).map((e) => ({ ...e.metadata }));
-  }
-  /**
-   * Execute callback with unwrapped secret and ensure cleanup
-   *
-   * @template T
-   * @param {string} bundleHash
-   * @param {(secret: string) => Promise<T>|T} fn
-   * @returns {Promise<T>}
-   */
-  async withSecret(e, t) {
-    const n = this.secrets.get(e);
-    if (!n)
-      throw R.notFound(e);
-    return ws(n.secret, t);
-  }
-  /**
-   * Clear all secrets from memory
-   */
-  clear() {
-    this.secrets.clear();
-  }
-}
-const rt = 10 ** 18;
-class ue {
-  /**
-   * @param {number} value
-   * @return {number}
-   */
-  static val(e) {
-    return Math.abs(e * rt) < 1 ? 0 : e;
-  }
-  /**
-   * @param {number} value1
-   * @param {number} value2
-   * @param {boolean} debug
-   * @return {number}
-   */
-  static cmp(e, t, n = !1) {
-    const s = ue.val(e) * rt, r = ue.val(t) * rt;
-    return Math.abs(s - r) < 1 ? 0 : s > r ? 1 : -1;
-  }
-  /**
-   * @param {number} value1
-   * @param {number} value2
-   * @return {boolean}
-   */
-  static equal(e, t) {
-    return ue.cmp(e, t) === 0;
-  }
-}
-class te extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "GraphQL did not provide a valid response.", t = null, n = null) {
-    super(e, t, n), this.name = "InvalidResponseException";
-  }
-}
-class Qe extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Authorization token missing or invalid.", t = null, n = null) {
-    super(e, t, n), this.name = "UnauthenticatedException";
-  }
-}
-let C = class {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   * @param {string|null} dataKey
-   */
-  constructor({
-    query: e,
-    json: t,
-    dataKey: n = null
-  }) {
-    if (this.dataKey = n, this.errorKey = "exception", this.$__payload = null, this.$__query = e, this.$__originResponse = t, this.$__response = t, typeof this.$__response > "u" || this.$__response === null)
-      throw new te();
-    if (M.has(this.$__response, this.errorKey)) {
-      const s = M.get(this.$__response, this.errorKey);
-      throw String(s).includes("Unauthenticated") ? new Qe() : new te();
-    }
-    if (this.$__response.errors && Array.isArray(this.$__response.errors) && this.$__response.errors.length > 0) {
-      const s = this.$__response.errors[0].message || "Unknown GraphQL error";
-      throw s.includes("Unauthenticated") ? new Qe() : new te(`GraphQL Error: ${s}`);
-    }
-    this.init();
-  }
-  /**
-   *
-   */
-  init() {
-  }
-  /**
-   * @return {*}
-   */
-  data() {
-    if (!this.dataKey)
-      return this.response();
-    if (!this.response().data)
-      throw new te("Response has no data field");
-    if (!M.has(this.response(), this.dataKey))
-      throw new te(`Missing expected field: ${this.dataKey}`);
-    return M.get(this.response(), this.dataKey);
-  }
-  /**
-   * @return {object}
-   */
-  response() {
-    return this.$__response;
-  }
-  /**
-   * @return {*}
-   */
-  payload() {
-    return null;
-  }
-  /**
-   * @return {Query}
-   */
-  query() {
-    return this.$__query;
-  }
-  /**
-   * @return {*}
-   */
-  status() {
-    return null;
-  }
-  /**
-   * Check if response was successful
-   * @return {boolean}
-   */
-  success() {
-    return !this.$__response?.errors?.length;
-  }
-  /**
-   * Get error message if any
-   *
-   * @return {string|null}
-   */
-  error() {
-    return this.$__response?.errors?.length ? this.$__response.errors[0].message || "Unknown error" : null;
-  }
-  /**
-   * Enhanced interface methods for standardized response handling
-   */
-  /**
-   * Get error reason (alias for error() to match standardized interface)
-   * @return {string|null}
-   */
-  reason() {
-    return this.error();
-  }
-  /**
-   * Convert to ValidationResult for enhanced error handling
-   * @return {object}
-   */
-  toValidationResult() {
-    return this.success() && this.payload() !== null ? {
-      success: !0,
-      data: this.payload(),
-      warnings: []
-    } : {
-      success: !1,
-      error: {
-        message: this.reason() || "Unknown error",
-        context: this.constructor.name,
-        details: this.$__response?.errors || []
-      }
-    };
-  }
-  /**
-   * Enhanced error handling with callbacks
-   * @param {function} callback
-   * @return {Response}
-   */
-  onSuccess(e) {
-    if (this.success() && this.payload() !== null)
-      try {
-        e(this.payload());
-      } catch (t) {
-        console.warn("Response.onSuccess callback failed:", t);
-      }
-    return this;
-  }
-  /**
-   * Enhanced failure handling with callbacks
-   * @param {function} callback
-   * @return {Response}
-   */
-  onFailure(e) {
-    if (!this.success())
-      try {
-        e(this.reason() || "Unknown error");
-      } catch (t) {
-        console.warn("Response.onFailure callback failed:", t);
-      }
-    return this;
-  }
-  /**
-   * Debug logging with enhanced context
-   * @param {string|null} label
-   * @return {Response}
-   */
-  debug(e = null) {
-    const t = e ? `[${e}]` : `[${this.constructor.name}]`;
-    return this.success() ? console.debug(`${t} Success:`, {
-      payload: this.payload(),
-      query: this.$__query?.constructor?.name,
-      dataKey: this.dataKey
-    }) : console.debug(`${t} Failure:`, {
-      error: this.reason(),
-      errors: this.$__response?.errors,
-      rawData: this.$__response
-    }), this;
-  }
-  /**
-   * Promise conversion for enhanced async patterns
-   * @return {Promise}
-   */
-  toPromise() {
-    return this.success() && this.payload() !== null ? Promise.resolve(this.payload()) : Promise.reject(new Error(this.reason() || "Unknown error"));
-  }
-  /**
-   * Functional programming map operation
-   * @param {function} mapper
-   * @return {Response}
-   */
-  map(e) {
-    if (this.success() && this.payload() !== null)
-      try {
-        const t = e(this.payload()), n = Object.create(Object.getPrototypeOf(this));
-        return Object.assign(n, this), n.$__payload = t, n;
-      } catch (t) {
-        const n = Object.create(Object.getPrototypeOf(this));
-        return Object.assign(n, this), n.$__response = { errors: [{ message: `Mapping failed: ${t.message}` }] }, n;
-      }
-    else
-      return this;
-  }
+var Mt = (e) => {
+	let { K: t, PRF: n, XOF: r, HASH512: i, ETA1: a, ETA2: o, du: s, dv: c } = e, l = Tt(1), u = Tt(c), d = Tt(s), f = _t("publicKey", vt(Tt(12), t), 32), p = vt(Tt(12), t), m = _t("ciphertext", vt(d, t), u), h = _t("seed", 32, 32), g = (e, r, i, s) => {
+		let c = [];
+		for (let e = 0; e < t; e++) c.push(N.NTT.encode(jt(n, s, e, a)));
+		let u = new Uint16Array(j), d = [];
+		for (let i = 0; i < t; i++) {
+			let a = jt(n, s, t + i, o), l = new Uint16Array(j);
+			for (let e = 0; e < t; e++) P(l, Ot(r(i, e), c[e]));
+			P(a, N.NTT.decode(l)), d.push(a), P(u, Ot(e[i], c[i])), A(l);
+		}
+		let f = jt(n, s, 2 * t, o);
+		P(f, N.NTT.decode(u));
+		let p = l.decode(i);
+		return P(p, f), A(e, c, u, f), m.encode([d, p]);
+	};
+	return {
+		secretCoder: p,
+		lengths: {
+			secretKey: p.bytesLen,
+			publicKey: f.bytesLen,
+			cipherText: m.bytesLen
+		},
+		keygen: (e) => {
+			k(e, 32, "seed");
+			let o = /* @__PURE__ */ new Uint8Array(33);
+			o.set(e), o[32] = t;
+			let s = i(o), [c, l] = h.decode(s), u = [], d = [];
+			for (let e = 0; e < t; e++) u.push(N.NTT.encode(jt(n, l, e, a)));
+			let m = r(c);
+			for (let e = 0; e < t; e++) {
+				let r = N.NTT.encode(jt(n, l, t + e, a));
+				for (let n = 0; n < t; n++) P(r, Ot(kt(m.get(n, e)), u[n]));
+				d.push(r);
+			}
+			m.clean();
+			let g = {
+				publicKey: f.encode([d, c]),
+				secretKey: p.encode(u)
+			};
+			return A(c, l, u, d, o, s), g;
+		},
+		encrypt: (e, t, n) => {
+			let [i, a] = f.decode(e), o = r(a), s = g(i, (e, t) => kt(o.get(e, t)), t, n);
+			return o.clean(), s;
+		},
+		prepare: (e) => {
+			let [n, i] = f.decode(e), a = r(i), o = [];
+			for (let e = 0; e < t; e++) for (let n = 0; n < t; n++) o.push(kt(a.get(e, n)));
+			return a.clean(), {
+				encrypt: (e, r) => g(n.map((e) => e.slice()), (e, n) => o[e * t + n].slice(), e, r),
+				clean: () => A(n, o)
+			};
+		},
+		decrypt: (e, n) => {
+			let [r, i] = m.decode(e), a = p.decode(n), o = new Uint16Array(j);
+			for (let e = 0; e < t; e++) P(o, Ot(a[e], N.NTT.encode(r[e])));
+			Et(i, N.NTT.decode(o));
+			let s = l.encode(i);
+			return A(o, a, r, i), s;
+		}
+	};
 };
-class F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    this.client = e, this.knishIOClient = t, this.$__variables = null, this.$__query = null, this.$__response = null, this.$__request = null;
-  }
-  /**
-   * Return a response object
-   * Used at KnishIOClient::createMolecule => sets the source wallet from the remainder one stored in response object
-   * @return {Response}
-   */
-  response() {
-    return this.$__response;
-  }
-  /**
-   * Builds a Response based on JSON input
-   *
-   * @param response
-   * @return {Promise<Response>}
-   */
-  async createResponseRaw(e) {
-    return this.createResponse(e);
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {Response}
-   */
-  createResponse(e) {
-    return new C({
-      query: this,
-      json: e
-    });
-  }
-  /**
-   * Creates a new Request for the given parameters
-   *
-   * @param {{}} variables
-   * @returns {{variables: (Object|null), query: null}}
-   */
-  createQuery({ variables: e = null }) {
-    if (this.$__variables = this.compiledVariables(e), !this.uri())
-      throw new ee("Query::createQuery() - Node URI was not initialized for this client instance!");
-    if (this.$__query === null)
-      throw new ee("Query::createQuery() - GraphQL subscription was not initialized!");
-    return {
-      query: this.$__query,
-      variables: this.variables()
-    };
-  }
-  /**
-   * Sends the Query to a Knish.IO node and returns the Response
-   *
-   * @param {object} variables
-   * @param {object} context
-   * @return {Promise<Response>}
-   */
-  async execute({ variables: e = null, context: t = {} }) {
-    this.$__request = this.createQuery({ variables: e });
-    const n = {
-      ...t,
-      ...this.createQueryContext()
-    };
-    try {
-      const s = await this.client.query({
-        ...this.$__request,
-        context: n
-      });
-      return this.$__response = await this.createResponseRaw(s), this.$__response;
-    } catch (s) {
-      if (s.name === "AbortError")
-        return this.knishIOClient.log("warn", "Query was cancelled"), new C({
-          query: this,
-          json: { data: null, errors: [{ message: "Query was cancelled" }] }
-        });
-      throw s;
-    }
-  }
-  /**
-   * Returns a variables object for the Query
-   *
-   * @param {object} variables
-   * @return {object}
-   */
-  compiledVariables(e = null) {
-    return e || {};
-  }
-  /**
-   * Returns the Knish.IO endpoint URI
-   *
-   * @return {string}
-   */
-  uri() {
-    return this.client.getUri();
-  }
-  /**
-   * Returns the query variables object
-   *
-   * @return {object|null}
-   */
-  variables() {
-    return this.$__variables;
-  }
-  createQueryContext() {
-    return {};
-  }
+function Nt(e) {
+	let t = e, n = Mt(t), { HASH256: r, HASH512: i, KDF: a } = t, { secretCoder: o, lengths: s } = n, c = _t("secretKey", s.secretKey, s.publicKey, 32, 32), l = (e, n) => {
+		let r = e.subarray(0, 384 * t.K), i = o.encode(o.decode(gt(r))), a = ht(i, r);
+		if (A(i), !a) throw Error(`ML-KEM.${n}: wrong publicKey modulus`);
+	}, u = Object.freeze({
+		...s,
+		seed: 64,
+		msg: 32,
+		msgRand: 32,
+		secretKey: c.bytesLen
+	});
+	return Object.freeze({
+		info: Object.freeze({ type: "ml-kem" }),
+		lengths: u,
+		keygen: (e) => {
+			let t = e === void 0, i = t ? pt(64) : e, a, o;
+			try {
+				k(i, 64, "seed");
+				let e = n.keygen(i.subarray(0, 32)), t = e.publicKey;
+				return a = e.secretKey, o = r(t), {
+					publicKey: t,
+					secretKey: c.encode([
+						a,
+						t,
+						o,
+						i.subarray(32)
+					])
+				};
+			} finally {
+				a !== void 0 && A(a), o !== void 0 && A(o), t && A(i);
+			}
+		},
+		getPublicKey: (e) => {
+			let [t, n, r, i] = c.decode(e);
+			return Uint8Array.from(n);
+		},
+		encapsulate: (e, t) => {
+			let a = t === void 0, o = a ? pt(32) : t, c;
+			try {
+				return k(e, s.publicKey, "publicKey"), k(o, 32, "message"), l(e, "encapsulate"), c = i.create().update(o).update(r(e)).digest(), {
+					cipherText: n.encrypt(e, o, c.subarray(32, 64)),
+					sharedSecret: c.subarray(0, 32)
+				};
+			} finally {
+				c !== void 0 && A(c.subarray(32)), a && A(o);
+			}
+		},
+		decapsulate: (e, t) => {
+			k(t, c.bytesLen, "secretKey"), k(e, s.cipherText, "cipherText");
+			let o = c.bytesLen - 96, l = o + 32;
+			if (!ht(r(t.subarray(o / 2, l)), t.subarray(l, l + 32))) throw Error("invalid secretKey: hash check failed");
+			let [u, d, f, p] = c.decode(t), m = n.decrypt(e, u), h = i.create().update(m).update(f).digest(), g = h.subarray(0, 32), _ = n.encrypt(d, m, h.subarray(32, 64)), v = ht(e, _), y = a.create({ dkLen: 32 }).update(p).update(e).digest();
+			return A(m, _, h.subarray(32), v ? y : g), v ? g : y;
+		},
+		prepare: (e) => {
+			k(e, s.publicKey, "publicKey"), l(e, "prepare");
+			let t = gt(e), o = r(t), u = n.prepare(t);
+			return Object.freeze({
+				publicKey: t,
+				encapsulate: (e) => {
+					let t = e === void 0, n = t ? pt(32) : e, r;
+					try {
+						return k(n, 32, "message"), r = i.create().update(n).update(o).digest(), {
+							cipherText: u.encrypt(n, r.subarray(32, 64)),
+							sharedSecret: r.subarray(0, 32)
+						};
+					} finally {
+						r !== void 0 && A(r.subarray(32)), t && A(n);
+					}
+				},
+				decapsulate: (e, r) => {
+					k(r, c.bytesLen, "secretKey"), k(e, s.cipherText, "cipherText");
+					let [l, d, f, p] = c.decode(r);
+					if (!ht(d, t) || !ht(f, o)) throw Error("ML-KEM.decapsulate: secretKey does not match prepared publicKey");
+					let m = n.decrypt(e, l), h = i.create().update(m).update(o).digest(), g = h.subarray(0, 32), _ = u.encrypt(m, h.subarray(32, 64)), v = ht(e, _), y = a.create({ dkLen: 32 }).update(p).update(e).digest();
+					return A(m, _, h.subarray(32), v ? y : g), v ? g : y;
+				},
+				clean: u.clean
+			});
+		}
+	});
 }
-class bs extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.ContinuId"
-    });
-  }
-  /**
-   * Returns the ContinuID wallet
-   *
-   * @return {Wallet|null}
-   */
-  payload() {
-    let e = null;
-    const t = this.data();
-    return t && (e = new S({
-      secret: null,
-      token: t.tokenSlug
-    }), e.address = t.address, e.position = t.position, e.bundle = t.bundleHash, e.batchId = t.batchId, e.characters = t.characters, e.pubkey = t.pubkey, e.balance = String(t.amount != null ? t.amount : 0)), e;
-  }
+function Pt(e, t, n) {
+	return it.create({ dkLen: e }).update(t).update(new Uint8Array([n])).digest();
 }
-class ks extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query ($bundle: String!) {
+var Ft = {
+	HASH256: et,
+	HASH512: tt,
+	KDF: it,
+	XOF: xt,
+	PRF: Pt
+}, It = (e) => Nt({
+	...Ft,
+	...e
+}), Lt = /* @__PURE__ */ It(St[768]), Rt = {
+	1024: {
+		kem: /* @__PURE__ */ It(St[1024]),
+		pkBytes: 1568,
+		skBytes: 3168,
+		ctBytes: 1568
+	},
+	768: {
+		kem: Lt,
+		pkBytes: 1184,
+		skBytes: 2400,
+		ctBytes: 1088
+	}
+}, zt = 1024, F = class t {
+	constructor({ secret: e = null, bundle: n = null, token: r = "USER", address: i = null, position: a = null, batchId: o = null, characters: s = null, mlKemParameterSet: c = zt }) {
+		let l = Number(c);
+		if (!Rt[l]) throw Error(`KnishIO: unsupported ML-KEM parameter set ${c}; expected 1024 or 768.`);
+		this.mlKemParameterSet = l, this.token = r, this.balance = "0", this.molecules = {}, this.key = null, this.privkey = null, this.pubkey = null, this.tokenUnits = [], this.tradeRates = {}, this.address = i, this.position = a, this.bundle = n, this.batchId = o, this.characters = s, e && (this.bundle = this.bundle || E(e, "Wallet::constructor"), this.position = this.position || t.generatePosition(), this.key = t.generateKey({
+			secret: e,
+			token: this.token,
+			position: this.position
+		}), this.address = this.address || t.generateAddress(this.key), this.characters = this.characters || "BASE64", this.initializeMLKEM());
+	}
+	static create({ secret: e = null, bundle: n = null, token: r, batchId: i = null, characters: a = null, mlKemParameterSet: o = zt }) {
+		let s = null;
+		if (!e && !n) throw new ue();
+		return e && !n && (s = t.generatePosition(), n = E(e, "Wallet::create")), new t({
+			secret: e,
+			bundle: n,
+			token: r,
+			position: s,
+			batchId: i,
+			characters: a,
+			mlKemParameterSet: o
+		});
+	}
+	static isBundleHash(e) {
+		return typeof e == "string" && e.length === 64 && v(e);
+	}
+	static getTokenUnits(e) {
+		let t = [];
+		return e.forEach((e) => {
+			t.push(le.createFromDB(e));
+		}), t;
+	}
+	static generateKey({ secret: t, token: n, position: r }) {
+		if (!t) throw new ue("Wallet::generateKey() - Secret is required!");
+		if (!r) throw new ue("Wallet::generateKey() - Position is required!");
+		let i = v(t) ? t : se(t, 1024), a = v(r) ? r : se(r, 256), o = BigInt(`0x${i}`) + BigInt(`0x${a}`), s = new e("SHAKE256", "TEXT");
+		s.update(o.toString(16)), n && s.update(n);
+		let c = new e("SHAKE256", "TEXT");
+		return c.update(s.getHash("HEX", { outputLen: 8192 })), c.getHash("HEX", { outputLen: 8192 });
+	}
+	static generateAddress(t) {
+		let n = d(t, 128), r = new e("SHAKE256", "TEXT");
+		for (let t in n) {
+			let i = n[t];
+			for (let t = 1; t <= 16; t++) {
+				let t = new e("SHAKE256", "TEXT");
+				t.update(i), i = t.getHash("HEX", { outputLen: 512 });
+			}
+			r.update(i);
+		}
+		let i = new e("SHAKE256", "TEXT");
+		return i.update(r.getHash("HEX", { outputLen: 8192 })), i.getHash("HEX", { outputLen: 256 });
+	}
+	static generatePosition(e = 64) {
+		return f(e, "abcdef0123456789");
+	}
+	initializeMLKEM() {
+		let e = oe(this.key, 128), t = /* @__PURE__ */ new Uint8Array(64);
+		for (let n = 0; n < 64; n++) t[n] = parseInt(e.substr(n * 2, 2), 16);
+		let { publicKey: n, secretKey: r } = Rt[this.mlKemParameterSet].kem.keygen(t);
+		this.pubkey = this.serializeKey(n), this.privkey = r;
+	}
+	serializeKey(e) {
+		if (typeof Buffer < "u") return Buffer.from(e).toString("base64");
+		let t = "", n = 32768;
+		for (let r = 0; r < e.length; r += n) t += String.fromCharCode(...e.subarray(r, r + n));
+		return btoa(t);
+	}
+	deserializeKey(e) {
+		if (typeof Buffer < "u") return new Uint8Array(Buffer.from(e, "base64"));
+		let t = atob(e);
+		return new Uint8Array(t.length).map((e, n) => t.charCodeAt(n));
+	}
+	balanceAsNumber() {
+		return Number(this.balance);
+	}
+	balanceAsBigInt() {
+		let e = String(this.balance), t = e.includes(".") ? e.split(".")[0] : e;
+		return BigInt(t || "0");
+	}
+	setBalanceBigInt(e) {
+		this.balance = e.toString();
+	}
+	setBalanceNumber(e) {
+		this.balance = String(e);
+	}
+	getTokenUnitsData() {
+		let e = [];
+		return this.tokenUnits.forEach((t) => {
+			e.push(t.toData());
+		}), e;
+	}
+	splitUnits(e, t, n = null) {
+		if (e.length === 0) return;
+		let r = [], i = [];
+		this.tokenUnits.forEach((t) => {
+			e.includes(t.id) ? r.push(t) : i.push(t);
+		}), this.tokenUnits = r, n !== null && (n.tokenUnits = r), t.tokenUnits = i;
+	}
+	splitUnitsMulti(e, t, n) {
+		let r = /* @__PURE__ */ new Set();
+		e.forEach((e) => {
+			e.forEach((e) => r.add(e));
+		}), r.size !== 0 && (t.forEach((t, n) => {
+			let r = e[n];
+			t.tokenUnits = this.tokenUnits.filter((e) => r.includes(e.id));
+		}), n.tokenUnits = this.tokenUnits.filter((e) => !r.has(e.id)), this.tokenUnits = this.tokenUnits.filter((e) => r.has(e.id)));
+	}
+	createRemainder(e) {
+		let n = t.create({
+			secret: e,
+			token: this.token,
+			characters: this.characters
+		});
+		return n.initBatchId({
+			sourceWallet: this,
+			isRemainder: !0
+		}), n;
+	}
+	isShadow() {
+		return (this.position === void 0 || this.position === null) && (this.address === void 0 || this.address === null);
+	}
+	initBatchId({ sourceWallet: e, isRemainder: t = !1 }) {
+		e.batchId && (this.batchId = t ? e.batchId : ce({}));
+	}
+	async encryptMessage(e, t) {
+		let n = JSON.stringify(e), r = new TextEncoder().encode(n), i = this.deserializeKey(t), a = Rt[this.mlKemParameterSet];
+		if (i.length !== a.pkBytes) throw Error(`KnishIO: cannot ML-KEM-encrypt — recipient public key is ${i.length} bytes, expected ${a.pkBytes} (ML-KEM-${this.mlKemParameterSet}). The peer is not running ML-KEM-${this.mlKemParameterSet}; upgrade the peer, or step this client back to the other parameter set.`);
+		let { cipherText: o, sharedSecret: s } = a.kem.encapsulate(i), c = await this.encryptWithSharedSecret(r, s);
+		return {
+			cipherText: this.serializeKey(o),
+			encryptedMessage: this.serializeKey(c)
+		};
+	}
+	async decryptMessage(e) {
+		let t = await this._mlkemDecryptToString(e);
+		return t === null ? null : JSON.parse(t);
+	}
+	async _mlkemDecryptToString(e) {
+		let { cipherText: t, encryptedMessage: n } = e, r = Rt[this.mlKemParameterSet], i = this.deserializeKey(t);
+		if (i.length !== r.ctBytes) return console.error(`Wallet::decryptMessage() - Ciphertext length mismatch: got ${i.length}, expected ${r.ctBytes}`), null;
+		let a;
+		try {
+			a = r.kem.decapsulate(i, this.privkey);
+		} catch (e) {
+			return console.error("Wallet::decryptMessage() - Decapsulation failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), null;
+		}
+		let o;
+		try {
+			o = this.deserializeKey(n);
+		} catch (e) {
+			return console.warn("Wallet::decryptMessage() - Deserialization failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", a), null;
+		}
+		let s;
+		try {
+			s = await this.decryptWithSharedSecret(o, a);
+		} catch (e) {
+			return console.warn("Wallet::decryptMessage() - Decryption failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", a), console.info("Wallet::decryptMessage() - deserialized encrypted message", o), null;
+		}
+		try {
+			return new TextDecoder().decode(s);
+		} catch (e) {
+			return console.warn("Wallet::decryptMessage() - Decoding failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", a), console.info("Wallet::decryptMessage() - deserialized encrypted message", o), console.info("Wallet::decryptMessage() - decrypted Uint8Array", s), null;
+		}
+	}
+	hashShare(e) {
+		let t = se(e, 64), n = Uint8Array.from(t.match(/.{2}/g).map((e) => parseInt(e, 16)));
+		return this.serializeKey(n);
+	}
+	async encryptStringML(e, t) {
+		let n = await this.encryptMessage(e, t);
+		return JSON.stringify({ [this.hashShare(t)]: n });
+	}
+	async decryptMyMessageML(e) {
+		let t = e[this.hashShare(this.pubkey)];
+		return t ? this._mlkemDecryptToString(t) : null;
+	}
+	async encryptWithSharedSecret(e, t) {
+		let n = crypto.getRandomValues(/* @__PURE__ */ new Uint8Array(12)), r = {
+			name: "AES-GCM",
+			iv: n
+		}, i = await crypto.subtle.importKey("raw", t, { name: "AES-GCM" }, !1, ["encrypt"]), a = await crypto.subtle.encrypt(r, i, e), o = new Uint8Array(n.length + a.byteLength);
+		return o.set(n), o.set(new Uint8Array(a), n.length), o;
+	}
+	async decryptWithSharedSecret(e, t) {
+		let n = {
+			name: "AES-GCM",
+			iv: e.slice(0, 12)
+		}, r = await crypto.subtle.importKey("raw", t, { name: "AES-GCM" }, !1, ["decrypt"]), i = await crypto.subtle.decrypt(n, r, e.slice(12));
+		return new Uint8Array(i);
+	}
+}, Bt = class extends C {
+	constructor(e = "There is an atom without an index", t = null, n = null) {
+		super(e, t, n), this.name = "AtomIndexException";
+	}
+}, Vt = class extends C {
+	constructor(e = "The molecular hash does not match", t = null, n = null) {
+		super(e, t, n), this.name = "MolecularHashMismatchException";
+	}
+}, Ht = class extends C {
+	constructor(e = "The molecular hash is missing", t = null, n = null) {
+		super(e, t, n), this.name = "MolecularHashMissingException";
+	}
+}, Ut = class extends C {
+	constructor(e = "", t = null, n = null) {
+		super(e, t, n), this.name = "PolicyInvalidException";
+	}
+}, Wt = class extends C {
+	constructor(e = "OTS malformed", t = null, n = null) {
+		super(e, t, n), this.name = "SignatureMalformedException";
+	}
+}, Gt = class extends C {
+	constructor(e = "One-time signature (OTS) does not match!", t = null, n = null) {
+		super(e, t, n), this.name = "SignatureMismatchException";
+	}
+}, I = class extends C {
+	constructor(e = "Insufficient balance to make transfer", t = null, n = null) {
+		super(e, t, n), this.name = "TransferBalanceException";
+	}
+}, Kt = class extends C {
+	constructor(e = "Token transfer atoms are malformed", t = null, n = null) {
+		super(e, t, n), this.name = "TransferMalformedException";
+	}
+}, qt = class extends C {
+	constructor(e = "Token slugs for wallets in transfer do not match!", t = null, n = null) {
+		super(e, t, n), this.name = "TransferMismatchedException";
+	}
+}, Jt = class extends C {
+	constructor(e = "Invalid remainder provided", t = null, n = null) {
+		super(e, t, n), this.name = "TransferRemainderException";
+	}
+}, Yt = class extends C {
+	constructor(e = "Sender and recipient(s) cannot be the same", t = null, n = null) {
+		super(e, t, n), this.name = "TransferToSelfException";
+	}
+}, Xt = class extends C {
+	constructor(e = "Token transfer atoms are unbalanced", t = null, n = null) {
+		super(e, t, n), this.name = "TransferUnbalancedException";
+	}
+}, L = class extends C {
+	constructor(e = "Empty meta data.", t = null, n = null) {
+		super(e, t, n), this.name = "MetaMissingException";
+	}
+}, R = class extends C {
+	constructor(e = "Wrong type of token for this isotope", t = null, n = null) {
+		super(e, t, n), this.name = "WrongTokenTypeException";
+	}
+}, Zt = class extends C {
+	constructor(e = "Incorrect BatchId", t = null, n = null) {
+		super(e, t, n), this.name = "BatchIdException";
+	}
+}, Qt = class {
+	constructor(e = {}) {
+		for (let t in e) this[`__${t}`] = e[t];
+	}
+	static toObject(e) {
+		return new this(e);
+	}
+	toJSON() {
+		let e = {};
+		for (let t of Object.keys(this)) t.substring(0, 2) === "__" && (e[t.substring(2, t.length)] = this[t]);
+		return e;
+	}
+}, $t = class extends C {
+	constructor(e = "An incorrect argument!", t = null, n = null) {
+		super(e, t, n), this.name = "RuleArgumentException";
+	}
+}, z = class extends C {
+	constructor(e = "Code exception", t = null, n = null) {
+		super(e, t, n), this.name = "CodeException";
+	}
+}, en = class e {
+	constructor({ action: e, metaType: t = null, metaId: n = null, meta: r = null, address: i = null, token: a = null, amount: o = null, comparison: s = null }) {
+		if (r && (this.meta = r), !e) throw new $t("Callback structure violated, missing mandatory \"action\" parameter.");
+		this.__metaId = n, this.__metaType = t, this.__action = e, this.__address = i, this.__token = a, this.__amount = o, this.__comparison = s;
+	}
+	set comparison(e) {
+		this.__comparison = e;
+	}
+	set amount(e) {
+		if (!y(e)) throw new z("Parameter amount should be a string containing numbers");
+		this.__amount = e;
+	}
+	set token(e) {
+		this.__token = e;
+	}
+	set address(e) {
+		this.__address = e;
+	}
+	set meta(e) {
+		this.__meta = e instanceof Qt ? e : Qt.toObject(e);
+	}
+	set metaType(e) {
+		this.__metaType = e;
+	}
+	set metaId(e) {
+		this.__metaId = e;
+	}
+	static toObject(t) {
+		let n = new e({ action: t.action });
+		return t.metaType && (n.metaType = t.metaType), t.metaId && (n.metaId = t.metaId), t.meta && (n.meta = t.meta), t.address && (n.address = t.address), t.token && (n.token = t.token), t.amount && (n.amount = t.amount), t.comparison && (n.comparison = t.comparison), n;
+	}
+	toJSON() {
+		let e = { action: this.__action };
+		return this.__metaType && (e.metaType = this.__metaType), this.__metaId && (e.metaId = this.__metaId), this.__meta && (e.meta = this.__meta), this.__address && (e.address = this.__address), this.__token && (e.token = this.__token), this.__amount && (e.amount = this.__amount), this.__comparison && (e.comparison = this.__comparison), e;
+	}
+	isReject() {
+		return this._is("reject");
+	}
+	isMeta() {
+		return x(Object.keys(this.toJSON()), [
+			"action",
+			"metaId",
+			"metaType",
+			"meta"
+		]).length === 4 && this._is("meta");
+	}
+	isCollect() {
+		return x(Object.keys(this.toJSON()), [
+			"action",
+			"address",
+			"token",
+			"amount",
+			"comparison"
+		]).length === 5 && this._is("collect");
+	}
+	isBuffer() {
+		return x(Object.keys(this.toJSON()), [
+			"action",
+			"address",
+			"token",
+			"amount",
+			"comparison"
+		]).length === 5 && this._is("buffer");
+	}
+	isRemit() {
+		return x(Object.keys(this.toJSON()), [
+			"action",
+			"token",
+			"amount"
+		]).length === 3 && this._is("remit");
+	}
+	isBurn() {
+		return x(Object.keys(this.toJSON()), [
+			"action",
+			"token",
+			"amount",
+			"comparison"
+		]).length === 4 && this._is("burn");
+	}
+	_is(e) {
+		return this.__action.toLowerCase() === e.toLowerCase();
+	}
+}, tn = class {
+	constructor({ key: e, value: t, comparison: n }) {
+		if ([
+			e,
+			t,
+			n
+		].some((e) => !e)) throw new $t("Condition::constructor( { key, value, comparison } ) - not all class parameters are initialised!");
+		this.__key = e, this.__value = t, this.__comparison = n;
+	}
+	static toObject(e) {
+		return new this({
+			key: e.key,
+			value: e.value,
+			comparison: e.comparison
+		});
+	}
+	toJSON() {
+		return {
+			key: this.__key,
+			value: this.__value,
+			comparison: this.__comparison
+		};
+	}
+}, nn = class e {
+	constructor({ condition: e = [], callback: t = [] }) {
+		for (let t of e) if (!(t instanceof tn)) throw new $t();
+		for (let e of t) if (!(e instanceof en)) throw new $t();
+		this.__condition = e, this.__callback = t;
+	}
+	set comparison(e) {
+		this.__condition.push(e instanceof tn ? e : tn.toObject(e));
+	}
+	set callback(e) {
+		this.__callback.push(e instanceof en ? e : en.toObject(e));
+	}
+	static toObject(t) {
+		if (!t.condition) throw new L("Rule::toObject() - Incorrect rule format! There is no condition field.");
+		if (!t.callback) throw new L("Rule::toObject() - Incorrect rule format! There is no callback field.");
+		let n = new e({});
+		for (let e of t.condition) n.comparison = e;
+		for (let e of t.callback) n.callback = e;
+		return n;
+	}
+	toJSON() {
+		return {
+			condition: this.__condition,
+			callback: this.__callback
+		};
+	}
+}, B = class {
+	static __init(e, t) {
+		this.arr = String(t).split("."), this.key = this.arr.shift();
+		let n = Number(this.key);
+		Number.isInteger(n) && (this.key = n), this.__nextKey = this.arr.length, this.__next = this.__tic(e);
+	}
+	static __tic(e) {
+		return !Array.isArray(e) && !(e instanceof Object) ? !1 : e[this.key] !== void 0;
+	}
+	static has(e, t) {
+		return this.__init(e, t), this.__next ? this.__nextKey === 0 || this.has(e[this.key], this.arr.join(".")) : !1;
+	}
+	static get(e, t, n = null) {
+		return this.__init(e, t), this.__next ? this.__nextKey === 0 ? e[this.key] : this.get(e[this.key], this.arr.join("."), n) : n;
+	}
+	static set(e, t, n) {
+		let r = t.split("."), i = e, a = r.length - 1;
+		for (let e = 0; e < a; e++) {
+			let t = r[e], n = Number(t), a = Number.isInteger(n);
+			(a ? n : t in i) || (i[a ? n : t] = r[e + 1].match(/^\d+$/) ? [] : {}), i = i[a ? n : t];
+		}
+		let o = r[a], s = Number(o);
+		return i[Number.isInteger(s) ? s : o] = n, e;
+	}
+}, rn = class t {
+	constructor(e) {
+		if (e.molecularHash === null) throw new Ht();
+		if (!e.atoms.length) throw new w();
+		for (let t of e.atoms) if (t.index === null) throw new Bt();
+		this.molecule = e;
+	}
+	verify(e) {
+		return this.molecularHash() && this.ots() && this.batchId() && this.continuId() && this.isotopeM() && this.isotopeT() && this.isotopeC() && this.isotopeU() && this.isotopeI() && this.isotopeR() && this.isotopeP() && this.isotopeA() && this.isotopeB() && this.isotopeF() && this.isotopeV(e);
+	}
+	continuId() {
+		if (this.molecule.atoms[0].token === "USER" && this.molecule.getIsotopes("I").length < 1) throw new w("Check::continuId() - Molecule is missing required ContinuID Atom!");
+		return !0;
+	}
+	batchId() {
+		if (this.molecule.atoms.length > 0) {
+			let e = this.molecule.atoms[0];
+			if (e.isotope === "V" && e.batchId !== null) {
+				let t = this.molecule.getIsotopes("V"), n = t[t.length - 1];
+				if (e.batchId !== n.batchId) throw new Zt();
+				for (let e of t) if (e.batchId === null) throw new Zt();
+			}
+			return !0;
+		}
+		throw new Zt();
+	}
+	isotopeI() {
+		for (let e of this.molecule.getIsotopes("I")) {
+			if (e.token !== "USER") throw new R(`Check::isotopeI() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+			if (e.index === 0) throw new Bt(`Check::isotopeI() - Isotope "${e.isotope}" Atoms must have a non-zero index!`);
+		}
+		return !0;
+	}
+	isotopeU() {
+		for (let e of this.molecule.getIsotopes("U")) {
+			if (e.token !== "AUTH") throw new R(`Check::isotopeU() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+			if (e.index !== 0) throw new Bt(`Check::isotopeU() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
+		}
+		return !0;
+	}
+	isotopeM() {
+		let e = ["readPolicy", "writePolicy"];
+		for (let t of this.molecule.getIsotopes("M")) {
+			if (t.meta.length < 1) throw new L();
+			if (t.token !== "USER") throw new R(`Check::isotopeM() - "${t.token}" is not a valid Token slug for "${t.isotope}" isotope Atoms!`);
+			let n = b.aggregateMeta(t.meta);
+			for (let t of e) {
+				let r = n[t];
+				if (r) {
+					r = JSON.parse(r);
+					for (let [t, i] of Object.entries(r)) if (!e.includes(t)) {
+						if (!Object.keys(n).includes(t)) throw new Ut(`${t} is missing from the meta.`);
+						for (let e of i) if (!F.isBundleHash(e) && !["all", "self"].includes(e)) throw new Ut(`${e} does not correspond to the format of the policy.`);
+					}
+				}
+			}
+		}
+		return !0;
+	}
+	isotopeC() {
+		for (let e of this.molecule.getIsotopes("C")) {
+			if (e.token !== "USER") throw new R(`Check::isotopeC() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+			if (e.index !== 0) throw new Bt(`Check::isotopeC() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
+		}
+		return !0;
+	}
+	isotopeT() {
+		for (let e of this.molecule.getIsotopes("T")) {
+			let t = e.aggregatedMeta();
+			if (String(e.metaType).toLowerCase() === "wallet") {
+				for (let e of ["position", "bundle"]) if (!Object.prototype.hasOwnProperty.call(t, e) || !t[e]) throw new L(`Check::isotopeT() - Required meta field "${e}" is missing!`);
+			}
+			for (let e of ["token"]) if (!Object.prototype.hasOwnProperty.call(t, e) || !t[e]) throw new L(`Check::isotopeT() - Required meta field "${e}" is missing!`);
+			if (e.token !== "USER") throw new R(`Check::isotopeT() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+			if (e.index !== 0) throw new Bt(`Check::isotopeT() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
+		}
+		return !0;
+	}
+	isotopeR() {
+		for (let e of this.molecule.getIsotopes("R")) {
+			let t = e.aggregatedMeta();
+			if (t.policy) {
+				let e = JSON.parse(t.policy);
+				if (!Object.keys(e).every((e) => ["read", "write"].includes(e))) throw new L("Check::isotopeR() - Mixing rules with politics!");
+			}
+			if (t.rule) {
+				let e = JSON.parse(t.rule);
+				if (!Array.isArray(e)) throw new L("Check::isotopeR() - Incorrect rule format!");
+				for (let t of e) nn.toObject(t);
+				if (e.length < 1) throw new L("Check::isotopeR() - No rules!");
+			}
+		}
+		return !0;
+	}
+	isotopeP() {
+		for (let e of this.molecule.getIsotopes("P")) {
+			if (e.token !== "USER") throw new R(`Check::isotopeP() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+			let t = e.aggregatedMeta();
+			if (!Object.prototype.hasOwnProperty.call(t, "peerHost") || !t.peerHost) throw new L("Check::isotopeP() - Required meta field \"peerHost\" is missing!");
+		}
+		return !0;
+	}
+	isotopeA() {
+		for (let e of this.molecule.getIsotopes("A")) {
+			if (e.token !== "USER") throw new R(`Check::isotopeA() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+			if (!e.metaType) throw new L("Check::isotopeA() - Required field \"metaType\" is missing!");
+			if (!e.metaId) throw new L("Check::isotopeA() - Required field \"metaId\" is missing!");
+			let t = e.aggregatedMeta();
+			if (!Object.prototype.hasOwnProperty.call(t, "action") || !t.action) throw new L("Check::isotopeA() - Required meta field \"action\" is missing!");
+		}
+		return !0;
+	}
+	isotopeB() {
+		let e = this.molecule.getIsotopes("B");
+		if (e.length === 0) return !0;
+		for (let t of e) {
+			if (!t.metaType || t.metaType !== "walletBundle") throw new L("Check::isotopeB() - B-isotope atoms must have metaType \"walletBundle\"!");
+			if (!t.metaId) throw new L("Check::isotopeB() - B-isotope atoms must have a metaId!");
+			let e = Number(t.value);
+			if (Number.isNaN(e)) throw new Kt("Check::isotopeB() - B-isotope atom value is not a valid number!");
+		}
+		let t = this.molecule.getIsotopes("V");
+		if (t.length > 0) {
+			let n = 0;
+			for (let r of [...t, ...e]) {
+				let e = Number(r.value);
+				Number.isNaN(e) || (n += e);
+			}
+			if (n !== 0) throw new Xt("Check::isotopeB() - V+B atom values do not balance to zero!");
+		}
+		return !0;
+	}
+	isotopeF() {
+		let e = this.molecule.getIsotopes("F");
+		if (e.length === 0) return !0;
+		for (let t of e) {
+			if (!t.metaType || t.metaType !== "walletBundle") throw new L("Check::isotopeF() - F-isotope atoms must have metaType \"walletBundle\"!");
+			if (!t.metaId) throw new L("Check::isotopeF() - F-isotope atoms must have a metaId!");
+			let e = Number(t.value);
+			if (Number.isNaN(e)) throw new Kt("Check::isotopeF() - F-isotope atom value is not a valid number!");
+			if (e < 0) throw new Kt("Check::isotopeF() - F-isotope atom value must not be negative!");
+		}
+		let t = this.molecule.getIsotopes("V");
+		if (t.length > 0) {
+			let n = 0;
+			for (let r of [...t, ...e]) {
+				let e = Number(r.value);
+				Number.isNaN(e) || (n += e);
+			}
+			if (n !== 0) throw new Xt("Check::isotopeF() - V+F atom values do not balance to zero!");
+		}
+		return !0;
+	}
+	isotopeV(e = null) {
+		let t = this.molecule.getIsotopes("V");
+		if (t.length === 0) return !0;
+		let n = this.molecule.getIsotopes("B").length > 0 || this.molecule.getIsotopes("F").length > 0, r = this.molecule.atoms[0];
+		if (!n && r.isotope === "V" && t.length === 2) {
+			let e = t[t.length - 1];
+			if (r.token !== e.token) throw new qt();
+			if (e.value < 0) throw new Kt();
+			if (Number(r.value) + Number(e.value) !== 0) throw new Xt();
+			return !0;
+		}
+		let i = 0, a = 0;
+		for (let e in this.molecule.atoms) if (Object.prototype.hasOwnProperty.call(this.molecule.atoms, e)) {
+			let t = this.molecule.atoms[e];
+			if (t.isotope !== "V") continue;
+			if (a = t.value * 1, Number.isNaN(a)) throw TypeError("Invalid isotope \"V\" values");
+			if (t.token !== r.token) throw new qt();
+			if (e > 0) {
+				if (a < 0) throw new Kt();
+				if (t.walletAddress === r.walletAddress) throw new Yt();
+			}
+			i += a;
+		}
+		if (!n && i !== 0) throw new Xt();
+		if (e) {
+			if (a = r.value * 1, Number.isNaN(a)) throw TypeError("Invalid isotope \"V\" values");
+			let t = Number(e.balance) + a;
+			if (t < 0) throw new I();
+			if (!n && t !== i) throw new Jt();
+		} else if (a !== 0) throw new Jt();
+		return !0;
+	}
+	molecularHash() {
+		if (this.molecule.molecularHash !== T.hashAtoms({ atoms: this.molecule.atoms })) throw new Vt();
+		return !0;
+	}
+	ots() {
+		let t = this.molecule.normalizedHash(), n = this.molecule.atoms.map((e) => e.otsFragment).reduce((e, t) => e + t);
+		if (n.length !== 2048 && (n = _(n), n.length !== 2048)) throw new Wt();
+		let r = d(n, 128), i = "";
+		for (let n in r) {
+			let a = r[n];
+			for (let r = 0, i = 8 + t[n]; r < i; r++) a = new e("SHAKE256", "TEXT").update(a).getHash("HEX", { outputLen: 512 });
+			i += a;
+		}
+		let a = new e("SHAKE256", "TEXT");
+		a.update(i);
+		let o = a.getHash("HEX", { outputLen: 8192 }), s = new e("SHAKE256", "TEXT");
+		s.update(o);
+		let c = s.getHash("HEX", { outputLen: 256 }), l = this.molecule.atoms[0], u = l.walletAddress, f = B.get(l.aggregatedMeta(), "signingWallet");
+		if (f && (u = B.get(JSON.parse(f), "address")), c !== u) throw new Gt();
+		return !0;
+	}
+	static fromServerData({ molecularHash: e, bundleHash: t, cellSlug: n = null, status: r = null, createdAt: i = null, atoms: a = [] }) {
+		let o = a.map((e) => {
+			let t = [];
+			if (e.metasJson) try {
+				let n = JSON.parse(e.metasJson);
+				Array.isArray(n) ? t = n : n && typeof n == "object" && (t = Object.entries(n).map(([e, t]) => ({
+					key: e,
+					value: t
+				})));
+			} catch {
+				t = [];
+			}
+			return {
+				position: e.position || null,
+				walletAddress: e.walletAddress || null,
+				isotope: e.isotope || null,
+				token: e.tokenSlug || e.token || null,
+				value: e.value == null ? null : String(e.value),
+				batchId: e.batchId || null,
+				metaType: e.metaType || null,
+				metaId: e.metaId || null,
+				meta: t,
+				index: e.index == null ? null : e.index,
+				otsFragment: e.otsFragment || null,
+				createdAt: e.createdAt || null
+			};
+		});
+		return on.fromJSON({
+			molecularHash: e,
+			bundle: t,
+			cellSlug: n,
+			status: r,
+			createdAt: i,
+			atoms: o
+		});
+	}
+	static verifyFromServerData(e) {
+		try {
+			let n = t.fromServerData(e);
+			return new t(n).verify(), {
+				molecularHash: e.molecularHash,
+				verified: !0,
+				error: null
+			};
+		} catch (t) {
+			return {
+				molecularHash: e.molecularHash || null,
+				verified: !1,
+				error: t.message || String(t)
+			};
+		}
+	}
+}, V = class extends C {
+	constructor(e = "Insufficient balance for requested transfer", t = null, n = null) {
+		super(e, t, n), this.name = "BalanceInsufficientException";
+	}
+}, an = class extends C {
+	constructor(e = "Amount cannot be negative!", t = null, n = null) {
+		super(e, t, n), this.name = "NegativeAmountException";
+	}
+}, on = class t {
+	constructor({ secret: e = null, bundle: t = null, sourceWallet: n = null, remainderWallet: r = null, cellSlug: i = null, version: a = null, continuIdPosition: o = null, mlKemParameterSet: s = null }) {
+		this.mlKemParameterSet = s || n && n.mlKemParameterSet || 1024, this.status = null, this.molecularHash = null, this.createdAt = String(+/* @__PURE__ */ new Date()), this.cellSlugOrigin = this.cellSlug = i, this.secret = e, this.bundle = t, this.sourceWallet = n, this.continuIdPosition = o, this.atoms = [], this.parentHashes = [], a !== null && Object.prototype.hasOwnProperty.call(ae, a) && (this.version = String(a)), (r || n) && (this.remainderWallet = r || F.create({
+			secret: e,
+			bundle: t,
+			token: n.token,
+			batchId: n.batchId,
+			characters: n.characters,
+			mlKemParameterSet: this.mlKemParameterSet
+		}));
+	}
+	withParentHashes(e) {
+		return this.parentHashes = Array.isArray(e) ? [...e] : [], this;
+	}
+	get cellSlugDelimiter() {
+		return ".";
+	}
+	static isotopeFilter(e, t) {
+		return Array.isArray(e) || (e = [e]), t.filter((t) => e.includes(t.isotope));
+	}
+	static generateNextAtomIndex(e) {
+		return e.length;
+	}
+	static jsonToObject(e) {
+		let n = Object.assign(new t({}), JSON.parse(e)), r = Object.keys(new t({}));
+		if (!Array.isArray(n.atoms)) throw new w();
+		for (let e in Object.keys(n.atoms)) {
+			n.atoms[e] = T.jsonToObject(JSON.stringify(n.atoms[e]));
+			for (let t of [
+				"position",
+				"walletAddress",
+				"isotope"
+			]) if (n.atoms[e].isotope.toLowerCase() !== "r" && (n.atoms[e][t] === void 0 || n.atoms[e][t] === null)) throw new w("MolecularStructure::jsonToObject() - Required Atom properties are missing!");
+		}
+		for (let e in n) Object.prototype.hasOwnProperty.call(n, e) && !r.includes(e) && delete n[e];
+		return n.atoms = T.sortAtoms(n.atoms), n;
+	}
+	static enumerate(e) {
+		let t = {
+			0: -8,
+			1: -7,
+			2: -6,
+			3: -5,
+			4: -4,
+			5: -3,
+			6: -2,
+			7: -1,
+			8: 0,
+			9: 1,
+			a: 2,
+			b: 3,
+			c: 4,
+			d: 5,
+			e: 6,
+			f: 7,
+			g: 8
+		}, n = [], r = e.toLowerCase().split("");
+		for (let e = 0, i = r.length; e < i; ++e) {
+			let i = r[e];
+			t[i] !== void 0 && (n[e] = t[i]);
+		}
+		return n;
+	}
+	static normalize(e) {
+		let t = e.reduce((e, t) => e + t), n = t < 0;
+		for (; t < 0 || t > 0;) for (let r of Object.keys(e)) if ((n ? e[r] < 8 : e[r] > -8) && (n ? (++e[r], ++t) : (--e[r], --t), t === 0)) break;
+		return e;
+	}
+	getIsotopes(e) {
+		return t.isotopeFilter(e, this.atoms);
+	}
+	generateIndex() {
+		return t.generateNextAtomIndex(this.atoms);
+	}
+	fill(e) {
+		for (let t in Object.keys(e)) this[t] = e[t];
+	}
+	addAtom(e) {
+		return this.molecularHash = null, e.index = this.generateIndex(), e.version = this.version, this.atoms.push(e), this.atoms = T.sortAtoms(this.atoms), this;
+	}
+	addContinuIdAtom() {
+		(!this.remainderWallet || this.remainderWallet.token !== "USER") && (this.remainderWallet = F.create({
+			secret: this.secret,
+			bundle: this.bundle,
+			mlKemParameterSet: this.mlKemParameterSet
+		}));
+		let e = {};
+		return this.continuIdPosition ? e.previousPosition = this.continuIdPosition : this.sourceWallet && this.sourceWallet.position && (e.previousPosition = this.sourceWallet.position), this.remainderWallet.pubkey && (e.pubkey = this.remainderWallet.pubkey), this.remainderWallet.characters && (e.characters = this.remainderWallet.characters), this.addAtom(T.create({
+			isotope: "I",
+			wallet: this.remainderWallet,
+			metaType: "walletBundle",
+			metaId: this.remainderWallet.bundle,
+			meta: new S(e)
+		})), this;
+	}
+	addPolicyAtom({ metaType: e, metaId: t, meta: n = {}, policy: r = {} }) {
+		let i = new S(n);
+		return i.addPolicy(r), this.addAtom(T.create({
+			wallet: this.sourceWallet,
+			isotope: "R",
+			metaType: e,
+			metaId: t,
+			meta: i
+		})), this;
+	}
+	fuseToken(e, t) {
+		let n = e.length;
+		if (this.sourceWallet.balance - n < 0) throw new V();
+		return this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.sourceWallet,
+			value: -n
+		})), this.addAtom(T.create({
+			isotope: "F",
+			wallet: t,
+			value: 1,
+			metaType: "walletBundle",
+			metaId: t.bundle
+		})), this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.remainderWallet,
+			value: this.sourceWallet.balance - n,
+			metaType: "walletBundle",
+			metaId: this.remainderWallet.bundle
+		})), this;
+	}
+	burnToken({ amount: e, walletBundle: t = null }) {
+		if (e < 0) throw new an("Molecule::burnToken() - Amount to burn must be positive!");
+		if (this.sourceWallet.balance - e < 0) throw new V();
+		let n = new F({
+			bundle: "0000000000000000000000000000000000000000000000000000000000000000",
+			token: this.sourceWallet.token,
+			mlKemParameterSet: this.mlKemParameterSet
+		});
+		return this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.sourceWallet,
+			value: -this.sourceWallet.balance
+		})), this.addAtom(T.create({
+			isotope: "V",
+			wallet: n,
+			value: e,
+			metaType: "walletBundle",
+			metaId: n.bundle
+		})), this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.remainderWallet,
+			value: this.sourceWallet.balance - e,
+			metaType: "walletBundle",
+			metaId: this.remainderWallet.bundle
+		})), this;
+	}
+	replenishToken({ amount: e, units: t = [] }) {
+		if (e < 0) throw new an("Molecule::replenishToken() - Amount to replenish must be positive!");
+		if (t.length) {
+			t = F.getTokenUnits(t), this.remainderWallet.tokenUnits = this.sourceWallet.tokenUnits;
+			for (let e of t) this.remainderWallet.tokenUnits.push(e);
+			this.remainderWallet.balance = String(this.remainderWallet.tokenUnits.length), this.sourceWallet.tokenUnits = t, this.sourceWallet.balance = String(this.sourceWallet.tokenUnits.length);
+		} else this.remainderWallet.balance = String(Number(this.sourceWallet.balance) + e), this.sourceWallet.balance = String(e);
+		return this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.sourceWallet,
+			value: Number(this.sourceWallet.balance)
+		})), this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.remainderWallet,
+			value: Number(this.remainderWallet.balance),
+			metaType: "walletBundle",
+			metaId: this.remainderWallet.bundle
+		})), this;
+	}
+	initValue({ recipientWallet: e, amount: t }) {
+		if (this.sourceWallet.balance - t < 0) throw new V();
+		return this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.sourceWallet,
+			value: -this.sourceWallet.balance
+		})), this.addAtom(T.create({
+			isotope: "V",
+			wallet: e,
+			value: t,
+			metaType: "walletBundle",
+			metaId: e.bundle
+		})), this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.remainderWallet,
+			value: this.sourceWallet.balance - t,
+			metaType: "walletBundle",
+			metaId: this.remainderWallet.bundle
+		})), this;
+	}
+	initValues({ recipientWallets: e, amounts: t }) {
+		let n = t.reduce((e, t) => e + Number(t), 0);
+		if (this.sourceWallet.balance - n < 0) throw new V();
+		return this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.sourceWallet,
+			value: -this.sourceWallet.balance
+		})), e.forEach((e, n) => {
+			this.addAtom(T.create({
+				isotope: "V",
+				wallet: e,
+				value: t[n],
+				metaType: "walletBundle",
+				metaId: e.bundle
+			}));
+		}), this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.remainderWallet,
+			value: this.sourceWallet.balance - n,
+			metaType: "walletBundle",
+			metaId: this.remainderWallet.bundle
+		})), this;
+	}
+	initDepositBuffer({ amount: e, tradeRates: t }) {
+		if (this.sourceWallet.balance - e < 0) throw new V();
+		let n = F.create({
+			secret: this.secret,
+			bundle: this.bundle,
+			token: this.sourceWallet.token,
+			batchId: this.sourceWallet.batchId,
+			mlKemParameterSet: this.mlKemParameterSet
+		});
+		return n.tradeRates = t, this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.sourceWallet,
+			value: -this.sourceWallet.balance
+		})), this.addAtom(T.create({
+			isotope: "B",
+			wallet: n,
+			value: e,
+			metaType: "walletBundle",
+			metaId: this.sourceWallet.bundle
+		})), this.addAtom(T.create({
+			isotope: "V",
+			wallet: this.remainderWallet,
+			value: this.sourceWallet.balance - e,
+			metaType: "walletBundle",
+			metaId: this.sourceWallet.bundle
+		})), this;
+	}
+	initWithdrawBuffer({ recipients: e, signingWallet: t = null }) {
+		let n = 0;
+		for (let t of Object.values(e || {})) n += t;
+		if (this.sourceWallet.balance - n < 0) throw new V();
+		let r = new S();
+		t && r.setSigningWallet(t), this.addAtom(T.create({
+			isotope: "B",
+			wallet: this.sourceWallet,
+			value: -this.sourceWallet.balance,
+			meta: r,
+			metaType: "walletBundle",
+			metaId: this.sourceWallet.bundle
+		}));
+		for (let [t, n] of Object.entries(e || {})) this.addAtom(new T({
+			isotope: "V",
+			token: this.sourceWallet.token,
+			value: n,
+			batchId: this.sourceWallet.batchId ? ce({}) : null,
+			metaType: "walletBundle",
+			metaId: t
+		}));
+		return this.addAtom(T.create({
+			isotope: "B",
+			wallet: this.remainderWallet,
+			value: this.sourceWallet.balance - n,
+			metaType: "walletBundle",
+			metaId: this.remainderWallet.bundle
+		})), this;
+	}
+	initTokenCreation({ recipientWallet: e, amount: t, meta: n }) {
+		let r = new S(n);
+		return r.setMetaWallet(e), this.addAtom(T.create({
+			isotope: "C",
+			wallet: this.sourceWallet,
+			value: t,
+			metaType: "token",
+			metaId: e.token,
+			meta: r,
+			batchId: e.batchId
+		})), this.addContinuIdAtom(), this;
+	}
+	createRule({ metaType: e, metaId: t, rule: n, policy: r = {} }) {
+		let i = [];
+		for (let e of n) i.push(e instanceof nn ? e : nn.toObject(e));
+		let a = new S({ rule: JSON.stringify(i) });
+		return a.addPolicy(r), this.addAtom(T.create({
+			isotope: "R",
+			wallet: this.sourceWallet,
+			metaType: e,
+			metaId: t,
+			meta: a
+		})), this.addContinuIdAtom(), this;
+	}
+	initWalletCreation(e, t = null) {
+		t ||= new S(), t.setMetaWallet(e);
+		let n = T.create({
+			isotope: "C",
+			wallet: this.sourceWallet,
+			metaType: "wallet",
+			metaId: e.address,
+			meta: t,
+			batchId: e.batchId
+		});
+		return this.addAtom(n), this.addContinuIdAtom(), this;
+	}
+	initShadowWalletClaim(e) {
+		let t = new S().setShadowWalletClaim(!0);
+		return this.initWalletCreation(e, t);
+	}
+	initIdentifierCreation({ type: e, contact: t, code: n }) {
+		let r = {
+			code: n,
+			hash: E(t.trim(), "Molecule::initIdentifierCreation")
+		};
+		return this.addAtom(T.create({
+			isotope: "C",
+			wallet: this.sourceWallet,
+			metaType: "identifier",
+			metaId: e,
+			meta: new S(r)
+		})), this.addContinuIdAtom(), this;
+	}
+	initMeta({ meta: e, metaType: t, metaId: n, policy: r }) {
+		return this.addAtom(T.create({
+			isotope: "M",
+			wallet: this.sourceWallet,
+			metaType: t,
+			metaId: n,
+			meta: new S(e)
+		})), r && Object.keys(r).length > 0 && this.addPolicyAtom({
+			metaType: t,
+			metaId: n,
+			meta: e,
+			policy: r
+		}), this.addContinuIdAtom(), this;
+	}
+	initPeering({ host: e }) {
+		return this.addAtom(T.create({
+			isotope: "P",
+			wallet: this.sourceWallet,
+			metaType: "walletBundle",
+			metaId: this.bundle,
+			meta: new S({ peerHost: e })
+		})), this.addContinuIdAtom(), this;
+	}
+	initAppendRequest({ metaType: e, metaId: t, action: n, meta: r = {} }) {
+		return this.addAtom(T.create({
+			isotope: "A",
+			wallet: this.sourceWallet,
+			metaType: e,
+			metaId: t,
+			meta: new S({
+				action: n,
+				...r
+			})
+		})), this.addContinuIdAtom(), this;
+	}
+	initTokenRequest({ token: e, amount: t, metaType: n, metaId: r, meta: i = {}, batchId: a = null }) {
+		return i.token = e, i.amount = String(t), this.addAtom(T.create({
+			isotope: "T",
+			wallet: this.sourceWallet,
+			value: t,
+			metaType: n,
+			metaId: r,
+			meta: new S(i),
+			batchId: a
+		})), this.addContinuIdAtom(), this;
+	}
+	initAuthorization({ meta: e }) {
+		return this.addAtom(T.create({
+			isotope: "U",
+			wallet: this.sourceWallet,
+			meta: new S(e)
+		})), this.addContinuIdAtom(), this;
+	}
+	sign({ bundle: t = null, anonymous: n = !1, compressed: r = !0 } = {}) {
+		if (this.atoms.length === 0 || this.atoms.filter((e) => !(e instanceof T)).length !== 0) throw new w();
+		!n && !this.bundle && (this.bundle = t || E(this.secret, "Molecule::sign")), this.molecularHash = T.hashAtoms({ atoms: this.atoms });
+		let i = this.atoms[0], a = i.position, o = B.get(i.aggregatedMeta(), "signingWallet");
+		if (o && (a = B.get(JSON.parse(o), "position")), !a) throw new Wt("Signing wallet must have a position!");
+		let s = d(F.generateKey({
+			secret: this.secret,
+			token: i.token,
+			position: i.position
+		}), 128), c = this.normalizedHash(), l = "";
+		for (let t in s) {
+			let n = s[t];
+			for (let r = 0, i = 8 - c[t]; r < i; r++) n = new e("SHAKE256", "TEXT").update(n).getHash("HEX", { outputLen: 512 });
+			l += n;
+		}
+		r && (l = g(l));
+		let u = d(l, Math.ceil(l.length / this.atoms.length)), f = null;
+		for (let e = 0, t = u.length; e < t; e++) this.atoms[e].otsFragment = u[e], f = this.atoms[e].position;
+		return f;
+	}
+	signSync(e = {}) {
+		return this.sign(e);
+	}
+	cellSlugBase() {
+		return (this.cellSlug || "").split(this.cellSlugDelimiter)[0];
+	}
+	toJSON(e = {}) {
+		let { includeValidationContext: t = !1, includeOtsFragments: n = !0 } = e;
+		try {
+			let e = {
+				status: this.status,
+				molecularHash: this.molecularHash,
+				createdAt: this.createdAt,
+				cellSlug: this.cellSlug,
+				bundle: this.bundle,
+				atoms: this.atoms.map((e) => e.toJSON({ includeOtsFragments: n }))
+			};
+			return this.parentHashes && this.parentHashes.length > 0 && (e.parentHashes = this.parentHashes), t && (e.cellSlugOrigin = this.cellSlugOrigin, e.version = this.version, this.sourceWallet && (e.sourceWallet = {
+				address: this.sourceWallet.address,
+				position: this.sourceWallet.position,
+				token: this.sourceWallet.token,
+				balance: this.sourceWallet.balance || "0",
+				bundle: this.sourceWallet.bundle,
+				batchId: this.sourceWallet.batchId || null,
+				characters: this.sourceWallet.characters || "BASE64",
+				pubkey: this.sourceWallet.pubkey || null,
+				tokenUnits: this.sourceWallet.tokenUnits || [],
+				tradeRates: this.sourceWallet.tradeRates || {},
+				molecules: this.sourceWallet.molecules || {}
+			}), this.remainderWallet && (e.remainderWallet = {
+				address: this.remainderWallet.address,
+				position: this.remainderWallet.position,
+				token: this.remainderWallet.token,
+				balance: this.remainderWallet.balance || "0",
+				bundle: this.remainderWallet.bundle,
+				batchId: this.remainderWallet.batchId || null,
+				characters: this.remainderWallet.characters || "BASE64",
+				pubkey: this.remainderWallet.pubkey || null,
+				tokenUnits: this.remainderWallet.tokenUnits || [],
+				tradeRates: this.remainderWallet.tradeRates || {},
+				molecules: this.remainderWallet.molecules || {}
+			})), e;
+		} catch (e) {
+			throw Error(`Molecule serialization failed: ${e.message}`);
+		}
+	}
+	static fromJSON(e, n = {}) {
+		let { includeValidationContext: r = !1, validateStructure: i = !0 } = n;
+		try {
+			let n = typeof e == "string" ? JSON.parse(e) : e;
+			if (i && (!n.molecularHash || !Array.isArray(n.atoms))) throw Error("Invalid molecule data: missing molecularHash or atoms array");
+			let a = new t({
+				secret: null,
+				bundle: n.bundle || null,
+				cellSlug: n.cellSlug || null,
+				version: n.version || null
+			});
+			return a.status = n.status, a.molecularHash = n.molecularHash, a.createdAt = n.createdAt || String(+/* @__PURE__ */ new Date()), a.cellSlugOrigin = n.cellSlugOrigin, a.parentHashes = Array.isArray(n.parentHashes) ? [...n.parentHashes] : [], Array.isArray(n.atoms) && (a.atoms = n.atoms.map((e, t) => {
+				try {
+					return T.fromJSON(e);
+				} catch (e) {
+					throw Error(`Failed to reconstruct atom ${t}: ${e.message}`);
+				}
+			})), r && (n.sourceWallet && (a.sourceWallet = new F({
+				secret: null,
+				token: n.sourceWallet.token,
+				position: n.sourceWallet.position,
+				bundle: n.sourceWallet.bundle,
+				batchId: n.sourceWallet.batchId,
+				characters: n.sourceWallet.characters,
+				mlKemParameterSet: a.mlKemParameterSet
+			}), a.sourceWallet.balance = String(n.sourceWallet.balance == null ? 0 : n.sourceWallet.balance), a.sourceWallet.address = n.sourceWallet.address, n.sourceWallet.pubkey && (a.sourceWallet.pubkey = n.sourceWallet.pubkey), a.sourceWallet.tokenUnits = n.sourceWallet.tokenUnits || [], a.sourceWallet.tradeRates = n.sourceWallet.tradeRates || {}, a.sourceWallet.molecules = n.sourceWallet.molecules || {}), n.remainderWallet && (a.remainderWallet = new F({
+				secret: null,
+				token: n.remainderWallet.token,
+				position: n.remainderWallet.position,
+				bundle: n.remainderWallet.bundle,
+				batchId: n.remainderWallet.batchId,
+				characters: n.remainderWallet.characters,
+				mlKemParameterSet: a.mlKemParameterSet
+			}), a.remainderWallet.balance = String(n.remainderWallet.balance == null ? 0 : n.remainderWallet.balance), a.remainderWallet.address = n.remainderWallet.address, n.remainderWallet.pubkey && (a.remainderWallet.pubkey = n.remainderWallet.pubkey), a.remainderWallet.tokenUnits = n.remainderWallet.tokenUnits || [], a.remainderWallet.tradeRates = n.remainderWallet.tradeRates || {}, a.remainderWallet.molecules = n.remainderWallet.molecules || {})), a;
+		} catch (e) {
+			throw Error(`Molecule deserialization failed: ${e.message}`);
+		}
+	}
+	check(e = null) {
+		return new rn(this).verify(e);
+	}
+	normalizedHash() {
+		return t.normalize(t.enumerate(this.molecularHash));
+	}
+}, sn = class e {
+	constructor({ token: e, expiresAt: t, encrypt: n, pubkey: r }) {
+		this.$__token = e, this.$__expiresAt = t, this.$__pubkey = r, this.$__encrypt = n;
+	}
+	static create(t, n) {
+		let r = new e(t);
+		return r.setWallet(n), r;
+	}
+	static restore(t, n) {
+		let r = new F({
+			secret: n,
+			token: "AUTH",
+			position: t.wallet.position,
+			characters: t.wallet.characters
+		});
+		return e.create({
+			token: t.token,
+			expiresAt: t.expiresAt,
+			pubkey: t.pubkey,
+			encrypt: t.encrypt
+		}, r);
+	}
+	setWallet(e) {
+		this.$__wallet = e;
+	}
+	getWallet() {
+		return this.$__wallet;
+	}
+	getSnapshot() {
+		return {
+			token: this.$__token,
+			expiresAt: this.$__expiresAt,
+			pubkey: this.$__pubkey,
+			encrypt: this.$__encrypt,
+			wallet: {
+				position: this.$__wallet.position,
+				characters: this.$__wallet.characters
+			}
+		};
+	}
+	getToken() {
+		return this.$__token;
+	}
+	getPubkey() {
+		return this.$__pubkey;
+	}
+	getExpireInterval() {
+		return this.$__expiresAt * 1e3 - Date.now();
+	}
+	isExpired() {
+		return !this.$__expiresAt || this.getExpireInterval() < 0;
+	}
+	getAuthData() {
+		return {
+			token: this.getToken(),
+			pubkey: this.getPubkey(),
+			wallet: this.getWallet()
+		};
+	}
+}, H = class e extends C {
+	constructor(e = "Secret storage operation failed", t = null, n = null) {
+		super(e, t, n), this.name = "SecretStorageException";
+	}
+	static notFound(t) {
+		return new e(`Secret not found for bundle: ${t}`);
+	}
+	static decryptionFailed(t = "Invalid passphrase or corrupted ciphertext") {
+		return new e(`Failed to decrypt master secret: ${t}`);
+	}
+	static unavailable(t, n = "Hardware or API not accessible") {
+		return new e(`Secret storage provider '${t}' is unavailable: ${n}`);
+	}
+}, cn = new TextEncoder();
+function U(e) {
+	if (e instanceof Uint8Array) e.fill(0);
+	else if (Array.isArray(e)) for (let t = 0; t < e.length; t++) e[t] = 0;
+}
+async function ln(e, t) {
+	try {
+		return await t(e);
+	} finally {
+		U(e);
+	}
+}
+async function un(e, t) {
+	let n = cn.encode(e);
+	try {
+		return await t(e);
+	} finally {
+		U(n);
+	}
+}
+function dn(e, t) {
+	let n = typeof e == "string" ? cn.encode(e) : e, r = typeof t == "string" ? cn.encode(t) : t, i = n.length === r.length ? 0 : 1, a = Math.min(n.length, r.length);
+	for (let e = 0; e < a; e++) i |= (n[e] ?? 0) ^ (r[e] ?? 0);
+	return typeof e == "string" && U(n), typeof t == "string" && U(r), i === 0;
+}
+//#endregion
+//#region src/storage/MemorySecretStorageProvider.js
+var fn = class {
+	constructor() {
+		this.providerType = "memory", this.secrets = /* @__PURE__ */ new Map();
+	}
+	isHardwareBacked() {
+		return !1;
+	}
+	async isAvailable() {
+		return !0;
+	}
+	async storeSecret(e, t, n = {}) {
+		if (!e) throw new H("Bundle hash cannot be empty");
+		if (!t) throw new H("Secret cannot be empty");
+		let r = {
+			bundleHash: e,
+			label: n.label,
+			createdAt: Date.now(),
+			hardwareBacked: !1,
+			providerType: this.providerType
+		};
+		this.secrets.set(e, {
+			secret: t,
+			metadata: r
+		});
+	}
+	async retrieveSecret(e) {
+		let t = this.secrets.get(e);
+		return t ? t.secret : null;
+	}
+	async deleteSecret(e) {
+		return this.secrets.delete(e);
+	}
+	async hasSecret(e) {
+		return this.secrets.has(e);
+	}
+	async listSecrets() {
+		return Array.from(this.secrets.values()).map((e) => ({ ...e.metadata }));
+	}
+	async withSecret(e, t) {
+		let n = this.secrets.get(e);
+		if (!n) throw H.notFound(e);
+		return un(n.secret, t);
+	}
+	clear() {
+		this.secrets.clear();
+	}
+}, pn = 10 ** 18, mn = class e {
+	static val(e) {
+		return Math.abs(e * pn) < 1 ? 0 : e;
+	}
+	static cmp(t, n, r = !1) {
+		let i = e.val(t) * pn, a = e.val(n) * pn;
+		return Math.abs(i - a) < 1 ? 0 : i > a ? 1 : -1;
+	}
+	static equal(t, n) {
+		return e.cmp(t, n) === 0;
+	}
+}, W = class extends C {
+	constructor(e = "GraphQL did not provide a valid response.", t = null, n = null) {
+		super(e, t, n), this.name = "InvalidResponseException";
+	}
+}, hn = class extends C {
+	constructor(e = "Authorization token missing or invalid.", t = null, n = null) {
+		super(e, t, n), this.name = "UnauthenticatedException";
+	}
+}, G = class {
+	constructor({ query: e, json: t, dataKey: n = null }) {
+		if (this.dataKey = n, this.errorKey = "exception", this.$__payload = null, this.$__query = e, this.$__originResponse = t, this.$__response = t, this.$__response === void 0 || this.$__response === null) throw new W();
+		if (B.has(this.$__response, this.errorKey)) {
+			let e = B.get(this.$__response, this.errorKey);
+			throw String(e).includes("Unauthenticated") ? new hn() : new W();
+		}
+		if (this.$__response.errors && Array.isArray(this.$__response.errors) && this.$__response.errors.length > 0) {
+			let e = this.$__response.errors[0].message || "Unknown GraphQL error";
+			throw e.includes("Unauthenticated") ? new hn() : new W(`GraphQL Error: ${e}`);
+		}
+		this.init();
+	}
+	init() {}
+	data() {
+		if (!this.dataKey) return this.response();
+		if (!this.response().data) throw new W("Response has no data field");
+		if (!B.has(this.response(), this.dataKey)) throw new W(`Missing expected field: ${this.dataKey}`);
+		return B.get(this.response(), this.dataKey);
+	}
+	response() {
+		return this.$__response;
+	}
+	payload() {
+		return null;
+	}
+	query() {
+		return this.$__query;
+	}
+	status() {
+		return null;
+	}
+	success() {
+		return !this.$__response?.errors?.length;
+	}
+	error() {
+		return this.$__response?.errors?.length ? this.$__response.errors[0].message || "Unknown error" : null;
+	}
+	reason() {
+		return this.error();
+	}
+	toValidationResult() {
+		return this.success() && this.payload() !== null ? {
+			success: !0,
+			data: this.payload(),
+			warnings: []
+		} : {
+			success: !1,
+			error: {
+				message: this.reason() || "Unknown error",
+				context: this.constructor.name,
+				details: this.$__response?.errors || []
+			}
+		};
+	}
+	onSuccess(e) {
+		if (this.success() && this.payload() !== null) try {
+			e(this.payload());
+		} catch (e) {
+			console.warn("Response.onSuccess callback failed:", e);
+		}
+		return this;
+	}
+	onFailure(e) {
+		if (!this.success()) try {
+			e(this.reason() || "Unknown error");
+		} catch (e) {
+			console.warn("Response.onFailure callback failed:", e);
+		}
+		return this;
+	}
+	debug(e = null) {
+		let t = e ? `[${e}]` : `[${this.constructor.name}]`;
+		return this.success() ? console.debug(`${t} Success:`, {
+			payload: this.payload(),
+			query: this.$__query?.constructor?.name,
+			dataKey: this.dataKey
+		}) : console.debug(`${t} Failure:`, {
+			error: this.reason(),
+			errors: this.$__response?.errors,
+			rawData: this.$__response
+		}), this;
+	}
+	toPromise() {
+		return this.success() && this.payload() !== null ? Promise.resolve(this.payload()) : Promise.reject(Error(this.reason() || "Unknown error"));
+	}
+	map(e) {
+		if (this.success() && this.payload() !== null) try {
+			let t = e(this.payload()), n = Object.create(Object.getPrototypeOf(this));
+			return Object.assign(n, this), n.$__payload = t, n;
+		} catch (e) {
+			let t = Object.create(Object.getPrototypeOf(this));
+			return Object.assign(t, this), t.$__response = { errors: [{ message: `Mapping failed: ${e.message}` }] }, t;
+		}
+		return this;
+	}
+}, K = class {
+	constructor(e, t) {
+		this.client = e, this.knishIOClient = t, this.$__variables = null, this.$__query = null, this.$__response = null, this.$__request = null;
+	}
+	response() {
+		return this.$__response;
+	}
+	async createResponseRaw(e) {
+		return this.createResponse(e);
+	}
+	createResponse(e) {
+		return new G({
+			query: this,
+			json: e
+		});
+	}
+	createQuery({ variables: e = null }) {
+		if (this.$__variables = this.compiledVariables(e), !this.uri()) throw new z("Query::createQuery() - Node URI was not initialized for this client instance!");
+		if (this.$__query === null) throw new z("Query::createQuery() - GraphQL subscription was not initialized!");
+		return {
+			query: this.$__query,
+			variables: this.variables()
+		};
+	}
+	async execute({ variables: e = null, context: t = {} }) {
+		this.$__request = this.createQuery({ variables: e });
+		let n = {
+			...t,
+			...this.createQueryContext()
+		};
+		try {
+			let e = await this.client.query({
+				...this.$__request,
+				context: n
+			});
+			return this.$__response = await this.createResponseRaw(e), this.$__response;
+		} catch (e) {
+			if (e.name === "AbortError") return this.knishIOClient.log("warn", "Query was cancelled"), new G({
+				query: this,
+				json: {
+					data: null,
+					errors: [{ message: "Query was cancelled" }]
+				}
+			});
+			throw e;
+		}
+	}
+	compiledVariables(e = null) {
+		return e || {};
+	}
+	uri() {
+		return this.client.getUri();
+	}
+	variables() {
+		return this.$__variables;
+	}
+	createQueryContext() {
+		return {};
+	}
+}, gn = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.ContinuId"
+		});
+	}
+	payload() {
+		let e = null, t = this.data();
+		return t && (e = new F({
+			secret: null,
+			token: t.tokenSlug
+		}), e.address = t.address, e.position = t.position, e.bundle = t.bundleHash, e.batchId = t.batchId, e.characters = t.characters, e.pubkey = t.pubkey, e.balance = String(t.amount == null ? 0 : t.amount)), e;
+	}
+}, _n = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query ($bundle: String!) {
       ContinuId(bundle: $bundle) {
         address,
         bundleHash,
@@ -4304,66 +2778,35 @@ class ks extends F {
         createdAt
       }
     }`;
-  }
-  /**
-   * Force network-only for ContinuID queries to prevent URQL cache from
-   * returning stale wallet positions after mutations advance the ContinuID chain
-   */
-  createQueryContext() {
-    return { requestPolicy: "network-only" };
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseContinuId}
-   */
-  createResponse(e) {
-    return new bs({
-      query: this,
-      json: e
-    });
-  }
-}
-class _s extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.WalletBundle"
-    });
-  }
-  /**
-   * Returns a wallet bundle with normalized metadata
-   *
-   * @return {{}|null}
-   */
-  payload() {
-    const e = this.data();
-    if (!e || e.length === 0)
-      return null;
-    const t = {};
-    return e.forEach((n) => {
-      n.metas = ye.aggregateMeta(n.metas), t[n.bundleHash] = n;
-    }), t;
-  }
-}
-class Ss extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $bundleHashes: [ String! ] ) {
+	}
+	createQueryContext() {
+		return { requestPolicy: "network-only" };
+	}
+	createResponse(e) {
+		return new gn({
+			query: this,
+			json: e
+		});
+	}
+}, vn = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.WalletBundle"
+		});
+	}
+	payload() {
+		let e = this.data();
+		if (!e || e.length === 0) return null;
+		let t = {};
+		return e.forEach((e) => {
+			e.metas = b.aggregateMeta(e.metas), t[e.bundleHash] = e;
+		}), t;
+	}
+}, yn = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query( $bundleHashes: [ String! ] ) {
       WalletBundle( bundleHashes: $bundleHashes ) {
         bundleHash,
         metas {
@@ -4376,102 +2819,54 @@ class Ss extends F {
         createdAt
       }
     }`;
-  }
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseWalletBundle}
-   */
-  createResponse(e) {
-    return new _s({
-      query: this,
-      json: e
-    });
-  }
-}
-class Ve extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.Wallet"
-    });
-  }
-  /**
-   * Returns a Knish.IO client Wallet class instance out of object data
-   *
-   * @param {object} data
-   * @param {string|null} secret
-   * @return {Wallet}
-   */
-  static toClientWallet({
-    data: e,
-    secret: t = null
-  }) {
-    let n;
-    if (e.position === null || typeof e.position > "u" ? n = S.create({
-      bundle: e.bundleHash,
-      token: e.tokenSlug,
-      batchId: e.batchId,
-      characters: e.characters
-    }) : (n = new S({
-      secret: t,
-      token: e.tokenSlug,
-      position: e.position,
-      batchId: e.batchId,
-      characters: e.characters
-    }), n.address = e.address, n.bundle = e.bundleHash), e.token && (n.tokenName = e.token.name, n.tokenAmount = e.token.amount, n.tokenSupply = e.token.supply, n.tokenFungibility = e.token.fungibility), e.tokenUnits.length)
-      for (const s of e.tokenUnits)
-        n.tokenUnits.push(ge.createFromGraphQL(s));
-    if (e.tradeRates.length)
-      for (const s of e.tradeRates)
-        n.tradeRates[s.tokenSlug] = s.amount;
-    return n.balance = String(e.amount != null ? e.amount : 0), n.pubkey = e.pubkey, n.createdAt = e.createdAt, n;
-  }
-  /**
-   * Returns a list of Wallet class instances
-   *
-   * @param secret
-   * @return {null|[Wallet]}
-   */
-  getWallets(e = null) {
-    const t = this.data();
-    if (!t)
-      return null;
-    const n = [];
-    for (const s of t)
-      n.push(Ve.toClientWallet({
-        data: s,
-        secret: e
-      }));
-    return n;
-  }
-  /**
-   * Returns response payload
-   *
-   * @return {null|[Wallet]}
-   */
-  payload() {
-    return this.getWallets();
-  }
-}
-class $s extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $bundleHash: String, $token: String ) {
+	}
+	createResponse(e) {
+		return new vn({
+			query: this,
+			json: e
+		});
+	}
+}, bn = class e extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.Wallet"
+		});
+	}
+	static toClientWallet({ data: e, secret: t = null }) {
+		let n;
+		if (e.position === null || e.position === void 0 ? n = F.create({
+			bundle: e.bundleHash,
+			token: e.tokenSlug,
+			batchId: e.batchId,
+			characters: e.characters
+		}) : (n = new F({
+			secret: t,
+			token: e.tokenSlug,
+			position: e.position,
+			batchId: e.batchId,
+			characters: e.characters
+		}), n.address = e.address, n.bundle = e.bundleHash), e.token && (n.tokenName = e.token.name, n.tokenAmount = e.token.amount, n.tokenSupply = e.token.supply, n.tokenFungibility = e.token.fungibility), e.tokenUnits.length) for (let t of e.tokenUnits) n.tokenUnits.push(le.createFromGraphQL(t));
+		if (e.tradeRates.length) for (let t of e.tradeRates) n.tradeRates[t.tokenSlug] = t.amount;
+		return n.balance = String(e.amount == null ? 0 : e.amount), n.pubkey = e.pubkey, n.createdAt = e.createdAt, n;
+	}
+	getWallets(t = null) {
+		let n = this.data();
+		if (!n) return null;
+		let r = [];
+		for (let i of n) r.push(e.toClientWallet({
+			data: i,
+			secret: t
+		}));
+		return r;
+	}
+	payload() {
+		return this.getWallets();
+	}
+}, xn = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query( $bundleHash: String, $token: String ) {
       Wallet( bundleHash: $bundleHash, token: $token ) {
         address,
         bundleHash,
@@ -4499,56 +2894,28 @@ class $s extends F {
         }
       }
     }`;
-  }
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseWalletList}
-   */
-  createResponse(e) {
-    return new Ve({
-      query: this,
-      json: e
-    });
-  }
-}
-class As extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.Balance"
-    });
-  }
-  /**
-   * Returns a wallet with balance
-   *
-   * @return {null|Wallet}
-   */
-  payload() {
-    let e = this.data();
-    return Array.isArray(e) && (e = e.length > 0 ? e[0] : null), !e || !e.bundleHash || !e.tokenSlug ? null : Ve.toClientWallet({
-      data: e
-    });
-  }
-}
-class vs extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $address: String, $bundleHash: String, $type: String, $token: String, $position: String ) {
+	}
+	createResponse(e) {
+		return new bn({
+			query: this,
+			json: e
+		});
+	}
+}, Sn = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.Balance"
+		});
+	}
+	payload() {
+		let e = this.data();
+		return Array.isArray(e) && (e = e.length > 0 ? e[0] : null), !e || !e.bundleHash || !e.tokenSlug ? null : bn.toClientWallet({ data: e });
+	}
+}, Cn = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query( $address: String, $bundleHash: String, $type: String, $token: String, $position: String ) {
       Balance( address: $address, bundleHash: $bundleHash, type: $type, token: $token, position: $position ) {
         address,
         bundleHash,
@@ -4571,59 +2938,34 @@ class vs extends F {
         }
       }
     }`;
-  }
-  /**
-   * @param {object} json
-   * @return {ResponseBalance}
-   */
-  createResponse(e) {
-    return new As({
-      query: this,
-      json: e
-    });
-  }
-}
-class xs extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.MetaType"
-    });
-  }
-  /**
-   * Returns meta type instance results
-   *
-   * @return {null|*}
-   */
-  payload() {
-    const e = this.data();
-    if (!e || e.length === 0)
-      return null;
-    const t = {
-      instances: {},
-      instanceCount: {},
-      paginatorInfo: {}
-    }, n = e.pop();
-    return n.instances && (t.instances = n.instances), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
-  }
-}
-class Ot extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $queryArgs: QueryArgs, $countBy: String, $cellSlug: String ) {
+	}
+	createResponse(e) {
+		return new Sn({
+			query: this,
+			json: e
+		});
+	}
+}, wn = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.MetaType"
+		});
+	}
+	payload() {
+		let e = this.data();
+		if (!e || e.length === 0) return null;
+		let t = {
+			instances: {},
+			instanceCount: {},
+			paginatorInfo: {}
+		}, n = e.pop();
+		return n.instances && (t.instances = n.instances), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
+	}
+}, Tn = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query( $metaType: String, $metaTypes: [ String! ], $metaId: String, $metaIds: [ String! ], $key: String, $keys: [ String! ], $value: String, $values: [ String! ], $count: String, $latest: Boolean, $filter: [ MetaFilter! ], $queryArgs: QueryArgs, $countBy: String, $cellSlug: String ) {
       MetaType( metaType: $metaType, metaTypes: $metaTypes, metaId: $metaId, metaIds: $metaIds, key: $key, keys: $keys, value: $value, values: $values, count: $count, filter: $filter, queryArgs: $queryArgs, countBy: $countBy, cellSlug: $cellSlug ) {
         metaType,
         instanceCount {
@@ -4648,288 +2990,124 @@ class Ot extends F {
         }
       }
     }`;
-  }
-  /**
-   * Builds a GraphQL-friendly variables object based on input fields
-   *
-   * @param {string|array|null} metaType
-   * @param {string|array|null} metaId
-   * @param {string|array|null} key
-   * @param {string|array|null} value
-   * @param {boolean|null} latest
-   * @param {object|null} filter
-   * @param {object|null} queryArgs
-   * @param {string|null} count
-   * @param {string|null} countBy
-   * @param {string|null} cellSlug
-   * @return {{}}
-   */
-  static createVariables({
-    metaType: e = null,
-    metaId: t = null,
-    key: n = null,
-    value: s = null,
-    latest: r = null,
-    filter: i = null,
-    queryArgs: a = null,
-    count: c = null,
-    countBy: u = null,
-    cellSlug: l = null
-  }) {
-    const h = {};
-    return e && (h[typeof e == "string" ? "metaType" : "metaTypes"] = e), t && (h[typeof t == "string" ? "metaId" : "metaIds"] = t), n && (h[typeof n == "string" ? "key" : "keys"] = n), s && (h[typeof s == "string" ? "value" : "values"] = s), h.latest = r === !0, i && (h.filter = i), a && ((typeof a.limit > "u" || a.limit === 0) && (a.limit = "*"), h.queryArgs = a), c && (h.count = c), u && (h.countBy = u), l && (h.cellSlug = l), h;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseMetaType}
-   */
-  createResponse(e) {
-    return new xs({
-      query: this,
-      json: e
-    });
-  }
-}
-class Ee extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $batchId: String ) {
+	}
+	static createVariables({ metaType: e = null, metaId: t = null, key: n = null, value: r = null, latest: i = null, filter: a = null, queryArgs: o = null, count: s = null, countBy: c = null, cellSlug: l = null }) {
+		let u = {};
+		return e && (u[typeof e == "string" ? "metaType" : "metaTypes"] = e), t && (u[typeof t == "string" ? "metaId" : "metaIds"] = t), n && (u[typeof n == "string" ? "key" : "keys"] = n), r && (u[typeof r == "string" ? "value" : "values"] = r), u.latest = i === !0, a && (u.filter = a), o && ((o.limit === void 0 || o.limit === 0) && (o.limit = "*"), u.queryArgs = o), s && (u.count = s), c && (u.countBy = c), l && (u.cellSlug = l), u;
+	}
+	createResponse(e) {
+		return new wn({
+			query: this,
+			json: e
+		});
+	}
+}, En = class e extends K {
+	constructor(t, n) {
+		super(t, n), this.$__query = i`query( $batchId: String ) {
       Batch( batchId: $batchId ) {
-        ${Ee.getFields()},
+        ${e.getFields()},
         children {
-          ${Ee.getFields()}
+          ${e.getFields()}
         }
       }
     }`;
-  }
-  static getFields() {
-    return `batchId,
-              molecularHash,
-              type,
-              status,
-              createdAt,
-              wallet {
-                  address,
-                  bundleHash,
-                  amount,
-                  tokenSlug,
-                  token {
-                      name,
-                      amount
-                  },
-                  tokenUnits {
-                      id,
-                      name,
-                      metas
-                  }
-              },
-              fromWallet {
-                  address,
-                  bundleHash,
-                  amount,
-                  batchId
-              },
-              toWallet {
-                  address,
-                  bundleHash,
-                  amount,
-                  batchId
-              },
-              sourceTokenUnits {
-                  id,
-                  name,
-                  metas
-              },
-              transferTokenUnits {
-                  id,
-                  name,
-                  metas
-              },
-              metas {
-                  key,
-                  value,
-              },
-              throughMetas {
-                  key,
-                  value
-              }`;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {Response}
-   */
-  createResponse(e) {
-    const t = new C({
-      query: this,
-      json: e
-    });
-    return t.dataKey = "data.Batch", t;
-  }
-}
-class Is extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $batchId: String ) {
+	}
+	static getFields() {
+		return "batchId,\n              molecularHash,\n              type,\n              status,\n              createdAt,\n              wallet {\n                  address,\n                  bundleHash,\n                  amount,\n                  tokenSlug,\n                  token {\n                      name,\n                      amount\n                  },\n                  tokenUnits {\n                      id,\n                      name,\n                      metas\n                  }\n              },\n              fromWallet {\n                  address,\n                  bundleHash,\n                  amount,\n                  batchId\n              },\n              toWallet {\n                  address,\n                  bundleHash,\n                  amount,\n                  batchId\n              },\n              sourceTokenUnits {\n                  id,\n                  name,\n                  metas\n              },\n              transferTokenUnits {\n                  id,\n                  name,\n                  metas\n              },\n              metas {\n                  key,\n                  value,\n              },\n              throughMetas {\n                  key,\n                  value\n              }";
+	}
+	createResponse(e) {
+		let t = new G({
+			query: this,
+			json: e
+		});
+		return t.dataKey = "data.Batch", t;
+	}
+}, Dn = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query( $batchId: String ) {
       BatchHistory( batchId: $batchId ) {
-        ${Ee.getFields()}
+        ${En.getFields()}
       }
     }`;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {Response}
-   */
-  createResponse(e) {
-    const t = new C({
-      query: this,
-      json: e
-    });
-    return t.dataKey = "data.BatchHistory", t;
-  }
-}
-class V extends C {
-  /**
-   * Class constructor
-   *
-   * @param {MutationProposeMolecule} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.ProposeMolecule"
-    }), this.$__clientMolecule = e.molecule();
-  }
-  /**
-   * Initialize response object with payload data
-   */
-  init() {
-    const e = M.get(this.data(), "payload");
-    try {
-      this.$__payload = Object.prototype.toString.call(e) === "[object String]" ? JSON.parse(e) : e;
-    } catch {
-      this.$__payload = null;
-    }
-  }
-  /**
-   * Returns the client molecule
-   */
-  clientMolecule() {
-    return this.$__clientMolecule;
-  }
-  /**
-   * Returns the resulting molecule
-   *
-   * @return {Molecule|null}
-   */
-  molecule() {
-    const e = this.data();
-    if (!e)
-      return null;
-    const t = new z({});
-    return t.molecularHash = M.get(e, "molecularHash"), t.status = M.get(e, "status"), t.createdAt = M.get(e, "createdAt"), t;
-  }
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @return {boolean}
-   */
-  success() {
-    return this.status() === "accepted";
-  }
-  /**
-   * Returns the status of the proposal
-   *
-   * @return {string}
-   */
-  status() {
-    return M.get(this.data(), "status", "rejected");
-  }
-  /**
-   * Returns the reason for rejection
-   *
-   * @return {string}
-   */
-  reason() {
-    return M.get(this.data(), "reason", "Invalid response from server");
-  }
-  /**
-   * Returns payload object
-   *
-   * @return {null}
-   */
-  payload() {
-    return this.$__payload;
-  }
-}
-class ze extends F {
-  /**
-   * Creates a new Request for the given parameters
-   *
-   * @param {{}} variables
-   * @returns {{variables: (Object|null), query: null}}
-   */
-  createQuery({ variables: e = null }) {
-    const t = super.createQuery({ variables: e });
-    return t.mutation = t.query, delete t.query, t;
-  }
-  /**
-   * Sends the Mutation to a Knish.IO node and returns the Response
-   * @param {Object||null} variables
-   * @param {Object||null} context
-   * @returns {Promise<Response|null>}
-   */
-  async execute({ variables: e = {}, context: t = {} }) {
-    this.$__request = this.createQuery({
-      variables: e
-    });
-    const n = {
-      ...t,
-      ...this.createQueryContext()
-    };
-    try {
-      const s = {
-        ...this.$__request,
-        context: n
-      }, r = await this.client.mutate(s);
-      return this.$__response = await this.createResponseRaw(r), this.$__response;
-    } catch (s) {
-      if (s.name === "AbortError")
-        return this.knishIOClient.log("warn", "Mutation was cancelled"), new C({
-          query: this,
-          json: { data: null, errors: [{ message: "Mutation was cancelled" }] }
-        });
-      throw s;
-    }
-  }
-  createQueryContext() {
-    return {};
-  }
-}
-class U extends ze {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   * @param molecule
-   */
-  constructor(e, t, n) {
-    super(e, t), this.$__molecule = n, this.$__remainderWallet = null, this.$__query = E`mutation( $molecule: MoleculeInput! ) {
+	}
+	createResponse(e) {
+		let t = new G({
+			query: this,
+			json: e
+		});
+		return t.dataKey = "data.BatchHistory", t;
+	}
+}, q = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.ProposeMolecule"
+		}), this.$__clientMolecule = e.molecule();
+	}
+	init() {
+		let e = B.get(this.data(), "payload");
+		try {
+			this.$__payload = Object.prototype.toString.call(e) === "[object String]" ? JSON.parse(e) : e;
+		} catch {
+			this.$__payload = null;
+		}
+	}
+	clientMolecule() {
+		return this.$__clientMolecule;
+	}
+	molecule() {
+		let e = this.data();
+		if (!e) return null;
+		let t = new on({});
+		return t.molecularHash = B.get(e, "molecularHash"), t.status = B.get(e, "status"), t.createdAt = B.get(e, "createdAt"), t;
+	}
+	success() {
+		return this.status() === "accepted";
+	}
+	status() {
+		return B.get(this.data(), "status", "rejected");
+	}
+	reason() {
+		return B.get(this.data(), "reason", "Invalid response from server");
+	}
+	payload() {
+		return this.$__payload;
+	}
+}, On = class extends K {
+	createQuery({ variables: e = null }) {
+		let t = super.createQuery({ variables: e });
+		return t.mutation = t.query, delete t.query, t;
+	}
+	async execute({ variables: e = {}, context: t = {} }) {
+		this.$__request = this.createQuery({ variables: e });
+		let n = {
+			...t,
+			...this.createQueryContext()
+		};
+		try {
+			let e = {
+				...this.$__request,
+				context: n
+			}, t = await this.client.mutate(e);
+			return this.$__response = await this.createResponseRaw(t), this.$__response;
+		} catch (e) {
+			if (e.name === "AbortError") return this.knishIOClient.log("warn", "Mutation was cancelled"), new G({
+				query: this,
+				json: {
+					data: null,
+					errors: [{ message: "Mutation was cancelled" }]
+				}
+			});
+			throw e;
+		}
+	}
+	createQueryContext() {
+		return {};
+	}
+}, J = class extends On {
+	constructor(e, t, n) {
+		super(e, t), this.$__molecule = n, this.$__remainderWallet = null, this.$__query = i`mutation( $molecule: MoleculeInput! ) {
       ProposeMolecule( molecule: $molecule ) {
         molecularHash,
         height,
@@ -4943,477 +3121,208 @@ class U extends ze {
         broadcastedAt,
       }
     }`;
-  }
-  /**
-   * Returns an object of query variables
-   *
-   * @param {object} variables
-   * @return {object}
-   */
-  compiledVariables(e) {
-    return { ...super.compiledVariables(e), molecule: this.molecule() };
-  }
-  /**
-   * Creates a new response from a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseProposeMolecule}
-   */
-  createResponse(e) {
-    return new V({
-      query: this,
-      json: e
-    });
-  }
-  /**
-   * Executes the query
-   *
-   * @param {object} variables
-   * @return {Promise}
-   */
-  async execute({ variables: e = null }) {
-    return e = e || {}, e.molecule = this.molecule(), super.execute({
-      variables: e
-    });
-  }
-  /**
-   * Returns the remainder wallet
-   *
-   * @return {null}
-   */
-  remainderWallet() {
-    return this.$__remainderWallet;
-  }
-  /**
-   * Returns the molecule we are proposing
-   *
-   * @return {Molecule}
-   */
-  molecule() {
-    return this.$__molecule;
-  }
-}
-class Ms extends V {
-  /**
-   * return the authorization key
-   *
-   * @param key
-   * @return {*}
-   */
-  payloadKey(e) {
-    if (!M.has(this.payload(), e))
-      throw new te(`ResponseRequestAuthorization::payloadKey() - '${e}' key was not found in the payload!`);
-    return M.get(this.payload(), e);
-  }
-  /**
-   * Returns the auth token
-   *
-   * @return {string}
-   */
-  token() {
-    return this.payloadKey("token");
-  }
-  /**
-   * Returns raw time value from payload
-   *
-   * @return {string}
-   */
-  time() {
-    return this.payloadKey("time");
-  }
-  /**
-   * Returns the expiration timestamp as Unix seconds.
-   * Handles both server formats:
-   * - PHP server: time = lifetime in ms, expiresAt = Unix timestamp in payload
-   * - Rust server: time = Unix timestamp in seconds
-   *
-   * @return {number}
-   */
-  expiresAt() {
-    try {
-      const t = this.payloadKey("expiresAt");
-      if (t)
-        return Number(t);
-    } catch {
-    }
-    const e = Number(this.time());
-    return e >= 1577836800 ? e : Math.floor(Date.now() / 1e3) + Math.floor(e / 1e3);
-  }
-  /**
-   *
-   * @return {string}
-   */
-  encrypt() {
-    return this.payloadKey("encrypt");
-  }
-  /**
-   *
-   * @return {string}
-   */
-  pubKey() {
-    return this.payloadKey("key");
-  }
-}
-class Ts extends U {
-  /**
-   *
-   * @param {object} meta
-   */
-  fillMolecule({ meta: e }) {
-    this.$__molecule.initAuthorization({ meta: e }), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseRequestAuthorization}
-   */
-  createResponse(e) {
-    return new Ms({
-      query: this,
-      json: e
-    });
-  }
-}
-class Cs extends V {
-}
-class Es extends U {
-  /**
-   * @param {Wallet|null} recipientWallet
-   * @param {number|null} amount
-   * @param {object|null} meta
-   */
-  fillMolecule({
-    recipientWallet: e,
-    amount: t,
-    meta: n = null
-  }) {
-    this.$__molecule.initTokenCreation({
-      recipientWallet: e,
-      amount: t,
-      meta: n || {}
-    }), this.$__molecule.sign({
-      bundle: e.bundle
-    }), this.$__molecule.check();
-  }
-  /**
-   * Builds a new Response object from a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseCreateToken}
-   */
-  createResponse(e) {
-    return new Cs({
-      query: this,
-      json: e
-    });
-  }
-}
-class Os extends V {
-}
-class Rs extends U {
-  /**
-   * Fills a Molecule with the appropriate atoms and prepares for broadcast
-   *
-   * @param {string} token
-   * @param {Number} amount
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {object} meta
-   * @param {string|null} batchId
-   */
-  fillMolecule({
-    token: e,
-    amount: t,
-    metaType: n,
-    metaId: s,
-    meta: r = null,
-    batchId: i = null
-  }) {
-    this.$__molecule.initTokenRequest({
-      token: e,
-      amount: t,
-      metaType: n,
-      metaId: s,
-      meta: r || {},
-      batchId: i
-    }), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseRequestTokens}
-   */
-  createResponse(e) {
-    return new Os({
-      query: this,
-      json: e
-    });
-  }
-}
-class qs extends V {
-  /**
-   * Returns result of the transfer
-   *
-   * @return {{reason: null, status: null}}
-   */
-  payload() {
-    const e = {
-      reason: null,
-      status: null
-    }, t = this.data();
-    return e.reason = typeof t.reason > "u" ? "Invalid response from server" : t.reason, e.status = typeof t.status > "u" ? "rejected" : t.status, e;
-  }
-}
-class Rt extends U {
-  /**
-   * Fills the Molecule with provided wallet and amount data
-   *
-   * @param recipientWallet
-   * @param amount
-   */
-  fillMolecule({
-    recipientWallet: e,
-    amount: t
-  }) {
-    this.$__molecule.initValue({
-      recipientWallet: e,
-      amount: t
-    }), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
-  }
-  /**
-   * Fills the Molecule for a MULTI-recipient transfer (WP line 544)
-   *
-   * @param {Wallet[]} recipientWallets
-   * @param {number[]} amounts - parallel to recipientWallets
-   */
-  fillMoleculeMulti({
-    recipientWallets: e,
-    amounts: t
-  }) {
-    this.$__molecule.initValues({
-      recipientWallets: e,
-      amounts: t
-    }), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
-  }
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseTransferTokens}
-   */
-  createResponse(e) {
-    return new qs({
-      query: this,
-      json: e
-    });
-  }
-}
-class Bs extends V {
-}
-class Us extends U {
-  fillMolecule({
-    type: e,
-    contact: t,
-    code: n
-  }) {
-    this.$__molecule.initIdentifierCreation({
-      type: e,
-      contact: t,
-      code: n
-    }), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseCreateIdentifier}
-   */
-  createResponse(e) {
-    return new Bs({
-      query: this,
-      json: e
-    });
-  }
-}
-class Ws extends V {
-}
-class Ps extends U {
-  /**
-   * Class constructor
-   *
-   * @param {string} token
-   * @param {string|null} batchId
-   */
-  fillMolecule({
-    token: e,
-    batchId: t = null
-  }) {
-    const n = S.create({
-      secret: this.$__molecule.secret,
-      bundle: this.$__molecule.bundle,
-      token: e,
-      batchId: t
-    });
-    this.$__molecule.initShadowWalletClaim(n), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseClaimShadowWallet}
-   */
-  createResponse(e) {
-    return new Ws({
-      query: this,
-      json: e
-    });
-  }
-}
-class Hs extends V {
-}
-class Ks extends U {
-  /**
-   * Fills a molecule with an appropriate metadata atom
-   *
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {array|object} meta
-   * @param {object} policy
-   */
-  fillMolecule({
-    metaType: e,
-    metaId: t,
-    meta: n,
-    policy: s
-  }) {
-    this.$__molecule.initMeta({
-      meta: n,
-      metaType: e,
-      metaId: t,
-      policy: s
-    }), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Builds a new Response object from a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseCreateMeta}
-   */
-  createResponse(e) {
-    return new Hs({
-      query: this,
-      json: e
-    });
-  }
-}
-class Ns extends V {
-}
-class Fs extends U {
-  /**
-   * Fills a molecule with a P-isotope peering atom
-   *
-   * @param {string} host
-   */
-  fillMolecule({
-    host: e
-  }) {
-    this.$__molecule.initPeering({
-      host: e
-    }), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Builds a new Response object from a JSON string
-   *
-   * @param {object} json
-   * @return {ResponsePeering}
-   */
-  createResponse(e) {
-    return new Ns({
-      query: this,
-      json: e
-    });
-  }
-}
-class Ls extends V {
-}
-class Qs extends U {
-  /**
-   * Fills a molecule with an A-isotope append request atom
-   *
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {string} action
-   * @param {object} meta
-   */
-  fillMolecule({
-    metaType: e,
-    metaId: t,
-    action: n,
-    meta: s = {}
-  }) {
-    this.$__molecule.initAppendRequest({
-      metaType: e,
-      metaId: t,
-      action: n,
-      meta: s
-    }), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Builds a new Response object from a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseAppendRequest}
-   */
-  createResponse(e) {
-    return new Ls({
-      query: this,
-      json: e
-    });
-  }
-}
-class Ds extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.LinkIdentifier"
-    });
-  }
-  /**
-   * Returns success status
-   *
-   * @return {*}
-   */
-  success() {
-    return M.get(this.data(), "set");
-  }
-  /**
-   * Returns message
-   *
-   * @return {*}
-   */
-  message() {
-    return M.get(this.data(), "message");
-  }
-}
-class js extends ze {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`mutation( $bundle: String!, $type: String!, $content: String! ) {
+	}
+	compiledVariables(e) {
+		return {
+			...super.compiledVariables(e),
+			molecule: this.molecule()
+		};
+	}
+	createResponse(e) {
+		return new q({
+			query: this,
+			json: e
+		});
+	}
+	async execute({ variables: e = null }) {
+		return e ||= {}, e.molecule = this.molecule(), super.execute({ variables: e });
+	}
+	remainderWallet() {
+		return this.$__remainderWallet;
+	}
+	molecule() {
+		return this.$__molecule;
+	}
+}, kn = class extends q {
+	payloadKey(e) {
+		if (!B.has(this.payload(), e)) throw new W(`ResponseRequestAuthorization::payloadKey() - '${e}' key was not found in the payload!`);
+		return B.get(this.payload(), e);
+	}
+	token() {
+		return this.payloadKey("token");
+	}
+	time() {
+		return this.payloadKey("time");
+	}
+	expiresAt() {
+		try {
+			let e = this.payloadKey("expiresAt");
+			if (e) return Number(e);
+		} catch {}
+		let e = Number(this.time());
+		return e >= 1577836800 ? e : Math.floor(Date.now() / 1e3) + Math.floor(e / 1e3);
+	}
+	encrypt() {
+		return this.payloadKey("encrypt");
+	}
+	pubKey() {
+		return this.payloadKey("key");
+	}
+}, An = class extends J {
+	fillMolecule({ meta: e }) {
+		this.$__molecule.initAuthorization({ meta: e }), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new kn({
+			query: this,
+			json: e
+		});
+	}
+}, jn = class extends q {}, Mn = class extends J {
+	fillMolecule({ recipientWallet: e, amount: t, meta: n = null }) {
+		this.$__molecule.initTokenCreation({
+			recipientWallet: e,
+			amount: t,
+			meta: n || {}
+		}), this.$__molecule.sign({ bundle: e.bundle }), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new jn({
+			query: this,
+			json: e
+		});
+	}
+}, Nn = class extends q {}, Pn = class extends J {
+	fillMolecule({ token: e, amount: t, metaType: n, metaId: r, meta: i = null, batchId: a = null }) {
+		this.$__molecule.initTokenRequest({
+			token: e,
+			amount: t,
+			metaType: n,
+			metaId: r,
+			meta: i || {},
+			batchId: a
+		}), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new Nn({
+			query: this,
+			json: e
+		});
+	}
+}, Fn = class extends q {
+	payload() {
+		let e = {
+			reason: null,
+			status: null
+		}, t = this.data();
+		return e.reason = t.reason === void 0 ? "Invalid response from server" : t.reason, e.status = t.status === void 0 ? "rejected" : t.status, e;
+	}
+}, In = class extends J {
+	fillMolecule({ recipientWallet: e, amount: t }) {
+		this.$__molecule.initValue({
+			recipientWallet: e,
+			amount: t
+		}), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
+	}
+	fillMoleculeMulti({ recipientWallets: e, amounts: t }) {
+		this.$__molecule.initValues({
+			recipientWallets: e,
+			amounts: t
+		}), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
+	}
+	createResponse(e) {
+		return new Fn({
+			query: this,
+			json: e
+		});
+	}
+}, Ln = class extends q {}, Rn = class extends J {
+	fillMolecule({ type: e, contact: t, code: n }) {
+		this.$__molecule.initIdentifierCreation({
+			type: e,
+			contact: t,
+			code: n
+		}), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new Ln({
+			query: this,
+			json: e
+		});
+	}
+}, zn = class extends q {}, Bn = class extends J {
+	fillMolecule({ token: e, batchId: t = null }) {
+		let n = F.create({
+			secret: this.$__molecule.secret,
+			bundle: this.$__molecule.bundle,
+			token: e,
+			batchId: t
+		});
+		this.$__molecule.initShadowWalletClaim(n), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new zn({
+			query: this,
+			json: e
+		});
+	}
+}, Vn = class extends q {}, Hn = class extends J {
+	fillMolecule({ metaType: e, metaId: t, meta: n, policy: r }) {
+		this.$__molecule.initMeta({
+			meta: n,
+			metaType: e,
+			metaId: t,
+			policy: r
+		}), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new Vn({
+			query: this,
+			json: e
+		});
+	}
+}, Un = class extends q {}, Wn = class extends J {
+	fillMolecule({ host: e }) {
+		this.$__molecule.initPeering({ host: e }), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new Un({
+			query: this,
+			json: e
+		});
+	}
+}, Gn = class extends q {}, Kn = class extends J {
+	fillMolecule({ metaType: e, metaId: t, action: n, meta: r = {} }) {
+		this.$__molecule.initAppendRequest({
+			metaType: e,
+			metaId: t,
+			action: n,
+			meta: r
+		}), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new Gn({
+			query: this,
+			json: e
+		});
+	}
+}, qn = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.LinkIdentifier"
+		});
+	}
+	success() {
+		return B.get(this.data(), "set");
+	}
+	message() {
+		return B.get(this.data(), "message");
+	}
+}, Jn = class extends On {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`mutation( $bundle: String!, $type: String!, $content: String! ) {
       LinkIdentifier( bundle: $bundle, type: $type, content: $content ) {
         type,
         bundle,
@@ -5422,277 +3331,121 @@ class js extends ze {
         message
       }
     }`;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseLinkIdentifier}
-   */
-  createResponse(e) {
-    return new Ds({
-      query: this,
-      json: e
-    });
-  }
-}
-class Vs extends V {
-}
-class zs extends U {
-  fillMolecule(e) {
-    this.$__molecule.initWalletCreation(e), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseCreateWallet}
-   */
-  createResponse(e) {
-    return new Vs({
-      query: this,
-      json: e
-    });
-  }
-}
-class Js extends C {
-  /**
-   * Class constructor
-   *
-   * @param {MutationRequestAuthorizationGuest} query
-   * @param json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.AccessToken"
-    });
-  }
-  /**
-   * Returns the reason for rejection
-   *
-   * @return {string}
-   */
-  reason() {
-    return "Invalid response from server";
-  }
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @return {boolean}
-   */
-  success() {
-    return this.payload() !== null;
-  }
-  /**
-   * Returns a wallet with balance
-   *
-   * @return {null|Wallet}
-   */
-  payload() {
-    return this.data();
-  }
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @return {*}
-   */
-  payloadKey(e) {
-    if (!M.has(this.payload(), e))
-      throw new te(`ResponseAuthorizationGuest::payloadKey() - '${e}' key is not found in the payload!`);
-    return M.get(this.payload(), e);
-  }
-  /**
-   * Returns the auth token
-   *
-   * @return {*}
-   */
-  token() {
-    return this.payloadKey("token");
-  }
-  /**
-   * Returns raw time value from payload
-   *
-   * @return {*}
-   */
-  time() {
-    return this.payloadKey("time");
-  }
-  /**
-   * Returns the expiration timestamp as Unix seconds.
-   * Handles both server formats:
-   * - PHP server: time = lifetime in ms, expiresAt = Unix timestamp in payload
-   * - Rust server: time = Unix timestamp in seconds
-   *
-   * @return {number}
-   */
-  expiresAt() {
-    try {
-      const t = this.payloadKey("expiresAt");
-      if (t)
-        return Number(t);
-    } catch {
-    }
-    const e = Number(this.time());
-    return e >= 1577836800 ? e : Math.floor(Date.now() / 1e3) + Math.floor(e / 1e3);
-  }
-  /**
-   * Returns timestamp
-   *
-   * @return {string}
-   */
-  pubKey() {
-    return this.payloadKey("key");
-  }
-  /**
-   *
-   * @return {string}
-   */
-  encrypt() {
-    return this.payloadKey("encrypt");
-  }
-}
-class Gs extends ze {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
+	}
+	createResponse(e) {
+		return new qn({
+			query: this,
+			json: e
+		});
+	}
+}, Yn = class extends q {}, Xn = class extends J {
+	fillMolecule(e) {
+		this.$__molecule.initWalletCreation(e), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new Yn({
+			query: this,
+			json: e
+		});
+	}
+}, Zn = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.AccessToken"
+		});
+	}
+	reason() {
+		return "Invalid response from server";
+	}
+	success() {
+		return this.payload() !== null;
+	}
+	payload() {
+		return this.data();
+	}
+	payloadKey(e) {
+		if (!B.has(this.payload(), e)) throw new W(`ResponseAuthorizationGuest::payloadKey() - '${e}' key is not found in the payload!`);
+		return B.get(this.payload(), e);
+	}
+	token() {
+		return this.payloadKey("token");
+	}
+	time() {
+		return this.payloadKey("time");
+	}
+	expiresAt() {
+		try {
+			let e = this.payloadKey("expiresAt");
+			if (e) return Number(e);
+		} catch {}
+		let e = Number(this.time());
+		return e >= 1577836800 ? e : Math.floor(Date.now() / 1e3) + Math.floor(e / 1e3);
+	}
+	pubKey() {
+		return this.payloadKey("key");
+	}
+	encrypt() {
+		return this.payloadKey("encrypt");
+	}
+}, Qn = class extends On {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`mutation( $cellSlug: String, $pubkey: String, $encrypt: Boolean ) {
       AccessToken( cellSlug: $cellSlug, pubkey: $pubkey, encrypt: $encrypt ) {
         token,
         pubkey,
         expiresAt
       }
     }`;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseRequestAuthorizationGuest}
-   */
-  createResponse(e) {
-    return new Js({
-      query: this,
-      json: e
-    });
-  }
-}
-class qt extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "The shadow wallet does not exist", t = null, n = null) {
-    super(e, t, n), this.name = "WalletShadowException";
-  }
-}
-class Xs extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Stackable tokens with unit IDs cannot have decimal places!", t = null, n = null) {
-    super(e, t, n), this.name = "StackableUnitDecimalsException";
-  }
-}
-class Ae extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Stackable tokens with unit IDs cannot have an amount!", t = null, n = null) {
-    super(e, t, n), this.name = "StackableUnitAmountException";
-  }
-}
-class Je {
-  /**
-   *
-   * @param {UrqlClientWrapper} graphQLClient
-   */
-  constructor(e) {
-    this.client = e, this.$__variables = null, this.$__subscribe = null;
-  }
-  /**
-   * Creates a new Request for the given parameters
-   *
-   * @param {{}} variables
-   * @returns {{variables: (Object|null), fetchPolicy: string, query: null}}
-   */
-  createSubscribe({
-    variables: e = null
-  }) {
-    if (this.$__variables = this.compiledVariables(e), !this.uri())
-      throw new ee("Subscribe::createSubscribe() - Node URI was not initialized for this client instance!");
-    if (this.$__subscribe === null)
-      throw new ee("Subscribe::createSubscribe() - GraphQL subscription was not initialized!");
-    return {
-      query: this.$__subscribe,
-      variables: this.variables(),
-      fetchPolicy: "no-cache"
-    };
-  }
-  /**
-   * Sends the Query to a Knish.IO node and returns the Response
-   *
-   * @param {{}} variables
-   * @param {function} closure
-   * @return {string}
-   */
-  async execute({
-    variables: e = null,
-    closure: t
-  }) {
-    if (!t)
-      throw new ee(`${this.constructor.name}::execute() - closure parameter is required!`);
-    return this.$__request = this.createSubscribe({
-      variables: e
-    }), this.client.subscribe(this.$__request, t);
-  }
-  /**
-   * Returns a variables object for the Query
-   *
-   * @param variables
-   * @return {object}
-   */
-  compiledVariables(e = null) {
-    return e || {};
-  }
-  /**
-   * Returns the Knish.IO endpoint URI
-   *
-   * @return {string}
-   */
-  uri() {
-    return this.client.getUri();
-  }
-  /**
-   * Returns the query variables object
-   *
-   * @return {object|null}
-   */
-  variables() {
-    return this.$__variables;
-  }
-}
-class Zs extends Je {
-  constructor(e) {
-    super(e), this.$__subscribe = E`
+	}
+	createResponse(e) {
+		return new Zn({
+			query: this,
+			json: e
+		});
+	}
+}, $n = class extends C {
+	constructor(e = "The shadow wallet does not exist", t = null, n = null) {
+		super(e, t, n), this.name = "WalletShadowException";
+	}
+}, er = class extends C {
+	constructor(e = "Stackable tokens with unit IDs cannot have decimal places!", t = null, n = null) {
+		super(e, t, n), this.name = "StackableUnitDecimalsException";
+	}
+}, tr = class extends C {
+	constructor(e = "Stackable tokens with unit IDs cannot have an amount!", t = null, n = null) {
+		super(e, t, n), this.name = "StackableUnitAmountException";
+	}
+}, nr = class {
+	constructor(e) {
+		this.client = e, this.$__variables = null, this.$__subscribe = null;
+	}
+	createSubscribe({ variables: e = null }) {
+		if (this.$__variables = this.compiledVariables(e), !this.uri()) throw new z("Subscribe::createSubscribe() - Node URI was not initialized for this client instance!");
+		if (this.$__subscribe === null) throw new z("Subscribe::createSubscribe() - GraphQL subscription was not initialized!");
+		return {
+			query: this.$__subscribe,
+			variables: this.variables(),
+			fetchPolicy: "no-cache"
+		};
+	}
+	async execute({ variables: e = null, closure: t }) {
+		if (!t) throw new z(`${this.constructor.name}::execute() - closure parameter is required!`);
+		return this.$__request = this.createSubscribe({ variables: e }), this.client.subscribe(this.$__request, t);
+	}
+	compiledVariables(e = null) {
+		return e || {};
+	}
+	uri() {
+		return this.client.getUri();
+	}
+	variables() {
+		return this.$__variables;
+	}
+}, rr = class extends nr {
+	constructor(e) {
+		super(e), this.$__subscribe = i`
       subscription onCreateMolecule ( $bundle: String! ) {
         CreateMolecule( bundle: $bundle ) {
           molecularHash,
@@ -5738,11 +3491,10 @@ class Zs extends Je {
         }
       }
     `;
-  }
-}
-class Ys extends Je {
-  constructor(e) {
-    super(e), this.$__subscribe = E`
+	}
+}, ir = class extends nr {
+	constructor(e) {
+		super(e), this.$__subscribe = i`
       subscription onWalletStatus ( $bundle: String!, $token: String! ) {
         WalletStatus( bundle: $bundle, token: $token ) {
           bundle,
@@ -5752,11 +3504,10 @@ class Ys extends Je {
         }
       }
     `;
-  }
-}
-class er extends Je {
-  constructor(e) {
-    super(e), this.$__subscribe = E`
+	}
+}, ar = class extends nr {
+	constructor(e) {
+		super(e), this.$__subscribe = i`
       subscription onActiveWallet ( $bundle: String! ) {
         ActiveWallet( bundle: $bundle ) {
           address,
@@ -5795,11 +3546,10 @@ class er extends Je {
         }
       }
     `;
-  }
-}
-class tr extends Je {
-  constructor(e) {
-    super(e), this.$__subscribe = E`
+	}
+}, or = class extends nr {
+	constructor(e) {
+		super(e), this.$__subscribe = i`
       subscription onActiveUser ( $metaType: String!, $metaId: String! ) {
         ActiveUser( metaType: $metaType, metaId: $metaId ) {
           bundleHash,
@@ -5810,33 +3560,18 @@ class tr extends Je {
           updatedAt
         }
       }`;
-  }
-}
-class nr extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.ActiveSession"
-    });
-  }
-}
-class sr extends ze {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`mutation(
+	}
+}, sr = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.ActiveSession"
+		});
+	}
+}, cr = class extends On {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`mutation(
       $bundleHash: String!,
       $metaType: String!,
       $metaId: String!,
@@ -5865,56 +3600,34 @@ class sr extends ze {
         updatedAt
       }
     }`;
-  }
-  /**
-   * Builds a Response object out of a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseActiveSession}
-   */
-  createResponse(e) {
-    return new nr({
-      query: this,
-      json: e
-    });
-  }
-}
-class rr extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.ActiveUser"
-    });
-  }
-  payload() {
-    const e = this.data();
-    if (!e)
-      return null;
-    const t = [];
-    for (const n of e) {
-      const s = { ...n };
-      s.jsonData && (s.jsonData = JSON.parse(s.jsonData)), s.createdAt && (s.createdAt = new Date(s.createdAt)), s.updatedAt && (s.updatedAt = new Date(s.updatedAt)), t.push(s);
-    }
-    return t;
-  }
-}
-class ir extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
+	}
+	createResponse(e) {
+		return new sr({
+			query: this,
+			json: e
+		});
+	}
+}, lr = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.ActiveUser"
+		});
+	}
+	payload() {
+		let e = this.data();
+		if (!e) return null;
+		let t = [];
+		for (let n of e) {
+			let e = { ...n };
+			e.jsonData &&= JSON.parse(e.jsonData), e.createdAt &&= new Date(e.createdAt), e.updatedAt &&= new Date(e.updatedAt), t.push(e);
+		}
+		return t;
+	}
+}, ur = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query ActiveUserQuery ($bundleHash:String, $metaType: String, $metaId: String) {
       ActiveUser (bundleHash: $bundleHash, metaType: $metaType, metaId: $metaId) {
         bundleHash,
         metaType,
@@ -5924,25 +3637,16 @@ class ir extends F {
         updatedAt
       }
     }`;
-  }
-  /**
-   * @param {object} json
-   * @return {ResponseQueryActiveSession}
-   */
-  createResponse(e) {
-    return new rr({
-      query: this,
-      json: e
-    });
-  }
-}
-class or extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $slug: String, $slugs: [ String! ], $limit: Int, $order: String ) {
+	}
+	createResponse(e) {
+		return new lr({
+			query: this,
+			json: e
+		});
+	}
+}, dr = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query( $slug: String, $slugs: [ String! ], $limit: Int, $order: String ) {
       Token( slug: $slug, slugs: $slugs, limit: $limit, order: $order ) {
         slug,
         name,
@@ -5953,87 +3657,51 @@ class or extends F {
         icon,
       }
     }`;
-  }
-  /**
-   *
-   * @param json
-   * @returns {Response}
-   */
-  createResponse(e) {
-    return new C({
-      query: this,
-      json: e,
-      dataKey: "data.Token"
-    });
-  }
-}
-class Bt extends x {
-  /**
-   * Class constructor
-   *
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
-   */
-  constructor(e = "Authorization attempt rejected by ledger.", t = null, n = null) {
-    super(e, t, n), this.name = "AuthorizationRejectedException";
-  }
-}
-class ar extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.Atom"
-    });
-  }
-  /**
-   * Returns meta type instance results
-   *
-   * @return {null|*}
-   */
-  payload() {
-    const e = this.data();
-    if (!e)
-      return null;
-    const t = {
-      instances: [],
-      instanceCount: {},
-      paginatorInfo: {}
-    };
-    if (e.instances) {
-      t.instances = e.instances;
-      for (const n in t.instances) {
-        const s = t.instances[n];
-        s.metasJson && (t.instances[n].metas = JSON.parse(s.metasJson));
-      }
-    }
-    return e.instanceCount && (t.instanceCount = e.instanceCount), e.paginatorInfo && (t.paginatorInfo = e.paginatorInfo), t;
-  }
-  metas() {
-    const e = this.payload(), t = [];
-    if (e && e.instances)
-      for (const n of e.instances)
-        n.metasJson && t.push(JSON.parse(n.metasJson));
-    return t;
-  }
-}
-class Ut extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query(
+	}
+	createResponse(e) {
+		return new G({
+			query: this,
+			json: e,
+			dataKey: "data.Token"
+		});
+	}
+}, fr = class extends C {
+	constructor(e = "Authorization attempt rejected by ledger.", t = null, n = null) {
+		super(e, t, n), this.name = "AuthorizationRejectedException";
+	}
+}, pr = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.Atom"
+		});
+	}
+	payload() {
+		let e = this.data();
+		if (!e) return null;
+		let t = {
+			instances: [],
+			instanceCount: {},
+			paginatorInfo: {}
+		};
+		if (e.instances) {
+			t.instances = e.instances;
+			for (let e in t.instances) {
+				let n = t.instances[e];
+				n.metasJson && (t.instances[e].metas = JSON.parse(n.metasJson));
+			}
+		}
+		return e.instanceCount && (t.instanceCount = e.instanceCount), e.paginatorInfo && (t.paginatorInfo = e.paginatorInfo), t;
+	}
+	metas() {
+		let e = this.payload(), t = [];
+		if (e && e.instances) for (let n of e.instances) n.metasJson && t.push(JSON.parse(n.metasJson));
+		return t;
+	}
+}, mr = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query(
       $molecularHashes: [String!],
       $bundleHashes: [String!],
       $positions:[String!],
@@ -6090,131 +3758,46 @@ class Ut extends F {
         }
       }
     }`;
-  }
-  /**
-   * Queries Knish.IO Atoms
-   *
-   * @param {string[]} molecularHashes
-   * @param {string} molecularHash
-   * @param {string[]} bundleHashes
-   * @param {string} bundleHash
-   * @param {string[]} positions
-   * @param {string} position
-   * @param {string[]} walletAddresses
-   * @param {string} walletAddress
-   * @param {string[]} isotopes
-   * @param {string} isotope
-   * @param {string[]} tokenSlugs
-   * @param {string} tokenSlug
-   * @param {string[]} cellSlugs
-   * @param {string} cellSlug
-   * @param {string[]} batchIds
-   * @param {string} batchId
-   * @param {string[]} values
-   * @param {string|number} value
-   * @param {string[]} metaTypes
-   * @param {string} metaType
-   * @param {string[]} metaIds
-   * @param {string} metaId
-   * @param {number[]} indexes
-   * @param {number} index
-   * @param {object[]} filter,
-   * @param {boolean} latest
-   * @param {object} queryArgs
-   * @return {object}
-   */
-  static createVariables({
-    molecularHashes: e,
-    molecularHash: t,
-    bundleHashes: n,
-    bundleHash: s,
-    positions: r,
-    position: i,
-    walletAddresses: a,
-    walletAddress: c,
-    isotopes: u,
-    isotope: l,
-    tokenSlugs: h,
-    tokenSlug: p,
-    cellSlugs: d,
-    cellSlug: w,
-    batchIds: A,
-    batchId: O,
-    values: f,
-    value: y,
-    metaTypes: b,
-    metaType: T,
-    metaIds: k,
-    metaId: $,
-    indexes: v,
-    index: I,
-    filter: _,
-    latest: W,
-    queryArgs: q
-  }) {
-    return t && (e = e || [], e.push(t)), s && (n = n || [], n.push(s)), i && (r = r || [], r.push(i)), c && (a = a || [], a.push(c)), l && (u = u || [], u.push(l)), p && (h = h || [], h.push(p)), w && (d = d || [], d.push(w)), O && (A = A || [], A.push(O)), y && (f = f || [], f.push(y)), T && (b = b || [], b.push(T)), $ && (k = k || [], k.push($)), I && (v = v || [], v.push(I)), {
-      molecularHashes: e,
-      bundleHashes: n,
-      positions: r,
-      walletAddresses: a,
-      isotopes: u,
-      tokenSlugs: h,
-      cellSlugs: d,
-      batchIds: A,
-      values: f,
-      metaTypes: b,
-      metaIds: k,
-      indexes: v,
-      filter: _,
-      latest: W,
-      queryArgs: q
-    };
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseAtom}
-   */
-  createResponse(e) {
-    return new ar({
-      query: this,
-      json: e
-    });
-  }
-}
-class lr extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t
-    }), this.dataKey = "data.Policy", this.init();
-  }
-  /**
-   *
-   * @returns {null|object}
-   */
-  payload() {
-    const e = this.data();
-    return e && e.callback ? JSON.parse(e.callback) : null;
-  }
-}
-class cr extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $metaType: String, $metaId: String, ) {
+	}
+	static createVariables({ molecularHashes: e, molecularHash: t, bundleHashes: n, bundleHash: r, positions: i, position: a, walletAddresses: o, walletAddress: s, isotopes: c, isotope: l, tokenSlugs: u, tokenSlug: d, cellSlugs: f, cellSlug: p, batchIds: m, batchId: h, values: g, value: _, metaTypes: v, metaType: y, metaIds: b, metaId: ee, indexes: te, index: ne, filter: x, latest: re, queryArgs: S }) {
+		return t && (e ||= [], e.push(t)), r && (n ||= [], n.push(r)), a && (i ||= [], i.push(a)), s && (o ||= [], o.push(s)), l && (c ||= [], c.push(l)), d && (u ||= [], u.push(d)), p && (f ||= [], f.push(p)), h && (m ||= [], m.push(h)), _ && (g ||= [], g.push(_)), y && (v ||= [], v.push(y)), ee && (b ||= [], b.push(ee)), ne && (te ||= [], te.push(ne)), {
+			molecularHashes: e,
+			bundleHashes: n,
+			positions: i,
+			walletAddresses: o,
+			isotopes: c,
+			tokenSlugs: u,
+			cellSlugs: f,
+			batchIds: m,
+			values: g,
+			metaTypes: v,
+			metaIds: b,
+			indexes: te,
+			filter: x,
+			latest: re,
+			queryArgs: S
+		};
+	}
+	createResponse(e) {
+		return new pr({
+			query: this,
+			json: e
+		});
+	}
+}, hr = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t
+		}), this.dataKey = "data.Policy", this.init();
+	}
+	payload() {
+		let e = this.data();
+		return e && e.callback ? JSON.parse(e.callback) : null;
+	}
+}, gr = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query( $metaType: String, $metaId: String, ) {
       Policy( metaType: $metaType, metaId: $metaId ) {
         molecularHash,
         position,
@@ -6226,56 +3809,34 @@ class cr extends F {
         createdAt
       }
     }`;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponsePolicy}
-   */
-  createResponse(e) {
-    return new lr({
-      query: this,
-      json: e
-    });
-  }
-}
-class ur extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.MetaTypeViaAtom"
-    });
-  }
-  payload() {
-    const e = this.data();
-    if (!e || e.length === 0)
-      return null;
-    const t = {
-      instances: {},
-      instanceCount: {},
-      paginatorInfo: {}
-    }, n = e.pop();
-    return n.instances && (t.instances = n.instances), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
-  }
-}
-class Wt extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
+	}
+	createResponse(e) {
+		return new hr({
+			query: this,
+			json: e
+		});
+	}
+}, _r = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.MetaTypeViaAtom"
+		});
+	}
+	payload() {
+		let e = this.data();
+		if (!e || e.length === 0) return null;
+		let t = {
+			instances: {},
+			instanceCount: {},
+			paginatorInfo: {}
+		}, n = e.pop();
+		return n.instances && (t.instances = n.instances), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
+	}
+}, vr = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
       MetaTypeViaAtom(
         metaTypes: $metaTypes
         metaIds: $metaIds
@@ -6309,165 +3870,82 @@ class Wt extends F {
         }
       }
     }`;
-  }
-  /**
-   * Builds a GraphQL-friendly variables object based on input fields
-   *
-   * @param {string|array|null} metaType
-   * @param {string|array|null} metaId
-   * @param {string|null} key
-   * @param {string|null} value
-   * @param {array|null} values
-   * @param {array|null} keys
-   * @param {array|null} atomValues
-   * @param {boolean|null} latest
-   * @param {array|null} filter
-   * @param {object|null} queryArgs
-   * @param {string|null} countBy
-   * @param {string|null} cellSlug
-   * @return {{}}
-   */
-  static createVariables({
-    metaType: e = null,
-    metaId: t = null,
-    key: n = null,
-    value: s = null,
-    keys: r = null,
-    values: i = null,
-    atomValues: a = null,
-    latest: c = null,
-    filter: u = null,
-    queryArgs: l = null,
-    countBy: h = null,
-    cellSlug: p = null
-  }) {
-    const d = {};
-    return a && (d.atomValues = a), r && (d.keys = r), i && (d.values = i), e && (d.metaTypes = typeof e == "string" ? [e] : e), t && (d.metaIds = typeof t == "string" ? [t] : t), p && (d.cellSlugs = typeof p == "string" ? [p] : p), h && (d.countBy = h), u && (d.filter = u), n && s && (d.filter = d.filter || [], d.filter.push({
-      key: n,
-      value: s,
-      comparison: "="
-    })), d.latest = c === !0, l && ((typeof l.limit > "u" || l.limit === 0) && (l.limit = "*"), d.queryArgs = l), d;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseMetaTypeViaAtom}
-   */
-  createResponse(e) {
-    return new ur({
-      query: this,
-      json: e
-    });
-  }
-}
-class pt extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.MetaTypeViaAtom"
-    });
-  }
-  /**
-   * Extracts metas from a molecule's atoms' metasJson for a specific instance.
-   * Filters atoms by matching metaType and metaId, then parses metasJson.
-   *
-   * @param {object} molecule - Molecule data with atoms array
-   * @param {string} metaType - Instance meta type to filter by
-   * @param {string} metaId - Instance meta ID to filter by
-   * @return {Array<{molecularHash: string, position: string, key: string, value: string, createdAt: string}>}
-   */
-  static extractMetasFromMolecule(e, t, n) {
-    if (!e || !e.atoms)
-      return [];
-    const s = [];
-    for (const r of e.atoms) {
-      if (r.metaType !== t || r.metaId !== n || !r.metasJson)
-        continue;
-      let i;
-      try {
-        if (i = JSON.parse(r.metasJson), !Array.isArray(i))
-          continue;
-      } catch {
-        continue;
-      }
-      for (const a of i)
-        s.push({
-          molecularHash: e.molecularHash,
-          position: r.position,
-          key: a.key,
-          value: a.value,
-          createdAt: r.createdAt
-        });
-    }
-    return s;
-  }
-  /**
-   * Returns meta type instance results with metas synthesized from molecule data.
-   * Produces the same payload format as ResponseMetaType and ResponseMetaTypeViaAtom:
-   * { instances, instanceCount, paginatorInfo }
-   *
-   * @return {null|{instances: Array, instanceCount: Array, paginatorInfo: object}}
-   */
-  payload() {
-    const e = this.data();
-    if (!e || e.length === 0)
-      return null;
-    const t = {
-      instances: {},
-      instanceCount: {},
-      paginatorInfo: {}
-    }, n = e.pop();
-    return n.instances && (t.instances = n.instances.map((s) => {
-      let r = s.metas;
-      return (!r || r.length === 0) && (r = pt.extractMetasFromMolecule(
-        s.molecule,
-        s.metaType,
-        s.metaId
-      )), {
-        ...s,
-        metas: r
-      };
-    })), n.instanceCount && (t.instanceCount = n.instanceCount), n.paginatorInfo && (t.paginatorInfo = n.paginatorInfo), t;
-  }
-  /**
-   * Verifies the cryptographic integrity of all molecules associated
-   * with meta instances in this response. For each instance, reconstructs
-   * the molecule from server data and runs CheckMolecule.verify() to validate
-   * the molecular hash and OTS signature.
-   *
-   * @return {{ verified: boolean, molecules: Array<{ molecularHash: string, verified: boolean, error: string|null }> }}
-   */
-  verifyIntegrity() {
-    const e = [], t = this.data();
-    if (!t || t.length === 0)
-      return { verified: !0, molecules: e };
-    const n = t[t.length - 1]?.instances || [];
-    for (const s of n)
-      s.molecule && e.push(Te.verifyFromServerData(s.molecule));
-    return {
-      verified: e.length === 0 || e.every((s) => s.verified),
-      molecules: e
-    };
-  }
-}
-class Pt extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
+	}
+	static createVariables({ metaType: e = null, metaId: t = null, key: n = null, value: r = null, keys: i = null, values: a = null, atomValues: o = null, latest: s = null, filter: c = null, queryArgs: l = null, countBy: u = null, cellSlug: d = null }) {
+		let f = {};
+		return o && (f.atomValues = o), i && (f.keys = i), a && (f.values = a), e && (f.metaTypes = typeof e == "string" ? [e] : e), t && (f.metaIds = typeof t == "string" ? [t] : t), d && (f.cellSlugs = typeof d == "string" ? [d] : d), u && (f.countBy = u), c && (f.filter = c), n && r && (f.filter = f.filter || [], f.filter.push({
+			key: n,
+			value: r,
+			comparison: "="
+		})), f.latest = s === !0, l && ((l.limit === void 0 || l.limit === 0) && (l.limit = "*"), f.queryArgs = l), f;
+	}
+	createResponse(e) {
+		return new _r({
+			query: this,
+			json: e
+		});
+	}
+}, yr = class e extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.MetaTypeViaAtom"
+		});
+	}
+	static extractMetasFromMolecule(e, t, n) {
+		if (!e || !e.atoms) return [];
+		let r = [];
+		for (let i of e.atoms) {
+			if (i.metaType !== t || i.metaId !== n || !i.metasJson) continue;
+			let a;
+			try {
+				if (a = JSON.parse(i.metasJson), !Array.isArray(a)) continue;
+			} catch {
+				continue;
+			}
+			for (let t of a) r.push({
+				molecularHash: e.molecularHash,
+				position: i.position,
+				key: t.key,
+				value: t.value,
+				createdAt: i.createdAt
+			});
+		}
+		return r;
+	}
+	payload() {
+		let t = this.data();
+		if (!t || t.length === 0) return null;
+		let n = {
+			instances: {},
+			instanceCount: {},
+			paginatorInfo: {}
+		}, r = t.pop();
+		return r.instances && (n.instances = r.instances.map((t) => {
+			let n = t.metas;
+			return (!n || n.length === 0) && (n = e.extractMetasFromMolecule(t.molecule, t.metaType, t.metaId)), {
+				...t,
+				metas: n
+			};
+		})), r.instanceCount && (n.instanceCount = r.instanceCount), r.paginatorInfo && (n.paginatorInfo = r.paginatorInfo), n;
+	}
+	verifyIntegrity() {
+		let e = [], t = this.data();
+		if (!t || t.length === 0) return {
+			verified: !0,
+			molecules: e
+		};
+		let n = t[t.length - 1]?.instances || [];
+		for (let t of n) t.molecule && e.push(rn.verifyFromServerData(t.molecule));
+		return {
+			verified: e.length === 0 || e.every((e) => e.verified),
+			molecules: e
+		};
+	}
+}, br = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query ($metaTypes: [String!], $metaIds: [String!], $values: [String!], $keys: [String!], $latest: Boolean, $filter: [MetaFilter!], $queryArgs: QueryArgs, $countBy: String, $atomValues: [String!], $cellSlugs: [String!] ) {
       MetaTypeViaAtom(
         metaTypes: $metaTypes
         metaIds: $metaIds
@@ -6522,101 +4000,36 @@ class Pt extends F {
         }
       }
     }`;
-  }
-  /**
-   * Builds a GraphQL-friendly variables object based on input fields
-   *
-   * @param {string|array|null} metaType
-   * @param {string|array|null} metaId
-   * @param {string|null} key
-   * @param {string|null} value
-   * @param {array|null} values
-   * @param {array|null} keys
-   * @param {array|null} atomValues
-   * @param {boolean|null} latest
-   * @param {array|null} filter
-   * @param {object|null} queryArgs
-   * @param {string|null} countBy
-   * @param {string|null} cellSlug
-   * @return {{}}
-   */
-  static createVariables({
-    metaType: e = null,
-    metaId: t = null,
-    key: n = null,
-    value: s = null,
-    keys: r = null,
-    values: i = null,
-    atomValues: a = null,
-    latest: c = null,
-    filter: u = null,
-    queryArgs: l = null,
-    countBy: h = null,
-    cellSlug: p = null
-  }) {
-    const d = {};
-    return a && (d.atomValues = a), r && (d.keys = r), i && (d.values = i), e && (d.metaTypes = typeof e == "string" ? [e] : e), t && (d.metaIds = typeof t == "string" ? [t] : t), p && (d.cellSlugs = typeof p == "string" ? [p] : p), h && (d.countBy = h), u && (d.filter = u), n && s && (d.filter = d.filter || [], d.filter.push({
-      key: n,
-      value: s,
-      comparison: "="
-    })), d.latest = c === !0, l && ((typeof l.limit > "u" || l.limit === 0) && (l.limit = "*"), d.queryArgs = l), d;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseMetaTypeViaMolecule}
-   */
-  createResponse(e) {
-    return new pt({
-      query: this,
-      json: e
-    });
-  }
-}
-class hr extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.embeddingStatus"
-    });
-  }
-  /**
-   * Returns the array of embedding status items, or null if empty.
-   *
-   * Each item contains:
-   * - metaType {string} - Metadata type (echoed from input)
-   * - metaId {string} - Instance identifier (echoed from input)
-   * - state {string} - PENDING | STALE | COMPLETE
-   * - totalMetas {number} - Total meta rows for this instance
-   * - embeddedCount {number} - Rows with current-model embeddings
-   * - embeddedAt {number|null} - Unix epoch of most recent embedding
-   * - model {string|null} - Model name used for embeddings
-   *
-   * @return {Array<object>|null}
-   */
-  payload() {
-    const e = this.data();
-    return !e || !Array.isArray(e) || e.length === 0 ? null : e;
-  }
-}
-class Ht extends F {
-  /**
-   * @param {UrqlClientWrapper} graphQLClient
-   * @param {KnishIOClient} knishIOClient
-   */
-  constructor(e, t) {
-    super(e, t), this.$__query = E`query( $metaType: String, $metaId: String, $instances: [EmbeddingStatusInput!] ) {
+	}
+	static createVariables({ metaType: e = null, metaId: t = null, key: n = null, value: r = null, keys: i = null, values: a = null, atomValues: o = null, latest: s = null, filter: c = null, queryArgs: l = null, countBy: u = null, cellSlug: d = null }) {
+		let f = {};
+		return o && (f.atomValues = o), i && (f.keys = i), a && (f.values = a), e && (f.metaTypes = typeof e == "string" ? [e] : e), t && (f.metaIds = typeof t == "string" ? [t] : t), d && (f.cellSlugs = typeof d == "string" ? [d] : d), u && (f.countBy = u), c && (f.filter = c), n && r && (f.filter = f.filter || [], f.filter.push({
+			key: n,
+			value: r,
+			comparison: "="
+		})), f.latest = s === !0, l && ((l.limit === void 0 || l.limit === 0) && (l.limit = "*"), f.queryArgs = l), f;
+	}
+	createResponse(e) {
+		return new yr({
+			query: this,
+			json: e
+		});
+	}
+}, xr = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.embeddingStatus"
+		});
+	}
+	payload() {
+		let e = this.data();
+		return !e || !Array.isArray(e) || e.length === 0 ? null : e;
+	}
+}, Sr = class extends K {
+	constructor(e, t) {
+		super(e, t), this.$__query = i`query( $metaType: String, $metaId: String, $instances: [EmbeddingStatusInput!] ) {
       embeddingStatus( metaType: $metaType, metaId: $metaId, instances: $instances ) {
         metaType,
         metaId,
@@ -6627,3086 +4040,2335 @@ class Ht extends F {
         model
       }
     }`;
-  }
-  /**
-   * Builds a GraphQL-friendly variables object for embedding status queries.
-   *
-   * Single mode: createVariables({ metaType: 'product', metaId: 'SKU-001' })
-   * Bulk mode:   createVariables({ instances: [{ metaType: 'product', metaId: 'SKU-001' }, ...] })
-   *
-   * @param {string|null} metaType
-   * @param {string|null} metaId
-   * @param {Array<{metaType: string, metaId: string}>|null} instances
-   * @return {{}}
-   */
-  static createVariables({
-    metaType: e = null,
-    metaId: t = null,
-    instances: n = null
-  }) {
-    const s = {};
-    return n && n.length > 0 && (s.instances = n), e && (s.metaType = e), t && (s.metaId = t), s;
-  }
-  /**
-   * Returns a Response object
-   *
-   * @param {object} json
-   * @return {ResponseEmbeddingStatus}
-   */
-  createResponse(e) {
-    return new hr({
-      query: this,
-      json: e
-    });
-  }
+	}
+	static createVariables({ metaType: e = null, metaId: t = null, instances: n = null }) {
+		let r = {};
+		return n && n.length > 0 && (r.instances = n), e && (r.metaType = e), t && (r.metaId = t), r;
+	}
+	createResponse(e) {
+		return new xr({
+			query: this,
+			json: e
+		});
+	}
+}, Cr = class extends q {}, wr = class extends J {
+	fillMolecule({ metaType: e, metaId: t, rule: n, policy: r }) {
+		this.$__molecule.createRule({
+			metaType: e,
+			metaId: t,
+			rule: n,
+			policy: r
+		}), this.$__molecule.sign({}), this.$__molecule.check();
+	}
+	createResponse(e) {
+		return new Cr({
+			query: this,
+			json: e
+		});
+	}
+}, Tr = class extends J {
+	fillMolecule({ amount: e, tradeRates: t }) {
+		this.$__molecule.initDepositBuffer({
+			amount: e,
+			tradeRates: t
+		}), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
+	}
+}, Er = class extends J {
+	fillMolecule({ recipients: e, signingWallet: t }) {
+		this.$__molecule.initWithdrawBuffer({
+			recipients: e,
+			signingWallet: t
+		}), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
+	}
+}, Dr = 2592e5, Or = "thumbmark", kr = "https://api.thumbmarkjs.com", Ar = {
+	exclude: [],
+	include: [],
+	stabilize: ["private", "iframe"],
+	logging: !0,
+	timeout: 5e3,
+	cache_api_call: !0,
+	cache_lifetime_in_ms: 0,
+	performance: !1,
+	experimental: !1,
+	simple_request: !1,
+	property_name_factory: (e) => `${Or}_${e}`
+}, jr = { ...Ar }, Mr = {
+	private: [
+		{
+			exclude: ["canvas"],
+			browsers: [
+				"firefox",
+				"safari>=17",
+				"brave"
+			]
+		},
+		{
+			exclude: ["audio"],
+			browsers: ["samsungbrowser", "safari"]
+		},
+		{
+			exclude: ["fonts"],
+			browsers: ["firefox"]
+		},
+		{
+			exclude: [
+				"audio.sampleHash",
+				"hardware.deviceMemory",
+				"header.acceptLanguage.q",
+				"system.hardwareConcurrency",
+				"plugins"
+			],
+			browsers: ["brave"]
+		},
+		{
+			exclude: ["tls.extensions"],
+			browsers: [
+				"firefox",
+				"chrome",
+				"safari"
+			]
+		},
+		{
+			exclude: ["header.acceptLanguage"],
+			browsers: ["edge", "chrome"]
+		}
+	],
+	iframe: [{
+		exclude: ["system.applePayVersion", "system.cookieEnabled"],
+		browsers: ["safari"]
+	}, { exclude: ["permissions"] }],
+	vpn: [{ exclude: ["ip"] }],
+	always: [{
+		exclude: ["speech"],
+		browsers: ["brave", "firefox"]
+	}]
+}, Nr = typeof window < "u" ? window.OfflineAudioContext || window.webkitOfflineAudioContext : null;
+function Pr(e) {
+	let t = 0;
+	for (let n = 0; n < e.length; ++n) t += Math.abs(e[n]);
+	return t;
 }
-class dr extends V {
+function Fr(e, t, n) {
+	if (e.length === 1) return e[0];
+	if (e.length === 3) {
+		let r = e[0].data, i = e[1].data, a = e[2].data, o = new Uint8ClampedArray(r.length);
+		for (let e = 0; e < r.length; e++) {
+			let t = r[e], n = i[e], s = a[e];
+			o[e] = t === n || t === s ? t : n === s ? n : t;
+		}
+		return new ImageData(o, t, n);
+	}
+	let r = [];
+	for (let t = 0; t < e[0].data.length; t++) {
+		let n = [];
+		for (let r = 0; r < e.length; r++) n.push(e[r].data[t]);
+		r.push(Ir(n));
+	}
+	let i = new Uint8ClampedArray(r);
+	return new ImageData(i, t, n);
 }
-class pr extends U {
-  /**
-   *
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {object[]} rule
-   * @param {object} policy
-   */
-  fillMolecule({
-    metaType: e,
-    metaId: t,
-    rule: n,
-    policy: s
-  }) {
-    this.$__molecule.createRule({
-      metaType: e,
-      metaId: t,
-      rule: n,
-      policy: s
-    }), this.$__molecule.sign({}), this.$__molecule.check();
-  }
-  /**
-   * Builds a new Response object from a JSON string
-   *
-   * @param {object} json
-   * @return {ResponseCreateRule}
-   */
-  createResponse(e) {
-    return new dr({
-      query: this,
-      json: e
-    });
-  }
+function Ir(e) {
+	if (e.length === 0) return 0;
+	let t = {};
+	for (let n of e) t[n] = (t[n] || 0) + 1;
+	let n = e[0];
+	for (let e in t) t[e] > t[n] && (n = parseInt(e, 10));
+	return n;
 }
-class fr extends U {
-  /**
-   * Fills the Molecule with provided wallet and amount data
-   *
-   * @param amount
-   * @param tradeRates
-   */
-  fillMolecule({
-    amount: e,
-    tradeRates: t
-  }) {
-    this.$__molecule.initDepositBuffer({
-      amount: e,
-      tradeRates: t
-    }), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
-  }
+function Lr(e) {
+	return e ^= e >>> 16, e = Math.imul(e, 2246822507), e ^= e >>> 13, e = Math.imul(e, 3266489909), (e ^= e >>> 16) >>> 0;
 }
-class yr extends U {
-  /**
-   *
-   * @param recipients
-   * @param signingWallet
-   */
-  fillMolecule({
-    recipients: e,
-    signingWallet: t
-  }) {
-    this.$__molecule.initWithdrawBuffer({
-      recipients: e,
-      signingWallet: t
-    }), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
-  }
+var Y = new Uint32Array([
+	597399067,
+	2869860233,
+	951274213,
+	2716044179
+]);
+function X(e, t) {
+	return e << t | e >>> 32 - t;
 }
-function Z(o, e, t, n) {
-  return new (t || (t = Promise))((function(s, r) {
-    function i(u) {
-      try {
-        c(n.next(u));
-      } catch (l) {
-        r(l);
-      }
-    }
-    function a(u) {
-      try {
-        c(n.throw(u));
-      } catch (l) {
-        r(l);
-      }
-    }
-    function c(u) {
-      var l;
-      u.done ? s(u.value) : (l = u.value, l instanceof t ? l : new t((function(h) {
-        h(l);
-      }))).then(i, a);
-    }
-    c((n = n.apply(o, [])).next());
-  }));
+function Z(e, t = 0) {
+	if (t = t ? 0 | t : 0, typeof e == "string" && (e = function(e) {
+		if (typeof TextEncoder < "u") return new TextEncoder().encode(e).buffer;
+		let t = [];
+		for (let n = 0; n < e.length; n++) {
+			let r = e.charCodeAt(n);
+			r < 128 ? t.push(r) : r < 2048 ? t.push(192 | r >> 6, 128 | 63 & r) : r < 55296 || r >= 57344 ? t.push(224 | r >> 12, 128 | r >> 6 & 63, 128 | 63 & r) : (n++, r = 65536 + ((1023 & r) << 10 | 1023 & e.charCodeAt(n)), t.push(240 | r >> 18, 128 | r >> 12 & 63, 128 | r >> 6 & 63, 128 | 63 & r));
+		}
+		return new Uint8Array(t).buffer;
+	}(e)), !(e instanceof ArrayBuffer)) throw TypeError("Expected key to be ArrayBuffer or string");
+	let n = new Uint32Array([
+		t,
+		t,
+		t,
+		t
+	]);
+	(function(e, t) {
+		let n = e.byteLength / 16 | 0, r = new Uint32Array(e, 0, 4 * n);
+		for (let e = 0; e < n; e++) {
+			let n = r.subarray(4 * e, 4 * (e + 1));
+			n[0] = Math.imul(n[0], Y[0]), n[0] = X(n[0], 15), n[0] = Math.imul(n[0], Y[1]), t[0] ^= n[0], t[0] = X(t[0], 19), t[0] += t[1], t[0] = Math.imul(t[0], 5) + 1444728091, n[1] = Math.imul(n[1], Y[1]), n[1] = X(n[1], 16), n[1] = Math.imul(n[1], Y[2]), t[1] ^= n[1], t[1] = X(t[1], 17), t[1] += t[2], t[1] = Math.imul(t[1], 5) + 197830471, n[2] = Math.imul(n[2], Y[2]), n[2] = X(n[2], 17), n[2] = Math.imul(n[2], Y[3]), t[2] ^= n[2], t[2] = X(t[2], 15), t[2] += t[3], t[2] = Math.imul(t[2], 5) + 2530024501, n[3] = Math.imul(n[3], Y[3]), n[3] = X(n[3], 18), n[3] = Math.imul(n[3], Y[0]), t[3] ^= n[3], t[3] = X(t[3], 13), t[3] += t[0], t[3] = Math.imul(t[3], 5) + 850148119;
+		}
+	})(e, n), function(e, t) {
+		let n = e.byteLength / 16 | 0, r = e.byteLength % 16, i = /* @__PURE__ */ new Uint32Array(4), a = new Uint8Array(e, 16 * n, r);
+		switch (r) {
+			case 15: i[3] ^= a[14] << 16;
+			case 14: i[3] ^= a[13] << 8;
+			case 13: i[3] ^= a[12], i[3] = Math.imul(i[3], Y[3]), i[3] = X(i[3], 18), i[3] = Math.imul(i[3], Y[0]), t[3] ^= i[3];
+			case 12: i[2] ^= a[11] << 24;
+			case 11: i[2] ^= a[10] << 16;
+			case 10: i[2] ^= a[9] << 8;
+			case 9: i[2] ^= a[8], i[2] = Math.imul(i[2], Y[2]), i[2] = X(i[2], 17), i[2] = Math.imul(i[2], Y[3]), t[2] ^= i[2];
+			case 8: i[1] ^= a[7] << 24;
+			case 7: i[1] ^= a[6] << 16;
+			case 6: i[1] ^= a[5] << 8;
+			case 5: i[1] ^= a[4], i[1] = Math.imul(i[1], Y[1]), i[1] = X(i[1], 16), i[1] = Math.imul(i[1], Y[2]), t[1] ^= i[1];
+			case 4: i[0] ^= a[3] << 24;
+			case 3: i[0] ^= a[2] << 16;
+			case 2: i[0] ^= a[1] << 8;
+			case 1: i[0] ^= a[0], i[0] = Math.imul(i[0], Y[0]), i[0] = X(i[0], 15), i[0] = Math.imul(i[0], Y[1]), t[0] ^= i[0];
+		}
+	}(e, n), function(e, t) {
+		t[0] ^= e.byteLength, t[1] ^= e.byteLength, t[2] ^= e.byteLength, t[3] ^= e.byteLength, t[0] = t[0] + t[1] | 0, t[0] = t[0] + t[2] | 0, t[0] = t[0] + t[3] | 0, t[1] = t[1] + t[0] | 0, t[2] = t[2] + t[0] | 0, t[3] = t[3] + t[0] | 0, t[0] = Lr(t[0]), t[1] = Lr(t[1]), t[2] = Lr(t[2]), t[3] = Lr(t[3]), t[0] = t[0] + t[1] | 0, t[0] = t[0] + t[2] | 0, t[0] = t[0] + t[3] | 0, t[1] = t[1] + t[0] | 0, t[2] = t[2] + t[0] | 0, t[3] = t[3] + t[0] | 0;
+	}(e, n);
+	let r = new Uint8Array(n.buffer);
+	return Array.from(r).map(((e) => e.toString(16).padStart(2, "0"))).join("");
 }
-function Y(o, e) {
-  var t, n, s, r, i = { label: 0, sent: function() {
-    if (1 & s[0]) throw s[1];
-    return s[1];
-  }, trys: [], ops: [] };
-  return r = { next: a(0), throw: a(1), return: a(2) }, typeof Symbol == "function" && (r[Symbol.iterator] = function() {
-    return this;
-  }), r;
-  function a(c) {
-    return function(u) {
-      return (function(l) {
-        if (t) throw new TypeError("Generator is already executing.");
-        for (; r && (r = 0, l[0] && (i = 0)), i; ) try {
-          if (t = 1, n && (s = 2 & l[0] ? n.return : l[0] ? n.throw || ((s = n.return) && s.call(n), 0) : n.next) && !(s = s.call(n, l[1])).done) return s;
-          switch (n = 0, s && (l = [2 & l[0], s.value]), l[0]) {
-            case 0:
-            case 1:
-              s = l;
-              break;
-            case 4:
-              return i.label++, { value: l[1], done: !1 };
-            case 5:
-              i.label++, n = l[1], l = [0];
-              continue;
-            case 7:
-              l = i.ops.pop(), i.trys.pop();
-              continue;
-            default:
-              if (s = i.trys, !((s = s.length > 0 && s[s.length - 1]) || l[0] !== 6 && l[0] !== 2)) {
-                i = 0;
-                continue;
-              }
-              if (l[0] === 3 && (!s || l[1] > s[0] && l[1] < s[3])) {
-                i.label = l[1];
-                break;
-              }
-              if (l[0] === 6 && i.label < s[1]) {
-                i.label = s[1], s = l;
-                break;
-              }
-              if (s && i.label < s[2]) {
-                i.label = s[2], i.ops.push(l);
-                break;
-              }
-              s[2] && i.ops.pop(), i.trys.pop();
-              continue;
-          }
-          l = e.call(o, i);
-        } catch (h) {
-          l = [6, h], n = 0;
-        } finally {
-          t = s = 0;
-        }
-        if (5 & l[0]) throw l[1];
-        return { value: l[0] ? l[1] : void 0, done: !0 };
-      })([c, u]);
-    };
-  }
+var Rr = 280;
+function zr(e, t) {
+	return new Promise(((n) => setTimeout(n, e, t)));
 }
-var B = { exclude: [], include: [], logging: !0 }, an = {}, mr = { timeout: "true" }, J = function(o, e) {
-  typeof window < "u" && (an[o] = e);
-}, gr = function() {
-  return Object.fromEntries(Object.entries(an).filter((function(o) {
-    var e, t = o[0];
-    return !(!((e = B?.exclude) === null || e === void 0) && e.includes(t));
-  })).filter((function(o) {
-    var e, t, n, s, r = o[0];
-    return !((e = B?.include) === null || e === void 0) && e.some((function(i) {
-      return i.includes(".");
-    })) ? (t = B?.include) === null || t === void 0 ? void 0 : t.some((function(i) {
-      return i.startsWith(r);
-    })) : ((n = B?.include) === null || n === void 0 ? void 0 : n.length) === 0 || ((s = B?.include) === null || s === void 0 ? void 0 : s.includes(r));
-  })).map((function(o) {
-    return [o[0], (0, o[1])()];
-  })));
+var Br = /* @__PURE__ */ "Arial.Arial Black.Arial Narrow.Arial Rounded MT.Arimo.Archivo.Barlow.Bebas Neue.Bitter.Bookman.Calibri.Cabin.Candara.Century.Century Gothic.Comic Sans MS.Constantia.Courier.Courier New.Crimson Text.DM Mono.DM Sans.DM Serif Display.DM Serif Text.Dosis.Droid Sans.Exo.Fira Code.Fira Sans.Franklin Gothic Medium.Garamond.Geneva.Georgia.Gill Sans.Helvetica.Impact.Inconsolata.Indie Flower.Inter.Josefin Sans.Karla.Lato.Lexend.Lucida Bright.Lucida Console.Lucida Sans Unicode.Manrope.Merriweather.Merriweather Sans.Montserrat.Myriad.Noto Sans.Nunito.Nunito Sans.Open Sans.Optima.Orbitron.Oswald.Pacifico.Palatino.Perpetua.PT Sans.PT Serif.Poppins.Prompt.Public Sans.Quicksand.Rajdhani.Recursive.Roboto.Roboto Condensed.Rockwell.Rubik.Segoe Print.Segoe Script.Segoe UI.Sora.Source Sans Pro.Space Mono.Tahoma.Taviraj.Times.Times New Roman.Titillium Web.Trebuchet MS.Ubuntu.Varela Round.Verdana.Work Sans".split("."), Vr = [
+	"monospace",
+	"sans-serif",
+	"serif"
+];
+function Hr(e, t) {
+	return e.font = `72px ${t}`, e.measureText("WwMmLli0Oo").width;
+}
+function Ur() {
+	let e = document.createElement("canvas"), t = e.getContext("webgl") ?? e.getContext("experimental-webgl");
+	if (t && "getParameter" in t) try {
+		let e = (t.getParameter(t.VENDOR) || "").toString(), n = (t.getParameter(t.RENDERER) || "").toString(), r = {
+			vendor: e,
+			renderer: n,
+			version: (t.getParameter(t.VERSION) || "").toString(),
+			shadingLanguageVersion: (t.getParameter(t.SHADING_LANGUAGE_VERSION) || "").toString()
+		};
+		if (!n.length || !e.length) {
+			let e = t.getExtension("WEBGL_debug_renderer_info");
+			if (e) {
+				let n = (t.getParameter(e.UNMASKED_VENDOR_WEBGL) || "").toString(), i = (t.getParameter(e.UNMASKED_RENDERER_WEBGL) || "").toString();
+				n && (r.vendorUnmasked = n), i && (r.rendererUnmasked = i);
+			}
+		}
+		return r;
+	} catch {}
+	return "undefined";
+}
+function Wr() {
+	let e = /* @__PURE__ */ new Float32Array(1), t = new Uint8Array(e.buffer);
+	return e[0] = 1 / 0, e[0] -= e[0], t[3];
+}
+var Gr = (e, t, n, r) => {
+	let i = (n - t) / r, a = 0;
+	for (let n = 0; n < r; n++) a += e(t + (n + .5) * i);
+	return a * i;
 };
-function We(o) {
-  return o ^= o >>> 16, o = Math.imul(o, 2246822507), o ^= o >>> 13, o = Math.imul(o, 3266489909), (o ^= o >>> 16) >>> 0;
+function Kr(e, t) {
+	let n = {};
+	return t.forEach(((t) => {
+		let r = function(e) {
+			if (e.length === 0) return null;
+			let t = {};
+			e.forEach(((e) => {
+				let n = String(e);
+				t[n] = (t[n] || 0) + 1;
+			}));
+			let n = e[0], r = 1;
+			return Object.keys(t).forEach(((e) => {
+				t[e] > r && (n = e, r = t[e]);
+			})), n;
+		}(e.map(((e) => t in e ? e[t] : void 0)).filter(((e) => e !== void 0)));
+		r && (n[t] = r);
+	})), n;
 }
-var P = new Uint32Array([597399067, 2869860233, 951274213, 2716044179]);
-function D(o, e) {
-  return o << e | o >>> 32 - e;
+var qr = /* @__PURE__ */ "accelerometer.accessibility.accessibility-events.ambient-light-sensor.background-fetch.background-sync.bluetooth.camera.clipboard-read.clipboard-write.device-info.display-capture.gyroscope.geolocation.local-fonts.magnetometer.microphone.midi.nfc.notifications.payment-handler.persistent-storage.push.speaker.storage-access.top-level-storage-access.window-management.query".split("."), Jr = /* @__PURE__ */ new Map();
+function Yr() {
+	if (typeof navigator > "u") return {
+		name: "unknown",
+		version: "unknown"
+	};
+	let e = !!navigator.brave, t = (e ? "B|" : "N|") + navigator.userAgent, n = Jr.get(t);
+	if (n) return n;
+	let r = [{
+		name: "Brave",
+		detect: () => e
+	}], i;
+	for (let e of r) if (e.detect()) {
+		let n = Xr(navigator.userAgent);
+		return i = {
+			name: e.name,
+			version: n.version
+		}, Jr.set(t, i), i;
+	}
+	return i = Xr(navigator.userAgent), Jr.set(t, i), i;
 }
-function ft(o, e) {
-  var t;
-  if (e === void 0 && (e = 0), e = e ? 0 | e : 0, typeof o == "string" && (t = o, o = new TextEncoder().encode(t).buffer), !(o instanceof ArrayBuffer)) throw new TypeError("Expected key to be ArrayBuffer or string");
-  var n = new Uint32Array([e, e, e, e]);
-  (function(r, i) {
-    for (var a = r.byteLength / 16 | 0, c = new Uint32Array(r, 0, 4 * a), u = 0; u < a; u++) {
-      var l = c.subarray(4 * u, 4 * (u + 1));
-      l[0] = Math.imul(l[0], P[0]), l[0] = D(l[0], 15), l[0] = Math.imul(l[0], P[1]), i[0] = i[0] ^ l[0], i[0] = D(i[0], 19), i[0] = i[0] + i[1], i[0] = Math.imul(i[0], 5) + 1444728091, l[1] = Math.imul(l[1], P[1]), l[1] = D(l[1], 16), l[1] = Math.imul(l[1], P[2]), i[1] = i[1] ^ l[1], i[1] = D(i[1], 17), i[1] = i[1] + i[2], i[1] = Math.imul(i[1], 5) + 197830471, l[2] = Math.imul(l[2], P[2]), l[2] = D(l[2], 17), l[2] = Math.imul(l[2], P[3]), i[2] = i[2] ^ l[2], i[2] = D(i[2], 15), i[2] = i[2] + i[3], i[2] = Math.imul(i[2], 5) + 2530024501, l[3] = Math.imul(l[3], P[3]), l[3] = D(l[3], 18), l[3] = Math.imul(l[3], P[0]), i[3] = i[3] ^ l[3], i[3] = D(i[3], 13), i[3] = i[3] + i[0], i[3] = Math.imul(i[3], 5) + 850148119;
-    }
-  })(o, n), (function(r, i) {
-    var a = r.byteLength / 16 | 0, c = r.byteLength % 16, u = new Uint32Array(4), l = new Uint8Array(r, 16 * a, c);
-    switch (c) {
-      case 15:
-        u[3] = u[3] ^ l[14] << 16;
-      case 14:
-        u[3] = u[3] ^ l[13] << 8;
-      case 13:
-        u[3] = u[3] ^ l[12] << 0, u[3] = Math.imul(u[3], P[3]), u[3] = D(u[3], 18), u[3] = Math.imul(u[3], P[0]), i[3] = i[3] ^ u[3];
-      case 12:
-        u[2] = u[2] ^ l[11] << 24;
-      case 11:
-        u[2] = u[2] ^ l[10] << 16;
-      case 10:
-        u[2] = u[2] ^ l[9] << 8;
-      case 9:
-        u[2] = u[2] ^ l[8] << 0, u[2] = Math.imul(u[2], P[2]), u[2] = D(u[2], 17), u[2] = Math.imul(u[2], P[3]), i[2] = i[2] ^ u[2];
-      case 8:
-        u[1] = u[1] ^ l[7] << 24;
-      case 7:
-        u[1] = u[1] ^ l[6] << 16;
-      case 6:
-        u[1] = u[1] ^ l[5] << 8;
-      case 5:
-        u[1] = u[1] ^ l[4] << 0, u[1] = Math.imul(u[1], P[1]), u[1] = D(u[1], 16), u[1] = Math.imul(u[1], P[2]), i[1] = i[1] ^ u[1];
-      case 4:
-        u[0] = u[0] ^ l[3] << 24;
-      case 3:
-        u[0] = u[0] ^ l[2] << 16;
-      case 2:
-        u[0] = u[0] ^ l[1] << 8;
-      case 1:
-        u[0] = u[0] ^ l[0] << 0, u[0] = Math.imul(u[0], P[0]), u[0] = D(u[0], 15), u[0] = Math.imul(u[0], P[1]), i[0] = i[0] ^ u[0];
-    }
-  })(o, n), (function(r, i) {
-    i[0] = i[0] ^ r.byteLength, i[1] = i[1] ^ r.byteLength, i[2] = i[2] ^ r.byteLength, i[3] = i[3] ^ r.byteLength, i[0] = i[0] + i[1] | 0, i[0] = i[0] + i[2] | 0, i[0] = i[0] + i[3] | 0, i[1] = i[1] + i[0] | 0, i[2] = i[2] + i[0] | 0, i[3] = i[3] + i[0] | 0, i[0] = We(i[0]), i[1] = We(i[1]), i[2] = We(i[2]), i[3] = We(i[3]), i[0] = i[0] + i[1] | 0, i[0] = i[0] + i[2] | 0, i[0] = i[0] + i[3] | 0, i[1] = i[1] + i[0] | 0, i[2] = i[2] + i[0] | 0, i[3] = i[3] + i[0] | 0;
-  })(o, n);
-  var s = new Uint8Array(n.buffer);
-  return Array.from(s).map((function(r) {
-    return r.toString(16).padStart(2, "0");
-  })).join("");
+function Xr(e) {
+	var t, n;
+	let r = [
+		/(?<name>SamsungBrowser)\/(?<version>\d+(?:\.\d+)+)/,
+		/(?<name>EdgA|EdgiOS|Edg)\/(?<version>\d+(?:\.\d+)+)/,
+		/(?<name>OPR|OPX)\/(?<version>\d+(?:\.\d+)+)/,
+		/Opera[\s\/](?<version>\d+(?:\.\d+)+)/,
+		/Opera Mini\/(?<version>\d+(?:\.\d+)+)/,
+		/Opera Mobi\/(?<version>\d+(?:\.\d+)+)/,
+		/(?<name>Vivaldi)\/(?<version>\d+(?:\.\d+)+)/,
+		/(?<name>CriOS)\/(?<version>\d+(?:\.\d+)+)/,
+		/(?<name>FxiOS)\/(?<version>\d+(?:\.\d+)+)/,
+		/(?<name>Chrome|Chromium)\/(?<version>\d+(?:\.\d+)+)/,
+		/(?<name>Firefox|Waterfox|Iceweasel|IceCat)\/(?<version>\d+(?:\.\d+)+)/,
+		/Version\/(?<version1>[\d.]+).*Safari\/[\d.]+|(?<name>Safari)\/(?<version2>[\d.]+)/,
+		/(?<name>MSIE|Trident|IEMobile).+?(?<version>\d+(?:\.\d+)+)/,
+		/(?<name>[A-Za-z]+)\/(?<version>\d+(?:\.\d+)+)/
+	], i = {
+		edg: "Edge",
+		edga: "Edge",
+		edgios: "Edge",
+		opr: "Opera",
+		opx: "Opera",
+		crios: "Chrome",
+		fxios: "Firefox",
+		samsung: "SamsungBrowser",
+		vivaldi: "Vivaldi"
+	};
+	for (let a of r) {
+		let r = e.match(a);
+		if (r) {
+			let e = r.groups?.name, o = r.groups?.version || r.groups?.version1 || r.groups?.version2;
+			if (e || !((t = r.groups) != null && t.version1) && !((n = r.groups) != null && n.version2) || (e = "Safari"), !e && a.source.includes("Opera Mini") && (e = "Opera Mini"), !e && a.source.includes("Opera Mobi") && (e = "Opera Mobi"), !e && a.source.includes("Opera") && (e = "Opera"), !e && r[1] && (e = r[1]), !o && r[2] && (o = r[2]), e) return {
+				name: i[e.toLowerCase()] || e,
+				version: o || "unknown"
+			};
+		}
+	}
+	return {
+		name: "unknown",
+		version: "unknown"
+	};
 }
-function wr(o, e) {
-  return new Promise((function(t) {
-    setTimeout((function() {
-      return t(e);
-    }), o);
-  }));
+function Zr() {
+	if (typeof navigator > "u" || !navigator.userAgent) return !1;
+	let e = navigator.userAgent;
+	return /Mobi|Android|iPhone|iPod|IEMobile|Opera Mini|Opera Mobi|webOS|BlackBerry|Windows Phone/i.test(e) && !/iPad/i.test(e);
 }
-function br(o, e, t) {
-  return Promise.all(o.map((function(n) {
-    return Promise.race([n, wr(e, t)]);
-  })));
+function Qr() {
+	let e = [], t = {
+		"prefers-contrast": [
+			"high",
+			"more",
+			"low",
+			"less",
+			"forced",
+			"no-preference"
+		],
+		"any-hover": ["hover", "none"],
+		"any-pointer": [
+			"none",
+			"coarse",
+			"fine"
+		],
+		pointer: [
+			"none",
+			"coarse",
+			"fine"
+		],
+		hover: ["hover", "none"],
+		update: ["fast", "slow"],
+		"inverted-colors": ["inverted", "none"],
+		"prefers-reduced-motion": ["reduce", "no-preference"],
+		"prefers-reduced-transparency": ["reduce", "no-preference"],
+		scripting: [
+			"none",
+			"initial-only",
+			"enabled"
+		],
+		"forced-colors": ["active", "none"]
+	};
+	return Object.keys(t).forEach(((n) => {
+		t[n].forEach(((t) => {
+			matchMedia(`(${n}: ${t})`).matches && e.push(`${n}: ${t}`);
+		}));
+	})), e;
 }
-var kr = "0.19.1";
-function _r() {
-  return kr;
+function $r() {
+	if (window.location.protocol === "https:" && typeof window.ApplePaySession == "function") try {
+		let e = window.ApplePaySession.supportsVersion;
+		for (let t = 15; t > 0; t--) if (e(t)) return t;
+	} catch {
+		return 0;
+	}
+	return 0;
 }
-function ln() {
-  return Z(this, void 0, void 0, (function() {
-    var o, e, t, n, s;
-    return Y(this, (function(r) {
-      switch (r.label) {
-        case 0:
-          return r.trys.push([0, 2, , 3]), o = gr(), e = Object.keys(o), [4, br(Object.values(o), B?.timeout || 1e3, mr)];
-        case 1:
-          return t = r.sent(), n = t.filter((function(i) {
-            return i !== void 0;
-          })), s = {}, n.forEach((function(i, a) {
-            s[e[a]] = i;
-          })), [2, cn(s, B.exclude || [], B.include || [], "")];
-        case 2:
-          throw r.sent();
-        case 3:
-          return [2];
-      }
-    }));
-  }));
+var ei = Yr().name === "SamsungBrowser" ? 3 : 1, ti = Yr().name !== "Brave", ni = 137, ri = (() => {
+	let e = /* @__PURE__ */ new Float32Array(548), t = 2 * Math.PI / ni;
+	for (let n = 0; n < ni; n++) {
+		let r = n * t;
+		e[4 * n] = 0, e[4 * n + 1] = 0, e[4 * n + 2] = 100 * Math.cos(r), e[4 * n + 3] = 50 * Math.sin(r);
+	}
+	return e;
+})(), ii = null;
+function ai() {
+	try {
+		if (typeof document > "u") return null;
+		let e = document.createElement("canvas");
+		e.width = 200, e.height = 100;
+		let t = e.getContext("webgl");
+		if (!t) return null;
+		e.addEventListener("webglcontextlost", ((e) => {
+			e.preventDefault(), ii = null;
+		}), { once: !0 });
+		let n = t.createShader(t.VERTEX_SHADER), r = t.createShader(t.FRAGMENT_SHADER);
+		if (!n || !r || (t.shaderSource(n, "\n    attribute vec2 position;\n    void main() {\n        gl_Position = vec4(position, 0.0, 1.0);\n    }\n"), t.compileShader(n), !t.getShaderParameter(n, t.COMPILE_STATUS)) || (t.shaderSource(r, "\n    precision mediump float;\n    void main() {\n        gl_FragColor = vec4(0.812, 0.195, 0.553, 0.921); // Set line color\n    }\n"), t.compileShader(r), !t.getShaderParameter(r, t.COMPILE_STATUS))) return null;
+		let i = t.createProgram();
+		if (!i || (t.attachShader(i, n), t.attachShader(i, r), t.linkProgram(i), !t.getProgramParameter(i, t.LINK_STATUS))) return null;
+		let a = t.createBuffer();
+		return a ? (t.bindBuffer(t.ARRAY_BUFFER, a), t.bufferData(t.ARRAY_BUFFER, ri, t.STATIC_DRAW), t.bindBuffer(t.ARRAY_BUFFER, null), {
+			canvas: e,
+			gl: t,
+			program: i,
+			buffer: a
+		}) : null;
+	} catch {
+		return null;
+	}
 }
-function cn(o, e, t, n) {
-  n === void 0 && (n = "");
-  for (var s = {}, r = function(u, l) {
-    var h = n + u + ".";
-    if (typeof l != "object" || Array.isArray(l)) {
-      var p = e.some((function(A) {
-        return h.startsWith(A);
-      })), d = t.some((function(A) {
-        return h.startsWith(A);
-      }));
-      p && !d || (s[u] = l);
-    } else {
-      var w = cn(l, e, t, h);
-      Object.keys(w).length > 0 && (s[u] = w);
-    }
-  }, i = 0, a = Object.entries(o); i < a.length; i++) {
-    var c = a[i];
-    r(c[0], c[1]);
-  }
-  return s;
+function Q(e) {
+	let t = /* @__PURE__ */ new Set();
+	return function e(n) {
+		if (n && n.toJSON && typeof n.toJSON == "function" && (n = n.toJSON()), n === void 0) return;
+		if (typeof n == "number") return isFinite(n) ? "" + n : "null";
+		if (typeof n != "object") return JSON.stringify(n);
+		let r, i;
+		if (Array.isArray(n)) {
+			for (i = "[", r = 0; r < n.length; r++) r && (i += ","), i += e(n[r]) || "null";
+			return i + "]";
+		}
+		if (n === null) return "null";
+		if (t.has(n)) throw TypeError("Converting circular structure to JSON");
+		t.add(n);
+		let a = Object.keys(n).sort();
+		for (i = "", r = 0; r < a.length; r++) {
+			let t = a[r], o = e(n[t]);
+			o && (i && (i += ","), i += JSON.stringify(t) + ":" + o);
+		}
+		return t.delete(n), "{" + i + "}";
+	}(e) || "";
 }
-function Sr(o) {
-  return Z(this, void 0, void 0, (function() {
-    var e, t;
-    return Y(this, (function(n) {
-      switch (n.label) {
-        case 0:
-          return n.trys.push([0, 2, , 3]), [4, ln()];
-        case 1:
-          return e = n.sent(), t = ft(JSON.stringify(e)), Math.random() < 1e-3 && B.logging && (function(s, r) {
-            Z(this, void 0, void 0, (function() {
-              var i, a;
-              return Y(this, (function(c) {
-                switch (c.label) {
-                  case 0:
-                    if (i = "https://logging.thumbmarkjs.com/v1/log", a = { thumbmark: s, components: r, version: _r() }, sessionStorage.getItem("_tmjs_l")) return [3, 4];
-                    sessionStorage.setItem("_tmjs_l", "1"), c.label = 1;
-                  case 1:
-                    return c.trys.push([1, 3, , 4]), [4, fetch(i, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) })];
-                  case 2:
-                  case 3:
-                    return c.sent(), [3, 4];
-                  case 4:
-                    return [2];
-                }
-              }));
-            }));
-          })(t, e), [2, t.toString()];
-        case 2:
-          throw n.sent();
-        case 3:
-          return [2];
-      }
-    }));
-  }));
+var oi = {
+	audio: async function() {
+		return Nr ? async function() {
+			return new Promise(((e, t) => {
+				try {
+					let t = new Nr(1, 5e3, 44100), n = t.createBufferSource(), r = t.createOscillator();
+					r.frequency.value = 1e3;
+					let i = t.createDynamicsCompressor(), a;
+					i.threshold.value = -50, i.knee.value = 40, i.ratio.value = 12, i.attack.value = 0, i.release.value = .2, r.connect(i), i.connect(t.destination), r.start(), t.oncomplete = (r) => {
+						a = r.renderedBuffer.getChannelData(0), e({
+							sampleHash: Pr(a),
+							maxChannels: t.destination.maxChannelCount,
+							channelCountMode: n.channelCountMode
+						});
+					}, t.startRendering();
+				} catch (e) {
+					t(e);
+				}
+			}));
+		}() : null;
+	},
+	canvas: async function() {
+		return new Promise(((e) => {
+			let t = Array.from({ length: 3 }, (() => function() {
+				let e = document.createElement("canvas"), t = e.getContext("2d");
+				if (!t) return null;
+				e.width = Rr, e.height = 20;
+				let n = t.createLinearGradient(0, 0, e.width, e.height);
+				n.addColorStop(0, "red"), n.addColorStop(1 / 6, "orange"), n.addColorStop(2 / 6, "yellow"), n.addColorStop(.5, "green"), n.addColorStop(4 / 6, "blue"), n.addColorStop(5 / 6, "indigo"), n.addColorStop(1, "violet"), t.fillStyle = n, t.fillRect(0, 0, e.width, e.height);
+				let r = "Random Text WMwmil10Oo";
+				return t.font = "23.123px Arial", t.fillStyle = "black", t.fillText(r, -5, 15), t.fillStyle = "rgba(0, 0, 255, 0.5)", t.fillText(r, -3.3, 17.7), t.beginPath(), t.moveTo(0, 0), t.lineTo(2 * e.width / 7, e.height), t.strokeStyle = "white", t.lineWidth = 2, t.stroke(), t.getImageData(0, 0, e.width, e.height);
+			}())).filter(((e) => e !== null));
+			t.length === 0 ? e(null) : e({ commonPixelsHash: Z(Fr(t, Rr, 20).data.toString()).toString() });
+		}));
+	},
+	fonts: async function(e) {
+		return new Promise(((e) => {
+			try {
+				(async function(e) {
+					for (; !document.body;) await zr(50);
+					let t = document.createElement("iframe");
+					t.setAttribute("frameBorder", "0");
+					let n = t.style;
+					n.setProperty("position", "fixed"), n.setProperty("display", "block", "important"), n.setProperty("visibility", "visible"), n.setProperty("border", "0"), n.setProperty("opacity", "0"), t.src = "about:blank", document.body.appendChild(t);
+					let r = t.contentDocument || t.contentWindow?.document;
+					if (!r) throw Error("Iframe document is not accessible");
+					e({ iframe: r }), setTimeout((() => {
+						document.body.removeChild(t);
+					}), 0);
+				})((async ({ iframe: t }) => {
+					let n = t.createElement("canvas").getContext("2d");
+					if (!n) return void e(null);
+					let r = Vr.map(((e) => Hr(n, e))), i = {};
+					Br.forEach(((e) => {
+						let t = Hr(n, e);
+						r.includes(t) || (i[e] = t);
+					})), e(i);
+				}));
+			} catch {
+				e(null);
+			}
+		}));
+	},
+	hardware: function() {
+		return new Promise(((e, t) => {
+			let n = navigator.deviceMemory === void 0 ? 0 : navigator.deviceMemory, r = window.performance && window.performance.memory ? window.performance.memory : 0;
+			e({
+				videocard: Ur(),
+				architecture: Wr(),
+				deviceMemory: n.toString() || "undefined",
+				jsHeapSizeLimit: r.jsHeapSizeLimit || 0
+			});
+		}));
+	},
+	locales: function() {
+		return new Promise(((e) => {
+			e({
+				languages: navigator.language,
+				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+			});
+		}));
+	},
+	math: function() {
+		return new Promise(((e) => {
+			e({
+				acos: Math.acos(.5),
+				asin: Gr(Math.asin, -1, 1, 97),
+				cos: Gr(Math.cos, 0, Math.PI, 97),
+				largeCos: Math.cos(0x56bc75e2d63100000),
+				largeSin: Math.sin(0x56bc75e2d63100000),
+				largeTan: Math.tan(0x56bc75e2d63100000),
+				sin: Gr(Math.sin, -Math.PI, Math.PI, 97),
+				tan: Gr(Math.tan, 0, 2 * Math.PI, 97)
+			});
+		}));
+	},
+	permissions: async function(e) {
+		let t = e?.permissions_to_check || qr;
+		return Kr(await Promise.all(Array.from({ length: 3 }, (() => async function(e) {
+			let t = {};
+			for (let n of e) try {
+				t[n] = (await navigator.permissions.query({ name: n })).state.toString();
+			} catch {}
+			return t;
+		}(t)))), t);
+	},
+	plugins: async function() {
+		let e = [];
+		if (navigator.plugins) for (let t = 0; t < navigator.plugins.length; t++) {
+			let n = navigator.plugins[t];
+			e.push([
+				n.name,
+				n.filename,
+				n.description
+			].join("|"));
+		}
+		return new Promise(((t) => {
+			t({ plugins: e });
+		}));
+	},
+	screen: function() {
+		return new Promise(((e) => {
+			if (typeof matchMedia > "u" || typeof screen > "u") return void e(null);
+			let t = {
+				is_touchscreen: navigator.maxTouchPoints > 0,
+				maxTouchPoints: navigator.maxTouchPoints,
+				colorDepth: screen.colorDepth,
+				mediaMatches: Qr()
+			};
+			Zr() && navigator.maxTouchPoints > 0 && (t.resolution = function() {
+				let e = window.screen.width, t = window.screen.height;
+				return `${Math.max(e, t).toString()}x${Math.min(e, t).toString()}`;
+			}()), e(t);
+		}));
+	},
+	system: function() {
+		return new Promise(((e) => {
+			let t = Yr();
+			e({
+				platform: window.navigator.platform,
+				productSub: navigator.productSub,
+				product: navigator.product,
+				useragent: navigator.userAgent,
+				hardwareConcurrency: navigator.hardwareConcurrency,
+				browser: {
+					name: t.name,
+					version: t.version
+				},
+				mobile: Zr(),
+				applePayVersion: $r(),
+				cookieEnabled: window.navigator.cookieEnabled
+			});
+		}));
+	},
+	webgl: async function() {
+		let e = ti ? (ii ||= ai(), ii) : ai();
+		if (!e) return { webgl: "unsupported" };
+		try {
+			return { commonPixelsHash: Z(Fr(Array.from({ length: ei }, (() => function(e) {
+				let { canvas: t, gl: n, program: r, buffer: i } = e;
+				try {
+					n.useProgram(r), n.bindBuffer(n.ARRAY_BUFFER, i);
+					let e = n.getAttribLocation(r, "position");
+					n.enableVertexAttribArray(e), n.vertexAttribPointer(e, 2, n.FLOAT, !1, 0, 0), n.viewport(0, 0, t.width, t.height), n.clearColor(0, 0, 0, 1), n.clear(n.COLOR_BUFFER_BIT), n.drawArrays(n.LINES, 0, 274);
+					let a = new Uint8ClampedArray(t.width * t.height * 4);
+					return n.readPixels(0, 0, t.width, t.height, n.RGBA, n.UNSIGNED_BYTE, a), new ImageData(a, t.width, t.height);
+				} catch {
+					return ii = null, new ImageData(1, 1);
+				} finally {
+					n.bindBuffer(n.ARRAY_BUFFER, null), n.useProgram(null), n.viewport(0, 0, n.drawingBufferWidth, n.drawingBufferHeight), n.clearColor(0, 0, 0, 0);
+				}
+			}(e))), e.canvas.width, e.canvas.height).data.toString()).toString() };
+		} catch {
+			return { webgl: "unsupported" };
+		}
+	},
+	webrtc: async function(e) {
+		return new Promise(((e) => {
+			let t;
+			try {
+				let n = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+				if (!n) return void e({
+					supported: !1,
+					error: "WebRTC not supported"
+				});
+				t = new n({
+					iceCandidatePoolSize: 1,
+					iceServers: []
+				});
+				let r = t;
+				r.createDataChannel(""), (async () => {
+					try {
+						let t = await r.createOffer({
+							offerToReceiveAudio: !0,
+							offerToReceiveVideo: !0
+						});
+						await r.setLocalDescription(t);
+						let n = t.sdp || "", i = [...new Set((n.match(/extmap:\d+ [^\n\r]+/g) || []).map(((e) => e.replace(/extmap:\d+ /, ""))))].sort(), a = (e) => {
+							let t = n.match(RegExp(`m=${e} [^\\s]+ [^\\s]+ ([^\\n\\r]+)`));
+							return t ? t[1].split(" ") : [];
+						}, o = (e, t) => t.map(((t) => {
+							let r = RegExp(`(rtpmap|fmtp|rtcp-fb):${t} (.+)`, "g"), i = [...n.matchAll(r)];
+							if (!i.length) return null;
+							let a = {};
+							return i.forEach(((t) => {
+								let [n, r, i] = t, o = i.split("/");
+								r === "rtpmap" ? (a.mimeType = `${e}/${o[0]}`, a.clockRate = +o[1], e === "audio" && (a.channels = +o[2] || 1)) : r === "rtcp-fb" ? (a.feedbackSupport = a.feedbackSupport || [], a.feedbackSupport.push(i)) : r === "fmtp" && (a.sdpFmtpLine = i);
+							})), a;
+						})).filter(Boolean), s = o("audio", a("audio")), c = o("video", a("video")), l = {
+							audio: {
+								count: s.length,
+								hash: Z(Q(s))
+							},
+							video: {
+								count: c.length,
+								hash: Z(Q(c))
+							},
+							extensionsHash: Z(Q(i))
+						};
+						r.close();
+						let u = {
+							supported: !0,
+							...l,
+							candidateType: "host"
+						};
+						e({
+							details: u,
+							hash: Z(Q(u))
+						});
+					} catch (t) {
+						r.close(), e({
+							supported: !0,
+							error: `WebRTC offer failed: ${t.message}`
+						});
+					}
+				})();
+			} catch (n) {
+				t?.close(), e({
+					supported: !1,
+					error: `WebRTC error: ${n.message}`
+				});
+			}
+		}));
+	},
+	speech: async function() {
+		return new Promise(((e) => {
+			try {
+				if (typeof window > "u" || !window.speechSynthesis || typeof window.speechSynthesis.getVoices != "function") return void e({
+					supported: !1,
+					error: "Speech Synthesis API not supported"
+				});
+				let t = !1, n = null, r = (r) => {
+					if (!t) {
+						t = !0, n && clearTimeout(n);
+						try {
+							let t = r.map(((e) => {
+								let t = (e) => e.replace(/\\/g, "\\\\").replace(/,/g, "\\,");
+								return [
+									t(e.voiceURI || ""),
+									t(e.name || ""),
+									t(e.lang || ""),
+									e.localService ? "1" : "0",
+									e.default ? "1" : "0"
+								].join(",");
+							}));
+							t.sort();
+							let n = {
+								voiceCount: r.length,
+								voicesHash: Z(Q(t))
+							};
+							e({
+								details: n,
+								hash: Z(Q(n))
+							});
+						} catch (t) {
+							e({
+								supported: !0,
+								error: `Voice processing failed: ${t.message}`
+							});
+						}
+					}
+				}, i = window.speechSynthesis.getVoices();
+				if (i.length > 0) return void r(i);
+				n = setTimeout((() => {
+					let e = window.speechSynthesis.getVoices();
+					r(e);
+				}), 800);
+				let a = () => {
+					window.speechSynthesis.removeEventListener("voiceschanged", a);
+					let e = window.speechSynthesis.getVoices();
+					r(e);
+				};
+				window.speechSynthesis.addEventListener("voiceschanged", a);
+			} catch (t) {
+				e({
+					supported: !1,
+					error: `Speech Synthesis error: ${t.message}`
+				});
+			}
+		}));
+	}
+}, si = {}, ci = { timeout: "true" };
+function li(e, t) {
+	var n;
+	let r = Yr();
+	if (r.name === "unknown" && t) {
+		let e = t.system?.browser;
+		e != null && e.name && (r = {
+			name: String(e.name),
+			version: String(e.version || "unknown")
+		});
+	}
+	let i = r.name.toLowerCase(), a = parseInt(r.version.split(".")[0] || "0", 10), o = Array.isArray(e?.exclude) ? [...e.exclude] : [], s = [.../* @__PURE__ */ new Set([...e?.stabilize || [], "always"])];
+	for (let e of s) {
+		let t = Mr[e];
+		if (t) for (let e of t) "browsers" in e && !((n = e.browsers) != null && n.some(((e) => {
+			let t = e.match(/(.+?)(>=)(\d+)/);
+			return t ? i === t[1] && a >= +t[3] : i === e;
+		}))) || o.push(...e.exclude);
+	}
+	return o;
 }
-function $r(o) {
-  for (var e = 0, t = 0; t < o.length; ++t) e += Math.abs(o[t]);
-  return e;
+function ui(e, t) {
+	let n = li(t, e), r = Array.isArray(t?.include) ? t.include : [];
+	return function e(t, i = "") {
+		let a = {};
+		for (let [o, s] of Object.entries(t)) {
+			let t = i ? `${i}.${o}` : o;
+			if (typeof s != "object" || Array.isArray(s) || s === null) {
+				let e = n.some(((e) => t.startsWith(e))), i = r.some(((e) => t.startsWith(e)));
+				e && !i || (a[o] = s);
+			} else {
+				let n = e(s, t);
+				Object.keys(n).length > 0 && (a[o] = n);
+			}
+		}
+		return a;
+	}(e);
 }
-function un(o, e, t) {
-  for (var n = [], s = 0; s < o[0].data.length; s++) {
-    for (var r = [], i = 0; i < o.length; i++) r.push(o[i].data[s]);
-    n.push(Ar(r));
-  }
-  var a = new Uint8ClampedArray(n);
-  return new ImageData(a, e, t);
+var di = "https://experimental.thumbmarkjs.com/experimental.min.js", fi = 131072;
+function $(e, t) {
+	let n = {
+		target: "request",
+		type: e
+	};
+	return t && (n.message = t.slice(0, 200)), {
+		schema: 0,
+		payload_id: "none",
+		signals: {},
+		errors: [n]
+	};
 }
-function Ar(o) {
-  if (o.length === 0) return 0;
-  for (var e = {}, t = 0, n = o; t < n.length; t++)
-    e[r = n[t]] = (e[r] || 0) + 1;
-  var s = o[0];
-  for (var r in e) e[r] > e[s] && (s = parseInt(r, 10));
-  return s;
+function pi(e) {
+	if (typeof e != "object" || !e || Array.isArray(e)) return !1;
+	let t = Object.getPrototypeOf(e);
+	return t === Object.prototype || t === null;
 }
-function Oe() {
-  if (typeof navigator > "u") return { name: "unknown", version: "unknown" };
-  for (var o = navigator.userAgent, e = { Edg: "Edge", OPR: "Opera" }, t = 0, n = [/(?<name>Edge|Edg)\/(?<version>\d+(?:\.\d+)?)/, /(?<name>(?:Chrome|Chromium|OPR|Opera|Vivaldi|Brave))\/(?<version>\d+(?:\.\d+)?)/, /(?<name>(?:Firefox|Waterfox|Iceweasel|IceCat))\/(?<version>\d+(?:\.\d+)?)/, /(?<name>Safari)\/(?<version>\d+(?:\.\d+)?)/, /(?<name>MSIE|Trident|IEMobile).+?(?<version>\d+(?:\.\d+)?)/, /(?<name>[A-Za-z]+)\/(?<version>\d+(?:\.\d+)?)/, /(?<name>SamsungBrowser)\/(?<version>\d+(?:\.\d+)?)/]; t < n.length; t++) {
-    var s = n[t], r = o.match(s);
-    if (r && r.groups) return { name: e[r.groups.name] || r.groups.name, version: r.groups.version };
-  }
-  return { name: "unknown", version: "unknown" };
+function mi(e) {
+	return e instanceof Error ? e.message : void 0;
 }
-J("audio", (function() {
-  return Z(this, void 0, void 0, (function() {
-    return Y(this, (function(o) {
-      return [2, new Promise((function(e, t) {
-        try {
-          var n = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 5e3, 44100), s = n.createBufferSource(), r = n.createOscillator();
-          r.frequency.value = 1e3;
-          var i, a = n.createDynamicsCompressor();
-          a.threshold.value = -50, a.knee.value = 40, a.ratio.value = 12, a.attack.value = 0, a.release.value = 0.2, r.connect(a), a.connect(n.destination), r.start(), n.oncomplete = function(c) {
-            i = c.renderedBuffer.getChannelData(0), e({ sampleHash: $r(i), oscillator: r.type, maxChannels: n.destination.maxChannelCount, channelCountMode: s.channelCountMode });
-          }, n.startRendering();
-        } catch (c) {
-          console.error("Error creating audio fingerprint:", c), t(c);
-        }
-      }))];
-    }));
-  }));
-}));
-var vr = Oe().name !== "SamsungBrowser" ? 1 : 3, Kt = 280, Nt = 20;
-Oe().name != "Firefox" && J("canvas", (function() {
-  return document.createElement("canvas").getContext("2d"), new Promise((function(o) {
-    var e = Array.from({ length: vr }, (function() {
-      return (function() {
-        var t = document.createElement("canvas"), n = t.getContext("2d");
-        if (!n) return new ImageData(1, 1);
-        t.width = Kt, t.height = Nt;
-        var s = n.createLinearGradient(0, 0, t.width, t.height);
-        s.addColorStop(0, "red"), s.addColorStop(0.16666666666666666, "orange"), s.addColorStop(0.3333333333333333, "yellow"), s.addColorStop(0.5, "green"), s.addColorStop(0.6666666666666666, "blue"), s.addColorStop(0.8333333333333334, "indigo"), s.addColorStop(1, "violet"), n.fillStyle = s, n.fillRect(0, 0, t.width, t.height);
-        var r = "Random Text WMwmil10Oo";
-        n.font = "23.123px Arial", n.fillStyle = "black", n.fillText(r, -5, 15), n.fillStyle = "rgba(0, 0, 255, 0.5)", n.fillText(r, -3.3, 17.7), n.beginPath(), n.moveTo(0, 0), n.lineTo(2 * t.width / 7, t.height), n.strokeStyle = "white", n.lineWidth = 2, n.stroke();
-        var i = n.getImageData(0, 0, t.width, t.height);
-        return i;
-      })();
-    }));
-    o({ commonImageDataHash: ft(un(e, Kt, Nt).data.toString()).toString() });
-  }));
-}));
-var it, xr = ["Arial", "Arial Black", "Arial Narrow", "Arial Rounded MT", "Arimo", "Archivo", "Barlow", "Bebas Neue", "Bitter", "Bookman", "Calibri", "Cabin", "Candara", "Century", "Century Gothic", "Comic Sans MS", "Constantia", "Courier", "Courier New", "Crimson Text", "DM Mono", "DM Sans", "DM Serif Display", "DM Serif Text", "Dosis", "Droid Sans", "Exo", "Fira Code", "Fira Sans", "Franklin Gothic Medium", "Garamond", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Impact", "Inconsolata", "Indie Flower", "Inter", "Josefin Sans", "Karla", "Lato", "Lexend", "Lucida Bright", "Lucida Console", "Lucida Sans Unicode", "Manrope", "Merriweather", "Merriweather Sans", "Montserrat", "Myriad", "Noto Sans", "Nunito", "Nunito Sans", "Open Sans", "Optima", "Orbitron", "Oswald", "Pacifico", "Palatino", "Perpetua", "PT Sans", "PT Serif", "Poppins", "Prompt", "Public Sans", "Quicksand", "Rajdhani", "Recursive", "Roboto", "Roboto Condensed", "Rockwell", "Rubik", "Segoe Print", "Segoe Script", "Segoe UI", "Sora", "Source Sans Pro", "Space Mono", "Tahoma", "Taviraj", "Times", "Times New Roman", "Titillium Web", "Trebuchet MS", "Ubuntu", "Varela Round", "Verdana", "Work Sans"], Ir = ["monospace", "sans-serif", "serif"];
-function Ft(o, e) {
-  if (!o) throw new Error("Canvas context not supported");
-  return o.font, o.font = "72px ".concat(e), o.measureText("WwMmLli0Oo").width;
+async function hi() {
+	try {
+		return await function(e, t) {
+			let n, r = new Promise(((e) => {
+				n = setTimeout((() => e(null)), t);
+			}));
+			return Promise.race([e, r]).finally((() => clearTimeout(n)));
+		}(async function() {
+			let e, t;
+			try {
+				let t = await fetch(di, { method: "GET" });
+				if (!t.ok) return $("http", `HTTP ${t.status}`);
+				e = await t.text();
+			} catch (e) {
+				return $("fetch", mi(e));
+			}
+			if (!e) return $("empty");
+			if (e.length > fi) return $("oversized", `${e.length} chars`);
+			try {
+				let n = eval;
+				t = await Promise.resolve(n(e));
+			} catch (e) {
+				return $(function(e) {
+					return e instanceof SyntaxError ? "syntax" : e instanceof EvalError ? "eval_blocked" : "threw";
+				}(e), mi(e));
+			}
+			return function(e) {
+				return !!pi(e) && !(typeof e.schema != "number" || e.schema < 1) && typeof e.payload_id == "string" && pi(e.signals);
+			}(t) ? {
+				...t,
+				errors: Array.isArray(t.errors) ? t.errors : []
+			} : $("malformed");
+		}(), 2e3) ?? $("timeout", "exceeded 2000ms");
+	} catch (e) {
+		return $("threw", mi(e));
+	}
 }
-function Mr() {
-  var o, e = document.createElement("canvas"), t = (o = e.getContext("webgl")) !== null && o !== void 0 ? o : e.getContext("experimental-webgl");
-  if (t && "getParameter" in t) try {
-    var n = (t.getParameter(t.VENDOR) || "").toString(), s = (t.getParameter(t.RENDERER) || "").toString(), r = { vendor: n, renderer: s, version: (t.getParameter(t.VERSION) || "").toString(), shadingLanguageVersion: (t.getParameter(t.SHADING_LANGUAGE_VERSION) || "").toString() };
-    if (!s.length || !n.length) {
-      var i = t.getExtension("WEBGL_debug_renderer_info");
-      if (i) {
-        var a = (t.getParameter(i.UNMASKED_VENDOR_WEBGL) || "").toString(), c = (t.getParameter(i.UNMASKED_RENDERER_WEBGL) || "").toString();
-        a && (r.vendorUnmasked = a), c && (r.rendererUnmasked = c);
-      }
-    }
-    return r;
-  } catch {
-  }
-  return "undefined";
+var gi = "visitor_id";
+function _i(e) {
+	return e.storage_property_name ? e.storage_property_name : e.property_name_factory(gi);
 }
-function Tr() {
-  var o = new Float32Array(1), e = new Uint8Array(o.buffer);
-  return o[0] = 1 / 0, o[0] = o[0] - o[0], e[3];
+var vi = `${Or}_${gi}`;
+function yi(e, t) {
+	try {
+		localStorage.setItem(_i(t), e);
+	} catch {}
 }
-function Cr(o, e) {
-  var t = {};
-  return e.forEach((function(n) {
-    var s = (function(r) {
-      if (r.length === 0) return null;
-      var i = {};
-      r.forEach((function(u) {
-        var l = String(u);
-        i[l] = (i[l] || 0) + 1;
-      }));
-      var a = r[0], c = 1;
-      return Object.keys(i).forEach((function(u) {
-        i[u] > c && (a = u, c = i[u]);
-      })), a;
-    })(o.map((function(r) {
-      return n in r ? r[n] : void 0;
-    })).filter((function(r) {
-      return r !== void 0;
-    })));
-    s && (t[n] = s);
-  })), t;
+var bi = "cache";
+function xi(e) {
+	try {
+		let t = localStorage.getItem(e.property_name_factory(bi));
+		return JSON.parse(t) || {};
+	} catch {}
+	return {};
 }
-function Er() {
-  var o = [], e = { "prefers-contrast": ["high", "more", "low", "less", "forced", "no-preference"], "any-hover": ["hover", "none"], "any-pointer": ["none", "coarse", "fine"], pointer: ["none", "coarse", "fine"], hover: ["hover", "none"], update: ["fast", "slow"], "inverted-colors": ["inverted", "none"], "prefers-reduced-motion": ["reduce", "no-preference"], "prefers-reduced-transparency": ["reduce", "no-preference"], scripting: ["none", "initial-only", "enabled"], "forced-colors": ["active", "none"] };
-  return Object.keys(e).forEach((function(t) {
-    e[t].forEach((function(n) {
-      matchMedia("(".concat(t, ": ").concat(n, ")")).matches && o.push("".concat(t, ": ").concat(n));
-    }));
-  })), o;
+function Si(e) {
+	return e.cache_lifetime_in_ms > Dr ? Date.now() + Dr : Date.now() + e.cache_lifetime_in_ms;
 }
-function Or() {
-  if (window.location.protocol === "https:" && typeof window.ApplePaySession == "function") try {
-    for (var o = window.ApplePaySession.supportsVersion, e = 15; e > 0; e--) if (o(e)) return e;
-  } catch {
-    return 0;
-  }
-  return 0;
+var Ci = class extends Error {
+	constructor(e) {
+		super(`HTTP error! status: ${e}`), this.status = e;
+	}
+}, wi = null, Ti = null;
+async function Ei(e, t, n, r) {
+	let i = n.simple_request ? { "Content-Type": "text/plain" } : {
+		"x-api-key": n.api_key,
+		Authorization: "custom-authorized",
+		"Content-Type": "application/json"
+	}, a = await fetch(e, {
+		method: "POST",
+		headers: i,
+		body: JSON.stringify(t)
+	});
+	if (!a.ok) throw new Ci(a.status);
+	let o = await a.json();
+	return o.visitorId && o.visitorId !== r && yi(o.visitorId, n), Ti = o, function(e, t) {
+		!e.cache_api_call || !e.cache_lifetime_in_ms || (function(e, t) {
+			let n = {
+				...xi(e),
+				...t
+			};
+			try {
+				localStorage.setItem(e.property_name_factory(bi), JSON.stringify(n));
+			} catch {}
+		})(e, {
+			apiResponseExpiry: Si(e),
+			apiResponse: t
+		});
+	}(n, o), o;
 }
-Oe().name != "Firefox" && J("fonts", (function() {
-  var o = this;
-  return new Promise((function(e, t) {
-    try {
-      (function(n) {
-        var s;
-        Z(this, void 0, void 0, (function() {
-          var r, i, a;
-          return Y(this, (function(c) {
-            switch (c.label) {
-              case 0:
-                return document.body ? [3, 2] : [4, (u = 50, new Promise((function(h) {
-                  return setTimeout(h, u, l);
-                })))];
-              case 1:
-                return c.sent(), [3, 0];
-              case 2:
-                if ((r = document.createElement("iframe")).setAttribute("frameBorder", "0"), (i = r.style).setProperty("position", "fixed"), i.setProperty("display", "block", "important"), i.setProperty("visibility", "visible"), i.setProperty("border", "0"), i.setProperty("opacity", "0"), r.src = "about:blank", document.body.appendChild(r), !(a = r.contentDocument || ((s = r.contentWindow) === null || s === void 0 ? void 0 : s.document))) throw new Error("Iframe document is not accessible");
-                return n({ iframe: a }), setTimeout((function() {
-                  document.body.removeChild(r);
-                }), 0), [2];
-            }
-            var u, l;
-          }));
-        }));
-      })((function(n) {
-        var s = n.iframe;
-        return Z(o, void 0, void 0, (function() {
-          var r, i, a, c;
-          return Y(this, (function(u) {
-            return r = s.createElement("canvas"), i = r.getContext("2d"), a = Ir.map((function(l) {
-              return Ft(i, l);
-            })), c = {}, xr.forEach((function(l) {
-              var h = Ft(i, l);
-              a.includes(h) || (c[l] = h);
-            })), e(c), [2];
-          }));
-        }));
-      }));
-    } catch {
-      t({ error: "unsupported" });
-    }
-  }));
-})), J("hardware", (function() {
-  return new Promise((function(o, e) {
-    var t = navigator.deviceMemory !== void 0 ? navigator.deviceMemory : 0, n = window.performance && window.performance.memory ? window.performance.memory : 0;
-    o({ videocard: Mr(), architecture: Tr(), deviceMemory: t.toString() || "undefined", jsHeapSizeLimit: n.jsHeapSizeLimit || 0 });
-  }));
-})), J("locales", (function() {
-  return new Promise((function(o) {
-    o({ languages: navigator.language, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
-  }));
-})), J("permissions", (function() {
-  return Z(this, void 0, void 0, (function() {
-    var o;
-    return Y(this, (function(e) {
-      return it = B?.permissions_to_check || ["accelerometer", "accessibility", "accessibility-events", "ambient-light-sensor", "background-fetch", "background-sync", "bluetooth", "camera", "clipboard-read", "clipboard-write", "device-info", "display-capture", "gyroscope", "geolocation", "local-fonts", "magnetometer", "microphone", "midi", "nfc", "notifications", "payment-handler", "persistent-storage", "push", "speaker", "storage-access", "top-level-storage-access", "window-management", "query"], o = Array.from({ length: B?.retries || 3 }, (function() {
-        return (function() {
-          return Z(this, void 0, void 0, (function() {
-            var t, n, s, r, i;
-            return Y(this, (function(a) {
-              switch (a.label) {
-                case 0:
-                  t = {}, n = 0, s = it, a.label = 1;
-                case 1:
-                  if (!(n < s.length)) return [3, 6];
-                  r = s[n], a.label = 2;
-                case 2:
-                  return a.trys.push([2, 4, , 5]), [4, navigator.permissions.query({ name: r })];
-                case 3:
-                  return i = a.sent(), t[r] = i.state.toString(), [3, 5];
-                case 4:
-                  return a.sent(), [3, 5];
-                case 5:
-                  return n++, [3, 1];
-                case 6:
-                  return [2, t];
-              }
-            }));
-          }));
-        })();
-      })), [2, Promise.all(o).then((function(t) {
-        return Cr(t, it);
-      }))];
-    }));
-  }));
-})), J("plugins", (function() {
-  var o = [];
-  if (navigator.plugins) for (var e = 0; e < navigator.plugins.length; e++) {
-    var t = navigator.plugins[e];
-    o.push([t.name, t.filename, t.description].join("|"));
-  }
-  return new Promise((function(n) {
-    n({ plugins: o });
-  }));
-})), J("screen", (function() {
-  return new Promise((function(o) {
-    o({ is_touchscreen: navigator.maxTouchPoints > 0, maxTouchPoints: navigator.maxTouchPoints, colorDepth: screen.colorDepth, mediaMatches: Er() });
-  }));
-})), J("system", (function() {
-  return new Promise((function(o) {
-    var e = Oe();
-    o({ platform: window.navigator.platform, cookieEnabled: window.navigator.cookieEnabled, productSub: navigator.productSub, product: navigator.product, useragent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency, browser: { name: e.name, version: e.version }, applePayVersion: Or() });
-  }));
-}));
-var N, Rr = Oe().name !== "SamsungBrowser" ? 1 : 3, m = null;
-J("webgl", (function() {
-  return Z(this, void 0, void 0, (function() {
-    var o;
-    return Y(this, (function(e) {
-      typeof document < "u" && ((N = document.createElement("canvas")).width = 200, N.height = 100, m = N.getContext("webgl"));
-      try {
-        if (!m) throw new Error("WebGL not supported");
-        return o = Array.from({ length: Rr }, (function() {
-          return (function() {
-            try {
-              if (!m) throw new Error("WebGL not supported");
-              var t = `
-          attribute vec2 position;
-          void main() {
-              gl_Position = vec4(position, 0.0, 1.0);
-          }
-      `, n = `
-          precision mediump float;
-          void main() {
-              gl_FragColor = vec4(0.812, 0.195, 0.553, 0.921); // Set line color
-          }
-      `, s = m.createShader(m.VERTEX_SHADER), r = m.createShader(m.FRAGMENT_SHADER);
-              if (!s || !r) throw new Error("Failed to create shaders");
-              if (m.shaderSource(s, t), m.shaderSource(r, n), m.compileShader(s), !m.getShaderParameter(s, m.COMPILE_STATUS)) throw new Error("Vertex shader compilation failed: " + m.getShaderInfoLog(s));
-              if (m.compileShader(r), !m.getShaderParameter(r, m.COMPILE_STATUS)) throw new Error("Fragment shader compilation failed: " + m.getShaderInfoLog(r));
-              var i = m.createProgram();
-              if (!i) throw new Error("Failed to create shader program");
-              if (m.attachShader(i, s), m.attachShader(i, r), m.linkProgram(i), !m.getProgramParameter(i, m.LINK_STATUS)) throw new Error("Shader program linking failed: " + m.getProgramInfoLog(i));
-              m.useProgram(i);
-              for (var a = 137, c = new Float32Array(4 * a), u = 2 * Math.PI / a, l = 0; l < a; l++) {
-                var h = l * u;
-                c[4 * l] = 0, c[4 * l + 1] = 0, c[4 * l + 2] = Math.cos(h) * (N.width / 2), c[4 * l + 3] = Math.sin(h) * (N.height / 2);
-              }
-              var p = m.createBuffer();
-              m.bindBuffer(m.ARRAY_BUFFER, p), m.bufferData(m.ARRAY_BUFFER, c, m.STATIC_DRAW);
-              var d = m.getAttribLocation(i, "position");
-              m.enableVertexAttribArray(d), m.vertexAttribPointer(d, 2, m.FLOAT, !1, 0, 0), m.viewport(0, 0, N.width, N.height), m.clearColor(0, 0, 0, 1), m.clear(m.COLOR_BUFFER_BIT), m.drawArrays(m.LINES, 0, 2 * a);
-              var w = new Uint8ClampedArray(N.width * N.height * 4);
-              return m.readPixels(0, 0, N.width, N.height, m.RGBA, m.UNSIGNED_BYTE, w), new ImageData(w, N.width, N.height);
-            } catch {
-              return new ImageData(1, 1);
-            } finally {
-              m && (m.bindBuffer(m.ARRAY_BUFFER, null), m.useProgram(null), m.viewport(0, 0, m.drawingBufferWidth, m.drawingBufferHeight), m.clearColor(0, 0, 0, 0));
-            }
-          })();
-        })), [2, { commonImageHash: ft(un(o, N.width, N.height).data.toString()).toString() }];
-      } catch {
-        return [2, { webgl: "unsupported" }];
-      }
-      return [2];
-    }));
-  }));
-}));
-var ie = function(o, e, t, n) {
-  for (var s = (t - e) / n, r = 0, i = 0; i < n; i++)
-    r += o(e + (i + 0.5) * s);
-  return r * s;
+var Di = (e, t) => {
+	if (e.cache_api_call) {
+		if (Ti) return Promise.resolve(Ti);
+		let t = function(e) {
+			let t = xi(e);
+			if (t && t.apiResponse && t.apiResponseExpiry && Date.now() <= t.apiResponseExpiry) return t.apiResponse;
+		}(e);
+		if (t) return Promise.resolve(t);
+		if (wi) return wi;
+	}
+	let n = e.api_endpoint || kr, r;
+	try {
+		let e = new URL(n);
+		r = e.pathname !== "/" || n.endsWith("/") ? n : `${e.origin}/thumbmark`;
+	} catch {
+		r = `${n}/thumbmark`;
+	}
+	let i = function(e) {
+		try {
+			let t = _i(e), n = localStorage.getItem(t);
+			return n || t === vi || (n = localStorage.getItem(vi), n && yi(n, e)), n;
+		} catch {
+			return null;
+		}
+	}(e), { api_key: a, ...o } = e, s = {
+		components: t,
+		options: o,
+		clientHash: Z(Q(t)),
+		version: "1.11.0"
+	};
+	if (i && (s.visitorId = i), e.metadata) {
+		let t = typeof e.metadata == "function" ? e.metadata() : e.metadata;
+		t && ((typeof t == "string" ? t.length : JSON.stringify(t).length) > 1e3 ? console.error("ThumbmarkJS: Metadata exceeds 1000 characters. Skipping metadata.") : s.metadata = t);
+	}
+	let c = e.timeout || 5e3, l = async function(e, t, n, r) {
+		for (let i = 0; i < 3; i++) {
+			i > 0 && await new Promise(((e) => setTimeout(e, 200 * i)));
+			try {
+				return await Ei(e, t, n, r);
+			} catch (e) {
+				if (e instanceof Ci || i === 2) throw e;
+			}
+		}
+		throw Error("Unreachable");
+	}(r, s, e, i).finally((() => {
+		wi = null;
+	})), u = new Promise(((t) => {
+		setTimeout((() => {
+			t(xi(e)?.apiResponse || {
+				info: { timed_out: !0 },
+				...i && { visitorId: i }
+			});
+		}), c);
+	}));
+	return wi = Promise.race([l, u]), wi;
 };
-J("math", (function() {
-  return Z(void 0, void 0, void 0, (function() {
-    return Y(this, (function(o) {
-      return [2, { acos: Math.acos(0.5), asin: ie(Math.asin, -1, 1, 97), atan: ie(Math.atan, -1, 1, 97), cos: ie(Math.cos, 0, Math.PI, 97), cosh: Math.cosh(9 / 7), e: Math.E, largeCos: Math.cos(1e20), largeSin: Math.sin(1e20), largeTan: Math.tan(1e20), log: Math.log(1e3), pi: Math.PI, sin: ie(Math.sin, -Math.PI, Math.PI, 97), sinh: ie(Math.sinh, -9 / 7, 7 / 9, 97), sqrt: Math.sqrt(2), tan: ie(Math.tan, 0, 2 * Math.PI, 97), tanh: ie(Math.tanh, -9 / 7, 7 / 9, 97) }];
-    }));
-  }));
-}));
-const qr = "query ( $Hash: String! ) { CipherHash ( Hash: $Hash ) { hash } }";
-function Br(o) {
-  const e = (o || "").match(/\b(query|mutation|subscription)\b/i), t = e ? e[1].toLowerCase() : "query", n = (o || "").indexOf("{"), s = n >= 0 ? o.slice(n + 1).match(/[A-Za-z_][A-Za-z0-9_]*/) : null;
-  return { type: t, name: s ? s[0] : "" };
+async function Oi(e, t = {}) {
+	var n;
+	if (typeof document > "u" || typeof window > "u") return {
+		thumbmark: "",
+		components: {},
+		info: {},
+		version: "1.11.0",
+		error: [{
+			type: "fatal",
+			message: "Browser environment required"
+		}]
+	};
+	try {
+		let r = {
+			...Ar,
+			...e
+		}, i = [], a = r.logging && !sessionStorage.getItem("_tmjs_l") && Math.random() < 1e-4, { elapsed: o, resolvedComponents: s, errors: c, pipelineTimings: l } = await ki({
+			...oi,
+			...si,
+			...t
+		}, r);
+		i.push(...c);
+		let u = r.api_key || r.simple_request ? Di(r, s) : null, d = null;
+		if (u) try {
+			d = await u;
+		} catch (e) {
+			if (e instanceof Ci && e.status === 403) return {
+				error: [{
+					type: "api_unauthorized",
+					message: "Invalid API key or quota exceeded"
+				}],
+				components: {},
+				info: {},
+				version: "1.11.0",
+				thumbmark: ""
+			};
+			i.push({
+				type: e instanceof Ci ? "api_error" : "network_error",
+				message: e instanceof Error ? e.message : String(e)
+			});
+		}
+		(n = d?.info) != null && n.timed_out && i.push({
+			type: "api_timeout",
+			message: "API request timed out"
+		});
+		let f = performance.now(), p = ui(d?.components || {}, r), m = performance.now() - f, h = {
+			...s,
+			...p
+		}, g = d?.info || { uniqueness: { score: "api only" } }, _, v = 0, y = 0;
+		if (d?.thumbmark) _ = d.thumbmark;
+		else {
+			let e = performance.now(), t = Q(h);
+			v = performance.now() - e;
+			let n = performance.now();
+			_ = Z(t), y = performance.now() - n;
+		}
+		a && async function(e, t, n, r = []) {
+			let i = `${kr}/log`;
+			sessionStorage.setItem("_tmjs_l", "1");
+			let a = {
+				thumbmark: e,
+				components: t,
+				experimental: await hi(),
+				version: "1.11.0",
+				options: n,
+				path: (window == null ? void 0 : window.location)?.pathname,
+				...r.length > 0 && { errors: r }
+			};
+			try {
+				await fetch(i, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(a)
+				});
+			} catch {}
+		}(_, h, r, i).catch((() => {}));
+		let b = {
+			"_pipeline.dispatch": l["_pipeline.dispatch"],
+			"_pipeline.resolve": l["_pipeline.resolve"],
+			"_pipeline.filter": l["_pipeline.filter"] + m,
+			"_pipeline.stringify": v,
+			"_pipeline.hash": y,
+			"_pipeline.assembly": 0
+		}, ee = {
+			...o,
+			...l,
+			...b
+		}, te = r.performance ? { elapsed: ee } : {}, ne = performance.now(), x = {
+			...d?.visitorId && { visitorId: d.visitorId },
+			thumbmark: _,
+			components: h,
+			info: g,
+			version: "1.11.0",
+			...te,
+			...i.length > 0 && { error: i },
+			...d?.requestId && { requestId: d.requestId },
+			...d?.metadata && { metadata: d.metadata }
+		};
+		return ee["_pipeline.assembly"] = performance.now() - ne, x;
+	} catch (e) {
+		return {
+			thumbmark: "",
+			components: {},
+			info: {},
+			version: "1.11.0",
+			error: [{
+				type: "fatal",
+				message: e instanceof Error ? e.message : String(e)
+			}]
+		};
+	}
 }
-class Ur {
-  constructor({ serverUri: e, socket: t = null, encrypt: n = !1 }) {
-    this.$__client = this.createUrqlClient({ serverUri: e, socket: t, encrypt: n }), this.$__authToken = "", this.$__pubkey = null, this.$__wallet = null, this.serverUri = e, this.soketi = t, this.cipherLink = !!n, this.$__subscriptionManager = /* @__PURE__ */ new Map();
-  }
-  createUrqlClient({ serverUri: e, socket: t, encrypt: n }) {
-    const s = [dn, pn];
-    if (t && t.socketUri) {
-      const r = mn({
-        url: t.socketUri,
-        connectionParams: () => ({
-          authToken: this.$__authToken
-        })
-      });
-      s.push(fn({
-        forwardSubscription: (i) => ({
-          subscribe: (a) => ({ unsubscribe: r.subscribe(i, a) })
-        })
-      }));
-    }
-    return yn({
-      url: e,
-      exchanges: s,
-      // PQ-transport Phase E: when encryption is on, route fetch through the CipherHash
-      // wrapper (encrypt the request body to the validator's ML-KEM pubkey, decrypt the
-      // response). Undefined → urql uses the global fetch (plaintext).
-      ...n ? { fetch: (r, i) => this.cipherFetch(r, i) } : {},
-      fetchOptions: () => ({
-        headers: {
-          "X-Auth-Token": this.$__authToken
-        },
-        // Add 60 second timeout for debugging
-        signal: AbortSignal.timeout(6e4)
-      })
-    });
-  }
-  /**
-   * Whether an outgoing GraphQL request body should be wrapped in CipherHash. Bypass (plaintext):
-   * introspection `__schema`, `ContinuId`, the `AccessToken` mutation, and the U-isotope
-   * `ProposeMolecule` (auth bootstrap — the key exchange itself can't be encrypted). Mirrors the
-   * Kotlin/validator bypass set.
-   */
-  shouldEncrypt(e) {
-    let t;
-    try {
-      t = JSON.parse(e);
-    } catch {
-      return !1;
-    }
-    const { type: n, name: s } = Br(t.query);
-    return !(n === "query" && (s === "__schema" || s === "ContinuId") || n === "mutation" && s === "AccessToken" || n === "mutation" && s === "ProposeMolecule" && (t.variables && t.variables.molecule && t.variables.molecule.atoms && t.variables.molecule.atoms[0] && t.variables.molecule.atoms[0].isotope) === "U");
-  }
-  /**
-   * Custom `fetch` that wraps a GraphQL request in the ML-KEM CipherHash envelope and decrypts the
-   * response (PQ-transport Phase E). Operates on the raw POST body (mirrors Kotlin's
-   * encryptBody/decryptBody). Reads the CURRENT client wallet + validator pubkey from auth.
-   */
-  async cipherFetch(e, t) {
-    const n = this.getWallet(), s = this.getPubKey();
-    let r = !1, i = t;
-    if (n && s && t && typeof t.body == "string" && this.shouldEncrypt(t.body)) {
-      const d = await n.encryptStringML768(t.body, s);
-      i = { ...t, body: JSON.stringify({ query: qr, variables: { Hash: d } }) }, r = !0;
-    }
-    const a = await fetch(e, i);
-    if (!r)
-      return a;
-    const c = await a.text(), u = { status: a.status, statusText: a.statusText, headers: a.headers };
-    let l;
-    try {
-      l = JSON.parse(c);
-    } catch {
-      return new Response(c, u);
-    }
-    const h = l && l.data && l.data.CipherHash && l.data.CipherHash.hash;
-    if (typeof h != "string")
-      return new Response(c, u);
-    const p = await n.decryptMyMessageML768(JSON.parse(h));
-    return new Response(p ?? c, u);
-  }
-  setAuthData({ token: e, pubkey: t, wallet: n }) {
-    this.$__authToken = e, this.$__pubkey = t, this.$__wallet = n, this.$__client = this.createUrqlClient({
-      serverUri: this.serverUri,
-      socket: this.soketi,
-      encrypt: !!this.cipherLink
-    });
-  }
-  /**
-   * Builds the urql operation options forwarded with a query/mutation.
-   *
-   * Forwards the requestPolicy (so a long-lived client does not serve stale
-   * cache-first reads) and, when the caller supplied a per-query abort signal,
-   * the signal too — while re-supplying the X-Auth-Token header. urql REPLACES
-   * (not merges) the client-level fetchOptions with any operation-context
-   * fetchOptions (createRequestOperation builds the op context as
-   * {...baseOpts, ...opts}), so forwarding fetchOptions WITHOUT the header would
-   * drop X-Auth-Token and break auth. The header here is byte-identical to the
-   * client-level one set in createUrqlClient.
-   *
-   * @param {object} context
-   * @returns {object|undefined}
-   */
-  buildRequestOptions(e) {
-    if (!e)
-      return;
-    const t = {};
-    e.requestPolicy && (t.requestPolicy = e.requestPolicy);
-    const n = e.fetchOptions && e.fetchOptions.signal;
-    if (n) {
-      const s = typeof AbortSignal < "u" && typeof AbortSignal.any == "function" ? AbortSignal.any([n, AbortSignal.timeout(6e4)]) : n;
-      t.fetchOptions = {
-        headers: { "X-Auth-Token": this.$__authToken },
-        signal: s
-      };
-    }
-    return Object.keys(t).length ? t : void 0;
-  }
-  async query(e) {
-    const { query: t, variables: n, context: s } = e, r = this.buildRequestOptions(s), i = await this.$__client.query(t, n || {}, r).toPromise();
-    return this.formatResponse(i);
-  }
-  async mutate(e) {
-    const { mutation: t, variables: n, context: s } = e, r = this.buildRequestOptions(s), i = await this.$__client.mutation(t, n || {}, r).toPromise();
-    return this.formatResponse(i);
-  }
-  subscribe(e, t) {
-    const { query: n, variables: s, operationName: r } = e, i = gn(
-      this.$__client.subscription(n, s),
-      wn((a) => {
-        t(this.formatResponse(a));
-      }),
-      bn(() => {
-      })
-    );
-    return this.$__subscriptionManager.set(r, i), {
-      unsubscribe: () => this.unsubscribe(r)
-    };
-  }
-  formatResponse(e) {
-    return {
-      data: e.data,
-      errors: e.error ? [e.error] : void 0
-    };
-  }
-  socketDisconnect() {
-    this.soketi && this.unsubscribeAll();
-  }
-  unsubscribe(e) {
-    const t = this.$__subscriptionManager.get(e);
-    t && (t.unsubscribe(), this.$__subscriptionManager.delete(e));
-  }
-  unsubscribeAll() {
-    this.$__subscriptionManager.forEach((e, t) => {
-      this.unsubscribe(t);
-    });
-  }
-  unsubscribeFromChannel(e) {
-    this.unsubscribe(e);
-  }
-  setEncryption(e = !1) {
-    this.cipherLink = e, this.$__client = this.createUrqlClient({
-      serverUri: this.serverUri,
-      socket: this.soketi,
-      encrypt: e
-    });
-  }
-  getAuthToken() {
-    return this.$__authToken;
-  }
-  getPubKey() {
-    return this.$__pubkey;
-  }
-  getWallet() {
-    return this.$__wallet;
-  }
-  getServerUri() {
-    return this.serverUri;
-  }
-  getSocketUri() {
-    return this.soketi ? this.soketi.socketUri : null;
-  }
-  getUri() {
-    return this.serverUri;
-  }
-  setUri(e) {
-    this.serverUri = e, this.$__client = this.createUrqlClient({
-      serverUri: e,
-      socket: this.soketi,
-      encrypt: !!this.cipherLink
-    });
-  }
-  setSocketUri({ socketUri: e, appKey: t }) {
-    this.soketi = { socketUri: e, appKey: t }, this.$__client = this.createUrqlClient({
-      serverUri: this.serverUri,
-      socket: this.soketi,
-      encrypt: !!this.cipherLink
-    });
-  }
+async function ki(e, t) {
+	let n = {
+		...Ar,
+		...t
+	}, r = li(n).filter(((e) => !e.includes("."))), i = Object.entries(e).filter((([e]) => !(n?.exclude)?.includes(e))).filter((([e]) => !r.includes(e))).filter((([e]) => (n?.include)?.some(((e) => e.includes("."))) ? (n?.include)?.some(((t) => t.startsWith(e))) : n?.include?.length === 0 || (n?.include)?.includes(e))), a = i.map((([e]) => e)), o = {}, s = performance.now(), c = i.map((([e, n]) => {
+		let r = performance.now(), i = n(t);
+		return o[`_dispatch.${e}`] = performance.now() - r, i;
+	})), l = performance.now() - s, u = performance.now(), d = await function(e, t, n) {
+		return Promise.all(e.map(((e) => {
+			let r = performance.now(), i, a = e.then(((e) => (i !== void 0 && clearTimeout(i), {
+				value: e,
+				elapsed: performance.now() - r
+			}))).catch(((e) => (i !== void 0 && clearTimeout(i), {
+				value: n,
+				elapsed: performance.now() - r,
+				error: e instanceof Error ? e.message : String(e)
+			}))), o = new Promise(((e) => {
+				i = setTimeout((() => {
+					e({
+						value: n,
+						elapsed: performance.now() - r,
+						error: "timeout"
+					});
+				}), t);
+			}));
+			return Promise.race([a, o]);
+		})));
+	}(c, n?.timeout || 5e3, ci), f = performance.now() - u, p = {}, m = {}, h = [];
+	d.forEach(((e, t) => {
+		let n = a[t];
+		p[n] = e.elapsed ?? 0, e.error === "timeout" ? h.push({
+			type: "component_timeout",
+			message: `Component '${n}' timed out`,
+			component: n
+		}) : e.error && h.push({
+			type: "component_error",
+			message: e.error,
+			component: n
+		}), e.value != null && (m[n] = e.value);
+	}));
+	let g = performance.now();
+	return {
+		elapsed: p,
+		resolvedComponents: ui(m, n),
+		errors: h,
+		pipelineTimings: {
+			"_pipeline.dispatch": l,
+			"_pipeline.resolve": f,
+			"_pipeline.filter": performance.now() - g,
+			...o
+		}
+	};
 }
-class Vr {
-  /**
-   * Class constructor
-   *
-   * @param {string} uri
-   * @param {string|null} cellSlug
-   * @param {object|null} socket
-   * @param {UrqlClientWrapper|null} client
-   * @param {number} serverSdkVersion
-   * @param {boolean} logging
-   */
-  constructor({
-    uri: e,
-    cellSlug: t = null,
-    client: n = null,
-    socket: s = null,
-    serverSdkVersion: r = 3,
-    logging: i = !1,
-    defaultRequestPolicy: a = null,
-    secretStorage: c = null
-  }) {
-    this.initialize({
-      uri: e,
-      cellSlug: t,
-      socket: s,
-      client: n,
-      serverSdkVersion: r,
-      logging: i,
-      defaultRequestPolicy: a,
-      secretStorage: c
-    });
-  }
-  /**
-   * Initializes a new Knish.IO client session
-   *
-   * @param {string|[]} uri
-   * @param {string|null} cellSlug
-   * @param {object|null} socket
-   * @param {UrqlClientWrapper|null} client
-   * @param {number} serverSdkVersion
-   * @param {boolean} logging
-   */
-  initialize({
-    uri: e,
-    cellSlug: t = null,
-    socket: n = null,
-    client: s = null,
-    serverSdkVersion: r = 3,
-    logging: i = !1,
-    defaultRequestPolicy: a = null,
-    secretStorage: c = null
-  }) {
-    this.reset(), this.$__secretStorage = c, this.$__logging = i, this.$__defaultRequestPolicy = a, this.$__authTokenObjects = {}, this.$__authInProcess = !1, this.abortControllers = /* @__PURE__ */ new Map(), this.setUri(e), t && this.setCellSlug(t);
-    for (const u in this.$__uris) {
-      const l = this.$__uris[u];
-      this.$__authTokenObjects[l] = null;
-    }
-    this.log("info", `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${r}...`), this.$__client = s || new Ur({
-      socket: {
-        socketUri: null,
-        appKey: "knishio",
-        ...n || {}
-      },
-      serverUri: this.getRandomUri()
-    }), this.$__serverSdkVersion = r;
-  }
-  /**
-   * Get random uri from specified this.$__uris
-   *
-   * @return {string}
-   */
-  getRandomUri() {
-    const e = Math.floor(Math.random() * this.$__uris.length);
-    return this.$__uris[e];
-  }
-  /**
-   *
-   * @param encrypt
-   * @return {boolean}
-   */
-  switchEncryption(e) {
-    return this.$__encrypt === e ? !1 : (this.log("info", `KnishIOClient::switchEncryption() - Forcing encryption ${e ? "on" : "off"} to match node...`), this.$__encrypt = e, this.$__client.setEncryption(e), !0);
-  }
-  /**
-   * De-initializes the Knish.IO client session so that a new session can replace it
-   */
-  deinitialize() {
-    this.log("info", "KnishIOClient::deinitialize() - Clearing the Knish.IO client session..."), this.reset();
-  }
-  /**
-   * Subscribes the client to the node's broadcast socket
-   *
-   * @return {UrqlClientWrapper}
-   */
-  subscribe() {
-    if (!this.client().getSocketUri())
-      throw new ee("KnishIOClient::subscribe() - Socket client not initialized!");
-    return this.client();
-  }
-  /**
-   * Gets the client's SDK version
-   *
-   * @return {number}
-   */
-  getServerSdkVersion() {
-    return this.$__serverSdkVersion;
-  }
-  /**
-   * Returns the client-level default urql request policy (or null)
-   *
-   * @return {string|null}
-   */
-  getDefaultRequestPolicy() {
-    return this.$__defaultRequestPolicy || null;
-  }
-  /**
-   * Sets the client-level default urql request policy applied to reads that
-   * omit a per-call policy (e.g. 'network-only' for a long-lived server client)
-   *
-   * @param {string|null} policy - 'cache-first'|'cache-only'|'network-only'|'cache-and-network'|null
-   */
-  setDefaultRequestPolicy(e) {
-    this.$__defaultRequestPolicy = e;
-  }
-  /**
-   * Reset common properties
-   */
-  reset() {
-    this.$__secret = "", this.$__bundle = "", this.$__secretStorage = null, this.remainderWallet = null, this.$__capabilityCache = {}, this.$__defaultRequestPolicy = null;
-  }
-  /**
-   * Returns the currently defined Cell identifier for this session
-   *
-   * @return {string|null}
-   */
-  getCellSlug() {
-    return this.$__cellSlug || null;
-  }
-  /**
-   * Sets the Cell identifier for this session
-   *
-   * @param {string} cellSlug
-   */
-  setCellSlug(e) {
-    this.$__cellSlug = e;
-  }
-  /**
-   * Sets the endpoint URI for this session
-   *
-   * @param {string|object} uri
-   */
-  setUri(e) {
-    if (this.$__uris = typeof e == "object" ? e : [e], this.$__client) {
-      const t = this.getRandomUri();
-      this.$__client.setUri(t);
-    }
-  }
-  /**
-   * Sets the WebSocket (subscription) endpoint for this session.
-   *
-   * `setUri()` only updates the HTTP endpoint; the subscription socket is built once
-   * at construction from the `socket.socketUri` passed in. This lets a caller re-point
-   * the socket when the endpoint changes (F-8a, E2E gauntlet 2026-06-02).
-   *
-   * @param {string} socketUri
-   */
-  setSocketUri(e) {
-    this.$__client && typeof this.$__client.setSocketUri == "function" && this.$__client.setSocketUri({ socketUri: e, appKey: "knishio" });
-  }
-  /**
-   * Retrieves the endpoint URI for this session
-   *
-   * @return {string}
-   */
-  getUri() {
-    return this.$__client.getUri();
-  }
-  /**
-   * Returns the GraphQL client class session
-   *
-   * @return {UrqlClientWrapper}
-   */
-  client() {
-    if (!this.$__authInProcess) {
-      const e = this.getRandomUri();
-      this.$__client.setUri(e);
-      const t = this.$__authTokenObjects[e];
-      t ? this.$__client.setAuthData(t.getAuthData()) : this.requestAuthToken({
-        secret: this.$__secret,
-        cellSlug: this.$__cellSlug,
-        encrypt: this.$__encrypt
-      }).catch((n) => {
-        this.log("warn", `KnishIOClient::client() - Background authorization failed: ${n.message}`);
-      });
-    }
-    return this.$__client;
-  }
-  /**
-   * Returns whether a secret is being stored for this session
-   *
-   * @return {boolean}
-   */
-  hasSecret() {
-    return !!this.$__secret && this.$__secret.length > 0 || !!this.$__secretStorage && !!this.$__bundle && this.$__bundle.length > 0;
-  }
-  /**
-   * Set the client's secret
-   *
-   * @param secret
-   */
-  setSecret(e) {
-    if (this.$__secret = e, this.$__bundle = this.hashSecret(e, "setSecret"), this.$__secretStorage)
-      this.$__secretStorage.storeSecret(this.$__bundle, e);
-    else {
-      const t = new ct();
-      t.storeSecret(this.$__bundle, e), this.$__secretStorage = t;
-    }
-  }
-  /**
-   * Hashes the user secret to produce a bundle hash
-   * @param {string} secret
-   * @param {string|null} source
-   * @returns {string}
-   */
-  hashSecret(e, t = null) {
-    return this.log("info", `KnishIOClient::hashSecret(${t ? `source: ${t}` : ""}) - Computing wallet bundle from secret...`), me(e);
-  }
-  /**
-   * Retrieves the stored secret for this session
-   *
-   * @return {string}
-   */
-  getSecret() {
-    if (!this.hasSecret())
-      throw new Qe("KnishIOClient::getSecret() - Unable to find a stored secret! Have you set a secret?");
-    return this.$__secret;
-  }
-  /**
-   * Sets the secret storage provider and optionally sets the bundle hash
-   *
-   * @param {object} storage
-   * @param {string|null} [bundleHash]
-   */
-  setSecretStorage(e, t = null) {
-    this.$__secretStorage = e, t && (this.$__bundle = t);
-  }
-  /**
-   * Returns current secret storage provider
-   *
-   * @returns {object|null}
-   */
-  getSecretStorage() {
-    return this.$__secretStorage;
-  }
-  /**
-   * Asynchronously retrieves the secret from storage or returns in-memory secret
-   *
-   * @param {object} [options]
-   * @returns {Promise<string|null>}
-   */
-  async retrieveSecret(e = {}) {
-    return this.$__secret && this.$__secret.length > 0 ? this.$__secret : this.$__secretStorage && this.$__bundle && this.$__bundle.length > 0 ? await this.$__secretStorage.retrieveSecret(this.$__bundle, e) : null;
-  }
-  /**
-   * Returns whether a bundle hash is being stored for this session
-   *
-   * @return {boolean}
-   */
-  hasBundle() {
-    return !!this.$__bundle;
-  }
-  /**
-   * Returns the bundle hash for this session
-   *
-   * @return {string}
-   */
-  getBundle() {
-    if (!this.hasBundle())
-      throw new Qe("KnishIOClient::getBundle() - Unable to find a stored bundle! Have you set a secret?");
-    return this.$__bundle;
-  }
-  /**
-   * Retrieves the device fingerprint.
-   *
-   * @returns {Promise<string>} A promise that resolves to the device fingerprint as a string.
-   */
-  getFingerprint() {
-    return Sr();
-  }
-  getFingerprintData() {
-    return ln();
-  }
-  /**
-   * Retrieves this session's wallet used for signing the next Molecule
-   *
-   * @return {Promise<*|Wallet|null>}
-   */
-  async getSourceWallet() {
-    let e = (await this.queryContinuId({
-      bundle: this.getBundle()
-    })).payload();
-    return e ? e.key = S.generateKey({
-      secret: this.getSecret(),
-      token: e.token,
-      position: e.position
-    }) : e = new S({
-      secret: this.getSecret()
-    }), e;
-  }
-  /**
-   * Retrieves this session's remainder wallet
-   *
-   * @return {null}
-   */
-  getRemainderWallet() {
-    return this.remainderWallet;
-  }
-  /**
-   * Instantiates a new Molecule and prepares this client session to operate on it
-   *
-   * @param secret
-   * @param bundle
-   * @param sourceWallet
-   * @param remainderWallet
-   * @return {Promise<Molecule>}
-   */
-  async createMolecule({
-    secret: e = null,
-    bundle: t = null,
-    sourceWallet: n = null,
-    remainderWallet: s = null
-  }) {
-    this.log("info", "KnishIOClient::createMolecule() - Creating a new molecule..."), e || (this.$__secret && this.$__secret.length > 0 ? e = this.getSecret() : this.$__secretStorage && this.$__bundle && this.$__bundle.length > 0 && (e = await this.$__secretStorage.retrieveSecret(this.$__bundle))), e = e || this.getSecret(), t = t || this.getBundle();
-    let r = null;
-    if (n && n.token !== "USER")
-      if (this.lastMoleculeQuery && this.getRemainderWallet() && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success())
-        r = this.getRemainderWallet().position;
-      else {
-        const i = await this.getSourceWallet();
-        r = i ? i.position : null;
-      }
-    return !n && this.lastMoleculeQuery && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() && (n = this.getRemainderWallet()), n === null && (n = await this.getSourceWallet()), this.remainderWallet = s || S.create({
-      secret: e,
-      bundle: t,
-      token: "USER",
-      batchId: n.batchId,
-      characters: n.characters
-    }), new z({
-      secret: e,
-      bundle: t,
-      sourceWallet: n,
-      remainderWallet: this.getRemainderWallet(),
-      cellSlug: this.getCellSlug(),
-      version: this.getServerSdkVersion(),
-      continuIdPosition: r
-    });
-  }
-  /**
-   * Builds a new instance of the provided Query class
-   *
-   * @param QueryClass
-   * @return {*}
-   */
-  createQuery(e) {
-    return new e(this.client(), this);
-  }
-  /**
-   * Builds a new instance of the provided Subscription class
-   *
-   * @param SubscribeClass
-   * @return {*}
-   */
-  createSubscribe(e) {
-    return new e(this.subscribe());
-  }
-  /**
-   * Uses the supplied Mutation class to build a new tailored Molecule
-   *
-   * @param mutationClass
-   * @param molecule
-   */
-  async createMoleculeMutation({
-    mutationClass: e,
-    molecule: t = null
-  }) {
-    this.log("info", `KnishIOClient::createMoleculeQuery() - Creating a new ${e.name} query...`);
-    const n = t || await this.createMolecule({}), s = new e(this.client(), this, n);
-    if (!(s instanceof U))
-      throw new ee(`${this.constructor.name}::createMoleculeMutation() - This method only accepts MutationProposeMolecule!`);
-    return this.lastMoleculeQuery = s, s;
-  }
-  /**
-   *
-   * @param query
-   * @param variables
-   * @returns {Promise<*>}
-   */
-  async executeQuery(e, t = null, n = {}) {
-    if (this.$__authToken && this.$__authToken.isExpired() && !this.$__authInProcess) {
-      this.log("info", "KnishIOClient::executeQuery() - Access token is expired. Getting new one...");
-      const i = this.$__secret || await this.retrieveSecret() || "";
-      await this.requestAuthToken({
-        secret: i,
-        cellSlug: this.$__cellSlug,
-        encrypt: this.$__encrypt
-      });
-    }
-    const s = new AbortController(), r = JSON.stringify({
-      query: e.$__query,
-      variables: t
-    });
-    this.abortControllers.set(r, s);
-    try {
-      const i = { ...n };
-      this.$__defaultRequestPolicy && !i.requestPolicy && (i.requestPolicy = this.$__defaultRequestPolicy);
-      const a = await e.execute({
-        variables: t,
-        context: {
-          fetchOptions: {
-            signal: s.signal
-          },
-          ...i
-        }
-      });
-      return this.abortControllers.delete(r), a;
-    } catch (i) {
-      if (i.name === "AbortError")
-        this.log("warn", "Query was cancelled");
-      else
-        throw i;
-    }
-  }
-  cancelQuery(e, t = null) {
-    const n = JSON.stringify({
-      query: e.$__query,
-      variables: t
-    }), s = this.abortControllers.get(n);
-    s && (s.abort(), this.abortControllers.delete(n));
-  }
-  cancelAllQueries() {
-    for (const e of this.abortControllers.values())
-      e.abort();
-    this.abortControllers.clear();
-  }
-  /**
-   * Retrieves the balance wallet for a specified Knish.IO identity and token slug
-   *
-   * @param {string} token
-   * @param {string|null} bundle
-   * @param {string} type
-   * @returns {Promise<*>}
-   */
-  async queryBalance({
-    token: e,
-    bundle: t = null,
-    type: n = "regular"
-  }) {
-    const s = this.createQuery(vs);
-    return this.executeQuery(s, {
-      bundleHash: t || this.getBundle(),
-      token: e,
-      type: n
-    });
-  }
-  /**
-   *
-   * @param {string} token
-   * @param {number} amount
-   * @param {string} type
-   * @returns {Promise<{address}|{position}|*>}
-   */
-  async querySourceWallet({
-    token: e,
-    amount: t,
-    type: n = "regular"
-  }) {
-    const s = (await this.queryBalance({
-      token: e,
-      type: n
-    })).payload();
-    if (s === null || ue.cmp(s.balance, t) < 0)
-      throw new G();
-    if (!s.position || !s.address)
-      throw new G("Source wallet can not be a shadow wallet.");
-    return s;
-  }
-  /**
-   * @param {string|null} bundle
-   * @param {function} closure
-   * @return {Promise<string>}
-   */
-  async subscribeCreateMolecule({
-    bundle: e,
-    closure: t
-  }) {
-    return await this.createSubscribe(Zs).execute({
-      variables: {
-        bundle: e || this.getBundle()
-      },
-      closure: t
-    });
-  }
-  /**
-   * Creates a subscription for updating Wallet status
-   *
-   * @param {string|null} bundle
-   * @param {string} token
-   * @param {function} closure
-   * @return {string}
-   */
-  subscribeWalletStatus({
-    bundle: e,
-    token: t,
-    closure: n
-  }) {
-    if (!t)
-      throw new ee(`${this.constructor.name}::subscribeWalletStatus() - Token parameter is required!`);
-    return this.createSubscribe(Ys).execute({
-      variables: {
-        bundle: e || this.getBundle(),
-        token: t
-      },
-      closure: n
-    });
-  }
-  /**
-   *  Creates a subscription for updating active Wallet
-   *
-   * @param {string|null} bundle
-   * @param {function} closure
-   * @return {string}
-   */
-  subscribeActiveWallet({
-    bundle: e,
-    closure: t
-  }) {
-    return this.createSubscribe(er).execute({
-      variables: {
-        bundle: e || this.getBundle()
-      },
-      closure: t
-    });
-  }
-  /**
-   * Creates a subscription for updating list of active sessions for a given MetaType
-   *
-   * @param {string} metaType
-   * @param {string} metaId
-   * @param {function} closure
-   * @return {*}
-   */
-  subscribeActiveSession({
-    metaType: e,
-    metaId: t,
-    closure: n
-  }) {
-    return this.createSubscribe(tr).execute({
-      variables: {
-        metaType: e,
-        metaId: t
-      },
-      closure: n
-    });
-  }
-  /**
-   * Unsubscribes from a given subscription name
-   *
-   * @param {string} operationName
-   */
-  unsubscribe(e) {
-    this.subscribe().unsubscribe(e);
-  }
-  unsubscribeAll() {
-    this.subscribe().unsubscribeAll();
-  }
-  /**
-   * Retrieves metadata for the given metaType and provided parameters
-   *
-   * @param {string|array|null} metaType
-   * @param {string|array|null} metaId
-   * @param {string|array|null} key
-   * @param {string|array|null} value
-   * @param {boolean|null} latest
-   * @param {object|null} fields
-   * @param {object|null} filter
-   * @param {object|null} queryArgs
-   * @param {string|null} count
-   * @param {string|null} countBy
-   * @param {boolean} throughAtom
-   * @param {boolean} throughMolecule
-   * @param {array|null} values
-   * @param {array|null} keys
-   * @param {array|null} atomValues
-   * @return {Promise<ResponseMetaType|ResponseMetaTypeViaAtom|ResponseMetaTypeViaMolecule>}
-   */
-  queryMeta({
-    metaType: e,
-    metaId: t = null,
-    key: n = null,
-    value: s = null,
-    latest: r = !0,
-    fields: i = null,
-    filter: a = null,
-    queryArgs: c = null,
-    count: u = null,
-    countBy: l = null,
-    throughAtom: h = !0,
-    throughMolecule: p = !1,
-    values: d = null,
-    keys: w = null,
-    atomValues: A = null,
-    requestPolicy: O = null
-  }) {
-    this.log("info", `KnishIOClient::queryMeta() - Querying metaType: ${e}, metaId: ${t}...`);
-    let f, y;
-    return p ? (f = this.createQuery(Pt), y = Pt.createVariables({
-      metaType: e,
-      metaId: t,
-      key: n,
-      value: s,
-      latest: r,
-      filter: a,
-      queryArgs: c,
-      countBy: l,
-      values: d,
-      keys: w,
-      atomValues: A,
-      cellSlug: this.getCellSlug()
-    })) : h ? (f = this.createQuery(Wt), y = Wt.createVariables({
-      metaType: e,
-      metaId: t,
-      key: n,
-      value: s,
-      latest: r,
-      filter: a,
-      queryArgs: c,
-      countBy: l,
-      values: d,
-      keys: w,
-      atomValues: A,
-      cellSlug: this.getCellSlug()
-    })) : (f = this.createQuery(Ot), y = Ot.createVariables({
-      metaType: e,
-      metaId: t,
-      key: n,
-      value: s,
-      latest: r,
-      filter: a,
-      queryArgs: c,
-      count: u,
-      countBy: l,
-      cellSlug: this.getCellSlug()
-    })), this.executeQuery(f, y, O ? { requestPolicy: O } : {});
-  }
-  /**
-   * Queries meta assets and verifies cryptographic integrity of associated molecules.
-   * Returns the same response as queryMeta(), with an additional `integrity` field on the payload
-   * containing verification results for each molecule.
-   *
-   * @param {object} params - Same parameters as queryMeta()
-   * @return {Promise<ResponseMetaType|ResponseMetaTypeViaAtom|ResponseMetaTypeViaMolecule>}
-   */
-  async queryMetaVerified(e) {
-    const t = await this.queryMeta(e), n = t.payload();
-    return n && (n.integrity = t.verifyIntegrity()), t;
-  }
-  /**
-   * Probes the connected server to check whether it supports a named root query field.
-   * Result is cached per URI so the network round-trip happens at most once per URI.
-   *
-   * Uses GraphQL introspection which is universally supported by spec-compliant servers.
-   *
-   * @param {string} fieldName - The root Query field name to check (e.g. 'embeddingStatus')
-   * @return {Promise<boolean>}
-   */
-  async hasQueryField(e) {
-    const n = `${this.getUri()}::${e}`;
-    if (typeof this.$__capabilityCache[n] == "boolean")
-      return this.$__capabilityCache[n];
-    try {
-      const i = ((await this.$__client.query({
-        query: "{ __schema { queryType { fields { name } } } }",
-        variables: {}
-      }))?.data?.__schema?.queryType?.fields || []).some((a) => a.name === e);
-      return this.$__capabilityCache[n] = i, i;
-    } catch (s) {
-      return this.log("warn", `KnishIOClient::hasQueryField() - Capability probe for '${e}' failed: ${s.message}`), this.$__capabilityCache[n] = !1, !1;
-    }
-  }
-  /**
-   * Queries embedding status for one or more meta instances (DataBraid observability).
-   *
-   * If the connected server does not support the embeddingStatus query,
-   * returns null without throwing an error (graceful degradation).
-   *
-   * Single mode: queryEmbeddingStatus({ metaType: 'product', metaId: 'SKU-001' })
-   * Bulk mode:   queryEmbeddingStatus({ instances: [{ metaType: 'product', metaId: 'SKU-001' }, ...] })
-   *
-   * @param {string|null} metaType - Metadata type (single-instance mode)
-   * @param {string|null} metaId - Instance identifier (single-instance mode)
-   * @param {Array<{metaType: string, metaId: string}>|null} instances - Bulk mode input
-   * @return {Promise<ResponseEmbeddingStatus|null>} Response with payload(), or null if unsupported
-   */
-  async queryEmbeddingStatus({
-    metaType: e = null,
-    metaId: t = null,
-    instances: n = null
-  }) {
-    if (this.log("info", `KnishIOClient::queryEmbeddingStatus() - Checking embedding status for metaType: ${e || "(bulk)"}...`), !await this.hasQueryField("embeddingStatus"))
-      return this.log("warn", "KnishIOClient::queryEmbeddingStatus() - Server does not support embeddingStatus query. Returning null."), null;
-    const r = this.createQuery(Ht), i = Ht.createVariables({ metaType: e, metaId: t, instances: n });
-    return this.executeQuery(r, i);
-  }
-  /**
-   * Query batch to get cascading meta instances by batchID
-   *
-   * @param batchId
-   * @return {Promise<*>}
-   */
-  async queryBatch({
-    batchId: e
-  }) {
-    this.log("info", `KnishIOClient::queryBatch() - Querying cascading meta instances for batchId: ${e}...`);
-    const t = this.createQuery(Ee);
-    return await this.executeQuery(t, {
-      batchId: e
-    });
-  }
-  /**
-   * Query batch history to get cascading meta instances by batchID
-   *
-   * @param batchId
-   * @return {Promise<*>}
-   */
-  async queryBatchHistory({
-    batchId: e
-  }) {
-    this.log("info", `KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${e}...`);
-    const t = this.createQuery(Is);
-    return await this.executeQuery(t, {
-      batchId: e
-    });
-  }
-  /**
-   * Queries atom instances based on the provided parameters.
-   *
-   * @param {string[]} molecularHashes - Array of multiple molecular hashes.
-   * @param {string} molecularHash - Single molecular hash.
-   * @param {string[]} bundleHashes - Array of multiple bundle hashes.
-   * @param {string} bundleHash - Single bundle hash.
-   * @param {number[]} positions - Array of multiple positions.
-   * @param {number} position - Single position.
-   * @param {string[]} walletAddresses - Array of multiple wallet addresses.
-   * @param {string} walletAddress - Single wallet address.
-   * @param {string[]} isotopes - Array of multiple isotopes.
-   * @param {string} isotope - Single isotope.
-   * @param {string[]} tokenSlugs - Array of multiple token slugs.
-   * @param {string} tokenSlug - Single token slug.
-   * @param {string[]} cellSlugs - Array of multiple cell slugs.
-   * @param {string} cellSlug - Single cell slug.
-   * @param {string[]} batchIds - Array of multiple batch IDs.
-   * @param {string} batchId - Single batch ID.
-   * @param {any[]} values - Array of multiple values.
-   * @param {any} value - Single value.
-   * @param {string[]} metaTypes - Array of multiple meta types.
-   * @param {string} metaType - Single meta type.
-   * @param {string[]} metaIds - Array of multiple meta IDs.
-   * @param {string} metaId - Single meta ID.
-   * @param {string[]} indexes - Array of multiple atom indices.
-   * @param {string} index - Single atom index.
-   * @param {object} filter - The filter object.
-   * @param {boolean} latest - The latest flag.
-   * @param {object} [queryArgs] - The query arguments (limit, offset).
-   * @param {number} [queryArgs.limit=15] - The limit.
-   * @param {number} [queryArgs.offset=1] - The offset.
-   *
-   * @returns {Promise<ResponseAtom>} - A promise that resolves with the queried atom instances.
-   */
-  async queryAtom({
-    molecularHashes: e,
-    molecularHash: t,
-    bundleHashes: n,
-    bundleHash: s,
-    positions: r,
-    position: i,
-    walletAddresses: a,
-    walletAddress: c,
-    isotopes: u,
-    isotope: l,
-    tokenSlugs: h,
-    tokenSlug: p,
-    cellSlugs: d,
-    cellSlug: w,
-    batchIds: A,
-    batchId: O,
-    values: f,
-    value: y,
-    metaTypes: b,
-    metaType: T,
-    metaIds: k,
-    metaId: $,
-    indexes: v,
-    index: I,
-    filter: _,
-    latest: W,
-    queryArgs: q = {
-      limit: 15,
-      offset: 1
-    }
-  }) {
-    this.log("info", "KnishIOClient::queryAtom() - Querying atom instances");
-    const he = this.createQuery(Ut);
-    return await this.executeQuery(he, Ut.createVariables({
-      molecularHashes: e,
-      molecularHash: t,
-      bundleHashes: n,
-      bundleHash: s,
-      positions: r,
-      position: i,
-      walletAddresses: a,
-      walletAddress: c,
-      isotopes: u,
-      isotope: l,
-      tokenSlugs: h,
-      tokenSlug: p,
-      cellSlugs: d,
-      cellSlug: w,
-      batchIds: A,
-      batchId: O,
-      values: f,
-      value: y,
-      metaTypes: b,
-      metaType: T,
-      metaIds: k,
-      metaId: $,
-      indexes: v,
-      index: I,
-      filter: _,
-      latest: W,
-      queryArgs: q
-    }));
-  }
-  /**
-   * Builds and executes a molecule to issue a new Wallet on the ledger
-   *
-   * @param {string} token - The token slug for the new wallet
-   * @returns {Promise<ResponseCreateWallet>} - A Promise that resolves with the result of the execution.
-   */
-  async createWallet({
-    token: e
-  }) {
-    const t = new S({
-      secret: this.getSecret(),
-      token: e
-    }), n = await this.createMoleculeMutation({
-      mutationClass: zs
-    });
-    return n.fillMolecule(t), await this.executeQuery(n);
-  }
-  /**
-   * Queries the ledger to retrieve a list of active sessions for the given MetaType
-   *
-   * @param {string} bundleHash - The hash of the session bundle.
-   * @param {string} metaType - The type of metadata associated with the session.
-   * @param {string} metaId - The ID of the metadata associated with the session.
-   * @returns {Promise<ResponseQueryActiveSession>} - Returns a promise containing the result of the query.
-   */
-  async queryActiveSession({
-    bundleHash: e,
-    metaType: t,
-    metaId: n
-  }) {
-    const s = this.createQuery(ir);
-    return await this.executeQuery(s, {
-      bundleHash: e,
-      metaType: t,
-      metaId: n
-    });
-  }
-  /**
-   * Builds and executes a molecule to declare an active session for the given MetaType
-   *
-   * @param {Object} options - The options for activating a session.
-   * @param {string} options.bundle - The bundle hash.
-   * @param {string} options.metaType - The meta type.
-   * @param {string} options.metaId - The meta ID.
-   * @param {string} options.ipAddress - The client's IP address.
-   * @param {string} options.browser - The client's browser.
-   * @param {string} options.osCpu - The client's operating system and CPU.
-   * @param {string} options.resolution - The client's screen resolution.
-   * @param {string} options.timeZone - The client's time zone.
-   * @param {Object} [options.json={}] - Additional JSON data.
-   * @returns {Promise<ResponseActiveSession>} A promise that resolves with the result of the activation.
-   */
-  async activeSession({
-    bundle: e,
-    metaType: t,
-    metaId: n,
-    ipAddress: s,
-    browser: r,
-    osCpu: i,
-    resolution: a,
-    timeZone: c,
-    json: u = {}
-  }) {
-    const l = this.createQuery(sr);
-    return await this.executeQuery(l, {
-      bundleHash: e,
-      metaType: t,
-      metaId: n,
-      ipAddress: s,
-      browser: r,
-      osCpu: i,
-      resolution: a,
-      timeZone: c,
-      json: JSON.stringify(u)
-    });
-  }
-  /**
-   * Creates a new token with the given parameters.
-   *
-   * @param {object} options - The options for creating the token.
-   * @param {string} options.token - The token identifier.
-   * @param {number} [options.amount] - The amount of tokens to create.
-   * @param {object} [options.meta] - Additional metadata for the token.
-   * @param {string} [options.batchId] - The batch identifier for stackable tokens.
-   * @param {array} [options.units] - The unit IDs for the token.
-   *
-   * @throws {StackableUnitDecimalsException} If a stackable token has decimals.
-   * @throws {StackableUnitAmountException} If stackable units are provided with an amount.
-   *
-   * @returns {Promise<ResponseCreateToken>} A Promise that resolves to the result of creating the token.
-   */
-  async createToken({
-    token: e,
-    amount: t = null,
-    meta: n = null,
-    batchId: s = null,
-    units: r = []
-  }) {
-    const i = M.get(n || {}, "fungibility");
-    if (i === "stackable" && (n.batchId = s || Fe({})), ["nonfungible", "stackable"].includes(i) && r.length > 0) {
-      if (M.get(n || {}, "decimals") > 0)
-        throw new Xs();
-      if (t > 0)
-        throw new Ae();
-      t = r.length, n.splittable = 1, n.decimals = 0, n.tokenUnits = JSON.stringify(r);
-    }
-    const a = new S({
-      secret: this.getSecret(),
-      bundle: this.getBundle(),
-      token: e,
-      batchId: s
-    }), c = await this.createMoleculeMutation({
-      mutationClass: Es
-    });
-    return c.fillMolecule({
-      recipientWallet: a,
-      amount: t,
-      meta: n || {}
-    }), await this.executeQuery(c);
-  }
-  /**
-   * Creates a new rule with the specified parameters.
-   *
-   * @param {string} metaType - The type of the metadata associated with the rule.
-   * @param {string} metaId - The ID of the metadata associated with the rule.
-   * @param {object} rule - The rule object.
-   * @param {object} [policy={}] - The policy object. (optional)
-   * @returns {Promise<ResponseCreateRule>} - A promise that resolves to the created rule.
-   */
-  async createRule({
-    metaType: e,
-    metaId: t,
-    rule: n,
-    policy: s = {}
-  }) {
-    const r = await this.createMoleculeMutation(
-      {
-        mutationClass: pr,
-        molecule: await this.createMolecule({
-          secret: this.getSecret()
-        })
-      }
-    );
-    return r.fillMolecule({
-      metaType: e,
-      metaId: t,
-      rule: n,
-      policy: s
-    }), await this.executeQuery(r);
-  }
-  /**
-   * Builds and executes a molecule to convey new metadata to the ledger
-   *
-   * @param {string} metaType - The type of the metadata entry.
-   * @param {string} metaId - The ID of the metadata entry.
-   * @param {object|array} meta - The metadata object.
-   * @param {object} [policy={}] - The policy object.
-   * @returns {Promise<ResponseCreateMeta>} - A Promise that resolves with the created metadata entry.
-   */
-  async createMeta({
-    metaType: e,
-    metaId: t,
-    meta: n = null,
-    policy: s = {}
-  }) {
-    const r = await this.createMoleculeMutation(
-      {
-        mutationClass: Ks,
-        molecule: await this.createMolecule({
-          secret: this.getSecret()
-        })
-      }
-    ), i = n || {};
-    return r.fillMolecule({
-      metaType: e,
-      metaId: t,
-      meta: i,
-      policy: s
-    }), await this.executeQuery(r);
-  }
-  /**
-   * Builds and executes a molecule to register a peer node via P-isotope
-   *
-   * @param {string} host - The peer host URL to register
-   * @returns {Promise<ResponsePeering>} - A Promise that resolves with the peering response.
-   */
-  async registerPeer({
-    host: e
-  }) {
-    const t = await this.createMoleculeMutation({
-      mutationClass: Fs,
-      molecule: await this.createMolecule({
-        secret: this.getSecret()
-      })
-    });
-    return t.fillMolecule({
-      host: e
-    }), await this.executeQuery(t);
-  }
-  /**
-   * Builds and executes a molecule to submit an append request via A-isotope
-   *
-   * @param {string} metaType - The target MetaType to append to
-   * @param {string} metaId - The target MetaId to append to
-   * @param {string} action - The action to perform
-   * @param {object} [meta={}] - Additional metadata
-   * @returns {Promise<ResponseAppendRequest>} - A Promise that resolves with the append request response.
-   */
-  async appendRequest({
-    metaType: e,
-    metaId: t,
-    action: n,
-    meta: s = {}
-  }) {
-    const r = await this.createMoleculeMutation({
-      mutationClass: Qs,
-      molecule: await this.createMolecule({
-        secret: this.getSecret()
-      })
-    });
-    return r.fillMolecule({
-      metaType: e,
-      metaId: t,
-      action: n,
-      meta: s
-    }), await this.executeQuery(r);
-  }
-  /**
-   * Builds and executes a molecule to create a new identifier on the ledger
-   *
-   * @param {string} type - The type of the identifier.
-   * @param {string} contact - The contact associated with the identifier.
-   * @param {string} code - The code for the identifier.
-   * @returns {Promise<ResponseCreateIdentifier>} - A promise that resolves to the created identifier.
-   */
-  async createIdentifier({
-    type: e,
-    contact: t,
-    code: n
-  }) {
-    const s = await this.createMoleculeMutation({
-      mutationClass: Us
-    });
-    return s.fillMolecule({
-      type: e,
-      contact: t,
-      code: n
-    }), await this.executeQuery(s);
-  }
-  /**
-   * Links an identifier to the current wallet bundle
-   *
-   * @param {string} type - The type of the identifier.
-   * @param {string} contact - The contact associated with the identifier.
-   * @returns {Promise<ResponseLinkIdentifier>} - A promise that resolves to the link result.
-   */
-  async linkIdentifier({
-    type: e,
-    contact: t
-  }) {
-    const n = this.createQuery(js);
-    return await this.executeQuery(n, {
-      bundle: this.getBundle(),
-      type: e,
-      content: t
-    });
-  }
-  /**
-   * Creates a policy for a given metaType and metaId.
-   *
-   * @param {Object} options - The options for creating the policy.
-   * @param {string} options.metaType - The type of the meta.
-   * @param {string} options.metaId - The ID of the meta.
-   * @param {Object} [options.policy={}] - The policy object.
-   * @returns {Promise<*>} - A promise that resolves with the result of the execution.
-   */
-  async createPolicy({
-    metaType: e,
-    metaId: t,
-    policy: n = {}
-  }) {
-    const s = await this.createMolecule({});
-    s.addPolicyAtom({
-      metaType: e,
-      metaId: t,
-      meta: {},
-      policy: n
-    }), s.addContinuIdAtom(), s.sign({
-      bundle: this.getBundle()
-    }), s.check();
-    const r = await this.createMoleculeMutation({
-      mutationClass: U,
-      molecule: s
-    });
-    return await this.executeQuery(r);
-  }
-  /**
-   * Queries the policy based on the provided metaType and metaId.
-   *
-   * @param {string} metaType - The type of the meta.
-   * @param {string} metaId - The ID of the meta.
-   * @returns {Promise<ResponsePolicy>} - A Promise that resolves to the query result.
-   */
-  async queryPolicy({
-    metaType: e,
-    metaId: t
-  }) {
-    const n = this.createQuery(cr);
-    return await this.executeQuery(n, {
-      metaType: e,
-      metaId: t
-    });
-  }
-  /**
-   * Queries wallets based on the provided parameters.
-   *
-   * @param {object} options - The options for querying wallets.
-   * @param {string|null} options.bundle - The bundle to query wallets for.
-   * @param {string|null} options.token - The token to query wallets for.
-   * @param {boolean} [options.unspent=true] - Whether to include unspent wallets or not.
-   *
-   * @returns {Promise<ResponseWalletList>} - A promise that resolves to the response payload of the query.
-   */
-  queryWallets({
-    bundle: e = null,
-    token: t = null,
-    unspent: n = !0
-  }) {
-    this.log("info", `KnishIOClient::queryWallets() - Querying wallets${e ? ` for ${e}` : ""}...`);
-    const s = this.createQuery($s);
-    return this.executeQuery(s, {
-      bundleHash: e || this.getBundle(),
-      token: t,
-      unspent: n
-    }).then((r) => r.payload());
-  }
-  /**
-   * Queries wallet bundle metadata.
-   *
-   * @param {Object} options - The options for the query.
-   * @param {string|null} options.bundle - The bundle to query. Default is null.
-   * @param {string|null} options.fields - The fields to retrieve. Default is null.
-   * @param {boolean} options.raw - Whether to return the raw response or the payload. Default is false.
-   * @returns {Promise<ResponseWalletBundle|{}|null>} - A promise that resolves to the response or payload.
-   */
-  queryBundle({
-    bundle: e = null,
-    fields: t = null,
-    raw: n = !1
-  }) {
-    this.log("info", `KnishIOClient::queryBundle() - Querying wallet bundle metadata${e ? ` for ${e}` : ""}...`), e || (e = this.getBundle()), typeof e == "string" && (e = [e]);
-    const s = this.createQuery(Ss);
-    return this.executeQuery(s, { bundleHashes: e }).then((r) => n ? r : r.payload());
-  }
-  /**
-   * Queries the ledger for the next ContinuId wallet
-   *
-   * @param {String} bundle - The bundle hash used in the query.
-   * @returns {Promise<ResponseContinuId>} - A promise that resolves to the result of the query.
-   */
-  async queryContinuId({
-    bundle: e
-  }) {
-    const t = this.createQuery(ks);
-    return this.executeQuery(t, {
-      bundle: e
-    });
-  }
-  /**
-   * Requests tokens for a specific recipient or for the current wallet bundle.
-   *
-   * @param {Object} options - The options for the token request.
-   * @param {string} options.token - The token slug.
-   * @param {string|Wallet} [options.to] - The recipient of the tokens. If not provided, tokens will be requested for the current wallet bundle.
-   * @param {number|null} [options.amount=null] - The amount of tokens to request. If not provided and `options.units` are provided, the amount will be calculated based on the number of
-   * units.
-   * @param {Array} [options.units=[]] - The array of unit IDs. If provided, the amount will be calculated based on the length of `options.units`.
-   * @param {Object|null} [options.meta=null] - Additional metadata for the token request.
-   * @param {string|null} [options.batchId=null] - The batch ID for the token request. If not provided and the token is stackable, a new batch ID will be generated.
-   *
-   * @returns {Promise<ResponseRequestTokens>} - A promise that resolves with the response from the token request.
-   *
-   * @throws {BatchIdException} - When a non-stackable token is used and `options.batchId` is not null.
-   * @throws {StackableUnitAmountException} - When both `options.units` and `options.amount` are provided for stackable tokens.
-   */
-  async requestTokens({
-    token: e,
-    to: t,
-    amount: n = null,
-    units: s = [],
-    meta: r = null,
-    batchId: i = null
-  }) {
-    let a, c;
-    r = r || {};
-    const u = this.createQuery(or), l = await this.executeQuery(u, {
-      slug: e
-    }), h = M.get(l.data(), "0.fungibility") === "stackable";
-    if (!h && i !== null)
-      throw new Ke("Expected Batch ID = null for non-stackable tokens.");
-    if (h && i === null && (i = Fe({})), s.length > 0) {
-      if (n > 0)
-        throw new Ae();
-      n = s.length, r.tokenUnits = JSON.stringify(s);
-    }
-    t ? (Object.prototype.toString.call(t) === "[object String]" && (S.isBundleHash(t) ? (a = "walletBundle", c = t) : t = S.create({
-      secret: t,
-      token: e
-    })), t instanceof S && (a = "wallet", r.position = t.position, r.bundle = t.bundle, c = t.address)) : (a = "walletBundle", c = this.getBundle());
-    const p = await this.createMoleculeMutation({
-      mutationClass: Rs
-    });
-    return p.fillMolecule({
-      token: e,
-      amount: n,
-      metaType: a,
-      metaId: c,
-      meta: r,
-      batchId: i
-    }), await this.executeQuery(p);
-  }
-  /**
-   * Claims a shadow wallet for a given token.
-   *
-   * @param {string} token - The token for which to claim the shadow wallet.
-   * @param {string|null} batchId - The batch ID of the shadow wallet (optional).
-   * @param {string|null} molecule - The molecule associated with the shadow wallet (optional).
-   *
-   * @returns {Promise<ResponseClaimShadowWallet>} - A promise that resolves to the result of the claim operation.
-   */
-  async claimShadowWallet({
-    token: e,
-    batchId: t = null,
-    molecule: n = null
-  }) {
-    const s = await this.createMoleculeMutation({
-      mutationClass: Ps,
-      molecule: n
-    });
-    return s.fillMolecule({
-      token: e,
-      batchId: t
-    }), await this.executeQuery(s);
-  }
-  /**
-   * Claims all shadow wallets for a given token.
-   *
-   * @param {Object} options - The options for claiming shadow wallets.
-   * @param {string} options.token - The token to claim shadow wallets for.
-   * @returns {Promise<*>} - A promise that resolves to an array of responses from claiming shadow wallets.
-   * @throws {WalletShadowException} - If the shadow wallet list is invalid or if a non-shadow wallet is found.
-   */
-  async claimShadowWallets({
-    token: e
-  }) {
-    const t = await this.queryWallets({ token: e });
-    if (!t || !Array.isArray(t))
-      throw new qt();
-    t.forEach((s) => {
-      if (!s.isShadow())
-        throw new qt();
-    });
-    const n = [];
-    for (const s of t)
-      n.push(await this.claimShadowWallet({
-        token: e,
-        batchId: s.batchId
-      }));
-    return n;
-  }
-  /**
-   * Transfers tokens from one wallet to another.
-   *
-   * @param {Object} options - The transfer options.
-   * @param {string} options.bundleHash - The bundle hash of the source wallet.
-   * @param {string} options.token - The token to transfer.
-   * @param {number} [options.amount=null] - The amount of tokens to transfer. Not required if units are provided.
-   * @param {Array} [options.units=[]] - An array of units to transfer. Overrides the amount if provided.
-   * @param {string} [options.batchId=null] - The batch ID for the recipient wallet.
-   * @param {Object} [options.sourceWallet=null] - The source wallet object. If not provided, it will be queried.
-   *
-   * @returns {Promise} - A Promise that resolves to the transaction result.
-   *
-   * @throws {StackableUnitAmountException} - If both amount and units are provided.
-   * @throws {TransferBalanceException} - If the source wallet does not have enough balance.
-   */
-  async transferToken({
-    bundleHash: e,
-    token: t,
-    amount: n = null,
-    units: s = [],
-    batchId: r = null,
-    sourceWallet: i = null
-  }) {
-    if (s.length > 0) {
-      if (n > 0)
-        throw new Ae();
-      n = s.length;
-    }
-    if (i === null && (i = await this.querySourceWallet({
-      token: t,
-      amount: n
-    })), i === null || ue.cmp(i.balance, n) < 0)
-      throw new G();
-    const a = S.create({
-      bundle: e,
-      token: t
-    });
-    r !== null ? a.batchId = r : a.initBatchId({
-      sourceWallet: i
-    });
-    const c = i.createRemainder(this.getSecret());
-    i.splitUnits(
-      s,
-      c,
-      a
-    );
-    const u = await this.createMolecule({
-      sourceWallet: i,
-      remainderWallet: c
-    }), l = await this.createMoleculeMutation({
-      mutationClass: Rt,
-      molecule: u
-    });
-    return l.fillMolecule({
-      recipientWallet: a,
-      amount: n
-    }), await this.executeQuery(l);
-  }
-  /**
-   * Transfers tokens from one source wallet to MULTIPLE recipients in a single molecule.
-   *
-   * One molecule funds N recipients (WP line 544: "utilizing the sender's Wallet to fund multiple
-   * recipients with one transaction"). Each recipient receives its own amount and, for stackable
-   * tokens, its own subset of token units. The source is fully drained and the unsent change
-   * returns via the remainder atom (UTXO), so the V-atoms conserve. Single-recipient transfers
-   * should keep using transferToken(); this is its N-recipient generalization.
-   *
-   * @param {Object} options - The transfer options.
-   * @param {string} options.token - The token to transfer.
-   * @param {Array} options.recipients - [{ bundleHash, amount?, units?, batchId? }] per recipient.
-   * @param {Object} [options.sourceWallet=null] - The source wallet; queried if not provided.
-   *
-   * @returns {Promise} - A Promise that resolves to the transaction result.
-   *
-   * @throws {StackableUnitAmountException} - If a recipient provides both amount and units.
-   * @throws {TransferBalanceException} - If the source wallet does not have enough balance.
-   */
-  async transferTokens({
-    token: e,
-    recipients: t,
-    sourceWallet: n = null
-  }) {
-    const s = t.map((l) => {
-      const h = l.units || [];
-      if (h.length > 0) {
-        if (l.amount > 0)
-          throw new Ae();
-        return h.length;
-      }
-      return l.amount || 0;
-    }), r = s.reduce((l, h) => l + h, 0);
-    if (n === null && (n = await this.querySourceWallet({
-      token: e,
-      amount: r
-    })), n === null || ue.cmp(n.balance, r) < 0)
-      throw new G();
-    const i = t.map((l) => {
-      const h = S.create({
-        bundle: l.bundleHash,
-        token: e
-      });
-      return l.batchId !== void 0 && l.batchId !== null ? h.batchId = l.batchId : h.initBatchId({
-        sourceWallet: n
-      }), h;
-    }), a = n.createRemainder(this.getSecret());
-    n.splitUnitsMulti(
-      t.map((l) => l.units || []),
-      i,
-      a
-    );
-    const c = await this.createMolecule({
-      sourceWallet: n,
-      remainderWallet: a
-    }), u = await this.createMoleculeMutation({
-      mutationClass: Rt,
-      molecule: c
-    });
-    return u.fillMoleculeMulti({
-      recipientWallets: i,
-      amounts: s
-    }), await this.executeQuery(u);
-  }
-  /**
-   * Deposits buffer token into the source wallet.
-   *
-   * @param {Object} options - The options for depositing buffer token.
-   * @param {string} options.tokenSlug - The slug of the token to deposit.
-   * @param {number} options.amount - The amount of token to deposit.
-   * @param {Object} options.tradeRates - The trade rates for the deposit.
-   * @param {Wallet|null} options.sourceWallet - The source wallet for the deposit. If not provided, a source wallet will be queried.
-   *
-   * @returns {Promise<*>} - A promise that resolves with the result of the deposit.
-   */
-  async depositBufferToken({
-    tokenSlug: e,
-    amount: t,
-    tradeRates: n,
-    sourceWallet: s = null
-  }) {
-    s === null && (s = await this.querySourceWallet({
-      token: e,
-      amount: t
-    }));
-    const r = s.createRemainder(this.getSecret()), i = await this.createMolecule({
-      sourceWallet: s,
-      remainderWallet: r
-    }), a = await this.createMoleculeMutation({
-      mutationClass: fr,
-      molecule: i
-    });
-    return a.fillMolecule({
-      amount: t,
-      tradeRates: n
-    }), await this.executeQuery(a);
-  }
-  /**
-   * Withdraws buffer tokens.
-   *
-   * @param {Object} options - The options for withdrawing buffer tokens.
-   * @param {string} options.tokenSlug - The token slug.
-   * @param {number} options.amount - The amount of tokens to withdraw.
-   * @param {Object} [options.sourceWallet=null] - The source wallet to withdraw tokens from. If not provided, a source wallet will be queried.
-   * @param {Object} [options.signingWallet=null] - The signing wallet to use for the transaction.
-   * @returns {Promise<Object>} A promise that resolves to the result of the withdrawal transaction.
-   */
-  async withdrawBufferToken({
-    tokenSlug: e,
-    amount: t,
-    sourceWallet: n = null,
-    signingWallet: s = null
-  }) {
-    n === null && (n = await this.querySourceWallet({
-      token: e,
-      amount: t,
-      type: "buffer"
-    }));
-    const r = n, i = await this.createMolecule({
-      sourceWallet: n,
-      remainderWallet: r
-    }), a = await this.createMoleculeMutation({
-      mutationClass: yr,
-      molecule: i
-    }), c = {};
-    return c[this.getBundle()] = t, a.fillMolecule({
-      recipients: c,
-      signingWallet: s
-    }), await this.executeQuery(a);
-  }
-  /**
-   * Builds and executes a molecule to destroy the specified Token units
-   *
-   * @param {string} token
-   * @param {number|null} amount
-   * @param {array|null} units
-   * @param {Wallet|null} sourceWallet
-   * @return {Promise<unknown>}
-   */
-  async burnTokens({
-    token: e,
-    amount: t = null,
-    units: n = [],
-    sourceWallet: s = null
-  }) {
-    s === null && (s = await this.querySourceWallet({
-      token: e,
-      amount: t
-    }));
-    const r = s.createRemainder(this.getSecret());
-    if (n.length > 0) {
-      if (t > 0)
-        throw new Ae();
-      t = n.length, s.splitUnits(
-        n,
-        r
-      );
-    }
-    const i = await this.createMolecule({
-      sourceWallet: s,
-      remainderWallet: r
-    });
-    i.burnToken({ amount: t }), i.sign({
-      bundle: this.getBundle()
-    }), i.check(s);
-    const a = await this.createMoleculeMutation({
-      mutationClass: U,
-      molecule: i
-    });
-    return this.executeQuery(a);
-  }
-  /**
-   * Builds and executes a molecule to destroy the specified Token units
-   *
-   * @param {string} token
-   * @param {number|null} amount
-   * @param {array|null} units
-   * @param {Wallet|null} sourceWallet
-   * @return {Promise<unknown>}
-   */
-  async replenishToken({
-    token: e,
-    amount: t = null,
-    units: n = [],
-    sourceWallet: s = null
-  }) {
-    if (s === null && (s = (await this.queryBalance({ token: e })).payload()), !s)
-      throw new G("Source wallet is missing or invalid.");
-    const r = s.createRemainder(this.getSecret()), i = await this.createMolecule({
-      sourceWallet: s,
-      remainderWallet: r
-    });
-    i.replenishToken({
-      amount: t,
-      units: n
-    }), i.sign({
-      bundle: this.getBundle()
-    }), i.check();
-    const a = await this.createMoleculeMutation({
-      mutationClass: U,
-      molecule: i
-    });
-    return this.executeQuery(a);
-  }
-  /**
-   *
-   * @param bundleHash
-   * @param tokenSlug
-   * @param newTokenUnit
-   * @param fusedTokenUnitIds
-   * @param sourceWallet
-   * @returns {Promise<*>}
-   */
-  async fuseToken({
-    bundleHash: e,
-    tokenSlug: t,
-    newTokenUnit: n,
-    fusedTokenUnitIds: s,
-    sourceWallet: r = null
-  }) {
-    if (r === null && (r = (await this.queryBalance({ token: t })).payload()), r === null)
-      throw new G("Source wallet is missing or invalid.");
-    if (!r.tokenUnits || !r.tokenUnits.length)
-      throw new G("Source wallet does not have token units.");
-    if (!s.length)
-      throw new G("Fused token unit list is empty.");
-    const i = [];
-    r.tokenUnits.forEach((h) => {
-      i.push(h.id);
-    }), s.forEach((h) => {
-      if (!i.includes(h))
-        throw new G(`Fused token unit ID = ${h} does not found in the source wallet.`);
-    });
-    const a = S.create({
-      bundle: e,
-      token: t
-    });
-    a.initBatchId({ sourceWallet: r });
-    const c = r.createRemainder(this.getSecret());
-    r.splitUnits(s, c), typeof n == "string" && (n = new ge(n, n, {})), n.metas.fusedTokenUnits = r.getTokenUnitsData(), a.tokenUnits = [n];
-    const u = await this.createMolecule({
-      sourceWallet: r,
-      remainderWallet: c
-    });
-    u.fuseToken(r.tokenUnits, a), u.sign({
-      bundle: this.getBundle()
-    }), u.check();
-    const l = await this.createMoleculeMutation({
-      mutationClass: U,
-      molecule: u
-    });
-    return this.executeQuery(l);
-  }
-  /**
-   * Requests a guest authentication token using the fingerprint of the user.
-   * @param {Object} options - The options for the guest authentication token request.
-   * @param {string} options.cellSlug - The slug of the cell to request the token for.
-   * @param {boolean} options.encrypt - Indicates whether the session should be encrypted.
-   * @returns {Promise<ResponseRequestAuthorizationGuest>} - A promise that resolves to the response of the guest authentication token request.
-   */
-  async requestGuestAuthToken({
-    cellSlug: e,
-    encrypt: t
-  }) {
-    this.setCellSlug(e);
-    const n = new S({
-      secret: at(await this.getFingerprint()),
-      token: "AUTH"
-    }), s = await this.createQuery(Gs), r = {
-      cellSlug: e,
-      pubkey: n.pubkey,
-      encrypt: t
-    }, i = await s.execute({ variables: r });
-    if (i.success()) {
-      const a = Ce.create({
-        token: i.token(),
-        expiresAt: i.expiresAt(),
-        pubkey: i.pubKey(),
-        encrypt: i.encrypt()
-      }, n);
-      this.setAuthToken(a);
-    } else
-      throw new Bt(`KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${i.reason()}`);
-    return i;
-  }
-  /**
-   * Request a profile auth token
-   *
-   * @param secret
-   * @param encrypt
-   * @returns {Promise<ResponseRequestAuthorization>}
-   */
-  async requestProfileAuthToken({
-    secret: e,
-    encrypt: t
-  }) {
-    this.setSecret(e);
-    const n = new S({
-      secret: e,
-      token: "AUTH"
-    }), s = await this.createMolecule({
-      secret: e,
-      sourceWallet: n
-    }), r = await this.createMoleculeMutation({
-      mutationClass: Ts,
-      molecule: s
-    }), i = { encrypt: t ? "true" : "false" };
-    n.pubkey && (i.walletPubkey = n.pubkey), r.fillMolecule({ meta: i });
-    const a = await r.execute({});
-    if (a.success()) {
-      const c = Ce.create({
-        token: a.token(),
-        expiresAt: a.expiresAt(),
-        pubkey: a.pubKey(),
-        encrypt: a.encrypt()
-      }, n);
-      this.setAuthToken(c);
-    } else
-      throw new Bt(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${a.reason()}`);
-    return a;
-  }
-  /**
-   * Request an auth token (guest or profile)
-   *
-   * @param secret
-   * @param seed
-   * @param cellSlug
-   * @param encrypt
-   * @returns {Promise<ResponseRequestAuthorizationGuest|ResponseRequestAuthorization|null>}
-   */
-  async requestAuthToken({
-    secret: e = null,
-    seed: t = null,
-    cellSlug: n = null,
-    encrypt: s = !1
-  }) {
-    if (this.$__serverSdkVersion < 3)
-      return this.log("warn", "KnishIOClient::authorize() - Server SDK version does not require an authorization..."), null;
-    e === null && t && (e = at(t)), n && this.setCellSlug(n), e === null && this.$__secretStorage && this.$__bundle && (e = await this.$__secretStorage.retrieveSecret(this.$__bundle)), this.$__authInProcess = !0;
-    let r;
-    return e ? r = await this.requestProfileAuthToken({
-      secret: e,
-      encrypt: s
-    }) : r = await this.requestGuestAuthToken({
-      cellSlug: n,
-      encrypt: s
-    }), this.log("info", `KnishIOClient::authorize() - Successfully retrieved auth token ${this.$__authToken.getToken()}...`), this.switchEncryption(s), this.$__authInProcess = !1, r;
-  }
-  /**
-   * Sets the auth token
-   *
-   * @param {AuthToken} authToken
-   */
-  setAuthToken(e) {
-    if (!e) {
-      this.log("info", "KnishIOClient::setAuthToken() - authToken object is empty.");
-      return;
-    }
-    this.$__authTokenObjects[this.getUri()] = e, this.client().setAuthData(e.getAuthData()), this.$__authToken = e;
-  }
-  /**
-   * Returns the current authorization token
-   *
-   * @return {AuthToken}
-   */
-  getAuthToken() {
-    return this.$__authToken;
-  }
-  /**
-   * Writes the specified message to the console.
-   * @param {string} level
-   * @param {string} message
-   */
-  log(e, t) {
-    if (this.$__logging)
-      switch (e) {
-        case "info":
-          console.info(t);
-          break;
-        case "warn":
-          console.warn(t);
-          break;
-        case "error":
-          console.error(t);
-          break;
-        default:
-          console.log(t);
-      }
-  }
+async function Ai() {
+	return (await Oi(jr)).components;
 }
-class zr extends C {
-  /**
-   * Class constructor
-   *
-   * @param {Query} query
-   * @param {object} json
-   */
-  constructor({
-    query: e,
-    json: t
-  }) {
-    super({
-      query: e,
-      json: t,
-      dataKey: "data.AccessToken"
-    });
-  }
-  /**
-   * Returns the reason for rejection
-   *
-   * @return {string}
-   */
-  reason() {
-    return "Invalid response from server";
-  }
-  /**
-   * Returns whether molecule was accepted or not
-   *
-   * @return {boolean}
-   */
-  success() {
-    return this.payload() !== null;
-  }
-  /**
-   * Returns a wallet with balance
-   *
-   * @return {null|Wallet}
-   */
-  payload() {
-    return this.data();
-  }
-  /**
-   * Returns the authorization key
-   *
-   * @param key
-   * @return {*}
-   */
-  payloadKey(e) {
-    if (!M.has(this.payload(), e))
-      throw new te(`ResponseAuthorizationGuest::payloadKey() - '${e}' key is not found in the payload!`);
-    return M.get(this.payload(), e);
-  }
-  /**
-   * Returns the auth token
-   *
-   * @return {*}
-   */
-  token() {
-    return this.payloadKey("token");
-  }
-  /**
-   * Returns timestamp
-   *
-   * @return {*}
-   */
-  time() {
-    return this.payloadKey("time");
-  }
+async function ji(e) {
+	try {
+		let t = await Oi(jr);
+		return e ? {
+			hash: t.thumbmark.toString(),
+			data: t.components
+		} : t.thumbmark.toString();
+	} catch (e) {
+		throw e;
+	}
 }
-class Wr {
-  constructor() {
-    this.store = /* @__PURE__ */ new Map();
-  }
-  getItem(e) {
-    return this.store.get(e) ?? null;
-  }
-  setItem(e, t) {
-    this.store.set(e, t);
-  }
-  removeItem(e) {
-    return this.store.delete(e);
-  }
-  keys() {
-    return Array.from(this.store.keys());
-  }
+//#endregion
+//#region src/libraries/urql/UrqlClientWrapper.js
+var Mi = "query ( $Hash: String! ) { CipherHash ( Hash: $Hash ) { hash } }";
+function Ni(e) {
+	let t = (e || "").match(/\b(query|mutation|subscription)\b/i), n = t ? t[1].toLowerCase() : "query", r = (e || "").indexOf("{"), i = r >= 0 ? e.slice(r + 1).match(/[A-Za-z_][A-Za-z0-9_]*/) : null;
+	return {
+		type: n,
+		name: i ? i[0] : ""
+	};
 }
-function ot(o) {
-  let e = "";
-  const t = o.byteLength;
-  for (let n = 0; n < t; n++) {
-    const s = o[n];
-    s !== void 0 && (e += String.fromCharCode(s));
-  }
-  return btoa(e);
-}
-function pe(o) {
-  const e = atob(o), t = e.length, n = new Uint8Array(t);
-  for (let s = 0; s < t; s++)
-    n[s] = e.charCodeAt(s);
-  return n;
-}
-const Lt = new TextEncoder(), Qt = new TextDecoder(), fe = "knishio:secret:", ve = 1e5;
-class Pr {
-  /**
-   * @param {{ backend?: object, defaultPassphrase?: string, hardwareBacked?: boolean }} [options]
-   */
-  constructor(e = {}) {
-    this.providerType = "webcrypto-aes-gcm", this.backend = e.backend || new Wr(), this.defaultPassphrase = e.defaultPassphrase, this.hardwareBacked = e.hardwareBacked || !1;
-  }
-  /**
-   * Whether this provider is backed by hardware
-   *
-   * @returns {boolean}
-   */
-  isHardwareBacked() {
-    return this.hardwareBacked;
-  }
-  /**
-   * Check if WebCrypto subtle API is available
-   *
-   * @returns {Promise<boolean>}
-   */
-  async isAvailable() {
-    return typeof globalThis.crypto < "u" && typeof globalThis.crypto.subtle < "u";
-  }
-  /**
-   * Derive an AES-GCM CryptoKey from a passphrase and salt using PBKDF2
-   *
-   * @param {string} passphrase
-   * @param {Uint8Array} salt
-   * @param {number} [iterations]
-   * @returns {Promise<CryptoKey>}
-   */
-  async deriveKey(e, t, n = ve) {
-    if (!await this.isAvailable())
-      throw R.unavailable(this.providerType, "WebCrypto API is not available");
-    const s = Lt.encode(e);
-    try {
-      const r = await globalThis.crypto.subtle.importKey(
-        "raw",
-        s,
-        "PBKDF2",
-        !1,
-        ["deriveKey"]
-      );
-      return await globalThis.crypto.subtle.deriveKey(
-        {
-          name: "PBKDF2",
-          salt: t,
-          iterations: n,
-          hash: "SHA-256"
-        },
-        r,
-        { name: "AES-GCM", length: 256 },
-        !1,
-        ["encrypt", "decrypt"]
-      );
-    } finally {
-      ce(s);
-    }
-  }
-  /**
-   * Store and encrypt a master secret
-   *
-   * @param {string} bundleHash
-   * @param {string} secret
-   * @param {{ label?: string, passphrase?: string }} [options]
-   * @returns {Promise<void>}
-   */
-  async storeSecret(e, t, n = {}) {
-    if (!e)
-      throw new R("Bundle hash cannot be empty");
-    if (!t)
-      throw new R("Secret cannot be empty");
-    const s = n.passphrase || this.defaultPassphrase;
-    if (!s)
-      throw new R("Passphrase required for envelope encryption");
-    const r = new Uint8Array(16), i = new Uint8Array(12);
-    globalThis.crypto.getRandomValues(r), globalThis.crypto.getRandomValues(i);
-    const a = await this.deriveKey(s, r, ve), c = Lt.encode(t);
-    try {
-      const u = await globalThis.crypto.subtle.encrypt(
-        {
-          name: "AES-GCM",
-          iv: i
-        },
-        a,
-        c
-      ), l = ot(new Uint8Array(u)), h = {
-        bundleHash: e,
-        label: n.label,
-        createdAt: Date.now(),
-        hardwareBacked: this.hardwareBacked,
-        providerType: this.providerType
-      }, p = {
-        version: 1,
-        ciphertext: l,
-        iv: ot(i),
-        salt: ot(r),
-        algorithm: "AES-GCM",
-        iterations: ve,
-        metadata: h
-      };
-      await this.backend.setItem(`${fe}${e}`, JSON.stringify(p));
-    } catch (u) {
-      const l = u instanceof Error ? u.message : String(u);
-      throw new R(`Encryption failed: ${l}`);
-    } finally {
-      ce(c);
-    }
-  }
-  /**
-   * Retrieve and decrypt the master secret
-   *
-   * @param {string} bundleHash
-   * @param {{ passphrase?: string }} [options]
-   * @returns {Promise<string|null>}
-   */
-  async retrieveSecret(e, t = {}) {
-    const n = await this.backend.getItem(`${fe}${e}`);
-    if (!n)
-      return null;
-    let s;
-    try {
-      s = JSON.parse(n);
-    } catch {
-      throw R.decryptionFailed("Corrupted payload format");
-    }
-    const r = t.passphrase || this.defaultPassphrase;
-    if (!r)
-      throw new R("Passphrase required for secret decryption");
-    const i = pe(s.salt), a = pe(s.iv), c = pe(s.ciphertext);
-    try {
-      const u = await this.deriveKey(r, i, s.iterations || ve), l = await globalThis.crypto.subtle.decrypt(
-        {
-          name: "AES-GCM",
-          iv: a
-        },
-        u,
-        c
-      ), h = new Uint8Array(l);
-      try {
-        return Qt.decode(h);
-      } finally {
-        ce(h);
-      }
-    } catch (u) {
-      const l = u instanceof Error ? u.message : String(u);
-      throw R.decryptionFailed(l);
-    }
-  }
-  /**
-   * Delete a stored secret
-   *
-   * @param {string} bundleHash
-   * @returns {Promise<boolean>}
-   */
-  async deleteSecret(e) {
-    const t = `${fe}${e}`;
-    return await this.backend.removeItem(t) !== !1;
-  }
-  /**
-   * Check if a secret exists
-   *
-   * @param {string} bundleHash
-   * @returns {Promise<boolean>}
-   */
-  async hasSecret(e) {
-    return await this.backend.getItem(`${fe}${e}`) !== null;
-  }
-  /**
-   * List all stored secret metadata
-   *
-   * @returns {Promise<Array<{ bundleHash: string, label?: string, createdAt: number, hardwareBacked: boolean, providerType: string }>>}
-   */
-  async listSecrets() {
-    const t = (await this.backend.keys()).filter((s) => s.startsWith(fe)), n = [];
-    for (const s of t) {
-      const r = await this.backend.getItem(s);
-      if (r)
-        try {
-          const i = JSON.parse(r);
-          i.metadata && n.push(i.metadata);
-        } catch {
-        }
-    }
-    return n;
-  }
-  /**
-   * Execute callback with unwrapped secret, zeroizing the decrypted buffer upon completion
-   *
-   * @template T
-   * @param {string} bundleHash
-   * @param {(secret: string) => Promise<T>|T} fn
-   * @param {{ passphrase?: string }} [options]
-   * @returns {Promise<T>}
-   */
-  async withSecret(e, t, n = {}) {
-    const s = await this.backend.getItem(`${fe}${e}`);
-    if (!s)
-      throw R.notFound(e);
-    let r;
-    try {
-      r = JSON.parse(s);
-    } catch {
-      throw R.decryptionFailed("Corrupted payload format");
-    }
-    const i = n.passphrase || this.defaultPassphrase;
-    if (!i)
-      throw new R("Passphrase required for secret decryption");
-    const a = pe(r.salt), c = pe(r.iv), u = pe(r.ciphertext);
-    try {
-      const l = await this.deriveKey(i, a, r.iterations || ve), h = await globalThis.crypto.subtle.decrypt(
-        {
-          name: "AES-GCM",
-          iv: c
-        },
-        l,
-        u
-      ), p = new Uint8Array(h);
-      return await gs(p, async (d) => {
-        const w = Qt.decode(d);
-        return await t(w);
-      });
-    } catch (l) {
-      if (l instanceof R)
-        throw l;
-      const h = l instanceof Error ? l.message : String(l);
-      throw R.decryptionFailed(h);
-    }
-  }
-}
-function Jr(o = {}) {
-  return o.type === "memory" ? new ct() : typeof globalThis.crypto < "u" && typeof globalThis.crypto.subtle < "u" ? new Pr({
-    backend: o.backend,
-    defaultPassphrase: o.defaultPassphrase,
-    hardwareBacked: o.hardwareBacked
-  }) : new ct();
-}
-export {
-  g as Atom,
-  Se as AtomIndexException,
-  K as AtomMeta,
-  ae as AtomsMissingException,
-  Ce as AuthToken,
-  Bt as AuthorizationRejectedException,
-  de as BalanceInsufficientException,
-  Ke as BatchIdException,
-  Te as CheckMolecule,
-  ee as CodeException,
-  ue as Decimal,
-  M as Dot,
-  te as InvalidResponseException,
-  Vr as KnishIOClient,
-  ct as MemorySecretStorageProvider,
-  Wr as MemoryStorageBackend,
-  ye as Meta,
-  H as MetaMissingException,
-  ps as MolecularHashMismatchException,
-  fs as MolecularHashMissingException,
-  z as Molecule,
-  ze as Mutation,
-  sr as MutationActiveSession,
-  Qs as MutationAppendRequest,
-  Ps as MutationClaimShadowWallet,
-  Us as MutationCreateIdentifier,
-  Ks as MutationCreateMeta,
-  pr as MutationCreateRule,
-  Es as MutationCreateToken,
-  zs as MutationCreateWallet,
-  fr as MutationDepositBufferToken,
-  js as MutationLinkIdentifier,
-  Fs as MutationPeering,
-  U as MutationProposeMolecule,
-  Ts as MutationRequestAuthorization,
-  Gs as MutationRequestAuthorizationGuest,
-  Rs as MutationRequestTokens,
-  Rt as MutationTransferTokens,
-  yr as MutationWithdrawBufferToken,
-  Et as NegativeAmountException,
-  It as PolicyInvalidException,
-  ht as PolicyMeta,
-  F as Query,
-  ir as QueryActiveSession,
-  Ut as QueryAtom,
-  vs as QueryBalance,
-  Ee as QueryBatch,
-  Is as QueryBatchHistory,
-  ks as QueryContinuId,
-  Ht as QueryEmbeddingStatus,
-  Ot as QueryMetaType,
-  Wt as QueryMetaTypeViaAtom,
-  Pt as QueryMetaTypeViaMolecule,
-  cr as QueryPolicy,
-  or as QueryToken,
-  Ss as QueryWalletBundle,
-  $s as QueryWalletList,
-  C as Response,
-  nr as ResponseActiveSession,
-  Ls as ResponseAppendRequest,
-  ar as ResponseAtom,
-  zr as ResponseAuthorizationGuest,
-  As as ResponseBalance,
-  Ws as ResponseClaimShadowWallet,
-  bs as ResponseContinuId,
-  Bs as ResponseCreateIdentifier,
-  Hs as ResponseCreateMeta,
-  dr as ResponseCreateRule,
-  Cs as ResponseCreateToken,
-  Vs as ResponseCreateWallet,
-  hr as ResponseEmbeddingStatus,
-  Ds as ResponseLinkIdentifier,
-  xs as ResponseMetaType,
-  ur as ResponseMetaTypeViaAtom,
-  pt as ResponseMetaTypeViaMolecule,
-  Ns as ResponsePeering,
-  lr as ResponsePolicy,
-  V as ResponseProposeMolecule,
-  rr as ResponseQueryActiveSession,
-  Ms as ResponseRequestAuthorization,
-  Js as ResponseRequestAuthorizationGuest,
-  Os as ResponseRequestTokens,
-  qs as ResponseTransferTokens,
-  _s as ResponseWalletBundle,
-  Ve as ResponseWalletList,
-  R as SecretStorageException,
-  on as SignatureMalformedException,
-  ys as SignatureMismatchException,
-  Ae as StackableUnitAmountException,
-  Xs as StackableUnitDecimalsException,
-  ge as TokenUnit,
-  G as TransferBalanceException,
-  $e as TransferMalformedException,
-  Mt as TransferMismatchedException,
-  Tt as TransferRemainderException,
-  ms as TransferToSelfException,
-  Ue as TransferUnbalancedException,
-  Qe as UnauthenticatedException,
-  S as Wallet,
-  qt as WalletShadowException,
-  Pr as WebCryptoSecretStorageProvider,
-  re as WrongTokenTypeException,
-  $n as base64ToHex,
-  yt as bufferToHexString,
-  kn as charsetBaseConvert,
-  Qr as chunkArray,
-  Ne as chunkSubstr,
-  Dr as constantTimeCompare,
-  Jr as createDefaultSecretStorage,
-  vn as deepCloning,
-  xn as diff,
-  Fe as generateBatchId,
-  me as generateBundleHash,
-  at as generateSecret,
-  _n as hexStringToBuffer,
-  Sn as hexToBase64,
-  we as intersect,
-  Xe as isHex,
-  An as isNumeric,
-  ut as randomString,
-  Ze as shake256,
-  gs as withSecureBytes,
-  ws as withSecureString,
-  ce as zeroizeBytes
+var Pi = class {
+	constructor({ serverUri: e, socket: t = null, encrypt: n = !1 }) {
+		this.$__client = this.createUrqlClient({
+			serverUri: e,
+			socket: t,
+			encrypt: n
+		}), this.$__authToken = "", this.$__pubkey = null, this.$__wallet = null, this.serverUri = e, this.soketi = t, this.cipherLink = !!n, this.$__subscriptionManager = /* @__PURE__ */ new Map();
+	}
+	createUrqlClient({ serverUri: e, socket: i, encrypt: s }) {
+		let c = [t, r];
+		if (i && i.socketUri) {
+			let e = o({
+				url: i.socketUri,
+				connectionParams: () => ({ authToken: this.$__authToken })
+			});
+			c.push(a({ forwardSubscription: (t) => ({ subscribe: (n) => ({ unsubscribe: e.subscribe(t, n) }) }) }));
+		}
+		return n({
+			url: e,
+			exchanges: c,
+			preferGetMethod: !1,
+			...s ? { fetch: (e, t) => this.cipherFetch(e, t) } : {},
+			fetchOptions: () => ({
+				headers: { "X-Auth-Token": this.$__authToken },
+				signal: AbortSignal.timeout(6e4)
+			})
+		});
+	}
+	shouldEncrypt(e) {
+		let t;
+		try {
+			t = JSON.parse(e);
+		} catch {
+			return !1;
+		}
+		let { type: n, name: r } = Ni(t.query);
+		return !(n === "query" && (r === "__schema" || r === "ContinuId") || n === "mutation" && r === "AccessToken" || n === "mutation" && r === "ProposeMolecule" && (t.variables && t.variables.molecule && t.variables.molecule.atoms && t.variables.molecule.atoms[0] && t.variables.molecule.atoms[0].isotope) === "U");
+	}
+	async cipherFetch(e, t) {
+		let n = this.getWallet(), r = this.getPubKey(), i = !1, a = t;
+		if (n && r && t && typeof t.body == "string" && this.shouldEncrypt(t.body)) {
+			let e = await n.encryptStringML(t.body, r);
+			a = {
+				...t,
+				body: JSON.stringify({
+					query: Mi,
+					variables: { Hash: e }
+				})
+			}, i = !0;
+		}
+		let o = await fetch(e, a);
+		if (!i) return o;
+		let s = await o.text(), c = {
+			status: o.status,
+			statusText: o.statusText,
+			headers: o.headers
+		}, l;
+		try {
+			l = JSON.parse(s);
+		} catch {
+			return new Response(s, c);
+		}
+		let u = l && l.data && l.data.CipherHash && l.data.CipherHash.hash;
+		if (typeof u != "string") return new Response(s, c);
+		let d = await n.decryptMyMessageML(JSON.parse(u));
+		return new Response(d ?? s, c);
+	}
+	setAuthData({ token: e, pubkey: t, wallet: n }) {
+		this.$__authToken = e, this.$__pubkey = t, this.$__wallet = n, this.$__client = this.createUrqlClient({
+			serverUri: this.serverUri,
+			socket: this.soketi,
+			encrypt: !!this.cipherLink
+		});
+	}
+	buildRequestOptions(e) {
+		if (!e) return;
+		let t = {};
+		e.requestPolicy && (t.requestPolicy = e.requestPolicy);
+		let n = e.fetchOptions && e.fetchOptions.signal;
+		if (n) {
+			let e = typeof AbortSignal < "u" && typeof AbortSignal.any == "function" ? AbortSignal.any([n, AbortSignal.timeout(6e4)]) : n;
+			t.fetchOptions = {
+				headers: { "X-Auth-Token": this.$__authToken },
+				signal: e
+			};
+		}
+		return Object.keys(t).length ? t : void 0;
+	}
+	async query(e) {
+		let { query: t, variables: n, context: r } = e, i = this.buildRequestOptions(r), a = await this.$__client.query(t, n || {}, i).toPromise();
+		return this.formatResponse(a);
+	}
+	async mutate(e) {
+		let { mutation: t, variables: n, context: r } = e, i = this.buildRequestOptions(r), a = await this.$__client.mutation(t, n || {}, i).toPromise();
+		return this.formatResponse(a);
+	}
+	subscribe(e, t) {
+		let { query: n, variables: r, operationName: i } = e, a = c(this.$__client.subscription(n, r), s((e) => {
+			t(this.formatResponse(e));
+		}), l(() => {}));
+		return this.$__subscriptionManager.set(i, a), { unsubscribe: () => this.unsubscribe(i) };
+	}
+	formatResponse(e) {
+		return {
+			data: e.data,
+			errors: e.error ? [e.error] : void 0
+		};
+	}
+	socketDisconnect() {
+		this.soketi && this.unsubscribeAll();
+	}
+	unsubscribe(e) {
+		let t = this.$__subscriptionManager.get(e);
+		t && (t.unsubscribe(), this.$__subscriptionManager.delete(e));
+	}
+	unsubscribeAll() {
+		this.$__subscriptionManager.forEach((e, t) => {
+			this.unsubscribe(t);
+		});
+	}
+	unsubscribeFromChannel(e) {
+		this.unsubscribe(e);
+	}
+	setEncryption(e = !1) {
+		this.cipherLink = e, this.$__client = this.createUrqlClient({
+			serverUri: this.serverUri,
+			socket: this.soketi,
+			encrypt: e
+		});
+	}
+	getAuthToken() {
+		return this.$__authToken;
+	}
+	getPubKey() {
+		return this.$__pubkey;
+	}
+	getWallet() {
+		return this.$__wallet;
+	}
+	getServerUri() {
+		return this.serverUri;
+	}
+	getSocketUri() {
+		return this.soketi ? this.soketi.socketUri : null;
+	}
+	getUri() {
+		return this.serverUri;
+	}
+	setUri(e) {
+		this.serverUri = e, this.$__client = this.createUrqlClient({
+			serverUri: e,
+			socket: this.soketi,
+			encrypt: !!this.cipherLink
+		});
+	}
+	setSocketUri({ socketUri: e, appKey: t }) {
+		this.soketi = {
+			socketUri: e,
+			appKey: t
+		}, this.$__client = this.createUrqlClient({
+			serverUri: this.serverUri,
+			socket: this.soketi,
+			encrypt: !!this.cipherLink
+		});
+	}
+}, Fi = class {
+	constructor({ uri: e, cellSlug: t = null, client: n = null, socket: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024 }) {
+		this.initialize({
+			uri: e,
+			cellSlug: t,
+			socket: r,
+			client: n,
+			serverSdkVersion: i,
+			logging: a,
+			defaultRequestPolicy: o,
+			secretStorage: s,
+			mlKemParameterSet: c
+		});
+	}
+	initialize({ uri: e, cellSlug: t = null, socket: n = null, client: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024 }) {
+		this.reset(), this.$__secretStorage = s, this.$__logging = a, this.$__defaultRequestPolicy = o, this.setMlKemParameterSet(c), this.$__authTokenObjects = {}, this.$__authInProcess = !1, this.abortControllers = /* @__PURE__ */ new Map(), this.setUri(e), t && this.setCellSlug(t);
+		for (let e in this.$__uris) {
+			let t = this.$__uris[e];
+			this.$__authTokenObjects[t] = null;
+		}
+		this.log("info", `KnishIOClient::initialize() - Initializing new Knish.IO client session for SDK version ${i}...`), this.$__client = r || new Pi({
+			socket: {
+				socketUri: null,
+				appKey: "knishio",
+				...n || {}
+			},
+			serverUri: this.getRandomUri()
+		}), this.$__serverSdkVersion = i;
+	}
+	getMlKemParameterSet() {
+		return this.$__mlKemParameterSet || 1024;
+	}
+	setMlKemParameterSet(e) {
+		let t = Number(e);
+		if (![1024, 768].includes(t)) throw Error(`KnishIO: unsupported ML-KEM parameter set ${e}; expected 1024 or 768.`);
+		return this.$__mlKemParameterSet = t, this;
+	}
+	getRandomUri() {
+		let e = Math.floor(Math.random() * this.$__uris.length);
+		return this.$__uris[e];
+	}
+	switchEncryption(e) {
+		return this.$__encrypt !== e && (this.log("info", `KnishIOClient::switchEncryption() - Forcing encryption ${e ? "on" : "off"} to match node...`), this.$__encrypt = e, this.$__client.setEncryption(e), !0);
+	}
+	deinitialize() {
+		this.log("info", "KnishIOClient::deinitialize() - Clearing the Knish.IO client session..."), this.reset();
+	}
+	subscribe() {
+		if (!this.client().getSocketUri()) throw new z("KnishIOClient::subscribe() - Socket client not initialized!");
+		return this.client();
+	}
+	getServerSdkVersion() {
+		return this.$__serverSdkVersion;
+	}
+	getDefaultRequestPolicy() {
+		return this.$__defaultRequestPolicy || null;
+	}
+	setDefaultRequestPolicy(e) {
+		this.$__defaultRequestPolicy = e;
+	}
+	reset() {
+		this.$__secret = "", this.$__bundle = "", this.$__secretStorage = null, this.remainderWallet = null, this.$__capabilityCache = {}, this.$__defaultRequestPolicy = null;
+	}
+	getCellSlug() {
+		return this.$__cellSlug || null;
+	}
+	setCellSlug(e) {
+		this.$__cellSlug = e;
+	}
+	setUri(e) {
+		if (this.$__uris = typeof e == "object" ? e : [e], this.$__client) {
+			let e = this.getRandomUri();
+			this.$__client.setUri(e);
+		}
+	}
+	setSocketUri(e) {
+		this.$__client && typeof this.$__client.setSocketUri == "function" && this.$__client.setSocketUri({
+			socketUri: e,
+			appKey: "knishio"
+		});
+	}
+	getUri() {
+		return this.$__client.getUri();
+	}
+	client() {
+		if (!this.$__authInProcess) {
+			let e = this.getRandomUri();
+			this.$__client.setUri(e);
+			let t = this.$__authTokenObjects[e];
+			t ? this.$__client.setAuthData(t.getAuthData()) : this.requestAuthToken({
+				secret: this.$__secret,
+				cellSlug: this.$__cellSlug,
+				encrypt: this.$__encrypt
+			}).catch((e) => {
+				this.log("warn", `KnishIOClient::client() - Background authorization failed: ${e.message}`);
+			});
+		}
+		return this.$__client;
+	}
+	hasSecret() {
+		return !!this.$__secret && this.$__secret.length > 0 || !!this.$__secretStorage && !!this.$__bundle && this.$__bundle.length > 0;
+	}
+	setSecret(e) {
+		if (this.$__secret = e, this.$__bundle = this.hashSecret(e, "setSecret"), this.$__secretStorage) this.$__secretStorage.storeSecret(this.$__bundle, e);
+		else {
+			let t = new fn();
+			t.storeSecret(this.$__bundle, e), this.$__secretStorage = t;
+		}
+	}
+	hashSecret(e, t = null) {
+		return this.log("info", `KnishIOClient::hashSecret(${t ? `source: ${t}` : ""}) - Computing wallet bundle from secret...`), E(e);
+	}
+	getSecret() {
+		if (!this.hasSecret()) throw new hn("KnishIOClient::getSecret() - Unable to find a stored secret! Have you set a secret?");
+		return this.$__secret;
+	}
+	setSecretStorage(e, t = null) {
+		this.$__secretStorage = e, t && (this.$__bundle = t);
+	}
+	getSecretStorage() {
+		return this.$__secretStorage;
+	}
+	async retrieveSecret(e = {}) {
+		return this.$__secret && this.$__secret.length > 0 ? this.$__secret : this.$__secretStorage && this.$__bundle && this.$__bundle.length > 0 ? await this.$__secretStorage.retrieveSecret(this.$__bundle, e) : null;
+	}
+	hasBundle() {
+		return !!this.$__bundle;
+	}
+	getBundle() {
+		if (!this.hasBundle()) throw new hn("KnishIOClient::getBundle() - Unable to find a stored bundle! Have you set a secret?");
+		return this.$__bundle;
+	}
+	getFingerprint() {
+		return ji();
+	}
+	getFingerprintData() {
+		return Ai();
+	}
+	async getSourceWallet() {
+		let e = (await this.queryContinuId({ bundle: this.getBundle() })).payload();
+		return e ? e.key = F.generateKey({
+			secret: this.getSecret(),
+			token: e.token,
+			position: e.position
+		}) : e = new F({
+			secret: this.getSecret(),
+			mlKemParameterSet: this.getMlKemParameterSet()
+		}), e;
+	}
+	getRemainderWallet() {
+		return this.remainderWallet;
+	}
+	async createMolecule({ secret: e = null, bundle: t = null, sourceWallet: n = null, remainderWallet: r = null }) {
+		this.log("info", "KnishIOClient::createMolecule() - Creating a new molecule..."), e || (this.$__secret && this.$__secret.length > 0 ? e = this.getSecret() : this.$__secretStorage && this.$__bundle && this.$__bundle.length > 0 && (e = await this.$__secretStorage.retrieveSecret(this.$__bundle))), e ||= this.getSecret(), t ||= this.getBundle();
+		let i = null;
+		if (n && n.token !== "USER") {
+			if (this.lastMoleculeQuery && this.getRemainderWallet() && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success()) i = this.getRemainderWallet().position;
+			else {
+				let e = await this.getSourceWallet();
+				i = e ? e.position : null;
+			}
+		}
+		return !n && this.lastMoleculeQuery && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() && (n = this.getRemainderWallet()), n === null && (n = await this.getSourceWallet()), this.remainderWallet = r || F.create({
+			secret: e,
+			bundle: t,
+			token: "USER",
+			batchId: n.batchId,
+			characters: n.characters,
+			mlKemParameterSet: this.getMlKemParameterSet()
+		}), new on({
+			secret: e,
+			bundle: t,
+			sourceWallet: n,
+			remainderWallet: this.getRemainderWallet(),
+			cellSlug: this.getCellSlug(),
+			version: this.getServerSdkVersion(),
+			continuIdPosition: i,
+			mlKemParameterSet: this.getMlKemParameterSet()
+		});
+	}
+	createQuery(e) {
+		return new e(this.client(), this);
+	}
+	createSubscribe(e) {
+		return new e(this.subscribe());
+	}
+	async createMoleculeMutation({ mutationClass: e, molecule: t = null }) {
+		this.log("info", `KnishIOClient::createMoleculeQuery() - Creating a new ${e.name} query...`);
+		let n = t || await this.createMolecule({}), r = new e(this.client(), this, n);
+		if (!(r instanceof J)) throw new z(`${this.constructor.name}::createMoleculeMutation() - This method only accepts MutationProposeMolecule!`);
+		return this.lastMoleculeQuery = r, r;
+	}
+	async executeQuery(e, t = null, n = {}) {
+		if (this.$__authToken && this.$__authToken.isExpired() && !this.$__authInProcess) {
+			this.log("info", "KnishIOClient::executeQuery() - Access token is expired. Getting new one...");
+			let e = this.$__secret || await this.retrieveSecret() || "";
+			await this.requestAuthToken({
+				secret: e,
+				cellSlug: this.$__cellSlug,
+				encrypt: this.$__encrypt
+			});
+		}
+		let r = new AbortController(), i = JSON.stringify({
+			query: e.$__query,
+			variables: t
+		});
+		this.abortControllers.set(i, r);
+		try {
+			let a = { ...n };
+			this.$__defaultRequestPolicy && !a.requestPolicy && (a.requestPolicy = this.$__defaultRequestPolicy);
+			let o = await e.execute({
+				variables: t,
+				context: {
+					fetchOptions: { signal: r.signal },
+					...a
+				}
+			});
+			return this.abortControllers.delete(i), o;
+		} catch (e) {
+			if (e.name === "AbortError") this.log("warn", "Query was cancelled");
+			else throw e;
+		}
+	}
+	cancelQuery(e, t = null) {
+		let n = JSON.stringify({
+			query: e.$__query,
+			variables: t
+		}), r = this.abortControllers.get(n);
+		r && (r.abort(), this.abortControllers.delete(n));
+	}
+	cancelAllQueries() {
+		for (let e of this.abortControllers.values()) e.abort();
+		this.abortControllers.clear();
+	}
+	async queryBalance({ token: e, bundle: t = null, type: n = "regular" }) {
+		let r = this.createQuery(Cn);
+		return this.executeQuery(r, {
+			bundleHash: t || this.getBundle(),
+			token: e,
+			type: n
+		});
+	}
+	async querySourceWallet({ token: e, amount: t, type: n = "regular" }) {
+		let r = (await this.queryBalance({
+			token: e,
+			type: n
+		})).payload();
+		if (r === null || mn.cmp(r.balance, t) < 0) throw new I();
+		if (!r.position || !r.address) throw new I("Source wallet can not be a shadow wallet.");
+		return r;
+	}
+	async subscribeCreateMolecule({ bundle: e, closure: t }) {
+		return await this.createSubscribe(rr).execute({
+			variables: { bundle: e || this.getBundle() },
+			closure: t
+		});
+	}
+	subscribeWalletStatus({ bundle: e, token: t, closure: n }) {
+		if (!t) throw new z(`${this.constructor.name}::subscribeWalletStatus() - Token parameter is required!`);
+		return this.createSubscribe(ir).execute({
+			variables: {
+				bundle: e || this.getBundle(),
+				token: t
+			},
+			closure: n
+		});
+	}
+	subscribeActiveWallet({ bundle: e, closure: t }) {
+		return this.createSubscribe(ar).execute({
+			variables: { bundle: e || this.getBundle() },
+			closure: t
+		});
+	}
+	subscribeActiveSession({ metaType: e, metaId: t, closure: n }) {
+		return this.createSubscribe(or).execute({
+			variables: {
+				metaType: e,
+				metaId: t
+			},
+			closure: n
+		});
+	}
+	unsubscribe(e) {
+		this.subscribe().unsubscribe(e);
+	}
+	unsubscribeAll() {
+		this.subscribe().unsubscribeAll();
+	}
+	queryMeta({ metaType: e, metaId: t = null, key: n = null, value: r = null, latest: i = !0, fields: a = null, filter: o = null, queryArgs: s = null, count: c = null, countBy: l = null, throughAtom: u = !0, throughMolecule: d = !1, values: f = null, keys: p = null, atomValues: m = null, requestPolicy: h = null }) {
+		this.log("info", `KnishIOClient::queryMeta() - Querying metaType: ${e}, metaId: ${t}...`);
+		let g, _;
+		return d ? (g = this.createQuery(br), _ = br.createVariables({
+			metaType: e,
+			metaId: t,
+			key: n,
+			value: r,
+			latest: i,
+			filter: o,
+			queryArgs: s,
+			countBy: l,
+			values: f,
+			keys: p,
+			atomValues: m,
+			cellSlug: this.getCellSlug()
+		})) : u ? (g = this.createQuery(vr), _ = vr.createVariables({
+			metaType: e,
+			metaId: t,
+			key: n,
+			value: r,
+			latest: i,
+			filter: o,
+			queryArgs: s,
+			countBy: l,
+			values: f,
+			keys: p,
+			atomValues: m,
+			cellSlug: this.getCellSlug()
+		})) : (g = this.createQuery(Tn), _ = Tn.createVariables({
+			metaType: e,
+			metaId: t,
+			key: n,
+			value: r,
+			latest: i,
+			filter: o,
+			queryArgs: s,
+			count: c,
+			countBy: l,
+			cellSlug: this.getCellSlug()
+		})), this.executeQuery(g, _, h ? { requestPolicy: h } : {});
+	}
+	async queryMetaVerified(e) {
+		let t = await this.queryMeta(e), n = t.payload();
+		return n && (n.integrity = t.verifyIntegrity()), t;
+	}
+	async hasQueryField(e) {
+		let t = `${this.getUri()}::${e}`;
+		if (typeof this.$__capabilityCache[t] == "boolean") return this.$__capabilityCache[t];
+		try {
+			let n = ((await this.$__client.query({
+				query: "{ __schema { queryType { fields { name } } } }",
+				variables: {}
+			}))?.data?.__schema?.queryType?.fields || []).some((t) => t.name === e);
+			return this.$__capabilityCache[t] = n, n;
+		} catch (n) {
+			return this.log("warn", `KnishIOClient::hasQueryField() - Capability probe for '${e}' failed: ${n.message}`), this.$__capabilityCache[t] = !1, !1;
+		}
+	}
+	async queryEmbeddingStatus({ metaType: e = null, metaId: t = null, instances: n = null }) {
+		if (this.log("info", `KnishIOClient::queryEmbeddingStatus() - Checking embedding status for metaType: ${e || "(bulk)"}...`), !await this.hasQueryField("embeddingStatus")) return this.log("warn", "KnishIOClient::queryEmbeddingStatus() - Server does not support embeddingStatus query. Returning null."), null;
+		let r = this.createQuery(Sr), i = Sr.createVariables({
+			metaType: e,
+			metaId: t,
+			instances: n
+		});
+		return this.executeQuery(r, i);
+	}
+	async queryBatch({ batchId: e }) {
+		this.log("info", `KnishIOClient::queryBatch() - Querying cascading meta instances for batchId: ${e}...`);
+		let t = this.createQuery(En);
+		return await this.executeQuery(t, { batchId: e });
+	}
+	async queryBatchHistory({ batchId: e }) {
+		this.log("info", `KnishIOClient::queryBatchHistory() - Querying cascading meta instances for batchId: ${e}...`);
+		let t = this.createQuery(Dn);
+		return await this.executeQuery(t, { batchId: e });
+	}
+	async queryAtom({ molecularHashes: e, molecularHash: t, bundleHashes: n, bundleHash: r, positions: i, position: a, walletAddresses: o, walletAddress: s, isotopes: c, isotope: l, tokenSlugs: u, tokenSlug: d, cellSlugs: f, cellSlug: p, batchIds: m, batchId: h, values: g, value: _, metaTypes: v, metaType: y, metaIds: b, metaId: ee, indexes: te, index: ne, filter: x, latest: re, queryArgs: S = {
+		limit: 15,
+		offset: 1
+	} }) {
+		this.log("info", "KnishIOClient::queryAtom() - Querying atom instances");
+		let C = this.createQuery(mr);
+		return await this.executeQuery(C, mr.createVariables({
+			molecularHashes: e,
+			molecularHash: t,
+			bundleHashes: n,
+			bundleHash: r,
+			positions: i,
+			position: a,
+			walletAddresses: o,
+			walletAddress: s,
+			isotopes: c,
+			isotope: l,
+			tokenSlugs: u,
+			tokenSlug: d,
+			cellSlugs: f,
+			cellSlug: p,
+			batchIds: m,
+			batchId: h,
+			values: g,
+			value: _,
+			metaTypes: v,
+			metaType: y,
+			metaIds: b,
+			metaId: ee,
+			indexes: te,
+			index: ne,
+			filter: x,
+			latest: re,
+			queryArgs: S
+		}));
+	}
+	async createWallet({ token: e }) {
+		let t = new F({
+			secret: this.getSecret(),
+			token: e,
+			mlKemParameterSet: this.getMlKemParameterSet()
+		}), n = await this.createMoleculeMutation({ mutationClass: Xn });
+		return n.fillMolecule(t), await this.executeQuery(n);
+	}
+	async queryActiveSession({ bundleHash: e, metaType: t, metaId: n }) {
+		let r = this.createQuery(ur);
+		return await this.executeQuery(r, {
+			bundleHash: e,
+			metaType: t,
+			metaId: n
+		});
+	}
+	async activeSession({ bundle: e, metaType: t, metaId: n, ipAddress: r, browser: i, osCpu: a, resolution: o, timeZone: s, json: c = {} }) {
+		let l = this.createQuery(cr);
+		return await this.executeQuery(l, {
+			bundleHash: e,
+			metaType: t,
+			metaId: n,
+			ipAddress: r,
+			browser: i,
+			osCpu: a,
+			resolution: o,
+			timeZone: s,
+			json: JSON.stringify(c)
+		});
+	}
+	async createToken({ token: e, amount: t = null, meta: n = null, batchId: r = null, units: i = [] }) {
+		let a = B.get(n || {}, "fungibility");
+		if (a === "stackable" && (n.batchId = r || ce({})), ["nonfungible", "stackable"].includes(a) && i.length > 0) {
+			if (B.get(n || {}, "decimals") > 0) throw new er();
+			if (t > 0) throw new tr();
+			t = i.length, n.splittable = 1, n.decimals = 0, n.tokenUnits = JSON.stringify(i);
+		}
+		let o = new F({
+			secret: this.getSecret(),
+			bundle: this.getBundle(),
+			token: e,
+			batchId: r,
+			mlKemParameterSet: this.getMlKemParameterSet()
+		}), s = await this.createMoleculeMutation({ mutationClass: Mn });
+		return s.fillMolecule({
+			recipientWallet: o,
+			amount: t,
+			meta: n || {}
+		}), await this.executeQuery(s);
+	}
+	async createRule({ metaType: e, metaId: t, rule: n, policy: r = {} }) {
+		let i = await this.createMoleculeMutation({
+			mutationClass: wr,
+			molecule: await this.createMolecule({ secret: this.getSecret() })
+		});
+		return i.fillMolecule({
+			metaType: e,
+			metaId: t,
+			rule: n,
+			policy: r
+		}), await this.executeQuery(i);
+	}
+	async createMeta({ metaType: e, metaId: t, meta: n = null, policy: r = {} }) {
+		let i = await this.createMoleculeMutation({
+			mutationClass: Hn,
+			molecule: await this.createMolecule({ secret: this.getSecret() })
+		}), a = n || {};
+		return i.fillMolecule({
+			metaType: e,
+			metaId: t,
+			meta: a,
+			policy: r
+		}), await this.executeQuery(i);
+	}
+	async registerPeer({ host: e }) {
+		let t = await this.createMoleculeMutation({
+			mutationClass: Wn,
+			molecule: await this.createMolecule({ secret: this.getSecret() })
+		});
+		return t.fillMolecule({ host: e }), await this.executeQuery(t);
+	}
+	async appendRequest({ metaType: e, metaId: t, action: n, meta: r = {} }) {
+		let i = await this.createMoleculeMutation({
+			mutationClass: Kn,
+			molecule: await this.createMolecule({ secret: this.getSecret() })
+		});
+		return i.fillMolecule({
+			metaType: e,
+			metaId: t,
+			action: n,
+			meta: r
+		}), await this.executeQuery(i);
+	}
+	async createIdentifier({ type: e, contact: t, code: n }) {
+		let r = await this.createMoleculeMutation({ mutationClass: Rn });
+		return r.fillMolecule({
+			type: e,
+			contact: t,
+			code: n
+		}), await this.executeQuery(r);
+	}
+	async linkIdentifier({ type: e, contact: t }) {
+		let n = this.createQuery(Jn);
+		return await this.executeQuery(n, {
+			bundle: this.getBundle(),
+			type: e,
+			content: t
+		});
+	}
+	async createPolicy({ metaType: e, metaId: t, policy: n = {} }) {
+		let r = await this.createMolecule({});
+		r.addPolicyAtom({
+			metaType: e,
+			metaId: t,
+			meta: {},
+			policy: n
+		}), r.addContinuIdAtom(), r.sign({ bundle: this.getBundle() }), r.check();
+		let i = await this.createMoleculeMutation({
+			mutationClass: J,
+			molecule: r
+		});
+		return await this.executeQuery(i);
+	}
+	async queryPolicy({ metaType: e, metaId: t }) {
+		let n = this.createQuery(gr);
+		return await this.executeQuery(n, {
+			metaType: e,
+			metaId: t
+		});
+	}
+	queryWallets({ bundle: e = null, token: t = null, unspent: n = !0 }) {
+		this.log("info", `KnishIOClient::queryWallets() - Querying wallets${e ? ` for ${e}` : ""}...`);
+		let r = this.createQuery(xn);
+		return this.executeQuery(r, {
+			bundleHash: e || this.getBundle(),
+			token: t,
+			unspent: n
+		}).then((e) => e.payload());
+	}
+	queryBundle({ bundle: e = null, fields: t = null, raw: n = !1 }) {
+		this.log("info", `KnishIOClient::queryBundle() - Querying wallet bundle metadata${e ? ` for ${e}` : ""}...`), e ||= this.getBundle(), typeof e == "string" && (e = [e]);
+		let r = this.createQuery(yn);
+		return this.executeQuery(r, { bundleHashes: e }).then((e) => n ? e : e.payload());
+	}
+	async queryContinuId({ bundle: e }) {
+		let t = this.createQuery(_n);
+		return this.executeQuery(t, { bundle: e });
+	}
+	async requestTokens({ token: e, to: t, amount: n = null, units: r = [], meta: i = null, batchId: a = null }) {
+		let o, s;
+		i ||= {};
+		let c = this.createQuery(dr), l = await this.executeQuery(c, { slug: e }), u = B.get(l.data(), "0.fungibility") === "stackable";
+		if (!u && a !== null) throw new Zt("Expected Batch ID = null for non-stackable tokens.");
+		if (u && a === null && (a = ce({})), r.length > 0) {
+			if (n > 0) throw new tr();
+			n = r.length, i.tokenUnits = JSON.stringify(r);
+		}
+		t ? (Object.prototype.toString.call(t) === "[object String]" && (F.isBundleHash(t) ? (o = "walletBundle", s = t) : t = F.create({
+			secret: t,
+			token: e,
+			mlKemParameterSet: this.getMlKemParameterSet()
+		})), t instanceof F && (o = "wallet", i.position = t.position, i.bundle = t.bundle, s = t.address)) : (o = "walletBundle", s = this.getBundle());
+		let d = await this.createMoleculeMutation({ mutationClass: Pn });
+		return d.fillMolecule({
+			token: e,
+			amount: n,
+			metaType: o,
+			metaId: s,
+			meta: i,
+			batchId: a
+		}), await this.executeQuery(d);
+	}
+	async claimShadowWallet({ token: e, batchId: t = null, molecule: n = null }) {
+		let r = await this.createMoleculeMutation({
+			mutationClass: Bn,
+			molecule: n
+		});
+		return r.fillMolecule({
+			token: e,
+			batchId: t
+		}), await this.executeQuery(r);
+	}
+	async claimShadowWallets({ token: e }) {
+		let t = await this.queryWallets({ token: e });
+		if (!t || !Array.isArray(t)) throw new $n();
+		t.forEach((e) => {
+			if (!e.isShadow()) throw new $n();
+		});
+		let n = [];
+		for (let r of t) n.push(await this.claimShadowWallet({
+			token: e,
+			batchId: r.batchId
+		}));
+		return n;
+	}
+	async transferToken({ bundleHash: e, token: t, amount: n = null, units: r = [], batchId: i = null, sourceWallet: a = null }) {
+		if (r.length > 0) {
+			if (n > 0) throw new tr();
+			n = r.length;
+		}
+		if (a === null && (a = await this.querySourceWallet({
+			token: t,
+			amount: n
+		})), a === null || mn.cmp(a.balance, n) < 0) throw new I();
+		let o = F.create({
+			bundle: e,
+			token: t,
+			mlKemParameterSet: this.getMlKemParameterSet()
+		});
+		i === null ? o.initBatchId({ sourceWallet: a }) : o.batchId = i;
+		let s = a.createRemainder(this.getSecret());
+		a.splitUnits(r, s, o);
+		let c = await this.createMolecule({
+			sourceWallet: a,
+			remainderWallet: s
+		}), l = await this.createMoleculeMutation({
+			mutationClass: In,
+			molecule: c
+		});
+		return l.fillMolecule({
+			recipientWallet: o,
+			amount: n
+		}), await this.executeQuery(l);
+	}
+	async transferTokens({ token: e, recipients: t, sourceWallet: n = null }) {
+		let r = t.map((e) => {
+			let t = e.units || [];
+			if (t.length > 0) {
+				if (e.amount > 0) throw new tr();
+				return t.length;
+			}
+			return e.amount || 0;
+		}), i = r.reduce((e, t) => e + t, 0);
+		if (n === null && (n = await this.querySourceWallet({
+			token: e,
+			amount: i
+		})), n === null || mn.cmp(n.balance, i) < 0) throw new I();
+		let a = t.map((t) => {
+			let r = F.create({
+				bundle: t.bundleHash,
+				token: e,
+				mlKemParameterSet: this.getMlKemParameterSet()
+			});
+			return t.batchId !== void 0 && t.batchId !== null ? r.batchId = t.batchId : r.initBatchId({ sourceWallet: n }), r;
+		}), o = n.createRemainder(this.getSecret());
+		n.splitUnitsMulti(t.map((e) => e.units || []), a, o);
+		let s = await this.createMolecule({
+			sourceWallet: n,
+			remainderWallet: o
+		}), c = await this.createMoleculeMutation({
+			mutationClass: In,
+			molecule: s
+		});
+		return c.fillMoleculeMulti({
+			recipientWallets: a,
+			amounts: r
+		}), await this.executeQuery(c);
+	}
+	async depositBufferToken({ tokenSlug: e, amount: t, tradeRates: n, sourceWallet: r = null }) {
+		r === null && (r = await this.querySourceWallet({
+			token: e,
+			amount: t
+		}));
+		let i = r.createRemainder(this.getSecret()), a = await this.createMolecule({
+			sourceWallet: r,
+			remainderWallet: i
+		}), o = await this.createMoleculeMutation({
+			mutationClass: Tr,
+			molecule: a
+		});
+		return o.fillMolecule({
+			amount: t,
+			tradeRates: n
+		}), await this.executeQuery(o);
+	}
+	async withdrawBufferToken({ tokenSlug: e, amount: t, sourceWallet: n = null, signingWallet: r = null }) {
+		n === null && (n = await this.querySourceWallet({
+			token: e,
+			amount: t,
+			type: "buffer"
+		}));
+		let i = n, a = await this.createMolecule({
+			sourceWallet: n,
+			remainderWallet: i
+		}), o = await this.createMoleculeMutation({
+			mutationClass: Er,
+			molecule: a
+		}), s = {};
+		return s[this.getBundle()] = t, o.fillMolecule({
+			recipients: s,
+			signingWallet: r
+		}), await this.executeQuery(o);
+	}
+	async burnTokens({ token: e, amount: t = null, units: n = [], sourceWallet: r = null }) {
+		r === null && (r = await this.querySourceWallet({
+			token: e,
+			amount: t
+		}));
+		let i = r.createRemainder(this.getSecret());
+		if (n.length > 0) {
+			if (t > 0) throw new tr();
+			t = n.length, r.splitUnits(n, i);
+		}
+		let a = await this.createMolecule({
+			sourceWallet: r,
+			remainderWallet: i
+		});
+		a.burnToken({ amount: t }), a.sign({ bundle: this.getBundle() }), a.check(r);
+		let o = await this.createMoleculeMutation({
+			mutationClass: J,
+			molecule: a
+		});
+		return this.executeQuery(o);
+	}
+	async replenishToken({ token: e, amount: t = null, units: n = [], sourceWallet: r = null }) {
+		if (r === null && (r = (await this.queryBalance({ token: e })).payload()), !r) throw new I("Source wallet is missing or invalid.");
+		let i = r.createRemainder(this.getSecret()), a = await this.createMolecule({
+			sourceWallet: r,
+			remainderWallet: i
+		});
+		a.replenishToken({
+			amount: t,
+			units: n
+		}), a.sign({ bundle: this.getBundle() }), a.check();
+		let o = await this.createMoleculeMutation({
+			mutationClass: J,
+			molecule: a
+		});
+		return this.executeQuery(o);
+	}
+	async fuseToken({ bundleHash: e, tokenSlug: t, newTokenUnit: n, fusedTokenUnitIds: r, sourceWallet: i = null }) {
+		if (i === null && (i = (await this.queryBalance({ token: t })).payload()), i === null) throw new I("Source wallet is missing or invalid.");
+		if (!i.tokenUnits || !i.tokenUnits.length) throw new I("Source wallet does not have token units.");
+		if (!r.length) throw new I("Fused token unit list is empty.");
+		let a = [];
+		i.tokenUnits.forEach((e) => {
+			a.push(e.id);
+		}), r.forEach((e) => {
+			if (!a.includes(e)) throw new I(`Fused token unit ID = ${e} does not found in the source wallet.`);
+		});
+		let o = F.create({
+			bundle: e,
+			token: t,
+			mlKemParameterSet: this.getMlKemParameterSet()
+		});
+		o.initBatchId({ sourceWallet: i });
+		let s = i.createRemainder(this.getSecret());
+		i.splitUnits(r, s), typeof n == "string" && (n = new le(n, n, {})), n.metas.fusedTokenUnits = i.getTokenUnitsData(), o.tokenUnits = [n];
+		let c = await this.createMolecule({
+			sourceWallet: i,
+			remainderWallet: s
+		});
+		c.fuseToken(i.tokenUnits, o), c.sign({ bundle: this.getBundle() }), c.check();
+		let l = await this.createMoleculeMutation({
+			mutationClass: J,
+			molecule: c
+		});
+		return this.executeQuery(l);
+	}
+	async requestGuestAuthToken({ cellSlug: e, encrypt: t }) {
+		this.setCellSlug(e);
+		let n = new F({
+			secret: oe(await this.getFingerprint()),
+			token: "AUTH",
+			mlKemParameterSet: this.getMlKemParameterSet()
+		}), r = await this.createQuery(Qn), i = {
+			cellSlug: e,
+			pubkey: n.pubkey,
+			encrypt: t
+		}, a = await r.execute({ variables: i });
+		if (a.success()) {
+			let e = sn.create({
+				token: a.token(),
+				expiresAt: a.expiresAt(),
+				pubkey: a.pubKey(),
+				encrypt: a.encrypt()
+			}, n);
+			this.setAuthToken(e);
+		} else throw new fr(`KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${a.reason()}`);
+		return a;
+	}
+	async requestProfileAuthToken({ secret: e, encrypt: t }) {
+		this.setSecret(e);
+		let n = new F({
+			secret: e,
+			token: "AUTH",
+			mlKemParameterSet: this.getMlKemParameterSet()
+		}), r = await this.createMolecule({
+			secret: e,
+			sourceWallet: n
+		}), i = await this.createMoleculeMutation({
+			mutationClass: An,
+			molecule: r
+		}), a = { encrypt: t ? "true" : "false" };
+		n.pubkey && (a.walletPubkey = n.pubkey), i.fillMolecule({ meta: a });
+		let o = await i.execute({});
+		if (o.success()) {
+			let e = sn.create({
+				token: o.token(),
+				expiresAt: o.expiresAt(),
+				pubkey: o.pubKey(),
+				encrypt: o.encrypt()
+			}, n);
+			this.setAuthToken(e);
+		} else throw new fr(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${o.reason()}`);
+		return o;
+	}
+	async requestAuthToken({ secret: e = null, seed: t = null, cellSlug: n = null, encrypt: r = !1 }) {
+		if (this.$__serverSdkVersion < 3) return this.log("warn", "KnishIOClient::authorize() - Server SDK version does not require an authorization..."), null;
+		e === null && t && (e = oe(t)), n && this.setCellSlug(n), e === null && this.$__secretStorage && this.$__bundle && (e = await this.$__secretStorage.retrieveSecret(this.$__bundle)), this.$__authInProcess = !0;
+		let i;
+		return i = e ? await this.requestProfileAuthToken({
+			secret: e,
+			encrypt: r
+		}) : await this.requestGuestAuthToken({
+			cellSlug: n,
+			encrypt: r
+		}), this.log("info", `KnishIOClient::authorize() - Successfully retrieved auth token ${this.$__authToken.getToken()}...`), this.switchEncryption(r), this.$__authInProcess = !1, i;
+	}
+	setAuthToken(e) {
+		if (!e) {
+			this.log("info", "KnishIOClient::setAuthToken() - authToken object is empty.");
+			return;
+		}
+		this.$__authTokenObjects[this.getUri()] = e, this.client().setAuthData(e.getAuthData()), this.$__authToken = e;
+	}
+	getAuthToken() {
+		return this.$__authToken;
+	}
+	log(e, t) {
+		if (this.$__logging) switch (e) {
+			case "info":
+				console.info(t);
+				break;
+			case "warn":
+				console.warn(t);
+				break;
+			case "error":
+				console.error(t);
+				break;
+			default: console.log(t);
+		}
+	}
+}, Ii = class extends G {
+	constructor({ query: e, json: t }) {
+		super({
+			query: e,
+			json: t,
+			dataKey: "data.AccessToken"
+		});
+	}
+	reason() {
+		return "Invalid response from server";
+	}
+	success() {
+		return this.payload() !== null;
+	}
+	payload() {
+		return this.data();
+	}
+	payloadKey(e) {
+		if (!B.has(this.payload(), e)) throw new W(`ResponseAuthorizationGuest::payloadKey() - '${e}' key is not found in the payload!`);
+		return B.get(this.payload(), e);
+	}
+	token() {
+		return this.payloadKey("token");
+	}
+	time() {
+		return this.payloadKey("time");
+	}
+}, Li = class {
+	constructor() {
+		this.store = /* @__PURE__ */ new Map();
+	}
+	getItem(e) {
+		return this.store.get(e) ?? null;
+	}
+	setItem(e, t) {
+		this.store.set(e, t);
+	}
+	removeItem(e) {
+		return this.store.delete(e);
+	}
+	keys() {
+		return Array.from(this.store.keys());
+	}
 };
+function Ri(e) {
+	let t = "", n = e.byteLength;
+	for (let r = 0; r < n; r++) {
+		let n = e[r];
+		n !== void 0 && (t += String.fromCharCode(n));
+	}
+	return btoa(t);
+}
+function zi(e) {
+	let t = atob(e), n = t.length, r = new Uint8Array(n);
+	for (let e = 0; e < n; e++) r[e] = t.charCodeAt(e);
+	return r;
+}
+var Bi = new TextEncoder(), Vi = new TextDecoder(), Hi = "knishio:secret:", Ui = 1e5, Wi = class {
+	constructor(e = {}) {
+		this.providerType = "webcrypto-aes-gcm", this.backend = e.backend || new Li(), this.defaultPassphrase = e.defaultPassphrase, this.hardwareBacked = e.hardwareBacked || !1;
+	}
+	isHardwareBacked() {
+		return this.hardwareBacked;
+	}
+	async isAvailable() {
+		return globalThis.crypto !== void 0 && globalThis.crypto.subtle !== void 0;
+	}
+	async deriveKey(e, t, n = Ui) {
+		if (!await this.isAvailable()) throw H.unavailable(this.providerType, "WebCrypto API is not available");
+		let r = Bi.encode(e);
+		try {
+			let e = await globalThis.crypto.subtle.importKey("raw", r, "PBKDF2", !1, ["deriveKey"]);
+			return await globalThis.crypto.subtle.deriveKey({
+				name: "PBKDF2",
+				salt: t,
+				iterations: n,
+				hash: "SHA-256"
+			}, e, {
+				name: "AES-GCM",
+				length: 256
+			}, !1, ["encrypt", "decrypt"]);
+		} finally {
+			U(r);
+		}
+	}
+	async storeSecret(e, t, n = {}) {
+		if (!e) throw new H("Bundle hash cannot be empty");
+		if (!t) throw new H("Secret cannot be empty");
+		let r = n.passphrase || this.defaultPassphrase;
+		if (!r) throw new H("Passphrase required for envelope encryption");
+		let i = /* @__PURE__ */ new Uint8Array(16), a = /* @__PURE__ */ new Uint8Array(12);
+		globalThis.crypto.getRandomValues(i), globalThis.crypto.getRandomValues(a);
+		let o = await this.deriveKey(r, i, Ui), s = Bi.encode(t);
+		try {
+			let t = await globalThis.crypto.subtle.encrypt({
+				name: "AES-GCM",
+				iv: a
+			}, o, s), r = Ri(new Uint8Array(t)), c = {
+				bundleHash: e,
+				label: n.label,
+				createdAt: Date.now(),
+				hardwareBacked: this.hardwareBacked,
+				providerType: this.providerType
+			}, l = {
+				version: 1,
+				ciphertext: r,
+				iv: Ri(a),
+				salt: Ri(i),
+				algorithm: "AES-GCM",
+				iterations: Ui,
+				metadata: c
+			};
+			await this.backend.setItem(`${Hi}${e}`, JSON.stringify(l));
+		} catch (e) {
+			throw new H(`Encryption failed: ${e instanceof Error ? e.message : String(e)}`);
+		} finally {
+			U(s);
+		}
+	}
+	async retrieveSecret(e, t = {}) {
+		let n = await this.backend.getItem(`${Hi}${e}`);
+		if (!n) return null;
+		let r;
+		try {
+			r = JSON.parse(n);
+		} catch {
+			throw H.decryptionFailed("Corrupted payload format");
+		}
+		let i = t.passphrase || this.defaultPassphrase;
+		if (!i) throw new H("Passphrase required for secret decryption");
+		let a = zi(r.salt), o = zi(r.iv), s = zi(r.ciphertext);
+		try {
+			let e = await this.deriveKey(i, a, r.iterations || Ui), t = await globalThis.crypto.subtle.decrypt({
+				name: "AES-GCM",
+				iv: o
+			}, e, s), n = new Uint8Array(t);
+			try {
+				return Vi.decode(n);
+			} finally {
+				U(n);
+			}
+		} catch (e) {
+			let t = e instanceof Error ? e.message : String(e);
+			throw H.decryptionFailed(t);
+		}
+	}
+	async deleteSecret(e) {
+		let t = `${Hi}${e}`;
+		return await this.backend.removeItem(t) !== !1;
+	}
+	async hasSecret(e) {
+		return await this.backend.getItem(`${Hi}${e}`) !== null;
+	}
+	async listSecrets() {
+		let e = (await this.backend.keys()).filter((e) => e.startsWith(Hi)), t = [];
+		for (let n of e) {
+			let e = await this.backend.getItem(n);
+			if (e) try {
+				let n = JSON.parse(e);
+				n.metadata && t.push(n.metadata);
+			} catch {}
+		}
+		return t;
+	}
+	async withSecret(e, t, n = {}) {
+		let r = await this.backend.getItem(`${Hi}${e}`);
+		if (!r) throw H.notFound(e);
+		let i;
+		try {
+			i = JSON.parse(r);
+		} catch {
+			throw H.decryptionFailed("Corrupted payload format");
+		}
+		let a = n.passphrase || this.defaultPassphrase;
+		if (!a) throw new H("Passphrase required for secret decryption");
+		let o = zi(i.salt), s = zi(i.iv), c = zi(i.ciphertext);
+		try {
+			let e = await this.deriveKey(a, o, i.iterations || Ui), n = await globalThis.crypto.subtle.decrypt({
+				name: "AES-GCM",
+				iv: s
+			}, e, c);
+			return await ln(new Uint8Array(n), async (e) => await t(Vi.decode(e)));
+		} catch (e) {
+			if (e instanceof H) throw e;
+			let t = e instanceof Error ? e.message : String(e);
+			throw H.decryptionFailed(t);
+		}
+	}
+};
+//#endregion
+//#region src/storage/index.js
+function Gi(e = {}) {
+	return e.type === "memory" ? new fn() : globalThis.crypto !== void 0 && globalThis.crypto.subtle !== void 0 ? new Wi({
+		backend: e.backend,
+		defaultPassphrase: e.defaultPassphrase,
+		hardwareBacked: e.hardwareBacked
+	}) : new fn();
+}
+//#endregion
+export { T as Atom, Bt as AtomIndexException, S as AtomMeta, w as AtomsMissingException, sn as AuthToken, fr as AuthorizationRejectedException, V as BalanceInsufficientException, Zt as BatchIdException, rn as CheckMolecule, z as CodeException, mn as Decimal, B as Dot, W as InvalidResponseException, Fi as KnishIOClient, fn as MemorySecretStorageProvider, Li as MemoryStorageBackend, b as Meta, L as MetaMissingException, Vt as MolecularHashMismatchException, Ht as MolecularHashMissingException, on as Molecule, On as Mutation, cr as MutationActiveSession, Kn as MutationAppendRequest, Bn as MutationClaimShadowWallet, Rn as MutationCreateIdentifier, Hn as MutationCreateMeta, wr as MutationCreateRule, Mn as MutationCreateToken, Xn as MutationCreateWallet, Tr as MutationDepositBufferToken, Jn as MutationLinkIdentifier, Wn as MutationPeering, J as MutationProposeMolecule, An as MutationRequestAuthorization, Qn as MutationRequestAuthorizationGuest, Pn as MutationRequestTokens, In as MutationTransferTokens, Er as MutationWithdrawBufferToken, an as NegativeAmountException, Ut as PolicyInvalidException, re as PolicyMeta, K as Query, ur as QueryActiveSession, mr as QueryAtom, Cn as QueryBalance, En as QueryBatch, Dn as QueryBatchHistory, _n as QueryContinuId, Sr as QueryEmbeddingStatus, Tn as QueryMetaType, vr as QueryMetaTypeViaAtom, br as QueryMetaTypeViaMolecule, gr as QueryPolicy, dr as QueryToken, yn as QueryWalletBundle, xn as QueryWalletList, G as Response, sr as ResponseActiveSession, Gn as ResponseAppendRequest, pr as ResponseAtom, Ii as ResponseAuthorizationGuest, Sn as ResponseBalance, zn as ResponseClaimShadowWallet, gn as ResponseContinuId, Ln as ResponseCreateIdentifier, Vn as ResponseCreateMeta, Cr as ResponseCreateRule, jn as ResponseCreateToken, Yn as ResponseCreateWallet, xr as ResponseEmbeddingStatus, qn as ResponseLinkIdentifier, wn as ResponseMetaType, _r as ResponseMetaTypeViaAtom, yr as ResponseMetaTypeViaMolecule, Un as ResponsePeering, hr as ResponsePolicy, q as ResponseProposeMolecule, lr as ResponseQueryActiveSession, kn as ResponseRequestAuthorization, Zn as ResponseRequestAuthorizationGuest, Nn as ResponseRequestTokens, Fn as ResponseTransferTokens, vn as ResponseWalletBundle, bn as ResponseWalletList, H as SecretStorageException, Wt as SignatureMalformedException, Gt as SignatureMismatchException, tr as StackableUnitAmountException, er as StackableUnitDecimalsException, le as TokenUnit, I as TransferBalanceException, Kt as TransferMalformedException, qt as TransferMismatchedException, Jt as TransferRemainderException, Yt as TransferToSelfException, Xt as TransferUnbalancedException, hn as UnauthenticatedException, F as Wallet, $n as WalletShadowException, Wi as WebCryptoSecretStorageProvider, R as WrongTokenTypeException, _ as base64ToHex, m as bufferToHexString, p as charsetBaseConvert, ee as chunkArray, d as chunkSubstr, dn as constantTimeCompare, Gi as createDefaultSecretStorage, te as deepCloning, ne as diff, ce as generateBatchId, E as generateBundleHash, oe as generateSecret, h as hexStringToBuffer, g as hexToBase64, x as intersect, v as isHex, y as isNumeric, f as randomString, se as shake256, ln as withSecureBytes, un as withSecureString, U as zeroizeBytes };
+
 //# sourceMappingURL=client.es.mjs.map
