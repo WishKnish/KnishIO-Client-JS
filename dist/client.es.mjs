@@ -1307,11 +1307,22 @@ var Ft = {
 	static generatePosition(e = 64) {
 		return f(e, "abcdef0123456789");
 	}
+	_deriveMlKemKeypair(e) {
+		let t = Rt[e];
+		if (!t) throw Error(`KnishIO: unsupported ML-KEM parameter set ${e}; expected 1024 or 768.`);
+		if (!this.key) return null;
+		let n = oe(this.key, 128), r = /* @__PURE__ */ new Uint8Array(64);
+		for (let e = 0; e < 64; e++) r[e] = parseInt(n.substr(e * 2, 2), 16);
+		let { publicKey: i, secretKey: a } = t.kem.keygen(r);
+		return {
+			pubkey: this.serializeKey(i),
+			privkey: a,
+			params: t
+		};
+	}
 	initializeMLKEM() {
-		let e = oe(this.key, 128), t = /* @__PURE__ */ new Uint8Array(64);
-		for (let n = 0; n < 64; n++) t[n] = parseInt(e.substr(n * 2, 2), 16);
-		let { publicKey: n, secretKey: r } = Rt[this.mlKemParameterSet].kem.keygen(t);
-		this.pubkey = this.serializeKey(n), this.privkey = r;
+		let e = this._deriveMlKemKeypair(this.mlKemParameterSet);
+		e && (this.pubkey = e.pubkey, this.privkey = e.privkey);
 	}
 	serializeKey(e) {
 		if (typeof Buffer < "u") return Buffer.from(e).toString("base64");
@@ -1323,6 +1334,17 @@ var Ft = {
 		if (typeof Buffer < "u") return new Uint8Array(Buffer.from(e, "base64"));
 		let t = atob(e);
 		return new Uint8Array(t.length).map((e, n) => t.charCodeAt(n));
+	}
+	static mlKemParameterSetFromPubkey(e) {
+		if (!e) return null;
+		let t;
+		try {
+			t = typeof Buffer < "u" ? Buffer.from(e, "base64").length : atob(e).length;
+		} catch {
+			return null;
+		}
+		for (let [e, n] of Object.entries(Rt)) if (n.pkBytes === t) return Number(e);
+		return null;
 	}
 	balanceAsNumber() {
 		return Number(this.balance);
@@ -1390,30 +1412,35 @@ var Ft = {
 		return t === null ? null : JSON.parse(t);
 	}
 	async _mlkemDecryptToString(e) {
-		let { cipherText: t, encryptedMessage: n } = e, r = Rt[this.mlKemParameterSet], i = this.deserializeKey(t);
-		if (i.length !== r.ctBytes) return console.error(`Wallet::decryptMessage() - Ciphertext length mismatch: got ${i.length}, expected ${r.ctBytes}`), null;
-		let a;
+		let { cipherText: t, encryptedMessage: n } = e, r = this.deserializeKey(t), i = Rt[this.mlKemParameterSet], a = this.mlKemParameterSet === 1024 ? 768 : 1024, o = i, s = this.privkey;
+		if (r.length !== i.ctBytes) {
+			if (r.length !== Rt[a].ctBytes) return console.error(`Wallet::decryptMessage() - Ciphertext length mismatch: got ${r.length}, expected ${i.ctBytes}`), null;
+			let e = this._deriveMlKemKeypair(a);
+			if (!e) return console.error(`Wallet::decryptMessage() - cannot derive the ML-KEM-${a} identity: wallet has no key`), null;
+			o = e.params, s = e.privkey;
+		}
+		let c;
 		try {
-			a = r.kem.decapsulate(i, this.privkey);
+			c = o.kem.decapsulate(r, s);
 		} catch (e) {
 			return console.error("Wallet::decryptMessage() - Decapsulation failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), null;
 		}
-		let o;
+		let l;
 		try {
-			o = this.deserializeKey(n);
+			l = this.deserializeKey(n);
 		} catch (e) {
-			return console.warn("Wallet::decryptMessage() - Deserialization failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", a), null;
+			return console.warn("Wallet::decryptMessage() - Deserialization failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", c), null;
 		}
-		let s;
+		let u;
 		try {
-			s = await this.decryptWithSharedSecret(o, a);
+			u = await this.decryptWithSharedSecret(l, c);
 		} catch (e) {
-			return console.warn("Wallet::decryptMessage() - Decryption failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", a), console.info("Wallet::decryptMessage() - deserialized encrypted message", o), null;
+			return console.warn("Wallet::decryptMessage() - Decryption failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", c), console.info("Wallet::decryptMessage() - deserialized encrypted message", l), null;
 		}
 		try {
-			return new TextDecoder().decode(s);
+			return new TextDecoder().decode(u);
 		} catch (e) {
-			return console.warn("Wallet::decryptMessage() - Decoding failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", a), console.info("Wallet::decryptMessage() - deserialized encrypted message", o), console.info("Wallet::decryptMessage() - decrypted Uint8Array", s), null;
+			return console.warn("Wallet::decryptMessage() - Decoding failed", e), console.info("Wallet::decryptMessage() - my public key", this.pubkey), console.info("Wallet::decryptMessage() - our shared secret", c), console.info("Wallet::decryptMessage() - deserialized encrypted message", l), console.info("Wallet::decryptMessage() - decrypted Uint8Array", u), null;
 		}
 	}
 	hashShare(e) {
@@ -1426,6 +1453,10 @@ var Ft = {
 	}
 	async decryptMyMessageML(e) {
 		let t = e[this.hashShare(this.pubkey)];
+		if (!t) {
+			let n = this.mlKemParameterSet === 1024 ? 768 : 1024, r = this._deriveMlKemKeypair(n);
+			r && (t = e[this.hashShare(r.pubkey)]);
+		}
 		return t ? this._mlkemDecryptToString(t) : null;
 	}
 	async encryptWithSharedSecret(e, t) {
@@ -2437,12 +2468,17 @@ var Ft = {
 		let r = new e(t);
 		return r.setWallet(n), r;
 	}
+	static resolveMlKemParameterSet(e) {
+		let t = e.wallet && e.wallet.mlKemParameterSet;
+		return t ? Number(t) : F.mlKemParameterSetFromPubkey(e.pubkey) || 768;
+	}
 	static restore(t, n) {
 		let r = new F({
 			secret: n,
 			token: "AUTH",
 			position: t.wallet.position,
-			characters: t.wallet.characters
+			characters: t.wallet.characters,
+			mlKemParameterSet: e.resolveMlKemParameterSet(t)
 		});
 		return e.create({
 			token: t.token,
@@ -2465,7 +2501,8 @@ var Ft = {
 			encrypt: this.$__encrypt,
 			wallet: {
 				position: this.$__wallet.position,
-				characters: this.$__wallet.characters
+				characters: this.$__wallet.characters,
+				mlKemParameterSet: this.$__wallet.mlKemParameterSet
 			}
 		};
 	}

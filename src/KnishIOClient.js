@@ -205,6 +205,7 @@ export default class KnishIOClient {
 
     this.$__serverSdkVersion = serverSdkVersion
   }
+
   /**
    * Get active ML-KEM parameter set (1024 default or 768 step-back)
    *
@@ -228,7 +229,6 @@ export default class KnishIOClient {
     this.$__mlKemParameterSet = paramNum
     return this
   }
-
 
   /**
    * Get random uri from specified this.$__uris
@@ -2499,7 +2499,7 @@ export default class KnishIOClient {
       molecule
     })
 
-    // PQ-transport Phase E (cycle 163): convey the AUTH source wallet's ML-KEM768 public key as a
+    // PQ-transport Phase E (cycle 163): convey the AUTH source wallet's ML-KEM public key as a
     // SIGNED `walletPubkey` meta on the U-atom (fillMolecule → initAuthorization → sign), so the
     // validator can encrypt CipherHash responses back to THIS wallet (the one that decrypts them).
     // Signed → tamper-proof. Only when present (PQ-capable wallet).

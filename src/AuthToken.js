@@ -84,6 +84,26 @@ export default class AuthToken {
   }
 
   /**
+   * ML-KEM parameter set a restored session must use, resolved in three tiers:
+   * an explicit snapshot field, then the stored validator key's length, then ML-KEM-768.
+   *
+   * The final tier is deliberately NOT the constructor default. A snapshot with neither an
+   * explicit field nor a recognisable key can only have come from a pre-bump build, and every
+   * pre-bump build was 768-only — defaulting to 1024 would make the restored wallet advertise
+   * a public key the validator never recorded for that token.
+   *
+   * @param {object} snapshot
+   * @return {number}
+   */
+  static resolveMlKemParameterSet (snapshot) {
+    const explicit = snapshot.wallet && snapshot.wallet.mlKemParameterSet
+    if (explicit) {
+      return Number(explicit)
+    }
+    return Wallet.mlKemParameterSetFromPubkey(snapshot.pubkey) || 768
+  }
+
+  /**
    *
    * @param {object} snapshot
    * @param {string} secret
@@ -94,7 +114,8 @@ export default class AuthToken {
       secret,
       token: 'AUTH',
       position: snapshot.wallet.position,
-      characters: snapshot.wallet.characters
+      characters: snapshot.wallet.characters,
+      mlKemParameterSet: AuthToken.resolveMlKemParameterSet(snapshot)
     })
     return AuthToken.create({
       token: snapshot.token,
@@ -122,7 +143,7 @@ export default class AuthToken {
 
   /**
    *
-   * @return {{wallet: {characters, position}, encrypt, expiresAt, token, pubkey}}
+   * @return {{wallet: {characters, position, mlKemParameterSet}, encrypt, expiresAt, token, pubkey}}
    */
   getSnapshot () {
     return {
@@ -132,7 +153,8 @@ export default class AuthToken {
       encrypt: this.$__encrypt,
       wallet: {
         position: this.$__wallet.position,
-        characters: this.$__wallet.characters
+        characters: this.$__wallet.characters,
+        mlKemParameterSet: this.$__wallet.mlKemParameterSet
       }
     }
   }
