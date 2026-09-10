@@ -40,6 +40,11 @@ detail, the entry says so instead of guessing.
   `768` step-back); `KnishIOClient.setMlKemParameterSet()` validates it.
 - Encapsulation is strict and **throws** on a wrong-length recipient key rather than silently
   downgrading to whatever the peer advertised.
+- **A supported Node floor is now declared: `engines.node` `>=20.0.0`.** The package previously
+  declared none while being unusable below Node 20 — `@noble/post-quantum` encapsulation reaches
+  `@noble/hashes`' `randomBytes`, which needs `globalThis.crypto`, unflagged only from Node 19.
+  Measured on Node 18, 25 of 143 tests fail across 13 suites. Declaring the floor turns a runtime
+  crash into an install-time warning; 1.0.0 is the breaking release in which to set it.
 
 ### Removed
 
