@@ -58,7 +58,7 @@ import WebCryptoSecretStorageProvider from './WebCryptoSecretStorageProvider.js'
 /**
  * Factory function to create a secret storage provider
  *
- * @param {{ type?: 'webcrypto'|'memory', defaultPassphrase?: string, backend?: object, hardwareBacked?: boolean }} [options]
+ * @param {{ type?: 'webcrypto'|'memory', defaultPassphrase?: string, backend?: object }} [options]
  * @returns {object}
  */
 export function createDefaultSecretStorage (options = {}) {
@@ -70,8 +70,7 @@ export function createDefaultSecretStorage (options = {}) {
   if (typeof globalThis.crypto !== 'undefined' && typeof globalThis.crypto.subtle !== 'undefined') {
     return new WebCryptoSecretStorageProvider({
       backend: options.backend,
-      defaultPassphrase: options.defaultPassphrase,
-      hardwareBacked: options.hardwareBacked
+      defaultPassphrase: options.defaultPassphrase
     })
   }
 

@@ -8,8 +8,15 @@ import {
 import {
   MemorySecretStorageProvider,
   WebCryptoSecretStorageProvider,
+  MemoryStorageBackend,
   createDefaultSecretStorage
 } from '../src/storage/index.js'
+import {
+  FROZEN_TS_0_9_7_ENVELOPE,
+  XSDK_BUNDLE,
+  XSDK_PASSPHRASE,
+  XSDK_PLAINTEXT
+} from './fixtures/frozenEnvelope.js'
 import SecretStorageException from '../src/exception/SecretStorageException.js'
 
 describe('Secure Memory & Zeroization Utilities', () => {
@@ -179,6 +186,41 @@ describe('WebCryptoSecretStorageProvider', () => {
     await expect(
       provider.withSecret('absent_bundle', (s) => s)
     ).rejects.toThrow(SecretStorageException)
+  })
+
+  test('cannot be made to claim hardware custody by its caller', async () => {
+    const backend = new MemoryStorageBackend()
+    const provider = new WebCryptoSecretStorageProvider({ backend, hardwareBacked: true })
+    expect(provider.isHardwareBacked()).toBe(false)
+    await provider.storeSecret('b', 's', { passphrase: 'p' })
+    const stored = JSON.parse(backend.getItem('knishio:secret:b') || '{}')
+    expect(stored.metadata.hardwareBacked).toBe(false)
+    expect(stored.metadata.providerType).toBe('webcrypto-aes-gcm')
+  })
+
+  test('decrypts the frozen cross-SDK envelope and emits the metadata contract', async () => {
+    const backend = new MemoryStorageBackend()
+    backend.setItem(`knishio:secret:${XSDK_BUNDLE}`, FROZEN_TS_0_9_7_ENVELOPE)
+    const provider = new WebCryptoSecretStorageProvider({ backend })
+    const decrypted = await provider.retrieveSecret(XSDK_BUNDLE, { passphrase: XSDK_PASSPHRASE })
+    expect(decrypted).toBe(XSDK_PLAINTEXT)
+
+    const freshBackend = new MemoryStorageBackend()
+    const freshProvider = new WebCryptoSecretStorageProvider({ backend: freshBackend })
+    await freshProvider.storeSecret(XSDK_BUNDLE, XSDK_PLAINTEXT, { passphrase: XSDK_PASSPHRASE })
+    const storedRaw = freshBackend.getItem(`knishio:secret:${XSDK_BUNDLE}`)
+    expect(storedRaw).not.toBeNull()
+    const stored = JSON.parse(storedRaw)
+    const metadata = stored.metadata
+
+    for (const key of ['bundleHash', 'createdAt', 'hardwareBacked', 'providerType']) {
+      expect(key in metadata).toBe(true)
+    }
+    for (const key of ['bundle_hash', 'created_at', 'hardware_backed', 'provider_type']) {
+      expect(key in metadata).toBe(false)
+    }
+    expect(metadata.hardwareBacked).toBe(false)
+    expect(metadata.providerType).toBe('webcrypto-aes-gcm')
   })
 })
 

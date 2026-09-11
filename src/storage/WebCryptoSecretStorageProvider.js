@@ -114,27 +114,30 @@ const KEY_PREFIX = 'knishio:secret:'
 const DEFAULT_ITERATIONS = 100000
 
 /**
- * Hardware-compatible envelope encryption secret storage provider
- * Uses WebCrypto AES-GCM (256-bit) with PBKDF2-HMAC-SHA256 key derivation
+ * Software envelope-encryption secret storage provider: WebCrypto AES-256-GCM with PBKDF2-HMAC-SHA256.
+ * Writes the cross-SDK envelope format; never hardware-backed.
  */
 export default class WebCryptoSecretStorageProvider {
   /**
-   * @param {{ backend?: object, defaultPassphrase?: string, hardwareBacked?: boolean }} [options]
+   * @param {{ backend?: object, defaultPassphrase?: string }} [options]
    */
   constructor (options = {}) {
     this.providerType = 'webcrypto-aes-gcm'
     this.backend = options.backend || new MemoryStorageBackend()
     this.defaultPassphrase = options.defaultPassphrase
-    this.hardwareBacked = options.hardwareBacked || false
   }
 
   /**
-   * Whether this provider is backed by hardware
+   * True only when this provider holds a non-exportable key inside platform-secure
+   * hardware (Android TEE/StrongBox, Secure Enclave, TPM) and learned that from the
+   * platform itself — never from a caller argument. Software envelope providers
+   * return false. The value is persisted as `metadata.hardwareBacked` in every
+   * envelope this provider writes.
    *
    * @returns {boolean}
    */
   isHardwareBacked () {
-    return this.hardwareBacked
+    return false
   }
 
   /**
@@ -233,7 +236,7 @@ export default class WebCryptoSecretStorageProvider {
         bundleHash,
         label: options.label,
         createdAt: Date.now(),
-        hardwareBacked: this.hardwareBacked,
+        hardwareBacked: false,
         providerType: this.providerType
       }
 

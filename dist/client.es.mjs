@@ -6266,10 +6266,10 @@ function zi(e) {
 }
 var Bi = new TextEncoder(), Vi = new TextDecoder(), Hi = "knishio:secret:", Ui = 1e5, Wi = class {
 	constructor(e = {}) {
-		this.providerType = "webcrypto-aes-gcm", this.backend = e.backend || new Li(), this.defaultPassphrase = e.defaultPassphrase, this.hardwareBacked = e.hardwareBacked || !1;
+		this.providerType = "webcrypto-aes-gcm", this.backend = e.backend || new Li(), this.defaultPassphrase = e.defaultPassphrase;
 	}
 	isHardwareBacked() {
-		return this.hardwareBacked;
+		return !1;
 	}
 	async isAvailable() {
 		return globalThis.crypto !== void 0 && globalThis.crypto.subtle !== void 0;
@@ -6308,7 +6308,7 @@ var Bi = new TextEncoder(), Vi = new TextDecoder(), Hi = "knishio:secret:", Ui =
 				bundleHash: e,
 				label: n.label,
 				createdAt: Date.now(),
-				hardwareBacked: this.hardwareBacked,
+				hardwareBacked: !1,
 				providerType: this.providerType
 			}, l = {
 				version: 1,
@@ -6401,8 +6401,7 @@ var Bi = new TextEncoder(), Vi = new TextDecoder(), Hi = "knishio:secret:", Ui =
 function Gi(e = {}) {
 	return e.type === "memory" ? new fn() : globalThis.crypto !== void 0 && globalThis.crypto.subtle !== void 0 ? new Wi({
 		backend: e.backend,
-		defaultPassphrase: e.defaultPassphrase,
-		hardwareBacked: e.hardwareBacked
+		defaultPassphrase: e.defaultPassphrase
 	}) : new fn();
 }
 //#endregion

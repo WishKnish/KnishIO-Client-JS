@@ -22,6 +22,7 @@ import {
 
 // Shared cross-SDK master (same convention as patent-vectors.test.js → ../../shared-test-results/)
 import vectors from '../../shared-test-results/cross-platform-test-vectors.json'
+import { FROZEN_TS_0_9_7_ENVELOPE } from './fixtures/frozenEnvelope.js'
 
 describe('Canonical Cross-Platform SHAKE256 Vectors', () => {
   const shake256Tests = vectors.vectors.shake256.tests
@@ -226,5 +227,13 @@ describe('Canonical pre-bump ML-KEM-768 auth molecule validates from a 1024 defa
     })
     expect(molecule.molecularHash).toBe(legacy.expectedMolecularHash)
     expect(molecule.check(molecule.sourceWallet)).toBe(true)
+  })
+})
+
+describe('Secret storage envelope parity with master vector', () => {
+  test('master vector payload matches the frozen envelope constant', () => {
+    const masterPayload = vectors.vectors.secret_storage_envelope.tests[0].payload
+    const frozenPayload = JSON.parse(FROZEN_TS_0_9_7_ENVELOPE)
+    expect(frozenPayload).toEqual(masterPayload)
   })
 })

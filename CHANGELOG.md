@@ -15,6 +15,11 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`hardwareBacked` is no longer a caller claim.** `WebCryptoSecretStorageProvider` and `createDefaultSecretStorage()` no longer accept a `hardwareBacked` option; the software provider always reports and persists `hardwareBacked: false`. Envelopes previously written with a caller-supplied `true` were never attested and remain readable. Source-level break for callers that passed the option; the wire format (`metadata.hardwareBacked`, required boolean) is unchanged.
+- **Frozen cross-SDK envelope test**: `tests/secret-storage.test.js` now decrypts the TS 0.9.7 envelope from the shared vector and asserts the emitted metadata key contract.
+
 ## [1.0.0] — 2026-09-10
 
 ### Added
