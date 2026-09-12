@@ -14,6 +14,12 @@ rather than written at release time; where the history does not substantiate a
 detail, the entry says so instead of guessing.
 
 ## [Unreleased]
+### Added
+
+- **`WebAuthnPrfSecretStorageProvider`**: passkey PRF secret storage provider using the WebAuthn PRF (Pseudo-Random Function) extension. Wraps a random device passphrase under an HKDF-derived AES-GCM KEK bound to a resident passkey credential (authenticator-bound PRF secret with unattested hardware custody, `isHardwareBacked: false`).
+- **`NonExtractableKeySecretStorageProvider`**: secret storage provider backed by a non-extractable WebCrypto AES-GCM CryptoKey stored in `IndexedDbKeyStore` (or `MemoryKeyStore` for headless/test environments).
+- **`sealEnvelope` and `openEnvelope`**: custody-agnostic functions extracted from `WebCryptoSecretStorageProvider` for sealing and opening cross-SDK encrypted secret envelopes.
+
 
 ### Fixed
 

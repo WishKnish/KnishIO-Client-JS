@@ -330,8 +330,14 @@ export {
 export {
   MemorySecretStorageProvider,
   WebCryptoSecretStorageProvider,
+  WebAuthnPrfSecretStorageProvider,
+  NonExtractableKeySecretStorageProvider,
+  IndexedDbKeyStore,
+  MemoryKeyStore,
   MemoryStorageBackend,
-  createDefaultSecretStorage
+  createDefaultSecretStorage,
+  sealEnvelope,
+  openEnvelope
 } from './storage/index.js'
 
 export {

@@ -219,6 +219,7 @@ describe('WebCryptoSecretStorageProvider', () => {
     for (const key of ['bundle_hash', 'created_at', 'hardware_backed', 'provider_type']) {
       expect(key in metadata).toBe(false)
     }
+    expect('label' in metadata).toBe(false)
     expect(metadata.hardwareBacked).toBe(false)
     expect(metadata.providerType).toBe('webcrypto-aes-gcm')
   })

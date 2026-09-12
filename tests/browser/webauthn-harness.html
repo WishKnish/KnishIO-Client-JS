@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="importmap">
+  {
+    "imports": {
+      "jssha": "/node_modules/jssha/dist/sha.mjs",
+      "@noble/post-quantum": "/node_modules/@noble/post-quantum/index.js",
+      "@noble/hashes": "/node_modules/@noble/hashes/index.js",
+      "@urql/core": "/node_modules/@urql/core/dist/urql-core.mjs",
+      "graphql": "/node_modules/graphql/index.mjs",
+      "graphql-ws": "/node_modules/graphql-ws/dist/index.js",
+      "isomorphic-fetch": "/node_modules/isomorphic-fetch/fetch-npm-browser.js",
+      "wonka": "/node_modules/wonka/dist/wonka.mjs",
+      "@0no-co/graphql.web": "/node_modules/@0no-co/graphql.web/dist/graphql.web.mjs"
+    }
+  }
+  </script>
+  <title>KnishIO JS Secret Storage Harness</title>
+</head>
+<body>
+  <h1>KnishIO Secret Storage Browser Verification (JS)</h1>
+  <div>
+    <button id="enroll">Enroll</button>
+    <button id="store">Store</button>
+    <button id="retrieve">Retrieve</button>
+    <button id="lock">Lock</button>
+    <button id="nonextractable-roundtrip">NonExtractable Roundtrip</button>
+  </div>
+  <pre id="out"></pre>
+
+  <script type="module">
+    import {
+      WebAuthnPrfSecretStorageProvider,
+      NonExtractableKeySecretStorageProvider
+    } from '../../dist/client.es.mjs';
+
+    const out = document.getElementById('out');
+    function logResult(step, ok, value) {
+      out.textContent = JSON.stringify({ step, ok, value });
+      console.log(JSON.stringify({ step, ok, value }));
+    }
+
+    class LocalStorageBackend {
+      getItem(key) { return localStorage.getItem(key); }
+      setItem(key, value) { localStorage.setItem(key, value); }
+      removeItem(key) { return localStorage.removeItem(key) !== null; }
+      keys() { return Object.keys(localStorage); }
+    }
+
+    const backend = new LocalStorageBackend();
+    const rp = { id: window.location.hostname, name: 'KnishIO Harness' };
+    const user = { id: new Uint8Array([1, 2, 3, 4]), name: 'testuser', displayName: 'Test User' };
+    const prfProvider = new WebAuthnPrfSecretStorageProvider({ backend, rp, user });
+    const nonExtProvider = new NonExtractableKeySecretStorageProvider({ backend });
+
+    window.prfProvider = prfProvider;
+    window.nonExtProvider = nonExtProvider;
+
+    document.getElementById('enroll').addEventListener('click', async () => {
+      try {
+        await prfProvider.enroll();
+        logResult('enroll', true, 'enrolled');
+      } catch (e) {
+        logResult('enroll', false, e.message);
+      }
+    });
+
+    document.getElementById('store').addEventListener('click', async () => {
+      try {
+        await prfProvider.storeSecret('bundle-harness', 'PLAINTEXT-WEB-AUTHN-SECRET');
+        logResult('store', true, 'stored');
+      } catch (e) {
+        logResult('store', false, e.message);
+      }
+    });
+
+    document.getElementById('retrieve').addEventListener('click', async () => {
+      try {
+        const value = await prfProvider.retrieveSecret('bundle-harness');
+        logResult('retrieve', true, value);
+      } catch (e) {
+        logResult('retrieve', false, e.message);
+      }
+    });
+
+    document.getElementById('lock').addEventListener('click', () => {
+      try {
+        prfProvider.lock();
+        logResult('lock', true, 'locked');
+      } catch (e) {
+        logResult('lock', false, e.message);
+      }
+    });
+
+    document.getElementById('nonextractable-roundtrip').addEventListener('click', async () => {
+      try {
+        await nonExtProvider.storeSecret('bundle-nonext', 'PLAINTEXT-NON-EXTRACTABLE-SECRET');
+        nonExtProvider.lock();
+        const value = await nonExtProvider.retrieveSecret('bundle-nonext');
+        logResult('nonextractable-roundtrip', true, value);
+      } catch (e) {
+        logResult('nonextractable-roundtrip', false, e.message);
+      }
+    });
+  </script>
+</body>
+</html>

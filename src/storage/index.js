@@ -51,6 +51,25 @@ export {
   default as WebCryptoSecretStorageProvider,
   MemoryStorageBackend
 } from './WebCryptoSecretStorageProvider.js'
+export {
+  default as WebAuthnPrfSecretStorageProvider,
+  PRF_SALT_LABEL,
+  KEK_INFO
+} from './WebAuthnPrfSecretStorageProvider.js'
+export {
+  default as NonExtractableKeySecretStorageProvider,
+  IndexedDbKeyStore,
+  MemoryKeyStore
+} from './NonExtractableKeySecretStorageProvider.js'
+export {
+  sealEnvelope,
+  openEnvelope,
+  uint8ArrayToBase64,
+  base64ToUint8Array,
+  deriveEnvelopeKey,
+  ENVELOPE_ALGORITHM,
+  DEFAULT_ITERATIONS
+} from './secretEnvelope.js'
 
 import MemorySecretStorageProvider from './MemorySecretStorageProvider.js'
 import WebCryptoSecretStorageProvider from './WebCryptoSecretStorageProvider.js'
