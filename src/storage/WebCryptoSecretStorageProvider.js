@@ -52,7 +52,9 @@ import {
   sealEnvelope,
   openEnvelope,
   deriveEnvelopeKey,
-  DEFAULT_ITERATIONS
+  DEFAULT_ITERATIONS,
+  SECRET_KEY_PREFIX,
+  RECOVERY_KEY_PREFIX
 } from './secretEnvelope.js'
 
 /**
@@ -81,7 +83,7 @@ export class MemoryStorageBackend {
 }
 
 const textDecoder = new TextDecoder()
-const KEY_PREFIX = 'knishio:secret:'
+const KEY_PREFIX = SECRET_KEY_PREFIX
 
 /**
  * Software envelope-encryption secret storage provider: WebCrypto AES-256-GCM with PBKDF2-HMAC-SHA256.
@@ -173,6 +175,18 @@ export default class WebCryptoSecretStorageProvider {
 
       const payload = await sealEnvelope(secret, passphrase, metadata)
       await this.backend.setItem(`${KEY_PREFIX}${bundleHash}`, JSON.stringify(payload))
+
+      if (options.recoveryPassphrase) {
+        const recoveryMetadata = {
+          bundleHash,
+          label: options.label,
+          createdAt: Date.now(),
+          hardwareBacked: false,
+          providerType: 'webcrypto-aes-gcm'
+        }
+        const recoveryPayload = await sealEnvelope(secret, options.recoveryPassphrase, recoveryMetadata)
+        await this.backend.setItem(`${RECOVERY_KEY_PREFIX}${bundleHash}`, JSON.stringify(recoveryPayload))
+      }
     } catch (err) {
       if (err instanceof SecretStorageException) {
         throw err
@@ -234,7 +248,9 @@ export default class WebCryptoSecretStorageProvider {
    */
   async deleteSecret (bundleHash) {
     const key = `${KEY_PREFIX}${bundleHash}`
+    const recoveryKey = `${RECOVERY_KEY_PREFIX}${bundleHash}`
     const result = await this.backend.removeItem(key)
+    await this.backend.removeItem(recoveryKey)
     return result !== false
   }
 
@@ -256,7 +272,7 @@ export default class WebCryptoSecretStorageProvider {
    */
   async listSecrets () {
     const keys = await this.backend.keys()
-    const matchingKeys = keys.filter(k => k.startsWith(KEY_PREFIX))
+    const matchingKeys = keys.filter(k => k.startsWith(KEY_PREFIX) && !k.startsWith(RECOVERY_KEY_PREFIX))
     const results = []
 
     for (const key of matchingKeys) {
@@ -320,5 +336,59 @@ export default class WebCryptoSecretStorageProvider {
       const msg = err instanceof Error ? err.message : String(err)
       throw SecretStorageException.decryptionFailed(msg)
     }
+  }
+
+  /**
+   * Recover a secret using its recovery envelope and re-enroll it
+   *
+   * @param {string} bundleHash
+   * @param {string} recoveryPassphrase
+   * @param {{ label?: string, passphrase?: string }} [options]
+   * @returns {Promise<void>}
+   */
+  async recoverSecret (bundleHash, recoveryPassphrase, options = {}) {
+    if (!bundleHash) {
+      throw new SecretStorageException('Bundle hash cannot be empty')
+    }
+    if (!recoveryPassphrase) {
+      throw new SecretStorageException('Recovery passphrase cannot be empty')
+    }
+
+    const raw = await this.backend.getItem(`${RECOVERY_KEY_PREFIX}${bundleHash}`)
+    if (!raw) {
+      throw SecretStorageException.notFound(bundleHash)
+    }
+
+    let payload
+    try {
+      payload = JSON.parse(raw)
+    } catch {
+      throw SecretStorageException.decryptionFailed('Corrupted recovery payload format')
+    }
+
+    let decryptedBytes
+    try {
+      decryptedBytes = await openEnvelope(payload, recoveryPassphrase)
+    } catch (err) {
+      if (err instanceof SecretStorageException) {
+        throw err
+      }
+      const msg = err instanceof Error ? err.message : String(err)
+      throw SecretStorageException.decryptionFailed(msg)
+    }
+
+    let secretStr
+    try {
+      secretStr = textDecoder.decode(decryptedBytes)
+    } finally {
+      zeroizeBytes(decryptedBytes)
+    }
+
+    const storePassphrase = options.passphrase || this.defaultPassphrase || recoveryPassphrase
+    await this.storeSecret(bundleHash, secretStr, {
+      ...options,
+      passphrase: storePassphrase,
+      recoveryPassphrase
+    })
   }
 }

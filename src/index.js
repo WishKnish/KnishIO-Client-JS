@@ -335,9 +335,13 @@ export {
   IndexedDbKeyStore,
   MemoryKeyStore,
   MemoryStorageBackend,
+  FileStorageBackend,
+  WebStorageBackend,
   createDefaultSecretStorage,
   sealEnvelope,
-  openEnvelope
+  openEnvelope,
+  SECRET_KEY_PREFIX,
+  RECOVERY_KEY_PREFIX
 } from './storage/index.js'
 
 export {

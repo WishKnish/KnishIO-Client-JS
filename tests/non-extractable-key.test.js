@@ -19,7 +19,7 @@ describe('NonExtractableKeySecretStorageProvider', () => {
     expect(provider.isHardwareBacked()).toBe(false)
     expect(provider.providerType).toBe('webcrypto-nonextractable')
 
-    await provider.storeSecret('bundle1', 'my-super-secret')
+    await provider.storeSecret('bundle1', 'my-super-secret', { allowUnrecoverable: true })
     const retrieved = await provider.retrieveSecret('bundle1')
     expect(retrieved).toBe('my-super-secret')
 
@@ -41,7 +41,7 @@ describe('NonExtractableKeySecretStorageProvider', () => {
       keyStore,
       alias: 'shared'
     })
-    await instance1.storeSecret('bundle2', 'shared-data')
+    await instance1.storeSecret('bundle2', 'shared-data', { allowUnrecoverable: true })
 
     const instance2 = new NonExtractableKeySecretStorageProvider({
       backend,
@@ -61,7 +61,7 @@ describe('NonExtractableKeySecretStorageProvider', () => {
       keyStore,
       alias: 'missing-key'
     })
-    await provider1.storeSecret('bundle3', 'data')
+    await provider1.storeSecret('bundle3', 'data', { allowUnrecoverable: true })
 
     // Delete the key from keyStore
     await keyStore.delete('knishio:kek:missing-key')
@@ -83,7 +83,7 @@ describe('NonExtractableKeySecretStorageProvider', () => {
       keyStore,
       alias: 'wrong-key'
     })
-    await provider1.storeSecret('bundle4', 'data')
+    await provider1.storeSecret('bundle4', 'data', { allowUnrecoverable: true })
 
     // Overwrite the key with a different newly generated key
     const differentKey = await globalThis.crypto.subtle.generateKey(
@@ -130,7 +130,7 @@ describe('NonExtractableKeySecretStorageProvider', () => {
       keyStore
     })
 
-    await provider.storeSecret('bundle-meta', 'secret')
+    await provider.storeSecret('bundle-meta', 'secret', { allowUnrecoverable: true })
     const raw = await backend.getItem('knishio:secret:bundle-meta')
     expect(raw).not.toBeNull()
     const parsed = JSON.parse(raw)
@@ -145,5 +145,44 @@ describe('NonExtractableKeySecretStorageProvider', () => {
     for (const forbidden of ['bundle_hash', 'created_at', 'hardware_backed', 'provider_type']) {
       expect(forbidden in metadata).toBe(false)
     }
+  })
+
+  test('requires recoveryPassphrase unless allowUnrecoverable is true', async () => {
+    const backend = new MemoryStorageBackend()
+    const keyStore = new MemoryKeyStore()
+    const provider = new NonExtractableKeySecretStorageProvider({ backend, keyStore })
+
+    await expect(
+      provider.storeSecret('bundle-err', 'secret')
+    ).rejects.toThrow('Recovery passphrase required for non-exportable hardware key unless allowUnrecoverable is true')
+  })
+
+  test('stores recovery envelope and recovers successfully', async () => {
+    const backend = new MemoryStorageBackend()
+    const keyStore = new MemoryKeyStore()
+    const provider = new NonExtractableKeySecretStorageProvider({
+      backend,
+      keyStore,
+      alias: 'recover-test'
+    })
+
+    await provider.storeSecret('bundle-rec', 'original-secret-val', {
+      recoveryPassphrase: 'recovery-pass-123'
+    })
+
+    const recRaw = await backend.getItem('knishio:recovery:bundle-rec')
+    expect(recRaw).not.toBeNull()
+
+    // Wipe the hardware key to simulate hardware loss
+    await provider.unenroll()
+    provider.lock()
+
+    // Direct retrieve now fails
+    await expect(provider.retrieveSecret('bundle-rec')).rejects.toThrow()
+
+    // Recover using recovery passphrase restores the secret
+    await provider.recoverSecret('bundle-rec', 'recovery-pass-123')
+    const recovered = await provider.retrieveSecret('bundle-rec')
+    expect(recovered).toBe('original-secret-val')
   })
 })

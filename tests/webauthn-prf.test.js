@@ -63,7 +63,7 @@ describe('WebAuthnPrfSecretStorageProvider', () => {
     expect(record).not.toBeNull()
 
     // Store and retrieve
-    await provider.storeSecret('bundle1', 'my-master-secret')
+    await provider.storeSecret('bundle1', 'my-master-secret', { allowUnrecoverable: true })
     const retrieved = await provider.retrieveSecret('bundle1')
     expect(retrieved).toBe('my-master-secret')
 
@@ -88,7 +88,7 @@ describe('WebAuthnPrfSecretStorageProvider', () => {
       credentials
     })
     await instance1.enroll()
-    await instance1.storeSecret('bundleX', 'shared-passkey-secret')
+    await instance1.storeSecret('bundleX', 'shared-passkey-secret', { allowUnrecoverable: true })
 
     const instance2 = new WebAuthnPrfSecretStorageProvider({
       backend,
@@ -111,7 +111,7 @@ describe('WebAuthnPrfSecretStorageProvider', () => {
       credentials: originalCredentials
     })
     await provider.enroll()
-    await provider.storeSecret('bundle-mismatch', 'secret-val')
+    await provider.storeSecret('bundle-mismatch', 'secret-val', { allowUnrecoverable: true })
     provider.lock()
 
     // Different authenticator PRF output
@@ -160,7 +160,7 @@ describe('WebAuthnPrfSecretStorageProvider', () => {
       credentials
     })
     await provider.enroll()
-    await provider.storeSecret('bundle-meta', 'secret')
+    await provider.storeSecret('bundle-meta', 'secret', { allowUnrecoverable: true })
 
     const raw = await backend.getItem('knishio:secret:bundle-meta')
     expect(raw).not.toBeNull()
@@ -176,6 +176,118 @@ describe('WebAuthnPrfSecretStorageProvider', () => {
     for (const forbidden of ['bundle_hash', 'created_at', 'hardware_backed', 'provider_type']) {
       expect(forbidden in metadata).toBe(false)
     }
+  })
+
+  test('requires recoveryPassphrase unless allowUnrecoverable is true', async () => {
+    const backend = new MemoryStorageBackend()
+    const credentials = createFakeCredentials()
+    const provider = new WebAuthnPrfSecretStorageProvider({
+      backend,
+      rp,
+      user,
+      credentials
+    })
+    await provider.enroll()
+
+    await expect(
+      provider.storeSecret('bundle-err', 'secret')
+    ).rejects.toThrow('Recovery passphrase required for non-exportable hardware key unless allowUnrecoverable is true')
+  })
+
+  test('unenrolls and allows re-enrollment', async () => {
+    const backend = new MemoryStorageBackend()
+    const credentials = createFakeCredentials()
+    const provider = new WebAuthnPrfSecretStorageProvider({
+      backend,
+      rp,
+      user,
+      credentials
+    })
+    await provider.enroll()
+    expect(await backend.getItem('knishio:webauthn-prf:default')).not.toBeNull()
+
+    await provider.unenroll()
+    expect(await backend.getItem('knishio:webauthn-prf:default')).toBeNull()
+
+    // Can enroll again cleanly
+    await provider.enroll()
+    expect(await backend.getItem('knishio:webauthn-prf:default')).not.toBeNull()
+  })
+
+  test('wraps NotAllowedError into SecretStorageException.unavailable', async () => {
+    const backend = new MemoryStorageBackend()
+    const refusingCredentials = {
+      create: async () => {
+        const err = new Error('The operation either timed out or was not allowed')
+        err.name = 'NotAllowedError'
+        throw err
+      },
+      get: async () => {
+        const err = new Error('The operation either timed out or was not allowed')
+        err.name = 'NotAllowedError'
+        throw err
+      }
+    }
+
+    const provider = new WebAuthnPrfSecretStorageProvider({
+      backend,
+      rp,
+      user,
+      credentials: refusingCredentials
+    })
+
+    // Pre-populate an enrolled record and secret so unlock attempts credentials.get
+    await backend.setItem('knishio:webauthn-prf:default', JSON.stringify({
+      version: 1,
+      credentialId: 'Y3JlZDEyMw',
+      iv: 'AAAA',
+      ciphertext: 'BBBB'
+    }))
+
+    await backend.setItem('knishio:secret:bundle-test', JSON.stringify({
+      version: 1,
+      ciphertext: 'AAAA',
+      iv: 'BBBB',
+      salt: 'CCCC',
+      algorithm: 'AES-GCM',
+      metadata: { bundleHash: 'bundle-test', createdAt: Date.now(), hardwareBacked: false, providerType: 'webauthn-prf' }
+    }))
+
+    await expect(
+      provider.retrieveSecret('bundle-test')
+    ).rejects.toThrow('authenticator refused or credential missing')
+  })
+
+  test('stores recovery envelope and recovers successfully', async () => {
+    const backend = new MemoryStorageBackend()
+    const credentials = createFakeCredentials()
+    const provider = new WebAuthnPrfSecretStorageProvider({
+      backend,
+      rp,
+      user,
+      credentials
+    })
+    await provider.enroll()
+
+    await provider.storeSecret('bundle-rec', 'master-prf-secret', {
+      recoveryPassphrase: 'passkey-backup-pass'
+    })
+
+    expect(await backend.getItem('knishio:recovery:bundle-rec')).not.toBeNull()
+
+    // Unenroll to simulate lost passkey / authenticator reset
+    await provider.unenroll()
+
+    // Retrieve fails closed
+    await expect(provider.retrieveSecret('bundle-rec')).rejects.toThrow()
+
+    // Re-enroll with a new passkey
+    await provider.enroll()
+
+    // Recover secret using recovery envelope
+    await provider.recoverSecret('bundle-rec', 'passkey-backup-pass')
+    const recovered = await provider.retrieveSecret('bundle-rec')
+    expect(recovered).toBe('master-prf-secret')
   })
 
   test('still decrypts frozen cross-SDK envelope via openEnvelope', async () => {

@@ -47,7 +47,8 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
 import SecretStorageException from '../exception/SecretStorageException.js'
-import { withSecureString } from '../libraries/secureMemory.js'
+import { withSecureString, zeroizeBytes } from '../libraries/secureMemory.js'
+import { sealEnvelope, openEnvelope } from './secretEnvelope.js'
 
 /**
  * In-memory secret storage provider
@@ -57,6 +58,7 @@ export default class MemorySecretStorageProvider {
   constructor () {
     this.providerType = 'memory'
     this.secrets = new Map()
+    this.recoverySecrets = new Map()
   }
 
   /**
@@ -102,6 +104,18 @@ export default class MemorySecretStorageProvider {
     }
 
     this.secrets.set(bundleHash, { secret, metadata })
+
+    if (options.recoveryPassphrase) {
+      const recoveryMetadata = {
+        bundleHash,
+        label: options.label,
+        createdAt: Date.now(),
+        hardwareBacked: false,
+        providerType: 'webcrypto-aes-gcm'
+      }
+      const recoveryPayload = await sealEnvelope(secret, options.recoveryPassphrase, recoveryMetadata)
+      this.recoverySecrets.set(bundleHash, JSON.stringify(recoveryPayload))
+    }
   }
 
   /**
@@ -122,6 +136,7 @@ export default class MemorySecretStorageProvider {
    * @returns {Promise<boolean>}
    */
   async deleteSecret (bundleHash) {
+    this.recoverySecrets.delete(bundleHash)
     return this.secrets.delete(bundleHash)
   }
 
@@ -166,5 +181,58 @@ export default class MemorySecretStorageProvider {
    */
   clear () {
     this.secrets.clear()
+    this.recoverySecrets.clear()
+  }
+
+  /**
+   * Recover a secret using its recovery envelope and restore it
+   *
+   * @param {string} bundleHash
+   * @param {string} recoveryPassphrase
+   * @param {{ label?: string }} [options]
+   * @returns {Promise<void>}
+   */
+  async recoverSecret (bundleHash, recoveryPassphrase, options = {}) {
+    if (!bundleHash) {
+      throw new SecretStorageException('Bundle hash cannot be empty')
+    }
+    if (!recoveryPassphrase) {
+      throw new SecretStorageException('Recovery passphrase cannot be empty')
+    }
+
+    const raw = this.recoverySecrets.get(bundleHash)
+    if (!raw) {
+      throw SecretStorageException.notFound(bundleHash)
+    }
+
+    let payload
+    try {
+      payload = JSON.parse(raw)
+    } catch {
+      throw SecretStorageException.decryptionFailed('Corrupted recovery payload format')
+    }
+
+    let decryptedBytes
+    try {
+      decryptedBytes = await openEnvelope(payload, recoveryPassphrase)
+    } catch (err) {
+      if (err instanceof SecretStorageException) {
+        throw err
+      }
+      const msg = err instanceof Error ? err.message : String(err)
+      throw SecretStorageException.decryptionFailed(msg)
+    }
+
+    let secretStr
+    try {
+      secretStr = new TextDecoder().decode(decryptedBytes)
+    } finally {
+      zeroizeBytes(decryptedBytes)
+    }
+
+    await this.storeSecret(bundleHash, secretStr, {
+      ...options,
+      recoveryPassphrase
+    })
   }
 }

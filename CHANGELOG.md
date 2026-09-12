@@ -16,11 +16,15 @@ detail, the entry says so instead of guessing.
 ## [Unreleased]
 ### Added
 
+- **`FileStorageBackend`**: Node-only persistent storage backend storing key-value pairs atomically in a JSON file with restrictive 0o600 permissions, using temporary file creation and atomic rename.
+- **`WebStorageBackend`**: browser persistent storage backend adapting Web Storage (`localStorage` or `sessionStorage`) to `IStorageBackend.keys()` with prefix filtering (`knishio:` by default).
+- **Secret Recovery (`recoverSecret` & `recoveryPassphrase`)**: cross-SDK secret recovery envelope support. When `options.recoveryPassphrase` is provided to `storeSecret`, a secondary software envelope is sealed and stored under `knishio:recovery:<bundleHash>`. `recoverSecret` opens the recovery record and re-enrolls the master secret under a fresh hardware KEK.
+- **Hardware provider recovery requirement**: `WebAuthnPrfSecretStorageProvider` and `NonExtractableKeySecretStorageProvider` require `options.recoveryPassphrase` unless `allowUnrecoverable: true` is explicitly passed.
+- **`WebAuthnPrfSecretStorageProvider.unenroll()`**: unenrolls the resident passkey credential, removing the stored PRF record and clearing cached passphrase material.
+- **`WebAuthnPrfSecretStorageProvider` error handling**: wraps `credentials.get` errors, mapping `NotAllowedError` to `SecretStorageException.unavailable('webauthn-prf', 'authenticator refused or credential missing')`.
 - **`WebAuthnPrfSecretStorageProvider`**: passkey PRF secret storage provider using the WebAuthn PRF (Pseudo-Random Function) extension. Wraps a random device passphrase under an HKDF-derived AES-GCM KEK bound to a resident passkey credential (authenticator-bound PRF secret with unattested hardware custody, `isHardwareBacked: false`).
 - **`NonExtractableKeySecretStorageProvider`**: secret storage provider backed by a non-extractable WebCrypto AES-GCM CryptoKey stored in `IndexedDbKeyStore` (or `MemoryKeyStore` for headless/test environments).
 - **`sealEnvelope` and `openEnvelope`**: custody-agnostic functions extracted from `WebCryptoSecretStorageProvider` for sealing and opening cross-SDK encrypted secret envelopes.
-
-
 ### Fixed
 
 - **`hardwareBacked` is no longer a caller claim.** `WebCryptoSecretStorageProvider` and `createDefaultSecretStorage()` no longer accept a `hardwareBacked` option; the software provider always reports and persists `hardwareBacked: false`. Envelopes previously written with a caller-supplied `true` were never attested and remain readable. Source-level break for callers that passed the option; the wire format (`metadata.hardwareBacked`, required boolean) is unchanged.

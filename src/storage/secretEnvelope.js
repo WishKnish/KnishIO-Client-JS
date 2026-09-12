@@ -51,6 +51,8 @@ import { zeroizeBytes } from '../libraries/secureMemory.js'
 
 export const ENVELOPE_ALGORITHM = 'AES-GCM'
 export const DEFAULT_ITERATIONS = 100000
+export const SECRET_KEY_PREFIX = 'knishio:secret:'
+export const RECOVERY_KEY_PREFIX = 'knishio:recovery:'
 const GCM_IV_LENGTH = 12
 const SALT_LENGTH = 16
 

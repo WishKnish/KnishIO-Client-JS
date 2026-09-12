@@ -51,6 +51,8 @@ export {
   default as WebCryptoSecretStorageProvider,
   MemoryStorageBackend
 } from './WebCryptoSecretStorageProvider.js'
+export { default as FileStorageBackend } from './FileStorageBackend.js'
+export { default as WebStorageBackend } from './WebStorageBackend.js'
 export {
   default as WebAuthnPrfSecretStorageProvider,
   PRF_SALT_LABEL,
@@ -68,7 +70,9 @@ export {
   base64ToUint8Array,
   deriveEnvelopeKey,
   ENVELOPE_ALGORITHM,
-  DEFAULT_ITERATIONS
+  DEFAULT_ITERATIONS,
+  SECRET_KEY_PREFIX,
+  RECOVERY_KEY_PREFIX
 } from './secretEnvelope.js'
 
 import MemorySecretStorageProvider from './MemorySecretStorageProvider.js'

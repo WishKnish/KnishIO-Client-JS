@@ -46,60 +46,72 @@ Please visit https://github.com/WishKnish/KnishIO-Client-JS for information.
 License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
 */
 
-import BaseException from './BaseException.js'
+import SecretStorageException from '../exception/SecretStorageException.js'
 
 /**
- * Exception thrown when secret storage or hardware envelope encryption fails
+ * Browser persistent storage backend wrapping Web Storage (localStorage or sessionStorage).
+ * Adapts the Web Storage API (length + key(i)) to IStorageBackend.keys(), filtering
+ * by a prefix (defaults to 'knishio:') so unrelated items are ignored.
  */
-export default class SecretStorageException extends BaseException {
+export default class WebStorageBackend {
   /**
-   * @param {string} message
-   * @param {string|null} fileName
-   * @param {number|null} lineNumber
+   * @param {Storage} [storage]
+   * @param {string} [prefix]
    */
-  constructor (message = 'Secret storage operation failed', fileName = null, lineNumber = null) {
-    super(message, fileName, lineNumber)
-    this.name = 'SecretStorageException'
+  constructor (storage, prefix = 'knishio:') {
+    if (storage) {
+      this.storage = storage
+    } else if (typeof globalThis !== 'undefined' && globalThis.localStorage) {
+      this.storage = globalThis.localStorage
+    } else {
+      throw SecretStorageException.unavailable(
+        'web-storage',
+        'WebStorageBackend requires a Storage object or global localStorage'
+      )
+    }
+    this.prefix = prefix
   }
 
   /**
-   * Factory method: secret not found for bundle
-   *
-   * @param {string} bundleHash
-   * @returns {SecretStorageException}
+   * @param {string} key
+   * @returns {string|null}
    */
-  static notFound (bundleHash) {
-    return new SecretStorageException(`Secret not found for bundle: ${bundleHash}`)
+  getItem (key) {
+    return this.storage.getItem(key)
   }
 
   /**
-   * Factory method: decryption failed
-   *
-   * @param {string} [reason]
-   * @returns {SecretStorageException}
+   * @param {string} key
+   * @param {string} value
    */
-  static decryptionFailed (reason = 'Invalid passphrase or corrupted ciphertext') {
-    return new SecretStorageException(`Failed to decrypt master secret: ${reason}`)
+  setItem (key, value) {
+    this.storage.setItem(key, value)
   }
 
   /**
-   * Factory method: provider unavailable
-   *
-   * @param {string} provider
-   * @param {string} [reason]
-   * @returns {SecretStorageException}
+   * @param {string} key
+   * @returns {boolean}
    */
-  static unavailable (provider, reason = 'Hardware or API not accessible') {
-    return new SecretStorageException(`Secret storage provider '${provider}' is unavailable: ${reason}`)
+  removeItem (key) {
+    const existed = this.storage.getItem(key) !== null
+    this.storage.removeItem(key)
+    return existed
   }
 
   /**
-   * Factory method: validation error
-   *
-   * @param {string} message
-   * @returns {SecretStorageException}
+   * @returns {string[]}
    */
-  static validationError (message) {
-    return new SecretStorageException(message)
+  keys () {
+    const result = []
+    const len = this.storage.length
+    for (let i = 0; i < len; i++) {
+      const k = this.storage.key(i)
+      if (k !== null) {
+        if (!this.prefix || k.startsWith(this.prefix)) {
+          result.push(k)
+        }
+      }
+    }
+    return result
   }
 }

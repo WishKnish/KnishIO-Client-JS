@@ -29,7 +29,10 @@ export default defineConfig({
         'graphql-ws',
         'isomorphic-fetch',
         'jssha',
-        'wonka'
+        'wonka',
+        'node:fs',
+        'node:fs/promises',
+        'node:path'
       ],
       output: {
         globals: {
