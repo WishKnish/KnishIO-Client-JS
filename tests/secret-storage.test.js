@@ -20,9 +20,13 @@ import * as path from 'node:path'
 import * as os from 'node:os'
 import {
   FROZEN_TS_0_9_7_ENVELOPE,
+  FROZEN_JS_1_1_0_RECOVERY_ENVELOPE,
   XSDK_BUNDLE,
   XSDK_PASSPHRASE,
-  XSDK_PLAINTEXT
+  XSDK_PLAINTEXT,
+  XSDK_RECOVERY_PASSPHRASE,
+  XSDK_RECOVERY_PLAINTEXT,
+  XSDK_REENROLLED_PRIMARY_PASSPHRASE
 } from './fixtures/frozenEnvelope.js'
 import SecretStorageException from '../src/exception/SecretStorageException.js'
 
@@ -229,6 +233,47 @@ describe('WebCryptoSecretStorageProvider', () => {
     expect('label' in metadata).toBe(false)
     expect(metadata.hardwareBacked).toBe(false)
     expect(metadata.providerType).toBe('webcrypto-aes-gcm')
+  })
+
+  test('recovers the frozen cross-SDK recovery record and re-enrols the primary', async () => {
+    const backend = new MemoryStorageBackend()
+    backend.setItem(`knishio:recovery:${XSDK_BUNDLE}`, FROZEN_JS_1_1_0_RECOVERY_ENVELOPE)
+    expect(backend.getItem(`knishio:secret:${XSDK_BUNDLE}`)).toBeNull()
+
+    const provider = new WebCryptoSecretStorageProvider({ backend })
+    await provider.recoverSecret(XSDK_BUNDLE, XSDK_RECOVERY_PASSPHRASE, {
+      passphrase: XSDK_REENROLLED_PRIMARY_PASSPHRASE
+    })
+    const retrieved = await provider.retrieveSecret(XSDK_BUNDLE, {
+      passphrase: XSDK_REENROLLED_PRIMARY_PASSPHRASE
+    })
+    expect(retrieved).toBe(XSDK_RECOVERY_PLAINTEXT)
+
+    const storedSecretRaw = backend.getItem(`knishio:secret:${XSDK_BUNDLE}`)
+    const storedRecoveryRaw = backend.getItem(`knishio:recovery:${XSDK_BUNDLE}`)
+    expect(storedSecretRaw).not.toBeNull()
+    expect(storedRecoveryRaw).not.toBeNull()
+
+    const storedSecret = JSON.parse(storedSecretRaw)
+    const metadata = storedSecret.metadata
+    expect(metadata.hardwareBacked).toBe(false)
+    for (const key of ['bundleHash', 'createdAt', 'hardwareBacked', 'providerType']) {
+      expect(key in metadata).toBe(true)
+    }
+    for (const key of ['bundle_hash', 'created_at', 'hardware_backed', 'provider_type']) {
+      expect(key in metadata).toBe(false)
+    }
+  })
+
+  test('rejects a wrong recovery passphrase', async () => {
+    const backend = new MemoryStorageBackend()
+    backend.setItem(`knishio:recovery:${XSDK_BUNDLE}`, FROZEN_JS_1_1_0_RECOVERY_ENVELOPE)
+    const provider = new WebCryptoSecretStorageProvider({ backend })
+    await expect(
+      provider.recoverSecret(XSDK_BUNDLE, 'wrong-recovery-passphrase', {
+        passphrase: XSDK_REENROLLED_PRIMARY_PASSPHRASE
+      })
+    ).rejects.toThrow(SecretStorageException)
   })
 })
 

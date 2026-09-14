@@ -22,7 +22,12 @@ import {
 
 // Shared cross-SDK master (same convention as patent-vectors.test.js → ../../shared-test-results/)
 import vectors from '../../shared-test-results/cross-platform-test-vectors.json'
-import { FROZEN_TS_0_9_7_ENVELOPE } from './fixtures/frozenEnvelope.js'
+import {
+  FROZEN_TS_0_9_7_ENVELOPE,
+  FROZEN_JS_1_1_0_RECOVERY_ENVELOPE,
+  XSDK_RECOVERY_PASSPHRASE,
+  XSDK_RECOVERY_PLAINTEXT
+} from './fixtures/frozenEnvelope.js'
 
 describe('Canonical Cross-Platform SHAKE256 Vectors', () => {
   const shake256Tests = vectors.vectors.shake256.tests
@@ -235,5 +240,15 @@ describe('Secret storage envelope parity with master vector', () => {
     const masterPayload = vectors.vectors.secret_storage_envelope.tests[0].payload
     const frozenPayload = JSON.parse(FROZEN_TS_0_9_7_ENVELOPE)
     expect(frozenPayload).toEqual(masterPayload)
+  })
+
+  test('master vector tests[1] is the frozen recovery record', () => {
+    const t = vectors.vectors.secret_storage_envelope.tests[1]
+    expect(t.storageKey).toBe(`knishio:recovery:${t.bundleHash}`)
+    expect(t.payload.metadata.hardwareBacked).toBe(false)
+    expect(t.recoveryPassphrase).toBe(XSDK_RECOVERY_PASSPHRASE)
+    expect(t.passphrase).toBeUndefined()
+    expect(t.payload).toEqual(JSON.parse(FROZEN_JS_1_1_0_RECOVERY_ENVELOPE))
+    expect(t.expectedPlaintext).toBe(XSDK_RECOVERY_PLAINTEXT)
   })
 })
