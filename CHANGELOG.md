@@ -13,6 +13,23 @@ history. Entries at and below `0.7.8` are reconstructed from commit messages
 rather than written at release time; where the history does not substantiate a
 detail, the entry says so instead of guessing.
 
+## [1.2.0] — 2026-09-20
+
+### Changed
+
+- The GraphQL transport **fails closed**. An encryption-enabled client with no authorized
+  wallet or no validator ML-KEM public key now throws `CodeException('Authorized wallet
+  missing.')` / `CodeException('Server public key missing.')` instead of silently sending the
+  request in plaintext. The bypass set (`__schema`, `ContinuId`, `AccessToken`, U-isotope
+  `ProposeMolecule`) is decided first, so the auth bootstrap is unaffected
+  (`src/libraries/urql/UrqlClientWrapper.js`).
+
+### Notes
+
+- Both live CipherHash cases (`tests/cipherhash-live.test.js`) passed against
+  `testnet.knish.io` on 2026-09-20 at ML-KEM-1024 and ML-KEM-768, including the validator
+  refusing a plaintext query from an `encrypt: true` session.
+
 ## [1.1.0] — 2026-09-12
 
 ### Added
@@ -266,7 +283,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.2.0
 [1.1.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.1.0
 [1.0.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.0.0
 [0.9.4]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v0.9.4

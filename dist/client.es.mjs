@@ -5344,7 +5344,9 @@ var Ki = class {
 	}
 	async cipherFetch(e, t) {
 		let n = this.getWallet(), r = this.getPubKey(), i = !1, a = t;
-		if (n && r && t && typeof t.body == "string" && this.shouldEncrypt(t.body)) {
+		if (t && typeof t.body == "string" && this.shouldEncrypt(t.body)) {
+			if (!n) throw new L("Authorized wallet missing.");
+			if (!r) throw new L("Server public key missing.");
 			let e = await n.encryptStringML(t.body, r);
 			a = {
 				...t,
