@@ -6,6 +6,7 @@ import {
 } from '@urql/core'
 import { createClient as createWSClient } from 'graphql-ws'
 import { pipe, map, subscribe } from 'wonka'
+import CodeException from '../../exception/CodeException.js'
 
 // PQ-transport Phase E (cycle 163): the post-quantum CipherHash wrapper query. The validator
 // intercepts the `CipherHash` op, decrypts `$Hash`, executes the inner request, and returns the
@@ -118,7 +119,18 @@ class UrqlClientWrapper {
     let encryptedRequest = false
     let requestInit = init
 
-    if (wallet && serverPubkey && init && typeof init.body === 'string' && this.shouldEncrypt(init.body)) {
+    // Decide the bypass FIRST, then demand the keys: a bypassed operation (`__schema`,
+    // `ContinuId`, `AccessToken`, U-isotope `ProposeMolecule`) must still go out in plaintext or
+    // the auth bootstrap would deadlock encrypting to a server pubkey it has not learned yet.
+    // Anything else on an encryption-enabled client fails closed rather than silently
+    // downgrading to plaintext (matches PHP Cipher.php / Kotlin HttpClient).
+    if (init && typeof init.body === 'string' && this.shouldEncrypt(init.body)) {
+      if (!wallet) {
+        throw new CodeException('Authorized wallet missing.')
+      }
+      if (!serverPubkey) {
+        throw new CodeException('Server public key missing.')
+      }
       const hashVar = await wallet.encryptStringML(init.body, serverPubkey)
       requestInit = { ...init, body: JSON.stringify({ query: CIPHER_HASH_QUERY, variables: { Hash: hashVar } }) }
       encryptedRequest = true
