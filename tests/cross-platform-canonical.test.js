@@ -16,12 +16,11 @@ import {
  * Canonical cross-platform test vectors — verifies JS SDK against
  * the shared cross-platform-test-vectors.json (Rust reference implementation).
  *
- * Unlike cross-platform.test.js (which tests against JS's own output),
- * this test validates against the canonical vectors shared across ALL SDKs.
+ * These are the canonical vectors shared across ALL SDKs.
  */
 
-// Shared cross-SDK master (same convention as patent-vectors.test.js → ../../shared-test-results/)
-import vectors from '../../shared-test-results/cross-platform-test-vectors.json'
+import fs from 'fs'
+import path from 'path'
 import {
   FROZEN_TS_0_9_7_ENVELOPE,
   FROZEN_JS_1_1_0_RECOVERY_ENVELOPE,
@@ -29,7 +28,18 @@ import {
   XSDK_RECOVERY_PLAINTEXT
 } from './fixtures/frozenEnvelope.js'
 
-describe('Canonical Cross-Platform SHAKE256 Vectors', () => {
+// Shared cross-SDK master (same convention as patent-vectors.test.js → ../../shared-test-results/),
+// absent in a standalone checkout of this SDK. Then the file registers one visible skipped
+// test and nothing else.
+const VECTORS_PATH = path.resolve(__dirname, '../../shared-test-results/cross-platform-test-vectors.json')
+const vectors = fs.existsSync(VECTORS_PATH) ? JSON.parse(fs.readFileSync(VECTORS_PATH, 'utf8')) : null
+const describeWithVectors = vectors ? describe : () => {}
+
+if (!vectors) {
+  test.skip('cross-platform-canonical.test.js: skipped — ../shared-test-results/cross-platform-test-vectors.json not found (standalone checkout)', () => {})
+}
+
+describeWithVectors('Canonical Cross-Platform SHAKE256 Vectors', () => {
   const shake256Tests = vectors.vectors.shake256.tests
 
   test.each(shake256Tests)('SHAKE256: $name', (vector) => {
@@ -40,7 +50,7 @@ describe('Canonical Cross-Platform SHAKE256 Vectors', () => {
   })
 })
 
-describe('Canonical Cross-Platform Bundle Hash Vectors', () => {
+describeWithVectors('Canonical Cross-Platform Bundle Hash Vectors', () => {
   const bundleTests = vectors.vectors.bundle_hash.tests
 
   test.each(bundleTests)('Bundle hash: $name', (vector) => {
@@ -49,7 +59,7 @@ describe('Canonical Cross-Platform Bundle Hash Vectors', () => {
   })
 })
 
-describe('Canonical Cross-Platform Wallet Address Vectors', () => {
+describeWithVectors('Canonical Cross-Platform Wallet Address Vectors', () => {
   const walletTests = vectors.vectors.wallet_generation.tests
 
   test('standard_wallet address matches Rust reference', () => {
@@ -87,7 +97,7 @@ describe('Canonical Cross-Platform Wallet Address Vectors', () => {
   })
 })
 
-describe('Canonical Cross-Platform ML-KEM768 Vectors', () => {
+describeWithVectors('Canonical Cross-Platform ML-KEM768 Vectors', () => {
   const mlkem = vectors.vectors.mlkem768
 
   // Keygen-from-seed is deterministic (FIPS-203) → byte-frozen pubkey, like a SHAKE vector.
@@ -107,7 +117,7 @@ describe('Canonical Cross-Platform ML-KEM768 Vectors', () => {
   })
 })
 
-describe('Canonical Cross-Platform ML-KEM1024 Vectors', () => {
+describeWithVectors('Canonical Cross-Platform ML-KEM1024 Vectors', () => {
   const mlkem = vectors.vectors.mlkem1024
 
   // Keygen-from-seed is deterministic (FIPS-203) → byte-frozen pubkey, like a SHAKE vector.
@@ -127,7 +137,7 @@ describe('Canonical Cross-Platform ML-KEM1024 Vectors', () => {
   })
 })
 
-describe('Backwards compatibility: a 1024-default build reads pre-bump ML-KEM-768 records', () => {
+describeWithVectors('Backwards compatibility: a 1024-default build reads pre-bump ML-KEM-768 records', () => {
   const mlkem768 = vectors.vectors.mlkem768.decrypt
 
   // (a) The whole point of dual-identity inbound decryption: no second wallet, no explicit step-back.
@@ -169,7 +179,7 @@ describe('Backwards compatibility: a 1024-default build reads pre-bump ML-KEM-76
   })
 })
 
-describe('Backwards compatibility: session snapshots keep their ML-KEM parameter set', () => {
+describeWithVectors('Backwards compatibility: session snapshots keep their ML-KEM parameter set', () => {
   const { secret, position } = vectors.vectors.mlkem768.decrypt
 
   test('a stepped-back 768 session survives a snapshot round trip', () => {
@@ -204,7 +214,7 @@ describe('Backwards compatibility: session snapshots keep their ML-KEM parameter
   })
 })
 
-describe('Canonical pre-bump ML-KEM-768 auth molecule validates from a 1024 default', () => {
+describeWithVectors('Canonical pre-bump ML-KEM-768 auth molecule validates from a 1024 default', () => {
   const legacy = vectors.vectors.legacyMlkem768AuthMolecule
 
   // Fails loudly if the fixture is ever regenerated at the 1024 default — at which point it
@@ -235,7 +245,7 @@ describe('Canonical pre-bump ML-KEM-768 auth molecule validates from a 1024 defa
   })
 })
 
-describe('Secret storage envelope parity with master vector', () => {
+describeWithVectors('Secret storage envelope parity with master vector', () => {
   test('master vector payload matches the frozen envelope constant', () => {
     const masterPayload = vectors.vectors.secret_storage_envelope.tests[0].payload
     const frozenPayload = JSON.parse(FROZEN_TS_0_9_7_ENVELOPE)

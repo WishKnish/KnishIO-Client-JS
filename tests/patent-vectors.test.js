@@ -14,7 +14,18 @@ import {
   charsetBaseConvert,
   chunkSubstr
 } from '../src'
-import vectors from '../../shared-test-results/canonical-patent-vectors.json'
+import fs from 'fs'
+import path from 'path'
+
+// Shared cross-SDK master (../shared-test-results), absent in a standalone checkout of
+// this SDK. Then the file registers one visible skipped test and nothing else.
+const VECTORS_PATH = path.resolve(__dirname, '../../shared-test-results/canonical-patent-vectors.json')
+const vectors = fs.existsSync(VECTORS_PATH) ? JSON.parse(fs.readFileSync(VECTORS_PATH, 'utf8')) : null
+const describeWithVectors = vectors ? describe : () => {}
+
+if (!vectors) {
+  test.skip('patent-vectors.test.js: skipped — ../shared-test-results/canonical-patent-vectors.json not found (standalone checkout)', () => {})
+}
 
 /**
  * Patent Vector Validation
@@ -28,7 +39,7 @@ import vectors from '../../shared-test-results/canonical-patent-vectors.json'
  *   - Claims 12-14: ContinuID chain relay
  *   - Claim 21: Multi-isotope dispatch
  */
-describe('Patent Vector Validation', () => {
+describeWithVectors('Patent Vector Validation', () => {
   // -----------------------------------------------------------------
   // 0. generateSecret cross-SDK parity (Batch AO) — seed → 2048 hex secret
   // -----------------------------------------------------------------
