@@ -6276,7 +6276,7 @@ var Ki = class {
 				pubkey: o.pubKey(),
 				encrypt: o.encrypt()
 			}, n);
-			this.setAuthToken(e);
+			this.setAuthToken(e), this.lastMoleculeQuery = null;
 		} else throw new Sr(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${o.reason()}`);
 		return o;
 	}

@@ -13,7 +13,7 @@ history. Entries at and below `0.7.8` are reconstructed from commit messages
 rather than written at release time; where the history does not substantiate a
 detail, the entry says so instead of guessing.
 
-## [Unreleased]
+## [1.2.1] — 2026-09-25
 
 ### Fixed
 
@@ -26,6 +26,12 @@ detail, the entry says so instead of guessing.
   Querying the pointer is correct against earlier validators too. Pinned by
   `tests/knishioclient.test.js` ("signs the first molecule after profile auth from the ContinuID
   pointer, not the auth remainder").
+
+### Notes
+
+- Needed against validator 0.5.0 and later, which testnet.knish.io has run since 2026-09-24:
+  earlier releases are rejected with `Wallet not found` on the first molecule after the second
+  and later logins of an identity.
 
 ## [1.2.0] — 2026-09-20
 
@@ -297,7 +303,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.2.1
 [1.2.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.2.0
 [1.1.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.1.0
 [1.0.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.0.0
