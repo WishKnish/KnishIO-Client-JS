@@ -18,6 +18,10 @@ import MutationCreateMeta from '../src/mutation/MutationCreateMeta'
 import MutationCreateWallet from '../src/mutation/MutationCreateWallet'
 import MutationClaimShadowWallet from '../src/mutation/MutationClaimShadowWallet'
 import QueryAtom from '../src/query/QueryAtom'
+import QueryContinuId from '../src/query/QueryContinuId'
+import MutationRequestAuthorization from '../src/mutation/MutationRequestAuthorization'
+import ResponseRequestAuthorization from '../src/response/ResponseRequestAuthorization'
+import ResponseContinuId from '../src/response/ResponseContinuId'
 
 const testUri = process.env.KNISHIO_TEST_URI || 'https://eteplitsky.testnet.knish.io:443/graphql'
 const testCell = 'TESTCELL'
@@ -78,6 +82,78 @@ describe('KnishIOClient - Unit', () => {
     }
     knishIOClientInstance.setAuthToken(mockAuthToken)
     expect(knishIOClientInstance.getAuthToken()).toBe(mockAuthToken)
+  })
+
+  // Validator 0.5.0 no longer executes the I-atom of an unproven
+  // re-authorization, so the auth molecule's USER remainder is never
+  // registered. The next molecule must be signed from the ContinuID pointer.
+  test('signs the first molecule after profile auth from the ContinuID pointer, not the auth remainder', async () => {
+    const client = knishIOClientInstance
+    const continuIdPosition = Wallet.generatePosition()
+
+    const executeSpy = jest.spyOn(MutationRequestAuthorization.prototype, 'execute')
+      .mockImplementation(async function () {
+        this.$__response = new ResponseRequestAuthorization({
+          query: this,
+          json: {
+            data: {
+              ProposeMolecule: {
+                molecularHash: 'offline',
+                status: 'accepted',
+                reason: null,
+                payload: JSON.stringify({
+                  token: 'offline-token',
+                  time: Math.floor(Date.now() / 1000) + 3600,
+                  key: 'offline-pubkey',
+                  encrypt: false
+                })
+              }
+            }
+          }
+        })
+        return this.$__response
+      })
+
+    const queryContinuIdSpy = jest.spyOn(client, 'queryContinuId')
+      .mockImplementation(async ({ bundle }) => {
+        const pointer = new Wallet({
+          secret: unitSecret,
+          token: 'USER',
+          position: continuIdPosition
+        })
+        return new ResponseContinuId({
+          query: client.createQuery(QueryContinuId),
+          json: {
+            data: {
+              ContinuId: {
+                tokenSlug: 'USER',
+                address: pointer.address,
+                position: continuIdPosition,
+                bundleHash: bundle,
+                batchId: null,
+                characters: 'BASE64',
+                pubkey: null,
+                amount: 0
+              }
+            }
+          }
+        })
+      })
+
+    try {
+      await client.requestProfileAuthToken({ secret: unitSecret, encrypt: false })
+      const authRemainderPosition = client.getRemainderWallet().position
+      queryContinuIdSpy.mockClear()
+
+      const molecule = await client.createMolecule({})
+
+      expect(queryContinuIdSpy).toHaveBeenCalledTimes(1)
+      expect(molecule.sourceWallet.position).toBe(continuIdPosition)
+      expect(molecule.sourceWallet.position).not.toBe(authRemainderPosition)
+    } finally {
+      executeSpy.mockRestore()
+      queryContinuIdSpy.mockRestore()
+    }
   })
 })
 

@@ -13,6 +13,20 @@ history. Entries at and below `0.7.8` are reconstructed from commit messages
 rather than written at release time; where the history does not substantiate a
 detail, the entry says so instead of guessing.
 
+## [Unreleased]
+
+### Fixed
+
+- After a profile authorization (`requestProfileAuthToken`, which `requestAuthToken` calls when
+  it has a secret), the next molecule is signed from the ContinuID position the validator reports
+  (`queryContinuId`) instead of from the auth molecule's cached USER remainder wallet. From
+  validator 0.5.0 an unproven re-authorization (every login of an identity after its first) no
+  longer creates a wallet at its I-atom position or moves the ContinuID pointer there, so the
+  first molecule after such a login was rejected with `Wallet not found: bundle=…, position=…`.
+  Querying the pointer is correct against earlier validators too. Pinned by
+  `tests/knishioclient.test.js` ("signs the first molecule after profile auth from the ContinuID
+  pointer, not the auth remainder").
+
 ## [1.2.0] — 2026-09-20
 
 ### Changed

@@ -2524,6 +2524,7 @@ export default class KnishIOClient {
         encrypt: response.encrypt()
       }, wallet)
       this.setAuthToken(authToken)
+      this.lastMoleculeQuery = null
     } else {
       throw new AuthorizationRejectedException(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }`)
     }
