@@ -2421,47 +2421,56 @@ export default class KnishIOClient {
     cellSlug,
     encrypt
   }) {
-    this.setCellSlug(cellSlug)
+    // Mark the login in progress so client() does not start a second one. Restore the previous
+    // value afterwards: when requestAuthToken is the caller, it clears the flag itself.
+    const previous = this.$__authInProcess
+    this.$__authInProcess = true
 
-    // Create a wallet for encryption
-    const wallet = new Wallet({
-      secret: generateSecret(await this.getFingerprint()),
-      token: 'AUTH',
-      mlKemParameterSet: this.getMlKemParameterSet()
-    })
+    try {
+      this.setCellSlug(cellSlug)
 
-    /**
-     * @type {MutationRequestAuthorizationGuest}
-     */
-    const query = await this.createQuery(MutationRequestAuthorizationGuest)
+      // Create a wallet for encryption
+      const wallet = new Wallet({
+        secret: generateSecret(await this.getFingerprint()),
+        token: 'AUTH',
+        mlKemParameterSet: this.getMlKemParameterSet()
+      })
 
-    const variables = {
-      cellSlug,
-      pubkey: wallet.pubkey,
-      encrypt
+      /**
+       * @type {MutationRequestAuthorizationGuest}
+       */
+      const query = await this.createQuery(MutationRequestAuthorizationGuest)
+
+      const variables = {
+        cellSlug,
+        pubkey: wallet.pubkey,
+        encrypt
+      }
+
+      /**
+       * @type {ResponseRequestAuthorizationGuest}
+       */
+      const response = await query.execute({ variables })
+
+      // Did the authorization molecule get accepted?
+      if (response.success()) {
+        // Create & set an auth token from the response data
+        // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
+        const authToken = AuthToken.create({
+          token: response.token(),
+          expiresAt: response.expiresAt(),
+          pubkey: response.pubKey(),
+          encrypt: response.encrypt()
+        }, wallet)
+        this.setAuthToken(authToken)
+      } else {
+        throw new AuthorizationRejectedException(`KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }`)
+      }
+
+      return response
+    } finally {
+      this.$__authInProcess = previous
     }
-
-    /**
-     * @type {ResponseRequestAuthorizationGuest}
-     */
-    const response = await query.execute({ variables })
-
-    // Did the authorization molecule get accepted?
-    if (response.success()) {
-      // Create & set an auth token from the response data
-      // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
-      const authToken = AuthToken.create({
-        token: response.token(),
-        expiresAt: response.expiresAt(),
-        pubkey: response.pubKey(),
-        encrypt: response.encrypt()
-      }, wallet)
-      this.setAuthToken(authToken)
-    } else {
-      throw new AuthorizationRejectedException(`KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }`)
-    }
-
-    return response
   }
 
   /**
@@ -2480,95 +2489,104 @@ export default class KnishIOClient {
     secret,
     encrypt
   }) {
-    this.setSecret(secret)
+    // Mark the login in progress so client() does not start a second one. Restore the previous
+    // value afterwards: when requestAuthToken is the caller, it clears the flag itself.
+    const previous = this.$__authInProcess
+    this.$__authInProcess = true
 
-    const authorize = async (wallet) => {
-      const molecule = await this.createMolecule({
-        secret,
-        sourceWallet: wallet
-      })
+    try {
+      this.setSecret(secret)
 
-      /**
-       * @type {MutationRequestAuthorization}
-       */
-      const query = await this.createMoleculeMutation({
-        mutationClass: MutationRequestAuthorization,
-        molecule
-      })
+      const authorize = async (wallet) => {
+        const molecule = await this.createMolecule({
+          secret,
+          sourceWallet: wallet
+        })
 
-      // PQ-transport Phase E (cycle 163): convey the source wallet's ML-KEM public key as a
-      // SIGNED `walletPubkey` meta on the U-atom (fillMolecule → initAuthorization → sign), so the
-      // validator can encrypt CipherHash responses back to THIS wallet (the one that decrypts them).
-      // Signed → tamper-proof. Only when present (PQ-capable wallet).
-      const authMeta = { encrypt: (encrypt ? 'true' : 'false') }
-      if (wallet.pubkey) {
-        authMeta.walletPubkey = wallet.pubkey
-      }
-      query.fillMolecule({ meta: authMeta })
+        /**
+         * @type {MutationRequestAuthorization}
+         */
+        const query = await this.createMoleculeMutation({
+          mutationClass: MutationRequestAuthorization,
+          molecule
+        })
 
-      /**
-       * @type {ResponseRequestAuthorization}
-       */
-      const response = await query.execute({})
+        // PQ-transport Phase E (cycle 163): convey the source wallet's ML-KEM public key as a
+        // SIGNED `walletPubkey` meta on the U-atom (fillMolecule → initAuthorization → sign), so the
+        // validator can encrypt CipherHash responses back to THIS wallet (the one that decrypts them).
+        // Signed → tamper-proof. Only when present (PQ-capable wallet).
+        const authMeta = { encrypt: (encrypt ? 'true' : 'false') }
+        if (wallet.pubkey) {
+          authMeta.walletPubkey = wallet.pubkey
+        }
+        query.fillMolecule({ meta: authMeta })
 
-      if (response.success()) {
-        // Create & set an auth token from the response data
-        // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
-        const authToken = AuthToken.create({
-          token: response.token(),
-          expiresAt: response.expiresAt(),
-          pubkey: response.pubKey(),
-          encrypt: response.encrypt()
-        }, wallet)
-        this.setAuthToken(authToken)
-        this.lastMoleculeQuery = null
-      }
-
-      return response
-    }
-
-    // The token filter matters: without it a bundle with no pointer yet falls back to its newest
-    // wallet of any token.
-    const continuId = (await this.queryContinuId({
-      bundle: this.getBundle(),
-      token: 'USER'
-    })).payload()
-
-    if (continuId && continuId.token === 'USER' && continuId.position) {
-      const pointerWallet = new Wallet({
-        secret,
-        token: 'USER',
-        position: continuId.position,
-        mlKemParameterSet: this.getMlKemParameterSet()
-      })
-
-      if (continuId.address && pointerWallet.address !== continuId.address) {
-        this.log('warn', `KnishIOClient::requestProfileAuthToken() - ContinuID wallet ${ continuId.address } is not derived from this secret at position ${ continuId.position }; signing from an AUTH wallet...`)
-      } else {
-        const response = await authorize(pointerWallet)
+        /**
+         * @type {ResponseRequestAuthorization}
+         */
+        const response = await query.execute({})
 
         if (response.success()) {
-          this.log('info', `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer ${ continuId.position }.`)
-          return response
+          // Create & set an auth token from the response data
+          // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
+          const authToken = AuthToken.create({
+            token: response.token(),
+            expiresAt: response.expiresAt(),
+            pubkey: response.pubKey(),
+            encrypt: response.encrypt()
+          }, wallet)
+          this.setAuthToken(authToken)
+          this.lastMoleculeQuery = null
         }
 
-        this.log('warn', `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer was rejected (${ response.reason() }); retrying once from an AUTH wallet...`)
+        return response
       }
+
+      // The token filter matters: without it a bundle with no pointer yet falls back to its newest
+      // wallet of any token.
+      const continuId = (await this.queryContinuId({
+        bundle: this.getBundle(),
+        token: 'USER'
+      })).payload()
+
+      if (continuId && continuId.token === 'USER' && continuId.position) {
+        const pointerWallet = new Wallet({
+          secret,
+          token: 'USER',
+          position: continuId.position,
+          mlKemParameterSet: this.getMlKemParameterSet()
+        })
+
+        if (continuId.address && pointerWallet.address !== continuId.address) {
+          this.log('warn', `KnishIOClient::requestProfileAuthToken() - ContinuID wallet ${ continuId.address } is not derived from this secret at position ${ continuId.position }; signing from an AUTH wallet...`)
+        } else {
+          const response = await authorize(pointerWallet)
+
+          if (response.success()) {
+            this.log('info', `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer ${ continuId.position }.`)
+            return response
+          }
+
+          this.log('warn', `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer was rejected (${ response.reason() }); retrying once from an AUTH wallet...`)
+        }
+      }
+
+      const response = await authorize(new Wallet({
+        secret,
+        token: 'AUTH',
+        mlKemParameterSet: this.getMlKemParameterSet()
+      }))
+
+      if (!response.success()) {
+        throw new AuthorizationRejectedException(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }`)
+      }
+
+      this.log('info', 'KnishIOClient::requestProfileAuthToken() - Authorization signed from a fresh AUTH wallet.')
+
+      return response
+    } finally {
+      this.$__authInProcess = previous
     }
-
-    const response = await authorize(new Wallet({
-      secret,
-      token: 'AUTH',
-      mlKemParameterSet: this.getMlKemParameterSet()
-    }))
-
-    if (!response.success()) {
-      throw new AuthorizationRejectedException(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${ response.reason() }`)
-    }
-
-    this.log('info', 'KnishIOClient::requestProfileAuthToken() - Authorization signed from a fresh AUTH wallet.')
-
-    return response
   }
 
   /**
@@ -2610,34 +2628,36 @@ export default class KnishIOClient {
     // Auth in process...
     this.$__authInProcess = true
 
-    // Auth token response
-    let response
+    try {
+      // Auth token response
+      let response
 
-    // Authorized user
-    if (secret) {
-      response = await this.requestProfileAuthToken({
-        secret,
-        encrypt
-      })
-    } else {
-      // Guest
-      response = await this.requestGuestAuthToken({
-        cellSlug,
-        encrypt
-      })
+      // Authorized user
+      if (secret) {
+        response = await this.requestProfileAuthToken({
+          secret,
+          encrypt
+        })
+      } else {
+        // Guest
+        response = await this.requestGuestAuthToken({
+          cellSlug,
+          encrypt
+        })
+      }
+
+      // Set auth token
+      this.log('info', `KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.getToken() }...`)
+
+      // Switch encryption mode if it has been changed
+      this.switchEncryption(encrypt)
+
+      // Return full response
+      return response
+    } finally {
+      // Auth process is stopped, whether the login succeeded or not
+      this.$__authInProcess = false
     }
-
-    // Set auth token
-    this.log('info', `KnishIOClient::authorize() - Successfully retrieved auth token ${ this.$__authToken.getToken() }...`)
-
-    // Switch encryption mode if it has been changed
-    this.switchEncryption(encrypt)
-
-    // Auth process is stopped
-    this.$__authInProcess = false
-
-    // Return full response
-    return response
   }
 
   /**

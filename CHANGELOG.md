@@ -49,6 +49,15 @@ detail, the entry says so instead of guessing.
   snapshot without it restores as AUTH, as before. Pinned by `tests/knishioclient.test.js`
   ("profile re-login from the ContinuID pointer", "AuthToken snapshot") and
   `tests/isotopes.test.js` (isotopeU).
+- A rejected login no longer leaves the client stuck in its "login in progress" state.
+  `requestAuthToken` cleared that state only when the login succeeded, so after an
+  `AuthorizationRejectedException` `client()` never authorized again and `executeQuery` never
+  refreshed an expired token. It is now cleared whether the login succeeds or fails. Calling
+  `requestProfileAuthToken` or `requestGuestAuthToken` directly now also marks a login in
+  progress, so `client()` no longer starts a second, concurrent login that would sign from the
+  same ContinuID pointer. Pinned by `tests/knishioclient.test.js` ("clears the in-progress flag
+  after a rejected login so client() authorizes again", "a direct profile login keeps client()
+  from starting a second login").
 
 ## [1.2.1] — 2026-09-25
 

@@ -163,8 +163,7 @@ describe('KnishIOClient - Unit', () => {
 
 // Validator 0.5.0 proves a re-login only when it is signed from the identity's ContinuID
 // pointer: atoms[0] at the pointer position, from the USER wallet registered there.
-// The tests log in through requestAuthToken, as consumers do: requestProfileAuthToken called
-// directly leaves $__authInProcess unset, so client() starts a second login in the background.
+// The tests log in through requestAuthToken, as consumers do, unless they test a direct call.
 describe('KnishIOClient - profile re-login from the ContinuID pointer', () => {
   const secret = generateSecret()
   let client
@@ -301,6 +300,45 @@ describe('KnishIOClient - profile re-login from the ContinuID pointer', () => {
       .rejects.toThrow(AuthorizationRejectedException)
     expect(proposals).toHaveLength(2)
     expect(proposals[1].atoms[0].token).toBe('AUTH')
+  })
+
+  test('clears the in-progress flag after a rejected login so client() authorizes again', async () => {
+    const position = Wallet.generatePosition()
+    stubContinuId(userPointer(position))
+    stubAuthorization(false, false, true)
+
+    await expect(client.requestAuthToken({ secret, encrypt: false }))
+      .rejects.toThrow(AuthorizationRejectedException)
+    expect(client.$__authInProcess).toBe(false)
+
+    const login = jest.spyOn(client, 'requestAuthToken')
+    spies.push(login)
+    client.client()
+
+    expect(login).toHaveBeenCalledTimes(1)
+    await login.mock.results[0].value
+    expect(proposals).toHaveLength(3)
+    expect(proposals[2].atoms[0].position).toBe(position)
+    expect(client.getAuthToken().getToken()).toBe('offline-token-3')
+    expect(client.$__authInProcess).toBe(false)
+  })
+
+  test('a direct profile login keeps client() from starting a second login', async () => {
+    const position = Wallet.generatePosition()
+    stubContinuId(userPointer(position))
+    stubAuthorization(true, true)
+    const background = jest.spyOn(client, 'requestAuthToken')
+    spies.push(background)
+
+    const login = client.requestProfileAuthToken({ secret, encrypt: false })
+    client.client()
+    await login
+    await Promise.allSettled(background.mock.results.map(result => result.value))
+
+    expect(proposals).toHaveLength(1)
+    expect(proposals[0].atoms[0].token).toBe('USER')
+    expect(proposals[0].atoms[0].position).toBe(position)
+    expect(client.$__authInProcess).toBe(false)
   })
 })
 
