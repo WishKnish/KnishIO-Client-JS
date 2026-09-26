@@ -1,6 +1,6 @@
 {
   "name": "@wishknish/knishio-client-js",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "type": "module",
   "productName": "Knish.IO Javascript SDK Client",
   "description": "JavaScript implementation of the Knish.IO SDK to consume Knish.IO GraphQL APIs.",

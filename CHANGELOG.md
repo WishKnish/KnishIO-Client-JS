@@ -13,18 +13,7 @@ history. Entries at and below `0.7.8` are reconstructed from commit messages
 rather than written at release time; where the history does not substantiate a
 detail, the entry says so instead of guessing.
 
-## [Unreleased]
-
-### Security
-
-- The verifier no longer honours a `signingWallet` meta on the first atom. `CheckMolecule.ots()`
-  compared the address recovered from the OTS signature against the address named in that meta
-  instead of `atoms[0].walletAddress`, so a molecule claiming one wallet's address but signed by
-  another wallet verified as valid. This affects offline verifiers that rely on `check()`, such
-  as knishproof. The address is now compared only with `atoms[0].walletAddress`. `sign()` no
-  longer reads the meta either and signs from `atoms[0].position`. Pinned by
-  `tests/signing-wallet-forgery.test.js` against the cross-SDK fixture
-  `tests/fixtures/signing-wallet-forgery.json`.
+## [1.3.0] — 2026-09-26
 
 ### Changed
 
@@ -58,6 +47,17 @@ detail, the entry says so instead of guessing.
   same ContinuID pointer. Pinned by `tests/knishioclient.test.js` ("clears the in-progress flag
   after a rejected login so client() authorizes again", "a direct profile login keeps client()
   from starting a second login").
+
+### Security
+
+- The verifier no longer honours a `signingWallet` meta on the first atom. `CheckMolecule.ots()`
+  compared the address recovered from the OTS signature against the address named in that meta
+  instead of `atoms[0].walletAddress`, so a molecule claiming one wallet's address but signed by
+  another wallet verified as valid. This affects offline verifiers that rely on `check()`, such
+  as knishproof. The address is now compared only with `atoms[0].walletAddress`. `sign()` no
+  longer reads the meta either and signs from `atoms[0].position`. Pinned by
+  `tests/signing-wallet-forgery.test.js` against the cross-SDK fixture
+  `tests/fixtures/signing-wallet-forgery.json`.
 
 ## [1.2.1] — 2026-09-25
 
@@ -349,7 +349,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.0
 [1.2.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.2.1
 [1.2.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.2.0
 [1.1.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.1.0

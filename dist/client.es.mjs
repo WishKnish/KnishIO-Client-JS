@@ -252,16 +252,6 @@ var re = class e {
 	setShadowWalletClaim(e) {
 		return this.merge({ shadowWalletClaim: e * 1 }), this;
 	}
-	setSigningWallet(e) {
-		return this.merge({ signingWallet: JSON.stringify({
-			tokenSlug: e.token,
-			bundleHash: e.bundle,
-			address: e.address,
-			position: e.position,
-			pubkey: e.pubkey,
-			characters: e.characters
-		}) }), this;
-	}
 	addPolicy(e) {
 		let t = new re(e, Object.keys(this.meta));
 		return this.merge({ policy: t.toJson() }), this;
@@ -1684,30 +1674,6 @@ var Lt = {
 			callback: this.__callback
 		};
 	}
-}, R = class {
-	static __init(e, t) {
-		this.arr = String(t).split("."), this.key = this.arr.shift();
-		let n = Number(this.key);
-		Number.isInteger(n) && (this.key = n), this.__nextKey = this.arr.length, this.__next = this.__tic(e);
-	}
-	static __tic(e) {
-		return !Array.isArray(e) && !(e instanceof Object) ? !1 : e[this.key] !== void 0;
-	}
-	static has(e, t) {
-		return this.__init(e, t), this.__next ? this.__nextKey === 0 || this.has(e[this.key], this.arr.join(".")) : !1;
-	}
-	static get(e, t, n = null) {
-		return this.__init(e, t), this.__next ? this.__nextKey === 0 ? e[this.key] : this.get(e[this.key], this.arr.join("."), n) : n;
-	}
-	static set(e, t, n) {
-		let r = t.split("."), i = e, a = r.length - 1;
-		for (let e = 0; e < a; e++) {
-			let t = r[e], n = Number(t), a = Number.isInteger(n);
-			(a ? n : t in i) || (i[a ? n : t] = r[e + 1].match(/^\d+$/) ? [] : {}), i = i[a ? n : t];
-		}
-		let o = r[a], s = Number(o);
-		return i[Number.isInteger(s) ? s : o] = n, e;
-	}
 }, on = class t {
 	constructor(e) {
 		if (e.molecularHash === null) throw new Wt();
@@ -1743,7 +1709,7 @@ var Lt = {
 	}
 	isotopeU() {
 		for (let e of this.molecule.getIsotopes("U")) {
-			if (e.token !== "AUTH") throw new I(`Check::isotopeU() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
+			if (e.token !== "AUTH" && e.token !== "USER") throw new I(`Check::isotopeU() - "${e.token}" is not a valid Token slug for "${e.isotope}" isotope Atoms!`);
 			if (e.index !== 0) throw new Ht(`Check::isotopeU() - Isotope "${e.isotope}" Atoms must have an index equal to 0!`);
 		}
 		return !0;
@@ -1909,9 +1875,7 @@ var Lt = {
 		let a = new e("SHAKE256", "TEXT");
 		a.update(i);
 		let o = a.getHash("HEX", { outputLen: 8192 }), s = new e("SHAKE256", "TEXT");
-		s.update(o);
-		let c = s.getHash("HEX", { outputLen: 256 }), l = this.molecule.atoms[0], u = l.walletAddress, f = R.get(l.aggregatedMeta(), "signingWallet");
-		if (f && (u = R.get(JSON.parse(f), "address")), c !== u) throw new qt();
+		if (s.update(o), s.getHash("HEX", { outputLen: 256 }) !== this.molecule.atoms[0].walletAddress) throw new qt();
 		return !0;
 	}
 	static fromServerData({ molecularHash: e, bundleHash: t, cellSlug: n = null, status: r = null, createdAt: i = null, atoms: a = [] }) {
@@ -2215,16 +2179,14 @@ var Lt = {
 			metaId: this.sourceWallet.bundle
 		})), this;
 	}
-	initWithdrawBuffer({ recipients: e, signingWallet: t = null }) {
-		let n = 0;
-		for (let t of Object.values(e || {})) n += t;
-		if (this.sourceWallet.balance - n < 0) throw new sn();
-		let r = new S();
-		t && r.setSigningWallet(t), this.addAtom(T.create({
+	initWithdrawBuffer({ recipients: e }) {
+		let t = 0;
+		for (let n of Object.values(e || {})) t += n;
+		if (this.sourceWallet.balance - t < 0) throw new sn();
+		this.addAtom(T.create({
 			isotope: "B",
 			wallet: this.sourceWallet,
 			value: -this.sourceWallet.balance,
-			meta: r,
 			metaType: "walletBundle",
 			metaId: this.sourceWallet.bundle
 		}));
@@ -2239,7 +2201,7 @@ var Lt = {
 		return this.addAtom(T.create({
 			isotope: "B",
 			wallet: this.remainderWallet,
-			value: this.sourceWallet.balance - n,
+			value: this.sourceWallet.balance - t,
 			metaType: "walletBundle",
 			metaId: this.remainderWallet.bundle
 		})), this;
@@ -2353,22 +2315,22 @@ var Lt = {
 	sign({ bundle: t = null, anonymous: n = !1, compressed: r = !0 } = {}) {
 		if (this.atoms.length === 0 || this.atoms.filter((e) => !(e instanceof T)).length !== 0) throw new w();
 		!n && !this.bundle && (this.bundle = t || se(this.secret, "Molecule::sign")), this.molecularHash = T.hashAtoms({ atoms: this.atoms });
-		let i = this.atoms[0], a = i.position, o = R.get(i.aggregatedMeta(), "signingWallet");
-		if (o && (a = R.get(JSON.parse(o), "position")), !a) throw new Kt("Signing wallet must have a position!");
-		let s = d(N.generateKey({
+		let i = this.atoms[0];
+		if (!i.position) throw new Kt("Signing wallet must have a position!");
+		let a = d(N.generateKey({
 			secret: this.secret,
 			token: i.token,
 			position: i.position
-		}), 128), c = this.normalizedHash(), l = "";
-		for (let t in s) {
-			let n = s[t];
-			for (let r = 0, i = 8 - c[t]; r < i; r++) n = new e("SHAKE256", "TEXT").update(n).getHash("HEX", { outputLen: 512 });
-			l += n;
+		}), 128), o = this.normalizedHash(), s = "";
+		for (let t in a) {
+			let n = a[t];
+			for (let r = 0, i = 8 - o[t]; r < i; r++) n = new e("SHAKE256", "TEXT").update(n).getHash("HEX", { outputLen: 512 });
+			s += n;
 		}
-		r && (l = g(l));
-		let u = d(l, Math.ceil(l.length / this.atoms.length)), f = null;
-		for (let e = 0, t = u.length; e < t; e++) this.atoms[e].otsFragment = u[e], f = this.atoms[e].position;
-		return f;
+		r && (s = g(s));
+		let c = d(s, Math.ceil(s.length / this.atoms.length)), l = null;
+		for (let e = 0, t = c.length; e < t; e++) this.atoms[e].otsFragment = c[e], l = this.atoms[e].position;
+		return l;
 	}
 	signSync(e = {}) {
 		return this.sign(e);
@@ -2475,7 +2437,7 @@ var Lt = {
 	static restore(t, n) {
 		let r = new N({
 			secret: n,
-			token: "AUTH",
+			token: t.wallet.token || "AUTH",
 			position: t.wallet.position,
 			characters: t.wallet.characters,
 			mlKemParameterSet: e.resolveMlKemParameterSet(t)
@@ -2500,6 +2462,7 @@ var Lt = {
 			pubkey: this.$__pubkey,
 			encrypt: this.$__encrypt,
 			wallet: {
+				token: this.$__wallet.token,
 				position: this.$__wallet.position,
 				characters: this.$__wallet.characters,
 				mlKemParameterSet: this.$__wallet.mlKemParameterSet
@@ -2524,6 +2487,30 @@ var Lt = {
 			pubkey: this.getPubkey(),
 			wallet: this.getWallet()
 		};
+	}
+}, R = class {
+	static __init(e, t) {
+		this.arr = String(t).split("."), this.key = this.arr.shift();
+		let n = Number(this.key);
+		Number.isInteger(n) && (this.key = n), this.__nextKey = this.arr.length, this.__next = this.__tic(e);
+	}
+	static __tic(e) {
+		return !Array.isArray(e) && !(e instanceof Object) ? !1 : e[this.key] !== void 0;
+	}
+	static has(e, t) {
+		return this.__init(e, t), this.__next ? this.__nextKey === 0 || this.has(e[this.key], this.arr.join(".")) : !1;
+	}
+	static get(e, t, n = null) {
+		return this.__init(e, t), this.__next ? this.__nextKey === 0 ? e[this.key] : this.get(e[this.key], this.arr.join("."), n) : n;
+	}
+	static set(e, t, n) {
+		let r = t.split("."), i = e, a = r.length - 1;
+		for (let e = 0; e < a; e++) {
+			let t = r[e], n = Number(t), a = Number.isInteger(n);
+			(a ? n : t in i) || (i[a ? n : t] = r[e + 1].match(/^\d+$/) ? [] : {}), i = i[a ? n : t];
+		}
+		let o = r[a], s = Number(o);
+		return i[Number.isInteger(s) ? s : o] = n, e;
 	}
 }, z = class e extends C {
 	constructor(e = "Secret storage operation failed", t = null, n = null) {
@@ -2909,8 +2896,8 @@ var Sn = class {
 	}
 }, Dn = class extends J {
 	constructor(e, t) {
-		super(e, t), this.$__query = i`query ($bundle: String!) {
-      ContinuId(bundle: $bundle) {
+		super(e, t), this.$__query = i`query ($bundle: String!, $token: String) {
+      ContinuId(bundle: $bundle, token: $token) {
         address,
         bundleHash,
         tokenSlug,
@@ -4218,11 +4205,8 @@ var Sn = class {
 		}), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
 	}
 }, Ir = class extends X {
-	fillMolecule({ recipients: e, signingWallet: t }) {
-		this.$__molecule.initWithdrawBuffer({
-			recipients: e,
-			signingWallet: t
-		}), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
+	fillMolecule({ recipients: e }) {
+		this.$__molecule.initWithdrawBuffer({ recipients: e }), this.$__molecule.sign({}), this.$__molecule.check(this.$__molecule.sourceWallet);
 	}
 }, Lr = 2592e5, Rr = "thumbmark", zr = "https://api.thumbmarkjs.com", Br = {
 	exclude: [],
@@ -6017,9 +6001,12 @@ var Ki = class {
 		let r = this.createQuery(kn);
 		return this.executeQuery(r, { bundleHashes: e }).then((e) => n ? e : e.payload());
 	}
-	async queryContinuId({ bundle: e }) {
-		let t = this.createQuery(Dn);
-		return this.executeQuery(t, { bundle: e });
+	async queryContinuId({ bundle: e, token: t = null }) {
+		let n = this.createQuery(Dn);
+		return this.executeQuery(n, t ? {
+			bundle: e,
+			token: t
+		} : { bundle: e });
 	}
 	async requestTokens({ token: e, to: t, amount: n = null, units: r = [], meta: i = null, batchId: a = null }) {
 		let o, s;
@@ -6148,23 +6135,20 @@ var Ki = class {
 			tradeRates: n
 		}), await this.executeQuery(o);
 	}
-	async withdrawBufferToken({ tokenSlug: e, amount: t, sourceWallet: n = null, signingWallet: r = null }) {
+	async withdrawBufferToken({ tokenSlug: e, amount: t, sourceWallet: n = null }) {
 		n === null && (n = await this.querySourceWallet({
 			token: e,
 			amount: t,
 			type: "buffer"
 		}));
-		let i = n, a = await this.createMolecule({
+		let r = n, i = await this.createMolecule({
 			sourceWallet: n,
-			remainderWallet: i
-		}), o = await this.createMoleculeMutation({
+			remainderWallet: r
+		}), a = await this.createMoleculeMutation({
 			mutationClass: Ir,
-			molecule: a
-		}), s = {};
-		return s[this.getBundle()] = t, o.fillMolecule({
-			recipients: s,
-			signingWallet: r
-		}), await this.executeQuery(o);
+			molecule: i
+		}), o = {};
+		return o[this.getBundle()] = t, a.fillMolecule({ recipients: o }), await this.executeQuery(a);
 	}
 	async burnTokens({ token: e, amount: t = null, units: n = [], sourceWallet: r = null }) {
 		r === null && (r = await this.querySourceWallet({
@@ -6233,64 +6217,102 @@ var Ki = class {
 		return this.executeQuery(l);
 	}
 	async requestGuestAuthToken({ cellSlug: e, encrypt: t }) {
-		this.setCellSlug(e);
-		let n = new N({
-			secret: oe(await this.getFingerprint()),
-			token: "AUTH",
-			mlKemParameterSet: this.getMlKemParameterSet()
-		}), r = await this.createQuery(cr), i = {
-			cellSlug: e,
-			pubkey: n.pubkey,
-			encrypt: t
-		}, a = await r.execute({ variables: i });
-		if (a.success()) {
-			let e = un.create({
-				token: a.token(),
-				expiresAt: a.expiresAt(),
-				pubkey: a.pubKey(),
-				encrypt: a.encrypt()
-			}, n);
-			this.setAuthToken(e);
-		} else throw new Sr(`KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${a.reason()}`);
-		return a;
+		let n = this.$__authInProcess;
+		this.$__authInProcess = !0;
+		try {
+			this.setCellSlug(e);
+			let n = new N({
+				secret: oe(await this.getFingerprint()),
+				token: "AUTH",
+				mlKemParameterSet: this.getMlKemParameterSet()
+			}), r = await this.createQuery(cr), i = {
+				cellSlug: e,
+				pubkey: n.pubkey,
+				encrypt: t
+			}, a = await r.execute({ variables: i });
+			if (a.success()) {
+				let e = un.create({
+					token: a.token(),
+					expiresAt: a.expiresAt(),
+					pubkey: a.pubKey(),
+					encrypt: a.encrypt()
+				}, n);
+				this.setAuthToken(e);
+			} else throw new Sr(`KnishIOClient::requestGuestAuthToken() - Authorization attempt rejected by ledger. Reason: ${a.reason()}`);
+			return a;
+		} finally {
+			this.$__authInProcess = n;
+		}
 	}
 	async requestProfileAuthToken({ secret: e, encrypt: t }) {
-		this.setSecret(e);
-		let n = new N({
-			secret: e,
-			token: "AUTH",
-			mlKemParameterSet: this.getMlKemParameterSet()
-		}), r = await this.createMolecule({
-			secret: e,
-			sourceWallet: n
-		}), i = await this.createMoleculeMutation({
-			mutationClass: Bn,
-			molecule: r
-		}), a = { encrypt: t ? "true" : "false" };
-		n.pubkey && (a.walletPubkey = n.pubkey), i.fillMolecule({ meta: a });
-		let o = await i.execute({});
-		if (o.success()) {
-			let e = un.create({
-				token: o.token(),
-				expiresAt: o.expiresAt(),
-				pubkey: o.pubKey(),
-				encrypt: o.encrypt()
-			}, n);
-			this.setAuthToken(e), this.lastMoleculeQuery = null;
-		} else throw new Sr(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${o.reason()}`);
-		return o;
+		let n = this.$__authInProcess;
+		this.$__authInProcess = !0;
+		try {
+			this.setSecret(e);
+			let n = async (n) => {
+				let r = await this.createMolecule({
+					secret: e,
+					sourceWallet: n
+				}), i = await this.createMoleculeMutation({
+					mutationClass: Bn,
+					molecule: r
+				}), a = { encrypt: t ? "true" : "false" };
+				n.pubkey && (a.walletPubkey = n.pubkey), i.fillMolecule({ meta: a });
+				let o = await i.execute({});
+				if (o.success()) {
+					let e = un.create({
+						token: o.token(),
+						expiresAt: o.expiresAt(),
+						pubkey: o.pubKey(),
+						encrypt: o.encrypt()
+					}, n);
+					this.setAuthToken(e), this.lastMoleculeQuery = null;
+				}
+				return o;
+			}, r = (await this.queryContinuId({
+				bundle: this.getBundle(),
+				token: "USER"
+			})).payload();
+			if (r && r.token === "USER" && r.position) {
+				let t = new N({
+					secret: e,
+					token: "USER",
+					position: r.position,
+					mlKemParameterSet: this.getMlKemParameterSet()
+				});
+				if (r.address && t.address !== r.address) this.log("warn", `KnishIOClient::requestProfileAuthToken() - ContinuID wallet ${r.address} is not derived from this secret at position ${r.position}; signing from an AUTH wallet...`);
+				else {
+					let e = await n(t);
+					if (e.success()) return this.log("info", `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer ${r.position}.`), e;
+					this.log("warn", `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer was rejected (${e.reason()}); retrying once from an AUTH wallet...`);
+				}
+			}
+			let i = await n(new N({
+				secret: e,
+				token: "AUTH",
+				mlKemParameterSet: this.getMlKemParameterSet()
+			}));
+			if (!i.success()) throw new Sr(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${i.reason()}`);
+			return this.log("info", "KnishIOClient::requestProfileAuthToken() - Authorization signed from a fresh AUTH wallet."), i;
+		} finally {
+			this.$__authInProcess = n;
+		}
 	}
 	async requestAuthToken({ secret: e = null, seed: t = null, cellSlug: n = null, encrypt: r = !1 }) {
 		if (this.$__serverSdkVersion < 3) return this.log("warn", "KnishIOClient::authorize() - Server SDK version does not require an authorization..."), null;
 		e === null && t && (e = oe(t)), n && this.setCellSlug(n), e === null && this.$__secretStorage && this.$__bundle && (e = await this.$__secretStorage.retrieveSecret(this.$__bundle)), this.$__authInProcess = !0;
-		let i;
-		return i = e ? await this.requestProfileAuthToken({
-			secret: e,
-			encrypt: r
-		}) : await this.requestGuestAuthToken({
-			cellSlug: n,
-			encrypt: r
-		}), this.log("info", `KnishIOClient::authorize() - Successfully retrieved auth token ${this.$__authToken.getToken()}...`), this.switchEncryption(r), this.$__authInProcess = !1, i;
+		try {
+			let t;
+			return t = e ? await this.requestProfileAuthToken({
+				secret: e,
+				encrypt: r
+			}) : await this.requestGuestAuthToken({
+				cellSlug: n,
+				encrypt: r
+			}), this.log("info", `KnishIOClient::authorize() - Successfully retrieved auth token ${this.$__authToken.getToken()}...`), this.switchEncryption(r), t;
+		} finally {
+			this.$__authInProcess = !1;
+		}
 	}
 	setAuthToken(e) {
 		if (!e) {
