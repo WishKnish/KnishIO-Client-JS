@@ -13,7 +13,7 @@ import { generateSecret } from '../src'
  * Gated on CIPHERHASH_TEST_URL (skips cleanly when unset). Run live against the dev validator:
  *   CIPHERHASH_TEST_URL=http://localhost:8081/graphql npm test -- tests/cipherhash-live.test.js
  *
- * The encrypted client conveys its AUTH source wallet's ML-KEM pubkey at auth (a signed
+ * The encrypted client conveys its auth source wallet's ML-KEM pubkey at auth (a signed
  * walletPubkey U-atom meta); the validator decrypts the encrypted queryBalance request, executes
  * it, and encrypts the response back to that pubkey, which the client decrypts. The transport is
  * transparent → the encrypted result must match the plaintext baseline.
@@ -31,8 +31,8 @@ describeCipherHash('CipherHash live ML-KEM round-trip (PQ Phase E)', () => {
     // pubkey, which is correct protocol behaviour, not a transport bug — so it must NOT be the
     // variable under test.)
     //
-    // The session authenticates PLAINTEXT on purpose. The AUTH wallet's ML-KEM pubkey is conveyed
-    // as a signed `walletPubkey` U-atom meta regardless of `encrypt` (KnishIOClient.js:2506-2509),
+    // The session authenticates PLAINTEXT on purpose. The auth wallet's ML-KEM pubkey is conveyed
+    // as a signed `walletPubkey` U-atom meta regardless of `encrypt` (KnishIOClient.js:2503-2506),
     // and the validator's CipherHash handler needs only that key — so an `encrypt: false` session
     // still speaks the encrypted transport. Authenticating with `encrypt: true` instead would make
     // the plaintext baseline leg below a silent downgrade, which the validator rejects when

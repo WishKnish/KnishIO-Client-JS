@@ -7,6 +7,7 @@ import Molecule from '../src/Molecule'
 import Wallet from '../src/Wallet'
 import Atom from '../src/Atom'
 import CheckMolecule from '../src/libraries/CheckMolecule'
+import WrongTokenTypeException from '../src/exception/WrongTokenTypeException'
 import {
   generateSecret,
   generateBundleHash
@@ -235,6 +236,32 @@ describe('CheckMolecule Isotope Validators', () => {
     // Directly test isotopeP, not the full verify chain
     // (OTS would fail first on tampered molecule)
     expect(() => checker.isotopeP()).toThrow(/Token slug/)
+  })
+
+  // An identity's re-login is signed from its ContinuID USER wallet (validator 0.5.0 proves
+  // the token only then); a first login signs from a fresh AUTH wallet.
+  test.each(['AUTH', 'USER'])('isotopeU accepts a %s-signed authorization', (token) => {
+    const molecule = new Molecule({
+      secret: testSecret,
+      bundle: testBundle,
+      sourceWallet: new Wallet({ secret: testSecret, token })
+    })
+    molecule.initAuthorization({ meta: { encrypt: 'false' } })
+    molecule.sign({})
+
+    expect(molecule.check()).toBe(true)
+  })
+
+  test('isotopeU rejects a token other than AUTH or USER', () => {
+    const molecule = new Molecule({
+      secret: testSecret,
+      bundle: testBundle,
+      sourceWallet: new Wallet({ secret: testSecret, token: 'TEST' })
+    })
+    molecule.initAuthorization({ meta: { encrypt: 'false' } })
+    molecule.sign({})
+
+    expect(() => molecule.check()).toThrow(WrongTokenTypeException)
   })
 
   test('verify chain includes all isotope validators', () => {

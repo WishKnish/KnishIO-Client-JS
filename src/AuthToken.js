@@ -104,6 +104,8 @@ export default class AuthToken {
   }
 
   /**
+   * Rebuilds a session from {@link AuthToken#getSnapshot}. A snapshot without a wallet token
+   * predates re-logins signed from the ContinuID USER wallet, so it was bound to an AUTH wallet.
    *
    * @param {object} snapshot
    * @param {string} secret
@@ -112,7 +114,7 @@ export default class AuthToken {
   static restore (snapshot, secret) {
     const wallet = new Wallet({
       secret,
-      token: 'AUTH',
+      token: snapshot.wallet.token || 'AUTH',
       position: snapshot.wallet.position,
       characters: snapshot.wallet.characters,
       mlKemParameterSet: AuthToken.resolveMlKemParameterSet(snapshot)
@@ -143,7 +145,7 @@ export default class AuthToken {
 
   /**
    *
-   * @return {{wallet: {characters, position, mlKemParameterSet}, encrypt, expiresAt, token, pubkey}}
+   * @return {{wallet: {token, characters, position, mlKemParameterSet}, encrypt, expiresAt, token, pubkey}}
    */
   getSnapshot () {
     return {
@@ -152,6 +154,7 @@ export default class AuthToken {
       pubkey: this.$__pubkey,
       encrypt: this.$__encrypt,
       wallet: {
+        token: this.$__wallet.token,
         position: this.$__wallet.position,
         characters: this.$__wallet.characters,
         mlKemParameterSet: this.$__wallet.mlKemParameterSet

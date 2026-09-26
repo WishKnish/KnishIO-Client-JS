@@ -191,7 +191,8 @@ export default class CheckMolecule {
    */
   isotopeU () {
     for (const atom of this.molecule.getIsotopes('U')) {
-      if (atom.token !== 'AUTH') {
+      // AUTH for a first login; USER for a re-login signed from the identity's ContinuID wallet
+      if (atom.token !== 'AUTH' && atom.token !== 'USER') {
         throw new WrongTokenTypeException(`Check::isotopeU() - "${ atom.token }" is not a valid Token slug for "${ atom.isotope }" isotope Atoms!`)
       }
 

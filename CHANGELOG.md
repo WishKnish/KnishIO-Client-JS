@@ -34,6 +34,22 @@ detail, the entry says so instead of guessing.
   molecule and code that calls `setSigningWallet` throws a `TypeError`; either way it only ever
   produced a molecule that validator 0.5.0 and later reject.
 
+### Fixed
+
+- A returning user's login (`requestProfileAuthToken`, which `requestAuthToken` calls when it
+  has a secret) is now signed from the ContinuID pointer, with the USER wallet registered there,
+  instead of from a fresh AUTH wallet at a random position. Validator 0.5.0 and later issue a
+  proven token only for such a login, so the user keeps read and subscription access to
+  permissioned and private cells. The pointer is looked up with `queryContinuId({ bundle, token:
+  'USER' })`; `queryContinuId` gained the optional `token` filter for this. A first login (no
+  pointer) is unchanged. A pointer-signed login the ledger rejects falls back once to the
+  previous, unproven AUTH-wallet login, so one login sends at most two authorization molecules.
+  `CheckMolecule` accepts a U atom with token USER as well as AUTH, and the `AuthToken` session
+  snapshot records the bound wallet's token so `restore()` rebuilds a USER wallet's keys; a
+  snapshot without it restores as AUTH, as before. Pinned by `tests/knishioclient.test.js`
+  ("profile re-login from the ContinuID pointer", "AuthToken snapshot") and
+  `tests/isotopes.test.js` (isotopeU).
+
 ## [1.2.1] — 2026-09-25
 
 ### Fixed

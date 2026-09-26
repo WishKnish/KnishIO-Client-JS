@@ -4,13 +4,16 @@ import {
   expect,
   beforeAll,
   beforeEach,
+  afterEach,
   jest
 } from '@jest/globals'
 import KnishIOClient from '../src/KnishIOClient'
 import Wallet from '../src/Wallet'
 import Molecule from '../src/Molecule'
+import AuthToken from '../src/AuthToken'
 import {
-  generateSecret
+  generateSecret,
+  generateBundleHash
 } from '../src'
 import MutationTransferTokens from '../src/mutation/MutationTransferTokens'
 import MutationCreateToken from '../src/mutation/MutationCreateToken'
@@ -22,6 +25,7 @@ import QueryContinuId from '../src/query/QueryContinuId'
 import MutationRequestAuthorization from '../src/mutation/MutationRequestAuthorization'
 import ResponseRequestAuthorization from '../src/response/ResponseRequestAuthorization'
 import ResponseContinuId from '../src/response/ResponseContinuId'
+import AuthorizationRejectedException from '../src/exception/AuthorizationRejectedException'
 
 const testUri = process.env.KNISHIO_TEST_URI || 'https://eteplitsky.testnet.knish.io:443/graphql'
 const testCell = 'TESTCELL'
@@ -154,6 +158,185 @@ describe('KnishIOClient - Unit', () => {
       executeSpy.mockRestore()
       queryContinuIdSpy.mockRestore()
     }
+  })
+})
+
+// Validator 0.5.0 proves a re-login only when it is signed from the identity's ContinuID
+// pointer: atoms[0] at the pointer position, from the USER wallet registered there.
+// The tests log in through requestAuthToken, as consumers do: requestProfileAuthToken called
+// directly leaves $__authInProcess unset, so client() starts a second login in the background.
+describe('KnishIOClient - profile re-login from the ContinuID pointer', () => {
+  const secret = generateSecret()
+  let client
+  let continuIdVariables
+  let proposals
+  let spies
+
+  const stubContinuId = (continuId) => {
+    spies.push(jest.spyOn(QueryContinuId.prototype, 'execute')
+      .mockImplementation(async function ({ variables }) {
+        continuIdVariables.push(variables)
+        return new ResponseContinuId({
+          query: this,
+          json: { data: { ContinuId: continuId } }
+        })
+      }))
+  }
+
+  const stubAuthorization = (...verdicts) => {
+    spies.push(jest.spyOn(MutationRequestAuthorization.prototype, 'execute')
+      .mockImplementation(async function () {
+        const accepted = verdicts[proposals.length]
+        proposals.push(this.molecule())
+        return new ResponseRequestAuthorization({
+          query: this,
+          json: {
+            data: {
+              ProposeMolecule: accepted
+                ? {
+                    molecularHash: 'offline',
+                    status: 'accepted',
+                    reason: null,
+                    payload: JSON.stringify({
+                      token: `offline-token-${ proposals.length }`,
+                      time: Math.floor(Date.now() / 1000) + 3600,
+                      key: 'offline-pubkey',
+                      encrypt: false
+                    })
+                  }
+                : {
+                    molecularHash: 'offline',
+                    status: 'rejected',
+                    reason: 'offline rejection',
+                    payload: null
+                  }
+            }
+          }
+        })
+      }))
+  }
+
+  const userPointer = (position, overrides = {}) => ({
+    tokenSlug: 'USER',
+    address: new Wallet({ secret, token: 'USER', position }).address,
+    position,
+    bundleHash: generateBundleHash(secret),
+    batchId: null,
+    characters: 'BASE64',
+    pubkey: null,
+    amount: 0,
+    ...overrides
+  })
+
+  beforeEach(() => {
+    client = new KnishIOClient({
+      uri: testUri,
+      cellSlug: testCell,
+      logging: false
+    })
+    continuIdVariables = []
+    proposals = []
+    spies = []
+  })
+
+  afterEach(() => {
+    spies.forEach(spy => spy.mockRestore())
+  })
+
+  test('signs a re-login from the USER wallet at the pointer and binds the token to it', async () => {
+    const position = Wallet.generatePosition()
+    stubContinuId(userPointer(position))
+    stubAuthorization(true)
+
+    await client.requestAuthToken({ secret, encrypt: false })
+
+    expect(continuIdVariables[0]).toEqual({ bundle: generateBundleHash(secret), token: 'USER' })
+    expect(proposals).toHaveLength(1)
+    const [signer, continuId] = proposals[0].atoms
+    expect(signer.isotope).toBe('U')
+    expect(signer.token).toBe('USER')
+    expect(signer.position).toBe(position)
+    expect(signer.walletAddress).toBe(new Wallet({ secret, token: 'USER', position }).address)
+    expect(continuId.isotope).toBe('I')
+    expect(continuId.aggregatedMeta().previousPosition).toBe(position)
+    expect(continuId.position).not.toBe(position)
+
+    const authWallet = client.getAuthToken().getWallet()
+    expect(authWallet.token).toBe('USER')
+    expect(authWallet.position).toBe(position)
+  })
+
+  test.each([
+    ['no pointer', () => null],
+    ['a non-USER wallet', () => userPointer(Wallet.generatePosition(), { tokenSlug: 'AUTH' })],
+    ['a pointer whose address the secret does not derive', () => userPointer(Wallet.generatePosition(), { address: 'f'.repeat(64) })]
+  ])('signs from a fresh AUTH wallet when ContinuID returns %s', async (_, continuId) => {
+    stubContinuId(continuId())
+    stubAuthorization(true)
+
+    await client.requestAuthToken({ secret, encrypt: false })
+
+    expect(proposals).toHaveLength(1)
+    expect(proposals[0].atoms[0].token).toBe('AUTH')
+    expect(client.getAuthToken().getWallet().token).toBe('AUTH')
+  })
+
+  test('falls back to an AUTH login once when the pointer-signed login is rejected', async () => {
+    stubContinuId(userPointer(Wallet.generatePosition()))
+    stubAuthorization(false, true)
+
+    await client.requestAuthToken({ secret, encrypt: false })
+
+    expect(proposals).toHaveLength(2)
+    expect(proposals[0].atoms[0].token).toBe('USER')
+    expect(proposals[1].atoms[0].token).toBe('AUTH')
+    expect(client.getAuthToken().getToken()).toBe('offline-token-2')
+  })
+
+  test('raises the rejection of the AUTH fallback without a third attempt', async () => {
+    stubContinuId(userPointer(Wallet.generatePosition()))
+    stubAuthorization(false, false)
+
+    await expect(client.requestAuthToken({ secret, encrypt: false }))
+      .rejects.toThrow(AuthorizationRejectedException)
+    expect(proposals).toHaveLength(2)
+    expect(proposals[1].atoms[0].token).toBe('AUTH')
+  })
+})
+
+describe('AuthToken snapshot', () => {
+  const secret = generateSecret()
+
+  test('restores the wallet a pointer-signed token is bound to', () => {
+    const wallet = new Wallet({ secret, token: 'USER', position: Wallet.generatePosition() })
+    const snapshot = AuthToken.create(
+      { token: 'T', expiresAt: 9999999999, pubkey: 'validator-pubkey', encrypt: true },
+      wallet
+    ).getSnapshot()
+
+    const restored = AuthToken.restore(snapshot, secret).getWallet()
+    expect(restored.token).toBe('USER')
+    expect(restored.address).toBe(wallet.address)
+    expect(restored.pubkey).toBe(wallet.pubkey)
+  })
+
+  test('restores a snapshot without a wallet token as AUTH', () => {
+    const wallet = new Wallet({ secret, token: 'AUTH' })
+    const snapshot = {
+      token: 'T',
+      expiresAt: 9999999999,
+      pubkey: 'validator-pubkey',
+      encrypt: true,
+      wallet: {
+        position: wallet.position,
+        characters: wallet.characters,
+        mlKemParameterSet: wallet.mlKemParameterSet
+      }
+    }
+
+    const restored = AuthToken.restore(snapshot, secret).getWallet()
+    expect(restored.token).toBe('AUTH')
+    expect(restored.address).toBe(wallet.address)
   })
 })
 
