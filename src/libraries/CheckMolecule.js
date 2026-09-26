@@ -71,7 +71,6 @@ import {
   chunkSubstr
 } from './strings.js'
 import JsSHA from 'jssha'
-import Dot from './../libraries/Dot.js'
 
 /**
  *
@@ -669,21 +668,8 @@ export default class CheckMolecule {
     addressSponge.update(digest)
     const address = addressSponge.getHash('HEX', { outputLen: 256 })
 
-    // Signing atom
-    const signingAtom = this.molecule.atoms[0]
-
-    // Get a signing address
-    let signingAddress = signingAtom.walletAddress
-
-    // Get signing wallet from first atom's metas
-    const signingWallet = Dot.get(signingAtom.aggregatedMeta(), 'signingWallet')
-
-    // Try to get custom signing address from the metas (local molecule with server secret)
-    if (signingWallet) {
-      signingAddress = Dot.get(JSON.parse(signingWallet), 'address')
-    }
-
-    if (address !== signingAddress) {
+    // The recovered address must be the address the first atom claims
+    if (address !== this.molecule.atoms[0].walletAddress) {
       throw new SignatureMismatchException()
     }
 

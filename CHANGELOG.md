@@ -13,6 +13,27 @@ history. Entries at and below `0.7.8` are reconstructed from commit messages
 rather than written at release time; where the history does not substantiate a
 detail, the entry says so instead of guessing.
 
+## [Unreleased]
+
+### Security
+
+- The verifier no longer honours a `signingWallet` meta on the first atom. `CheckMolecule.ots()`
+  compared the address recovered from the OTS signature against the address named in that meta
+  instead of `atoms[0].walletAddress`, so a molecule claiming one wallet's address but signed by
+  another wallet verified as valid. This affects offline verifiers that rely on `check()`, such
+  as knishproof. The address is now compared only with `atoms[0].walletAddress`. `sign()` no
+  longer reads the meta either and signs from `atoms[0].position`. Pinned by
+  `tests/signing-wallet-forgery.test.js` against the cross-SDK fixture
+  `tests/fixtures/signing-wallet-forgery.json`.
+
+### Changed
+
+- Removed the `signingWallet` option from `KnishIOClient.withdrawBufferToken`,
+  `MutationWithdrawBufferToken.fillMolecule` and `Molecule.initWithdrawBuffer`, and removed
+  `AtomMeta.setSigningWallet`. Code that passes `signingWallet` no longer has any effect on the
+  molecule and code that calls `setSigningWallet` throws a `TypeError`; either way it only ever
+  produced a molecule that validator 0.5.0 and later reject.
+
 ## [1.2.1] — 2026-09-25
 
 ### Fixed

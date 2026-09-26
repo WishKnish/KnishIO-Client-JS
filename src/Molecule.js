@@ -58,7 +58,6 @@ import {
   generateBatchId,
   generateBundleHash
 } from './libraries/crypto.js'
-import Dot from './libraries/Dot.js'
 import Rule from './instance/Rules/Rule.js'
 import AtomsMissingException from './exception/AtomsMissingException.js'
 import BalanceInsufficientException from './exception/BalanceInsufficientException.js'
@@ -725,12 +724,10 @@ export default class Molecule {
   /**
    *
    * @param {{}} recipients
-   * @param {Wallet|{}} signingWallet
    * @returns {Molecule}
    */
   initWithdrawBuffer ({
-    recipients,
-    signingWallet = null
+    recipients
   }) {
     // Calculate final amount from all recipients
     let amount = 0
@@ -741,18 +738,11 @@ export default class Molecule {
       throw new BalanceInsufficientException()
     }
 
-    // Set a metas signing position for molecule correct reconciliation
-    const firstAtomMeta = new AtomMeta()
-    if (signingWallet) {
-      firstAtomMeta.setSigningWallet(signingWallet)
-    }
-
     // Initializing a new Atom to remove tokens from source (debit full balance)
     this.addAtom(Atom.create({
       isotope: 'B',
       wallet: this.sourceWallet,
       value: -this.sourceWallet.balance,
-      meta: firstAtomMeta,
       metaType: 'walletBundle',
       metaId: this.sourceWallet.bundle
     }))
@@ -1105,19 +1095,8 @@ export default class Molecule {
     // Signing atom
     const signingAtom = this.atoms[0]
 
-    // Set signing position from the first atom
-    let signingPosition = signingAtom.position
-
-    // Get signing wallet from first atom's metas
-    const signingWallet = Dot.get(signingAtom.aggregatedMeta(), 'signingWallet')
-
-    // Try to get custom signing position from the metas (local molecule with server secret)
-    if (signingWallet) {
-      signingPosition = Dot.get(JSON.parse(signingWallet), 'position')
-    }
-
     // Signing position is required
-    if (!signingPosition) {
+    if (!signingAtom.position) {
       throw new SignatureMalformedException('Signing wallet must have a position!')
     }
 

@@ -2173,14 +2173,12 @@ export default class KnishIOClient {
    * @param {string} options.tokenSlug - The token slug.
    * @param {number} options.amount - The amount of tokens to withdraw.
    * @param {Object} [options.sourceWallet=null] - The source wallet to withdraw tokens from. If not provided, a source wallet will be queried.
-   * @param {Object} [options.signingWallet=null] - The signing wallet to use for the transaction.
    * @returns {Promise<Object>} A promise that resolves to the result of the withdrawal transaction.
    */
   async withdrawBufferToken ({
     tokenSlug,
     amount,
-    sourceWallet = null,
-    signingWallet = null
+    sourceWallet = null
   }) {
     // Get a source wallet
     if (sourceWallet === null) {
@@ -2209,8 +2207,7 @@ export default class KnishIOClient {
     const recipients = {}
     recipients[this.getBundle()] = amount
     query.fillMolecule({
-      recipients,
-      signingWallet
+      recipients
     })
     return await this.executeQuery(query)
   }

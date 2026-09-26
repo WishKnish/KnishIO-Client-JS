@@ -144,25 +144,6 @@ export default class AtomMeta {
 
   /**
    *
-   * @param {Wallet} signingWallet
-   * @returns {AtomMeta}
-   */
-  setSigningWallet (signingWallet) {
-    this.merge({
-      signingWallet: JSON.stringify({
-        tokenSlug: signingWallet.token,
-        bundleHash: signingWallet.bundle,
-        address: signingWallet.address,
-        position: signingWallet.position,
-        pubkey: signingWallet.pubkey,
-        characters: signingWallet.characters
-      })
-    })
-    return this
-  }
-
-  /**
-   *
    * @param policy
    * @todo move logic to the separated class
    * @returns {AtomMeta}
