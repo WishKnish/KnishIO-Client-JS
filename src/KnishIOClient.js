@@ -1861,16 +1861,26 @@ export default class KnishIOClient {
    * Claims a shadow wallet for a given token.
    *
    * @param {string} token - The token for which to claim the shadow wallet.
-   * @param {string|null} batchId - The batch ID of the shadow wallet (optional).
+   * @param {string|null} batchId - The batch ID of the shadow wallet. When omitted, the first shadow wallet
+   *   `queryWallets({ token })` returns is claimed; the validator rejects a claim without a batch ID.
    * @param {string|null} molecule - The molecule associated with the shadow wallet (optional).
    *
    * @returns {Promise<ResponseClaimShadowWallet>} - A promise that resolves to the result of the claim operation.
+   * @throws {WalletShadowException} - If no batch ID is given and the token has no shadow wallet.
    */
   async claimShadowWallet ({
     token,
     batchId = null,
     molecule = null
   }) {
+    if (!batchId) {
+      const shadowWallets = ((await this.queryWallets({ token })) || []).filter(wallet => wallet.isShadow())
+      if (!shadowWallets.length) {
+        throw new WalletShadowException(`KnishIOClient::claimShadowWallet() - No shadow wallets found for token ${ token }`)
+      }
+      batchId = shadowWallets[0].batchId
+    }
+
     /**
      * @type {MutationClaimShadowWallet}
      */

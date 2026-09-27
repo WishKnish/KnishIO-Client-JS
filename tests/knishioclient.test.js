@@ -26,6 +26,7 @@ import MutationRequestAuthorization from '../src/mutation/MutationRequestAuthori
 import ResponseRequestAuthorization from '../src/response/ResponseRequestAuthorization'
 import ResponseContinuId from '../src/response/ResponseContinuId'
 import AuthorizationRejectedException from '../src/exception/AuthorizationRejectedException'
+import WalletShadowException from '../src/exception/WalletShadowException'
 
 const testUri = process.env.KNISHIO_TEST_URI || 'https://eteplitsky.testnet.knish.io:443/graphql'
 const testCell = 'TESTCELL'
@@ -575,5 +576,58 @@ describeIntegration('KnishIOClient - Integration (requires server)', () => {
       mutationClass: MutationCreateMeta
     })
     expect(mutation.molecule()).toBeInstanceOf(Molecule)
+  })
+})
+
+// Validator 0.5.0 rejects a shadow wallet claim without a batch id ("Shadow wallet claim
+// requires batch_id"), so a claim that names none must take it from the shadow wallet itself.
+describe('KnishIOClient - claimShadowWallet batch id resolution', () => {
+  const secret = generateSecret()
+  const token = 'SHADOWTOKEN'
+  let client
+  let mutation
+  let executeSpy
+
+  beforeEach(() => {
+    client = new KnishIOClient({ uri: testUri, cellSlug: testCell, logging: false })
+    client.setSecret(secret)
+    mutation = { fillMolecule: jest.fn() }
+    jest.spyOn(client, 'createMoleculeMutation').mockResolvedValue(mutation)
+    executeSpy = jest.spyOn(client, 'executeQuery').mockResolvedValue('response')
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  const regularWallet = () => new Wallet({ secret, token })
+  const shadowWallet = batchId => new Wallet({ token, batchId })
+
+  test('claims the first shadow wallet listed when no batch id is given', async () => {
+    jest.spyOn(client, 'queryWallets').mockResolvedValue([regularWallet(), shadowWallet('batch-shadow-1')])
+
+    await expect(client.claimShadowWallet({ token })).resolves.toBe('response')
+
+    expect(client.queryWallets).toHaveBeenCalledWith({ token })
+    expect(mutation.fillMolecule).toHaveBeenCalledWith({ token, batchId: 'batch-shadow-1' })
+    expect(executeSpy).toHaveBeenCalledTimes(1)
+  })
+
+  test('throws without proposing when no shadow wallet exists', async () => {
+    jest.spyOn(client, 'queryWallets').mockResolvedValue([regularWallet()])
+
+    await expect(client.claimShadowWallet({ token })).rejects.toThrow(WalletShadowException)
+
+    expect(mutation.fillMolecule).not.toHaveBeenCalled()
+    expect(executeSpy).not.toHaveBeenCalled()
+  })
+
+  test('uses an explicit batch id without querying wallets', async () => {
+    const querySpy = jest.spyOn(client, 'queryWallets')
+
+    await client.claimShadowWallet({ token, batchId: 'batch-explicit' })
+
+    expect(querySpy).not.toHaveBeenCalled()
+    expect(mutation.fillMolecule).toHaveBeenCalledWith({ token, batchId: 'batch-explicit' })
   })
 })

@@ -47,6 +47,12 @@ detail, the entry says so instead of guessing.
   same ContinuID pointer. Pinned by `tests/knishioclient.test.js` ("clears the in-progress flag
   after a rejected login so client() authorizes again", "a direct profile login keeps client()
   from starting a second login").
+- `claimShadowWallet` without a `batchId` now takes the batch ID from the first shadow wallet
+  that `queryWallets({ token })` returns (the TS SDK also resolves it from that query), and
+  throws `WalletShadowException` when the token has none. It sent the claim with no batch ID,
+  which validator 0.5.0 rejects with "Shadow wallet claim requires batch_id". An explicit
+  `batchId` is used as before. Pinned by `tests/knishioclient.test.js` ("claimShadowWallet batch
+  id resolution").
 
 ### Security
 
