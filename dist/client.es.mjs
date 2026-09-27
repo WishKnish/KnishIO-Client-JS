@@ -6033,6 +6033,11 @@ var Ki = class {
 		}), await this.executeQuery(d);
 	}
 	async claimShadowWallet({ token: e, batchId: t = null, molecule: n = null }) {
+		if (!t) {
+			let n = (await this.queryWallets({ token: e }) || []).filter((e) => e.isShadow());
+			if (!n.length) throw new lr(`KnishIOClient::claimShadowWallet() - No shadow wallets found for token ${e}`);
+			t = n[0].batchId;
+		}
 		let r = await this.createMoleculeMutation({
 			mutationClass: Xn,
 			molecule: n
