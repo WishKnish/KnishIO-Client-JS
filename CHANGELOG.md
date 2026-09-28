@@ -13,6 +13,36 @@ history. Entries at and below `0.7.8` are reconstructed from commit messages
 rather than written at release time; where the history does not substantiate a
 detail, the entry says so instead of guessing.
 
+## [1.3.1] — 2026-09-28
+
+### Fixed
+
+- `replenishToken` builds the molecule validator 0.6.0 and later accept: a C atom with meta
+  `action` = `add`, signed by the USER wallet like `createToken`, crediting the identity's wallet
+  for the token (from `queryBalance`, or a new one) through the metas `address`, `position`,
+  `pubkey`, `batchId` (only when that wallet has one) and `tokenUnits` (only for stackable units),
+  followed by the ContinuID atom. It built two positive V atoms that its own `check()` rejected
+  (`TransferUnbalancedException`), so no replenish was ever sent. A stackable token without units
+  now throws `StackableUnitAmountException`, and an amount that is not positive throws
+  `NegativeAmountException`, before anything is sent. `Molecule.replenishToken` now takes the
+  credited wallet (`creditedWallet`).
+- `fuseToken` builds the conserved four-atom fusion molecule: V source (-balance, carrying the
+  fused units), V burn (+(M-1) to the zero bundle, all fused units but the last), F recipient (+1,
+  the new unit, whose `fusedTokenUnits` meta lists every fused unit) and V remainder (+(balance-M),
+  the kept units, emitted even when it is 0). It emitted an unconserved `V(-n) F(+1) V(balance-n)`.
+  When the source wallet has a batch ID the remainder keeps it and the burn and F atoms get fresh
+  ones. Fusing fewer than two units, a unit the wallet does not hold, or a new unit whose ID the
+  wallet already holds throws `TransferBalanceException`. `Molecule.fuseToken` now takes
+  `{ fusedTokenUnitIds, newTokenUnit, recipientWallet }`.
+- `withdrawBufferToken` sends the change of a partial withdraw to a fresh remainder wallet
+  (`createRemainder`) instead of back to the buffer wallet's own, just-consumed position, where
+  validator 0.6.1 rejects it ("Value may not be credited to a consumed signing position").
+- Pinned by the cross-SDK vectors `token_replenish`, `stackable_fusion_conservation` and
+  `buffer_withdraw_fresh_remainder` (`tests/patent-vectors.test.js` against the master,
+  `tests/phaseb-vectors.test.js` against frozen copies) and by `tests/phaseb-vectors.test.js`
+  ("pre-submit molecule check"), which locks in that high-level operations run `check()` before
+  sending while the raw `MutationProposeMolecule` path sends a caller-built molecule unchanged.
+
 ## [1.3.0] — 2026-09-26
 
 ### Changed
@@ -355,7 +385,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.1
 [1.3.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.0
 [1.2.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.2.1
 [1.2.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.2.0
