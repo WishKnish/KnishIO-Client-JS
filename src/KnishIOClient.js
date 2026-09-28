@@ -55,7 +55,7 @@ import {
 } from './libraries/crypto.js'
 import Molecule from './Molecule.js'
 import Wallet from './Wallet.js'
-import TokenUnit from './TokenUnit.js'
+import NegativeAmountException from './exception/NegativeAmountException.js'
 import AuthToken from './AuthToken.js'
 import QueryContinuId from './query/QueryContinuId.js'
 import QueryWalletBundle from './query/QueryWalletBundle.js'
@@ -2179,12 +2179,13 @@ export default class KnishIOClient {
   }
 
   /**
-   * Withdraws buffer tokens.
+   * Withdraws buffer tokens back to this identity (contract 9.6): the source is the
+   * identity's buffer wallet, and the change goes to a fresh remainder position.
    *
    * @param {Object} options - The options for withdrawing buffer tokens.
    * @param {string} options.tokenSlug - The token slug.
    * @param {number} options.amount - The amount of tokens to withdraw.
-   * @param {Object} [options.sourceWallet=null] - The source wallet to withdraw tokens from. If not provided, a source wallet will be queried.
+   * @param {Object} [options.sourceWallet=null] - The buffer wallet to withdraw from. If not provided, the identity's buffer balance wallet is queried.
    * @returns {Promise<Object>} A promise that resolves to the result of the withdrawal transaction.
    */
   async withdrawBufferToken ({
@@ -2192,7 +2193,7 @@ export default class KnishIOClient {
     amount,
     sourceWallet = null
   }) {
-    // Get a source wallet
+    // Get the buffer wallet
     if (sourceWallet === null) {
       sourceWallet = await this.querySourceWallet({
         token: tokenSlug,
@@ -2201,8 +2202,8 @@ export default class KnishIOClient {
       })
     }
 
-    // Remainder wallet
-    const remainderWallet = sourceWallet
+    // The remainder takes a fresh position: the source position is consumed by signing
+    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
 
     // Build the molecule itself
     const molecule = await this.createMolecule({
@@ -2288,12 +2289,13 @@ export default class KnishIOClient {
   }
 
   /**
-   * Builds and executes a molecule to destroy the specified Token units
+   * Mints more supply of an existing token this identity created (contract 9.1). The
+   * supply is credited to the identity's existing wallet for the token, or to a new one.
    *
    * @param {string} token
-   * @param {number|null} amount
-   * @param {array|null} units
-   * @param {Wallet|null} sourceWallet
+   * @param {number|null} amount - the fungible amount; with units, null or the unit count
+   * @param {array} units - new token units as [id, name, metas] triples (stackable tokens)
+   * @param {Wallet|null} sourceWallet - the wallet to credit; queried when not given
    * @return {Promise<unknown>}
    */
   async replenishToken ({
@@ -2302,22 +2304,37 @@ export default class KnishIOClient {
     units = [],
     sourceWallet = null
   }) {
-    if (sourceWallet === null) {
-      sourceWallet = (await this.queryBalance({ token })).payload()
-    }
-    if (!sourceWallet) {
-      throw new TransferBalanceException('Source wallet is missing or invalid.')
+    if (units.length === 0) {
+      if (!(Number(amount) > 0)) {
+        throw new NegativeAmountException('KnishIOClient::replenishToken() - Amount to replenish must be positive!')
+      }
+
+      // A stackable token is replenished with new units, never with a bare amount
+      const tokenResponse = await this.executeQuery(this.createQuery(QueryToken), {
+        slug: token
+      })
+      if (Dot.get(tokenResponse.data(), '0.fungibility') === 'stackable') {
+        throw new StackableUnitAmountException('KnishIOClient::replenishToken() - Replenishing a stackable token requires token units!')
+      }
     }
 
-    // Remainder wallet
-    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
+    // The credited wallet: the identity's existing wallet for the token, or a new one
+    let creditedWallet = sourceWallet
+    if (creditedWallet === null) {
+      creditedWallet = (await this.queryBalance({ token })).payload()
+    }
+    if (!creditedWallet) {
+      creditedWallet = Wallet.create({
+        secret: this.getSecret(),
+        token,
+        mlKemParameterSet: this.getMlKemParameterSet()
+      })
+    }
 
-    // Create a molecule
-    const molecule = await this.createMolecule({
-      sourceWallet,
-      remainderWallet
-    })
+    // Signed by the identity's USER wallet, like createToken
+    const molecule = await this.createMolecule({})
     molecule.replenishToken({
+      creditedWallet,
       amount,
       units
     })
@@ -2335,12 +2352,13 @@ export default class KnishIOClient {
   }
 
   /**
+   * Fuses stackable token units of this identity into one new unit (contract 9.2).
    *
-   * @param bundleHash
-   * @param tokenSlug
-   * @param newTokenUnit
-   * @param fusedTokenUnitIds
-   * @param sourceWallet
+   * @param {string} bundleHash - the bundle receiving the new unit
+   * @param {string} tokenSlug - the stackable token
+   * @param {TokenUnit|string} newTokenUnit - the new unit (a string is used as id and name)
+   * @param {string[]} fusedTokenUnitIds - the unit ids to fuse (at least two)
+   * @param {Wallet|null} sourceWallet - the wallet holding the units; queried when not given
    * @returns {Promise<*>}
    */
   async fuseToken ({
@@ -2353,64 +2371,41 @@ export default class KnishIOClient {
     if (sourceWallet === null) {
       sourceWallet = (await this.queryBalance({ token: tokenSlug })).payload()
     }
-
-    // Check source wallet
-    if (sourceWallet === null) {
+    if (!sourceWallet) {
       throw new TransferBalanceException('Source wallet is missing or invalid.')
     }
-    if (!sourceWallet.tokenUnits || !sourceWallet.tokenUnits.length) {
-      throw new TransferBalanceException('Source wallet does not have token units.')
-    }
-    if (!fusedTokenUnitIds.length) {
-      throw new TransferBalanceException('Fused token unit list is empty.')
-    }
 
-    // Check fused token units
-    const sourceTokenUnitIds = []
-    sourceWallet.tokenUnits.forEach((tokenUnit) => {
-      sourceTokenUnitIds.push(tokenUnit.id)
-    })
-    fusedTokenUnitIds.forEach((tokenUnitId) => {
-      if (!sourceTokenUnitIds.includes(tokenUnitId)) {
-        throw new TransferBalanceException(`Fused token unit ID = ${ tokenUnitId } does not found in the source wallet.`)
-      }
-    })
-
-    // Generate new recipient wallet if only recipient secret has been passed
-    const recipientWallet = Wallet.create({
-      bundle: bundleHash,
-      token: tokenSlug,
-      mlKemParameterSet: this.getMlKemParameterSet()
-    })
-
-    // Set batch ID
+    // The new unit goes to a fresh own wallet, or to the recipient bundle
+    const recipientWallet = bundleHash === this.getBundle()
+      ? Wallet.create({
+        secret: this.getSecret(),
+        token: tokenSlug,
+        mlKemParameterSet: this.getMlKemParameterSet()
+      })
+      : Wallet.create({
+        bundle: bundleHash,
+        token: tokenSlug,
+        mlKemParameterSet: this.getMlKemParameterSet()
+      })
     recipientWallet.initBatchId({ sourceWallet })
 
     // Remainder wallet
     const remainderWallet = sourceWallet.createRemainder(this.getSecret())
-
-    // Split token units (fused)
-    sourceWallet.splitUnits(fusedTokenUnitIds, remainderWallet)
-
-    // Coerce string newTokenUnit to TokenUnit object
-    if (typeof newTokenUnit === 'string') {
-      newTokenUnit = new TokenUnit(newTokenUnit, newTokenUnit, {})
-    }
-
-    // Set recipient new fused token unit
-    newTokenUnit.metas.fusedTokenUnits = sourceWallet.getTokenUnitsData()
-    recipientWallet.tokenUnits = [newTokenUnit]
 
     // Create a molecule
     const molecule = await this.createMolecule({
       sourceWallet,
       remainderWallet
     })
-    molecule.fuseToken(sourceWallet.tokenUnits, recipientWallet)
+    molecule.fuseToken({
+      fusedTokenUnitIds,
+      newTokenUnit,
+      recipientWallet
+    })
     molecule.sign({
       bundle: this.getBundle()
     })
-    molecule.check()
+    molecule.check(sourceWallet)
 
     // Create & execute a mutation
     const query = await this.createMoleculeMutation({

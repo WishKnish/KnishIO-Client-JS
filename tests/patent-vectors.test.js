@@ -1,7 +1,9 @@
 import {
   describe,
   test,
-  expect
+  expect,
+  afterEach,
+  jest
 } from '@jest/globals'
 import Wallet from '../src/Wallet'
 import Molecule from '../src/Molecule'
@@ -16,6 +18,16 @@ import {
 } from '../src'
 import fs from 'fs'
 import path from 'path'
+import {
+  TOKEN_REPLENISH_TESTS,
+  STACKABLE_FUSION_TESTS,
+  BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS
+} from './fixtures/phaseBVectors.js'
+import {
+  assertReplenishVector,
+  assertFusionVector,
+  assertWithdrawVector
+} from './fixtures/phaseBHarness.js'
 
 // Shared cross-SDK master (../shared-test-results), absent in a standalone checkout of
 // this SDK. Then the file registers one visible skipped test and nothing else.
@@ -110,6 +122,29 @@ describeWithVectors('Patent Vector Validation', () => {
       expect(vAtom.value).toBe(vector.expectedRecipientValue)
       expect(bAtoms[1].value).toBe(vector.expectedRemainderValue)
     })
+  })
+
+  // -----------------------------------------------------------------
+  // 0a-phaseB. token_replenish, stackable_fusion_conservation and
+  //     buffer_withdraw_fresh_remainder (Phase B, contracts 9.1 / 9.2 / 9.6):
+  //     each master test is built through the public client operation and
+  //     asserted atom by atom; the frozen copies the always-on unit suite
+  //     (tests/phaseb-vectors.test.js) uses must equal the master.
+  // -----------------------------------------------------------------
+  describe('Phase B molecule vectors', () => {
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    test('the frozen fixtures equal the master vectors', () => {
+      expect(vectors.vectors.token_replenish.tests).toEqual(TOKEN_REPLENISH_TESTS)
+      expect(vectors.vectors.stackable_fusion_conservation.tests).toEqual(STACKABLE_FUSION_TESTS)
+      expect(vectors.vectors.buffer_withdraw_fresh_remainder.tests).toEqual(BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS)
+    })
+
+    test.each(vectors.vectors.token_replenish.tests)('token_replenish $name', assertReplenishVector)
+    test.each(vectors.vectors.stackable_fusion_conservation.tests)('stackable_fusion_conservation $name', assertFusionVector)
+    test.each(vectors.vectors.buffer_withdraw_fresh_remainder.tests)('buffer_withdraw_fresh_remainder $name', assertWithdrawVector)
   })
 
   // -----------------------------------------------------------------
