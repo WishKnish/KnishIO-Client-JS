@@ -5917,7 +5917,7 @@ var qi = class {
 		if (a === "stackable" && (n.batchId = r || le({})), ["nonfungible", "stackable"].includes(a) && i.length > 0) {
 			if (z.get(n || {}, "decimals") > 0) throw new fr();
 			if (t > 0) throw new R();
-			t = i.length, n.splittable = 1, n.decimals = 0, n.tokenUnits = JSON.stringify(i);
+			t = i.length, n.splittable = 1, n.decimals = 0, n.tokenUnits = JSON.stringify(i.map((e) => typeof e == "string" ? new ue(e, e, {}).toData() : Array.isArray(e) ? new ue(e[0], e[1] ?? e[0], e[2] || {}).toData() : e.toData()));
 		}
 		let o = new N({
 			secret: this.getSecret(),
