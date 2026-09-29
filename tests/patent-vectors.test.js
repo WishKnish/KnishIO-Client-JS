@@ -21,12 +21,14 @@ import path from 'path'
 import {
   TOKEN_REPLENISH_TESTS,
   STACKABLE_FUSION_TESTS,
-  BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS
+  BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS,
+  CREATE_TOKEN_UNITS_TESTS
 } from './fixtures/phaseBVectors.js'
 import {
   assertReplenishVector,
   assertFusionVector,
-  assertWithdrawVector
+  assertWithdrawVector,
+  assertCreateTokenUnitsVector
 } from './fixtures/phaseBHarness.js'
 
 // Shared cross-SDK master (../shared-test-results), absent in a standalone checkout of
@@ -125,8 +127,9 @@ describeWithVectors('Patent Vector Validation', () => {
   })
 
   // -----------------------------------------------------------------
-  // 0a-phaseB. token_replenish, stackable_fusion_conservation and
-  //     buffer_withdraw_fresh_remainder (Phase B, contracts 9.1 / 9.2 / 9.6):
+  // 0a-phaseB. token_replenish, stackable_fusion_conservation,
+  //     buffer_withdraw_fresh_remainder (Phase B, contracts 9.1 / 9.2 / 9.6) and
+  //     create_token_units (createToken sends [id, name, metas] unit triples):
   //     each master test is built through the public client operation and
   //     asserted atom by atom; the frozen copies the always-on unit suite
   //     (tests/phaseb-vectors.test.js) uses must equal the master.
@@ -140,11 +143,13 @@ describeWithVectors('Patent Vector Validation', () => {
       expect(vectors.vectors.token_replenish.tests).toEqual(TOKEN_REPLENISH_TESTS)
       expect(vectors.vectors.stackable_fusion_conservation.tests).toEqual(STACKABLE_FUSION_TESTS)
       expect(vectors.vectors.buffer_withdraw_fresh_remainder.tests).toEqual(BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS)
+      expect(vectors.vectors.create_token_units.tests).toEqual(CREATE_TOKEN_UNITS_TESTS)
     })
 
     test.each(vectors.vectors.token_replenish.tests)('token_replenish $name', assertReplenishVector)
     test.each(vectors.vectors.stackable_fusion_conservation.tests)('stackable_fusion_conservation $name', assertFusionVector)
     test.each(vectors.vectors.buffer_withdraw_fresh_remainder.tests)('buffer_withdraw_fresh_remainder $name', assertWithdrawVector)
+    test.each(vectors.vectors.create_token_units.tests)('create_token_units $name', assertCreateTokenUnitsVector)
   })
 
   // -----------------------------------------------------------------

@@ -15,14 +15,16 @@ import TransferBalanceException from '../src/exception/TransferBalanceException'
 import {
   TOKEN_REPLENISH_TESTS,
   STACKABLE_FUSION_TESTS,
-  BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS
+  BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS,
+  CREATE_TOKEN_UNITS_TESTS
 } from './fixtures/phaseBVectors.js'
 import {
   stubClient,
   atomUnits,
   assertReplenishVector,
   assertFusionVector,
-  assertWithdrawVector
+  assertWithdrawVector,
+  assertCreateTokenUnitsVector
 } from './fixtures/phaseBHarness.js'
 
 afterEach(() => {
@@ -41,6 +43,26 @@ describe('stackable_fusion_conservation vectors (frozen)', () => {
 
 describe('buffer_withdraw_fresh_remainder vectors (frozen)', () => {
   test.each(BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS)('$name', assertWithdrawVector)
+})
+
+describe('create_token_units vectors (frozen)', () => {
+  test.each(CREATE_TOKEN_UNITS_TESTS)('$name', assertCreateTokenUnitsVector)
+})
+
+describe('createToken', () => {
+  test.each([
+    ['a triple', ['X1', 'Name X', { k: 'v' }], '[["X1","Name X",{"k":"v"}]]'],
+    ['a triple without metas', ['X1', 'Name X'], '[["X1","Name X",{}]]'],
+    ['a TokenUnit', new TokenUnit('X1', 'Name X', { k: 'v' }), '[["X1","Name X",{"k":"v"}]]']
+  ])('sends %s with its own name and metas', async (_label, unit, expected) => {
+    const { client, proposed } = stubClient()
+
+    await client.createToken({ token: 'CRTTRI', amount: null, meta: { fungibility: 'stackable' }, units: [unit] })
+
+    const cAtom = proposed[0].atoms.find(atom => atom.isotope === 'C')
+    expect(cAtom.aggregatedMeta().tokenUnits).toBe(expected)
+    expect(proposed[0].check()).toBe(true)
+  })
 })
 
 describe('replenishToken', () => {

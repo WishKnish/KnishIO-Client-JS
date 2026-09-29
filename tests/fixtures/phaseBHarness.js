@@ -193,3 +193,27 @@ export async function assertWithdrawVector (vector) {
   expect(valueSum(molecule.atoms)).toBe(vector.expectedSum)
   expect(molecule.check(buffer)).toBe(true)
 }
+
+/** create_token_units: createToken of a stackable token with units and no amount. */
+export async function assertCreateTokenUnitsVector (vector) {
+  const { client, proposed } = stubClient()
+
+  await client.createToken({
+    token: vector.token,
+    amount: null,
+    meta: { fungibility: 'stackable' },
+    units: vector.units
+  })
+
+  expect(proposed).toHaveLength(1)
+  const molecule = proposed[0]
+  const cAtoms = molecule.atoms.filter(atom => atom.isotope === 'C')
+  expect(cAtoms).toHaveLength(1)
+  const [cAtom] = cAtoms
+  expect(cAtom.aggregatedMeta().tokenUnits).toBe(vector.expectedTokenUnits)
+  expect(cAtom.value).toBe(vector.expectedCValue)
+  expect(cAtom.metaType).toBe(vector.expectedMetaType)
+  expect(cAtom.metaId).toBe(vector.expectedMetaId)
+  expect(atomUnits(cAtom).map(unit => unit[0])).toEqual(vector.expectedTokenUnitIds)
+  expect(molecule.check()).toBe(true)
+}

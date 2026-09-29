@@ -83,6 +83,7 @@ import UnauthenticatedException from './exception/UnauthenticatedException.js'
 import WalletShadowException from './exception/WalletShadowException.js'
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException.js'
 import StackableUnitAmountException from './exception/StackableUnitAmountException.js'
+import TokenUnit from './TokenUnit.js'
 import CreateMoleculeSubscribe from './subscribe/CreateMoleculeSubscribe.js'
 import WalletStatusSubscribe from './subscribe/WalletStatusSubscribe.js'
 import ActiveWalletSubscribe from './subscribe/ActiveWalletSubscribe.js'
@@ -1355,7 +1356,8 @@ export default class KnishIOClient {
    * @param {number} [options.amount] - The amount of tokens to create.
    * @param {object} [options.meta] - Additional metadata for the token.
    * @param {string} [options.batchId] - The batch identifier for stackable tokens.
-   * @param {array} [options.units] - The unit IDs for the token.
+   * @param {Array<string|Array|TokenUnit>} [options.units] - The token units: a bare id (sent as [id, id, {}]),
+   *   an [id, name, metas] triple or a TokenUnit.
    *
    * @throws {StackableUnitDecimalsException} If a stackable token has decimals.
    * @throws {StackableUnitAmountException} If stackable units are provided with an amount.
@@ -1393,7 +1395,11 @@ export default class KnishIOClient {
       amount = units.length
       meta.splittable = 1
       meta.decimals = 0
-      meta.tokenUnits = JSON.stringify(units)
+      meta.tokenUnits = JSON.stringify(units.map(u => typeof u === 'string'
+        ? new TokenUnit(u, u, {}).toData()
+        : Array.isArray(u)
+          ? new TokenUnit(u[0], u[1] ?? u[0], u[2] || {}).toData()
+          : u.toData()))
     }
 
     // Creating the wallet that will receive the new tokens

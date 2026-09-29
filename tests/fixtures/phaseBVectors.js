@@ -225,3 +225,27 @@ export const BUFFER_WITHDRAW_FRESH_REMAINDER_TESTS = [
     expectedRemainderPositionDistinctFromSource: true
   }
 ]
+
+// vectors.create_token_units.tests
+export const CREATE_TOKEN_UNITS_TESTS = [
+  {
+    name: 'ids_to_triples',
+    token: 'CRTSTK',
+    units: ['U1', 'U2', 'U3'],
+    expectedCValue: '3',
+    expectedMetaType: 'token',
+    expectedMetaId: 'CRTSTK',
+    expectedTokenUnits: '[["U1","U1",{}],["U2","U2",{}],["U3","U3",{}]]',
+    expectedTokenUnitIds: ['U1', 'U2', 'U3']
+  },
+  {
+    name: 'single_id',
+    token: 'CRTONE',
+    units: ['solo'],
+    expectedCValue: '1',
+    expectedMetaType: 'token',
+    expectedMetaId: 'CRTONE',
+    expectedTokenUnits: '[["solo","solo",{}]]',
+    expectedTokenUnitIds: ['solo']
+  }
+]
