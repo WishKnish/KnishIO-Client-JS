@@ -13,6 +13,20 @@ history. Entries at and below `0.7.8` are reconstructed from commit messages
 rather than written at release time; where the history does not substantiate a
 detail, the entry says so instead of guessing.
 
+## [Unreleased]
+
+### Added
+
+- Optional kcore backend: when the application installs `@wishknish/knishio-kcore`, the WOTS+
+  chains and address (`Wallet.generateAddress`, `Molecule.sign`, `CheckMolecule.ots`) and
+  ML-KEM-1024/768 keygen, encapsulation and decapsulation run in the shared C core. Outputs are
+  identical to the pure-JS path, which stays the fallback for a missing package, browsers, and any
+  input kcore is not guaranteed to treat identically (peer OTS text that is not lowercase hex,
+  counts outside 0..64). `KNISHIO_KCORE=auto|off|require` selects the mode (`require` throws
+  `KcoreUnavailable` when kcore cannot be loaded) and `KNISHIO_KCORE_MODULE` overrides the module
+  path. Loading needs Node.js ≥ 20.16 or ≥ 22.3 (`process.getBuiltinModule`). The package is not
+  a dependency.
+
 ## [1.3.2] — 2026-09-29
 
 ### Fixed

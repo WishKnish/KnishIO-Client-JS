@@ -71,6 +71,7 @@ import {
   chunkSubstr
 } from './strings.js'
 import JsSHA from 'jssha'
+import * as kcore from './kcore.js'
 
 /**
  *
@@ -647,16 +648,21 @@ export default class CheckMolecule {
     // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
     const otsChunks = chunkSubstr(ots, 128)
 
-    let keyFragments = ''
+    // kcore advances the 16 chains at once for lowercase-hex input; anything else (peer-supplied
+    // text) runs the per-chunk SHAKE256 loop, so the verdict never depends on kcore being present.
+    let keyFragments = kcore.chainsHex(ots, otsChunks.map((_, i) => 8 + normalizedHash[i]))
 
-    for (const index in otsChunks) {
-      let workingChunk = otsChunks[index]
+    if (keyFragments === null) {
+      keyFragments = ''
+      for (const index in otsChunks) {
+        let workingChunk = otsChunks[index]
 
-      for (let iterationCount = 0, condition = 8 + normalizedHash[index]; iterationCount < condition; iterationCount++) {
-        workingChunk = (new JsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
+        for (let iterationCount = 0, condition = 8 + normalizedHash[index]; iterationCount < condition; iterationCount++) {
+          workingChunk = (new JsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
+        }
+
+        keyFragments += workingChunk
       }
-
-      keyFragments += workingChunk
     }
 
     // Absorb the hashed Kk into the sponge to receive the digest Dk

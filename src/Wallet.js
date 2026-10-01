@@ -58,12 +58,13 @@ import {
   shake256
 } from './libraries/crypto.js'
 import TokenUnit from './TokenUnit.js'
+import * as kcore from './libraries/kcore.js'
 import WalletCredentialException from './exception/WalletCredentialException.js'
 import { ml_kem768 as MlKEM768, ml_kem1024 as MlKEM1024 } from '@noble/post-quantum/ml-kem.js'
 
 const ML_KEM_PARAMS = {
-  1024: { kem: MlKEM1024, pkBytes: 1568, skBytes: 3168, ctBytes: 1568 },
-  768: { kem: MlKEM768, pkBytes: 1184, skBytes: 2400, ctBytes: 1088 }
+  1024: { set: 1024, kem: MlKEM1024, pkBytes: 1568, skBytes: 3168, ctBytes: 1568 },
+  768: { set: 768, kem: MlKEM768, pkBytes: 1184, skBytes: 2400, ctBytes: 1088 }
 }
 const DEFAULT_ML_KEM_PARAMETER_SET = 1024
 
@@ -262,6 +263,8 @@ export default class Wallet {
    * @return {string}
    */
   static generateAddress (key) {
+    const viaKcore = kcore.wotsAddress(key)
+    if (viaKcore !== null) return viaKcore
     // Subdivide private key into 16 fragments of 128 characters each
     const keyFragments = chunkSubstr(key, 128)
     // Generating wallet digest
@@ -318,7 +321,7 @@ export default class Wallet {
     for (let i = 0; i < 64; i++) {
       seed[i] = parseInt(seedHex.substr(i * 2, 2), 16)
     }
-    const { publicKey, secretKey } = params.kem.keygen(seed)
+    const { publicKey, secretKey } = kcore.mlkemKeypair(params.set, seed) ?? params.kem.keygen(seed)
     return {
       pubkey: this.serializeKey(publicKey),
       privkey: secretKey,
@@ -580,7 +583,7 @@ export default class Wallet {
         'upgrade the peer, or step this client back to the other parameter set.'
       )
     }
-    const { cipherText, sharedSecret } = params.kem.encapsulate(deserializedPubkey)
+    const { cipherText, sharedSecret } = kcore.mlkemEncaps(params.set, deserializedPubkey) ?? params.kem.encapsulate(deserializedPubkey)
     const encryptedMessage = await this.encryptWithSharedSecret(messageUint8, sharedSecret)
     return {
       cipherText: this.serializeKey(cipherText),
@@ -633,8 +636,11 @@ export default class Wallet {
 
     let sharedSecret
     try {
-      sharedSecret = decapsParams.kem.decapsulate(deserializedCipherText, decapsPrivkey)
+      sharedSecret = kcore.mlkemDecaps(decapsParams.set, deserializedCipherText, decapsPrivkey) ??
+        decapsParams.kem.decapsulate(deserializedCipherText, decapsPrivkey)
     } catch (e) {
+      // KNISHIO_KCORE=require with no loadable kcore must fail loudly, not read as a bad ciphertext.
+      if (e instanceof kcore.KcoreUnavailable) throw e
       console.error('Wallet::decryptMessage() - Decapsulation failed', e)
       console.info('Wallet::decryptMessage() - my public key', this.pubkey)
       return null

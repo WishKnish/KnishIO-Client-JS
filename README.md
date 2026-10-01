@@ -17,6 +17,17 @@ The SDK can be installed via either of the following:
 
 (**Note:** For installations in a Vite-based environment, you will need to install the https://www.npmjs.com/package/vite-plugin-node-polyfills plugin to ensure compatibility with Node.js libraries.)
 
+### Optional kcore acceleration (Node.js)
+
+When the application also installs `@wishknish/knishio-kcore` (the Node binding of the shared KnishIO Crypto Core), the SDK uses it for the WOTS+ chain and address hashing behind wallet creation, `Molecule.sign` and `CheckMolecule.ots`, and for ML-KEM-1024/768 key generation, encapsulation and decapsulation. The SDK does not depend on the package; without it, and in browsers, the pure-JavaScript code runs as before and produces identical signatures and addresses. Loading needs `process.getBuiltinModule` (Node.js ≥ 20.16 or ≥ 22.3).
+
+| Variable | Values | Effect |
+|---|---|---|
+| `KNISHIO_KCORE` | `auto` (default), `off`, `require` | `off` never loads kcore; `require` throws `KcoreUnavailable` from every call when kcore cannot be loaded |
+| `KNISHIO_KCORE_MODULE` | module specifier or absolute directory | Loads kcore from there instead of `@wishknish/knishio-kcore` |
+
+Both are read on first use. `available()` and `backend()` (`'napi'`, `'wasm'` or `null`) from `@wishknish/knishio-client-js/src/libraries/kcore.js` report what loaded.
+
 ## Basic Usage
 
 The purpose of the Knish.IO SDK is to expose various ledger functions to new or existing applications.

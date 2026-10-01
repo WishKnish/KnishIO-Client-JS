@@ -49,6 +49,7 @@ import Atom from './Atom.js'
 import AtomMeta from './AtomMeta.js'
 import Wallet from './Wallet.js'
 import JsSHA from 'jssha'
+import * as kcore from './libraries/kcore.js'
 import {
   chunkSubstr,
   hexToBase64
@@ -1175,16 +1176,20 @@ export default class Molecule {
     // Convert Hm to numeric notation, and then normalize
     const normalizedHash = this.normalizedHash()
 
-    // Building a one-time-signature
-    let signatureFragments = ''
+    // Building a one-time-signature: kcore advances all 16 chains at once when it is available
+    // and the inputs are eligible; otherwise the per-chunk SHAKE256 loop below does the same work.
+    let signatureFragments = kcore.chainsHex(key, keyChunks.map((_, i) => 8 - normalizedHash[i]))
 
-    for (const index in keyChunks) {
-      let workingChunk = keyChunks[index]
+    if (signatureFragments === null) {
+      signatureFragments = ''
+      for (const index in keyChunks) {
+        let workingChunk = keyChunks[index]
 
-      for (let iterationCount = 0, condition = 8 - normalizedHash[index]; iterationCount < condition; iterationCount++) {
-        workingChunk = (new JsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
+        for (let iterationCount = 0, condition = 8 - normalizedHash[index]; iterationCount < condition; iterationCount++) {
+          workingChunk = (new JsSHA('SHAKE256', 'TEXT')).update(workingChunk).getHash('HEX', { outputLen: 512 })
+        }
+        signatureFragments += workingChunk
       }
-      signatureFragments += workingChunk
     }
 
     // Compressing the OTS
