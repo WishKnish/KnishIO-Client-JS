@@ -23,9 +23,9 @@ detail, the entry says so instead of guessing.
 - `require('@wishknish/knishio-client-js')` returned an empty object in 1.3.2 and 1.4.0: the
   CommonJS bundle was named `dist/client.cjs.js` in a `"type": "module"` package, so Node loaded
   it as ESM. It is now `dist/client.cjs` (`main` and `exports["."].require`), and CI fails if
-  the CommonJS entry does not export the API. CommonJS consumers need Node.js ≥ 20.19 or
-  ≥ 22.12, because the bundle `require()`s the ESM-only `@noble/post-quantum`; the ESM entry is
-  unchanged.
+  the CommonJS entry does not export the API. `@noble/post-quantum` is bundled into the
+  CommonJS output, so it loads on every Node.js the package supports (`engines` ≥ 20.0; checked
+  on 20.0.0, 20.10.0, 20.18.3, 20.20.2 and 24.21.0); the ESM entry is unchanged.
 
 ## [1.4.0] — 2026-10-04
 
