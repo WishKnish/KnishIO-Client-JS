@@ -72,7 +72,18 @@ jobs:
       # needed fix is younger than the 7-day cooldown, review it manually — never drop
       # the flag at publish time.
       - name: Resolve dependencies (script-free, 7-day cooldown)
-        run: npm install --package-lock-only --ignore-scripts --before="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+        run: |
+          set -euo pipefail
+          CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          # Named cooldown exception — see the identical block in ci.yml for the full rationale.
+          # @wishknish/knishio-kcore@0.1.0 (first-party optionalDependency), published
+          # 2026-10-04T14:57:40Z. Without the floor the resolve drops it and npm ci then fails
+          # with "Missing: @wishknish/knishio-kcore@0.1.0 from lock file".
+          # SELF-EXPIRING after 2026-10-11T15:00Z.
+          FLOOR='2026-10-04T15:00:00Z'
+          if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
+          echo "cooldown cutoff: $CUTOFF"
+          npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
 
       - name: Install dependencies (locked, no lifecycle scripts)
         run: npm ci --ignore-scripts
@@ -116,7 +127,16 @@ jobs:
       # trusted publishing when a malicious dependency script executes in a job like this
       # one. Scripts stay OFF and the resolve is cooldown-gated for exactly that reason.
       - name: Resolve dependencies (script-free, 7-day cooldown)
-        run: npm install --package-lock-only --ignore-scripts --before="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+        run: |
+          set -euo pipefail
+          CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          # Named cooldown exception — see the identical block in ci.yml for the full rationale.
+          # @wishknish/knishio-kcore@0.1.0 (first-party optionalDependency), published
+          # 2026-10-04T14:57:40Z. SELF-EXPIRING after 2026-10-11T15:00Z.
+          FLOOR='2026-10-04T15:00:00Z'
+          if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
+          echo "cooldown cutoff: $CUTOFF"
+          npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
 
       - name: Install dependencies (locked, no lifecycle scripts)
         run: npm ci --ignore-scripts
