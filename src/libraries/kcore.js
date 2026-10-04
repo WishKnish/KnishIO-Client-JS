@@ -50,9 +50,10 @@ License: https://github.com/WishKnish/KnishIO-Client-JS/blob/master/LICENSE
  * Optional kcore backend (KnishIO-Crypto-Core through @wishknish/knishio-kcore) for the WOTS+
  * hot paths and ML-KEM.
  *
- * The package is never a dependency of this SDK: it is found only when the application installs
- * it. Every function returns `null` when kcore is off, missing, or the input is not one it is
- * guaranteed to treat exactly like the pure-JS path, and the caller then runs its existing code.
+ * The package is an optionalDependency of this SDK, so npm installs it where it can and the SDK
+ * still works where it cannot (or in browsers). Every function returns `null` when kcore is off,
+ * missing, or the input is not one it is guaranteed to treat exactly like the pure-JS path, and
+ * the caller then runs its existing code.
  *
  * Environment, read on first use:
  *   KNISHIO_KCORE         auto (default) | off | require. `require` turns a failed load into a

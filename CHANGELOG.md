@@ -15,6 +15,9 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+
+## [1.4.0] — 2026-10-04
+
 ### Added
 
 - Optional kcore backend: when the application installs `@wishknish/knishio-kcore`, the WOTS+
@@ -24,8 +27,13 @@ detail, the entry says so instead of guessing.
   input kcore is not guaranteed to treat identically (peer OTS text that is not lowercase hex,
   counts outside 0..64). `KNISHIO_KCORE=auto|off|require` selects the mode (`require` throws
   `KcoreUnavailable` when kcore cannot be loaded) and `KNISHIO_KCORE_MODULE` overrides the module
-  path. Loading needs Node.js ≥ 20.16 or ≥ 22.3 (`process.getBuiltinModule`). The package is not
-  a dependency.
+  path. Loading needs Node.js ≥ 20.16 or ≥ 22.3 (`process.getBuiltinModule`).
+- `@wishknish/knishio-kcore` `^0.1.0` is an `optionalDependency`, so kcore is on by default
+  wherever npm can install it; `--omit=optional`, unsupported platforms and browsers run the
+  pure-JS path.
+- CI: a `Tests (kcore required)` step reruns the jest suite with `KNISHIO_KCORE=require`.
+- README: "Thread safety" (calls run on the calling thread; use `worker_threads` or processes for
+  multi-core throughput).
 
 ## [1.3.2] — 2026-09-29
 
@@ -407,7 +415,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.4.0
 [1.3.2]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.2
 [1.3.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.1
 [1.3.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.0
