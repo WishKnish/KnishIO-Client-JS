@@ -16,6 +16,17 @@ detail, the entry says so instead of guessing.
 ## [Unreleased]
 
 
+## [1.4.1] — 2026-10-04
+
+### Fixed
+
+- `require('@wishknish/knishio-client-js')` returned an empty object in 1.3.2 and 1.4.0: the
+  CommonJS bundle was named `dist/client.cjs.js` in a `"type": "module"` package, so Node loaded
+  it as ESM. It is now `dist/client.cjs` (`main` and `exports["."].require`), and CI fails if
+  the CommonJS entry does not export the API. CommonJS consumers need Node.js ≥ 20.19 or
+  ≥ 22.12, because the bundle `require()`s the ESM-only `@noble/post-quantum`; the ESM entry is
+  unchanged.
+
 ## [1.4.0] — 2026-10-04
 
 ### Added
@@ -415,7 +426,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.4.1
 [1.4.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.4.0
 [1.3.2]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.2
 [1.3.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.1
