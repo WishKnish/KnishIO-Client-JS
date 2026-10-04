@@ -12,7 +12,7 @@ export default defineConfig({
           case 'es':
             return 'client.es.mjs'
           case 'cjs':
-            return 'client.cjs.js'
+            return 'client.cjs'
           case 'iife':
             return 'client.iife.js'
           default:

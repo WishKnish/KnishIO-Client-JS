@@ -107,6 +107,11 @@ jobs:
       - name: Build (vite)
         run: npm run build
 
+      # The CommonJS entry must export the API (1.3.2-1.4.0 shipped dist/client.cjs.js, which
+      # Node loads as ESM under "type": "module", so require() returned an empty object).
+      - name: CJS entry exports the API
+        run: node -e "const m = require('./dist/client.cjs'); if (typeof m.Wallet !== 'function' || typeof m.KnishIOClient !== 'function') { console.error('CJS entry exports ' + Object.keys(m).length + ' names'); process.exit(1) }"
+
       # jest unit suite (incl. the cross-SDK canonical-vector parity tests). The
       # live-validator integration suite auto-skips without KNISHIO_TEST_URI.
       - name: Jest

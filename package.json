@@ -23,14 +23,14 @@
       "role": "developer"
     }
   ],
-  "main": "dist/client.cjs.js",
+  "main": "dist/client.cjs",
   "module": "dist/client.es.mjs",
   "browser": "dist/client.iife.js",
   "exports": {
     ".": {
       "browser": "./dist/client.iife.js",
       "import": "./dist/client.es.mjs",
-      "require": "./dist/client.cjs.js"
+      "require": "./dist/client.cjs"
     },
     "./src": "./src/index.js",
     "./src/*": "./src/*",
