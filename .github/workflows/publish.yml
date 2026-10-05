@@ -149,6 +149,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      # npm receives THIS job's build, not the verify job's, so check the CJS entry again here.
+      - name: CJS entry exports the API
+        run: node -e "const m = require('./dist/client.cjs'); if (typeof m.Wallet !== 'function' || typeof m.KnishIOClient !== 'function') { console.error('CJS entry exports ' + Object.keys(m).length + ' names'); process.exit(1) }"
+
       # Release body = this tag's CHANGELOG.md section, NOT generate_release_notes.
       # generate_release_notes builds "What's Changed" from merged PULL REQUESTS in the tag
       # range. Releases here land as direct pushes to master, so the only PR in v0.9.3..v0.9.4
