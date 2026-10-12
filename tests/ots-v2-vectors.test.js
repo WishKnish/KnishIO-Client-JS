@@ -1,7 +1,8 @@
 import {
   describe,
   test,
-  expect
+  expect,
+  jest
 } from '@jest/globals'
 import fs from 'fs'
 import path from 'path'
@@ -10,6 +11,7 @@ import Molecule from '../src/Molecule'
 import CheckMolecule from '../src/libraries/CheckMolecule'
 import SignatureMismatchException from '../src/exception/SignatureMismatchException'
 import SignatureMalformedException from '../src/exception/SignatureMalformedException'
+import KnishIOClient from '../src/KnishIOClient'
 
 /**
  * OTS v2 cross-SDK vectors (docs/OTS_V2_SPECIFICATION.md): key derivation, address, the
@@ -87,5 +89,18 @@ describeWithVectors('OTS malformed declared hash', () => {
   test.each(vectors ? vectors.malformed_hash.tests : [])('$name → $expected', (vector) => {
     const check = new CheckMolecule(Molecule.fromJSON(vector.molecule))
     expect(() => check.ots()).toThrow(EXCEPTIONS[vector.expected])
+  })
+})
+
+describe('createMolecule with an OTS v2 source wallet', () => {
+  test('the default remainder wallet keeps the source wallet OTS version', async () => {
+    const secret = 'a'.repeat(2048)
+    const client = new KnishIOClient({ uri: 'http://127.0.0.1:9/graphql', cellSlug: 'ots-v2', logging: false })
+    const sourceWallet = Wallet.create({ secret, token: 'USER', otsVersion: 2 })
+    const getSourceWallet = jest.spyOn(client, 'getSourceWallet')
+    const molecule = await client.createMolecule({ secret, bundle: sourceWallet.bundle, sourceWallet })
+    expect(getSourceWallet).not.toHaveBeenCalled()
+    expect(molecule.remainderWallet.otsVersion).toBe(2)
+    expect(client.getRemainderWallet().otsVersion).toBe(2)
   })
 })

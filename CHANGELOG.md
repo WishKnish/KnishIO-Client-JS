@@ -33,6 +33,10 @@ detail, the entry says so instead of guessing.
   throws `SignatureMalformedException`.
 - `CheckMolecule.ots()` throws `SignatureMalformedException` unless the declared
   `molecularHash` is exactly 64 characters of `0-9a-g`.
+- `KnishIOClient.createMolecule()` creates its default remainder wallet at the source wallet's
+  OTS version.
+- `Molecule.sign()` throws `SignatureMalformedException` unless the computed `molecularHash` is
+  exactly 64 characters of `0-9a-g`.
 
 
 

@@ -630,7 +630,8 @@ export default class KnishIOClient {
       token: 'USER',
       batchId: sourceWallet.batchId,
       characters: sourceWallet.characters,
-      mlKemParameterSet: this.getMlKemParameterSet()
+      mlKemParameterSet: this.getMlKemParameterSet(),
+      otsVersion: sourceWallet.otsVersion
     })
 
     return new Molecule({

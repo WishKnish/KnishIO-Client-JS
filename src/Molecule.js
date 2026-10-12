@@ -1170,6 +1170,9 @@ export default class Molecule {
     this.molecularHash = Atom.hashAtoms({
       atoms: this.atoms
     })
+    if (typeof this.molecularHash !== 'string' || !/^[0-9a-g]{64}$/.test(this.molecularHash)) {
+      throw new SignatureMalformedException('Molecular hash must be 64 characters of [0-9a-g]')
+    }
 
     // Signing atom
     const signingAtom = this.atoms[0]
