@@ -67,6 +67,25 @@ const ML_KEM_PARAMS = {
   768: { set: 768, kem: MlKEM768, pkBytes: 1184, skBytes: 2400, ctBytes: 1088 }
 }
 const DEFAULT_ML_KEM_PARAMETER_SET = 1024
+// OTS versions (docs/OTS_V2_SPECIFICATION.md): v1 keys are 2048 hex characters (16 chains),
+// v2 keys 8192 hex characters (64 chains), derived under a domain tag.
+const OTS_VERSIONS = [1, 2]
+const DEFAULT_OTS_VERSION = 1
+const OTS_V2_DOMAIN_TAG = 'KnishIO-OTS-v2'
+
+/**
+ * Validates an OTS version and returns it as a number.
+ *
+ * @param {number|string} otsVersion
+ * @return {number}
+ */
+function checkedOtsVersion (otsVersion) {
+  const version = Number(otsVersion)
+  if (!OTS_VERSIONS.includes(version)) {
+    throw new Error(`KnishIO: unsupported OTS version ${otsVersion}; expected 1 or 2.`)
+  }
+  return version
+}
 
 /**
  * Wallet class represents the set of public and private
@@ -83,6 +102,8 @@ export default class Wallet {
    * @param {string|null} position - hexadecimal string used to salt the secret and produce one-time signatures
    * @param {string|null} batchId
    * @param {string|null} characters
+   * @param {number} mlKemParameterSet - 1024 (default) or 768
+   * @param {number} otsVersion - 1 (default) or 2; see docs/OTS_V2_SPECIFICATION.md
    */
   constructor ({
     secret = null,
@@ -92,8 +113,10 @@ export default class Wallet {
     position = null,
     batchId = null,
     characters = null,
-    mlKemParameterSet = DEFAULT_ML_KEM_PARAMETER_SET
+    mlKemParameterSet = DEFAULT_ML_KEM_PARAMETER_SET,
+    otsVersion = DEFAULT_OTS_VERSION
   }) {
+    this.otsVersion = checkedOtsVersion(otsVersion)
     const paramSetNum = Number(mlKemParameterSet)
     if (!ML_KEM_PARAMS[paramSetNum]) {
       throw new Error(`KnishIO: unsupported ML-KEM parameter set ${mlKemParameterSet}; expected 1024 or 768.`)
@@ -127,7 +150,8 @@ export default class Wallet {
       this.key = Wallet.generateKey({
         secret,
         token: this.token,
-        position: this.position
+        position: this.position,
+        otsVersion: this.otsVersion
       })
       this.address = this.address || Wallet.generateAddress(this.key)
 
@@ -147,6 +171,8 @@ export default class Wallet {
    * @param {string} token
    * @param {string|null} batchId
    * @param {string|null} characters
+   * @param {number} mlKemParameterSet
+   * @param {number} otsVersion
    * @return {Wallet}
    */
   static create ({
@@ -155,7 +181,8 @@ export default class Wallet {
     token,
     batchId = null,
     characters = null,
-    mlKemParameterSet = DEFAULT_ML_KEM_PARAMETER_SET
+    mlKemParameterSet = DEFAULT_ML_KEM_PARAMETER_SET,
+    otsVersion = DEFAULT_OTS_VERSION
   }) {
     let position = null
 
@@ -178,7 +205,8 @@ export default class Wallet {
       position,
       batchId,
       characters,
-      mlKemParameterSet
+      mlKemParameterSet,
+      otsVersion
     })
   }
 
@@ -216,13 +244,16 @@ export default class Wallet {
    * @param {string} secret
    * @param {string} token
    * @param {string} position
+   * @param {number} otsVersion - 1 (2048 hex) or 2 (8192 hex)
    * @return {string}
    */
   static generateKey ({
     secret,
     token,
-    position
+    position,
+    otsVersion = DEFAULT_OTS_VERSION
   }) {
+    const version = checkedOtsVersion(otsVersion)
     if (!secret) {
       throw new WalletCredentialException('Wallet::generateKey() - Secret is required!')
     }
@@ -244,20 +275,25 @@ export default class Wallet {
     // Hashing the indexed key to produce the intermediate key
     const intermediateKeySponge = new JsSHA('SHAKE256', 'TEXT')
 
-    intermediateKeySponge.update(indexedKey.toString(16))
+    if (version === 2) {
+      // v2 absorbs a domain-tagged, delimited input, so its key never extends the v1 key
+      intermediateKeySponge.update(`${ OTS_V2_DOMAIN_TAG }|${ indexedKey.toString(16) }|${ token || '' }`)
+    } else {
+      intermediateKeySponge.update(indexedKey.toString(16))
 
-    if (token) {
-      intermediateKeySponge.update(token)
+      if (token) {
+        intermediateKeySponge.update(token)
+      }
     }
 
-    // Hashing the intermediate key to produce the private key
+    // Hashing the intermediate key to produce the private key: 16 chunks (v1) or 64 (v2)
     const privateKeySponge = new JsSHA('SHAKE256', 'TEXT')
     privateKeySponge.update(intermediateKeySponge.getHash('HEX', { outputLen: 8192 }))
-    return privateKeySponge.getHash('HEX', { outputLen: 8192 })
+    return privateKeySponge.getHash('HEX', { outputLen: version === 2 ? 32768 : 8192 })
   }
 
   /**
-   * Generates a wallet address
+   * Generates a wallet address from a 2048-hex (OTS v1) or 8192-hex (OTS v2) private key
    *
    * @param {string} key
    * @return {string}
@@ -265,20 +301,27 @@ export default class Wallet {
   static generateAddress (key) {
     const viaKcore = kcore.wotsAddress(key)
     if (viaKcore !== null) return viaKcore
-    // Subdivide private key into 16 fragments of 128 characters each
-    const keyFragments = chunkSubstr(key, 128)
+    // kcore's address entry point takes v1 keys only; its chain primitive takes the 64 v2 chains
+    const endpoints = key.length === 8192 ? kcore.chainsHex(key, new Array(64).fill(16)) : null
     // Generating wallet digest
     const digestSponge = new JsSHA('SHAKE256', 'TEXT')
 
-    for (const index in keyFragments) {
-      let workingFragment = keyFragments[index]
-      for (let fragmentCount = 1; fragmentCount <= 16; fragmentCount++) {
-        const workingSponge = new JsSHA('SHAKE256', 'TEXT')
-        workingSponge.update(workingFragment)
-        workingFragment = workingSponge.getHash('HEX', { outputLen: 512 })
-      }
+    if (endpoints !== null) {
+      digestSponge.update(endpoints)
+    } else {
+      // Subdivide private key into fragments of 128 characters each (16 for v1, 64 for v2)
+      const keyFragments = chunkSubstr(key, 128)
 
-      digestSponge.update(workingFragment)
+      for (const index in keyFragments) {
+        let workingFragment = keyFragments[index]
+        for (let fragmentCount = 1; fragmentCount <= 16; fragmentCount++) {
+          const workingSponge = new JsSHA('SHAKE256', 'TEXT')
+          workingSponge.update(workingFragment)
+          workingFragment = workingSponge.getHash('HEX', { outputLen: 512 })
+        }
+
+        digestSponge.update(workingFragment)
+      }
     }
 
     // Producing wallet address
@@ -533,7 +576,8 @@ export default class Wallet {
     const remainderWallet = Wallet.create({
       secret,
       token: this.token,
-      characters: this.characters
+      characters: this.characters,
+      otsVersion: this.otsVersion
     })
     remainderWallet.initBatchId({
       sourceWallet: this,

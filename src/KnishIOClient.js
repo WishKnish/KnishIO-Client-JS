@@ -545,7 +545,8 @@ export default class KnishIOClient {
       sourceWallet.key = Wallet.generateKey({
         secret: this.getSecret(),
         token: sourceWallet.token,
-        position: sourceWallet.position
+        position: sourceWallet.position,
+        otsVersion: sourceWallet.otsVersion
       })
     }
 

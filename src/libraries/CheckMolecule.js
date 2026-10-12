@@ -624,6 +624,12 @@ export default class CheckMolecule {
    * @returns {boolean}
    */
   ots () {
+    // The declared hash must be exactly 64 base-17 characters before any chain work
+    // (docs/OTS_V2_SPECIFICATION.md §5, step 0)
+    if (typeof this.molecule.molecularHash !== 'string' || !/^[0-9a-g]{64}$/.test(this.molecule.molecularHash)) {
+      throw new SignatureMalformedException()
+    }
+
     // Convert Hm to numeric notation via EnumerateMolecule(Hm)
     const normalizedHash = this.molecule.normalizedHash()
 
@@ -634,21 +640,22 @@ export default class CheckMolecule {
       (accumulator, otsFragment) => accumulator + otsFragment
     )
 
-    // Wrong size? Maybe it's compressed
-    if (ots.length !== 2048) {
+    // OTS v1 is 2048 hex characters (16 chains), OTS v2 8192 (64 chains); anything else is
+    // the compressed (base64) form, and the decoded length decides the version
+    if (ots.length !== 2048 && ots.length !== 8192) {
       // Attempting decompression
       ots = base64ToHex(ots)
 
-      // Still wrong? That's a failure
-      if (ots.length !== 2048) {
+      // Still neither size? That's a failure
+      if (ots.length !== 2048 && ots.length !== 8192) {
         throw new SignatureMalformedException()
       }
     }
 
-    // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
+    // Subdivide the signature into segments of 128 hex characters: 16 (v1) or 64 (v2)
     const otsChunks = chunkSubstr(ots, 128)
 
-    // kcore advances the 16 chains at once for lowercase-hex input; anything else (peer-supplied
+    // kcore advances every chain at once for lowercase-hex input; anything else (peer-supplied
     // text) runs the per-chunk SHAKE256 loop, so the verdict never depends on kcore being present.
     let keyFragments = kcore.chainsHex(ots, otsChunks.map((_, i) => 8 + normalizedHash[i]))
 

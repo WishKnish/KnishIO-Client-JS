@@ -119,7 +119,8 @@ export default class Molecule {
         token: sourceWallet.token,
         batchId: sourceWallet.batchId,
         characters: sourceWallet.characters,
-        mlKemParameterSet: this.mlKemParameterSet
+        mlKemParameterSet: this.mlKemParameterSet,
+        otsVersion: sourceWallet.otsVersion
       })
     }
   }
@@ -133,6 +134,16 @@ export default class Molecule {
   withParentHashes (hashes) {
     this.parentHashes = Array.isArray(hashes) ? [...hashes] : []
     return this
+  }
+
+  /**
+   * OTS version this molecule signs with: its source wallet's (docs/OTS_V2_SPECIFICATION.md),
+   * or 1 without a source wallet.
+   *
+   * @return {number}
+   */
+  signingOtsVersion () {
+    return (this.sourceWallet && this.sourceWallet.otsVersion) || 1
   }
 
   /**
@@ -353,7 +364,8 @@ export default class Molecule {
       this.remainderWallet = Wallet.create({
         secret: this.secret,
         bundle: this.bundle,
-        mlKemParameterSet: this.mlKemParameterSet
+        mlKemParameterSet: this.mlKemParameterSet,
+        otsVersion: this.signingOtsVersion()
       })
     }
 
@@ -755,7 +767,8 @@ export default class Molecule {
       bundle: this.bundle,
       token: this.sourceWallet.token,
       batchId: this.sourceWallet.batchId,
-      mlKemParameterSet: this.mlKemParameterSet
+      mlKemParameterSet: this.mlKemParameterSet,
+      otsVersion: this.signingOtsVersion()
     })
     bufferWallet.tradeRates = tradeRates
 
@@ -1129,7 +1142,8 @@ export default class Molecule {
 
   /**
    * Creates a one-time signature for a molecule and breaks it up across multiple atoms within that
-   * molecule. Resulting 4096 byte (2048 character) string is the one-time signature, which is then compressed.
+   * molecule. The signature is 1024 bytes (2048 hex, OTS v1) or 4096 bytes (8192 hex, OTS v2),
+   * then compressed to base64.
    *
    * @param {string|null} bundle
    * @param {boolean} anonymous
@@ -1169,14 +1183,15 @@ export default class Molecule {
     const key = Wallet.generateKey({
       secret: this.secret,
       token: signingAtom.token,
-      position: signingAtom.position
+      position: signingAtom.position,
+      otsVersion: this.signingOtsVersion()
     })
-    // Subdivide Kk into 16 segments of 256 bytes (128 characters) each
+    // Subdivide Kk into segments of 128 hex characters: 16 (v1) or 64 (v2)
     const keyChunks = chunkSubstr(key, 128)
     // Convert Hm to numeric notation, and then normalize
     const normalizedHash = this.normalizedHash()
 
-    // Building a one-time-signature: kcore advances all 16 chains at once when it is available
+    // Building a one-time-signature: kcore advances every chain at once when it is available
     // and the inputs are eligible; otherwise the per-chunk SHAKE256 loop below does the same work.
     let signatureFragments = kcore.chainsHex(key, keyChunks.map((_, i) => 8 - normalizedHash[i]))
 

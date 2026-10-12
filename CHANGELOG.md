@@ -15,6 +15,26 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+### Added
+
+- **Opt-in OTS v2 signatures.** New API, all additive:
+  - `new Wallet({ …, otsVersion: 2 })`, `Wallet.create({ …, otsVersion })` and
+    `Wallet.generateKey({ …, otsVersion })`; any version other than 1 or 2 throws
+    `KnishIO: unsupported OTS version …`. `wallet.otsVersion` defaults to 1.
+  - `Wallet.generateAddress` takes a 2048- or 8192-character key.
+  - `molecule.signingOtsVersion()`: a molecule signs with its source wallet's version, and the
+    remainder, ContinuID and buffer wallets it creates inherit it.
+
+  v1 stays the default and is unchanged. `KnishIOClient` has no OTS version option yet.
+
+### Changed
+
+- `CheckMolecule.ots()` verifies both OTS v1 and v2 signatures; a signature of any other size
+  throws `SignatureMalformedException`.
+- `CheckMolecule.ots()` throws `SignatureMalformedException` unless the declared
+  `molecularHash` is exactly 64 characters of `0-9a-g`.
+
+
 
 ## [1.4.1] — 2026-10-04
 

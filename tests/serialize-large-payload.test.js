@@ -7,7 +7,7 @@ import Wallet from '../src/Wallet'
 import { generateSecret } from '../src'
 
 /**
- * Production regression (knish-kits, 2026-07-21, via the TS sibling SDK): `serializeKey`
+ * Regression seen in a downstream app (2026-07-21, via the TS sibling SDK): `serializeKey`
  * used `String.fromCharCode.apply(null, key)`, which passes every byte of the AES-GCM
  * ciphertext as a stack-allocated argument and throws `RangeError: Maximum call stack
  * size exceeded` past the engine's argument limit (~64–125K) — any payload over ~100KB.
