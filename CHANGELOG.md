@@ -15,6 +15,8 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-10-13
+
 ### Added
 
 - **Opt-in OTS v2 signatures.** New API, all additive:
@@ -470,7 +472,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.0
 [1.4.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.4.1
 [1.4.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.4.0
 [1.3.2]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.3.2
