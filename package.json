@@ -65,7 +65,7 @@
     "wonka": "^6.3.5"
   },
   "optionalDependencies": {
-    "@wishknish/knishio-kcore": "^0.1.0"
+    "@wishknish/knishio-kcore": "^0.2.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",

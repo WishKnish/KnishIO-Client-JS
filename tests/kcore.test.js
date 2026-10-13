@@ -100,6 +100,21 @@ describe('kcore parity', () => {
     expect(kcore.wotsAddress(keys[0])).toBe(pure[0])
   })
 
+  kcoreTest('Wallet.generateAddress matches the pure-JS address for 20 OTS v2 (8192-hex) keys', () => {
+    const keys = Array.from({ length: 20 }, (_, i) =>
+      createHash('shake256', { outputLength: 4096 }).update(`v2-${i}`).digest('hex'))
+    const viaKcore = keys.map(key => Wallet.generateAddress(key))
+    const pure = withKcoreOff(() => keys.map(key => Wallet.generateAddress(key)))
+    expect(viaKcore.every(a => /^[0-9a-f]{64}$/.test(a))).toBe(true)
+    expect(viaKcore).toEqual(pure)
+    // kcore 0.2.0 answers directly; an older binding has no v2 entry point and falls back.
+    expect(kcore.wotsAddressV2(keys[0])).toBe(pure[0])
+    expect(kcore.wotsAddressV2(keys[0].slice(1))).toBeNull()
+    expect(kcore.wotsAddressV2(keys[0].toUpperCase())).toBeNull()
+    expect(kcore.wotsAddressV2(keys[0].slice(0, 2048))).toBeNull()
+    expect(kcore.wotsAddress(keys[0])).toBeNull()
+  })
+
   kcoreTest('Molecule.sign gives the same OTS with kcore on and off, and each verifies under the other', () => {
     const secret = generateSecret('kcore-sign-parity')
 

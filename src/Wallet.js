@@ -357,9 +357,9 @@ export default class Wallet {
    * @return {string}
    */
   static generateAddress (key) {
-    const viaKcore = kcore.wotsAddress(key)
+    const viaKcore = key.length === 8192 ? kcore.wotsAddressV2(key) : kcore.wotsAddress(key)
     if (viaKcore !== null) return viaKcore
-    // kcore's address entry point takes v1 keys only; its chain primitive takes the 64 v2 chains
+    // Bindings before kcore 0.2.0 lack the v2 address entry point; their chain primitive still takes 64 chains
     const endpoints = key.length === 8192 ? kcore.chainsHex(key, new Array(64).fill(16)) : null
     // Generating wallet digest
     const digestSponge = new JsSHA('SHAKE256', 'TEXT')

@@ -58,8 +58,7 @@ detail, the entry says so instead of guessing.
   `getSourceWallet()`, `querySourceWallet()` and those balance wallets throw
   `WalletCredentialException` when neither version derives the address; the login pointer falls
   back to an AUTH wallet as before.
-
-
+- With kcore 0.2.0 (`@wishknish/knishio-kcore` 0.2.0), OTS v2 addresses are computed by kcore.
 
 ## [1.4.1] — 2026-10-04
 

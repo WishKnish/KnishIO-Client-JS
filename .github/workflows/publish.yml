@@ -5,7 +5,7 @@
 #   npmjs.com → the `@wishknish/knishio-client-js` package → Settings → Trusted Publisher →
 #   GitHub Actions: organization `WishKnish`, repository `KnishIO-Client-JS`, workflow `publish.yml`.
 #   (All fields case-sensitive; npm validates them only at publish time.)
-# Requires npm >= 11.5.1 + Node >= 22.14 (we use Node 24 + `npm install -g npm@latest`). Provenance
+# Requires npm >= 11.5.1 + Node >= 22.14 (we use Node 24 + npm 11.21.0, pinned). Provenance
 # attestations are generated automatically under trusted publishing.
 name: Publish
 
@@ -76,11 +76,11 @@ jobs:
           set -euo pipefail
           CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
           # Named cooldown exception — see the identical block in ci.yml for the full rationale.
-          # @wishknish/knishio-kcore@0.1.0 (first-party optionalDependency), published
-          # 2026-10-04T14:57:40Z. Without the floor the resolve drops it and npm ci then fails
-          # with "Missing: @wishknish/knishio-kcore@0.1.0 from lock file".
-          # SELF-EXPIRING after 2026-10-11T15:00Z.
-          FLOOR='2026-10-04T15:00:00Z'
+          # @wishknish/knishio-kcore@0.2.0 (first-party optionalDependency), published
+          # 2026-10-13T19:59:49Z. Without the floor the resolve drops it and npm ci then fails
+          # with "Missing: @wishknish/knishio-kcore@0.2.0 from lock file".
+          # SELF-EXPIRING after 2026-10-20T20:00Z.
+          FLOOR='2026-10-13T20:00:00Z'
           if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
           echo "cooldown cutoff: $CUTOFF"
           npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
@@ -124,9 +124,10 @@ jobs:
           # installs with `npm install`, so there is nothing to cache against.
           package-manager-cache: false
 
-      # Trusted publishing needs npm >= 11.5.1 (newer than the bundled npm).
-      - name: Upgrade npm (>= 11.5.1 for trusted publishing)
-        run: npm install -g npm@latest
+      # Trusted publishing needs npm >= 11.5.1 (newer than the bundled npm). Pinned, not @latest:
+      # a new npm major can change how `npm publish` behaves without notice.
+      - name: Install npm 11.21.0 (>= 11.5.1 for trusted publishing)
+        run: npm install -g npm@11.21.0
 
       # This job holds `id-token: write` — the ChainDrop worm propagates through OIDC
       # trusted publishing when a malicious dependency script executes in a job like this
@@ -136,9 +137,9 @@ jobs:
           set -euo pipefail
           CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
           # Named cooldown exception — see the identical block in ci.yml for the full rationale.
-          # @wishknish/knishio-kcore@0.1.0 (first-party optionalDependency), published
-          # 2026-10-04T14:57:40Z. SELF-EXPIRING after 2026-10-11T15:00Z.
-          FLOOR='2026-10-04T15:00:00Z'
+          # @wishknish/knishio-kcore@0.2.0 (first-party optionalDependency), published
+          # 2026-10-13T19:59:49Z. SELF-EXPIRING after 2026-10-20T20:00Z.
+          FLOOR='2026-10-13T20:00:00Z'
           if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
           echo "cooldown cutoff: $CUTOFF"
           npm install --package-lock-only --ignore-scripts --before="$CUTOFF"

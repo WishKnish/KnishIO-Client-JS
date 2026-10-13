@@ -186,6 +186,24 @@ export function wotsAddress (key) {
 }
 
 /**
+ * WOTS+ address of an 8192-hex (OTS v2, 64-chain) private key (`Wallet.generateAddress`).
+ * Null when kcore is unavailable, predates 0.2.0 (no `wotsAddressV2`) or refuses the key.
+ *
+ * @param {string} key
+ * @return {string|null}
+ */
+export function wotsAddressV2 (key) {
+  if (!ensure() || typeof lib.wotsAddressV2 !== 'function' || !isHex(key, 8192)) {
+    return null
+  }
+  try {
+    return lib.wotsAddressV2(key)
+  } catch {
+    return null
+  }
+}
+
+/**
  * Advances `counts.length` WOTS+ chains of 128 lowercase hex characters each.
  * `CheckMolecule.ots()` passes peer-supplied text here, so anything outside lowercase hex and
  * integer counts 0..64 stays on the caller's own loop.

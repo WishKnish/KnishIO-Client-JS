@@ -72,15 +72,15 @@ jobs:
           set -euo pipefail
           CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
           # Named cooldown exception (ChainDrop policy: review the version, never drop the flag).
-          # @wishknish/knishio-kcore@0.1.0 — first-party (WishKnish/KnishIO-Kcore-JS), published
-          # 2026-10-04T14:57:40Z by the maintainer from the npm-tarball artifact of that repo's
-          # publish dry run 37210896144 (sha256 ad0221527854128bb83c5dfb17707f435748b88364ad86b6314ca40609457fed,
+          # @wishknish/knishio-kcore@0.2.0 — first-party (WishKnish/KnishIO-Kcore-JS), published
+          # 2026-10-13T19:59:49Z by the maintainer from the npm-tarball artifact of that repo's
+          # publish run 38457911337 (sha256 2ef8b4922b43e25fb39f92c5f69f0fd877700c65538e284fd55885131c3cfa3d,
           # byte-identical to the GitHub Release asset); no dependencies, no install scripts.
           # It is this SDK's optionalDependency, and the `Tests (kcore required)` step needs it
           # resolved. The floor admits every package published before it, not only this one.
-          # SELF-EXPIRING: from 2026-10-11T15:00Z the rolling window is later than the floor, the
+          # SELF-EXPIRING: from 2026-10-20T20:00Z the rolling window is later than the floor, the
           # floor stops binding, and this block can go back to the single-line rolling resolve.
-          FLOOR='2026-10-04T15:00:00Z'
+          FLOOR='2026-10-13T20:00:00Z'
           if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
           echo "cooldown cutoff: $CUTOFF"
           npm install --package-lock-only --ignore-scripts --before="$CUTOFF"

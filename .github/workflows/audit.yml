@@ -82,7 +82,17 @@ jobs:
       # Identical to the ci.yml resolve: writes an ephemeral package-lock.json WITHOUT running
       # any lifecycle script, and refuses any version published in the last 7 days.
       - name: Resolve dependencies (script-free, 7-day cooldown)
-        run: npm install --package-lock-only --ignore-scripts --before="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+        run: |
+          set -euo pipefail
+          CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          # Named cooldown exception — see the identical block in ci.yml for the full rationale.
+          # @wishknish/knishio-kcore@0.2.0 (first-party optionalDependency), published
+          # 2026-10-13T19:59:49Z. Without the floor the resolve drops it and the audit misses it.
+          # SELF-EXPIRING after 2026-10-20T20:00Z.
+          FLOOR='2026-10-13T20:00:00Z'
+          if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
+          echo "cooldown cutoff: $CUTOFF"
+          npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
 
       # The deep scan: every severity, whole tree, dev included. Reads the lockfile written
       # above — no install, so still nothing from npm has executed in this job.
