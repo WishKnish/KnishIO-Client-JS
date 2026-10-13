@@ -104,6 +104,18 @@ export default class AuthToken {
   }
 
   /**
+   * OTS version a restored session's wallet must use: the snapshot's explicit field, or 1 for a
+   * snapshot written before the field existed (every such session was v1).
+   *
+   * @param {object} snapshot
+   * @return {number}
+   */
+  static resolveOtsVersion (snapshot) {
+    const explicit = snapshot.wallet && snapshot.wallet.otsVersion
+    return Wallet.checkedOtsVersion(explicit || 1)
+  }
+
+  /**
    * Rebuilds a session from {@link AuthToken#getSnapshot}. A snapshot without a wallet token
    * predates re-logins signed from the ContinuID USER wallet, so it was bound to an AUTH wallet.
    *
@@ -117,7 +129,8 @@ export default class AuthToken {
       token: snapshot.wallet.token || 'AUTH',
       position: snapshot.wallet.position,
       characters: snapshot.wallet.characters,
-      mlKemParameterSet: AuthToken.resolveMlKemParameterSet(snapshot)
+      mlKemParameterSet: AuthToken.resolveMlKemParameterSet(snapshot),
+      otsVersion: AuthToken.resolveOtsVersion(snapshot)
     })
     return AuthToken.create({
       token: snapshot.token,
@@ -145,7 +158,7 @@ export default class AuthToken {
 
   /**
    *
-   * @return {{wallet: {token, characters, position, mlKemParameterSet}, encrypt, expiresAt, token, pubkey}}
+   * @return {{wallet: {token, characters, position, mlKemParameterSet, otsVersion}, encrypt, expiresAt, token, pubkey}}
    */
   getSnapshot () {
     return {
@@ -157,7 +170,8 @@ export default class AuthToken {
         token: this.$__wallet.token,
         position: this.$__wallet.position,
         characters: this.$__wallet.characters,
-        mlKemParameterSet: this.$__wallet.mlKemParameterSet
+        mlKemParameterSet: this.$__wallet.mlKemParameterSet,
+        otsVersion: this.$__wallet.otsVersion
       }
     }
   }

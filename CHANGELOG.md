@@ -25,7 +25,14 @@ detail, the entry says so instead of guessing.
   - `molecule.signingOtsVersion()`: a molecule signs with its source wallet's version, and the
     remainder, ContinuID and buffer wallets it creates inherit it.
 
-  v1 stays the default and is unchanged. `KnishIOClient` has no OTS version option yet.
+  v1 stays the default and is unchanged.
+- **Client-level OTS version.** `new KnishIOClient({ …, otsVersion })` (1 default, or 2),
+  `getOtsVersion()` and `setOtsVersion()`. Keys the client creates from its secret (the first
+  source wallet, AUTH and guest wallets, `createWallet`, token and claim wallets) use it.
+- `Wallet.detectOtsVersion({ secret, token, position, address, preferred })`: the OTS version
+  whose derived address equals `address`, or `null`. `Wallet.checkedOtsVersion()`, and
+  `wallet.setOtsVersion()` for a wallet that holds no key.
+- `AuthToken` snapshots carry `wallet.otsVersion`; a snapshot without it restores at 1.
 
 ### Changed
 
@@ -37,6 +44,12 @@ detail, the entry says so instead of guessing.
   OTS version.
 - `Molecule.sign()` throws `SignatureMalformedException` unless the computed `molecularHash` is
   exactly 64 characters of `0-9a-g`.
+- Wallets the ledger returns for this client (the ContinuID head in `getSourceWallet()` and the
+  login pointer, `querySourceWallet()`, and the balance wallets `replenishToken()` and
+  `fuseToken()` sign from) are used at the OTS version their address was derived at.
+  `getSourceWallet()`, `querySourceWallet()` and those balance wallets throw
+  `WalletCredentialException` when neither version derives the address; the login pointer falls
+  back to an AUTH wallet as before.
 
 
 

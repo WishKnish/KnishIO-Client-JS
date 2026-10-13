@@ -81,6 +81,7 @@ import TransferBalanceException from './exception/TransferBalanceException.js'
 import CodeException from './exception/CodeException.js'
 import UnauthenticatedException from './exception/UnauthenticatedException.js'
 import WalletShadowException from './exception/WalletShadowException.js'
+import WalletCredentialException from './exception/WalletCredentialException.js'
 import StackableUnitDecimalsException from './exception/StackableUnitDecimalsException.js'
 import StackableUnitAmountException from './exception/StackableUnitAmountException.js'
 import TokenUnit from './TokenUnit.js'
@@ -121,6 +122,8 @@ export default class KnishIOClient {
    * @param {UrqlClientWrapper|null} client
    * @param {number} serverSdkVersion
    * @param {boolean} logging
+   * @param {number} mlKemParameterSet - 1024 (default) or 768
+   * @param {number} otsVersion - OTS version of the keys this client creates: 1 (default) or 2
    */
   constructor ({
     uri,
@@ -131,7 +134,8 @@ export default class KnishIOClient {
     logging = false,
     defaultRequestPolicy = null,
     secretStorage = null,
-    mlKemParameterSet = 1024
+    mlKemParameterSet = 1024,
+    otsVersion = 1
   }) {
     this.initialize({
       uri,
@@ -142,7 +146,8 @@ export default class KnishIOClient {
       logging,
       defaultRequestPolicy,
       secretStorage,
-      mlKemParameterSet
+      mlKemParameterSet,
+      otsVersion
     })
   }
 
@@ -165,7 +170,8 @@ export default class KnishIOClient {
     logging = false,
     defaultRequestPolicy = null,
     secretStorage = null,
-    mlKemParameterSet = 1024
+    mlKemParameterSet = 1024,
+    otsVersion = 1
   }) {
     this.reset()
 
@@ -176,6 +182,7 @@ export default class KnishIOClient {
     // a stale cache-first read; browser/SPA consumers leave this null (cache-first).
     this.$__defaultRequestPolicy = defaultRequestPolicy
     this.setMlKemParameterSet(mlKemParameterSet)
+    this.setOtsVersion(otsVersion)
     this.$__authTokenObjects = {}
     this.$__authInProcess = false
     this.abortControllers = new Map()
@@ -229,6 +236,51 @@ export default class KnishIOClient {
     }
     this.$__mlKemParameterSet = paramNum
     return this
+  }
+
+  /**
+   * OTS version of the keys this client creates from its secret (1 default, or 2)
+   *
+   * @return {number}
+   */
+  getOtsVersion () {
+    return this.$__otsVersion || 1
+  }
+
+  /**
+   * Sets the OTS version of the keys this client creates from its secret. Wallets the ledger
+   * returns keep the version their address was derived at.
+   *
+   * @param {number|string} otsVersion - 1 or 2
+   * @return {KnishIOClient}
+   */
+  setOtsVersion (otsVersion) {
+    this.$__otsVersion = Wallet.checkedOtsVersion(otsVersion)
+    return this
+  }
+
+  /**
+   * Sets the OTS version of one of this client's own wallets returned by the ledger, from the
+   * address it was derived at; the client's version when the wallet has no position or address.
+   *
+   * @param {Wallet} wallet
+   * @return {Wallet}
+   */
+  bindOwnWalletOtsVersion (wallet) {
+    if (!wallet.position || !wallet.address) {
+      return wallet.setOtsVersion(this.getOtsVersion())
+    }
+    const otsVersion = Wallet.detectOtsVersion({
+      secret: this.getSecret(),
+      token: wallet.token,
+      position: wallet.position,
+      address: wallet.address,
+      preferred: this.getOtsVersion()
+    })
+    if (otsVersion === null) {
+      throw new WalletCredentialException(`KnishIO: wallet ${ wallet.address } is not derived from this secret at position ${ wallet.position } under OTS version 1 or 2.`)
+    }
+    return wallet.setOtsVersion(otsVersion)
   }
 
   /**
@@ -539,9 +591,11 @@ export default class KnishIOClient {
     if (!sourceWallet) {
       sourceWallet = new Wallet({
         secret: this.getSecret(),
-        mlKemParameterSet: this.getMlKemParameterSet()
+        mlKemParameterSet: this.getMlKemParameterSet(),
+        otsVersion: this.getOtsVersion()
       })
     } else {
+      this.bindOwnWalletOtsVersion(sourceWallet)
       sourceWallet.key = Wallet.generateKey({
         secret: this.getSecret(),
         token: sourceWallet.token,
@@ -602,9 +656,12 @@ export default class KnishIOClient {
         // Carry-forward: use last successful USER remainder wallet position
         continuIdPosition = this.getRemainderWallet().position
       } else {
-        // Query server for current ContinuID position
-        const userWallet = await this.getSourceWallet()
-        continuIdPosition = userWallet ? userWallet.position : null
+        // Query server for current ContinuID position (only the position is needed here, so the
+        // head wallet is not re-keyed); a bundle without a ContinuID gets a fresh position
+        const continuId = (await this.queryContinuId({
+          bundle: this.getBundle()
+        })).payload()
+        continuIdPosition = continuId ? continuId.position : Wallet.generatePosition()
       }
     }
 
@@ -827,7 +884,7 @@ export default class KnishIOClient {
       throw new TransferBalanceException('Source wallet can not be a shadow wallet.')
     }
 
-    return sourceWallet
+    return this.bindOwnWalletOtsVersion(sourceWallet)
   }
 
   /**
@@ -1272,7 +1329,8 @@ export default class KnishIOClient {
     const newWallet = new Wallet({
       secret: this.getSecret(),
       token,
-      mlKemParameterSet: this.getMlKemParameterSet()
+      mlKemParameterSet: this.getMlKemParameterSet(),
+      otsVersion: this.getOtsVersion()
     })
 
     /**
@@ -1410,7 +1468,8 @@ export default class KnishIOClient {
       bundle: this.getBundle(),
       token,
       batchId,
-      mlKemParameterSet: this.getMlKemParameterSet()
+      mlKemParameterSet: this.getMlKemParameterSet(),
+      otsVersion: this.getOtsVersion()
     })
 
     /**
@@ -1827,7 +1886,8 @@ export default class KnishIOClient {
           to = Wallet.create({
             secret: to,
             token,
-            mlKemParameterSet: this.getMlKemParameterSet()
+            mlKemParameterSet: this.getMlKemParameterSet(),
+            otsVersion: this.getOtsVersion()
           })
         }
       }
@@ -1899,7 +1959,8 @@ export default class KnishIOClient {
 
     query.fillMolecule({
       token,
-      batchId
+      batchId,
+      otsVersion: this.getOtsVersion()
     })
 
     return await this.executeQuery(query)
@@ -2330,12 +2391,16 @@ export default class KnishIOClient {
     let creditedWallet = sourceWallet
     if (creditedWallet === null) {
       creditedWallet = (await this.queryBalance({ token })).payload()
+      if (creditedWallet) {
+        this.bindOwnWalletOtsVersion(creditedWallet)
+      }
     }
     if (!creditedWallet) {
       creditedWallet = Wallet.create({
         secret: this.getSecret(),
         token,
-        mlKemParameterSet: this.getMlKemParameterSet()
+        mlKemParameterSet: this.getMlKemParameterSet(),
+        otsVersion: this.getOtsVersion()
       })
     }
 
@@ -2378,6 +2443,9 @@ export default class KnishIOClient {
   }) {
     if (sourceWallet === null) {
       sourceWallet = (await this.queryBalance({ token: tokenSlug })).payload()
+      if (sourceWallet) {
+        this.bindOwnWalletOtsVersion(sourceWallet)
+      }
     }
     if (!sourceWallet) {
       throw new TransferBalanceException('Source wallet is missing or invalid.')
@@ -2388,7 +2456,8 @@ export default class KnishIOClient {
       ? Wallet.create({
         secret: this.getSecret(),
         token: tokenSlug,
-        mlKemParameterSet: this.getMlKemParameterSet()
+        mlKemParameterSet: this.getMlKemParameterSet(),
+        otsVersion: this.getOtsVersion()
       })
       : Wallet.create({
         bundle: bundleHash,
@@ -2446,7 +2515,8 @@ export default class KnishIOClient {
       const wallet = new Wallet({
         secret: generateSecret(await this.getFingerprint()),
         token: 'AUTH',
-        mlKemParameterSet: this.getMlKemParameterSet()
+        mlKemParameterSet: this.getMlKemParameterSet(),
+        otsVersion: this.getOtsVersion()
       })
 
       /**
@@ -2563,16 +2633,27 @@ export default class KnishIOClient {
       })).payload()
 
       if (continuId && continuId.token === 'USER' && continuId.position) {
-        const pointerWallet = new Wallet({
-          secret,
-          token: 'USER',
-          position: continuId.position,
-          mlKemParameterSet: this.getMlKemParameterSet()
-        })
+        // The pointer wallet's OTS version is the one its ledger address was derived at
+        const pointerOtsVersion = continuId.address
+          ? Wallet.detectOtsVersion({
+            secret,
+            token: 'USER',
+            position: continuId.position,
+            address: continuId.address,
+            preferred: this.getOtsVersion()
+          })
+          : this.getOtsVersion()
 
-        if (continuId.address && pointerWallet.address !== continuId.address) {
+        if (pointerOtsVersion === null) {
           this.log('warn', `KnishIOClient::requestProfileAuthToken() - ContinuID wallet ${ continuId.address } is not derived from this secret at position ${ continuId.position }; signing from an AUTH wallet...`)
         } else {
+          const pointerWallet = new Wallet({
+            secret,
+            token: 'USER',
+            position: continuId.position,
+            mlKemParameterSet: this.getMlKemParameterSet(),
+            otsVersion: pointerOtsVersion
+          })
           const response = await authorize(pointerWallet)
 
           if (response.success()) {
@@ -2587,7 +2668,8 @@ export default class KnishIOClient {
       const response = await authorize(new Wallet({
         secret,
         token: 'AUTH',
-        mlKemParameterSet: this.getMlKemParameterSet()
+        mlKemParameterSet: this.getMlKemParameterSet(),
+        otsVersion: this.getOtsVersion()
       }))
 
       if (!response.success()) {

@@ -1354,6 +1354,11 @@ var N = class t {
 			otsVersion: this.otsVersion
 		}), this.address = this.address || t.generateAddress(this.key), this.characters = this.characters || "BASE64", this.initializeMLKEM());
 	}
+	setOtsVersion(e) {
+		let t = pn(e);
+		if (this.key && t !== this.otsVersion) throw Error("KnishIO: cannot change the OTS version of a keyed wallet.");
+		return this.otsVersion = t, this;
+	}
 	static create({ secret: e = null, bundle: n = null, token: r, batchId: i = null, characters: a = null, mlKemParameterSet: o = ln, otsVersion: s = dn }) {
 		let c = null;
 		if (!e && !n) throw new Me();
@@ -1376,6 +1381,23 @@ var N = class t {
 		return e.forEach((e) => {
 			t.push(ue.createFromDB(e));
 		}), t;
+	}
+	static checkedOtsVersion(e) {
+		return pn(e);
+	}
+	static detectOtsVersion({ secret: e, token: n, position: r, address: i, preferred: a = dn }) {
+		if (!e || !r || !i) return null;
+		let o = pn(a), s = i.toLowerCase();
+		for (let i of [o, o === 1 ? 2 : 1]) {
+			let a = t.generateKey({
+				secret: e,
+				token: n,
+				position: r,
+				otsVersion: i
+			});
+			if (t.generateAddress(a) === s) return i;
+		}
+		return null;
 	}
 	static generateKey({ secret: t, token: n, position: r, otsVersion: i = dn }) {
 		let a = pn(i);
@@ -2590,13 +2612,18 @@ var N = class t {
 		let t = e.wallet && e.wallet.mlKemParameterSet;
 		return t ? Number(t) : N.mlKemParameterSetFromPubkey(e.pubkey) || 768;
 	}
+	static resolveOtsVersion(e) {
+		let t = e.wallet && e.wallet.otsVersion;
+		return N.checkedOtsVersion(t || 1);
+	}
 	static restore(t, n) {
 		let r = new N({
 			secret: n,
 			token: t.wallet.token || "AUTH",
 			position: t.wallet.position,
 			characters: t.wallet.characters,
-			mlKemParameterSet: e.resolveMlKemParameterSet(t)
+			mlKemParameterSet: e.resolveMlKemParameterSet(t),
+			otsVersion: e.resolveOtsVersion(t)
 		});
 		return e.create({
 			token: t.token,
@@ -2621,7 +2648,8 @@ var N = class t {
 				token: this.$__wallet.token,
 				position: this.$__wallet.position,
 				characters: this.$__wallet.characters,
-				mlKemParameterSet: this.$__wallet.mlKemParameterSet
+				mlKemParameterSet: this.$__wallet.mlKemParameterSet,
+				otsVersion: this.$__wallet.otsVersion
 			}
 		};
 	}
@@ -3538,14 +3566,15 @@ var Xn = class {
 		});
 	}
 }, Cr = class extends J {}, wr = class extends Y {
-	fillMolecule({ token: e, batchId: t = null }) {
-		let n = N.create({
+	fillMolecule({ token: e, batchId: t = null, otsVersion: n = 1 }) {
+		let r = N.create({
 			secret: this.$__molecule.secret,
 			bundle: this.$__molecule.bundle,
 			token: e,
-			batchId: t
+			batchId: t,
+			otsVersion: n
 		});
-		this.$__molecule.initShadowWalletClaim(n), this.$__molecule.sign({}), this.$__molecule.check();
+		this.$__molecule.initShadowWalletClaim(r), this.$__molecule.sign({}), this.$__molecule.check();
 	}
 	createResponse(e) {
 		return new Cr({
@@ -5608,7 +5637,7 @@ var va = class {
 		});
 	}
 }, ya = class {
-	constructor({ uri: e, cellSlug: t = null, client: n = null, socket: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024 }) {
+	constructor({ uri: e, cellSlug: t = null, client: n = null, socket: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024, otsVersion: l = 1 }) {
 		this.initialize({
 			uri: e,
 			cellSlug: t,
@@ -5618,11 +5647,12 @@ var va = class {
 			logging: a,
 			defaultRequestPolicy: o,
 			secretStorage: s,
-			mlKemParameterSet: c
+			mlKemParameterSet: c,
+			otsVersion: l
 		});
 	}
-	initialize({ uri: e, cellSlug: t = null, socket: n = null, client: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024 }) {
-		this.reset(), this.$__secretStorage = s, this.$__logging = a, this.$__defaultRequestPolicy = o, this.setMlKemParameterSet(c), this.$__authTokenObjects = {}, this.$__authInProcess = !1, this.abortControllers = /* @__PURE__ */ new Map(), this.setUri(e), t && this.setCellSlug(t);
+	initialize({ uri: e, cellSlug: t = null, socket: n = null, client: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024, otsVersion: l = 1 }) {
+		this.reset(), this.$__secretStorage = s, this.$__logging = a, this.$__defaultRequestPolicy = o, this.setMlKemParameterSet(c), this.setOtsVersion(l), this.$__authTokenObjects = {}, this.$__authInProcess = !1, this.abortControllers = /* @__PURE__ */ new Map(), this.setUri(e), t && this.setCellSlug(t);
 		for (let e in this.$__uris) {
 			let t = this.$__uris[e];
 			this.$__authTokenObjects[t] = null;
@@ -5643,6 +5673,24 @@ var va = class {
 		let t = Number(e);
 		if (![1024, 768].includes(t)) throw Error(`KnishIO: unsupported ML-KEM parameter set ${e}; expected 1024 or 768.`);
 		return this.$__mlKemParameterSet = t, this;
+	}
+	getOtsVersion() {
+		return this.$__otsVersion || 1;
+	}
+	setOtsVersion(e) {
+		return this.$__otsVersion = N.checkedOtsVersion(e), this;
+	}
+	bindOwnWalletOtsVersion(e) {
+		if (!e.position || !e.address) return e.setOtsVersion(this.getOtsVersion());
+		let t = N.detectOtsVersion({
+			secret: this.getSecret(),
+			token: e.token,
+			position: e.position,
+			address: e.address,
+			preferred: this.getOtsVersion()
+		});
+		if (t === null) throw new Me(`KnishIO: wallet ${e.address} is not derived from this secret at position ${e.position} under OTS version 1 or 2.`);
+		return e.setOtsVersion(t);
 	}
 	getRandomUri() {
 		let e = Math.floor(Math.random() * this.$__uris.length);
@@ -5747,14 +5795,15 @@ var va = class {
 	}
 	async getSourceWallet() {
 		let e = (await this.queryContinuId({ bundle: this.getBundle() })).payload();
-		return e ? e.key = N.generateKey({
+		return e ? (this.bindOwnWalletOtsVersion(e), e.key = N.generateKey({
 			secret: this.getSecret(),
 			token: e.token,
 			position: e.position,
 			otsVersion: e.otsVersion
-		}) : e = new N({
+		})) : e = new N({
 			secret: this.getSecret(),
-			mlKemParameterSet: this.getMlKemParameterSet()
+			mlKemParameterSet: this.getMlKemParameterSet(),
+			otsVersion: this.getOtsVersion()
 		}), e;
 	}
 	getRemainderWallet() {
@@ -5766,8 +5815,8 @@ var va = class {
 		if (n && n.token !== "USER") {
 			if (this.lastMoleculeQuery && this.getRemainderWallet() && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success()) i = this.getRemainderWallet().position;
 			else {
-				let e = await this.getSourceWallet();
-				i = e ? e.position : null;
+				let e = (await this.queryContinuId({ bundle: this.getBundle() })).payload();
+				i = e ? e.position : N.generatePosition();
 			}
 		}
 		return !n && this.lastMoleculeQuery && this.getRemainderWallet().token === "USER" && this.lastMoleculeQuery.response() && this.lastMoleculeQuery.response().success() && (n = this.getRemainderWallet()), n === null && (n = await this.getSourceWallet()), this.remainderWallet = r || N.create({
@@ -5858,7 +5907,7 @@ var va = class {
 		})).payload();
 		if (r === null || Qn.cmp(r.balance, t) < 0) throw new P();
 		if (!r.position || !r.address) throw new P("Source wallet can not be a shadow wallet.");
-		return r;
+		return this.bindOwnWalletOtsVersion(r);
 	}
 	async subscribeCreateMolecule({ bundle: e, closure: t }) {
 		return await this.createSubscribe(Br).execute({
@@ -6015,7 +6064,8 @@ var va = class {
 		let t = new N({
 			secret: this.getSecret(),
 			token: e,
-			mlKemParameterSet: this.getMlKemParameterSet()
+			mlKemParameterSet: this.getMlKemParameterSet(),
+			otsVersion: this.getOtsVersion()
 		}), n = await this.createMoleculeMutation({ mutationClass: Pr });
 		return n.fillMolecule(t), await this.executeQuery(n);
 	}
@@ -6053,7 +6103,8 @@ var va = class {
 			bundle: this.getBundle(),
 			token: e,
 			batchId: r,
-			mlKemParameterSet: this.getMlKemParameterSet()
+			mlKemParameterSet: this.getMlKemParameterSet(),
+			otsVersion: this.getOtsVersion()
 		}), s = await this.createMoleculeMutation({ mutationClass: gr });
 		return s.fillMolecule({
 			recipientWallet: o,
@@ -6174,7 +6225,8 @@ var va = class {
 		t ? (Object.prototype.toString.call(t) === "[object String]" && (N.isBundleHash(t) ? (o = "walletBundle", s = t) : t = N.create({
 			secret: t,
 			token: e,
-			mlKemParameterSet: this.getMlKemParameterSet()
+			mlKemParameterSet: this.getMlKemParameterSet(),
+			otsVersion: this.getOtsVersion()
 		})), t instanceof N && (o = "wallet", i.position = t.position, i.bundle = t.bundle, s = t.address)) : (o = "walletBundle", s = this.getBundle());
 		let d = await this.createMoleculeMutation({ mutationClass: vr });
 		return d.fillMolecule({
@@ -6198,7 +6250,8 @@ var va = class {
 		});
 		return r.fillMolecule({
 			token: e,
-			batchId: t
+			batchId: t,
+			otsVersion: this.getOtsVersion()
 		}), await this.executeQuery(r);
 	}
 	async claimShadowWallets({ token: e }) {
@@ -6337,10 +6390,11 @@ var va = class {
 			if (z.get(n.data(), "0.fungibility") === "stackable") throw new R("KnishIOClient::replenishToken() - Replenishing a stackable token requires token units!");
 		}
 		let i = r;
-		i === null && (i = (await this.queryBalance({ token: e })).payload()), i ||= N.create({
+		i === null && (i = (await this.queryBalance({ token: e })).payload(), i && this.bindOwnWalletOtsVersion(i)), i ||= N.create({
 			secret: this.getSecret(),
 			token: e,
-			mlKemParameterSet: this.getMlKemParameterSet()
+			mlKemParameterSet: this.getMlKemParameterSet(),
+			otsVersion: this.getOtsVersion()
 		});
 		let a = await this.createMolecule({});
 		a.replenishToken({
@@ -6355,11 +6409,12 @@ var va = class {
 		return this.executeQuery(o);
 	}
 	async fuseToken({ bundleHash: e, tokenSlug: t, newTokenUnit: n, fusedTokenUnitIds: r, sourceWallet: i = null }) {
-		if (i === null && (i = (await this.queryBalance({ token: t })).payload()), !i) throw new P("Source wallet is missing or invalid.");
+		if (i === null && (i = (await this.queryBalance({ token: t })).payload(), i && this.bindOwnWalletOtsVersion(i)), !i) throw new P("Source wallet is missing or invalid.");
 		let a = e === this.getBundle() ? N.create({
 			secret: this.getSecret(),
 			token: t,
-			mlKemParameterSet: this.getMlKemParameterSet()
+			mlKemParameterSet: this.getMlKemParameterSet(),
+			otsVersion: this.getOtsVersion()
 		}) : N.create({
 			bundle: e,
 			token: t,
@@ -6389,7 +6444,8 @@ var va = class {
 			let n = new N({
 				secret: oe(await this.getFingerprint()),
 				token: "AUTH",
-				mlKemParameterSet: this.getMlKemParameterSet()
+				mlKemParameterSet: this.getMlKemParameterSet(),
+				otsVersion: this.getOtsVersion()
 			}), r = await this.createQuery(Ir), i = {
 				cellSlug: e,
 				pubkey: n.pubkey,
@@ -6439,23 +6495,31 @@ var va = class {
 				token: "USER"
 			})).payload();
 			if (r && r.token === "USER" && r.position) {
-				let t = new N({
+				let t = r.address ? N.detectOtsVersion({
 					secret: e,
 					token: "USER",
 					position: r.position,
-					mlKemParameterSet: this.getMlKemParameterSet()
-				});
-				if (r.address && t.address !== r.address) this.log("warn", `KnishIOClient::requestProfileAuthToken() - ContinuID wallet ${r.address} is not derived from this secret at position ${r.position}; signing from an AUTH wallet...`);
+					address: r.address,
+					preferred: this.getOtsVersion()
+				}) : this.getOtsVersion();
+				if (t === null) this.log("warn", `KnishIOClient::requestProfileAuthToken() - ContinuID wallet ${r.address} is not derived from this secret at position ${r.position}; signing from an AUTH wallet...`);
 				else {
-					let e = await n(t);
-					if (e.success()) return this.log("info", `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer ${r.position}.`), e;
-					this.log("warn", `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer was rejected (${e.reason()}); retrying once from an AUTH wallet...`);
+					let i = await n(new N({
+						secret: e,
+						token: "USER",
+						position: r.position,
+						mlKemParameterSet: this.getMlKemParameterSet(),
+						otsVersion: t
+					}));
+					if (i.success()) return this.log("info", `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer ${r.position}.`), i;
+					this.log("warn", `KnishIOClient::requestProfileAuthToken() - Authorization signed from the ContinuID pointer was rejected (${i.reason()}); retrying once from an AUTH wallet...`);
 				}
 			}
 			let i = await n(new N({
 				secret: e,
 				token: "AUTH",
-				mlKemParameterSet: this.getMlKemParameterSet()
+				mlKemParameterSet: this.getMlKemParameterSet(),
+				otsVersion: this.getOtsVersion()
 			}));
 			if (!i.success()) throw new Yr(`KnishIOClient::requestProfileAuthToken() - Authorization attempt rejected by ledger. Reason: ${i.reason()}`);
 			return this.log("info", "KnishIOClient::requestProfileAuthToken() - Authorization signed from a fresh AUTH wallet."), i;

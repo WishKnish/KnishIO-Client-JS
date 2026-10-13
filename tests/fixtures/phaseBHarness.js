@@ -30,6 +30,7 @@ export function stubClient ({
   })
   client.setSecret(secret)
   jest.spyOn(client, 'getSourceWallet').mockImplementation(async () => new Wallet({ secret }))
+  jest.spyOn(client, 'queryContinuId').mockResolvedValue({ payload: () => null })
   jest.spyOn(client, 'queryBalance').mockResolvedValue({ payload: () => balanceWallet })
   const proposed = []
   jest.spyOn(client, 'executeQuery').mockImplementation(async (query) => {

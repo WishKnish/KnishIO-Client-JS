@@ -164,6 +164,22 @@ export default class Wallet {
   }
 
   /**
+   * Sets the OTS version of a wallet that holds no key (e.g. a wallet rebuilt from ledger data).
+   * A keyed wallet keeps the version its key was derived at.
+   *
+   * @param {number|string} otsVersion
+   * @return {Wallet}
+   */
+  setOtsVersion (otsVersion) {
+    const version = checkedOtsVersion(otsVersion)
+    if (this.key && version !== this.otsVersion) {
+      throw new Error('KnishIO: cannot change the OTS version of a keyed wallet.')
+    }
+    this.otsVersion = version
+    return this
+  }
+
+  /**
    * Creates a new Wallet instance
    *
    * @param {string|null} secret
@@ -236,6 +252,48 @@ export default class Wallet {
       result.push(TokenUnit.createFromDB(unitData))
     })
     return result
+  }
+
+  /**
+   * Validates an OTS version (1 or 2) and returns it as a number.
+   *
+   * @param {number|string} otsVersion
+   * @return {number}
+   */
+  static checkedOtsVersion (otsVersion) {
+    return checkedOtsVersion(otsVersion)
+  }
+
+  /**
+   * The OTS version whose key, derived from secret, token and position, has the given address.
+   * Tries `preferred` first, then the other version.
+   *
+   * @param {string} secret
+   * @param {string} token
+   * @param {string} position
+   * @param {string} address
+   * @param {number} preferred - 1 (default) or 2
+   * @return {number|null}
+   */
+  static detectOtsVersion ({
+    secret,
+    token,
+    position,
+    address,
+    preferred = DEFAULT_OTS_VERSION
+  }) {
+    if (!secret || !position || !address) {
+      return null
+    }
+    const first = checkedOtsVersion(preferred)
+    const wanted = address.toLowerCase()
+    for (const otsVersion of [first, first === 1 ? 2 : 1]) {
+      const key = Wallet.generateKey({ secret, token, position, otsVersion })
+      if (Wallet.generateAddress(key) === wanted) {
+        return otsVersion
+      }
+    }
+    return null
   }
 
   /**

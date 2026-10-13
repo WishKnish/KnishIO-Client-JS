@@ -216,6 +216,7 @@ describe('pre-submit molecule check', () => {
   test('a USER-signed meta mutation that lost its ContinuID atom is refused before any request', async () => {
     const { client } = stubClient()
     client.executeQuery.mockRestore()
+    client.queryContinuId.mockRestore()
     const mutate = jest.spyOn(client.client(), 'mutate')
     jest.spyOn(Molecule.prototype, 'addContinuIdAtom').mockImplementation(function () { return this })
 
@@ -227,6 +228,7 @@ describe('pre-submit molecule check', () => {
   test('the raw propose mutation sends a USER-signed M-only molecule unchanged', async () => {
     const { client, secret } = stubClient()
     client.executeQuery.mockRestore()
+    client.queryContinuId.mockRestore()
     const mutate = jest.spyOn(client.client(), 'mutate').mockResolvedValue({ data: { ProposeMolecule: { status: 'rejected' } } })
 
     const molecule = new Molecule({ secret, bundle: client.getBundle(), sourceWallet: new Wallet({ secret }), cellSlug: 'vectors' })
