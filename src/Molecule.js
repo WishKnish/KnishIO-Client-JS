@@ -85,6 +85,8 @@ export default class Molecule {
    * @param {Wallet|null} remainderWallet
    * @param {string|null} cellSlug
    * @param {string|number|null} version
+   * @param {number} minOtsVersion - lowest OTS version for the wallets this molecule creates for
+   *   its signer (1 or 2); see successorOtsVersion()
    */
   constructor ({
     secret = null,
@@ -94,9 +96,11 @@ export default class Molecule {
     cellSlug = null,
     version = null,
     continuIdPosition = null,
-    mlKemParameterSet = null
+    mlKemParameterSet = null,
+    minOtsVersion = 1
   }) {
     this.mlKemParameterSet = mlKemParameterSet || (sourceWallet && sourceWallet.mlKemParameterSet) || 1024
+    this.minOtsVersion = Wallet.checkedOtsVersion(minOtsVersion)
     this.status = null
     this.molecularHash = null
     this.createdAt = String(+new Date())
@@ -120,7 +124,7 @@ export default class Molecule {
         batchId: sourceWallet.batchId,
         characters: sourceWallet.characters,
         mlKemParameterSet: this.mlKemParameterSet,
-        otsVersion: sourceWallet.otsVersion
+        otsVersion: this.successorOtsVersion()
       })
     }
   }
@@ -144,6 +148,16 @@ export default class Molecule {
    */
   signingOtsVersion () {
     return (this.sourceWallet && this.sourceWallet.otsVersion) || 1
+  }
+
+  /**
+   * OTS version of the wallets this molecule creates for its signer (remainder, ContinuID,
+   * buffer): the higher of the signing version and minOtsVersion.
+   *
+   * @return {number}
+   */
+  successorOtsVersion () {
+    return Math.max(this.signingOtsVersion(), this.minOtsVersion)
   }
 
   /**
@@ -365,7 +379,7 @@ export default class Molecule {
         secret: this.secret,
         bundle: this.bundle,
         mlKemParameterSet: this.mlKemParameterSet,
-        otsVersion: this.signingOtsVersion()
+        otsVersion: this.successorOtsVersion()
       })
     }
 
@@ -768,7 +782,7 @@ export default class Molecule {
       token: this.sourceWallet.token,
       batchId: this.sourceWallet.batchId,
       mlKemParameterSet: this.mlKemParameterSet,
-      otsVersion: this.signingOtsVersion()
+      otsVersion: this.successorOtsVersion()
     })
     bufferWallet.tradeRates = tradeRates
 

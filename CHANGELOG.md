@@ -23,7 +23,10 @@ detail, the entry says so instead of guessing.
     `KnishIO: unsupported OTS version …`. `wallet.otsVersion` defaults to 1.
   - `Wallet.generateAddress` takes a 2048- or 8192-character key.
   - `molecule.signingOtsVersion()`: a molecule signs with its source wallet's version, and the
-    remainder, ContinuID and buffer wallets it creates inherit it.
+    remainder, ContinuID and buffer wallets it creates take the higher of that version and
+    `new Molecule({ …, minOtsVersion })` (`molecule.successorOtsVersion()`).
+  - `wallet.createRemainder(secret, minOtsVersion)`: the remainder takes the higher of the
+    wallet's version and `minOtsVersion` (default 1).
 
   v1 stays the default and is unchanged.
 - **Client-level OTS version.** `new KnishIOClient({ …, otsVersion })` (1 default, or 2),
@@ -40,8 +43,13 @@ detail, the entry says so instead of guessing.
   throws `SignatureMalformedException`.
 - `CheckMolecule.ots()` throws `SignatureMalformedException` unless the declared
   `molecularHash` is exactly 64 characters of `0-9a-g`.
-- `KnishIOClient.createMolecule()` creates its default remainder wallet at the source wallet's
-  OTS version.
+- `KnishIOClient.createMolecule()` creates its default remainder wallet at the higher of the
+  source wallet's and the client's OTS version.
+- A client set to `otsVersion: 2` creates the ContinuID head, token remainders and deposit buffer
+  of every molecule it signs at version 2, so an identity created at version 1 moves to version 2
+  on its next sign-in or molecule. A client at version 1 keeps a version 2 identity at version 2.
+- `ResponseWalletList.getWallets(secret)` keys each wallet at the OTS version its address was
+  derived at, and returns it without a key when neither version derives that address.
 - `Molecule.sign()` throws `SignatureMalformedException` unless the computed `molecularHash` is
   exactly 64 characters of `0-9a-g`.
 - Wallets the ledger returns for this client (the ContinuID head in `getSourceWallet()` and the

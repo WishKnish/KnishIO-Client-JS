@@ -1504,17 +1504,17 @@ var N = class t {
 			t.tokenUnits = this.tokenUnits.filter((e) => r.includes(e.id));
 		}), n.tokenUnits = this.tokenUnits.filter((e) => !r.has(e.id)), this.tokenUnits = this.tokenUnits.filter((e) => r.has(e.id)));
 	}
-	createRemainder(e) {
-		let n = t.create({
+	createRemainder(e, n = 1) {
+		let r = t.create({
 			secret: e,
 			token: this.token,
 			characters: this.characters,
-			otsVersion: this.otsVersion
+			otsVersion: Math.max(this.otsVersion, t.checkedOtsVersion(n))
 		});
-		return n.initBatchId({
+		return r.initBatchId({
 			sourceWallet: this,
 			isRemainder: !0
-		}), n;
+		}), r;
 	}
 	isShadow() {
 		return (this.position === void 0 || this.position === null) && (this.address === void 0 || this.address === null);
@@ -2082,15 +2082,15 @@ var N = class t {
 		super(e, t, n), this.name = "StackableUnitAmountException";
 	}
 }, Pn = "0000000000000000000000000000000000000000000000000000000000000000", Fn = class t {
-	constructor({ secret: e = null, bundle: t = null, sourceWallet: n = null, remainderWallet: r = null, cellSlug: i = null, version: a = null, continuIdPosition: o = null, mlKemParameterSet: s = null }) {
-		this.mlKemParameterSet = s || n && n.mlKemParameterSet || 1024, this.status = null, this.molecularHash = null, this.createdAt = String(+/* @__PURE__ */ new Date()), this.cellSlugOrigin = this.cellSlug = i, this.secret = e, this.bundle = t, this.sourceWallet = n, this.continuIdPosition = o, this.atoms = [], this.parentHashes = [], a !== null && Object.prototype.hasOwnProperty.call(ae, a) && (this.version = String(a)), (r || n) && (this.remainderWallet = r || N.create({
+	constructor({ secret: e = null, bundle: t = null, sourceWallet: n = null, remainderWallet: r = null, cellSlug: i = null, version: a = null, continuIdPosition: o = null, mlKemParameterSet: s = null, minOtsVersion: c = 1 }) {
+		this.mlKemParameterSet = s || n && n.mlKemParameterSet || 1024, this.minOtsVersion = N.checkedOtsVersion(c), this.status = null, this.molecularHash = null, this.createdAt = String(+/* @__PURE__ */ new Date()), this.cellSlugOrigin = this.cellSlug = i, this.secret = e, this.bundle = t, this.sourceWallet = n, this.continuIdPosition = o, this.atoms = [], this.parentHashes = [], a !== null && Object.prototype.hasOwnProperty.call(ae, a) && (this.version = String(a)), (r || n) && (this.remainderWallet = r || N.create({
 			secret: e,
 			bundle: t,
 			token: n.token,
 			batchId: n.batchId,
 			characters: n.characters,
 			mlKemParameterSet: this.mlKemParameterSet,
-			otsVersion: n.otsVersion
+			otsVersion: this.successorOtsVersion()
 		}));
 	}
 	withParentHashes(e) {
@@ -2098,6 +2098,9 @@ var N = class t {
 	}
 	signingOtsVersion() {
 		return this.sourceWallet && this.sourceWallet.otsVersion || 1;
+	}
+	successorOtsVersion() {
+		return Math.max(this.signingOtsVersion(), this.minOtsVersion);
 	}
 	get cellSlugDelimiter() {
 		return ".";
@@ -2170,7 +2173,7 @@ var N = class t {
 			secret: this.secret,
 			bundle: this.bundle,
 			mlKemParameterSet: this.mlKemParameterSet,
-			otsVersion: this.signingOtsVersion()
+			otsVersion: this.successorOtsVersion()
 		}));
 		let e = {};
 		return this.continuIdPosition ? e.previousPosition = this.continuIdPosition : this.sourceWallet && this.sourceWallet.position && (e.previousPosition = this.sourceWallet.position), this.remainderWallet.pubkey && (e.pubkey = this.remainderWallet.pubkey), this.remainderWallet.characters && (e.characters = this.remainderWallet.characters), this.addAtom(T.create({
@@ -2333,7 +2336,7 @@ var N = class t {
 			token: this.sourceWallet.token,
 			batchId: this.sourceWallet.batchId,
 			mlKemParameterSet: this.mlKemParameterSet,
-			otsVersion: this.signingOtsVersion()
+			otsVersion: this.successorOtsVersion()
 		});
 		return n.tradeRates = t, this.addAtom(T.create({
 			isotope: "V",
@@ -3151,18 +3154,29 @@ var Xn = class {
 	}
 	static toClientWallet({ data: e, secret: t = null }) {
 		let n;
-		if (e.position === null || e.position === void 0 ? n = N.create({
+		if (e.position === null || e.position === void 0) n = N.create({
 			bundle: e.bundleHash,
 			token: e.tokenSlug,
 			batchId: e.batchId,
 			characters: e.characters
-		}) : (n = new N({
-			secret: t,
-			token: e.tokenSlug,
-			position: e.position,
-			batchId: e.batchId,
-			characters: e.characters
-		}), n.address = e.address, n.bundle = e.bundleHash), e.token && (n.tokenName = e.token.name, n.tokenAmount = e.token.amount, n.tokenSupply = e.token.supply, n.tokenFungibility = e.token.fungibility), e.tokenUnits.length) for (let t of e.tokenUnits) n.tokenUnits.push(ue.createFromGraphQL(t));
+		});
+		else {
+			let r = t ? N.detectOtsVersion({
+				secret: t,
+				token: e.tokenSlug,
+				position: e.position,
+				address: e.address
+			}) : null;
+			n = new N({
+				secret: r ? t : null,
+				token: e.tokenSlug,
+				position: e.position,
+				batchId: e.batchId,
+				characters: e.characters,
+				otsVersion: r || 1
+			}), n.address = e.address, n.bundle = e.bundleHash;
+		}
+		if (e.token && (n.tokenName = e.token.name, n.tokenAmount = e.token.amount, n.tokenSupply = e.token.supply, n.tokenFungibility = e.token.fungibility), e.tokenUnits.length) for (let t of e.tokenUnits) n.tokenUnits.push(ue.createFromGraphQL(t));
 		if (e.tradeRates.length) for (let t of e.tradeRates) n.tradeRates[t.tokenSlug] = t.amount;
 		return n.balance = String(e.amount == null ? 0 : e.amount), n.pubkey = e.pubkey, n.createdAt = e.createdAt, n;
 	}
@@ -5826,7 +5840,7 @@ var va = class {
 			batchId: n.batchId,
 			characters: n.characters,
 			mlKemParameterSet: this.getMlKemParameterSet(),
-			otsVersion: n.otsVersion
+			otsVersion: Math.max(n.otsVersion, this.getOtsVersion())
 		}), new Fn({
 			secret: e,
 			bundle: t,
@@ -5835,7 +5849,8 @@ var va = class {
 			cellSlug: this.getCellSlug(),
 			version: this.getServerSdkVersion(),
 			continuIdPosition: i,
-			mlKemParameterSet: this.getMlKemParameterSet()
+			mlKemParameterSet: this.getMlKemParameterSet(),
+			minOtsVersion: this.getOtsVersion()
 		});
 	}
 	createQuery(e) {
@@ -6282,7 +6297,7 @@ var va = class {
 			mlKemParameterSet: this.getMlKemParameterSet()
 		});
 		i === null ? o.initBatchId({ sourceWallet: a }) : o.batchId = i;
-		let s = a.createRemainder(this.getSecret());
+		let s = a.createRemainder(this.getSecret(), this.getOtsVersion());
 		a.splitUnits(r, s, o);
 		let c = await this.createMolecule({
 			sourceWallet: a,
@@ -6316,7 +6331,7 @@ var va = class {
 				mlKemParameterSet: this.getMlKemParameterSet()
 			});
 			return t.batchId !== void 0 && t.batchId !== null ? r.batchId = t.batchId : r.initBatchId({ sourceWallet: n }), r;
-		}), o = n.createRemainder(this.getSecret());
+		}), o = n.createRemainder(this.getSecret(), this.getOtsVersion());
 		n.splitUnitsMulti(t.map((e) => e.units || []), a, o);
 		let s = await this.createMolecule({
 			sourceWallet: n,
@@ -6335,7 +6350,7 @@ var va = class {
 			token: e,
 			amount: t
 		}));
-		let i = r.createRemainder(this.getSecret()), a = await this.createMolecule({
+		let i = r.createRemainder(this.getSecret(), this.getOtsVersion()), a = await this.createMolecule({
 			sourceWallet: r,
 			remainderWallet: i
 		}), o = await this.createMoleculeMutation({
@@ -6353,7 +6368,7 @@ var va = class {
 			amount: t,
 			type: "buffer"
 		}));
-		let r = n.createRemainder(this.getSecret()), i = await this.createMolecule({
+		let r = n.createRemainder(this.getSecret(), this.getOtsVersion()), i = await this.createMolecule({
 			sourceWallet: n,
 			remainderWallet: r
 		}), a = await this.createMoleculeMutation({
@@ -6367,7 +6382,7 @@ var va = class {
 			token: e,
 			amount: t
 		}));
-		let i = r.createRemainder(this.getSecret());
+		let i = r.createRemainder(this.getSecret(), this.getOtsVersion());
 		if (n.length > 0) {
 			if (t > 0) throw new R();
 			t = n.length, r.splitUnits(n, i);
@@ -6421,7 +6436,7 @@ var va = class {
 			mlKemParameterSet: this.getMlKemParameterSet()
 		});
 		a.initBatchId({ sourceWallet: i });
-		let o = i.createRemainder(this.getSecret()), s = await this.createMolecule({
+		let o = i.createRemainder(this.getSecret(), this.getOtsVersion()), s = await this.createMolecule({
 			sourceWallet: i,
 			remainderWallet: o
 		});

@@ -680,7 +680,8 @@ export default class KnishIOClient {
       sourceWallet = await this.getSourceWallet()
     }
 
-    // Set the remainder wallet for the next transaction
+    // Set the remainder wallet for the next transaction: never below the client's OTS version, so
+    // a client set to v2 moves the identity's ContinuID head to v2
     this.remainderWallet = remainderWallet || Wallet.create({
       secret,
       bundle,
@@ -688,7 +689,7 @@ export default class KnishIOClient {
       batchId: sourceWallet.batchId,
       characters: sourceWallet.characters,
       mlKemParameterSet: this.getMlKemParameterSet(),
-      otsVersion: sourceWallet.otsVersion
+      otsVersion: Math.max(sourceWallet.otsVersion, this.getOtsVersion())
     })
 
     return new Molecule({
@@ -699,7 +700,8 @@ export default class KnishIOClient {
       cellSlug: this.getCellSlug(),
       version: this.getServerSdkVersion(),
       continuIdPosition,
-      mlKemParameterSet: this.getMlKemParameterSet()
+      mlKemParameterSet: this.getMlKemParameterSet(),
+      minOtsVersion: this.getOtsVersion()
     })
   }
 
@@ -2065,7 +2067,7 @@ export default class KnishIOClient {
     }
 
     // Create a remainder from the source wallet
-    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
+    const remainderWallet = sourceWallet.createRemainder(this.getSecret(), this.getOtsVersion())
 
     // --- Token units splitting
     sourceWallet.splitUnits(
@@ -2168,7 +2170,7 @@ export default class KnishIOClient {
     })
 
     // Create a remainder from the source wallet
-    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
+    const remainderWallet = sourceWallet.createRemainder(this.getSecret(), this.getOtsVersion())
 
     // --- Token units splitting (N-way): source keeps the union, each recipient its subset,
     //     remainder the kept units
@@ -2226,7 +2228,7 @@ export default class KnishIOClient {
     }
 
     // Remainder wallet
-    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
+    const remainderWallet = sourceWallet.createRemainder(this.getSecret(), this.getOtsVersion())
 
     // Build the molecule itself
     const molecule = await this.createMolecule({
@@ -2272,7 +2274,7 @@ export default class KnishIOClient {
     }
 
     // The remainder takes a fresh position: the source position is consumed by signing
-    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
+    const remainderWallet = sourceWallet.createRemainder(this.getSecret(), this.getOtsVersion())
 
     // Build the molecule itself
     const molecule = await this.createMolecule({
@@ -2318,7 +2320,7 @@ export default class KnishIOClient {
     }
 
     // Remainder wallet
-    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
+    const remainderWallet = sourceWallet.createRemainder(this.getSecret(), this.getOtsVersion())
 
     // Calculate amount & set meta key
     if (units.length > 0) {
@@ -2467,7 +2469,7 @@ export default class KnishIOClient {
     recipientWallet.initBatchId({ sourceWallet })
 
     // Remainder wallet
-    const remainderWallet = sourceWallet.createRemainder(this.getSecret())
+    const remainderWallet = sourceWallet.createRemainder(this.getSecret(), this.getOtsVersion())
 
     // Create a molecule
     const molecule = await this.createMolecule({

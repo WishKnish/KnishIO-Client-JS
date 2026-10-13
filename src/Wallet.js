@@ -626,16 +626,19 @@ export default class Wallet {
   }
 
   /**
-   * Create a remainder wallet from the source one
+   * Create a remainder wallet from the source one. Its OTS version is the higher of this
+   * wallet's and minOtsVersion.
    *
-   * @param secret
+   * @param {string} secret
+   * @param {number} minOtsVersion - lowest OTS version for the remainder (1 or 2)
+   * @return {Wallet}
    */
-  createRemainder (secret) {
+  createRemainder (secret, minOtsVersion = 1) {
     const remainderWallet = Wallet.create({
       secret,
       token: this.token,
       characters: this.characters,
-      otsVersion: this.otsVersion
+      otsVersion: Math.max(this.otsVersion, Wallet.checkedOtsVersion(minOtsVersion))
     })
     remainderWallet.initBatchId({
       sourceWallet: this,

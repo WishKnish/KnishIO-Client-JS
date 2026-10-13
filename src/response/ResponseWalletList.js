@@ -91,12 +91,23 @@ export default class ResponseWalletList extends Response {
         characters: data.characters
       })
     } else {
+      // With a secret, the wallet is keyed at the OTS version its ledger address was derived at;
+      // it stays keyless when neither version derives that address from the secret
+      const otsVersion = secret
+        ? Wallet.detectOtsVersion({
+          secret,
+          token: data.tokenSlug,
+          position: data.position,
+          address: data.address
+        })
+        : null
       wallet = new Wallet({
-        secret,
+        secret: otsVersion ? secret : null,
         token: data.tokenSlug,
         position: data.position,
         batchId: data.batchId,
-        characters: data.characters
+        characters: data.characters,
+        otsVersion: otsVersion || 1
       })
       wallet.address = data.address
       wallet.bundle = data.bundleHash
