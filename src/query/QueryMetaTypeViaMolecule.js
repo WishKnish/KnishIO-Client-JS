@@ -109,7 +109,8 @@ export default class QueryMetaTypeViaMolecule extends Query {
               index,
               createdAt,
               otsFragment,
-              metasJson
+              metasJson,
+              version
             }
           }
         },

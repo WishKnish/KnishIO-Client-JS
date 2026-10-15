@@ -267,4 +267,38 @@ describe('served molecules', () => {
     data.atoms[0].createdAt = input
     expect(CheckMolecule.fromServerData(data).atoms[0].createdAt).toBe(expected)
   })
+
+  const withAtomVersion = (data, version) => {
+    const copy = JSON.parse(JSON.stringify(data))
+    copy.atoms.forEach(atom => { atom.version = version })
+    return copy
+  }
+
+  test('v2ts molecule served without atom versions verifies (version 4 fallback)', () => {
+    const result = CheckMolecule.verifyFromServerData(servedFixture.v2ts)
+    expect(result.error).toBeNull()
+    expect(result.verified).toBe(true)
+  })
+
+  test('v2ts molecule served with atom version 4 verifies directly', () => {
+    const result = CheckMolecule.verifyFromServerData(withAtomVersion(servedFixture.v2ts, '4'))
+    expect(result.error).toBeNull()
+    expect(result.verified).toBe(true)
+  })
+
+  test('tampered v2ts molecule fails on both hash paths', () => {
+    const data = JSON.parse(JSON.stringify(servedFixture.v2ts))
+    const atom = data.atoms[0]
+    expect(atom.metasJson).toContain('"f1"')
+    atom.metasJson = atom.metasJson.replace('"f1"', '"f2"')
+    const result = CheckMolecule.verifyFromServerData(data)
+    expect(result.verified).toBe(false)
+    expect(result.error).toMatch(/molecular hash does not match/i)
+  })
+
+  test('a served atom version disables the fallback', () => {
+    const result = CheckMolecule.verifyFromServerData(withAtomVersion(servedFixture.v1, '4'))
+    expect(result.verified).toBe(false)
+    expect(result.error).toMatch(/molecular hash does not match/i)
+  })
 })

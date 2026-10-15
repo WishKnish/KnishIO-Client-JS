@@ -72,6 +72,7 @@ import {
 } from './strings.js'
 import JsSHA from 'jssha'
 import * as kcore from './kcore.js'
+import versions from '../versions/index.js'
 
 const RFC3339_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/
 // Validators return createdAt as an RFC 3339 string; molecules are signed over epoch milliseconds.
@@ -82,6 +83,12 @@ function toSignedTimestamp (value) {
   if (/^\d+$/.test(value)) return value
   if (RFC3339_TIMESTAMP.test(value)) return String(Date.parse(value))
   return value
+}
+
+// Atom version used by versioned hashing (Version4); it must be a registered version.
+const VERSIONED_ATOM_HASHING = '4'
+if (!versions[VERSIONED_ATOM_HASHING]) {
+  throw new Error(`Atom version ${VERSIONED_ATOM_HASHING} is not registered`)
 }
 
 /**
@@ -757,7 +764,8 @@ export default class CheckMolecule {
         meta,
         index: serverAtom.index != null ? serverAtom.index : null,
         otsFragment: serverAtom.otsFragment || null,
-        createdAt: toSignedTimestamp(serverAtom.createdAt)
+        createdAt: toSignedTimestamp(serverAtom.createdAt),
+        version: serverAtom.version ?? null
       }
     })
 
@@ -779,20 +787,32 @@ export default class CheckMolecule {
    * @return {{ molecularHash: string, verified: boolean, error: string|null }}
    */
   static verifyFromServerData (moleculeData) {
-    try {
-      const molecule = CheckMolecule.fromServerData(moleculeData)
-      new CheckMolecule(molecule).verify()
-      return {
-        molecularHash: moleculeData.molecularHash,
-        verified: true,
-        error: null
-      }
-    } catch (error) {
-      return {
-        molecularHash: moleculeData.molecularHash || null,
-        verified: false,
-        error: error.message || String(error)
+    const verify = data => {
+      try {
+        new CheckMolecule(CheckMolecule.fromServerData(data)).verify()
+        return { molecularHash: moleculeData.molecularHash, verified: true, error: null }
+      } catch (error) {
+        return {
+          molecularHash: moleculeData.molecularHash || null,
+          verified: false,
+          error: error.message || String(error),
+          hashMismatch: error instanceof MolecularHashMismatchException
+        }
       }
     }
+    const strip = ({ hashMismatch, ...result }) => result
+
+    const result = verify(moleculeData)
+    const servedVersion = (moleculeData.atoms || []).some(atom => atom.version != null)
+    if (result.verified || !result.hashMismatch || servedVersion) {
+      return strip(result)
+    }
+
+    // Validators before 0.8.5 do not serve atom versions; molecules signed with
+    // versioned atoms only match their hash when rebuilt with that version.
+    return strip(verify({
+      ...moleculeData,
+      atoms: moleculeData.atoms.map(atom => ({ ...atom, version: VERSIONED_ATOM_HASHING }))
+    }))
   }
 }
