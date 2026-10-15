@@ -84,12 +84,16 @@ jobs:
           if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
           echo "cooldown cutoff: $CUTOFF"
           npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
+          echo "CUTOFF=$CUTOFF" >> "$GITHUB_ENV"
 
       # Dependency audit gate: fail on high/critical advisories in the published
       # dependency tree (dev tooling is reported by the full audit but not enforced).
-      # Reads the lockfile written above — no install needed.
+      # Reads the lockfile written above — no install needed. `npm audit` still rebuilds
+      # the tree and fetches packuments, so it takes the same --before: on npm 10 (Node 20)
+      # a registry release newer than the cutoff otherwise crashes it in arborist's peer-set
+      # load ("Cannot read properties of null (reading 'edgesOut')").
       - name: npm audit (prod deps, high+)
-        run: npm audit --omit=dev --audit-level=high
+        run: npm audit --omit=dev --audit-level=high --before="$CUTOFF"
 
       # Install exactly the resolved set, still without lifecycle scripts. Platform
       # binaries (@swc, rolldown) arrive as optionalDependencies and need no scripts.

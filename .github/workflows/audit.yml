@@ -93,8 +93,10 @@ jobs:
           if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
           echo "cooldown cutoff: $CUTOFF"
           npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
+          echo "CUTOFF=$CUTOFF" >> "$GITHUB_ENV"
 
       # The deep scan: every severity, whole tree, dev included. Reads the lockfile written
-      # above — no install, so still nothing from npm has executed in this job.
+      # above — no install, so still nothing from npm has executed in this job. Same --before
+      # as the resolve: see the ci.yml audit step.
       - name: npm audit (full tree, low and above)
-        run: npm audit --audit-level=low
+        run: npm audit --audit-level=low --before="$CUTOFF"
