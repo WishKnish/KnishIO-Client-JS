@@ -15,6 +15,13 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+## [1.5.1] — 2026-10-14
+
+### Fixed
+
+- `CheckMolecule.fromServerData`, `verifyFromServerData` and `queryMetaVerified` accept the
+  RFC 3339 `createdAt` that validators return, so molecules served by a meta query verify.
+
 ## [1.5.0] — 2026-10-13
 
 ### Added
@@ -472,7 +479,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.1
 [1.5.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.0
 [1.4.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.4.1
 [1.4.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.4.0
