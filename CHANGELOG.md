@@ -15,6 +15,19 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+## [1.5.2] — 2026-10-15
+
+### Fixed
+
+- `CheckMolecule.verifyFromServerData` (and `queryMetaVerified`) verify molecules whose atoms
+  were signed with atom version 4, including molecules served without a version.
+
+### Changed
+
+- Through-molecule meta queries (`queryMeta({ throughMolecule: true })`, `queryMetaVerified`)
+  request each atom's `version` and need validator 0.8.5 or later; an older validator rejects
+  the query with an unknown-field error.
+
 ## [1.5.1] — 2026-10-14
 
 ### Fixed
@@ -479,7 +492,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.2
 [1.5.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.1
 [1.5.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.0
 [1.4.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.4.1
