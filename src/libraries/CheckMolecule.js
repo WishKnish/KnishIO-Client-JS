@@ -73,6 +73,17 @@ import {
 import JsSHA from 'jssha'
 import * as kcore from './kcore.js'
 
+const RFC3339_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/
+// Validators return createdAt as an RFC 3339 string; molecules are signed over epoch milliseconds.
+function toSignedTimestamp (value) {
+  if (value === null || value === undefined || value === '') return null
+  if (typeof value === 'number') return Number.isSafeInteger(value) ? String(value) : null
+  if (typeof value !== 'string') return null
+  if (/^\d+$/.test(value)) return value
+  if (RFC3339_TIMESTAMP.test(value)) return String(Date.parse(value))
+  return value
+}
+
 /**
  *
  */
@@ -705,7 +716,7 @@ export default class CheckMolecule {
    * @param {string} serverData.bundleHash
    * @param {string|null} serverData.cellSlug
    * @param {string|null} serverData.status
-   * @param {string|null} serverData.createdAt
+   * @param {string|number|null} serverData.createdAt - epoch-ms string, epoch-ms number, or RFC 3339 string
    * @param {array} serverData.atoms - Array of server-format atom objects
    * @return {Molecule}
    */
@@ -746,7 +757,7 @@ export default class CheckMolecule {
         meta,
         index: serverAtom.index != null ? serverAtom.index : null,
         otsFragment: serverAtom.otsFragment || null,
-        createdAt: serverAtom.createdAt || null
+        createdAt: toSignedTimestamp(serverAtom.createdAt)
       }
     })
 
@@ -755,7 +766,7 @@ export default class CheckMolecule {
       bundle: bundleHash,
       cellSlug,
       status,
-      createdAt,
+      createdAt: toSignedTimestamp(createdAt),
       atoms: mappedAtoms
     })
   }

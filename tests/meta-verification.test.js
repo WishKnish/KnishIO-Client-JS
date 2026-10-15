@@ -3,6 +3,8 @@ import {
   test,
   expect
 } from '@jest/globals'
+import fs from 'fs'
+import path from 'path'
 import Molecule from '../src/Molecule'
 import Wallet from '../src/Wallet'
 import Atom from '../src/Atom'
@@ -228,5 +230,41 @@ describe('Meta Query Tamper Verification', () => {
       expect(result.verified).toBe(false)
       expect(result.error).toBeTruthy()
     })
+  })
+})
+
+// Fixture captured from validator 0.8.3 MetaType through-molecule responses.
+const SERVED_FIXTURE_PATH = path.resolve(__dirname, 'fixtures/served-molecules.json')
+const servedFixture = JSON.parse(fs.readFileSync(SERVED_FIXTURE_PATH, 'utf8'))
+
+describe('served molecules', () => {
+  test.each(['v1', 'v2'])('%s molecule served by the validator verifies', key => {
+    const result = CheckMolecule.verifyFromServerData(servedFixture[key])
+    expect(result.error).toBeNull()
+    expect(result.verified).toBe(true)
+  })
+
+  test('molecule with RFC 3339 createdAt values verifies', () => {
+    const { molecule } = buildSignedMetaMolecule()
+    const serverData = moleculeToServerFormat(molecule)
+    const toIso = x => new Date(Number(x)).toISOString().replace('Z', '+00:00')
+    serverData.createdAt = toIso(serverData.createdAt)
+    serverData.atoms.forEach(atom => { atom.createdAt = toIso(atom.createdAt) })
+
+    const result = CheckMolecule.verifyFromServerData(serverData)
+    expect(result.error).toBeNull()
+    expect(result.verified).toBe(true)
+  })
+
+  test.each([
+    ['2026-10-14T20:02:37+00:00', '1792008157000'],
+    ['2026-10-14T20:02:37.110Z', '1792008157110'],
+    [1792008157110, '1792008157110'],
+    ['1792008157110', '1792008157110'],
+    ['not-a-date', 'not-a-date']
+  ])('atom createdAt %p normalizes to %p', (input, expected) => {
+    const data = JSON.parse(JSON.stringify(servedFixture.v1))
+    data.atoms[0].createdAt = input
+    expect(CheckMolecule.fromServerData(data).atoms[0].createdAt).toBe(expected)
   })
 })
