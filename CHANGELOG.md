@@ -15,6 +15,14 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+## [1.5.3] — 2026-10-16
+
+### Fixed
+
+- `CheckMolecule.verifyFromServerData` (`verify_from_server_data`) verifies molecules whose atoms
+  carry any version, hashing them the way validators do, including molecules signed with atom
+  version 3 and served without their version.
+
 ## [1.5.2] — 2026-10-15
 
 ### Fixed
@@ -492,7 +500,8 @@ Published to npm; no corresponding git tag exists in this repository.
 commit messages do not support accurate reconstruction. See the git tag history
 and the [npm version list](https://www.npmjs.com/package/@wishknish/knishio-client-js?activeTab=versions).
 
-[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/WishKnish/KnishIO-Client-JS/compare/v1.5.3...HEAD
+[1.5.3]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.3
 [1.5.2]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.2
 [1.5.1]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.1
 [1.5.0]: https://github.com/WishKnish/KnishIO-Client-JS/releases/tag/v1.5.0
