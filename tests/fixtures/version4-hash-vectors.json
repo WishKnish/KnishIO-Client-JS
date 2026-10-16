@@ -1,0 +1,553 @@
+{
+  "description": "Versioned (Version4) molecular hash vectors: when every atom carries a version, the molecular hash is SHAKE256-256 over JSON.stringify of each index-sorted atom view (12 single-key objects in key order batchId, createdAt, index, isotope, meta, metaId, metaType, position, token, value, version, walletAddress; meta items as [{\"key\":k},{\"value\":v}]), base17-encoded and zero-padded to 64 characters. atoms are client-format atom JSON; viewJson is the exact string hashed.",
+  "generator": "scripts/gen-version4-hash-vectors.mjs",
+  "alphabet": "0123456789abcdefg",
+  "cases": [
+    {
+      "name": "v4-basic",
+      "atoms": [
+        {
+          "position": "9ea1946ab0ecbe2ca659cfcd9181056fac0c1c74938d770a8f046d06a878f0f6",
+          "walletAddress": "cb43b523d08e1718005630b0f991db23756f298202a2b55973ea07d919b1d27f",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": "batch-v4-basic",
+          "metaType": "Smoke",
+          "metaId": "smoke-v4-basic",
+          "meta": [
+            {
+              "key": "check",
+              "value": "version4"
+            },
+            {
+              "key": "case",
+              "value": "v4-basic"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": "4"
+        },
+        {
+          "position": "a7243db3ca7bc1dfc840b6cd106edb12bde5256efff682e8a570f8559b973ca5",
+          "walletAddress": "982a0470421cfbe0b0969413f1907d266f6d6129746e2c0fe382e4f34ae816b2",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "walletBundle",
+          "metaId": "d7cf81cff59590dd43c4ef9f23014d389e1a3e4831eb99e15117dded019eadb3",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "8562d997bb4164f4da7d80f2324a1c2f94cf817527d4573cfb82f3e6bee66791"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": "4"
+        }
+      ],
+      "viewJson": "[[{\"batchId\":\"batch-v4-basic\"},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"check\"},{\"value\":\"version4\"}],[{\"key\":\"case\"},{\"value\":\"v4-basic\"}]]},{\"metaId\":\"smoke-v4-basic\"},{\"metaType\":\"Smoke\"},{\"position\":\"9ea1946ab0ecbe2ca659cfcd9181056fac0c1c74938d770a8f046d06a878f0f6\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"cb43b523d08e1718005630b0f991db23756f298202a2b55973ea07d919b1d27f\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"8562d997bb4164f4da7d80f2324a1c2f94cf817527d4573cfb82f3e6bee66791\"}]]},{\"metaId\":\"d7cf81cff59590dd43c4ef9f23014d389e1a3e4831eb99e15117dded019eadb3\"},{\"metaType\":\"walletBundle\"},{\"position\":\"a7243db3ca7bc1dfc840b6cd106edb12bde5256efff682e8a570f8559b973ca5\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"982a0470421cfbe0b0969413f1907d266f6d6129746e2c0fe382e4f34ae816b2\"}]]",
+      "expectedHash": "0219dd1bdbg0ec830g0gg04e0372fa28b9f0d77adcf90c19792807503e7c6511"
+    },
+    {
+      "name": "v3-basic",
+      "atoms": [
+        {
+          "position": "9ea1946ab0ecbe2ca659cfcd9181056fac0c1c74938d770a8f046d06a878f0f6",
+          "walletAddress": "cb43b523d08e1718005630b0f991db23756f298202a2b55973ea07d919b1d27f",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": "batch-v4-basic",
+          "metaType": "Smoke",
+          "metaId": "smoke-v4-basic",
+          "meta": [
+            {
+              "key": "check",
+              "value": "version4"
+            },
+            {
+              "key": "case",
+              "value": "v4-basic"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": "3"
+        },
+        {
+          "position": "a7243db3ca7bc1dfc840b6cd106edb12bde5256efff682e8a570f8559b973ca5",
+          "walletAddress": "982a0470421cfbe0b0969413f1907d266f6d6129746e2c0fe382e4f34ae816b2",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "walletBundle",
+          "metaId": "d7cf81cff59590dd43c4ef9f23014d389e1a3e4831eb99e15117dded019eadb3",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "8562d997bb4164f4da7d80f2324a1c2f94cf817527d4573cfb82f3e6bee66791"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": "3"
+        }
+      ],
+      "viewJson": "[[{\"batchId\":\"batch-v4-basic\"},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"check\"},{\"value\":\"version4\"}],[{\"key\":\"case\"},{\"value\":\"v4-basic\"}]]},{\"metaId\":\"smoke-v4-basic\"},{\"metaType\":\"Smoke\"},{\"position\":\"9ea1946ab0ecbe2ca659cfcd9181056fac0c1c74938d770a8f046d06a878f0f6\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"3\"},{\"walletAddress\":\"cb43b523d08e1718005630b0f991db23756f298202a2b55973ea07d919b1d27f\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"8562d997bb4164f4da7d80f2324a1c2f94cf817527d4573cfb82f3e6bee66791\"}]]},{\"metaId\":\"d7cf81cff59590dd43c4ef9f23014d389e1a3e4831eb99e15117dded019eadb3\"},{\"metaType\":\"walletBundle\"},{\"position\":\"a7243db3ca7bc1dfc840b6cd106edb12bde5256efff682e8a570f8559b973ca5\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"3\"},{\"walletAddress\":\"982a0470421cfbe0b0969413f1907d266f6d6129746e2c0fe382e4f34ae816b2\"}]]",
+      "expectedHash": "02gda1f65ged2f6ec31a6489g9246gb2790acfcad654f6c5df48c07gee5a72a0"
+    },
+    {
+      "name": "slash-unicode",
+      "atoms": [
+        {
+          "position": "be5213cdf60ee16a640fa2f363cb8ca6574560126dd8c15eb2a84b0455c847d0",
+          "walletAddress": "9d7813fa1c2176dbb33e1c941c8e0d71c085ec0a3747bfe5440e611dbdb87fbc",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": "batch-slash-unicode",
+          "metaType": "Smoke",
+          "metaId": "café-日本-🙂",
+          "meta": [
+            {
+              "key": "url",
+              "value": "https://knish.io/a/b?c=d&e=f"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": "4"
+        },
+        {
+          "position": "1a85bd13d5c7281d670ee44dc7c8518fe68b1f3e6218caf7d998a1b4abe41393",
+          "walletAddress": "22642c5b36c5916febd959008f5047d0182a387d4dd0507db17fcf1a1b51a17d",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "walletBundle",
+          "metaId": "0770534eb275e76e369cc7a076a028fdd2acf1d6ffbb1f499eb1fddb36a8f799",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "ea368cf463f9a95bf6fe4ac7944a65247a075569fd03c15af5196d725b0aaee8"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": "4"
+        }
+      ],
+      "viewJson": "[[{\"batchId\":\"batch-slash-unicode\"},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"url\"},{\"value\":\"https://knish.io/a/b?c=d&e=f\"}]]},{\"metaId\":\"café-日本-🙂\"},{\"metaType\":\"Smoke\"},{\"position\":\"be5213cdf60ee16a640fa2f363cb8ca6574560126dd8c15eb2a84b0455c847d0\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"9d7813fa1c2176dbb33e1c941c8e0d71c085ec0a3747bfe5440e611dbdb87fbc\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"ea368cf463f9a95bf6fe4ac7944a65247a075569fd03c15af5196d725b0aaee8\"}]]},{\"metaId\":\"0770534eb275e76e369cc7a076a028fdd2acf1d6ffbb1f499eb1fddb36a8f799\"},{\"metaType\":\"walletBundle\"},{\"position\":\"1a85bd13d5c7281d670ee44dc7c8518fe68b1f3e6218caf7d998a1b4abe41393\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"22642c5b36c5916febd959008f5047d0182a387d4dd0507db17fcf1a1b51a17d\"}]]",
+      "expectedHash": "047ge49g9bfaf42acd1c811483667767f41f6f75b764825gg5e5f8b6c57bbgga"
+    },
+    {
+      "name": "control-quote",
+      "atoms": [
+        {
+          "position": "5bdde2ae50a378c1247438512458322e0f50cd0a3b824879a54c6e4ff85ae6b7",
+          "walletAddress": "aeec52f8de428255a70271dc4698999683cee69734ea2ab1011145686204d60b",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": "batch-control-quote",
+          "metaType": "Smoke",
+          "metaId": "smoke-control-quote",
+          "meta": [
+            {
+              "key": "text",
+              "value": "line1\nline2\t\"q\"\\end"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": "4"
+        },
+        {
+          "position": "cffc2dcfbddb208c85399b9da949d6b8ac01e691b7c060816ca31c3ca72b1d68",
+          "walletAddress": "cf47a98ab791e1bfbd50879ae9f9dedc2aa6dcba5102586285778f41af9eca68",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "walletBundle",
+          "metaId": "c42d7348be431def4fecc172abf05e5e7d189dd0ff3b1cb2470d6c3e2fbc5c25",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "a2ed36a9db38815ac750d7df742193f5edfcc782ded7c061b348cf21c9473d71"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": "4"
+        }
+      ],
+      "viewJson": "[[{\"batchId\":\"batch-control-quote\"},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"text\"},{\"value\":\"line1\\nline2\\t\\\"q\\\"\\\\end\"}]]},{\"metaId\":\"smoke-control-quote\"},{\"metaType\":\"Smoke\"},{\"position\":\"5bdde2ae50a378c1247438512458322e0f50cd0a3b824879a54c6e4ff85ae6b7\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"aeec52f8de428255a70271dc4698999683cee69734ea2ab1011145686204d60b\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"a2ed36a9db38815ac750d7df742193f5edfcc782ded7c061b348cf21c9473d71\"}]]},{\"metaId\":\"c42d7348be431def4fecc172abf05e5e7d189dd0ff3b1cb2470d6c3e2fbc5c25\"},{\"metaType\":\"walletBundle\"},{\"position\":\"cffc2dcfbddb208c85399b9da949d6b8ac01e691b7c060816ca31c3ca72b1d68\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"cf47a98ab791e1bfbd50879ae9f9dedc2aa6dcba5102586285778f41af9eca68\"}]]",
+      "expectedHash": "04c8gf873g64d7b60d0dd610gd128361agg0dgc34fb710df6318052a8de524f8"
+    },
+    {
+      "name": "line-separators",
+      "atoms": [
+        {
+          "position": "70b62c707c1bef78a2980d1dfa455d89ca53f864e68a1b3a49a6b01761290c3b",
+          "walletAddress": "8260f504a680a7aeabe296ae5a7723dbc3ec2832c96a3184ba077b512485d54a",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": "batch-line-separators",
+          "metaType": "Smoke",
+          "metaId": "smoke-line-separators",
+          "meta": [
+            {
+              "key": "text",
+              "value": "a b c"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": "4"
+        },
+        {
+          "position": "59f5433d0c19254eec3c14fae1a74c233599bbd09a60966845e59fa0a11e88cb",
+          "walletAddress": "079f4842fe7650573babcd878afa2c0f15b4994c77f5d2f7782a89e444623cc9",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "walletBundle",
+          "metaId": "2dc086876bced48b80f27e01cb8053a78cd1bfa4fe3d96d4b5c59e8ee9de1d71",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "46139fe8bdbe6f6a99cbbb3c36c1d695cbb0a6083108e54d3c131aff307c6df6"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": "4"
+        }
+      ],
+      "viewJson": "[[{\"batchId\":\"batch-line-separators\"},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"text\"},{\"value\":\"a b c\"}]]},{\"metaId\":\"smoke-line-separators\"},{\"metaType\":\"Smoke\"},{\"position\":\"70b62c707c1bef78a2980d1dfa455d89ca53f864e68a1b3a49a6b01761290c3b\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"8260f504a680a7aeabe296ae5a7723dbc3ec2832c96a3184ba077b512485d54a\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"46139fe8bdbe6f6a99cbbb3c36c1d695cbb0a6083108e54d3c131aff307c6df6\"}]]},{\"metaId\":\"2dc086876bced48b80f27e01cb8053a78cd1bfa4fe3d96d4b5c59e8ee9de1d71\"},{\"metaType\":\"walletBundle\"},{\"position\":\"59f5433d0c19254eec3c14fae1a74c233599bbd09a60966845e59fa0a11e88cb\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"079f4842fe7650573babcd878afa2c0f15b4994c77f5d2f7782a89e444623cc9\"}]]",
+      "expectedHash": "00f9618gee6cf2480dde820eg9e8355gd664a1dde0afc8845b8c27590074a4c0"
+    },
+    {
+      "name": "nulls",
+      "atoms": [
+        {
+          "position": "37e7869c3b383556ce890e017faf206e9edaeb45a76445bca8a32656cc438c01",
+          "walletAddress": "624ff0ccd8bff21e633ad5f386474f5a7f304d7f450d3fe747ade4422a7a2756",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "Smoke",
+          "metaId": "smoke-nulls",
+          "meta": [
+            {
+              "key": "empty",
+              "value": null
+            },
+            {
+              "key": "set",
+              "value": "x"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": "4"
+        },
+        {
+          "position": "a776ba246a4a56003c15e18808e09cb46707392713c1c19ec141b8ebdd1bbbbe",
+          "walletAddress": "763117c62208fb98688de14f7b1c6694d6abdce8687102552764b0b7ab877bba",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": null,
+          "metaId": null,
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "4aa13b8328bb580035cb330b9484bb32b67fcb284acc01cc513f5bd688eaf866"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": "4"
+        }
+      ],
+      "viewJson": "[[{\"batchId\":null},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"empty\"},{\"value\":null}],[{\"key\":\"set\"},{\"value\":\"x\"}]]},{\"metaId\":\"smoke-nulls\"},{\"metaType\":\"Smoke\"},{\"position\":\"37e7869c3b383556ce890e017faf206e9edaeb45a76445bca8a32656cc438c01\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"624ff0ccd8bff21e633ad5f386474f5a7f304d7f450d3fe747ade4422a7a2756\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"4aa13b8328bb580035cb330b9484bb32b67fcb284acc01cc513f5bd688eaf866\"}]]},{\"metaId\":null},{\"metaType\":null},{\"position\":\"a776ba246a4a56003c15e18808e09cb46707392713c1c19ec141b8ebdd1bbbbe\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"763117c62208fb98688de14f7b1c6694d6abdce8687102552764b0b7ab877bba\"}]]",
+      "expectedHash": "0532d2f22aeb91e907dba721g2be70a73271d190g11c7da369389291213egced"
+    },
+    {
+      "name": "empty-strings",
+      "atoms": [
+        {
+          "position": "4c20484ae81b728f14bc24c5b9d95ab9a44a73ab4bb8ec031680704bb0371d47",
+          "walletAddress": "b690a9586c9c88e2f70f95a941076a7fb25f5eff6a93dcf878a9e8d9ed872037",
+          "isotope": "M",
+          "token": "USER",
+          "value": "",
+          "batchId": "",
+          "metaType": "Smoke",
+          "metaId": "",
+          "meta": [
+            {
+              "key": "blank",
+              "value": ""
+            },
+            {
+              "key": "set",
+              "value": "x"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": "4"
+        },
+        {
+          "position": "c489250361be18a4a6fa547692685d517bb85d0d550dd7dcdfbd9e4aca310acb",
+          "walletAddress": "fe4ee13526d27808fa4f4ab10f691d1e20f876733d216ba790ae39542a883203",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "",
+          "metaId": "4abde2a6079758e1b7183b7e7bd1f722788dd7c2a202f3783d844d14cfb01f6f",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "15304a8eb1f6960d9acd8113f5241e8daded8b443dc748427bb1c3b9adf69603"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": "4"
+        }
+      ],
+      "viewJson": "[[{\"batchId\":\"\"},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"blank\"},{\"value\":\"\"}],[{\"key\":\"set\"},{\"value\":\"x\"}]]},{\"metaId\":\"\"},{\"metaType\":\"Smoke\"},{\"position\":\"4c20484ae81b728f14bc24c5b9d95ab9a44a73ab4bb8ec031680704bb0371d47\"},{\"token\":\"USER\"},{\"value\":\"\"},{\"version\":\"4\"},{\"walletAddress\":\"b690a9586c9c88e2f70f95a941076a7fb25f5eff6a93dcf878a9e8d9ed872037\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"15304a8eb1f6960d9acd8113f5241e8daded8b443dc748427bb1c3b9adf69603\"}]]},{\"metaId\":\"4abde2a6079758e1b7183b7e7bd1f722788dd7c2a202f3783d844d14cfb01f6f\"},{\"metaType\":\"\"},{\"position\":\"c489250361be18a4a6fa547692685d517bb85d0d550dd7dcdfbd9e4aca310acb\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"fe4ee13526d27808fa4f4ab10f691d1e20f876733d216ba790ae39542a883203\"}]]",
+      "expectedHash": "014bg6fe523gg9eb660gdc88969b8548afeg3b8e6bbb5gccg5831dbef0394a93"
+    },
+    {
+      "name": "empty-version",
+      "atoms": [
+        {
+          "position": "5298eef731a6d049320e75495d089db947f6e6f944d9bdd29f3d0a1025894a7a",
+          "walletAddress": "165e52e1980f3ff68e7979f7d7c1b28cd03190fbefe6ff36a2c4cc21f3655c57",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": "batch-empty-version",
+          "metaType": "Smoke",
+          "metaId": "smoke-empty-version",
+          "meta": [
+            {
+              "key": "check",
+              "value": "version4"
+            },
+            {
+              "key": "case",
+              "value": "empty-version"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": ""
+        },
+        {
+          "position": "88ee340bdb3051598d579316b3c2545a746f7d697334750a336a94698ec089a3",
+          "walletAddress": "a31422720d35fb5241eaaa36e41884079843873984d573213ccca7393304b885",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "walletBundle",
+          "metaId": "07a7ddab08ac1b2f4393d4aa25e775822ed1f1d87db8f2a4beaa79c0737b0f67",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "9e34acaba8773083e29851d7d620104a8a396e1c4a36f812a9d4e20c190d4af2"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": ""
+        }
+      ],
+      "viewJson": "[[{\"batchId\":\"batch-empty-version\"},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"check\"},{\"value\":\"version4\"}],[{\"key\":\"case\"},{\"value\":\"empty-version\"}]]},{\"metaId\":\"smoke-empty-version\"},{\"metaType\":\"Smoke\"},{\"position\":\"5298eef731a6d049320e75495d089db947f6e6f944d9bdd29f3d0a1025894a7a\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"\"},{\"walletAddress\":\"165e52e1980f3ff68e7979f7d7c1b28cd03190fbefe6ff36a2c4cc21f3655c57\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"9e34acaba8773083e29851d7d620104a8a396e1c4a36f812a9d4e20c190d4af2\"}]]},{\"metaId\":\"07a7ddab08ac1b2f4393d4aa25e775822ed1f1d87db8f2a4beaa79c0737b0f67\"},{\"metaType\":\"walletBundle\"},{\"position\":\"88ee340bdb3051598d579316b3c2545a746f7d697334750a336a94698ec089a3\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"\"},{\"walletAddress\":\"a31422720d35fb5241eaaa36e41884079843873984d573213ccca7393304b885\"}]]",
+      "expectedHash": "033c2aeg68a1g2g5153c66afd132db2e7g5934f26d33fa0da39fe696agb457g7"
+    },
+    {
+      "name": "index-order",
+      "atoms": [
+        {
+          "position": "52af5138014838039886a89d349352fbd396a38797144f47fd9f5504315041f7",
+          "walletAddress": "8f5847e2a00d76a751ea8d0ac1c1313758318eee96efa79cfdc32283a6b7154a",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "walletBundle",
+          "metaId": "860de1104b4fcc0635ab171167799309fa212d5b023144b22d88f5e9728545f5",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "e68622103a867e3c1ad5c9bae365b41f08fb35ba35c7eee1e93781374afb5d81"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000",
+          "version": "4"
+        },
+        {
+          "position": "3024404b0feb5bc49973334a5a85f8aaa17e6eb820bbcc2e37ba7203d3656fa5",
+          "walletAddress": "099e4e79829c34db811867345df364fb5dea2df861d15ba65602f017bdab4c89",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": "batch-index-order",
+          "metaType": "Smoke",
+          "metaId": "smoke-index-order",
+          "meta": [
+            {
+              "key": "check",
+              "value": "version4"
+            },
+            {
+              "key": "case",
+              "value": "index-order"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000",
+          "version": "4"
+        }
+      ],
+      "viewJson": "[[{\"batchId\":\"batch-index-order\"},{\"createdAt\":\"1792008157000\"},{\"index\":0},{\"isotope\":\"M\"},{\"meta\":[[{\"key\":\"check\"},{\"value\":\"version4\"}],[{\"key\":\"case\"},{\"value\":\"index-order\"}]]},{\"metaId\":\"smoke-index-order\"},{\"metaType\":\"Smoke\"},{\"position\":\"3024404b0feb5bc49973334a5a85f8aaa17e6eb820bbcc2e37ba7203d3656fa5\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"099e4e79829c34db811867345df364fb5dea2df861d15ba65602f017bdab4c89\"}],[{\"batchId\":null},{\"createdAt\":\"1792008158000\"},{\"index\":1},{\"isotope\":\"I\"},{\"meta\":[[{\"key\":\"previousPosition\"},{\"value\":\"e68622103a867e3c1ad5c9bae365b41f08fb35ba35c7eee1e93781374afb5d81\"}]]},{\"metaId\":\"860de1104b4fcc0635ab171167799309fa212d5b023144b22d88f5e9728545f5\"},{\"metaType\":\"walletBundle\"},{\"position\":\"52af5138014838039886a89d349352fbd396a38797144f47fd9f5504315041f7\"},{\"token\":\"USER\"},{\"value\":null},{\"version\":\"4\"},{\"walletAddress\":\"8f5847e2a00d76a751ea8d0ac1c1313758318eee96efa79cfdc32283a6b7154a\"}]]",
+      "expectedHash": "04deg9f21a0925c0062ad68456bd795g1a9g1083dea05826954bff87997ec595"
+    }
+  ],
+  "legacyDescription": "legacyCases: atoms without a version, hashed on the legacy path: SHAKE256-256 over the concatenation, per index-sorted atom, of the atom count, position, walletAddress, isotope, token, then value, batchId, metaType and metaId when not null, then key and value of every meta item whose value is not null, then createdAt. A \"\" meta value is hashed (its key is absorbed); a null one is skipped.",
+  "legacyCases": [
+    {
+      "name": "legacy-empty-strings",
+      "atoms": [
+        {
+          "position": "4c20484ae81b728f14bc24c5b9d95ab9a44a73ab4bb8ec031680704bb0371d47",
+          "walletAddress": "b690a9586c9c88e2f70f95a941076a7fb25f5eff6a93dcf878a9e8d9ed872037",
+          "isotope": "M",
+          "token": "USER",
+          "value": "",
+          "batchId": "",
+          "metaType": "Smoke",
+          "metaId": "",
+          "meta": [
+            {
+              "key": "blank",
+              "value": ""
+            },
+            {
+              "key": "set",
+              "value": "x"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000"
+        },
+        {
+          "position": "c489250361be18a4a6fa547692685d517bb85d0d550dd7dcdfbd9e4aca310acb",
+          "walletAddress": "fe4ee13526d27808fa4f4ab10f691d1e20f876733d216ba790ae39542a883203",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "",
+          "metaId": "4abde2a6079758e1b7183b7e7bd1f722788dd7c2a202f3783d844d14cfb01f6f",
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "15304a8eb1f6960d9acd8113f5241e8daded8b443dc748427bb1c3b9adf69603"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000"
+        }
+      ],
+      "expectedHash": "0077e6106d94da978ebe6555b876910372711d1g8d94gg9efa7f408d9d42cgbg"
+    },
+    {
+      "name": "legacy-nulls",
+      "atoms": [
+        {
+          "position": "37e7869c3b383556ce890e017faf206e9edaeb45a76445bca8a32656cc438c01",
+          "walletAddress": "624ff0ccd8bff21e633ad5f386474f5a7f304d7f450d3fe747ade4422a7a2756",
+          "isotope": "M",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": "Smoke",
+          "metaId": "smoke-nulls",
+          "meta": [
+            {
+              "key": "empty",
+              "value": null
+            },
+            {
+              "key": "set",
+              "value": "x"
+            }
+          ],
+          "index": 0,
+          "otsFragment": null,
+          "createdAt": "1792008157000"
+        },
+        {
+          "position": "a776ba246a4a56003c15e18808e09cb46707392713c1c19ec141b8ebdd1bbbbe",
+          "walletAddress": "763117c62208fb98688de14f7b1c6694d6abdce8687102552764b0b7ab877bba",
+          "isotope": "I",
+          "token": "USER",
+          "value": null,
+          "batchId": null,
+          "metaType": null,
+          "metaId": null,
+          "meta": [
+            {
+              "key": "previousPosition",
+              "value": "4aa13b8328bb580035cb330b9484bb32b67fcb284acc01cc513f5bd688eaf866"
+            }
+          ],
+          "index": 1,
+          "otsFragment": null,
+          "createdAt": "1792008158000"
+        }
+      ],
+      "expectedHash": "0317707175fagee31998e64d875149fgb0e662ed658c0b74f6g1a048c24030ab"
+    }
+  ]
+}
