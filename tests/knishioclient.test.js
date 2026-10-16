@@ -160,6 +160,19 @@ describe('KnishIOClient - Unit', () => {
       queryContinuIdSpy.mockRestore()
     }
   })
+
+  // Served atom versions of any value are kept for verification, but signing must keep
+  // emitting unversioned atoms for the default server SDK version (3).
+  test('signs unversioned atoms by default', async () => {
+    expect(knishIOClientInstance.getServerSdkVersion()).toBe(3)
+    const sourceWallet = new Wallet({ secret: unitSecret, token: 'USER' })
+    const molecule = await knishIOClientInstance.createMolecule({ sourceWallet })
+    molecule.initMeta({ meta: { check: 'version' }, metaType: 'VersionCheck', metaId: 'default' })
+    molecule.sign({})
+
+    expect(molecule.atoms.length).toBeGreaterThan(0)
+    expect(molecule.atoms.map(atom => atom.version ?? null)).toEqual(molecule.atoms.map(() => null))
+  })
 })
 
 // Validator 0.5.0 proves a re-login only when it is signed from the identity's ContinuID
