@@ -50,7 +50,7 @@ import { charsetBaseConvert } from './libraries/strings.js'
 import Meta from './Meta.js'
 import AtomMeta from './AtomMeta.js'
 import AtomsMissingException from './exception/AtomsMissingException.js'
-import versions from './versions/index.js'
+import Version4 from './versions/Version4.js'
 
 /**
  * Atom class used to form microtransactions within a Molecule
@@ -100,7 +100,7 @@ export default class Atom {
     this.index = index
     this.otsFragment = otsFragment
     this.createdAt = String(+new Date())
-    if (version !== null && Object.prototype.hasOwnProperty.call(versions, version)) {
+    if (version !== null && version !== undefined) {
       this.version = String(version)
     }
   }
@@ -360,8 +360,9 @@ export default class Atom {
     })
 
     // Hashing each atom in the molecule to produce a molecular hash
-    if (atomList.every(atom => atom.version && Object.prototype.hasOwnProperty.call(versions, atom.version))) {
-      molecularSponge.update(JSON.stringify(atomList.map(atom => versions[atom.version].create(atom).view())))
+    // Validators hash with the structured view whenever every atom carries a version, whatever its value
+    if (atomList.every(atom => atom.version !== null && atom.version !== undefined)) {
+      molecularSponge.update(JSON.stringify(atomList.map(atom => Version4.create(atom).view())))
     } else {
       const numberOfAtoms = String(atoms.length)
       let hashableValues = []

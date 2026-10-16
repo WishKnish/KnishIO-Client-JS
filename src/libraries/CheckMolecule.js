@@ -72,7 +72,6 @@ import {
 } from './strings.js'
 import JsSHA from 'jssha'
 import * as kcore from './kcore.js'
-import versions from '../versions/index.js'
 
 const RFC3339_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/
 // Validators return createdAt as an RFC 3339 string; molecules are signed over epoch milliseconds.
@@ -85,11 +84,8 @@ function toSignedTimestamp (value) {
   return value
 }
 
-// Atom version used by versioned hashing (Version4); it must be a registered version.
-const VERSIONED_ATOM_HASHING = '4'
-if (!versions[VERSIONED_ATOM_HASHING]) {
-  throw new Error(`Atom version ${VERSIONED_ATOM_HASHING} is not registered`)
-}
+// Atom versions retried, in order, when a molecule is served without atom versions.
+const UNSERVED_ATOM_VERSIONS = ['4', '3']
 
 /**
  *
@@ -810,9 +806,16 @@ export default class CheckMolecule {
 
     // Validators before 0.8.5 do not serve atom versions; molecules signed with
     // versioned atoms only match their hash when rebuilt with that version.
-    return strip(verify({
-      ...moleculeData,
-      atoms: moleculeData.atoms.map(atom => ({ ...atom, version: VERSIONED_ATOM_HASHING }))
-    }))
+    let retried = result
+    for (const version of UNSERVED_ATOM_VERSIONS) {
+      retried = verify({
+        ...moleculeData,
+        atoms: moleculeData.atoms.map(atom => ({ ...atom, version }))
+      })
+      if (retried.verified) {
+        break
+      }
+    }
+    return strip(retried)
   }
 }

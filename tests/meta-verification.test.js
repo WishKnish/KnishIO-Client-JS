@@ -301,4 +301,27 @@ describe('served molecules', () => {
     expect(result.verified).toBe(false)
     expect(result.error).toMatch(/molecular hash does not match/i)
   })
+
+  test('v3rust molecule served with atom version 3 verifies', () => {
+    const result = CheckMolecule.verifyFromServerData(servedFixture.v3rust)
+    expect(result.error).toBeNull()
+    expect(result.verified).toBe(true)
+  })
+
+  test('v3rust molecule served without atom versions verifies (version 3 fallback)', () => {
+    const result = CheckMolecule.verifyFromServerData(withAtomVersion(servedFixture.v3rust, null))
+    expect(result.error).toBeNull()
+    expect(result.verified).toBe(true)
+  })
+
+  test('tampered v3rust fails', () => {
+    const data = JSON.parse(JSON.stringify(servedFixture.v3rust))
+    expect(data.atoms[0].version).toBe('3')
+    data.atoms[0].metaId = `${data.atoms[0].metaId}-x`
+    for (const variant of [data, withAtomVersion(data, null)]) {
+      const result = CheckMolecule.verifyFromServerData(variant)
+      expect(result.verified).toBe(false)
+      expect(result.error).toMatch(/molecular hash does not match/i)
+    }
+  })
 })
