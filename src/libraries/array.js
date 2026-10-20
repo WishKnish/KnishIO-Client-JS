@@ -16,8 +16,8 @@ export function chunkArray (arr, size) {
 }
 
 export function deepCloning (
-  o // The only argument passed by user: object to clone
-  , h // Cache (organized as array: [key,value,key,value,...])
+  o, // The only argument passed by user: object to clone
+  h // Cache (organized as array: [key,value,key,value,...])
 ) {
   let i
   let r
