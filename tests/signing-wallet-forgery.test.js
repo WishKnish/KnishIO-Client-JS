@@ -9,7 +9,7 @@ import Molecule from '../src/Molecule'
 import SignatureMismatchException from '../src/exception/SignatureMismatchException'
 
 /**
- * Cross-SDK regression fixture for the signingWallet forgery (WOTS+ mitigation plan §8 Phase 0.2).
+ * Cross-SDK regression fixture for the signingWallet forgery.
  *
  * `forged` claims the victim's address in atoms[0].walletAddress, carries the attacker's OTS
  * signature, and names the attacker in an atoms[0] `signingWallet` meta. The verifier must check
