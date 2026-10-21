@@ -123,7 +123,7 @@ export default class KnishIOClient {
    * @param {number} serverSdkVersion
    * @param {boolean} logging
    * @param {number} mlKemParameterSet - 1024 (default) or 768
-   * @param {number} otsVersion - OTS version of the keys this client creates: 1 (default) or 2
+   * @param {number} otsVersion - OTS version of the keys this client creates: 2 (default) or 1
    */
   constructor ({
     uri,
@@ -135,7 +135,7 @@ export default class KnishIOClient {
     defaultRequestPolicy = null,
     secretStorage = null,
     mlKemParameterSet = 1024,
-    otsVersion = 1
+    otsVersion = 2
   }) {
     this.initialize({
       uri,
@@ -171,7 +171,7 @@ export default class KnishIOClient {
     defaultRequestPolicy = null,
     secretStorage = null,
     mlKemParameterSet = 1024,
-    otsVersion = 1
+    otsVersion = 2
   }) {
     this.reset()
 
@@ -239,12 +239,12 @@ export default class KnishIOClient {
   }
 
   /**
-   * OTS version of the keys this client creates from its secret (1 default, or 2)
+   * OTS version of the keys this client creates from its secret (2 default, or 1)
    *
    * @return {number}
    */
   getOtsVersion () {
-    return this.$__otsVersion || 1
+    return this.$__otsVersion || 2
   }
 
   /**

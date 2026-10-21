@@ -622,7 +622,7 @@ describe('KnishIOClient - claimShadowWallet batch id resolution', () => {
     await expect(client.claimShadowWallet({ token })).resolves.toBe('response')
 
     expect(client.queryWallets).toHaveBeenCalledWith({ token })
-    expect(mutation.fillMolecule).toHaveBeenCalledWith({ token, batchId: 'batch-shadow-1', otsVersion: 1 })
+    expect(mutation.fillMolecule).toHaveBeenCalledWith({ token, batchId: 'batch-shadow-1', otsVersion: 2 })
     expect(executeSpy).toHaveBeenCalledTimes(1)
   })
 
@@ -641,6 +641,6 @@ describe('KnishIOClient - claimShadowWallet batch id resolution', () => {
     await client.claimShadowWallet({ token, batchId: 'batch-explicit' })
 
     expect(querySpy).not.toHaveBeenCalled()
-    expect(mutation.fillMolecule).toHaveBeenCalledWith({ token, batchId: 'batch-explicit', otsVersion: 1 })
+    expect(mutation.fillMolecule).toHaveBeenCalledWith({ token, batchId: 'batch-explicit', otsVersion: 2 })
   })
 })
