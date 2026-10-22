@@ -5677,7 +5677,7 @@ var Ca = class {
 		});
 	}
 }, wa = class {
-	constructor({ uri: e, cellSlug: t = null, client: n = null, socket: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024, otsVersion: l = 1 }) {
+	constructor({ uri: e, cellSlug: t = null, client: n = null, socket: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024, otsVersion: l = 2 }) {
 		this.initialize({
 			uri: e,
 			cellSlug: t,
@@ -5691,7 +5691,7 @@ var Ca = class {
 			otsVersion: l
 		});
 	}
-	initialize({ uri: e, cellSlug: t = null, socket: n = null, client: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024, otsVersion: l = 1 }) {
+	initialize({ uri: e, cellSlug: t = null, socket: n = null, client: r = null, serverSdkVersion: i = 3, logging: a = !1, defaultRequestPolicy: o = null, secretStorage: s = null, mlKemParameterSet: c = 1024, otsVersion: l = 2 }) {
 		this.reset(), this.$__secretStorage = s, this.$__logging = a, this.$__defaultRequestPolicy = o, this.setMlKemParameterSet(c), this.setOtsVersion(l), this.$__authTokenObjects = {}, this.$__authInProcess = !1, this.abortControllers = /* @__PURE__ */ new Map(), this.setUri(e), t && this.setCellSlug(t);
 		for (let e in this.$__uris) {
 			let t = this.$__uris[e];
@@ -5715,7 +5715,7 @@ var Ca = class {
 		return this.$__mlKemParameterSet = t, this;
 	}
 	getOtsVersion() {
-		return this.$__otsVersion || 1;
+		return this.$__otsVersion || 2;
 	}
 	setOtsVersion(e) {
 		return this.$__otsVersion = P.checkedOtsVersion(e), this;
