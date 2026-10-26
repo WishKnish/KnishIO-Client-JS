@@ -20,3 +20,5 @@ src/types/
 
 # Local agent instructions
 CLAUDE.md
+# CycloneDX SBOM output (.github/scripts/sbom.sh)
+/sbom-out/

@@ -103,9 +103,56 @@ jobs:
       - name: CJS entry exports the API
         run: node -e "const m = require('./dist/client.cjs'); if (typeof m.Wallet !== 'function' || typeof m.KnishIOClient !== 'function') { console.error('CJS entry exports ' + Object.keys(m).length + ' names'); process.exit(1) }"
 
+  sbom:
+    name: SBOM (CycloneDX) + OSV scan
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node 20
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: '20'
+          # setup-node v5 turns package-manager caching ON by default (v4 did not), and it
+          # HARD FAILS when it cannot find a lockfile: "Dependencies lock file is not found".
+          # This repo gitignores both lockfiles on purpose (see below), so there is nothing
+          # to cache against. Committing .yarnrc.yml for Yarn Berry is what makes v5 detect
+          # yarn and go looking for yarn.lock at all.
+          package-manager-cache: false
+
+      - name: Install npm 11.21.0 (npm 10.8 crashes in the --before resolve)
+        run: npm install -g npm@11.21.0
+
+      - name: Resolve dependencies (script-free, 7-day cooldown)
+        run: |
+          set -euo pipefail
+          CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          # Named cooldown exception — see the identical block in ci.yml for the full rationale.
+          # @wishknish/knishio-kcore@0.2.0 (first-party optionalDependency), published
+          # 2026-10-13T19:59:49Z. SELF-EXPIRING after 2026-10-20T20:00Z.
+          FLOOR='2026-10-13T20:00:00Z'
+          if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
+          echo "cooldown cutoff: $CUTOFF"
+          npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
+
+      - name: Generate SBOM
+        run: bash .github/scripts/sbom.sh
+
+      - name: Export SBOM paths
+        run: cat sbom-out/paths.env >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: sbom
+          path: sbom-out/*.cdx.json
+          if-no-files-found: error
+
   publish:
     name: publish to npm (Trusted Publishing)
-    needs: verify
+    needs: [verify, sbom]
     if: github.event_name == 'push'   # dispatch = dry run; never publishes
     runs-on: ubuntu-latest
     environment: release   # matches the npm trusted-publisher Environment + the repo's `release` env
@@ -191,6 +238,11 @@ jobs:
       - name: Publish to npm (Trusted Publishing)
         run: npm publish --access public
 
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: sbom
+          path: sbom-out
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3
         with:
@@ -203,3 +255,4 @@ jobs:
           # synthesizing that needs the previous tag — i.e. fetch-depth: 0 on a publish
           # job — which is not worth a full-history clone for a cosmetic link.
           body_path: /tmp/release-notes.md
+          files: sbom-out/*.cdx.json

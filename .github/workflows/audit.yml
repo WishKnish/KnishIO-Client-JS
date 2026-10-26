@@ -79,6 +79,10 @@ jobs:
           # would hard-fail with "Dependencies lock file is not found". Nothing to cache.
           package-manager-cache: false
 
+      # npm 10.8.2 (Node 20's bundled npm) crashes in the --before resolve; see ci.yml.
+      - name: Install npm 11.21.0 (npm 10.8 crashes in the --before resolve)
+        run: npm install -g npm@11.21.0
+
       # Identical to the ci.yml resolve: writes an ephemeral package-lock.json WITHOUT running
       # any lifecycle script, and refuses any version published in the last 7 days.
       - name: Resolve dependencies (script-free, 7-day cooldown)
@@ -100,3 +104,63 @@ jobs:
       # as the resolve: see the ci.yml audit step.
       - name: npm audit (full tree, low and above)
         run: npm audit --audit-level=low --before="$CUTOFF"
+
+  sbom:
+    name: SBOM (CycloneDX) + OSV scan
+    runs-on: ubuntu-latest
+    steps:
+      # `if: inputs.selftest_fail` reads the DECLARED BOOLEAN directly. Do not "fix" this to
+      # `== 'true'`: GitHub coerces mismatched types to number for loose equality, the string
+      # 'true' casts to NaN, and NaN equals nothing — so that form is always false and the
+      # probe would silently never fire. The input is used only inside this expression and is
+      # never interpolated into shell text.
+      - name: Selftest failure probe
+        if: inputs.selftest_fail
+        run: |
+          echo "::error::Selftest failure probe requested — failing this run deliberately."
+          exit 1
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node 20
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: '20'
+          # setup-node v5 turns package-manager caching ON by default (v4 did not), and it
+          # HARD FAILS when it cannot find a lockfile: "Dependencies lock file is not found".
+          # This repo gitignores both lockfiles on purpose (see below), so there is nothing
+          # to cache against. Committing .yarnrc.yml for Yarn Berry is what makes v5 detect
+          # yarn and go looking for yarn.lock at all.
+          package-manager-cache: false
+
+      - name: Install npm 11.21.0 (npm 10.8 crashes in the --before resolve)
+        run: npm install -g npm@11.21.0
+
+      - name: Resolve dependencies (script-free, 7-day cooldown)
+        run: |
+          set -euo pipefail
+          CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          # Named cooldown exception — see the identical block in ci.yml for the full rationale.
+          # @wishknish/knishio-kcore@0.2.0 (first-party optionalDependency), published
+          # 2026-10-13T19:59:49Z. Without the floor the resolve drops it and the audit misses it.
+          # SELF-EXPIRING after 2026-10-20T20:00Z.
+          FLOOR='2026-10-13T20:00:00Z'
+          if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
+          echo "cooldown cutoff: $CUTOFF"
+          npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
+          echo "CUTOFF=$CUTOFF" >> "$GITHUB_ENV"
+
+      - name: Generate SBOM
+        run: bash .github/scripts/sbom.sh
+
+      - name: Export SBOM paths
+        run: cat sbom-out/paths.env >> "$GITHUB_ENV"
+
+      - name: OSV scan
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36  # v2.7.0
+        with:
+          scan-args: |-
+            -L
+            ${{ env.SBOM_FILE }}

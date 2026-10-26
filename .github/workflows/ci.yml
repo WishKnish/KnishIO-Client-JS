@@ -63,6 +63,12 @@ jobs:
           # yarn and go looking for yarn.lock at all.
           package-manager-cache: false
 
+      # Node 20 stays the test floor, but its bundled npm 10.8.2 crashes in the cooldown
+      # resolve itself ("Cannot read properties of null (reading 'edgesOut')", reproduced
+      # 2026-10-26 on node:20; npm 10.9 and 11 resolve the same tree). Pinned, not @latest.
+      - name: Install npm 11.21.0 (npm 10.8 crashes in the --before resolve)
+        run: npm install -g npm@11.21.0
+
       # No lockfile is committed (both npm and yarn locks are gitignored); this resolves
       # fresh and writes an ephemeral package-lock.json WITHOUT executing any lifecycle
       # script (--package-lock-only overrides the .npmrc package-lock=false guard), and
@@ -167,3 +173,63 @@ jobs:
             exit 1
           fi
           echo "OK: CHANGELOG.md documents $NEW"
+
+  sbom:
+    name: SBOM (CycloneDX) + OSV scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node 20
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: '20'
+          # setup-node v5 turns package-manager caching ON by default (v4 did not), and it
+          # HARD FAILS when it cannot find a lockfile: "Dependencies lock file is not found".
+          # This repo gitignores both lockfiles on purpose (see below), so there is nothing
+          # to cache against. Committing .yarnrc.yml for Yarn Berry is what makes v5 detect
+          # yarn and go looking for yarn.lock at all.
+          package-manager-cache: false
+
+      - name: Install npm 11.21.0 (npm 10.8 crashes in the --before resolve)
+        run: npm install -g npm@11.21.0
+
+      - name: Resolve dependencies (script-free, 7-day cooldown)
+        run: |
+          set -euo pipefail
+          CUTOFF="$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          # Named cooldown exception (ChainDrop policy: review the version, never drop the flag).
+          # @wishknish/knishio-kcore@0.2.0 — first-party (WishKnish/KnishIO-Kcore-JS), published
+          # 2026-10-13T19:59:49Z by the maintainer from the npm-tarball artifact of that repo's
+          # publish run 38457911337 (sha256 2ef8b4922b43e25fb39f92c5f69f0fd877700c65538e284fd55885131c3cfa3d,
+          # byte-identical to the GitHub Release asset); no dependencies, no install scripts.
+          # It is this SDK's optionalDependency, and the `Tests (kcore required)` step needs it
+          # resolved. The floor admits every package published before it, not only this one.
+          # SELF-EXPIRING: from 2026-10-20T20:00Z the rolling window is later than the floor, the
+          # floor stops binding, and this block can go back to the single-line rolling resolve.
+          FLOOR='2026-10-13T20:00:00Z'
+          if [ "$CUTOFF" \< "$FLOOR" ]; then CUTOFF="$FLOOR"; fi
+          echo "cooldown cutoff: $CUTOFF"
+          npm install --package-lock-only --ignore-scripts --before="$CUTOFF"
+          echo "CUTOFF=$CUTOFF" >> "$GITHUB_ENV"
+
+      - name: Generate SBOM
+        run: bash .github/scripts/sbom.sh
+
+      - name: Export SBOM paths
+        run: cat sbom-out/paths.env >> "$GITHUB_ENV"
+
+      - name: OSV scan
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36  # v2.7.0
+        with:
+          scan-args: |-
+            -L
+            ${{ env.SBOM_FILE }}
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: sbom
+          path: sbom-out/*.cdx.json
+          if-no-files-found: error
