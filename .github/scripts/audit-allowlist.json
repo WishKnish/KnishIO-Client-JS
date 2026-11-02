@@ -1,0 +1,51 @@
+{
+  "$comment": [
+    "Advisories the JS SDK's dev toolchain knowingly ships with, read by audit-gate.mjs",
+    "from the scheduled audit (.github/workflows/audit.yml). Empty is the goal state. As of",
+    "2026-11-02 every entry below is devDependency-only (eslint/neostandard/typescript-eslint",
+    "and jest chains) and has no fixed release reachable without a breaking downgrade or a",
+    "major the dependents do not accept. Nothing here ships in the published package.",
+    "",
+    "Add an entry ONLY when the fix is genuinely unreachable. Prefer, in order: drop the",
+    "dependency, bump it, or add a scoped `overrides` entry in package.json. Scope every entry",
+    "with `paths` so the exception cannot silently widen to a different install location.",
+    "",
+    "Fields: advisory (GHSA id), package, paths (exact npm-audit node paths), reason (why it is",
+    "not fixable and why the residual risk is acceptable), revisitBy (YYYY-MM-DD; the gate",
+    "FAILS once this date passes, forcing a re-look)."
+  ],
+  "entries": [
+    {
+      "advisory": "GHSA-g3hv-75wg-m249",
+      "package": "minimatch",
+      "paths": [
+        "node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch",
+        "node_modules/glob/node_modules/minimatch",
+        "node_modules/minimatch",
+        "node_modules/test-exclude/node_modules/glob/node_modules/minimatch",
+        "node_modules/test-exclude/node_modules/minimatch"
+      ],
+      "reason": "Dev-only. eslint/@eslint/config-array/@eslint/eslintrc, @typescript-eslint/typescript-estree and jest's test-exclude/glob pin minimatch 3.1.5, 9.0.9 and 10.2.6; the fix is 11.0.1 (ESM-only) with no 3.x/9.x/10.x backport and npm reports no non-breaking fix. Globs are fixed repository lint/coverage patterns, not attacker input.",
+      "revisitBy": "2027-01-31"
+    },
+    {
+      "advisory": "GHSA-3g3m-2fjr-6pw4",
+      "package": "glob",
+      "paths": [
+        "node_modules/glob",
+        "node_modules/test-exclude/node_modules/glob"
+      ],
+      "reason": "Dev-only, via jest (@jest/reporters, jest-config, jest-runtime, test-exclude): glob 13.0.6 and 10.5.0; the fix is 14.0.2 with no 10.x/13.x backport, and npm's only offered fix is a breaking jest downgrade. jest never passes an AbortSignal timeout to glob over attacker-controlled trees.",
+      "revisitBy": "2027-01-31"
+    },
+    {
+      "advisory": "GHSA-gcqx-w48m-w2h4",
+      "package": "deepmerge",
+      "paths": [
+        "node_modules/deepmerge"
+      ],
+      "reason": "Dev-only, via jest-config: deepmerge 4.3.1 (latest 4.x, affected range >=4.2.0 <=4.3.1, no fixed release); npm's only offered fix is a breaking jest downgrade. jest merges the repository's own static config objects, never untrusted JSON.",
+      "revisitBy": "2027-01-31"
+    }
+  ]
+}

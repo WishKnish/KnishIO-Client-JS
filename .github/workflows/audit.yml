@@ -100,10 +100,12 @@ jobs:
           echo "CUTOFF=$CUTOFF" >> "$GITHUB_ENV"
 
       # The deep scan: every severity, whole tree, dev included. Reads the lockfile written
-      # above — no install, so still nothing from npm has executed in this job. Same --before
-      # as the resolve: see the ci.yml audit step.
-      - name: npm audit (full tree, low and above)
-        run: npm audit --audit-level=low --before="$CUTOFF"
+      # above — no install, so still nothing from npm has executed in this job. The gate runs
+      # `npm audit --audit-level=low --json --before="$CUTOFF"` (same --before as the resolve:
+      # see the ci.yml audit step) and fails on any advisory without a dated, path-scoped entry
+      # in .github/scripts/audit-allowlist.json, and on any stale or expired entry.
+      - name: npm audit (full tree, low and above, allowlist-gated)
+        run: node .github/scripts/audit-gate.mjs
 
   sbom:
     name: SBOM (CycloneDX) + OSV scan
