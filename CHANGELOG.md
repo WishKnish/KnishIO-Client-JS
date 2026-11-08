@@ -19,6 +19,13 @@ detail, the entry says so instead of guessing.
 
 - CI generates a CycloneDX SBOM of the published dependency graph (`.github/scripts/sbom.sh`) and scans it
   with OSV on every push and weekly. Each GitHub Release attaches it as `knishio-client-js-<version>.cdx.json`.
+- `tests/kcore-parity-vectors.test.js` checks the cross-SDK kcore parity vectors
+  (`tests/fixtures/kcore-parity-vectors.json`): 16 signed molecules (metadata, value transfer,
+  token creation, wallet creation × OTS v1/v2 × unique/colliding `createdAt`). Each must verify
+  (molecular hash and OTS) and re-sign to the same molecular hash and byte-identical
+  `otsFragment`s. Under `KNISHIO_KCORE=require` it also asserts that kcore computed every chain.
+  CI now runs the jest suite under `KNISHIO_KCORE=off` as well as under `require`: with kcore
+  installed as an optionalDependency, the default mode loaded it, so the pure-JS path never ran in CI.
 
 ## [1.6.0] — 2026-10-21
 

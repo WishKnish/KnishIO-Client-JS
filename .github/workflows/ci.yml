@@ -122,9 +122,13 @@ jobs:
       - name: CJS entry exports the API
         run: node -e "const m = require('./dist/client.cjs'); if (typeof m.Wallet !== 'function' || typeof m.KnishIOClient !== 'function') { console.error('CJS entry exports ' + Object.keys(m).length + ' names'); process.exit(1) }"
 
-      # jest unit suite (incl. the cross-SDK canonical-vector parity tests). The
-      # live-validator integration suite auto-skips without KNISHIO_TEST_URI.
-      - name: Jest
+      # jest unit suite (incl. the cross-SDK canonical-vector parity tests) on the pure-JS path.
+      # kcore is installed as an optionalDependency, so the default (auto) would load it and the
+      # pure path would never run in CI; KNISHIO_KCORE=off pins it. The live-validator integration
+      # suite auto-skips without KNISHIO_TEST_URI.
+      - name: Jest (kcore off)
+        env:
+          KNISHIO_KCORE: 'off'
         run: npm test
 
       # The same suite with kcore mandatory: @wishknish/knishio-kcore is an optionalDependency,
