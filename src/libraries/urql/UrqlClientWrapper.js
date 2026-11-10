@@ -141,22 +141,43 @@ class UrqlClientWrapper {
       return response
     }
 
-    // Decrypt the CipherHash response back to the inner GraphQL response JSON.
+    // Decrypt the CipherHash response back to the inner GraphQL response JSON. A reply to a
+    // wrapped request is accepted only as a decryptable envelope or an errors-only reply
+    // (`data` absent, null or empty), so a plaintext `data` payload cannot stand in for the
+    // encrypted one (matches PHP Cipher.php / C client.c).
     const text = await response.text()
     const init2 = { status: response.status, statusText: response.statusText, headers: response.headers }
     let parsed
     try {
       parsed = JSON.parse(text)
     } catch (e) {
+      if (response.ok) {
+        throw new CodeException('CipherHash: reply is not valid JSON')
+      }
       return new Response(text, init2)
     }
     const hash = parsed && parsed.data && parsed.data.CipherHash && parsed.data.CipherHash.hash
-    if (typeof hash !== 'string') {
-      // Plaintext (e.g. a validator-side error response) — pass through unchanged.
+    if (typeof hash === 'string') {
+      let map
+      try {
+        map = JSON.parse(hash)
+      } catch (e) {
+        throw new CodeException('CipherHash: reply could not be decrypted')
+      }
+      // Not wrapped: KNISHIO_KCORE=require with no loadable kcore must keep failing loudly.
+      const decrypted = await wallet.decryptMyMessageML(map)
+      if (decrypted == null) {
+        throw new CodeException('CipherHash: reply could not be decrypted')
+      }
+      return new Response(decrypted, init2)
+    }
+    const data = parsed && parsed.data
+    if (data == null || (typeof data === 'object' && Object.keys(data).length === 0)) {
+      // Errors-only reply (e.g. the validator refused the envelope): pass through so its
+      // `errors` stay visible.
       return new Response(text, init2)
     }
-    const decrypted = await wallet.decryptMyMessageML(JSON.parse(hash))
-    return new Response(decrypted != null ? decrypted : text, init2)
+    throw new CodeException('CipherHash: plaintext reply to an encrypted request')
   }
 
   setAuthData ({ token, pubkey, wallet }) {

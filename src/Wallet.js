@@ -757,7 +757,6 @@ export default class Wallet {
     } catch (e) {
       console.warn('Wallet::decryptMessage() - Deserialization failed', e)
       console.info('Wallet::decryptMessage() - my public key', this.pubkey)
-      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
       return null
     }
 
@@ -767,8 +766,6 @@ export default class Wallet {
     } catch (e) {
       console.warn('Wallet::decryptMessage() - Decryption failed', e)
       console.info('Wallet::decryptMessage() - my public key', this.pubkey)
-      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
-      console.info('Wallet::decryptMessage() - deserialized encrypted message', deserializedEncryptedMessage)
       return null
     }
 
@@ -777,9 +774,6 @@ export default class Wallet {
     } catch (e) {
       console.warn('Wallet::decryptMessage() - Decoding failed', e)
       console.info('Wallet::decryptMessage() - my public key', this.pubkey)
-      console.info('Wallet::decryptMessage() - our shared secret', sharedSecret)
-      console.info('Wallet::decryptMessage() - deserialized encrypted message', deserializedEncryptedMessage)
-      console.info('Wallet::decryptMessage() - decrypted Uint8Array', decryptedUint8)
       return null
     }
   }

@@ -39,6 +39,22 @@ function recordingFetch () {
   return sent
 }
 
+/** Answers every fetch with the given raw body and status (a stand-in validator reply). */
+function replyingFetch (body, status = 200) {
+  globalThis.fetch = jest.fn(async () => new Response(body, {
+    status,
+    headers: { 'Content-Type': 'application/json' }
+  }))
+}
+
+/** A client that wraps every non-bootstrap operation in the CipherHash envelope. */
+function keyedWrapper () {
+  const wallet = new Wallet({ secret: SECRET, token: 'AUTH' })
+  const wrapper = new UrqlClientWrapper({ serverUri: testUri, encrypt: true })
+  wrapper.setAuthData({ token: 'T', pubkey: wallet.pubkey, wallet })
+  return wrapper
+}
+
 /** urql surfaces a throwing fetch as a CombinedError networkError on the formatted response. */
 function networkErrorMessage (response) {
   const error = response.errors && response.errors[0]
@@ -98,5 +114,51 @@ describe('an encryption-enabled client WITH transport keys', () => {
     expect(body.query).toContain('CipherHash')
     expect(typeof body.variables.Hash).toBe('string')
     expect(String(sent[0].body)).not.toContain('Balance')
+  })
+})
+
+/**
+ * A reply to a wrapped request is accepted only as a decryptable envelope or an errors-only reply
+ * (the rule PHP Cipher.php and C client.c apply). Before this, any reply without an envelope was
+ * handed to the caller as if it had come back encrypted, so whoever answered the request could
+ * substitute plaintext data.
+ */
+describe('the reply to an encrypted request', () => {
+  test('rejects a plaintext data reply to an encrypted request', async () => {
+    replyingFetch(JSON.stringify({ data: { Balance: { address: 'x' } } }))
+
+    const response = await keyedWrapper().query({ query: BALANCE_QUERY, variables: {} })
+
+    expect(networkErrorMessage(response)).toBe('CipherHash: plaintext reply to an encrypted request')
+    expect(response.data).toBeUndefined()
+  })
+
+  test('passes an errors-only reply through', async () => {
+    replyingFetch(JSON.stringify({
+      data: null,
+      errors: [{ message: 'CipherHash: no envelope addressed to the validator' }]
+    }))
+
+    const response = await keyedWrapper().query({ query: BALANCE_QUERY, variables: {} })
+
+    expect(response.errors[0].networkError).toBeUndefined()
+    expect(response.errors[0].message).toContain('CipherHash: no envelope addressed to the validator')
+  })
+
+  test('rejects an envelope that does not decrypt', async () => {
+    replyingFetch(JSON.stringify({ data: { CipherHash: { hash: '{}' } } }))
+
+    const response = await keyedWrapper().query({ query: BALANCE_QUERY, variables: {} })
+
+    expect(networkErrorMessage(response)).toBe('CipherHash: reply could not be decrypted')
+    expect(response.data).toBeUndefined()
+  })
+
+  test('rejects a non-JSON 200 reply', async () => {
+    replyingFetch('<html>not graphql</html>')
+
+    const response = await keyedWrapper().query({ query: BALANCE_QUERY, variables: {} })
+
+    expect(networkErrorMessage(response)).toBe('CipherHash: reply is not valid JSON')
   })
 })

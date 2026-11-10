@@ -15,6 +15,21 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+### Security
+
+- A failed ML-KEM decryption (`Wallet.decryptMessage`, and the encrypted transport's reply
+  decryption) no longer logs the ML-KEM shared secret, the deserialized ciphertext or the decrypted
+  bytes. The error and the wallet's public key are still logged.
+- A reply to a request the client wrapped in the CipherHash envelope is accepted only if it is an
+  envelope that decrypts for this wallet, or an errors-only reply (`data` absent, `null` or empty),
+  which is passed through so the validator's `errors` stay visible. Anything else is now an error
+  instead of being returned as if it had arrived encrypted: plaintext `data`
+  (`CipherHash: plaintext reply to an encrypted request`), an envelope that does not decrypt
+  (`CipherHash: reply could not be decrypted`) and a non-JSON 2xx body
+  (`CipherHash: reply is not valid JSON`). This is the rule the PHP and C SDKs already apply.
+  Bootstrap operations sent in plaintext (`__schema`, `ContinuId`, `AccessToken`, U-isotope
+  `ProposeMolecule`) are unaffected.
+
 ### Added
 
 - CI generates a CycloneDX SBOM of the published dependency graph (`.github/scripts/sbom.sh`) and scans it
