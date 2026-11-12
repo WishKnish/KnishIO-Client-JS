@@ -28,7 +28,7 @@
   "browser": "dist/client.iife.js",
   "exports": {
     ".": {
-      "browser": "./dist/client.iife.js",
+      "browser": "./dist/client.es.mjs",
       "import": "./dist/client.es.mjs",
       "require": "./dist/client.cjs"
     },

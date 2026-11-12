@@ -29,6 +29,11 @@ detail, the entry says so instead of guessing.
   (`CipherHash: reply is not valid JSON`). This is the rule the PHP and C SDKs already apply.
   Bootstrap operations sent in plaintext (`__schema`, `ContinuId`, `AccessToken`, U-isotope
   `ProposeMolecule`) are unaffected.
+- The built bundles in `dist/` are no longer tracked in git (`/dist/` is ignored). The tracked
+  copies predated the two fixes above, so a checkout or a git-URL install served bundles that
+  still logged the ML-KEM shared secret and accepted plaintext replies to encrypted requests.
+  The npm package is unaffected (it is built at publish time); a git checkout now needs
+  `npm run build` before `dist/` exists.
 
 ### Added
 
@@ -41,6 +46,14 @@ detail, the entry says so instead of guessing.
   `otsFragment`s. Under `KNISHIO_KCORE=require` it also asserts that kcore computed every chain.
   CI now runs the jest suite under `KNISHIO_KCORE=off` as well as under `require`: with kcore
   installed as an optionalDependency, the default mode loaded it, so the pure-JS path never ran in CI.
+
+### Fixed
+
+- `exports["."].browser` points at the ES module (`./dist/client.es.mjs`) instead of the IIFE
+  bundle. Browser-targeting bundlers (Vite, webpack, Rollup, esbuild) pick the `browser`
+  condition first and received a script with no exports that expects globals (`jsSHA`,
+  `UrqlCore`), so `import { KnishIOClient } from '@wishknish/knishio-client-js'` failed. The
+  top-level `browser` field still names the IIFE for script-tag use.
 
 ## [1.6.0] — 2026-10-21
 
