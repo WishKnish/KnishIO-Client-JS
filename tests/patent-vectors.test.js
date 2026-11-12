@@ -31,15 +31,9 @@ import {
   assertCreateTokenUnitsVector
 } from './fixtures/phaseBHarness.js'
 
-// Shared cross-SDK master (../shared-test-results), absent in a standalone checkout of
-// this SDK. Then the file registers one visible skipped test and nothing else.
-const VECTORS_PATH = path.resolve(__dirname, '../../shared-test-results/canonical-patent-vectors.json')
-const vectors = fs.existsSync(VECTORS_PATH) ? JSON.parse(fs.readFileSync(VECTORS_PATH, 'utf8')) : null
-const describeWithVectors = vectors ? describe : () => {}
-
-if (!vectors) {
-  test.skip('patent-vectors.test.js: skipped — ../shared-test-results/canonical-patent-vectors.json not found (standalone checkout)', () => {})
-}
+// Vendored copy of the cross-SDK master (kept in sync by the monorepo's
+// scripts/sync-cross-sdk-fixtures.sh). A missing or unreadable file fails the suite.
+const vectors = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'fixtures/canonical-patent-vectors.json'), 'utf8'))
 
 /**
  * Patent Vector Validation
@@ -53,7 +47,7 @@ if (!vectors) {
  *   - Claims 12-14: ContinuID chain relay
  *   - Claim 21: Multi-isotope dispatch
  */
-describeWithVectors('Patent Vector Validation', () => {
+describe('Patent Vector Validation', () => {
   // -----------------------------------------------------------------
   // 0. generateSecret cross-SDK parity (Batch AO) — seed → 2048 hex secret
   // -----------------------------------------------------------------

@@ -136,8 +136,9 @@ const sharedResultsDir = process.env.KNISHIO_SHARED_RESULTS ||
                         path.resolve(__dirname, '../../../shared-test-results');
 
 /**
- * Loads the shared canonical-patent-vectors.json fixture used by the buffer-family
- * test below. Absence is NOT an error by itself — testBufferFamily() decides
+ * Loads canonical-patent-vectors.json for the buffer-family test below: an explicit
+ * KNISHIO_CANONICAL_VECTORS path, then the copy vendored in tests/fixtures/, then the
+ * monorepo master. Absence is NOT an error by itself — testBufferFamily() decides
  * whether that's a skip or a hard failure based on KNISHIO_REQUIRE_VECTORS.
  */
 function loadCanonicalVectors() {
@@ -145,6 +146,7 @@ function loadCanonicalVectors() {
   if (process.env.KNISHIO_CANONICAL_VECTORS) {
     candidates.push(process.env.KNISHIO_CANONICAL_VECTORS);
   }
+  candidates.push(path.resolve(__dirname, '../fixtures/canonical-patent-vectors.json'));
   candidates.push(path.join(sharedResultsDir, 'canonical-patent-vectors.json'));
 
   for (const candidate of candidates) {

@@ -28,18 +28,11 @@ import {
   XSDK_RECOVERY_PLAINTEXT
 } from './fixtures/frozenEnvelope.js'
 
-// Shared cross-SDK master (same convention as patent-vectors.test.js → ../../shared-test-results/),
-// absent in a standalone checkout of this SDK. Then the file registers one visible skipped
-// test and nothing else.
-const VECTORS_PATH = path.resolve(__dirname, '../../shared-test-results/cross-platform-test-vectors.json')
-const vectors = fs.existsSync(VECTORS_PATH) ? JSON.parse(fs.readFileSync(VECTORS_PATH, 'utf8')) : null
-const describeWithVectors = vectors ? describe : () => {}
+// Vendored copy of the cross-SDK master (kept in sync by the monorepo's
+// scripts/sync-cross-sdk-fixtures.sh). A missing or unreadable file fails the suite.
+const vectors = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'fixtures/cross-platform-test-vectors.json'), 'utf8'))
 
-if (!vectors) {
-  test.skip('cross-platform-canonical.test.js: skipped — ../shared-test-results/cross-platform-test-vectors.json not found (standalone checkout)', () => {})
-}
-
-describeWithVectors('Canonical Cross-Platform SHAKE256 Vectors', () => {
+describe('Canonical Cross-Platform SHAKE256 Vectors', () => {
   const shake256Tests = vectors.vectors.shake256.tests
 
   test.each(shake256Tests)('SHAKE256: $name', (vector) => {
@@ -50,7 +43,7 @@ describeWithVectors('Canonical Cross-Platform SHAKE256 Vectors', () => {
   })
 })
 
-describeWithVectors('Canonical Cross-Platform Bundle Hash Vectors', () => {
+describe('Canonical Cross-Platform Bundle Hash Vectors', () => {
   const bundleTests = vectors.vectors.bundle_hash.tests
 
   test.each(bundleTests)('Bundle hash: $name', (vector) => {
@@ -59,7 +52,7 @@ describeWithVectors('Canonical Cross-Platform Bundle Hash Vectors', () => {
   })
 })
 
-describeWithVectors('Canonical Cross-Platform Wallet Address Vectors', () => {
+describe('Canonical Cross-Platform Wallet Address Vectors', () => {
   const walletTests = vectors.vectors.wallet_generation.tests
 
   test('standard_wallet address matches Rust reference', () => {
@@ -97,7 +90,7 @@ describeWithVectors('Canonical Cross-Platform Wallet Address Vectors', () => {
   })
 })
 
-describeWithVectors('Canonical Cross-Platform ML-KEM768 Vectors', () => {
+describe('Canonical Cross-Platform ML-KEM768 Vectors', () => {
   const mlkem = vectors.vectors.mlkem768
 
   // Keygen-from-seed is deterministic (FIPS-203) → byte-frozen pubkey, like a SHAKE vector.
@@ -117,7 +110,7 @@ describeWithVectors('Canonical Cross-Platform ML-KEM768 Vectors', () => {
   })
 })
 
-describeWithVectors('Canonical Cross-Platform ML-KEM1024 Vectors', () => {
+describe('Canonical Cross-Platform ML-KEM1024 Vectors', () => {
   const mlkem = vectors.vectors.mlkem1024
 
   // Keygen-from-seed is deterministic (FIPS-203) → byte-frozen pubkey, like a SHAKE vector.
@@ -137,7 +130,7 @@ describeWithVectors('Canonical Cross-Platform ML-KEM1024 Vectors', () => {
   })
 })
 
-describeWithVectors('Backwards compatibility: a 1024-default build reads pre-bump ML-KEM-768 records', () => {
+describe('Backwards compatibility: a 1024-default build reads pre-bump ML-KEM-768 records', () => {
   const mlkem768 = vectors.vectors.mlkem768.decrypt
 
   // (a) The whole point of dual-identity inbound decryption: no second wallet, no explicit step-back.
@@ -179,7 +172,7 @@ describeWithVectors('Backwards compatibility: a 1024-default build reads pre-bum
   })
 })
 
-describeWithVectors('Backwards compatibility: session snapshots keep their ML-KEM parameter set', () => {
+describe('Backwards compatibility: session snapshots keep their ML-KEM parameter set', () => {
   const { secret, position } = vectors.vectors.mlkem768.decrypt
 
   test('a stepped-back 768 session survives a snapshot round trip', () => {
@@ -214,7 +207,7 @@ describeWithVectors('Backwards compatibility: session snapshots keep their ML-KE
   })
 })
 
-describeWithVectors('Canonical pre-bump ML-KEM-768 auth molecule validates from a 1024 default', () => {
+describe('Canonical pre-bump ML-KEM-768 auth molecule validates from a 1024 default', () => {
   const legacy = vectors.vectors.legacyMlkem768AuthMolecule
 
   // Fails loudly if the fixture is ever regenerated at the 1024 default — at which point it
@@ -245,7 +238,7 @@ describeWithVectors('Canonical pre-bump ML-KEM-768 auth molecule validates from 
   })
 })
 
-describeWithVectors('Secret storage envelope parity with master vector', () => {
+describe('Secret storage envelope parity with master vector', () => {
   test('master vector payload matches the frozen envelope constant', () => {
     const masterPayload = vectors.vectors.secret_storage_envelope.tests[0].payload
     const frozenPayload = JSON.parse(FROZEN_TS_0_9_7_ENVELOPE)

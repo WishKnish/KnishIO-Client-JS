@@ -9,9 +9,9 @@ import Atom from '../src/Atom'
 import Version4 from '../src/versions/Version4'
 
 /**
- * Atom-hash vectors shared by every SDK (master:
- * shared-test-results/version4-hash-vectors.json, produced by
- * scripts/gen-version4-hash-vectors.mjs). Each versioned case gives client-format atoms,
+ * Atom-hash vectors shared by every SDK (vendored copy of the monorepo master
+ * version4-hash-vectors.json, produced by scripts/gen-version4-hash-vectors.mjs).
+ * Each versioned case gives client-format atoms,
  * the exact JSON string hashed, and the expected base17 molecular hash; each legacy case
  * gives unversioned atoms and their expected legacy molecular hash.
  */

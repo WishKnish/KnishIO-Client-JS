@@ -1,5 +1,5 @@
 /**
- * Copied byte-for-byte from sdks/shared-test-results/cross-platform-test-vectors.json
+ * Copied byte-for-byte from cross-platform-test-vectors.json (vendored beside this file)
  * (vectors.secret_storage_envelope.tests[0] and tests[1]). A round-trip test passes regardless of
  * framing casing; these frozen payloads prove this SDK reads peer output. Pinned by cross-platform-canonical
  * drift guards — do not regenerate.

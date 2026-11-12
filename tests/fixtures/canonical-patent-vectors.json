@@ -1,0 +1,265 @@
+{
+  "version": "1.0.0",
+  "description": "Canonical test vectors for patent utility prosecution (Appendix B). Generated from Rust SDK reference implementation.",
+  "generated": "2026-02-19T00:00:00Z",
+  "patent_claims": "These vectors provide reduction-to-practice evidence for Claims 1-2 (O(k) WOTS+), 4-5 (Base17, ContinuID), 8 (multi-isotope), 12-14 (ContinuID chain), 21 (multi-isotope dispatch).",
+  "vectors": {
+    "generate_secret": {
+      "description": "Deterministic secret from a seed: SHAKE256(seed) squeezed to length/2 bytes (length=2048 hex chars -> 1024 bytes -> 2048 hex). All SDKs MUST produce this exact value. Cross-SDK parity lock (Batch AO, 2026-06-04).",
+      "tests": [
+        {
+          "name": "test_seed_2048",
+          "seed": "test-seed",
+          "length": 2048,
+          "expectedSecret": "473a54a30cedc99d5b3fa7d3d04c09786b3eaca0c19769d8bd09bf2ce4d3c83c01394084277a30957a69c545b1b3648a55b93fad85f48b81f15739ffa4e15fb2511d14d66e0b245119ea3d6ba5402b0237dd4fcd0503e989d6a503650637bbb7dc4ce09094dd63f3a3f3a88ace95c70934766d402a12f1dbdaf52056c7712647691223721853c20dc6acd1216af608549b234be705ee30dc36c402c45c0383d635853e5d2e1104341dff6b16db05da89da39ae375b4695a25dafd8d8ed679cde886177dd947e5bcb0720d5c1fa7ab4199a4b6bdde9ad35d96831b3027e7e5fd602d0fc4827f4c2d9796fbbc855914cad0ebae2316a51dc60a7e5a0af6ec3a91f7463f2b2445b4efe11c38436497ba07cf44f6389565c4a4e85b8c5e5a4039bad6fa4854d3f19ccef577bb7f6dcc2e283c5c2d1ec3d286218ffae86df1f2e12b4fde99c82f1f51087f170e08ad7010f66b7e8e0ad17da81bd82e7934384eccd82a4c3ce42dde9e64792cecddc822530e50e44e6ee04991dc39ef79ebb278e3a3cccda9c61ae804e40991deacabac1b89babc9a0285ca934a57c452e7aedaf9d014f81a83fb056a5a88b56323488c2196f1032afbd4b353d28ff0ede90dcbd5f180d7a33d7a3a09bb35048208414c15e10f66f52b6c7c409376e4f99740672a06428d0e4e799760a7f395435cc8d0f9661fd448237ea995930ade77bb5ed2d469910462ea19ddf058a80815d2e44e50e7655063b732f16877f1255e5a2aea809113bd75f388bff4c37deda02dd0051dc94b8d8c51fa178e222ef30cb11b1fd4502003767064591ab0fe6d599813a013945d679814f54d7f67735436b74062adf2f43dd07d509643025c236b6de020a5f929c809a462886822eea8c0c31f0a0d27e7cea12b9e8833ce7f0f2aad6c31595e8f26a2fdb5d24fe7a3c323585f647b7a762e46dcf298b0880ae957cf03123184045b4314bb4c5abbdb2a99e7a10ee40967d17adeae6fdaa168159c360f50c7a9a195f2d1fb09c476ef2eafc920c019bd89400de7a96a1fc67fe41b3c3f14be19b98f40ae92660a034d4a00c4beb4a4c5408b2b822d59129d90d347b28b3a406941b500351028ea710d2e88ecc099762aec7bfdefffa74c92641d68f3ff81e46ee8691e7950271535a37928c773ab1da1b0b90c038ee22d9f3d6aae7e430213d895903f1628b19aa763cfdc20f95719154dd9bc7c075c1018fa8c33ab7767b6104e2f84daf0770bfff8e6e35a8d7efd975e4a3f6f3146b4f6c91c44bcc5dec6295a0aa0219038e8c8799926a5a763201fe2dad69d9b2da6cd2af5e5b0d8284d5b61486ec57ce58a4ba01490faeb3522022e7328bed0a0f944945e383deae72b43d1575c7eba63ff2aab26136b9533e338b58d2fb6dc643d4c15c51501c050d4f06647bd9fbeecd5ded6a8f8d1df0b4ea06",
+          "invariants": {
+            "length_hex_chars": 2048,
+            "derivation": "shake256(seed) squeezed to 1024 bytes, hex-encoded"
+          }
+        }
+      ]
+    },
+    "atom_value_format": {
+      "description": "An atom V/B/F numeric value MUST serialize as an integer string (the validator parses it as i128); whole-number floats carry NO trailing '.0'. JS String(n) is canonical; all SDKs MUST match. Cross-SDK parity lock (Batch AQ, 2026-06-05).",
+      "tests": [
+        { "name": "whole_positive", "value": 1000, "expected": "1000" },
+        { "name": "debit_negative", "value": -1000, "expected": "-1000" },
+        { "name": "zero", "value": 0, "expected": "0" },
+        { "name": "large_i64", "value": 9007199254740991, "expected": "9007199254740991" }
+      ]
+    },
+    "continuid_chain": {
+      "description": "ContinuID identity relay: two sequential wallet positions from same secret. Position2 is SHAKE256(position1, 256). Patent Claims 5, 12-14.",
+      "tests": [
+        {
+          "name": "two_position_relay",
+          "secret": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+          "token": "USER",
+          "expectedBundle": "bb20ee47fa9b872343274bebbd37d0b73105a00ace539073227baa60d142d86b",
+          "position1": "1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b",
+          "expectedAddress1": "fbf42152398e00c86534e719af1fc8914297d1979a763314b1f83e887c6ac808",
+          "expectedPosition2": "f2afe8096e16a029e443181398d43611272d180c647e7012e432dab7e64c0e34",
+          "expectedAddress2": "c21b633e390fa1b2fee40e087925ba2c16d532eced8335ab46eab54bce7b73f1",
+          "invariants": {
+            "same_bundle": true,
+            "different_positions": true,
+            "different_addresses": true,
+            "position2_derivation": "shake256(position1, 256)"
+          }
+        }
+      ]
+    },
+    "base17_enumeration": {
+      "description": "Hex-to-Base17 conversion used in WOTS+ signature indexing. Base17 digits: 0-9, a-g. Patent Claim 5.",
+      "tests": [
+        {
+          "name": "zero_hash",
+          "hexInput": "0000000000000000000000000000000000000000000000000000000000000000",
+          "expectedBase17": "0000000000000000000000000000000000000000000000000000000000000000",
+          "normalizedSum": 0
+        },
+        {
+          "name": "ones_hash",
+          "hexInput": "1111111111111111111111111111111111111111111111111111111111111111",
+          "expectedBase17": "006cgd8dg07a1440cc28d789427b0ab8d87a40560b1bbaea7g5505ecd2bcdcf0",
+          "normalizedSum": 0
+        },
+        {
+          "name": "typical_hash",
+          "hexInput": "cf1392e7b4e0b6b3d2f8a9c5e7d1b4a6c8f2e5d7a9b3c6f1e4d8a2b5c7e9f3a1",
+          "expectedBase17": "04e134e9b28c143e42gee63d6f6b29873182d227b9908e1b8c219746507d4d01",
+          "normalizedSum": 0
+        },
+        {
+          "name": "max_hex",
+          "hexInput": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "expectedBase17": "05g7dfd526bf1c9b3c3cea92b2cc972cf7c094c59d8549f406b75304a6652640",
+          "normalizedSum": 0
+        },
+        {
+          "name": "alternating",
+          "hexInput": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "expectedBase17": "03eb103a595bd22446f757dfc3d421ad5ggd600ga5c66g6ea456c5g2gc21590a",
+          "normalizedSum": 0
+        }
+      ]
+    },
+    "multi_isotope_molecule": {
+      "description": "Multiple isotope types (V, M, I) in a single molecule, each with position-derived wallet addresses. Patent Claims 8, 21.",
+      "tests": [
+        {
+          "name": "v_m_i_combined",
+          "secret": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+          "expectedBundle": "bb20ee47fa9b872343274bebbd37d0b73105a00ace539073227baa60d142d86b",
+          "isotopes": {
+            "V": {
+              "positionDerivation": "shake256(sourcePosition + 'V', 256)",
+              "expectedPosition": "1909a3f272526c13cfc0ec10841baa7deefe7435f3b1373c6a8a864d718ed3b9",
+              "token": "TESTTOKEN",
+              "expectedAddress": "56822fa282bbe7f21b1a58d31d322466d19a1c983f615e271bb0018d391a45ab"
+            },
+            "M": {
+              "positionDerivation": "shake256(sourcePosition + 'M', 256)",
+              "expectedPosition": "fe17959d05c09a06fa2a55dd965e39329218b2efdc83e015ae6560fa9228b8fc",
+              "token": "USER",
+              "expectedAddress": "087947c899a5cc84f12633f1b32dbf6b2e34b93b430fdce4f6390b20918792b2"
+            },
+            "I": {
+              "positionDerivation": "shake256(sourcePosition + 'I', 256)",
+              "expectedPosition": "7be8c0bb62e50cb3da4c8137738896697fe4bd9b175adf051cd26412ff401f52",
+              "token": "USER",
+              "expectedAddress": "a0cd6d9a80e7c6a155146b1d036212f0a3fa9f5b4a1b86bf9a6782b92437edfa"
+            }
+          },
+          "invariants": {
+            "all_addresses_unique": true,
+            "same_bundle_for_all": true,
+            "source_position": "1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b"
+          }
+        }
+      ]
+    },
+    "bigint_carry_edge": {
+      "description": "Edge cases in BigInt arithmetic during SHAKE256 hashing and key generation. Tests 65-char hex (overflow), max values, boundary values. Patent Claim 5.",
+      "tests": [
+        {
+          "name": "65_char_hex",
+          "input": "1abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+          "inputLength": 65,
+          "expectedShake256": "e787fdcea55558201e4893140f41cd5559dd8b2a2cf5de4ef6f95063bcffd991",
+          "expectedBase17OfHash": "056cg52d21f9eadf5f25306630c2ef289f35dg65dg4106c042b6ad499bf977d7",
+          "expectedKeyLength": 2048
+        },
+        {
+          "name": "all_f_64",
+          "input": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "inputLength": 64,
+          "expectedShake256": "89fab67806198a51c49264021c41b930eef4fe0999fbaa10198a835906869ee6",
+          "expectedBase17OfHash": "033bagd14e6546gg671cbfgb09237g55246d7gc7dc2d23a1427faa1d86d3aa2b",
+          "expectedKeyLength": 2048
+        },
+        {
+          "name": "boundary_value_2_256",
+          "input": "10000000000000000000000000000000000000000000000000000000000000000",
+          "inputLength": 65,
+          "expectedShake256": "2c77c2261c0d437ef7b5a8aa760b58ac3ff55bd49635c5ada8f8edbd01d75328",
+          "expectedBase17OfHash": "010aa4f5f2b48bg36gcd308f9bdd6edfd5008f33cf8bd096ffa6g4ad3b2b9611",
+          "expectedKeyLength": 2048
+        },
+        {
+          "name": "single_high_bit",
+          "input": "8000000000000000000000000000000000000000000000000000000000000000",
+          "inputLength": 64,
+          "expectedShake256": "9c8197c6eabbe59dbefaa8bd01ef798b02e017b480ca9425e7774b38bf889b8c",
+          "expectedBase17OfHash": "03b080951cbc2f19ef19023a1gg1bg8gd6a8e0ebg68b700f52gagb28e6de25f8",
+          "expectedKeyLength": 2048
+        }
+      ]
+    },
+    "wots_roundtrip": {
+      "description": "Full WOTS+ sign/verify roundtrip. The OTS address is the protocol wallet address: hash each 128-char key chunk 16 times, join the 16 public fragments, then digest = SHAKE256(joined, 8192) and address = SHAKE256(digest, 256). This two-pass derivation matches generate_address and CheckMolecule.ots (the address the validator verifies against). Patent Claims 1-2, 5.",
+      "tests": [
+        {
+          "name": "deterministic_roundtrip",
+          "secret": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+          "token": "USER",
+          "position": "1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b",
+          "expectedOtsAddress": "fbf42152398e00c86534e719af1fc8914297d1979a763314b1f83e887c6ac808",
+          "molecularHashHex": "cf1392e7b4e0b6b3d2f8a9c5e7d1b4a6c8f2e5d7a9b3c6f1e4d8a2b5c7e9f3a1",
+          "molecularHashBase17": "04e134e9b28c143e42gee63d6f6b29873182d227b9908e1b8c219746507d4d01",
+          "expectedSignatureFragmentCount": 16,
+          "expectedSignatureFragment0": "b8eb449c47ea1a60c4e7d25caaf0426d547c92b3b1a50a5752f006081a8321f64a84f061603fd509c00df3db0ed7bcb461841dfab5560560047ec5255fb52c43",
+          "expectedSignatureFragment15": "6bed13bff121f1443fe725daea9b2801190f8331d1f8d956664ec19690d82c6375b50818ce4043dd571981a615372e8ebdeda6f99aac2656cacc032f11ef5726",
+          "expectedVerified": true,
+          "otsAddressDerivation": "For each of 16 key chunks (128 chars): hash chunk 16 times with SHAKE256(chunk, 512). Join all 16 public fragments, then digest = SHAKE256(joined, 8192) and address = SHAKE256(digest, 256). This two-pass derivation is the protocol address (generate_address / CheckMolecule.ots) and equals continuid_chain.expectedAddress1 for the same secret+position."
+        }
+      ]
+    },
+    "buffer_deposit_conservation": {
+      "description": "init_deposit_buffer (B-isotope buffer deposit) debits the FULL source balance for UTXO conservation (JS/PHP/TS reference); a partial deposit must still conserve. Emitted atoms (in order): source V = -sourceBalance, buffer B = +amount (metaType walletBundle), remainder V = +(sourceBalance-amount) (metaType walletBundle). The sum of all V+B atom values MUST equal 0 (the validator's b_isotope conservation check). Cross-SDK parity lock (Batch BF, 2026-06-08). Rust+Python previously debited only -amount, making partial deposits non-conserving (validator-rejected); fixed to match JS/PHP/TS.",
+      "tests": [
+        { "name": "partial_deposit", "sourceBalance": 100, "amount": 30, "expectedSourceValue": "-100", "expectedBufferValue": "30", "expectedRemainderValue": "70", "expectedSum": "0" },
+        { "name": "full_deposit", "sourceBalance": 50, "amount": 50, "expectedSourceValue": "-50", "expectedBufferValue": "50", "expectedRemainderValue": "0", "expectedSum": "0" }
+      ]
+    },
+    "buffer_withdraw_conservation": {
+      "description": "init_withdraw_buffer (B-isotope buffer withdraw) debits the FULL source balance for UTXO conservation (JS/PHP/TS/Kotlin/C++ reference); a partial withdraw must still conserve. Emitted atoms (in order): source B = -sourceBalance (metaType walletBundle), recipient V = +amount (metaType walletBundle), remainder B = +(sourceBalance-amount) (metaType walletBundle). The sum of all V+B atom values MUST equal 0 (the validator's b_isotope conservation check). Cross-SDK parity lock (cycle 148, 2026-06-28) — the withdraw analog of buffer_deposit_conservation. Rust+Python previously debited only -total/-amount, making partial withdraws non-conserving; fixed to match JS/PHP/TS/Kotlin/C++.",
+      "tests": [
+        { "name": "partial_withdraw", "sourceBalance": 100, "amount": 30, "expectedSourceValue": "-100", "expectedRecipientValue": "30", "expectedRemainderValue": "70", "expectedSum": "0" },
+        { "name": "full_withdraw", "sourceBalance": 50, "amount": 50, "expectedSourceValue": "-50", "expectedRecipientValue": "50", "expectedRemainderValue": "0", "expectedSum": "0" }
+      ]
+    },
+    "buffer_conservation_negative": {
+      "description": "NEGATIVE cases: buffer molecules every SDK must REJECT. The two conservation vectors above only assert that VALID molecules are accepted, and that gap concealed a live fail-open defect — Kotlin gated its V-only conservation on the presence of B/F atoms (stating 'the B/F atoms own the cross-isotope conservation') while having no isotopeB or isotopeF to own it, so a molecule destroying value verified clean and passed every positive vector. A validator never observed rejecting is indistinguishable from an absent one; these vectors make the SDK demonstrate the rejection. Added 2026-07-27.",
+      "recipe": "Do NOT hand-assemble atoms: a hand-built molecule is refused by unrelated checks (atom index, self-transfer) before conservation is ever evaluated, so the test passes while proving nothing. Instead build a VALID molecule with the SDK's own init_deposit_buffer/init_withdraw_buffer, apply the single `tamper` mutation below, re-sign, and assert the molecule is rejected. Tamper targets: firstV/lastV/firstB/lastB select the first or last atom of that isotope in emission order.",
+      "tests": [
+        {
+          "name": "unbalanced_deposit_remainder",
+          "buildFrom": "deposit",
+          "sourceBalance": 100,
+          "amount": 30,
+          "tamper": { "target": "lastV", "field": "value", "to": "50" },
+          "mustReject": true,
+          "reason": "remainder 70 -> 50 makes V+B sum -20 instead of 0; value is destroyed"
+        },
+        {
+          "name": "unbalanced_withdraw_remainder",
+          "buildFrom": "withdraw",
+          "sourceBalance": 100,
+          "amount": 30,
+          "tamper": { "target": "lastB", "field": "value", "to": "50" },
+          "mustReject": true,
+          "reason": "remainder 70 -> 50 makes B+V sum -20 instead of 0; value is destroyed"
+        },
+        {
+          "name": "deposit_b_atom_wrong_meta_type",
+          "buildFrom": "deposit",
+          "sourceBalance": 100,
+          "amount": 30,
+          "tamper": { "target": "firstB", "field": "metaType", "to": "notAWalletBundle" },
+          "mustReject": true,
+          "reason": "B-isotope atoms must carry metaType 'walletBundle'"
+        },
+        {
+          "name": "deposit_inflates_remainder",
+          "buildFrom": "deposit",
+          "sourceBalance": 100,
+          "amount": 30,
+          "tamper": { "target": "lastV", "field": "value", "to": "90" },
+          "mustReject": true,
+          "reason": "remainder 70 -> 90 makes V+B sum +20; value is created out of nothing"
+        }
+      ]
+    },
+    "token_replenish": {
+      "description": "replenishToken mints additional supply of an EXISTING token with a C atom (the minting isotope), never with V atoms. Emitted atoms (in order): C (signed by the identity's USER wallet exactly like the SDK's own createToken C atom; metaType 'token', metaId = token slug, value = +amount for fungible or the new unit count for stackable/non-fungible; metas in order: action = 'add', then address/position/pubkey of the credited wallet (the identity's existing wallet for the token, or a new one), batchId only when that wallet has one, tokenUnits only for stackable/non-fungible), then the SDK's standard I ContinuID remainder atom. Validator 0.6.0 accepts it only from the token's creator bundle, for supply 'infinite' or 'replenishable', crediting the creator's own bundle. Replaces the historical 2-V replenish (V(+amount), V(+(balance+amount))) that JS/TS/PHP/Rust built and every CheckMolecule rejects. Cross-SDK parity lock (Phase B, validator 0.6.0 / SDK patch wave, 2026-09-26).",
+      "tests": [
+        { "name": "fungible_replenish", "token": "REPLTOK", "amount": 500, "units": [], "expectedIsotopes": ["C", "I"], "expectedCValue": "500", "expectedMetaType": "token", "expectedMetaId": "REPLTOK", "expectedAction": "add", "expectedTokenUnitIds": null },
+        { "name": "stackable_replenish", "token": "REPLSTK", "amount": null, "units": [["R1", "R1", {}], ["R2", "R2", {}]], "expectedIsotopes": ["C", "I"], "expectedCValue": "2", "expectedMetaType": "token", "expectedMetaId": "REPLSTK", "expectedAction": "add", "expectedTokenUnitIds": ["R1", "R2"] }
+      ]
+    },
+    "stackable_fusion_conservation": {
+      "description": "fuseToken fuses M >= 2 units of a stackable token held by the source wallet (balance B = unit count, B >= M) into ONE new unit N delivered to the recipient bundle. Emitted atoms (in order): source V = -B (tokenUnits = the M fused units in the source order: the SENT set; the kept units appear only on the remainder atom); burn V = +(M-1) (metaType walletBundle, metaId = 64 zeros, tokenUnits = the fused ids except the LAST, caller order); F = +1 (metaType walletBundle, metaId = recipient bundle, tokenUnits = [N] where N.metas.fusedTokenUnits = the full triples of all M fused units, caller order); remainder V = +(B-M) (metaType walletBundle, metaId = sender bundle, tokenUnits = the source units minus the fused ones, source order; emitted even when B = M with value 0 and tokenUnits []). No I (ContinuID) atom: like transferToken and burnToken, the molecule is signed by the source token wallet at its own position, and the validator requires any I-bearing molecule to sign at the ContinuID pointer. The sum of all V+F values MUST equal 0; the last fused unit is absorbed by the F atom (validator 0.6.0 tombstones it and inserts N). Source units are U1..U5 (triples [id, id, {}]) unless the test lists sourceUnits; N id is 'FUSED'. Cross-SDK parity lock (Phase B, validator 0.6.0 / SDK patch wave, 2026-09-26).",
+      "tests": [
+        { "name": "fuse_2_of_2", "sourceUnits": ["U1", "U2"], "fuse": ["U1", "U2"], "newUnitId": "FUSED", "expectedIsotopes": ["V", "V", "F", "V"], "expectedSourceValue": "-2", "expectedSourceUnitIds": ["U1", "U2"], "expectedBurnValue": "1", "expectedFusionValue": "1", "expectedRemainderValue": "0", "expectedBurnUnitIds": ["U1"], "expectedRemainderUnitIds": [], "expectedFusedTokenUnitIds": ["U1", "U2"], "expectedSum": "0" },
+        { "name": "fuse_2_of_5", "sourceUnits": ["U1", "U2", "U3", "U4", "U5"], "fuse": ["U2", "U4"], "newUnitId": "FUSED", "expectedIsotopes": ["V", "V", "F", "V"], "expectedSourceValue": "-5", "expectedSourceUnitIds": ["U2", "U4"], "expectedBurnValue": "1", "expectedFusionValue": "1", "expectedRemainderValue": "3", "expectedBurnUnitIds": ["U2"], "expectedRemainderUnitIds": ["U1", "U3", "U5"], "expectedFusedTokenUnitIds": ["U2", "U4"], "expectedSum": "0" },
+        { "name": "fuse_3_of_5", "sourceUnits": ["U1", "U2", "U3", "U4", "U5"], "fuse": ["U2", "U4", "U5"], "newUnitId": "FUSED", "expectedIsotopes": ["V", "V", "F", "V"], "expectedSourceValue": "-5", "expectedSourceUnitIds": ["U2", "U4", "U5"], "expectedBurnValue": "2", "expectedFusionValue": "1", "expectedRemainderValue": "2", "expectedBurnUnitIds": ["U2", "U4"], "expectedRemainderUnitIds": ["U1", "U3"], "expectedFusedTokenUnitIds": ["U2", "U4", "U5"], "expectedSum": "0" },
+        { "name": "fuse_single_unit_rejected", "sourceUnits": ["U1", "U2", "U3", "U4", "U5"], "fuse": ["U1"], "newUnitId": "FUSED", "mustReject": true, "expectedErrorContains": "at least two token units" }
+      ]
+    },
+    "buffer_withdraw_fresh_remainder": {
+      "description": "init_withdraw_buffer after validator 0.6.1 / SDK patch wave (contract 9.6): the source B atom is the actual buffer wallet S (Balance(type: buffer)), value -S.balance; one addressless recipient V = +amount per recipient (metaType walletBundle, metaId recipient bundle); the remainder B = +(S.balance-amount) goes to S.createRemainder(secret), a FRESH position that MUST differ from S's position (a remainder at the signing position is credited behind a consumed one-time key and is stranded; validator 0.6.1 rejects it with 'Value may not be credited to a consumed signing position'). No I atom. Emitted even when the remainder value is 0. Sum of V+B values MUST be 0.",
+      "tests": [
+        { "name": "partial_withdraw_fresh_remainder", "sourceBalance": 50, "amount": 20, "expectedIsotopes": ["B", "V", "B"], "expectedSourceValue": "-50", "expectedRecipientValue": "20", "expectedRemainderValue": "30", "expectedSum": "0", "expectedRemainderPositionDistinctFromSource": true },
+        { "name": "full_withdraw_fresh_remainder", "sourceBalance": 50, "amount": 50, "expectedIsotopes": ["B", "V", "B"], "expectedSourceValue": "-50", "expectedRecipientValue": "50", "expectedRemainderValue": "0", "expectedSum": "0", "expectedRemainderPositionDistinctFromSource": true }
+      ]
+    },
+    "create_token_units": {
+      "description": "createToken with units sends the C atom meta tokenUnits as compact [id, name, metas] triples. A bare id string is sent as [id, id, {}]; a triple or unit object keeps its own name and metas ({} when absent). Value = unit count; amount must be null or 0.",
+      "tests": [
+        { "name": "ids_to_triples", "token": "CRTSTK", "units": ["U1", "U2", "U3"], "expectedCValue": "3", "expectedMetaType": "token", "expectedMetaId": "CRTSTK", "expectedTokenUnits": "[[\"U1\",\"U1\",{}],[\"U2\",\"U2\",{}],[\"U3\",\"U3\",{}]]", "expectedTokenUnitIds": ["U1", "U2", "U3"] },
+        { "name": "single_id", "token": "CRTONE", "units": ["solo"], "expectedCValue": "1", "expectedMetaType": "token", "expectedMetaId": "CRTONE", "expectedTokenUnits": "[[\"solo\",\"solo\",{}]]", "expectedTokenUnitIds": ["solo"] }
+      ]
+    }
+  }
+}

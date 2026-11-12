@@ -19,24 +19,19 @@ import ResponseWalletList from '../src/response/ResponseWalletList'
  * OTS v2 cross-SDK vectors (docs/OTS_V2_SPECIFICATION.md): key derivation, address, the
  * normalized hash, ML-KEM identities of v2 wallets, and molecule verdicts.
  *
- * Shared master (absent in a standalone checkout of this SDK, where the file registers one
- * visible skipped test and nothing else). Produced by scripts/gen-ots-v2-vectors.mjs.
+ * Vendored copy of the cross-SDK master (kept in sync by the monorepo's
+ * scripts/sync-cross-sdk-fixtures.sh; produced by scripts/gen-ots-v2-vectors.mjs). A missing or
+ * unreadable file fails the suite.
  */
-const VECTORS_PATH = path.resolve(__dirname, '../../shared-test-results/ots-v2-vectors.json')
-const vectors = fs.existsSync(VECTORS_PATH) ? JSON.parse(fs.readFileSync(VECTORS_PATH, 'utf8')).vectors : null
-const describeWithVectors = vectors ? describe : () => {}
-
-if (!vectors) {
-  test.skip('ots-v2-vectors.test.js: skipped — ../shared-test-results/ots-v2-vectors.json not found (standalone checkout)', () => {})
-}
+const vectors = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'fixtures/ots-v2-vectors.json'), 'utf8')).vectors
 
 const EXCEPTIONS = {
   SignatureMismatch: SignatureMismatchException,
   SignatureMalformed: SignatureMalformedException
 }
 
-describeWithVectors('OTS v2 key derivation and address', () => {
-  test.each(vectors ? vectors.key_derivation.tests : [])('$name', (vector) => {
+describe('OTS v2 key derivation and address', () => {
+  test.each(vectors.key_derivation.tests)('$name', (vector) => {
     const { secret, token, position } = vector
     expect(Wallet.generateKey({ secret, token, position })).toBe(vector.expectedKeyV1)
     expect(Wallet.generateKey({ secret, token, position, otsVersion: 2 })).toBe(vector.expectedKeyV2)
@@ -50,14 +45,14 @@ describeWithVectors('OTS v2 key derivation and address', () => {
   })
 })
 
-describeWithVectors('OTS v2 normalized hash', () => {
-  test.each(vectors ? vectors.signature.tests : [])('$name', (vector) => {
+describe('OTS v2 normalized hash', () => {
+  test.each(vectors.signature.tests)('$name', (vector) => {
     expect(Molecule.normalize(Molecule.enumerate(vector.molecularHash))).toEqual(vector.expectedNormalized)
   })
 })
 
-describeWithVectors('OTS v2 wallet ML-KEM identities', () => {
-  test.each(vectors ? vectors.mlkem_identity.tests : [])('$name', (vector) => {
+describe('OTS v2 wallet ML-KEM identities', () => {
+  test.each(vectors.mlkem_identity.tests)('$name', (vector) => {
     const { secret, token, position } = vectors.key_derivation.tests.find(k => k.name === vector.keyFrom)
     const pubkey = mlKemParameterSet => new Wallet({ secret, token, position, otsVersion: 2, mlKemParameterSet }).pubkey
     expect(pubkey(1024)).toBe(vector.expectedMlKem1024Pubkey)
@@ -65,8 +60,8 @@ describeWithVectors('OTS v2 wallet ML-KEM identities', () => {
   })
 })
 
-describeWithVectors('OTS v2 molecule verdicts', () => {
-  test.each(vectors ? vectors.molecules.tests : [])('$name → $expected', (vector) => {
+describe('OTS v2 molecule verdicts', () => {
+  test.each(vectors.molecules.tests)('$name → $expected', (vector) => {
     const molecule = Molecule.fromJSON(vector.molecule)
     if (vector.expected === 'verified') {
       expect(molecule.check()).toBe(true)
@@ -86,9 +81,9 @@ describeWithVectors('OTS v2 molecule verdicts', () => {
   })
 })
 
-describeWithVectors('OTS malformed declared hash', () => {
+describe('OTS malformed declared hash', () => {
   // CheckMolecule.ots() on its own, without a prior molecular-hash check: refused before any chain work
-  test.each(vectors ? vectors.malformed_hash.tests : [])('$name → $expected', (vector) => {
+  test.each(vectors.malformed_hash.tests)('$name → $expected', (vector) => {
     const check = new CheckMolecule(Molecule.fromJSON(vector.molecule))
     expect(() => check.ots()).toThrow(EXCEPTIONS[vector.expected])
   })

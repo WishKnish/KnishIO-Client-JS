@@ -1,6 +1,6 @@
-// Frozen copies of the Phase B cross-SDK vectors in the monorepo master
-// (../shared-test-results/canonical-patent-vectors.json), so the unit suites run in a
-// standalone checkout. tests/patent-vectors.test.js asserts they equal the master.
+// Frozen copies of the Phase B cross-SDK vectors in canonical-patent-vectors.json (vendored
+// beside this file from the monorepo master). tests/patent-vectors.test.js asserts they equal
+// that file.
 
 // vectors.token_replenish.tests
 export const TOKEN_REPLENISH_TESTS = [
