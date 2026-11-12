@@ -18,6 +18,9 @@ name: CI
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   # Catch version drift at commit time, not at release time. The publish workflow already
   # refuses a tag that disagrees with the manifest, but that only fires on a tag push, so
