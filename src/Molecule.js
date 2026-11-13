@@ -340,7 +340,7 @@ export default class Molecule {
    * @param {Molecule} molecule
    */
   fill (molecule) {
-    for (const key in Object.keys(molecule)) {
+    for (const key of Object.keys(molecule)) {
       this[key] = molecule[key]
     }
   }

@@ -160,19 +160,22 @@ export default class ResponseRequestAuthorizationGuest extends Response {
   }
 
   /**
-   * Returns timestamp
+   * Returns the server's public key: `pubkey`, the field MutationRequestAuthorizationGuest selects,
+   * or the legacy duplicate `key`
    *
    * @return {string}
    */
   pubKey () {
-    return this.payloadKey('key')
+    return Dot.has(this.payload(), 'pubkey') ? this.payloadKey('pubkey') : this.payloadKey('key')
   }
 
   /**
+   * Returns the encrypt flag, or null when the reply does not carry one (the mutation does not
+   * select it)
    *
-   * @return {string}
+   * @return {boolean|null}
    */
   encrypt () {
-    return this.payloadKey('encrypt')
+    return Dot.has(this.payload(), 'encrypt') ? this.payloadKey('encrypt') : null
   }
 }

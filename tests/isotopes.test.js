@@ -8,6 +8,7 @@ import Wallet from '../src/Wallet'
 import Atom from '../src/Atom'
 import CheckMolecule from '../src/libraries/CheckMolecule'
 import WrongTokenTypeException from '../src/exception/WrongTokenTypeException'
+import TransferUnbalancedException from '../src/exception/TransferUnbalancedException'
 import {
   generateSecret,
   generateBundleHash
@@ -293,5 +294,27 @@ describe('All Isotope Atoms', () => {
       })
       expect(atom.isotope).toBe(isotope)
     }
+  })
+})
+
+describe('V-Isotope without a sender wallet', () => {
+  const secret = generateSecret('isotope-v-no-sender')
+  const wallet = position => new Wallet({ secret, token: 'TEST', position })
+  const check = values => {
+    const molecule = new Molecule({ secret })
+    const positions = ['aa', 'bb', 'cc']
+    values.forEach((value, i) => molecule.addAtom(Atom.create({ isotope: 'V', wallet: wallet(positions[i].repeat(32)), value })))
+    molecule.molecularHash = '0'.repeat(64)
+    return new CheckMolecule(molecule)
+  }
+
+  // The validator and every served-molecule check verify transfers with no sender wallet, so a
+  // balanced transfer that leaves a remainder must pass; conservation is still enforced.
+  test('accepts a balanced transfer whose remainder atom is non-zero', () => {
+    expect(check([-10, 4, 6]).isotopeV(null)).toBe(true)
+  })
+
+  test('still rejects an unbalanced transfer', () => {
+    expect(() => check([-10, 4, 5]).isotopeV(null)).toThrow(TransferUnbalancedException)
   })
 })

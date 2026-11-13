@@ -54,6 +54,18 @@ detail, the entry says so instead of guessing.
   condition first and received a script with no exports that expects globals (`jsSHA`,
   `UrqlCore`), so `import { KnishIOClient } from '@wishknish/knishio-client-js'` failed. The
   top-level `browser` field still names the IIFE for script-tag use.
+- `requestGuestAuthToken` accepts the reply its own mutation asks for. `MutationRequestAuthorizationGuest`
+  selects `token pubkey expiresAt`, but `ResponseRequestAuthorizationGuest` read `key` and `encrypt`
+  and threw `InvalidResponseException` on that reply. `pubKey()` now reads `pubkey` (falling back
+  to the legacy `key`), `encrypt()` returns `null` when the reply carries no flag, and the auth
+  token then uses the `encrypt` mode the caller requested.
+- `Molecule.fill()` copies the given object's properties. It iterated the array indices of
+  `Object.keys()` (`for … in`), so it set properties named `0`, `1`, … and copied nothing.
+- `CheckMolecule.isotopeV()` with no sender wallet no longer throws `TransferRemainderException`
+  when the last V atom is non-zero. That atom is a transfer's remainder, so the rule rejected
+  ordinary balanced transfers checked without a wallet (`Molecule.check()`, `verifyFromServerData`);
+  the validator does not apply it and the C, C++ and Python SDKs never did. V-only conservation is
+  still enforced, and the checks that need a sender wallet are unchanged.
 
 ## [1.6.0] — 2026-10-21
 

@@ -2540,12 +2540,13 @@ export default class KnishIOClient {
       // Did the authorization molecule get accepted?
       if (response.success()) {
         // Create & set an auth token from the response data
-        // Map server payload field names (time/key) to AuthToken constructor names (expiresAt/pubkey)
+        // Map server payload field names to AuthToken constructor names (expiresAt/pubkey)
         const authToken = AuthToken.create({
           token: response.token(),
           expiresAt: response.expiresAt(),
           pubkey: response.pubKey(),
-          encrypt: response.encrypt()
+          // The mutation does not select `encrypt`; without it in the reply, the requested mode applies
+          encrypt: String(response.encrypt() ?? encrypt) === 'true'
         }, wallet)
         this.setAuthToken(authToken)
       } else {

@@ -161,6 +161,14 @@ describe('Molecule', () => {
     expect(characters.value).toBe('BASE64')
   })
 
+  test('fill copies every property of the given object', () => {
+    const molecule = new Molecule({ secret: testSecret })
+    molecule.fill({ cellSlug: 'filled-cell', status: 'filled' })
+
+    expect(molecule.cellSlug).toBe('filled-cell')
+    expect(molecule.status).toBe('filled')
+  })
+
   test('initializes token creation correctly', () => {
     const molecule = new Molecule({
       secret: testSecret,

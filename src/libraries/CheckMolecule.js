@@ -605,10 +605,10 @@ export default class CheckMolecule {
       if (!hasCrossIsotope && remainder !== sum) {
         throw new TransferRemainderException()
       }
-    } else if (value !== 0) {
-      // No senderWallet, but have a remainder?
-      throw new TransferRemainderException()
     }
+    // Without a sender wallet only V-only conservation (above) applies: the validator and
+    // verifyFromServerData() check served transfers this way, and a transfer's last V atom is
+    // its remainder, which is normally non-zero.
 
     // Looks like we passed all the tests!
     return true
