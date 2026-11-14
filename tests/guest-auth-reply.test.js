@@ -9,6 +9,7 @@ import KnishIOClient from '../src/KnishIOClient.js'
 import AuthToken from '../src/AuthToken.js'
 import UrqlClientWrapper from '../src/libraries/urql/UrqlClientWrapper.js'
 import { generateBundleHash, generateSecret } from '../src/libraries/crypto.js'
+import { Thumbmark } from '@thumbmarkjs/thumbmarkjs'
 
 const makeClient = () => new KnishIOClient({ uri: 'https://test.local/graphql', cellSlug: 'cell', logging: false })
 const inAnHour = () => Math.floor(Date.now() / 1000) + 3600
@@ -64,5 +65,21 @@ describe('requestGuestAuthToken', () => {
     expect(authToken.getToken()).toBe('legacy-token')
     expect(client.client().getPubKey()).toBe('legacy-key')
     expect(authToken.getSnapshot().encrypt).toBe(true)
+  })
+})
+
+describe('fingerprint', () => {
+  test('getFingerprint and getFingerprintData read the ThumbmarkJS Thumbmark result', async () => {
+    const get = jest.spyOn(Thumbmark.prototype, 'get').mockResolvedValue({
+      thumbmark: 'tm-hash-1',
+      components: { locales: { timezone: 'UTC' } },
+      info: {},
+      version: '1.11.0'
+    })
+    const client = makeClient()
+
+    expect(await client.getFingerprint()).toBe('tm-hash-1')
+    expect(await client.getFingerprintData()).toEqual({ locales: { timezone: 'UTC' } })
+    expect(get).toHaveBeenCalledTimes(2)
   })
 })

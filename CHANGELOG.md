@@ -15,6 +15,14 @@ detail, the entry says so instead of guessing.
 
 ## [Unreleased]
 
+### Fixed
+
+- `KnishIOClient.getFingerprint` and `getFingerprintData` called ThumbmarkJS's deprecated
+  `getFingerprint` / `getFingerprintData` functions; they now read the `thumbmark` and
+  `components` of `new Thumbmark().get()`. In the ThumbmarkJS source (1.11 and 1.12) the
+  deprecated functions are wrappers that call the same `getThumbmark` pipeline with the same
+  default options; the two were not compared in a browser.
+
 ## [1.7.0] — 2026-11-13
 
 ### Upgrade notes

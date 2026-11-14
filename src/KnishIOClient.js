@@ -102,10 +102,7 @@ import QueryEmbeddingStatus from './query/QueryEmbeddingStatus.js'
 import MutationCreateRule from './mutation/MutationCreateRule.js'
 import MutationDepositBufferToken from './mutation/MutationDepositBufferToken.js'
 import MutationWithdrawBufferToken from './mutation/MutationWithdrawBufferToken.js'
-import {
-  getFingerprint,
-  getFingerprintData
-} from '@thumbmarkjs/thumbmarkjs'
+import { Thumbmark } from '@thumbmarkjs/thumbmarkjs'
 import UrqlClientWrapper from './libraries/urql/UrqlClientWrapper.js'
 
 /**
@@ -570,12 +567,14 @@ export default class KnishIOClient {
    *
    * @returns {Promise<string>} A promise that resolves to the device fingerprint as a string.
    */
-  getFingerprint () {
-    return getFingerprint()
+  async getFingerprint () {
+    const { thumbmark } = await new Thumbmark().get()
+    return thumbmark
   }
 
-  getFingerprintData () {
-    return getFingerprintData()
+  async getFingerprintData () {
+    const { components } = await new Thumbmark().get()
+    return components
   }
 
   /**
