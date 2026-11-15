@@ -56,6 +56,11 @@ describe('KnishIOClient - Unit', () => {
     expect(knishIOClientInstance.getSecret()).toBe(unitSecret)
   })
 
+  test('getFingerprint is empty outside a browser (ThumbmarkJS needs window and document)', async () => {
+    expect(await knishIOClientInstance.getFingerprint()).toBe('')
+    expect(await knishIOClientInstance.getFingerprintData()).toEqual({})
+  })
+
   test('handles encryption toggle correctly', () => {
     expect(knishIOClientInstance.switchEncryption(true)).toBe(true)
     expect(knishIOClientInstance.switchEncryption(true)).toBe(false) // No change, already true
@@ -467,16 +472,6 @@ describeIntegration('KnishIOClient - Integration (requires server)', () => {
     molecule.sign({})
     expect(molecule.molecularHash).toBeTruthy()
     expect(() => molecule.check()).not.toThrow()
-  })
-
-  test('generates and verifies client fingerprint', async () => {
-    const fingerprint = await knishIOClientInstance.getFingerprint()
-    expect(fingerprint).toBeTruthy()
-    expect(typeof fingerprint).toBe('string')
-
-    const fingerprintData = await knishIOClientInstance.getFingerprintData()
-    expect(fingerprintData).toBeTruthy()
-    expect(typeof fingerprintData).toBe('object')
   })
 
   test('prepares token creation correctly', async () => {
